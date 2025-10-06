@@ -1,0 +1,7 @@
+<svg width="800" height="1000" viewBox="0 0 800 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="1000" fill="#F9FAFB"/>
+  <rect x="100" y="150" width="600" height="700" rx="8" fill="white" stroke="#D1D5DB" stroke-width="2"/>
+  <text x="400" y="520" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="600" fill="#6B7280" text-anchor="middle">
+    Cookbook Mockup
+  </text>
+</svg>

@@ -294,3 +294,106 @@ examples/
 
 - [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
 - [Context Engineering Best Practices](https://www.philschmid.de/context-engineering)
+
+---
+
+# SmallPlates Landing Page
+
+A conversion-focused landing page for SmallPlates & Company, built with Next.js 14 (App Router), React, and Tailwind CSS.
+
+## 🚀 Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Open http://localhost:3000
+```
+
+## 📦 Build & Deploy
+
+```bash
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Lint code
+npm run lint
+```
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Components**: React 19
+
+## 📁 Project Structure
+
+```
+.
+├── app/
+│   ├── layout.tsx          # Root layout with Metadata API
+│   ├── page.tsx            # Main landing page
+│   └── globals.css         # Global styles
+├── components/
+│   ├── Banner.tsx          # Top logo banner
+│   ├── Hero.tsx            # Hero section
+│   ├── ProductShowcase.tsx # Product section
+│   ├── CollectorTool.tsx   # Collector explainer
+│   └── CTAButton.tsx       # Reusable CTA button
+├── public/
+│   └── images/             # Static images
+├── docs/landing/           # Landing page best practices
+│   ├── landing.md          # UX principles
+│   └── seo.md              # SEO guidelines
+└── examples/               # Reference implementations
+```
+
+## 🎨 Design Principles
+
+- **Clean & Minimal**: White background, generous spacing
+- **Mobile-First**: Responsive across all breakpoints (375px → 1440px)
+- **Accessible**: WCAG 2.1 Level AA compliance
+- **Performant**: Core Web Vitals optimized (LCP ≤ 2.5s)
+
+See [docs/landing/landing.md](docs/landing/landing.md) for detailed best practices.
+
+## 🔧 Environment Variables
+
+Copy `.env.example` to `.env.local`:
+
+```bash
+cp .env.example .env.local
+```
+
+Configure:
+- `NEXT_PUBLIC_SITE_URL`: Your production URL
+- `NEXT_PUBLIC_GA_ID`: (Optional) Google Analytics ID
+
+## 📝 SEO Configuration
+
+SEO metadata is configured in `app/layout.tsx` using Next.js Metadata API:
+- Title: "Small Plates & Company — The People Behind Every Recipe"
+- Description optimized for search and social sharing
+- OpenGraph tags for rich social previews
+
+See [docs/landing/seo.md](docs/landing/seo.md) for SEO guidelines.
+
+## 🧪 Development
+
+This project was built using Context Engineering principles with:
+- Complete PRP at [PRPs/smallplates-landing-page.md](PRPs/smallplates-landing-page.md)
+- Reference examples in `examples/` directory
+- Development rules in `CLAUDE.md`
+
+## 📚 Additional Documentation
+
+- Landing page best practices: [docs/landing/landing.md](docs/landing/landing.md)
+- SEO guidelines: [docs/landing/seo.md](docs/landing/seo.md)
+- Feature specification: [INITIAL.md](INITIAL.md)
