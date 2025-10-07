@@ -1,0 +1,260 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { OnboardingProvider, useOnboarding } from "@/lib/contexts/OnboardingContext";
+import OnboardingStep from "@/components/OnboardingStep";
+
+/**
+ * Step 1 Component - Placeholder for future questions
+ */
+function Step1() {
+  const { nextStep } = useOnboarding();
+
+  return (
+    <OnboardingStep
+      stepNumber={1}
+      totalSteps={3}
+      title="Let's get started"
+      description="We'll help you create your personalized cookbook experience."
+    >
+      <div className="bg-gray-50 rounded-xl p-8 text-center">
+        <p className="text-gray-600 mb-4">
+          Questions for Step 1 will be added here
+        </p>
+        <p className="text-sm text-gray-500">
+          This is a placeholder for the questionnaire content
+        </p>
+      </div>
+
+      {/* Navigation */}
+      <div className="flex justify-between mt-8">
+        <button
+          type="button"
+          onClick={() => window.history.back()}
+          className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors"
+        >
+          Back
+        </button>
+        <button
+          type="button"
+          onClick={nextStep}
+          className="px-8 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors"
+        >
+          Continue
+        </button>
+      </div>
+    </OnboardingStep>
+  );
+}
+
+/**
+ * Step 2 Component - Placeholder for future questions
+ */
+function Step2() {
+  const { nextStep, previousStep } = useOnboarding();
+
+  return (
+    <OnboardingStep
+      stepNumber={2}
+      totalSteps={3}
+      title="Tell us more"
+      description="Help us understand your preferences."
+    >
+      <div className="bg-gray-50 rounded-xl p-8 text-center">
+        <p className="text-gray-600 mb-4">
+          Questions for Step 2 will be added here
+        </p>
+        <p className="text-sm text-gray-500">
+          This is a placeholder for the questionnaire content
+        </p>
+      </div>
+
+      {/* Navigation */}
+      <div className="flex justify-between mt-8">
+        <button
+          type="button"
+          onClick={previousStep}
+          className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors"
+        >
+          Back
+        </button>
+        <button
+          type="button"
+          onClick={nextStep}
+          className="px-8 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors"
+        >
+          Continue
+        </button>
+      </div>
+    </OnboardingStep>
+  );
+}
+
+/**
+ * Step 3 Component - Final step with account creation
+ */
+function Step3() {
+  const { previousStep, completeOnboarding } = useOnboarding();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleComplete = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      await completeOnboarding(email, password);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create account");
+      setLoading(false);
+    }
+  };
+
+  return (
+    <OnboardingStep
+      stepNumber={3}
+      totalSteps={3}
+      title="Create your account"
+      description="Almost done! Let's set up your account."
+    >
+      <form onSubmit={handleComplete} className="space-y-6">
+        {/* Placeholder for Step 3 questions */}
+        <div className="bg-gray-50 rounded-xl p-8 text-center mb-6">
+          <p className="text-gray-600 mb-4">
+            Questions for Step 3 will be added here
+          </p>
+          <p className="text-sm text-gray-500">
+            This is a placeholder for the questionnaire content
+          </p>
+        </div>
+
+        {/* Account Creation Fields */}
+        <div className="space-y-4">
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all"
+              placeholder="you@example.com"
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all"
+              placeholder="••••••••"
+              disabled={loading}
+              minLength={6}
+            />
+          </div>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
+        {/* Navigation */}
+        <div className="flex justify-between mt-8">
+          <button
+            type="button"
+            onClick={previousStep}
+            disabled={loading}
+            className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors disabled:opacity-50"
+          >
+            Back
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-8 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? "Creating account..." : "Complete"}
+          </button>
+        </div>
+      </form>
+    </OnboardingStep>
+  );
+}
+
+/**
+ * Main Onboarding Page Component
+ * Manages the 3-step questionnaire flow
+ */
+function OnboardingContent() {
+  const { state } = useOnboarding();
+  const router = useRouter();
+
+  const handleExit = () => {
+    router.push("/");
+  };
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Exit Button */}
+      <div className="absolute top-6 right-6">
+        <button
+          onClick={handleExit}
+          className="p-2 text-gray-400 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-100"
+          aria-label="Exit onboarding"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div className="max-w-7xl mx-auto py-12 md:py-20">
+        {state.currentStep === 1 && <Step1 />}
+        {state.currentStep === 2 && <Step2 />}
+        {state.currentStep === 3 && <Step3 />}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Page wrapper with OnboardingProvider
+ */
+export default function OnboardingPage() {
+  return (
+    <OnboardingProvider>
+      <OnboardingContent />
+    </OnboardingProvider>
+  );
+}

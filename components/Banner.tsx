@@ -52,7 +52,7 @@ export default function Banner() {
               </button>
             )}
             <Link
-              href="/get-started"
+              href="/onboarding"
               className="inline-flex items-center justify-center rounded-full bg-black text-white px-5 py-2 text-sm font-semibold hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black"
             >
               Get Started

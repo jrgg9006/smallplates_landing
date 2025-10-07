@@ -1,7 +1,16 @@
+"use client";
+
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import CTAButton from "./CTAButton";
 
 export default function Hero() {
+  const router = useRouter();
+
+  const handleGetStarted = () => {
+    router.push("/onboarding");
+  };
+
   return (
     <section
       aria-labelledby="hero-title"
@@ -17,7 +26,7 @@ export default function Hero() {
             A cookbook experience made with your loved ones&rsquo; recipes.
           </p>
           <div className="mt-8">
-            <CTAButton data-cta="hero-primary" />
+            <CTAButton data-cta="hero-primary" onClick={handleGetStarted} />
           </div>
         </div>
 

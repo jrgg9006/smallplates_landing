@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   signInWithEmail,
-  signUpWithEmail,
   signInWithGoogle,
   resetPassword,
 } from "@/lib/supabase/auth";
@@ -14,7 +13,7 @@ interface LoginModalProps {
   onClose: () => void;
 }
 
-type ModalMode = "login" | "signup" | "forgot-password";
+type ModalMode = "login" | "forgot-password";
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [email, setEmail] = useState("");
@@ -44,17 +43,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             onClose();
             router.push("/profile");
           }, 1000);
-        }
-      } else if (mode === "signup") {
-        const { user, error } = await signUpWithEmail(email, password);
-        if (error) {
-          setError(error);
-        } else {
-          setMessage("Account created! Redirecting to profile...");
-          setTimeout(() => {
-            onClose();
-            router.push("/profile");
-          }, 1500);
         }
       } else if (mode === "forgot-password") {
         const { error } = await resetPassword(email);
@@ -120,17 +108,11 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           {/* Modal Content */}
           <div className="text-center mb-6">
             <h2 className="text-2xl font-semibold text-gray-900">
-              {mode === "login"
-                ? "Log in"
-                : mode === "signup"
-                ? "Sign up"
-                : "Reset password"}
+              {mode === "login" ? "Log in" : "Reset password"}
             </h2>
             <p className="text-gray-600 mt-2">
               {mode === "login"
                 ? "Welcome back!"
-                : mode === "signup"
-                ? "Create your account"
                 : "Enter your email to reset password"}
             </p>
           </div>
@@ -211,8 +193,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 ? "Loading..."
                 : mode === "login"
                 ? "Log in"
-                : mode === "signup"
-                ? "Sign up"
                 : "Send reset email"}
             </button>
 
@@ -277,33 +257,20 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           )}
 
           {/* Sign Up/Login Toggle Link */}
-          {mode !== "forgot-password" && (
+          {mode === "login" && (
             <p className="text-center text-sm text-gray-600 mt-6">
-              {mode === "login" ? (
-                <>
-                  Don&rsquo;t have an account?{" "}
-                  <button
-                    type="button"
-                    onClick={() => setMode("signup")}
-                    disabled={loading}
-                    className="text-black font-semibold hover:underline disabled:opacity-50"
-                  >
-                    Sign up
-                  </button>
-                </>
-              ) : (
-                <>
-                  Already have an account?{" "}
-                  <button
-                    type="button"
-                    onClick={() => setMode("login")}
-                    disabled={loading}
-                    className="text-black font-semibold hover:underline disabled:opacity-50"
-                  >
-                    Log in
-                  </button>
-                </>
-              )}
+              Don&rsquo;t have an account?{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  router.push("/onboarding");
+                }}
+                disabled={loading}
+                className="text-black font-semibold hover:underline disabled:opacity-50"
+              >
+                Sign up
+              </button>
             </p>
           )}
         </div>
