@@ -7,6 +7,7 @@ import {
   useState,
   ReactNode,
 } from "react";
+import { useRouter } from "next/navigation";
 import { createSupabaseClient } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
 
@@ -27,6 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const supabase = createSupabaseClient();
@@ -52,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const supabase = createSupabaseClient();
     await supabase.auth.signOut();
     setUser(null);
+    router.push("/");
   };
 
   return (

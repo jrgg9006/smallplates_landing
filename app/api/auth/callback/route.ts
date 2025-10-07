@@ -10,6 +10,7 @@ import { createSupabaseRoute } from "@/lib/supabase/route";
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const next = requestUrl.searchParams.get("next") || "/";
   const origin = requestUrl.origin;
 
   if (code) {
@@ -24,6 +25,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // Redirect to home page after successful authentication
-  return NextResponse.redirect(origin);
+  // Redirect to specified page or home page after successful authentication
+  return NextResponse.redirect(`${origin}${next}`);
 }

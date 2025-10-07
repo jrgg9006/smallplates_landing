@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   signInWithEmail,
   signUpWithEmail,
@@ -22,6 +23,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const router = useRouter();
 
   if (!isOpen) return null;
 
@@ -40,8 +42,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           setMessage("Login successful!");
           setTimeout(() => {
             onClose();
-            // Refresh to update auth state
-            window.location.reload();
+            router.push("/profile");
           }, 1000);
         }
       } else if (mode === "signup") {
@@ -49,8 +50,11 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         if (error) {
           setError(error);
         } else {
-          setMessage("Account created! Check your email to verify.");
-          setTimeout(() => onClose(), 2000);
+          setMessage("Account created! Redirecting to profile...");
+          setTimeout(() => {
+            onClose();
+            router.push("/profile");
+          }, 1500);
         }
       } else if (mode === "forgot-password") {
         const { error } = await resetPassword(email);
