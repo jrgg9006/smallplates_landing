@@ -139,10 +139,7 @@ export function GuestDetailsModal({ guest, isOpen, onClose }: GuestDetailsModalP
             </div>
             
             <div>
-              <Label className="text-sm font-medium text-gray-600">Add Plus One</Label>
-              <div className="mt-2">
-                <button className="text-sm text-blue-600 hover:underline">+ Add Plus One</button>
-              </div>
+              <button className="text-sm text-blue-600 hover:underline">+ Add Plus One</button>
             </div>
             
             <div>

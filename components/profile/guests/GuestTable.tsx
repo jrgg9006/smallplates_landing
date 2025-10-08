@@ -18,6 +18,7 @@ import { columns } from "./GuestTableColumns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GuestDetailsModal } from "./GuestDetailsModal";
+import { AddGuestModal } from "./AddGuestModal";
 
 interface GuestTableProps {
   data: Guest[];
@@ -31,8 +32,16 @@ export function GuestTable({ data }: GuestTableProps) {
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [selectedGuest, setSelectedGuest] = React.useState<Guest | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
+  const [isModalClosing, setIsModalClosing] = React.useState(false);
 
   const handleGuestClick = (guest: Guest) => {
+    // Prevent opening if a modal just closed
+    if (isModalClosing) {
+      setIsModalClosing(false);
+      return;
+    }
+    
     setSelectedGuest(guest);
     setIsModalOpen(true);
   };
@@ -42,11 +51,24 @@ export function GuestTable({ data }: GuestTableProps) {
     setSelectedGuest(null);
   };
 
+  const handleAddGuest = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const handleCloseAddModal = () => {
+    setIsAddModalOpen(false);
+  };
+
   const table = useReactTable({
     data,
     columns,
     meta: {
       onGuestClick: handleGuestClick,
+      onModalClose: () => {
+        setIsModalClosing(true);
+        // Reset the flag after a brief delay
+        setTimeout(() => setIsModalClosing(false), 300);
+      },
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -100,7 +122,7 @@ export function GuestTable({ data }: GuestTableProps) {
           <Button variant="outline">
             Upload spreadsheet
           </Button>
-          <Button>
+          <Button onClick={handleAddGuest}>
             Add guests
           </Button>
         </div>
@@ -193,6 +215,11 @@ export function GuestTable({ data }: GuestTableProps) {
         guest={selectedGuest}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+      />
+
+      <AddGuestModal
+        isOpen={isAddModalOpen}
+        onClose={handleCloseAddModal}
       />
     </div>
   );

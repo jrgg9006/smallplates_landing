@@ -7,6 +7,7 @@ import { Guest } from "@/lib/types/guest";
 import { useState } from "react";
 import { DeleteGuestModal } from "./DeleteGuestModal";
 import { Button } from "@/components/ui/button";
+import { SendMessageModal } from "./SendMessageModal";
 import "@/lib/types/table";
 
 // Status badge component
@@ -34,14 +35,35 @@ function StatusBadge({ status }: { status: Guest["recipeStatus"] }) {
   );
 }
 
-// Actions cell component
-function ActionsCell({ guest }: { guest: Guest }) {
+// Actions cell component  
+function ActionsCell({ guest, onModalClose }: { guest: Guest; onModalClose?: () => void }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
 
   const handleDelete = () => {
     // In production, this would call an API to delete the guest
     console.log("Deleting guest:", guest.id);
     setShowDeleteModal(false);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+    // Signal that a modal is closing to prevent row click
+    if (onModalClose) {
+      onModalClose();
+    }
+  };
+
+  const handleSendMessage = () => {
+    setShowMessageModal(true);
+  };
+
+  const handleCloseMessageModal = () => {
+    setShowMessageModal(false);
+    // Signal that a modal is closing to prevent row click
+    if (onModalClose) {
+      onModalClose();
+    }
   };
 
   return (
@@ -51,6 +73,10 @@ function ActionsCell({ guest }: { guest: Guest }) {
           variant="ghost"
           size="icon"
           className="h-8 w-8"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleSendMessage();
+          }}
           aria-label="Send message"
           title="Send message"
         >
@@ -60,7 +86,10 @@ function ActionsCell({ guest }: { guest: Guest }) {
           variant="ghost"
           size="icon"
           className="h-8 w-8"
-          onClick={() => setShowDeleteModal(true)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowDeleteModal(true);
+          }}
           aria-label="Delete guest"
           title="Delete guest"
         >
@@ -71,8 +100,14 @@ function ActionsCell({ guest }: { guest: Guest }) {
       <DeleteGuestModal
         isOpen={showDeleteModal}
         guestName={guest.name}
-        onClose={() => setShowDeleteModal(false)}
+        onClose={handleCloseDeleteModal}
         onConfirm={handleDelete}
+      />
+
+      <SendMessageModal
+        guest={guest}
+        isOpen={showMessageModal}
+        onClose={handleCloseMessageModal}
       />
     </>
   );
@@ -144,9 +179,10 @@ export const columns: ColumnDef<Guest>[] = [
   {
     id: "actions",
     header: "",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const guest = row.original;
-      return <ActionsCell guest={guest} />;
+      const onModalClose = table.options.meta?.onModalClose;
+      return <ActionsCell guest={guest} onModalClose={onModalClose} />;
     },
     enableSorting: false,
     enableHiding: false,
