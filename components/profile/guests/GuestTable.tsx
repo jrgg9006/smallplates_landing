@@ -119,9 +119,6 @@ export function GuestTable({ data }: GuestTableProps) {
         </div>
         
         <div className="flex items-center gap-2">
-          <Button variant="outline">
-            Upload spreadsheet
-          </Button>
           <Button onClick={handleAddGuest}>
             Add guests
           </Button>

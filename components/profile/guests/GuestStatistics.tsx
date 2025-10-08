@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GuestStatistics } from "@/lib/types/guest";
 
 interface GuestStatisticsProps {
@@ -6,35 +5,35 @@ interface GuestStatisticsProps {
 }
 
 export function GuestStatisticsComponent({ stats }: GuestStatisticsProps) {
-  const statCards = [
+  const statItems = [
     {
-      title: "Total Guests",
+      label: "Guests",
       value: stats.totalGuests,
     },
     {
-      title: "Invites Sent",
+      label: "Invites Sent", 
       value: stats.invitesSent,
     },
     {
-      title: "Recipes Received",
+      label: "Recipes Received",
       value: stats.recipesReceived,
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      {statCards.map((stat, index) => (
-        <Card key={index}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {stat.title}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="text-3xl font-semibold">{stat.value}</div>
-          </CardContent>
-        </Card>
-      ))}
+    <div className="bg-gray-50 rounded-xl p-6 mb-8">
+      <div className="grid grid-cols-3 divide-x divide-gray-200">
+        {statItems.map((stat, index) => (
+          <div key={index} className="text-center px-4">
+            <div className="text-3xl font-semibold text-gray-900 mb-1">
+              {stat.value}
+            </div>
+            <div className="text-sm text-gray-600 font-medium">
+              {stat.label}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
