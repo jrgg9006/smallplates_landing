@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import Banner from '@/components/Banner'
 import Hero from '@/components/Hero'
+import TextSection from '@/components/TextSection'
+import CookbookShowcase from '@/components/CookbookShowcase'
 import ProductShowcase from '@/components/ProductShowcase'
 import CollectorTool from '@/components/CollectorTool'
 import CTAButton from '@/components/CTAButton'
@@ -19,6 +21,8 @@ export default function Home() {
       <Banner />
       <main className="min-h-screen">
         <Hero />
+        <TextSection />
+        <CookbookShowcase />
         <ProductShowcase />
         <CollectorTool />
 

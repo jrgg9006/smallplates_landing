@@ -107,7 +107,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
           {/* Modal Content */}
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-900">
+            <h2 className="text-4xl font-serif font-semibold text-gray-900">
               {mode === "login" ? "Log in" : "Reset password"}
             </h2>
             <p className="text-gray-600 mt-2">
@@ -187,7 +187,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-black text-white py-3 rounded-lg font -semibold hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading
                 ? "Loading..."
