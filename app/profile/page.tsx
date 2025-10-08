@@ -5,8 +5,10 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { GuestTable } from "@/components/profile/guests/GuestTable";
+import { GuestTableControls } from "@/components/profile/guests/GuestTableControls";
 import { GuestStatisticsComponent } from "@/components/profile/guests/GuestStatistics";
 import { RecipeCollectorLink } from "@/components/profile/guests/RecipeCollectorLink";
+import { AddGuestModal } from "@/components/profile/guests/AddGuestModal";
 import { Guest, GuestStatistics } from "@/lib/types/guest";
 import ProfileDropdown from "@/components/profile/ProfileDropdown";
 import { Bell } from "lucide-react";
@@ -57,6 +59,21 @@ export default function ProfilePage() {
   const router = useRouter();
   const [guests] = useState<Guest[]>(mockGuests);
   const [stats] = useState<GuestStatistics>(mockStats);
+  const [searchValue, setSearchValue] = useState("");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  const handleFilterChange = (value: string) => {
+    // This will be handled by the table internally
+    console.log("Filter changed to:", value);
+  };
+
+  const handleAddGuest = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const handleCloseAddModal = () => {
+    setIsAddModalOpen(false);
+  };
 
   useEffect(() => {
     // Redirect to home if not authenticated
@@ -114,10 +131,24 @@ export default function ProfilePage() {
         {/* Statistics */}
         <GuestStatisticsComponent stats={stats} />
 
+        {/* Guest Table Controls */}
+        <GuestTableControls
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          onFilterChange={handleFilterChange}
+          onAddGuest={handleAddGuest}
+        />
+
         {/* Guest Table */}
         <Card>
-          <CardContent>
-            <GuestTable data={guests} />
+          <CardContent className="p-0">
+            <GuestTable 
+              data={guests}
+              searchValue={searchValue}
+              onSearchChange={setSearchValue}
+              onFilterChange={handleFilterChange}
+              onAddGuest={handleAddGuest}
+            />
           </CardContent>
         </Card>
 
@@ -135,6 +166,12 @@ export default function ProfilePage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Add Guest Modal */}
+        <AddGuestModal
+          isOpen={isAddModalOpen}
+          onClose={handleCloseAddModal}
+        />
       </div>
     </div>
   );

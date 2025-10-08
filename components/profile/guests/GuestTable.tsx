@@ -22,14 +22,17 @@ import { AddGuestModal } from "./AddGuestModal";
 
 interface GuestTableProps {
   data: Guest[];
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+  onFilterChange: (value: string) => void;
+  onAddGuest: () => void;
 }
 
-export function GuestTable({ data }: GuestTableProps) {
+export function GuestTable({ data, searchValue, onSearchChange, onFilterChange, onAddGuest }: GuestTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const [globalFilter, setGlobalFilter] = React.useState("");
   const [selectedGuest, setSelectedGuest] = React.useState<Guest | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
@@ -78,53 +81,18 @@ export function GuestTable({ data }: GuestTableProps) {
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
-    onGlobalFilterChange: setGlobalFilter,
+    onGlobalFilterChange: onSearchChange,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
-      globalFilter,
+      globalFilter: searchValue,
     },
   });
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between py-4">
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search by name..."
-              value={globalFilter ?? ""}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <select
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-            onChange={(e) => {
-              if (e.target.value === "all") {
-                table.getColumn("recipeStatus")?.setFilterValue(undefined);
-              } else {
-                table.getColumn("recipeStatus")?.setFilterValue(e.target.value);
-              }
-            }}
-          >
-            <option value="all">All statuses</option>
-            <option value="not_invited">Not Invited</option>
-            <option value="invited">Invited</option>
-            <option value="submitted">Submitted</option>
-          </select>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Button onClick={handleAddGuest}>
-            Add guests
-          </Button>
-        </div>
-      </div>
-
       <div className="overflow-hidden rounded-lg border">
         <table className="w-full border-collapse bg-background">
           <thead className="bg-muted/50">
