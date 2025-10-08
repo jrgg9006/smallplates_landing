@@ -17,6 +17,7 @@ import { Guest } from "@/lib/types/guest";
 import { columns } from "./GuestTableColumns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { GuestDetailsModal } from "./GuestDetailsModal";
 
 interface GuestTableProps {
   data: Guest[];
@@ -28,10 +29,25 @@ export function GuestTable({ data }: GuestTableProps) {
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
   const [globalFilter, setGlobalFilter] = React.useState("");
+  const [selectedGuest, setSelectedGuest] = React.useState<Guest | null>(null);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+  const handleGuestClick = (guest: Guest) => {
+    setSelectedGuest(guest);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedGuest(null);
+  };
 
   const table = useReactTable({
     data,
     columns,
+    meta: {
+      onGuestClick: handleGuestClick,
+    },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -117,7 +133,8 @@ export function GuestTable({ data }: GuestTableProps) {
                 <tr
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-muted/50"
+                  className="hover:bg-muted/50 cursor-pointer"
+                  onClick={() => handleGuestClick(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
@@ -171,6 +188,12 @@ export function GuestTable({ data }: GuestTableProps) {
           </Button>
         </div>
       </div>
+
+      <GuestDetailsModal
+        guest={selectedGuest}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }

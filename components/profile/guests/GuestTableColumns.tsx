@@ -1,11 +1,13 @@
 "use client";
 
+import React from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, Mail, Trash2 } from "lucide-react";
 import { Guest } from "@/lib/types/guest";
 import { useState } from "react";
 import { DeleteGuestModal } from "./DeleteGuestModal";
 import { Button } from "@/components/ui/button";
+import "@/lib/types/table";
 
 // Status badge component
 function StatusBadge({ status }: { status: Guest["recipeStatus"] }) {
@@ -44,7 +46,7 @@ function ActionsCell({ guest }: { guest: Guest }) {
 
   return (
     <>
-      <div className="flex justify-end items-center gap-1">
+      <div className="flex justify-end items-center gap-1" onClick={(e) => e.stopPropagation()}>
         <Button
           variant="ghost"
           size="icon"
@@ -93,6 +95,7 @@ export const columns: ColumnDef<Guest>[] = [
         type="checkbox"
         checked={row.getIsSelected()}
         onChange={(e) => row.toggleSelected(e.target.checked)}
+        onClick={(e) => e.stopPropagation()}
         className="h-4 w-4 rounded border-gray-300 text-black focus:ring-2 focus:ring-black focus:ring-offset-2"
         aria-label="Select row"
       />

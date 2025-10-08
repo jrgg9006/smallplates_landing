@@ -1,9 +1,10 @@
 "use client";
 
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import LoginModal from "./LoginModal";
+import LoginModal from "@/components/auth/LoginModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
 
 export default function Banner() {
@@ -55,7 +56,7 @@ export default function Banner() {
               href="/onboarding"
               className="inline-flex items-center justify-center rounded-full bg-black text-white px-5 py-2 text-sm font-semibold hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black"
             >
-              Let's do it
+              Let&apos;s do it
             </Link>
           </div>
         </div>

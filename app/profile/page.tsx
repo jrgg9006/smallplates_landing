@@ -1,13 +1,14 @@
 "use client";
 
+import React from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { GuestTable } from "@/components/guests/GuestTable";
-import { GuestStatisticsComponent } from "@/components/guests/GuestStatistics";
-import { RecipeCollectorLink } from "@/components/guests/RecipeCollectorLink";
+import { GuestTable } from "@/components/profile/guests/GuestTable";
+import { GuestStatisticsComponent } from "@/components/profile/guests/GuestStatistics";
+import { RecipeCollectorLink } from "@/components/profile/guests/RecipeCollectorLink";
 import { Guest, GuestStatistics } from "@/lib/types/guest";
-import ProfileDropdown from "@/components/ProfileDropdown";
+import ProfileDropdown from "@/components/profile/ProfileDropdown";
 import { Bell } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -83,7 +84,7 @@ export default function ProfilePage() {
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Guest Management</h1>
+              <h1 className="text-4xl font-serif font-semibold text-gray-900">Guest Management</h1>
               <p className="mt-1 text-gray-600">Manage your cookbook contributors</p>
             </div>
             <div className="flex items-center gap-3">

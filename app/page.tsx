@@ -1,13 +1,14 @@
 "use client";
 
+import React from "react";
 import { useRouter } from "next/navigation";
-import Banner from '@/components/Banner'
-import Hero from '@/components/Hero'
-import TextSection from '@/components/TextSection'
-import CookbookShowcase from '@/components/CookbookShowcase'
-import ProductShowcase from '@/components/ProductShowcase'
-import CollectorTool from '@/components/CollectorTool'
-import CTAButton from '@/components/CTAButton'
+import Banner from '@/components/landing/Banner'
+import Hero from '@/components/landing/Hero'
+import TextSection from '@/components/landing/TextSection'
+import CookbookShowcase from '@/components/landing/CookbookShowcase'
+import ProductShowcase from '@/components/landing/ProductShowcase'
+import CollectorTool from '@/components/landing/CollectorTool'
+import CTAButton from '@/components/landing/CTAButton'
 
 export default function Home() {
   const router = useRouter();

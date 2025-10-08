@@ -1,9 +1,10 @@
 "use client";
 
+import React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { OnboardingProvider, useOnboarding } from "@/lib/contexts/OnboardingContext";
-import OnboardingStep from "@/components/OnboardingStep";
+import OnboardingStep from "@/components/onboarding/OnboardingStep";
 
 /**
  * Step 1 Component - Placeholder for future questions
