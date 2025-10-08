@@ -210,35 +210,9 @@ function Step3() {
  */
 function OnboardingContent() {
   const { state } = useOnboarding();
-  const router = useRouter();
-
-  const handleExit = () => {
-    router.push("/");
-  };
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Exit Button */}
-      <div className="absolute top-6 right-6">
-        <button
-          onClick={handleExit}
-          className="p-2 text-gray-400 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-100"
-          aria-label="Exit onboarding"
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
       <div className="max-w-7xl mx-auto py-12 md:py-20">
         {state.currentStep === 1 && <Step1 />}
         {state.currentStep === 2 && <Step2 />}

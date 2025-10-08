@@ -16,7 +16,7 @@ export default function CTAButton({
       aria-label={label}
       data-cta={props["data-cta"] ?? "hero-primary"}
       onClick={onClick}
-      className={`inline-flex items-center justify-center rounded-2xl bg-black text-white px-6 py-3 text-base font-semibold shadow-sm hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black transition-colors ${className}`}
+      className={`inline-flex items-center justify-center rounded-2xl bg-white text-black px-6 py-3 text-lg font-semibold shadow-sm hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white transition-colors ${className}`}
       {...props}
     >
       {label}
