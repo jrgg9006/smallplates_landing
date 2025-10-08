@@ -2,11 +2,60 @@
 
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { GuestTable } from "@/components/guests/GuestTable";
+import { GuestStatisticsComponent } from "@/components/guests/GuestStatistics";
+import { RecipeCollectorLink } from "@/components/guests/RecipeCollectorLink";
+import { Guest, GuestStatistics } from "@/lib/types/guest";
+import ProfileDropdown from "@/components/ProfileDropdown";
+import { Bell } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+// Mock data for development
+const mockGuests: Guest[] = [
+  {
+    id: "1",
+    name: "John Smith",
+    email: "john.smith@example.com",
+    phone: "(555) 123-4567",
+    recipeStatus: "submitted",
+    invitedAt: new Date("2024-01-15"),
+    submittedAt: new Date("2024-01-20"),
+    createdAt: new Date("2024-01-10"),
+    updatedAt: new Date("2024-01-20"),
+  },
+  {
+    id: "2",
+    name: "Sarah Johnson",
+    email: "sarah.j@example.com",
+    recipeStatus: "invited",
+    invitedAt: new Date("2024-01-18"),
+    createdAt: new Date("2024-01-12"),
+    updatedAt: new Date("2024-01-18"),
+  },
+  {
+    id: "3",
+    name: "Michael Brown",
+    email: "m.brown@example.com",
+    phone: "(555) 987-6543",
+    recipeStatus: "not_invited",
+    createdAt: new Date("2024-01-20"),
+    updatedAt: new Date("2024-01-20"),
+  },
+];
+
+const mockStats: GuestStatistics = {
+  totalGuests: 12,
+  invitesSent: 8,
+  recipesReceived: 5,
+};
 
 export default function ProfilePage() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
+  const [guests] = useState<Guest[]>(mockGuests);
+  const [stats] = useState<GuestStatistics>(mockStats);
 
   useEffect(() => {
     // Redirect to home if not authenticated
@@ -29,17 +78,62 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-          <button
-            onClick={signOut}
-            className="px-6 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
-          >
-            Sign out
-          </button>
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Guest Management</h1>
+              <p className="mt-1 text-gray-600">Manage your cookbook contributors</p>
+            </div>
+            <div className="flex items-center gap-3">
+              {/* Notification Bell */}
+              <button
+                className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5 text-gray-600" />
+                {/* Notification Badge */}
+                <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs font-medium">1</span>
+                </span>
+              </button>
+              
+              <ProfileDropdown />
+            </div>
+          </div>
         </div>
-        <p className="mt-4 text-gray-600">Welcome, {user.email}</p>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Recipe Collector Link */}
+        <RecipeCollectorLink userId={user?.id} />
+        
+        {/* Statistics */}
+        <GuestStatisticsComponent stats={stats} />
+
+        {/* Guest Table */}
+        <Card>
+          <CardContent>
+            <GuestTable data={guests} />
+          </CardContent>
+        </Card>
+
+        {/* Book Preview Section */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle>Your Cookbook</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8">
+              <p className="text-muted-foreground mb-4">
+                You have {stats.recipesReceived} recipes ready for your cookbook
+              </p>
+              <Button size="lg">Preview & Order Book</Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
