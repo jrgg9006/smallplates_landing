@@ -86,9 +86,6 @@ export default function OnboardingStep({
             );
           })}
         </div>
-        <p className="text-center text-sm text-gray-600">
-          Step {stepNumber} of {totalSteps}
-        </p>
       </div>
 
       {/* Step Content */}

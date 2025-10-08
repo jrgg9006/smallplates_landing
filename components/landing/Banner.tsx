@@ -34,9 +34,12 @@ export default function Banner() {
           <div className="flex items-center gap-4">
             {user ? (
               <>
-                <span className="text-sm text-gray-600">
+                <Link
+                  href="/profile"
+                  className="text-sm text-gray-600 hover:text-gray-900 underline transition-colors"
+                >
                   {user.email}
-                </span>
+                </Link>
                 <button
                   onClick={signOut}
                   className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
@@ -53,10 +56,10 @@ export default function Banner() {
               </button>
             )}
             <Link
-              href="/onboarding"
+              href={user ? "/profile" : "/onboarding"}
               className="inline-flex items-center justify-center rounded-full bg-black text-white px-5 py-2 text-sm font-semibold hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black"
             >
-              Let&apos;s do it
+              {user ? "Go to Profile" : "Let's do it"}
             </Link>
           </div>
         </div>

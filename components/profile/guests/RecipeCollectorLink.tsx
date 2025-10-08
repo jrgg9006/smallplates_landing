@@ -27,28 +27,29 @@ export function RecipeCollectorLink({ userId = "demo" }: RecipeCollectorLinkProp
   };
 
   return (
-    <Card className="mb-8">
-      <CardHeader>
+    <Card>
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle>Your Recipe Collector</CardTitle>
-          <Button variant="link" className="p-0 h-auto">
+          <CardTitle className="text-base">Your Recipe Collector</CardTitle>
+          <Button variant="link" className="p-0 h-auto text-sm">
             Edit
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-3">
-          <div className="flex-1 bg-muted rounded-lg px-4 py-3 text-muted-foreground overflow-hidden">
-            <span className="block truncate">{collectorLink}</span>
+      <CardContent className="pt-0">
+        <div className="flex items-center gap-2">
+          <div className="flex-1 bg-muted rounded-lg px-3 py-2 text-muted-foreground overflow-hidden">
+            <span className="block truncate text-sm">{collectorLink}</span>
           </div>
           
           <Button
             onClick={handleCopyLink}
             variant="outline"
-            className="flex items-center gap-2"
+            size="sm"
+            className="flex items-center gap-1"
           >
-            <LinkIcon className="h-4 w-4" />
-            {copied ? "Copied!" : "Copy link"}
+            <LinkIcon className="h-3 w-3" />
+            <span className="text-xs">{copied ? "Copied!" : "Copy link"}</span>
           </Button>
         </div>
       </CardContent>

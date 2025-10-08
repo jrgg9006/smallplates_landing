@@ -5,27 +5,62 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { OnboardingProvider, useOnboarding } from "@/lib/contexts/OnboardingContext";
 import OnboardingStep from "@/components/onboarding/OnboardingStep";
+import { SelectionCard } from "@/components/onboarding/SelectionCard";
 
 /**
- * Step 1 Component - Placeholder for future questions
+ * Step 1 Component - Recipe Count Question
  */
 function Step1() {
-  const { nextStep } = useOnboarding();
+  const { nextStep, updateStepData } = useOnboarding();
+  const [selectedRecipeCount, setSelectedRecipeCount] = useState<string>("");
+
+  const recipeOptions = [
+    { value: "40-or-less", label: "40 or less" },
+    { value: "40-60", label: "40 - 60 recipes" },
+    { value: "60-or-more", label: "60 or more" },
+  ];
+
+  const handleSelection = (value: string) => {
+    setSelectedRecipeCount(value);
+    // Store the answer in onboarding context
+    updateStepData(1, { recipeCount: value });
+  };
+
+  const handleContinue = () => {
+    if (selectedRecipeCount) {
+      nextStep();
+    }
+  };
 
   return (
     <OnboardingStep
       stepNumber={1}
       totalSteps={3}
       title="Let's get started"
-      description="We'll help you create your personalized cookbook experience."
     >
-      <div className="bg-gray-50 rounded-xl p-8 text-center">
-        <p className="text-gray-600 mb-4">
-          Questions for Step 1 will be added here
-        </p>
-        <p className="text-sm text-gray-500">
-          This is a placeholder for the questionnaire content
-        </p>
+      <div className="max-w-lg mx-auto">
+        {/* Question */}
+        <div className="text-center mb-8">
+          <h2 className="text-xl font-medium text-gray-900 mb-2">
+            How many recipes are you planning to add (approx)?
+          </h2>
+          <p className="text-gray-600">
+            This can change in the future. Dont´t worry about it too much.
+          </p>
+        </div>
+
+        {/* Selection Cards */}
+        <div className="space-y-3 mb-8">
+          {recipeOptions.map((option) => (
+            <SelectionCard
+              key={option.value}
+              value={option.value}
+              label={option.label}
+              isSelected={selectedRecipeCount === option.value}
+              onClick={handleSelection}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Navigation */}
@@ -39,8 +74,13 @@ function Step1() {
         </button>
         <button
           type="button"
-          onClick={nextStep}
-          className="px-8 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors"
+          onClick={handleContinue}
+          disabled={!selectedRecipeCount}
+          className={`px-8 py-3 rounded-xl font-semibold transition-colors ${
+            selectedRecipeCount
+              ? "bg-black text-white hover:bg-gray-800"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+          }`}
         >
           Continue
         </button>

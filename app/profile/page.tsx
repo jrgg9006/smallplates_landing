@@ -4,6 +4,8 @@ import React from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { GuestTable } from "@/components/profile/guests/GuestTable";
 import { GuestTableControls } from "@/components/profile/guests/GuestTableControls";
 import { GuestStatisticsComponent } from "@/components/profile/guests/GuestStatistics";
@@ -100,9 +102,21 @@ export default function ProfilePage() {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-serif font-semibold text-gray-900">Guest Management</h1>
-              <p className="mt-1 text-gray-600">Manage your cookbook contributors</p>
+            <div className="flex items-center gap-8">
+              {/* Logo - Clickable to go back to landing */}
+              <Link href="/" className="hover:opacity-80 transition-opacity">
+                <Image
+                  src="/images/SmallPlates_logo_horizontal.png"
+                  alt="Small Plates & Co."
+                  width={200}
+                  height={40}
+                  className="h-14 w-auto cursor-pointer"
+                />
+              </Link>
+              {/* Divider */}
+              <div className="h-10 w-px bg-gray-300" />
+              {/* Page Title */}
+              <h1 className="text-4xl font-serif font-semibold text-gray-900">Guest List</h1>
             </div>
             <div className="flex items-center gap-3">
               {/* Notification Bell */}
@@ -125,11 +139,18 @@ export default function ProfilePage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Recipe Collector Link */}
-        <RecipeCollectorLink userId={user?.id} />
-        
-        {/* Statistics */}
-        <GuestStatisticsComponent stats={stats} />
+        {/* Two Column Layout: Statistics + Recipe Collector */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 items-start">
+          {/* Statistics - Left Side */}
+          <div className="h-full">
+            <GuestStatisticsComponent stats={stats} />
+          </div>
+          
+          {/* Recipe Collector - Right Side */}
+          <div className="h-full">
+            <RecipeCollectorLink userId={user?.id} />
+          </div>
+        </div>
 
         {/* Guest Table Controls */}
         <GuestTableControls
