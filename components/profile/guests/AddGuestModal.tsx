@@ -10,13 +10,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { addGuest, checkGuestExists } from "@/lib/supabase/guests";
+import type { GuestFormData } from "@/lib/types/database";
 
 interface AddGuestModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onGuestAdded?: () => void; // Callback to refresh the guest list
 }
 
-export function AddGuestModal({ isOpen, onClose }: AddGuestModalProps) {
+export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalProps) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -24,27 +27,10 @@ export function AddGuestModal({ isOpen, onClose }: AddGuestModalProps) {
   const [hasPlusOne, setHasPlusOne] = useState(false);
   const [plusOneFirstName, setPlusOneFirstName] = useState('');
   const [plusOneLastName, setPlusOneLastName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSave = () => {
-    // TODO: Implement save functionality
-    const newGuest = {
-      firstName,
-      lastName,
-      email,
-      phone,
-      fullName: `${firstName} ${lastName}`.trim(),
-      ...(hasPlusOne && {
-        plusOne: {
-          firstName: plusOneFirstName,
-          lastName: plusOneLastName,
-          fullName: `${plusOneFirstName} ${plusOneLastName}`.trim()
-        }
-      })
-    };
-    
-    console.log('Adding new guest:', newGuest);
-    
-    // Reset form
+  const resetForm = () => {
     setFirstName('');
     setLastName('');
     setEmail('');
@@ -52,8 +38,62 @@ export function AddGuestModal({ isOpen, onClose }: AddGuestModalProps) {
     setHasPlusOne(false);
     setPlusOneFirstName('');
     setPlusOneLastName('');
-    
-    onClose();
+    setError(null);
+  };
+
+  const handleSave = async () => {
+    if (!firstName.trim()) {
+      setError('Please fill in First Name');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Check if guest email already exists (only if email is provided)
+      if (email.trim()) {
+        const emailExists = await checkGuestExists(email);
+        if (emailExists) {
+          setError('A guest with this email already exists');
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Prepare guest data
+      const guestData: GuestFormData = {
+        first_name: firstName.trim(),
+        last_name: lastName.trim() || '',
+        email: email.trim() || undefined,
+        phone: phone.trim() || undefined,
+        significant_other_name: hasPlusOne ? `${plusOneFirstName} ${plusOneLastName}`.trim() : undefined,
+      };
+
+      // Add the guest to the database
+      const { error } = await addGuest(guestData);
+
+      if (error) {
+        setError(error);
+        setLoading(false);
+        return;
+      }
+
+      // Success! Reset form and close modal
+      resetForm();
+      onClose();
+      
+      // Refresh the guest list if callback provided
+      if (onGuestAdded) {
+        onGuestAdded();
+      }
+
+    } catch (err) {
+      setError('An unexpected error occurred');
+      console.error('Error adding guest:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAddPlusOne = () => {
@@ -79,13 +119,14 @@ export function AddGuestModal({ isOpen, onClose }: AddGuestModalProps) {
             <h3 className="text-lg font-medium mb-4">Guest Information</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="firstName" className="text-sm font-medium text-gray-600">First Name</Label>
+                <Label htmlFor="firstName" className="text-sm font-medium text-gray-600">First Name *</Label>
                 <Input
                   id="firstName"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   className="mt-1"
                   placeholder="First Name"
+                  required
                 />
               </div>
               <div>
@@ -172,15 +213,24 @@ export function AddGuestModal({ isOpen, onClose }: AddGuestModalProps) {
                 />
               </div>
           </div>
+
+
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-3">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
         </div>
 
         {/* Save Button - Fixed position in bottom right */}
         <div className="absolute bottom-6 right-6">
           <Button 
             onClick={handleSave}
-            className="bg-black text-white hover:bg-gray-800 px-6 py-2 rounded-full"
+            disabled={loading}
+            className="bg-black text-white hover:bg-gray-800 px-6 py-2 rounded-full disabled:opacity-50"
           >
-            Save
+            {loading ? 'Saving...' : 'Save'}
           </Button>
         </div>
       </DialogContent>

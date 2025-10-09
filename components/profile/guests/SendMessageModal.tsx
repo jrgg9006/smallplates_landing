@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Guest } from "@/lib/types/guest";
+import { Guest } from "@/lib/types/database";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +26,7 @@ export function SendMessageModal({ guest, isOpen, onClose }: SendMessageModalPro
     if (!guest) return;
     
     // TODO: Implement send message functionality
-    console.log('Sending message to:', guest.name);
+    console.log('Sending message to:', `${guest.first_name} ${guest.last_name || ''}`.trim());
     console.log('Email:', guest.email);
     console.log('Message:', message);
     console.log('Send copy to me:', sendCopyToMe);
@@ -41,8 +41,15 @@ export function SendMessageModal({ guest, isOpen, onClose }: SendMessageModalPro
 
   if (!guest) return null;
 
+  const handleClose = (open: boolean) => {
+    if (!open) {
+      // Modal is being closed
+      onClose();
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl fixed top-[15%] left-[50%] translate-x-[-50%] translate-y-0 z-[60]">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl font-semibold mb-4">Send Message</DialogTitle>
@@ -61,7 +68,7 @@ export function SendMessageModal({ guest, isOpen, onClose }: SendMessageModalPro
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium text-gray-600 w-16">TO</span>
-              <span className="text-sm text-gray-800">{guest.name} ({guest.email})</span>
+              <span className="text-sm text-gray-800">{`${guest.first_name} ${guest.last_name || ''}`.trim()} ({guest.email})</span>
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium text-gray-600 w-16">SUBJECT</span>

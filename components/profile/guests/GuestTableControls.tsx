@@ -43,8 +43,10 @@ export function GuestTableControls({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All statuses</SelectItem>
-            <SelectItem value="not_invited">Not Invited</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="invited">Invited</SelectItem>
+            <SelectItem value="responded">Responded</SelectItem>
+            <SelectItem value="declined">Declined</SelectItem>
             <SelectItem value="submitted">Submitted</SelectItem>
           </SelectContent>
         </Select>

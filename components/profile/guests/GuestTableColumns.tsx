@@ -3,24 +3,29 @@
 import React from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, Mail, Trash2 } from "lucide-react";
-import { Guest } from "@/lib/types/guest";
+import { Guest } from "@/lib/types/database";
 import { useState } from "react";
 import { DeleteGuestModal } from "./DeleteGuestModal";
 import { Button } from "@/components/ui/button";
 import { SendMessageModal } from "./SendMessageModal";
+import { archiveGuest } from "@/lib/supabase/guests";
 import "@/lib/types/table";
 
 // Status badge component
-function StatusBadge({ status }: { status: Guest["recipeStatus"] }) {
+function StatusBadge({ status }: { status: Guest["status"] }) {
   const styles = {
-    not_invited: "bg-gray-100 text-gray-700",
+    pending: "bg-gray-100 text-gray-700",
     invited: "bg-yellow-100 text-yellow-700",
-    submitted: "bg-green-100 text-green-700",
+    responded: "bg-green-100 text-green-700",
+    declined: "bg-red-100 text-red-700",
+    submitted: "bg-blue-100 text-blue-700",
   };
 
   const labels = {
-    not_invited: "Not Invited",
+    pending: "Pending",
     invited: "Invited",
+    responded: "Responded",
+    declined: "Declined", 
     submitted: "Submitted",
   };
 
@@ -36,14 +41,36 @@ function StatusBadge({ status }: { status: Guest["recipeStatus"] }) {
 }
 
 // Actions cell component  
-function ActionsCell({ guest, onModalClose }: { guest: Guest; onModalClose?: () => void }) {
+function ActionsCell({ guest, onModalClose, onGuestDeleted }: { guest: Guest; onModalClose?: () => void; onGuestDeleted?: () => void }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  const handleDelete = () => {
-    // In production, this would call an API to delete the guest
-    console.log("Deleting guest:", guest.id);
-    setShowDeleteModal(false);
+  const handleDelete = async () => {
+    setDeleting(true);
+    
+    try {
+      const { error } = await archiveGuest(guest.id);
+      
+      if (error) {
+        console.error('Error archiving guest:', error);
+        // You could show a toast notification here
+        setDeleting(false);
+        return;
+      }
+      
+      // Success! Close modal and refresh the guest list
+      handleCloseDeleteModal();
+      
+      if (onGuestDeleted) {
+        onGuestDeleted();
+      }
+      
+    } catch (err) {
+      console.error('Unexpected error archiving guest:', err);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleCloseDeleteModal = () => {
@@ -58,7 +85,11 @@ function ActionsCell({ guest, onModalClose }: { guest: Guest; onModalClose?: () 
     setShowMessageModal(true);
   };
 
+  // Check if guest has any contact information
+  const hasContactInfo = (guest.email && guest.email.trim()) || (guest.phone && guest.phone.trim());
+
   const handleCloseMessageModal = () => {
+    console.log('SendMessageModal closing, calling onModalClose');
     setShowMessageModal(false);
     // Signal that a modal is closing to prevent row click
     if (onModalClose) {
@@ -72,13 +103,16 @@ function ActionsCell({ guest, onModalClose }: { guest: Guest; onModalClose?: () 
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8"
+          className={`h-8 w-8 ${!hasContactInfo ? 'opacity-50 cursor-not-allowed' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
-            handleSendMessage();
+            if (hasContactInfo) {
+              handleSendMessage();
+            }
           }}
-          aria-label="Send message"
-          title="Send message"
+          disabled={!hasContactInfo}
+          aria-label={hasContactInfo ? "Send message" : "No contact info available"}
+          title={hasContactInfo ? "Send message" : "No contact info available"}
         >
           <Mail className="h-4 w-4" />
         </Button>
@@ -99,9 +133,10 @@ function ActionsCell({ guest, onModalClose }: { guest: Guest; onModalClose?: () 
 
       <DeleteGuestModal
         isOpen={showDeleteModal}
-        guestName={guest.name}
+        guestName={`${guest.first_name} ${guest.last_name || ''}`.trim()}
         onClose={handleCloseDeleteModal}
         onConfirm={handleDelete}
+        loading={deleting}
       />
 
       <SendMessageModal
@@ -139,7 +174,7 @@ export const columns: ColumnDef<Guest>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "name",
+    id: "name",
     header: ({ column }) => {
       return (
         <Button
@@ -152,7 +187,11 @@ export const columns: ColumnDef<Guest>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="font-medium">{row.getValue("name")}</div>,
+    cell: ({ row }) => {
+      const guest = row.original;
+      const fullName = `${guest.first_name} ${guest.last_name || ''}`.trim();
+      return <div className="font-medium">{fullName}</div>;
+    },
   },
   {
     id: "contact",
@@ -161,19 +200,29 @@ export const columns: ColumnDef<Guest>[] = [
       const guest = row.original;
       return (
         <div className="space-y-1">
-          <div className="text-sm">{guest.email}</div>
-          {guest.phone && (
-            <div className="text-xs text-gray-500">{guest.phone}</div>
-          )}
+          <div className="text-xs">
+            {guest.email && guest.email.trim() ? (
+              guest.email
+            ) : (
+              <span className="text-red-500">No email</span>
+            )}
+          </div>
+          <div className="text-xs">
+            {guest.phone && guest.phone.trim() ? (
+              <span className="text-gray-500">{guest.phone}</span>
+            ) : (
+              <span className="text-red-500">No mobile</span>
+            )}
+          </div>
         </div>
       );
     },
   },
   {
-    accessorKey: "recipeStatus",
+    accessorKey: "status",
     header: "Recipe Status",
     cell: ({ row }) => {
-      return <StatusBadge status={row.getValue("recipeStatus")} />;
+      return <StatusBadge status={row.getValue("status")} />;
     },
   },
   {
@@ -182,7 +231,8 @@ export const columns: ColumnDef<Guest>[] = [
     cell: ({ row, table }) => {
       const guest = row.original;
       const onModalClose = table.options.meta?.onModalClose;
-      return <ActionsCell guest={guest} onModalClose={onModalClose} />;
+      const onGuestDeleted = table.options.meta?.onGuestDeleted;
+      return <ActionsCell guest={guest} onModalClose={onModalClose} onGuestDeleted={onGuestDeleted} />;
     },
     enableSorting: false,
     enableHiding: false,

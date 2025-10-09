@@ -11,63 +11,17 @@ import { GuestTableControls } from "@/components/profile/guests/GuestTableContro
 import { GuestStatisticsComponent } from "@/components/profile/guests/GuestStatistics";
 import { RecipeCollectorLink } from "@/components/profile/guests/RecipeCollectorLink";
 import { AddGuestModal } from "@/components/profile/guests/AddGuestModal";
-import { Guest, GuestStatistics } from "@/lib/types/guest";
 import ProfileDropdown from "@/components/profile/ProfileDropdown";
 import { Bell } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-// Mock data for development
-const mockGuests: Guest[] = [
-  {
-    id: "1",
-    name: "John Smith",
-    email: "john.smith@example.com",
-    phone: "(555) 123-4567",
-    recipeStatus: "submitted",
-    invitedAt: new Date("2024-01-15"),
-    submittedAt: new Date("2024-01-20"),
-    createdAt: new Date("2024-01-10"),
-    updatedAt: new Date("2024-01-20"),
-  },
-  {
-    id: "2",
-    name: "Sarah Johnson",
-    email: "sarah.j@example.com",
-    recipeStatus: "invited",
-    invitedAt: new Date("2024-01-18"),
-    createdAt: new Date("2024-01-12"),
-    updatedAt: new Date("2024-01-18"),
-  },
-  {
-    id: "3",
-    name: "Michael Brown",
-    email: "m.brown@example.com",
-    phone: "(555) 987-6543",
-    recipeStatus: "not_invited",
-    createdAt: new Date("2024-01-20"),
-    updatedAt: new Date("2024-01-20"),
-  },
-];
-
-const mockStats: GuestStatistics = {
-  totalGuests: 12,
-  invitesSent: 8,
-  recipesReceived: 5,
-};
-
 export default function ProfilePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [guests] = useState<Guest[]>(mockGuests);
-  const [stats] = useState<GuestStatistics>(mockStats);
-  const [searchValue, setSearchValue] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-
-  const handleFilterChange = (value: string) => {
-    // This will be handled by the table internally
-    console.log("Filter changed to:", value);
-  };
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [searchValue, setSearchValue] = useState('');
 
   const handleAddGuest = () => {
     setIsAddModalOpen(true);
@@ -75,6 +29,10 @@ export default function ProfilePage() {
 
   const handleCloseAddModal = () => {
     setIsAddModalOpen(false);
+  };
+
+  const handleGuestAdded = () => {
+    setRefreshTrigger(prev => prev + 1);
   };
 
   useEffect(() => {
@@ -143,7 +101,7 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 items-start">
           {/* Statistics - Left Side */}
           <div className="h-full">
-            <GuestStatisticsComponent stats={stats} />
+            <GuestStatisticsComponent />
           </div>
           
           {/* Recipe Collector - Right Side */}
@@ -156,20 +114,14 @@ export default function ProfilePage() {
         <GuestTableControls
           searchValue={searchValue}
           onSearchChange={setSearchValue}
-          onFilterChange={handleFilterChange}
+          onFilterChange={() => {}} // TODO: Implement filter functionality
           onAddGuest={handleAddGuest}
         />
 
         {/* Guest Table */}
         <Card>
           <CardContent className="p-0">
-            <GuestTable 
-              data={guests}
-              searchValue={searchValue}
-              onSearchChange={setSearchValue}
-              onFilterChange={handleFilterChange}
-              onAddGuest={handleAddGuest}
-            />
+            <GuestTable key={refreshTrigger} searchValue={searchValue} />
           </CardContent>
         </Card>
 
@@ -181,7 +133,7 @@ export default function ProfilePage() {
           <CardContent>
             <div className="text-center py-8">
               <p className="text-muted-foreground mb-4">
-                You have {stats.recipesReceived} recipes ready for your cookbook
+                Your recipes are being collected for your cookbook
               </p>
               <Button size="lg">Preview & Order Book</Button>
             </div>
@@ -192,6 +144,7 @@ export default function ProfilePage() {
         <AddGuestModal
           isOpen={isAddModalOpen}
           onClose={handleCloseAddModal}
+          onGuestAdded={handleGuestAdded}
         />
       </div>
     </div>

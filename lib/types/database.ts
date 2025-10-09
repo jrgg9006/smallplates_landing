@@ -254,11 +254,11 @@ export interface GuestFull extends Guest {
 // Form data types for UI components
 export interface GuestFormData {
   first_name: string;
-  last_name: string;
-  email: string;
+  last_name?: string;
+  email?: string;
   phone?: string;
   significant_other_name?: string;
-  number_of_recipes: number;
+  number_of_recipes?: number;
   notes?: string;
   tags?: string[];
 }

@@ -16,31 +16,34 @@ interface DeleteGuestModalProps {
   guestName: string;
   onClose: () => void;
   onConfirm: () => void;
+  loading?: boolean;
 }
 
-export function DeleteGuestModal({ isOpen, guestName, onClose, onConfirm }: DeleteGuestModalProps) {
+export function DeleteGuestModal({ isOpen, guestName, onClose, onConfirm, loading = false }: DeleteGuestModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl font-semibold mb-4">Delete</DialogTitle>
+          <DialogTitle className="font-serif text-2xl font-semibold mb-4">Remove Guest</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete <span className="font-medium text-foreground">{guestName}</span> and all guest information?
+            Are you sure you want to remove <span className="font-medium text-foreground">{guestName}</span> from your guest list?
             <br />
             <br />
-            <span className="text-sm text-muted-foreground">This cannot be undone</span>
+            <span className="text-sm text-muted-foreground">The guest and their recipes will be archived but not permanently deleted</span>
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex-col gap-2 sm:flex-row sm:gap-4">
           <Button
             onClick={onConfirm}
-            className="order-1 sm:order-2 bg-black text-white hover:bg-gray-800"
+            disabled={loading}
+            className="order-1 sm:order-2 bg-black text-white hover:bg-gray-800 disabled:opacity-50"
           >
-            Delete
+{loading ? 'Removing...' : 'Remove'}
           </Button>
           <Button
             variant="outline"
             onClick={onClose}
+            disabled={loading}
             className="order-2 sm:order-1"
           >
             Cancel

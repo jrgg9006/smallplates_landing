@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Guest } from "@/lib/types/guest";
+import { Guest } from "@/lib/types/database";
+import { updateGuest } from "@/lib/supabase/guests";
 import {
   Dialog,
   DialogContent,
@@ -22,48 +23,87 @@ interface GuestDetailsModalProps {
   guest: Guest | null;
   isOpen: boolean;
   onClose: () => void;
+  onGuestUpdated?: () => void; // Callback to refresh the guest list
 }
 
-export function GuestDetailsModal({ guest, isOpen, onClose }: GuestDetailsModalProps) {
-  // Parse name into first and last name (simple split on first space)
-  const nameParts = guest?.name.trim().split(' ') || ['', ''];
-  const [firstName, setFirstName] = useState(nameParts[0] || '');
-  const [lastName, setLastName] = useState(nameParts.slice(1).join(' ') || '');
+export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated }: GuestDetailsModalProps) {
+  const [firstName, setFirstName] = useState(guest?.first_name || '');
+  const [lastName, setLastName] = useState(guest?.last_name || '');
   const [email, setEmail] = useState(guest?.email || '');
   const [phone, setPhone] = useState(guest?.phone || '');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Update state when guest changes
   React.useEffect(() => {
     if (guest) {
-      const parts = guest.name.trim().split(' ');
-      setFirstName(parts[0] || '');
-      setLastName(parts.slice(1).join(' ') || '');
+      setFirstName(guest.first_name);
+      setLastName(guest.last_name);
       setEmail(guest.email);
       setPhone(guest.phone || '');
+      setError(null);
     }
   }, [guest]);
 
-  const handleSave = () => {
-    // TODO: Implement save functionality
-    console.log('Saving guest data:', {
-      firstName,
-      lastName,
-      email,
-      phone,
-      fullName: `${firstName} ${lastName}`.trim()
-    });
-    // Here you would typically call an API to save the changes
+  const handleSave = async () => {
+    if (!guest) return;
+    
+    // Validate required fields
+    if (!firstName.trim()) {
+      setError('Please fill in First Name');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Prepare update data
+      const updates = {
+        first_name: firstName.trim(),
+        last_name: lastName.trim() || '',
+        email: email.trim() || '',
+        phone: phone.trim() || null,
+      };
+
+      // Update the guest in the database
+      const { error } = await updateGuest(guest.id, updates);
+
+      if (error) {
+        setError(error);
+        setLoading(false);
+        return;
+      }
+
+      // Success! Close modal and refresh the guest list
+      onClose();
+      
+      // Refresh the guest list if callback provided
+      if (onGuestUpdated) {
+        onGuestUpdated();
+      }
+
+    } catch (err) {
+      setError('An unexpected error occurred');
+      console.error('Error updating guest:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!guest) return null;
 
-  // Map recipe status to user-friendly labels
-  const getRecipeStatusLabel = (status: Guest["recipeStatus"]) => {
+  // Map status to user-friendly labels
+  const getStatusLabel = (status: Guest["status"]) => {
     switch (status) {
-      case 'not_invited':
-        return 'Not requested';
+      case 'pending':
+        return 'Pending';
       case 'invited':
-        return 'Requested';
+        return 'Invited';
+      case 'responded':
+        return 'Responded';
+      case 'declined':
+        return 'Declined';
       case 'submitted':
         return 'Submitted';
       default:
@@ -71,14 +111,18 @@ export function GuestDetailsModal({ guest, isOpen, onClose }: GuestDetailsModalP
     }
   };
 
-  const getStatusBadgeStyle = (status: Guest["recipeStatus"]) => {
+  const getStatusBadgeStyle = (status: Guest["status"]) => {
     switch (status) {
-      case 'not_invited':
+      case 'pending':
         return 'bg-gray-100 text-gray-700';
       case 'invited':
         return 'bg-yellow-100 text-yellow-700';
-      case 'submitted':
+      case 'responded':
         return 'bg-green-100 text-green-700';
+      case 'declined':
+        return 'bg-red-100 text-red-700';
+      case 'submitted':
+        return 'bg-blue-100 text-blue-700';
       default:
         return 'bg-gray-100 text-gray-700';
     }
@@ -105,19 +149,7 @@ export function GuestDetailsModal({ guest, isOpen, onClose }: GuestDetailsModalP
           </TabsList>
           
           <TabsContent value="guest-info" className="space-y-4 mt-6 pb-20">
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="title" className="text-sm font-medium text-gray-600">Title</Label>
-                <select
-                  id="title"
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                >
-                  <option value="Mr.">Mr.</option>
-                  <option value="Mrs.">Mrs.</option>
-                  <option value="Ms.">Ms.</option>
-                  <option value="Dr.">Dr.</option>
-                </select>
-              </div>
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="firstName" className="text-sm font-medium text-gray-600">First Name</Label>
                 <Input
@@ -143,13 +175,17 @@ export function GuestDetailsModal({ guest, isOpen, onClose }: GuestDetailsModalP
             </div>
             
             <div>
-              <Label className="text-sm font-medium text-gray-600">Invited</Label>
+              <Label className="text-sm font-medium text-gray-600">Status</Label>
               <div className="mt-1 text-sm">
-                {guest.recipeStatus !== 'not_invited' ? 'Yes' : 'No'}
-                {guest.invitedAt && (
-                  <span className="text-gray-500 ml-2">
-                    ({new Date(guest.invitedAt).toLocaleDateString()})
-                  </span>
+                <span
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeStyle(guest.status)}`}
+                >
+                  {getStatusLabel(guest.status)}
+                </span>
+                {guest.date_message_sent && (
+                  <div className="mt-2 text-xs text-gray-500">
+                    Message sent on {new Date(guest.date_message_sent).toLocaleDateString()}
+                  </div>
                 )}
               </div>
             </div>
@@ -183,30 +219,45 @@ export function GuestDetailsModal({ guest, isOpen, onClose }: GuestDetailsModalP
           
           <TabsContent value="recipe-status" className="space-y-4 mt-6 pb-20">
             <div>
-              <label className="text-sm font-medium text-gray-600">Recipe Status</label>
+              <label className="text-sm font-medium text-gray-600">Guest Status</label>
               <div className="mt-2">
                 <span
-                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeStyle(guest.recipeStatus)}`}
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeStyle(guest.status)}`}
                 >
-                  {getRecipeStatusLabel(guest.recipeStatus)}
+                  {getStatusLabel(guest.status)}
                 </span>
               </div>
-              {guest.submittedAt && (
-                <div className="mt-2 text-xs text-gray-500">
-                  Submitted on {new Date(guest.submittedAt).toLocaleDateString()}
+              <div className="mt-4 space-y-2">
+                <div className="text-sm">
+                  <span className="font-medium text-gray-600">Recipes received:</span>
+                  <span className="ml-2">{guest.recipes_received || 0}</span>
                 </div>
-              )}
+                {guest.notes && (
+                  <div className="text-sm">
+                    <span className="font-medium text-gray-600">Notes:</span>
+                    <div className="mt-1 text-gray-700">{guest.notes}</div>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
+        
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
         
         {/* Save Button - Fixed position in bottom right */}
         <div className="absolute bottom-6 right-6">
           <Button 
             onClick={handleSave}
-            className="bg-black text-white hover:bg-gray-800 px-6 py-2 rounded-full"
+            disabled={loading}
+            className="bg-black text-white hover:bg-gray-800 px-6 py-2 rounded-full disabled:opacity-50"
           >
-            Save
+            {loading ? 'Saving...' : 'Save'}
           </Button>
         </div>
       </DialogContent>
