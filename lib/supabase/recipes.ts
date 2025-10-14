@@ -18,22 +18,68 @@ export async function addRecipe(guestId: string, formData: RecipeFormData) {
     return { data: null, error: 'User not authenticated' };
   }
 
-  const recipeData: GuestRecipeInsert = {
-    guest_id: guestId,
-    user_id: user.id,
-    recipe_name: formData.recipe_name,
-    ingredients: formData.ingredients,
-    instructions: formData.instructions,
-    comments: formData.comments,
-  };
+  try {
+    // Get current guest data to check if we need to increase expected recipe count
+    const { data: guestData, error: guestFetchError } = await supabase
+      .from('guests')
+      .select('recipes_received, number_of_recipes')
+      .eq('id', guestId)
+      .single();
+      
+    if (guestFetchError) {
+      console.error('Failed to fetch guest data:', guestFetchError);
+      return { data: null, error: 'Failed to fetch guest data' };
+    }
+    
+    const currentRecipes = guestData?.recipes_received || 0;
+    const expectedRecipes = guestData?.number_of_recipes || 1;
+    const willHaveRecipes = currentRecipes + 1;
+    
+    // If we need more expected recipes, update that first
+    if (willHaveRecipes > expectedRecipes) {
+      console.log(`Updating number_of_recipes from ${expectedRecipes} to ${willHaveRecipes}`);
+      const { error: updateExpectedError } = await supabase
+        .from('guests')
+        .update({ number_of_recipes: willHaveRecipes })
+        .eq('id', guestId);
+        
+      if (updateExpectedError) {
+        console.error('Failed to update number_of_recipes:', updateExpectedError);
+        return { data: null, error: 'Failed to update guest recipe limit' };
+      }
+    }
 
-  const { data, error } = await supabase
-    .from('guest_recipes')
-    .insert(recipeData)
-    .select()
-    .single();
+    // Now insert the recipe as submitted - let triggers handle the rest
+    const recipeData: GuestRecipeInsert = {
+      guest_id: guestId,
+      user_id: user.id,
+      recipe_name: formData.recipe_name,
+      ingredients: formData.ingredients,
+      instructions: formData.instructions,
+      comments: formData.comments,
+      submission_status: 'submitted',
+      submitted_at: new Date().toISOString(),
+    };
 
-  return { data, error: error?.message || null };
+    console.log('Inserting recipe with data:', recipeData);
+    const { data: insertedRecipe, error: recipeError } = await supabase
+      .from('guest_recipes')
+      .insert(recipeData)
+      .select()
+      .single();
+      
+    if (recipeError) {
+      console.error('Recipe insert error:', recipeError);
+      return { data: null, error: recipeError.message };
+    }
+
+    console.log('Recipe inserted successfully:', insertedRecipe);
+    return { data: insertedRecipe, error: null };
+    
+  } catch (err) {
+    console.error('Unexpected error in addRecipe:', err);
+    return { data: null, error: 'An unexpected error occurred' };
+  }
 }
 
 /**

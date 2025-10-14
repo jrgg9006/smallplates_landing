@@ -55,7 +55,7 @@ export function SendMessageModal({ guest, isOpen, onClose }: SendMessageModalPro
           <DialogTitle className="font-serif text-2xl font-semibold mb-4">Send Message</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6 pb-20" onClick={(e) => e.stopPropagation()}>
+        <div className="space-y-6 pb-20" onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}>
           <p className="text-gray-600 text-sm">
             We'll send the note below to your guest.
           </p>

@@ -57,7 +57,7 @@ export function GuestTableControls({
           onClick={onAddGuest}
           className="bg-black text-white hover:bg-gray-800 rounded-full px-6"
         >
-          Add guests
+          Add Guests & Recipes
         </Button>
       </div>
     </div>

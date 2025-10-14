@@ -5,6 +5,7 @@
 
 // Enums and basic types
 export type GuestStatus = 'pending' | 'invited' | 'responded' | 'declined' | 'submitted';
+export type GuestSource = 'manual' | 'collection';
 export type RecipeSubmissionStatus = 'draft' | 'submitted' | 'approved' | 'rejected';
 export type CommunicationType = 'invitation' | 'reminder' | 'thank_you' | 'custom';
 export type CommunicationChannel = 'email' | 'sms' | 'whatsapp';
@@ -20,6 +21,8 @@ export interface Database {
           email: string;
           full_name: string | null;
           phone_number: string | null;
+          collection_link_token: string | null;
+          collection_enabled: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -28,11 +31,15 @@ export interface Database {
           email: string;
           full_name?: string | null;
           phone_number?: string | null;
+          collection_link_token?: string | null;
+          collection_enabled?: boolean;
         };
         Update: {
           email?: string;
           full_name?: string | null;
           phone_number?: string | null;
+          collection_link_token?: string | null;
+          collection_enabled?: boolean;
         };
       };
       guests: {
@@ -51,6 +58,7 @@ export interface Database {
           recipes_received: number;
           notes: string | null;
           tags: string[] | null;
+          source: GuestSource;
           is_archived: boolean;
           created_at: string;
           updated_at: string;
@@ -70,6 +78,7 @@ export interface Database {
           recipes_received?: number;
           notes?: string | null;
           tags?: string[] | null;
+          source?: GuestSource;
           is_archived?: boolean;
         };
         Update: {
@@ -85,6 +94,7 @@ export interface Database {
           recipes_received?: number;
           notes?: string | null;
           tags?: string[] | null;
+          source?: GuestSource;
           is_archived?: boolean;
         };
       };
@@ -287,6 +297,25 @@ export interface GuestSearchFilters {
   status?: GuestStatus;
   include_archived?: boolean;
   tags?: string[];
+}
+
+// Collection-specific types
+export interface CollectionGuestSubmission {
+  first_name: string;
+  last_name: string;
+  email?: string;
+  phone?: string;
+  recipe_name: string;
+  ingredients: string;
+  instructions: string;
+  comments?: string;
+}
+
+export interface CollectionTokenInfo {
+  user_id: string;
+  user_name: string;
+  token: string;
+  is_valid: boolean;
 }
 
 // API response types

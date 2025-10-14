@@ -40,6 +40,7 @@ export function GuestTable({ searchValue: externalSearchValue = '' }: GuestTable
   // Modal state
   const [selectedGuest, setSelectedGuest] = React.useState<Guest | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [modalDefaultTab, setModalDefaultTab] = React.useState<string>("guest-info");
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
   const [isModalClosing, setIsModalClosing] = React.useState(false);
   const isModalClosingRef = React.useRef(false);
@@ -127,6 +128,13 @@ export function GuestTable({ searchValue: externalSearchValue = '' }: GuestTable
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedGuest(null);
+    setModalDefaultTab("guest-info"); // Reset to default tab
+  };
+
+  const handleAddRecipe = (guest: Guest) => {
+    setSelectedGuest(guest);
+    setModalDefaultTab("recipe-status");
+    setIsModalOpen(true);
   };
 
   const handleAddGuest = () => {
@@ -154,6 +162,7 @@ export function GuestTable({ searchValue: externalSearchValue = '' }: GuestTable
         }, 500);
       },
       onGuestDeleted: loadGuests,
+      onAddRecipe: handleAddRecipe,
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -225,7 +234,10 @@ export function GuestTable({ searchValue: externalSearchValue = '' }: GuestTable
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   className="hover:bg-muted/50 cursor-pointer"
-                  onClick={() => handleGuestClick(row.original)}
+                  onClick={(e: React.MouseEvent<HTMLTableRowElement>) => {
+                    e.preventDefault();
+                    handleGuestClick(row.original);
+                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
@@ -285,6 +297,7 @@ export function GuestTable({ searchValue: externalSearchValue = '' }: GuestTable
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onGuestUpdated={() => loadGuests(false)}
+        defaultTab={modalDefaultTab}
       />
 
       <AddGuestModal

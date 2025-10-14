@@ -2,7 +2,7 @@
 
 import React from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, Mail, Trash2 } from "lucide-react";
+import { ArrowUpDown, Mail, Trash2, ArrowUp } from "lucide-react";
 import { Guest } from "@/lib/types/database";
 import { useState } from "react";
 import { DeleteGuestModal } from "./DeleteGuestModal";
@@ -41,7 +41,12 @@ function StatusBadge({ status }: { status: Guest["status"] }) {
 }
 
 // Actions cell component  
-function ActionsCell({ guest, onModalClose, onGuestDeleted }: { guest: Guest; onModalClose?: () => void; onGuestDeleted?: () => void }) {
+function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: { 
+  guest: Guest; 
+  onModalClose?: () => void; 
+  onGuestDeleted?: () => void;
+  onAddRecipe?: (guest: Guest) => void;
+}) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -99,12 +104,12 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted }: { guest: Guest; on
 
   return (
     <>
-      <div className="flex justify-end items-center gap-1" onClick={(e) => e.stopPropagation()}>
+      <div className="flex justify-end items-center gap-1" onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}>
         <Button
           variant="ghost"
           size="icon"
           className={`h-8 w-8 ${!hasContactInfo ? 'opacity-50 cursor-not-allowed' : ''}`}
-          onClick={(e) => {
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
             if (hasContactInfo) {
               handleSendMessage();
@@ -120,7 +125,22 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted }: { guest: Guest; on
           variant="ghost"
           size="icon"
           className="h-8 w-8"
-          onClick={(e) => {
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation();
+            if (onAddRecipe) {
+              onAddRecipe(guest);
+            }
+          }}
+          aria-label="Add recipe"
+          title="Add recipe"
+        >
+          <ArrowUp className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
             setShowDeleteModal(true);
           }}
@@ -165,7 +185,7 @@ export const columns: ColumnDef<Guest>[] = [
         type="checkbox"
         checked={row.getIsSelected()}
         onChange={(e) => row.toggleSelected(e.target.checked)}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e: React.MouseEvent<HTMLInputElement>) => e.stopPropagation()}
         className="h-4 w-4 rounded border-gray-300 text-black focus:ring-2 focus:ring-black focus:ring-offset-2"
         aria-label="Select row"
       />
@@ -232,7 +252,8 @@ export const columns: ColumnDef<Guest>[] = [
       const guest = row.original;
       const onModalClose = table.options.meta?.onModalClose;
       const onGuestDeleted = table.options.meta?.onGuestDeleted;
-      return <ActionsCell guest={guest} onModalClose={onModalClose} onGuestDeleted={onGuestDeleted} />;
+      const onAddRecipe = table.options.meta?.onAddRecipe;
+      return <ActionsCell guest={guest} onModalClose={onModalClose} onGuestDeleted={onGuestDeleted} onAddRecipe={onAddRecipe} />;
     },
     enableSorting: false,
     enableHiding: false,

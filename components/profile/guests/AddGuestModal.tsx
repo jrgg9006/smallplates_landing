@@ -7,10 +7,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { addGuest, checkGuestExists } from "@/lib/supabase/guests";
+import { addRecipe } from "@/lib/supabase/recipes";
 import type { GuestFormData } from "@/lib/types/database";
 
 interface AddGuestModalProps {
@@ -29,6 +36,12 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
   const [plusOneLastName, setPlusOneLastName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Recipe state
+  const [recipeTitle, setRecipeTitle] = useState('');
+  const [recipeSteps, setRecipeSteps] = useState('');
+  const [recipeInstructions, setRecipeInstructions] = useState('');
+  const [recipeNotes, setRecipeNotes] = useState('');
 
   const resetForm = () => {
     setFirstName('');
@@ -39,6 +52,10 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
     setPlusOneFirstName('');
     setPlusOneLastName('');
     setError(null);
+    setRecipeTitle('');
+    setRecipeSteps('');
+    setRecipeInstructions('');
+    setRecipeNotes('');
   };
 
   const handleSave = async () => {
@@ -71,12 +88,29 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
       };
 
       // Add the guest to the database
-      const { error } = await addGuest(guestData);
+      const { data: newGuest, error } = await addGuest(guestData);
 
       if (error) {
         setError(error);
         setLoading(false);
         return;
+      }
+
+      // If recipe data is provided, add the recipe for the guest
+      if (newGuest && (recipeTitle || recipeInstructions || recipeSteps)) {
+        const recipeData = {
+          recipe_name: recipeTitle || 'Untitled Recipe',
+          ingredients: recipeSteps || '',
+          instructions: recipeInstructions || '',
+          comments: recipeNotes || ''
+        };
+
+        const { error: recipeError } = await addRecipe(newGuest.id, recipeData);
+        
+        if (recipeError) {
+          // Log the error but don't fail the whole operation
+          console.error('Error adding recipe:', recipeError);
+        }
       }
 
       // Success! Reset form and close modal
@@ -108,15 +142,23 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl fixed top-[15%] left-[50%] translate-x-[-50%] translate-y-0">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="font-serif text-2xl font-semibold mb-4">Add Guest</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6 pb-20">
-          {/* Main Guest Information */}
-          <div>
-            <h3 className="text-lg font-medium mb-4">Guest Information</h3>
+        <Tabs defaultValue="guest-info" className="w-full flex-1 flex flex-col overflow-hidden">
+          <TabsList className="grid w-full grid-cols-2 bg-transparent p-0 h-auto border-b border-gray-200 flex-shrink-0">
+            <TabsTrigger value="guest-info" className="bg-transparent border-0 rounded-none pb-2 px-0 text-gray-600 font-normal data-[state=active]:bg-transparent data-[state=active]:text-black data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium">
+              Guest Information
+            </TabsTrigger>
+            <TabsTrigger value="recipe" className="bg-transparent border-0 rounded-none pb-2 px-0 text-gray-600 font-normal data-[state=active]:bg-transparent data-[state=active]:text-black data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium">
+              Recipe
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="guest-info" className="flex-1 overflow-y-auto mt-6 px-1">
+            <div className="space-y-6 pb-24 pr-2">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="firstName" className="text-sm font-medium text-gray-600">First Name *</Label>
@@ -140,18 +182,17 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
                 />
               </div>
             </div>
-          </div>
 
-          {/* Add Plus One Section */}
-          <div>
-            {!hasPlusOne ? (
-              <button 
-                onClick={handleAddPlusOne}
-                className="text-sm text-blue-600 hover:underline"
-              >
-                + Add Plus One
-              </button>
-            ) : (
+            {/* Add Plus One Section */}
+            <div>
+              {!hasPlusOne ? (
+                <button 
+                  onClick={handleAddPlusOne}
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  + Add Plus One
+                </button>
+              ) : (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-600">Plus One Information</span>
@@ -186,10 +227,10 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
                   </div>
                 </div>
               )}
-          </div>
+            </div>
 
-          {/* Contact Information */}
-          <div className="space-y-3">
+            {/* Contact Information */}
+            <div className="space-y-3">
               <div>
                 <Label htmlFor="email" className="text-sm font-medium text-gray-600">Email</Label>
                 <Input
@@ -212,16 +253,85 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
                   placeholder="Phone number"
                 />
               </div>
-          </div>
-
-
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-3">
-              <p className="text-sm text-red-600">{error}</p>
             </div>
-          )}
-        </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="recipe" className="flex-1 overflow-y-auto mt-6 px-1">
+            <div className="space-y-6 pb-24 pr-2">
+              <div className="space-y-4">
+              <div>
+                <Label htmlFor="recipeTitle" className="text-sm font-medium text-gray-600">Recipe Title</Label>
+                <Input
+                  id="recipeTitle"
+                  value={recipeTitle}
+                  onChange={(e) => setRecipeTitle(e.target.value)}
+                  className="mt-1"
+                  placeholder="Recipe name"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="recipeSteps" className="text-sm font-medium text-gray-600">Steps</Label>
+                <textarea
+                  id="recipeSteps"
+                  value={recipeSteps}
+                  onChange={(e) => setRecipeSteps(e.target.value)}
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[100px]"
+                  placeholder="List the ingredients or steps"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="recipeInstructions" className="text-sm font-medium text-gray-600">Instructions</Label>
+                <textarea
+                  id="recipeInstructions"
+                  value={recipeInstructions}
+                  onChange={(e) => setRecipeInstructions(e.target.value)}
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[150px]"
+                  placeholder="If you have the recipe all in one single piece, just paste in here"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="recipeNotes" className="text-sm font-medium text-gray-600">Notes</Label>
+                <textarea
+                  id="recipeNotes"
+                  value={recipeNotes}
+                  onChange={(e) => setRecipeNotes(e.target.value)}
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[80px]"
+                  placeholder="Any additional notes about this recipe"
+                />
+              </div>
+              
+              <div className="pt-2">
+                <Label className="text-sm font-medium text-gray-600 mb-2 block">Recipe Image</Label>
+                <Button 
+                  type="button"
+                  onClick={() => console.log('Add image placeholder')}
+                  className="bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md px-4 py-2"
+                >
+                  Add Image
+                </Button>
+              </div>
+              </div>
+              
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Save Button - Fixed position in bottom right */}
         <div className="absolute bottom-6 right-6">
