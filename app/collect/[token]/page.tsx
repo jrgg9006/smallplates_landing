@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
+import Image from 'next/image';
 import { validateCollectionToken, searchGuestInCollection } from '@/lib/supabase/collection';
 import type { CollectionTokenInfo, Guest } from '@/lib/types/database';
 import { Input } from '@/components/ui/input';
@@ -136,15 +137,14 @@ export default function CollectionLandingPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-2xl mx-auto px-6 py-6">
-          <div className="text-center">
-            <h1 className="text-3xl font-serif font-semibold text-gray-900">
-              Share a Recipe
-            </h1>
-            <p className="mt-2 text-lg text-gray-600">
-              with <span className="font-medium">{tokenInfo?.user_name}</span>
-            </p>
-          </div>
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-center">
+          <Image
+            src="/images/SmallPlates_logo_horizontal.png"
+            alt="Small Plates & Co"
+            width={200}
+            height={40}
+            priority
+          />
         </div>
       </div>
 

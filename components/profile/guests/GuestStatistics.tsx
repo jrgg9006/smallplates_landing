@@ -72,21 +72,21 @@ export function GuestStatisticsComponent({}: GuestStatisticsProps = {}) {
       value: stats.total_guests,
     },
     {
-      label: "Invites Sent", 
+      label: "Reached Out", 
       value: stats.invites_sent,
     },
     {
-      label: "Recipes Received",
+      label: "Recipes Collected",
       value: stats.recipes_received,
     },
   ];
 
   return (
-    <div className="bg-gray-50 rounded-xl p-6 h-full flex items-center">
-      <div className="grid grid-cols-3 divide-x divide-gray-200 w-full">
+    <div className="flex justify-center">
+      <div className="grid grid-cols-3 gap-8 w-full max-w-lg">
         {statItems.map((stat, index) => (
-          <div key={index} className="text-center px-4">
-            <div className="text-2xl font-semibold text-gray-900 mb-1">
+          <div key={index} className="text-center">
+            <div className="text-3xl font-bold text-gray-900 mb-2">
               {stat.value}
             </div>
             <div className="text-sm text-gray-600 font-medium">

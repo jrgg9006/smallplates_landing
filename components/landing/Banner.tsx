@@ -33,34 +33,28 @@ export default function Banner() {
           {/* Navigation Buttons */}
           <div className="flex items-center gap-4">
             {user ? (
+              <Link
+                href="/profile"
+                className="inline-flex items-center justify-center rounded-full bg-black text-white px-5 py-2 text-sm font-semibold hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black"
+              >
+                Go to Profile
+              </Link>
+            ) : (
               <>
-                <Link
-                  href="/profile"
-                  className="text-sm text-gray-600 hover:text-gray-900 underline transition-colors"
-                >
-                  {user.email}
-                </Link>
                 <button
-                  onClick={signOut}
+                  onClick={() => setIsLoginModalOpen(true)}
                   className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
                 >
-                  Sign out
+                  Login
                 </button>
+                <Link
+                  href="/onboarding"
+                  className="inline-flex items-center justify-center rounded-full bg-black text-white px-5 py-2 text-sm font-semibold hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black"
+                >
+                  Let's do it
+                </Link>
               </>
-            ) : (
-              <button
-                onClick={() => setIsLoginModalOpen(true)}
-                className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
-              >
-                Login
-              </button>
             )}
-            <Link
-              href={user ? "/profile" : "/onboarding"}
-              className="inline-flex items-center justify-center rounded-full bg-black text-white px-5 py-2 text-sm font-semibold hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black"
-            >
-              {user ? "Go to Profile" : "Let's do it"}
-            </Link>
           </div>
         </div>
       </header>

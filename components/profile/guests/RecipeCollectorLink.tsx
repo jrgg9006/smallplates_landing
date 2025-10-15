@@ -104,7 +104,7 @@ export function RecipeCollectorLink({ userId }: RecipeCollectorLinkProps) {
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base">Your Recipe Collector</CardTitle>
+          <CardTitle className="text-lg font-semibold">Your Recipe Collector</CardTitle>
           <Button 
             variant="link" 
             className="p-0 h-auto text-sm"
@@ -126,27 +126,19 @@ export function RecipeCollectorLink({ userId }: RecipeCollectorLinkProps) {
         )}
       </CardHeader>
       <CardContent className="pt-0">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="flex-1 bg-muted rounded-lg px-3 py-2 text-muted-foreground overflow-hidden">
-              <span className="block truncate text-sm">
-                {collectorLink || 'Loading...'}
-              </span>
-            </div>
-            
-            <Button
-              onClick={handleCopyLink}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1"
-              disabled={!collectorLink}
-            >
-              <LinkIcon className="h-3 w-3" />
-              <span className="text-xs">{copied ? "Copied!" : "Copy link"}</span>
-            </Button>
-          </div>
-          <p className="text-xs text-gray-500">
-            Share this link with family and friends to collect their recipes
+        <div className="space-y-4 flex flex-col items-center">
+          <Button
+            onClick={handleCopyLink}
+            variant="default"
+            size="lg"
+            className="bg-black text-white hover:bg-gray-800 px-8"
+            disabled={!collectorLink}
+          >
+            <LinkIcon className="h-4 w-4 mr-2" />
+            {copied ? "Copied!" : "Copy Form Link"}
+          </Button>
+          <p className="text-sm text-gray-600 text-center">
+            Share with guests to collect their favorite recipes
           </p>
         </div>
       </CardContent>

@@ -11,6 +11,8 @@ import { GuestTableControls } from "@/components/profile/guests/GuestTableContro
 import { GuestStatisticsComponent } from "@/components/profile/guests/GuestStatistics";
 import { RecipeCollectorLink } from "@/components/profile/guests/RecipeCollectorLink";
 import { AddGuestModal } from "@/components/profile/guests/AddGuestModal";
+import { ProgressBar } from "@/components/profile/ProgressBar";
+import { getUserProgress, UserProgress } from "@/lib/supabase/progress";
 import ProfileDropdown from "@/components/profile/ProfileDropdown";
 import { Bell } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +25,8 @@ export default function ProfilePage() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [progressData, setProgressData] = useState<UserProgress | null>(null);
+  const [progressLoading, setProgressLoading] = useState(true);
 
   const handleAddGuest = () => {
     setIsAddModalOpen(true);
@@ -34,6 +38,29 @@ export default function ProfilePage() {
 
   const handleGuestAdded = () => {
     setRefreshTrigger(prev => prev + 1);
+    loadProgressData(); // Reload progress when guest is added
+  };
+
+  // Load user progress data
+  const loadProgressData = async () => {
+    if (!user?.id) return;
+
+    try {
+      setProgressLoading(true);
+      const { data, error } = await getUserProgress(user.id);
+      
+      if (error) {
+        console.error('Error loading progress data:', error);
+        setProgressData(null);
+      } else {
+        setProgressData(data);
+      }
+    } catch (err) {
+      console.error('Error in loadProgressData:', err);
+      setProgressData(null);
+    } finally {
+      setProgressLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -42,6 +69,13 @@ export default function ProfilePage() {
       router.push("/");
     }
   }, [user, loading, router]);
+
+  // Load progress data when user is available
+  useEffect(() => {
+    if (user?.id) {
+      loadProgressData();
+    }
+  }, [user?.id]);
 
   if (loading) {
     return (
@@ -98,15 +132,32 @@ export default function ProfilePage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Two Column Layout: Statistics + Recipe Collector */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 items-start">
-          {/* Statistics - Left Side */}
-          <div className="h-full">
+        {/* Title Section */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-serif font-bold text-gray-900 mb-8">
+            Your Cookbook is Cooking...
+          </h1>
+        </div>
+
+        {/* Statistics Section - Centered */}
+        <div className="flex justify-center mb-8">
+          <div className="w-full max-w-2xl">
             <GuestStatisticsComponent />
           </div>
-          
-          {/* Recipe Collector - Right Side */}
-          <div className="h-full">
+        </div>
+
+        {/* Progress Bar Section - Centered */}
+        <div className="flex justify-center mb-8">
+          <ProgressBar 
+            current={progressData?.current_recipes || 0}
+            goal={progressData?.goal_recipes || 40}
+            loading={progressLoading}
+          />
+        </div>
+
+        {/* Recipe Collector Section - Centered */}
+        <div className="flex justify-center mb-8">
+          <div className="w-full max-w-2xl">
             <RecipeCollectorLink userId={user?.id} />
           </div>
         </div>

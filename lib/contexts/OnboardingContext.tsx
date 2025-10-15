@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { signUpWithEmail } from "@/lib/supabase/auth";
+import { saveOnboardingData } from "@/lib/supabase/onboarding";
 import {
   OnboardingState,
   OnboardingContextType,
@@ -96,6 +97,14 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
           throw new Error(error);
         }
 
+        // Save onboarding answers to database
+        const saveResult = await saveOnboardingData(user.id, state.answers);
+        
+        if (saveResult.error) {
+          console.error('Failed to save onboarding data:', saveResult.error);
+          // Continue anyway - don't block the user flow
+        }
+
         // Mark onboarding as complete
         setState((prev) => ({
           ...prev,
@@ -106,10 +115,6 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
           },
         }));
 
-        // TODO: Save onboarding answers to database (future implementation)
-        // This will be added when we implement the actual questions
-        // await saveOnboardingData(user.id, state.answers);
-
         // Redirect to profile
         router.push("/profile");
       } catch (err) {
@@ -117,7 +122,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         throw err;
       }
     },
-    [router]
+    [router, state.answers]
   );
 
   /**

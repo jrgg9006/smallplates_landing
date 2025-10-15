@@ -9,7 +9,7 @@ export default function CollectorTool() {
     <section aria-labelledby="collector-title" className="bg-white">
       <div className="mx-auto max-w-7xl px-6 md:px-8 py-12 md:py-16">
         <h2 id="collector-title" className="text-2xl md:text-3xl font-semibold text-gray-900">
-          Recipe Collector Tool
+          How It Works
         </h2>
         <p className="mt-3 text-gray-700 max-w-prose">
           Easily gather recipes from friends and family with a simple link.
