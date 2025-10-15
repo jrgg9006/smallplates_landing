@@ -2,13 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Search } from 'lucide-react';
 import Image from 'next/image';
 import { validateCollectionToken, searchGuestInCollection } from '@/lib/supabase/collection';
 import type { CollectionTokenInfo, Guest } from '@/lib/types/database';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function CollectionLandingPage() {
   const params = useParams();
@@ -24,8 +23,9 @@ export default function CollectionLandingPage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [searching, setSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<Guest | null>(null);
+  const [searchResults, setSearchResults] = useState<Guest[]>([]);
   const [searchCompleted, setSearchCompleted] = useState(false);
+  const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
 
   // Validate token on component mount
   useEffect(() => {
@@ -69,7 +69,7 @@ export default function CollectionLandingPage() {
       if (error) {
         setError(error);
       } else {
-        setSearchResults(guest);
+        setSearchResults(guest || []);
         setSearchCompleted(true);
       }
     } catch (err) {
@@ -80,16 +80,28 @@ export default function CollectionLandingPage() {
     }
   };
 
-  // Handle continue to recipe form
-  const handleContinue = () => {
-    const guestData = searchResults ? {
-      id: searchResults.id,
-      firstName: searchResults.first_name,
-      lastName: searchResults.last_name,
-      email: searchResults.email,
-      phone: searchResults.phone,
+  // Handle guest selection
+  const handleGuestSelect = (guest: Guest) => {
+    setSelectedGuest(guest);
+    const guestData = {
+      id: guest.id,
+      firstName: guest.first_name,
+      lastName: guest.last_name,
+      email: guest.email,
+      phone: guest.phone,
       existing: true
-    } : {
+    };
+
+    // Store guest data in session storage for the recipe form
+    sessionStorage.setItem('collectionGuestData', JSON.stringify(guestData));
+    
+    // Navigate to recipe form
+    router.push(`/collect/${token}/recipe`);
+  };
+
+  // Handle continue for new guest
+  const handleContinueAsNew = () => {
+    const guestData = {
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       existing: false
@@ -148,62 +160,73 @@ export default function CollectionLandingPage() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-2xl mx-auto px-6 py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-center">Find Yourself</CardTitle>
-            <p className="text-center text-gray-600">
-              Type your first and last name to see if you're already in the guest list
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Search Form */}
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
+      {/* Main Content - Two Column Layout */}
+      <div className="min-h-[calc(100vh-4rem)] flex">
+        {/* Left Column - Image */}
+        <div className="hidden lg:flex lg:w-1/2 bg-gray-100 items-center justify-center">
+          <div className="w-80 h-80 bg-gray-300 rounded-lg flex items-center justify-center">
+            <span className="text-gray-500 text-lg">Recipe Collection Image</span>
+          </div>
+        </div>
+
+        {/* Right Column - Content */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-8">
+          <div className="w-full max-w-md">
+            <div className="space-y-6">
+              <div className="text-center lg:text-left">
+                <h1 className="text-3xl font-semibold text-gray-900 mb-4">
+                  Find Yourself
+                </h1>
+                <p className="text-gray-600 mb-6">
+                  Please enter your first initial and last name
+                </p>
+              </div>
+
+              {/* Search Form */}
+              <div className="space-y-4">
+              <div className="flex gap-4 items-end">
+                <div className="w-20">
                   <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                    First Name *
+                    First initial
                   </label>
                   <Input
                     id="firstName"
                     value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="Your first name"
+                    onChange={(e) => setFirstName(e.target.value.slice(0, 1).toUpperCase())}
+                    placeholder=""
                     disabled={searching}
+                    maxLength={1}
+                    className="text-left"
                   />
                 </div>
-                <div>
+                <div className="flex-1">
                   <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                    Last Name
+                    Last name
                   </label>
                   <Input
                     id="lastName"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Your last name"
+                    placeholder=""
                     disabled={searching}
                   />
                 </div>
+                <Button 
+                  onClick={handleSearch}
+                  disabled={!firstName.trim() || searching}
+                  className="bg-gray-400 text-white hover:bg-gray-500 px-8 py-2 rounded-full h-10"
+                >
+                  {searching ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Searching...
+                    </>
+                  ) : (
+                    "Search"
+                  )}
+                </Button>
               </div>
 
-              <Button 
-                onClick={handleSearch}
-                disabled={!firstName.trim() || searching}
-                className="w-full bg-black text-white hover:bg-gray-800"
-              >
-                {searching ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Searching...
-                  </>
-                ) : (
-                  <>
-                    <Search className="h-4 w-4 mr-2" />
-                    Find Me
-                  </>
-                )}
-              </Button>
             </div>
 
             {/* Error Message */}
@@ -216,28 +239,55 @@ export default function CollectionLandingPage() {
             {/* Search Results */}
             {searchCompleted && (
               <div className="border-t pt-6">
-                {searchResults ? (
-                  <div className="bg-green-50 border border-green-200 rounded-md p-4">
-                    <h3 className="text-lg font-medium text-green-900 mb-2">
-                      Great! We found you
+                {searchResults.length > 0 ? (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium text-gray-900">
+                      Select your name to unlock your private form
                     </h3>
-                    <p className="text-green-700 mb-4">
-                      Hi <strong>{searchResults.first_name} {searchResults.last_name}</strong>! 
-                      Ready to share a recipe with {tokenInfo?.user_name}?
-                    </p>
-                    <Button 
-                      onClick={handleContinue}
-                      className="bg-green-600 text-white hover:bg-green-700"
-                    >
-                      Continue to Recipe Form
-                    </Button>
+                    <div className="space-y-3">
+                      {searchResults.map((guest) => (
+                        <button
+                          key={guest.id}
+                          onClick={() => handleGuestSelect(guest)}
+                          className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors text-left"
+                        >
+                          <span className="text-gray-900 font-medium">
+                            {guest.first_name} {guest.last_name}
+                          </span>
+                          <svg 
+                            className="w-5 h-5 text-gray-400" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      ))}
+                      <button
+                        onClick={handleContinueAsNew}
+                        className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors text-left"
+                      >
+                        <span className="text-gray-900 font-medium">
+                          I don't see my name
+                        </span>
+                        <svg 
+                          className="w-5 h-5 text-gray-400" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 ) : (
-                  <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-                    <h3 className="text-lg font-medium text-blue-900 mb-2">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium text-gray-900">
                       Welcome! You're not in the list yet
                     </h3>
-                    <p className="text-blue-700 mb-4">
+                    <p className="text-gray-600 mb-4">
                       No worries! We'll add you when you submit your recipe.
                       {lastName.trim() && (
                         <span> We'll use <strong>{firstName} {lastName}</strong> as your name.</span>
@@ -246,25 +296,35 @@ export default function CollectionLandingPage() {
                         <span> We'll use <strong>{firstName}</strong> as your name.</span>
                       )}
                     </p>
-                    <Button 
-                      onClick={handleContinue}
-                      className="bg-blue-600 text-white hover:bg-blue-700"
+                    <button
+                      onClick={handleContinueAsNew}
+                      className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors text-left"
                     >
-                      Continue to Recipe Form
-                    </Button>
+                      <span className="text-gray-900 font-medium">
+                        Continue to Recipe Form
+                      </span>
+                      <svg 
+                        className="w-5 h-5 text-gray-400" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
                   </div>
                 )}
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Instructions */}
-        <div className="mt-6 text-center text-sm text-gray-500">
-          <p>
-            After finding yourself, you'll be able to submit your favorite recipe 
-            to be included in {tokenInfo?.user_name}'s collection.
-          </p>
+              {/* Instructions */}
+              <div className="text-center text-sm text-gray-500 mt-6">
+                <p>
+                  After finding yourself, you'll be able to submit your favorite recipe 
+                  to be included in the collection.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

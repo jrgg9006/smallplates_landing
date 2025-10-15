@@ -53,25 +53,25 @@ export async function searchGuestInCollection(
   userId: string, 
   firstName: string, 
   lastName: string
-): Promise<{ data: Guest | null; error: string | null }> {
+): Promise<{ data: Guest[] | null; error: string | null }> {
   const supabase = createSupabaseClient();
   
   try {
-    // Search for exact match first, then fuzzy match
+    // Search for guests where first name starts with the initial and last name matches
     const { data: guests, error } = await supabase
       .from('guests')
       .select('*')
       .eq('user_id', userId)
       .eq('is_archived', false)
-      .ilike('first_name', firstName.trim())
-      .ilike('last_name', lastName.trim())
-      .limit(1);
+      .ilike('first_name', `${firstName.trim()}%`)
+      .ilike('last_name', `%${lastName.trim()}%`)
+      .order('first_name', { ascending: true });
 
     if (error) {
       return { data: null, error: error.message };
     }
 
-    return { data: guests?.[0] || null, error: null };
+    return { data: guests || [], error: null };
   } catch (err) {
     console.error('Error searching guest in collection:', err);
     return { data: null, error: 'Failed to search for guest' };
@@ -95,13 +95,16 @@ export async function submitGuestRecipe(
     }
 
     // Search for existing guest
-    const { data: existingGuest } = await searchGuestInCollection(
+    const { data: existingGuests } = await searchGuestInCollection(
       tokenInfo.user_id,
       submission.first_name,
       submission.last_name
     );
 
     let guestId: string;
+
+    // Use the first matching guest if any exist
+    const existingGuest = existingGuests?.[0];
 
     if (existingGuest) {
       // Use existing guest
@@ -136,7 +139,7 @@ export async function submitGuestRecipe(
         status: 'submitted',
         source: 'collection',
         number_of_recipes: 1,
-        recipes_received: 1,
+        recipes_received: 0,
         is_archived: false,
       };
 
@@ -151,6 +154,14 @@ export async function submitGuestRecipe(
       }
 
       guestId = newGuest.id;
+
+      // Update the recipe count after creating the guest
+      await supabase
+        .from('guests')
+        .update({ 
+          recipes_received: 1
+        })
+        .eq('id', guestId);
     }
 
     // Now create the recipe
