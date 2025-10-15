@@ -107,12 +107,12 @@ export async function submitGuestRecipe(
       // Use existing guest
       guestId = existingGuest.id;
       
-      // Update their status to 'responded' if not already
-      if (existingGuest.status === 'pending' || existingGuest.status === 'invited') {
+      // Update their status to 'submitted' if not already
+      if (existingGuest.status === 'pending' || existingGuest.status === 'reached_out') {
         await supabase
           .from('guests')
           .update({ 
-            status: 'responded',
+            status: 'submitted',
             recipes_received: (existingGuest.recipes_received || 0) + 1
           })
           .eq('id', guestId);
@@ -133,7 +133,7 @@ export async function submitGuestRecipe(
         last_name: submission.last_name.trim(),
         email: submission.email?.trim() || '',
         phone: submission.phone?.trim() || null,
-        status: 'responded',
+        status: 'submitted',
         source: 'collection',
         number_of_recipes: 1,
         recipes_received: 1,

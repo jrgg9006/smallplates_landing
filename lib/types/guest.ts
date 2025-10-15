@@ -1,4 +1,4 @@
-export type RecipeStatus = 'not_invited' | 'invited' | 'submitted';
+export type RecipeStatus = 'pending' | 'reached_out' | 'submitted';
 
 export interface Guest {
   id: string;

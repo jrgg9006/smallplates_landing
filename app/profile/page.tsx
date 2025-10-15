@@ -22,6 +22,7 @@ export default function ProfilePage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [searchValue, setSearchValue] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const handleAddGuest = () => {
     setIsAddModalOpen(true);
@@ -114,14 +115,14 @@ export default function ProfilePage() {
         <GuestTableControls
           searchValue={searchValue}
           onSearchChange={setSearchValue}
-          onFilterChange={() => {}} // TODO: Implement filter functionality
+          onFilterChange={setStatusFilter}
           onAddGuest={handleAddGuest}
         />
 
         {/* Guest Table */}
         <Card>
           <CardContent className="p-0">
-            <GuestTable key={refreshTrigger} searchValue={searchValue} />
+            <GuestTable key={refreshTrigger} searchValue={searchValue} statusFilter={statusFilter} />
           </CardContent>
         </Card>
 

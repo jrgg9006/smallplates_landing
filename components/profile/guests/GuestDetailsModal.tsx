@@ -192,14 +192,10 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
     switch (status) {
       case 'pending':
         return 'Pending';
-      case 'invited':
-        return 'Invited';
-      case 'responded':
-        return 'Responded';
-      case 'declined':
-        return 'Declined';
       case 'submitted':
         return 'Submitted';
+      case 'reached_out':
+        return 'Reached Out';
       default:
         return 'Unknown';
     }
@@ -209,14 +205,10 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
     switch (status) {
       case 'pending':
         return 'bg-gray-100 text-gray-700';
-      case 'invited':
-        return 'bg-yellow-100 text-yellow-700';
-      case 'responded':
-        return 'bg-green-100 text-green-700';
-      case 'declined':
-        return 'bg-red-100 text-red-700';
       case 'submitted':
         return 'bg-blue-100 text-blue-700';
+      case 'reached_out':
+        return 'bg-green-100 text-green-700';
       default:
         return 'bg-gray-100 text-gray-700';
     }
@@ -303,7 +295,7 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
                 <div className="mt-4">
                   <div className="text-xs font-medium text-gray-500 mb-2">Recipe Titles:</div>
                   <div className="space-y-2">
-                    {recipes.map((recipe, index) => (
+                    {recipes.map((recipe) => (
                       <div 
                         key={recipe.id} 
                         className="flex items-center gap-2 text-sm"
@@ -398,13 +390,13 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
                   </div>
                   
                   <div>
-                    <Label htmlFor="recipeSteps" className="text-sm font-medium text-gray-600">Steps</Label>
+                    <Label htmlFor="recipeSteps" className="text-sm font-medium text-gray-600">Ingredients</Label>
                     <textarea
                       id="recipeSteps"
                       value={recipeSteps}
                       onChange={(e) => setRecipeSteps(e.target.value)}
                       className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[100px]"
-                      placeholder="List the ingredients or steps"
+                      placeholder="List the ingredients needed for this recipe"
                     />
                   </div>
                   

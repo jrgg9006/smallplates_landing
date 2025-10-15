@@ -279,13 +279,13 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
               </div>
               
               <div>
-                <Label htmlFor="recipeSteps" className="text-sm font-medium text-gray-600">Steps</Label>
+                <Label htmlFor="recipeSteps" className="text-sm font-medium text-gray-600">Ingredients</Label>
                 <textarea
                   id="recipeSteps"
                   value={recipeSteps}
                   onChange={(e) => setRecipeSteps(e.target.value)}
                   className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[100px]"
-                  placeholder="List the ingredients or steps"
+                  placeholder="List the ingredients needed for this recipe"
                 />
               </div>
               

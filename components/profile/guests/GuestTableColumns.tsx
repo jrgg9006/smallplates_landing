@@ -15,18 +15,14 @@ import "@/lib/types/table";
 function StatusBadge({ status }: { status: Guest["status"] }) {
   const styles = {
     pending: "bg-gray-100 text-gray-700",
-    invited: "bg-yellow-100 text-yellow-700",
-    responded: "bg-green-100 text-green-700",
-    declined: "bg-red-100 text-red-700",
     submitted: "bg-blue-100 text-blue-700",
+    reached_out: "bg-green-100 text-green-700",
   };
 
   const labels = {
     pending: "Pending",
-    invited: "Invited",
-    responded: "Responded",
-    declined: "Declined", 
     submitted: "Submitted",
+    reached_out: "Reached Out",
   };
 
   return (

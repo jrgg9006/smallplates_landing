@@ -44,10 +44,8 @@ export function GuestTableControls({
           <SelectContent>
             <SelectItem value="all">All statuses</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="invited">Invited</SelectItem>
-            <SelectItem value="responded">Responded</SelectItem>
-            <SelectItem value="declined">Declined</SelectItem>
             <SelectItem value="submitted">Submitted</SelectItem>
+            <SelectItem value="reached_out">Reached Out</SelectItem>
           </SelectContent>
         </Select>
       </div>

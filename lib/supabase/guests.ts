@@ -186,7 +186,7 @@ export async function batchUpdateGuestStatus(guestIds: string[], status: Guest['
   
   const { data, error } = await supabase
     .from('guests')
-    .update({ status, date_message_sent: status === 'invited' ? new Date().toISOString() : undefined })
+    .update({ status, date_message_sent: status === 'reached_out' ? new Date().toISOString() : undefined })
     .in('id', guestIds)
     .select();
 

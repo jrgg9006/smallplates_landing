@@ -14,7 +14,7 @@ import {
 } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Guest } from "@/lib/types/database";
-import { getGuests, searchGuests } from "@/lib/supabase/guests";
+import { getGuests, searchGuests, getGuestsByStatus } from "@/lib/supabase/guests";
 import { columns } from "./GuestTableColumns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,9 +23,10 @@ import { AddGuestModal } from "./AddGuestModal";
 
 interface GuestTableProps {
   searchValue?: string; // External search value
+  statusFilter?: string; // External status filter
 }
 
-export function GuestTable({ searchValue: externalSearchValue = '' }: GuestTableProps = {}) {
+export function GuestTable({ searchValue: externalSearchValue = '', statusFilter = 'all' }: GuestTableProps = {}) {
   // Data management
   const [data, setData] = React.useState<Guest[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -45,70 +46,72 @@ export function GuestTable({ searchValue: externalSearchValue = '' }: GuestTable
   const [isModalClosing, setIsModalClosing] = React.useState(false);
   const isModalClosingRef = React.useRef(false);
   
+  // Refresh trigger for forcing data reload
+  const [refreshTrigger, setRefreshTrigger] = React.useState(0);
+  
   // Use external search value instead of internal state
   const searchValue = externalSearchValue;
 
-  // Load guests with optional loading state
-  const loadGuests = React.useCallback(async (showLoading = true) => {
-    try {
-      if (showLoading) {
-        setLoading(true);
-      }
-      setError(null);
-      
-      const { data: guests, error } = await getGuests(false); // Don't include archived
-      
-      if (error) {
-        setError(error);
-        return;
-      }
-      
-      setData(guests || []);
-    } catch (err) {
-      setError('Failed to load guests');
-      console.error('Error loading guests:', err);
-    } finally {
-      if (showLoading) {
-        setLoading(false);
-      }
-    }
-  }, []);
 
-  // Load guests when component mounts
+  // Combined effect to handle both search and status filtering
   React.useEffect(() => {
-    loadGuests();
-  }, [loadGuests]);
-
-  // Handle search with debouncing
-  React.useEffect(() => {
-    if (!searchValue.trim()) {
-      loadGuests(false); // Don't show loading when clearing search
-      return;
-    }
-
     const timeoutId = setTimeout(async () => {
       try {
-        // Don't show loading for search operations to avoid flickering
-        const { data: searchResults, error } = await searchGuests({
-          search_query: searchValue,
-          include_archived: false,
-        });
-        
-        if (error) {
-          setError(error);
-          return;
+        setLoading(true);
+        setError(null);
+
+        // If there's a search query, use search function
+        if (searchValue.trim()) {
+          const { data: searchResults, error } = await searchGuests({
+            search_query: searchValue,
+            include_archived: false,
+          });
+          
+          if (error) {
+            setError(error);
+            return;
+          }
+          
+          // Apply status filter to search results
+          let filteredResults = searchResults || [];
+          if (statusFilter !== 'all') {
+            filteredResults = filteredResults.filter((guest: Guest) => guest.status === statusFilter);
+          }
+          
+          setData(filteredResults);
+        } else {
+          // No search query - load by status or all guests
+          if (statusFilter !== 'all') {
+            const { data: statusResults, error } = await getGuestsByStatus(statusFilter as Guest['status'], false);
+            
+            if (error) {
+              setError(error);
+              return;
+            }
+            
+            setData(statusResults || []);
+          } else {
+            // Load all guests
+            const { data: guests, error } = await getGuests(false);
+            
+            if (error) {
+              setError(error);
+              return;
+            }
+            
+            setData(guests || []);
+          }
         }
-        
-        setData(searchResults || []);
-        setError(null); // Clear any previous errors
       } catch (err) {
-        setError('Search failed');
-        console.error('Search error:', err);
+        setError('Failed to load guests');
+        console.error('Error loading guests:', err);
+      } finally {
+        setLoading(false);
       }
-    }, 300); // 300ms debounce
+    }, searchValue.trim() ? 300 : 0); // Only debounce search, not filter changes
 
     return () => clearTimeout(timeoutId);
-  }, [searchValue]);
+  }, [searchValue, statusFilter, refreshTrigger]);
 
   const handleGuestClick = (guest: Guest) => {
     console.log('handleGuestClick called, isModalClosing:', isModalClosing, 'isModalClosingRef:', isModalClosingRef.current);
@@ -137,8 +140,8 @@ export function GuestTable({ searchValue: externalSearchValue = '' }: GuestTable
     setIsModalOpen(true);
   };
 
-  const handleAddGuest = () => {
-    setIsAddModalOpen(true);
+  const refreshData = () => {
+    setRefreshTrigger(prev => prev + 1);
   };
 
   const handleCloseAddModal = () => {
@@ -161,7 +164,7 @@ export function GuestTable({ searchValue: externalSearchValue = '' }: GuestTable
           isModalClosingRef.current = false;
         }, 500);
       },
-      onGuestDeleted: loadGuests,
+      onGuestDeleted: refreshData,
       onAddRecipe: handleAddRecipe,
     },
     onSortingChange: setSorting,
@@ -187,7 +190,7 @@ export function GuestTable({ searchValue: externalSearchValue = '' }: GuestTable
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <p className="text-red-600">Error: {error}</p>
           <Button 
-            onClick={loadGuests} 
+            onClick={refreshData} 
             className="mt-2"
             variant="outline"
           >
@@ -296,14 +299,14 @@ export function GuestTable({ searchValue: externalSearchValue = '' }: GuestTable
         guest={selectedGuest}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        onGuestUpdated={() => loadGuests(false)}
+        onGuestUpdated={refreshData}
         defaultTab={modalDefaultTab}
       />
 
       <AddGuestModal
         isOpen={isAddModalOpen}
         onClose={handleCloseAddModal}
-        onGuestAdded={() => loadGuests(false)}
+        onGuestAdded={refreshData}
       />
     </div>
   );
