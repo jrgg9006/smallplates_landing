@@ -111,23 +111,43 @@ export async function submitGuestRecipe(
       // Use existing guest
       guestId = existingGuest.id;
       
-      // Update their status to 'submitted' if not already
+      // Get current guest data to check if we need to increase expected recipe count
+      const currentRecipeCount = existingGuest.recipes_received || 0;
+      const expectedRecipes = existingGuest.number_of_recipes || 1;
+      const willHaveRecipes = currentRecipeCount + 1;
+      
+      console.log('Guest recipe count check:', {
+        guestId,
+        currentRecipeCount,
+        expectedRecipes,
+        willHaveRecipes
+      });
+      
+      // If we need more expected recipes, update that first (same as addRecipe function)
+      if (willHaveRecipes > expectedRecipes) {
+        console.log(`Updating number_of_recipes from ${expectedRecipes} to ${willHaveRecipes}`);
+        const { error: updateExpectedError } = await supabase
+          .from('guests')
+          .update({ number_of_recipes: willHaveRecipes })
+          .eq('id', guestId);
+          
+        if (updateExpectedError) {
+          console.error('Failed to update number_of_recipes:', updateExpectedError);
+          return { data: null, error: 'Failed to update guest recipe limit' };
+        }
+      }
+
+      // Update status to submitted if needed (don't touch recipes_received - let triggers handle it)
       if (existingGuest.status === 'pending' || existingGuest.status === 'reached_out') {
-        await supabase
+        const { error: updateError } = await supabase
           .from('guests')
-          .update({ 
-            status: 'submitted',
-            recipes_received: (existingGuest.recipes_received || 0) + 1
-          })
+          .update({ status: 'submitted' })
           .eq('id', guestId);
-      } else {
-        // Just increment recipe count
-        await supabase
-          .from('guests')
-          .update({ 
-            recipes_received: (existingGuest.recipes_received || 0) + 1
-          })
-          .eq('id', guestId);
+        
+        if (updateError) {
+          console.error('Error updating guest status:', updateError);
+          return { data: null, error: updateError.message };
+        }
       }
     } else {
       // Create new guest
@@ -155,14 +175,6 @@ export async function submitGuestRecipe(
       }
 
       guestId = newGuest.id;
-
-      // Update the recipe count after creating the guest
-      await supabase
-        .from('guests')
-        .update({ 
-          recipes_received: 1
-        })
-        .eq('id', guestId);
     }
 
     // Now create the recipe
