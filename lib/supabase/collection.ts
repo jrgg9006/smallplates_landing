@@ -35,6 +35,7 @@ export async function validateCollectionToken(token: string): Promise<{ data: Co
       data: {
         user_id: profile.id,
         user_name: profile.full_name || 'Recipe Collector',
+        raw_full_name: profile.full_name,
         token,
         is_valid: true,
       },

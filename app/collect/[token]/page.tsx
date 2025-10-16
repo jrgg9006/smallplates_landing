@@ -3,11 +3,50 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { validateCollectionToken, searchGuestInCollection } from '@/lib/supabase/collection';
 import type { CollectionTokenInfo, Guest } from '@/lib/types/database';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+
+/**
+ * Generate personalized request message based on user's full name
+ * Handles both single person and couple scenarios
+ */
+function generatePersonalizedMessage(fullName: string, rawFullName: string | null) {
+  if (!rawFullName) {
+    return {
+      beforeName: 'Share Your Recipe',
+      name: '',
+      afterName: '',
+      description: 'Please enter your first initial and last name to get started'
+    };
+  }
+
+  // Check if it's a couple (contains " and ")
+  if (fullName.includes(' and ')) {
+    // Extract first names for couple
+    const parts = fullName.split(' and ');
+    const firstPersonFirstName = parts[0]?.split(' ')[0] || '';
+    const secondPersonFirstName = parts[1]?.split(' ')[0] || '';
+    
+    return {
+      beforeName: '',
+      name: `${firstPersonFirstName} and ${secondPersonFirstName}`,
+      afterName: ' request your recipe',
+      description: 'Share a treasured family recipe to be included in their cookbook'
+    };
+  } else {
+    // Single person - extract first name
+    const firstName = fullName.split(' ')[0] || '';
+    return {
+      beforeName: '',
+      name: firstName,
+      afterName: ' is creating a cookbook, and would love to include your recipe!',
+    };
+  }
+}
 
 export default function CollectionLandingPage() {
   const params = useParams();
@@ -150,13 +189,15 @@ export default function CollectionLandingPage() {
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-center">
-          <Image
-            src="/images/SmallPlates_logo_horizontal.png"
-            alt="Small Plates & Co"
-            width={200}
-            height={40}
-            priority
-          />
+          <Link href="/" className="hover:opacity-80 transition-opacity">
+            <Image
+              src="/images/SmallPlates_logo_horizontal.png"
+              alt="Small Plates & Co"
+              width={200}
+              height={40}
+              priority
+            />
+          </Link>
         </div>
       </div>
 
@@ -173,14 +214,34 @@ export default function CollectionLandingPage() {
         <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-8">
           <div className="w-full max-w-md">
             <div className="space-y-6">
-              <div className="text-center lg:text-left">
-                <h1 className="text-3xl font-semibold text-gray-900 mb-4">
-                  Find Yourself
-                </h1>
-                <p className="text-gray-600 mb-6">
-                  Please enter your first initial and last name
-                </p>
-              </div>
+              {(() => {
+                const userName = tokenInfo?.user_name || '';
+                const rawFullName = tokenInfo?.raw_full_name || null;
+                console.log('Debug - tokenInfo:', tokenInfo);
+                console.log('Debug - user_name:', userName);
+                console.log('Debug - raw_full_name:', rawFullName);
+                const personalizedMessage = generatePersonalizedMessage(userName, rawFullName);
+                console.log('Debug - personalizedMessage:', personalizedMessage);
+                return (
+                  <div className="text-center lg:text-left">
+                    <h1 className="text-3xl font-semibold text-gray-900 mb-4">
+                      {personalizedMessage.beforeName}
+                      {personalizedMessage.name && (
+                        <span className="font-serif text-4xl font-bold text-gray-900 mx-1">
+                          {personalizedMessage.name}
+                        </span>
+                      )}
+                      {personalizedMessage.afterName}
+                    </h1>
+                    <p className="text-gray-600 mb-6">
+                      {personalizedMessage.description}
+                    </p>
+                    <div className="text-sm text-gray-500 mb-6">
+                      Please enter your first initial and last name to find yourself
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Search Form */}
               <div className="space-y-4">

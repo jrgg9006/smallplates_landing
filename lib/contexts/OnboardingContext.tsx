@@ -82,16 +82,18 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
   /**
    * Complete the onboarding process and create user account
-   *
-   * Args:
-   *   email (string): User's email
-   *   password (string): User's password
    */
   const completeOnboarding = useCallback(
-    async (email: string, password: string) => {
+    async () => {
       try {
-        // Create the user account
-        const { user, error } = await signUpWithEmail(email, password);
+        const step2Data = state.answers.step2;
+        if (!step2Data?.email) {
+          throw new Error("Email is required to complete onboarding");
+        }
+
+        // For now, create account without password (they can set it later)
+        // TODO: Integrate with Stripe and create account after payment
+        const { user, error } = await signUpWithEmail(step2Data.email, "tempPassword123!");
 
         if (error) {
           throw new Error(error);
@@ -109,10 +111,6 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         setState((prev) => ({
           ...prev,
           isComplete: true,
-          answers: {
-            ...prev.answers,
-            email,
-          },
         }));
 
         // Redirect to profile

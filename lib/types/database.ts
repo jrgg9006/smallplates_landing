@@ -320,6 +320,7 @@ export interface CollectionGuestSubmission {
 export interface CollectionTokenInfo {
   user_id: string;
   user_name: string;
+  raw_full_name: string | null;
   token: string;
   is_valid: boolean;
 }

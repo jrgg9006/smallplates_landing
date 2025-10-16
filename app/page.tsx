@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import Banner from '@/components/landing/Banner'
 import Hero from '@/components/landing/Hero'
 import TextSection from '@/components/landing/TextSection'
-import CookbookShowcase from '@/components/landing/CookbookShowcase'
-import ProductShowcase from '@/components/landing/ProductShowcase'
-import CollectorTool from '@/components/landing/CollectorTool'
+import BooksPrinted from '@/components/landing/BooksPrinted'
+import WhatsIncluded from '@/components/landing/WhatsIncluded'
+import HowItWorks from '@/components/landing/HowItWorks'
+import Guarantee from '@/components/landing/Guarantee'
 import CTAButton from '@/components/landing/CTAButton'
 
 export default function Home() {
@@ -23,9 +24,10 @@ export default function Home() {
       <main className="min-h-screen">
         <Hero />
         <TextSection />
-        <CookbookShowcase />
-        <ProductShowcase />
-        <CollectorTool />
+        <BooksPrinted />
+        <WhatsIncluded />
+        <HowItWorks />
+        <Guarantee />
 
         {/* Repeat CTA at bottom per best practices */}
         <section className="bg-white">

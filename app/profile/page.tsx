@@ -177,20 +177,6 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Book Preview Section */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>Your Cookbook</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">
-                Your recipes are being collected for your cookbook
-              </p>
-              <Button size="lg">Preview & Order Book</Button>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Add Guest Modal */}
         <AddGuestModal

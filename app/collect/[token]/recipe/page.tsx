@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
+import Image from 'next/image';
 import { validateCollectionToken } from '@/lib/supabase/collection';
 import type { CollectionTokenInfo } from '@/lib/types/database';
 import { Input } from '@/components/ui/input';
@@ -146,78 +147,29 @@ export default function RecipeFormPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-2xl mx-auto px-6 py-6">
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={handleBack}
-              className="rounded-full"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="text-2xl font-serif font-semibold text-gray-900">
-                Share Your Recipe
-              </h1>
-              <p className="text-gray-600">
-                with {tokenInfo?.user_name}
-              </p>
-            </div>
-          </div>
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={handleBack}
+            className="rounded-full"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <Image
+            src="/images/SmallPlates_logo_horizontal.png"
+            alt="Small Plates & Co"
+            width={200}
+            height={40}
+            priority
+          />
+          <div className="w-10"></div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="max-w-2xl mx-auto px-6 py-8">
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
-          {/* Guest Info Confirmation */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Your Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="font-medium text-gray-900">
-                  {guestData?.firstName} {guestData?.lastName}
-                </p>
-                <p className="text-sm text-gray-600">
-                  {guestData?.existing ? "Found in guest list" : "New guest - will be added"}
-                </p>
-              </div>
-
-              {/* Additional contact info for new guests */}
-              {!guestData?.existing && (
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-600">
-                    Optional: Add your contact information to stay connected
-                  </p>
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <Label htmlFor="email">Email (optional)</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="your.email@example.com"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="phone">Phone (optional)</Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="Your phone number"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
 
           {/* Recipe Form */}
           <Card>

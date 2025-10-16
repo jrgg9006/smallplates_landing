@@ -46,13 +46,30 @@ export async function saveOnboardingData(userId: string, answers: OnboardingData
       };
     }
 
+    // Extract personal information from step 2
+    const step2Data = answers.step2;
+    if (!step2Data?.firstName || !step2Data?.lastName || !step2Data?.email) {
+      return {
+        data: null,
+        error: 'Personal information not found in onboarding answers'
+      };
+    }
+
     // Map category to specific number
     const recipeGoalNumber = mapRecipeCategoryToNumber(recipeCount);
+
+    // Build full name - concatenate with partner if exists
+    let fullName = `${step2Data.firstName} ${step2Data.lastName}`;
+    if (step2Data.hasPartner && step2Data.partnerFirstName && step2Data.partnerLastName) {
+      fullName = `${step2Data.firstName} ${step2Data.lastName} and ${step2Data.partnerFirstName} ${step2Data.partnerLastName}`;
+    }
 
     // Update the user's profile with onboarding data
     const { data, error } = await supabase
       .from('profiles')
       .update({
+        full_name: fullName,
+        email: step2Data.email,
         recipe_goal_category: recipeCount,
         recipe_goal_number: recipeGoalNumber,
         updated_at: new Date().toISOString()

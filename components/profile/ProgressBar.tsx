@@ -68,44 +68,8 @@ export function ProgressBar({ current, goal, loading = false }: ProgressBarProps
               <div className="w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-20 animate-pulse"></div>
             </div>
           </div>
-          
-          {/* Progress percentage label (only show if > 5% to avoid clutter) */}
-          {progressPercentage > 5 && (
-            <div 
-              className="absolute top-0 h-2 flex items-center justify-end pr-1"
-              style={{ width: `${progressPercentage}%` }}
-            >
-              <span className="text-xs font-medium text-white text-shadow">
-                {Math.round(progressPercentage)}%
-              </span>
-            </div>
-          )}
         </div>
 
-        {/* Motivational message */}
-        <div className="text-center">
-          {progressPercentage >= 100 ? (
-            <p className="text-xs text-green-600 font-medium">
-              🎉 Congratulations! You've reached your recipe goal!
-            </p>
-          ) : progressPercentage >= 75 ? (
-            <p className="text-xs text-blue-600 font-medium">
-              Almost there! Keep collecting those recipes
-            </p>
-          ) : progressPercentage >= 50 ? (
-            <p className="text-xs text-purple-600 font-medium">
-              Great progress! You're halfway to your goal
-            </p>
-          ) : progressPercentage >= 25 ? (
-            <p className="text-xs text-orange-600 font-medium">
-              Nice start! Keep inviting friends and family
-            </p>
-          ) : (
-            <p className="text-xs text-gray-500 font-medium">
-              Start collecting recipes to build your cookbook
-            </p>
-          )}
-        </div>
       </div>
     </div>
   );
