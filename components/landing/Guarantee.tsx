@@ -31,7 +31,7 @@ export default function Guarantee() {
           
           {/* Subheading */}
           <p className="font-serif text-xl md:text-2xl text-gray-900 mb-16">
-            You'll Love It, Guaranteed.
+            
           </p>
           
           {/* Testimonials grid */}

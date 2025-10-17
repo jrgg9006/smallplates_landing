@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function TextSection() {
   return (
     <section className="bg-white py-16 md:py-32">
@@ -9,12 +11,34 @@ export default function TextSection() {
             connect through Food
           </h1>
           
-          {/* Subheading with decorative line */}
-          <div className="mb-12">
-            <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl font-medium text-gray-900 mb-12">
+          {/* Subheading */}
+          <div className="mb-8">
+            <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl font-medium text-gray-900">
               That's why we created<br />
               Small Plates & Co.
             </h2>
+          </div>
+          
+          {/* Beautiful Plate Image */}
+          <div className="relative w-full max-w-md mx-auto mb-12">
+            <div className="relative aspect-square overflow-hidden">
+              <Image
+                src="/images/other/plato_1.jpg"
+                alt="Artisanal ceramic plate"
+                fill
+                className="object-contain"
+                sizes="(max-width: 768px) 100vw, 400px"
+                priority
+              />
+              {/* Subtle gradient only at the very edge */}
+              <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white/40 to-transparent pointer-events-none"></div>
+            </div>
+            {/* Subtle shadow for depth */}
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-2/3 h-6 bg-gradient-to-b from-gray-100/10 to-transparent rounded-[50%] blur-2xl"></div>
+          </div>
+          
+          {/* Decorative line */}
+          <div className="mb-12">
             <div className="w-32 h-0.5 bg-gray-900 mx-auto"></div>
           </div>
           
