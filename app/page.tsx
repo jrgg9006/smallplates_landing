@@ -1,13 +1,15 @@
 "use client";
 
+import React from "react";
 import { useRouter } from "next/navigation";
-import Banner from '@/components/Banner'
-import Hero from '@/components/Hero'
-import TextSection from '@/components/TextSection'
-import CookbookShowcase from '@/components/CookbookShowcase'
-import ProductShowcase from '@/components/ProductShowcase'
-import CollectorTool from '@/components/CollectorTool'
-import CTAButton from '@/components/CTAButton'
+import Banner from '@/components/landing/Banner'
+import Hero from '@/components/landing/Hero'
+import TextSection from '@/components/landing/TextSection'
+import BooksPrinted from '@/components/landing/BooksPrinted'
+import WhatsIncluded from '@/components/landing/WhatsIncluded'
+import HowItWorks from '@/components/landing/HowItWorks'
+import Guarantee from '@/components/landing/Guarantee'
+import CTAButton from '@/components/landing/CTAButton'
 
 export default function Home() {
   const router = useRouter();
@@ -22,9 +24,10 @@ export default function Home() {
       <main className="min-h-screen">
         <Hero />
         <TextSection />
-        <CookbookShowcase />
-        <ProductShowcase />
-        <CollectorTool />
+        <BooksPrinted />
+        <WhatsIncluded />
+        <HowItWorks />
+        <Guarantee />
 
         {/* Repeat CTA at bottom per best practices */}
         <section className="bg-white">

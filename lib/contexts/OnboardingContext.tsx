@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import {
   createContext,
   useContext,
@@ -9,6 +10,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { signUpWithEmail } from "@/lib/supabase/auth";
+import { saveOnboardingData } from "@/lib/supabase/onboarding";
 import {
   OnboardingState,
   OnboardingContextType,
@@ -80,34 +82,36 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
   /**
    * Complete the onboarding process and create user account
-   *
-   * Args:
-   *   email (string): User's email
-   *   password (string): User's password
    */
   const completeOnboarding = useCallback(
-    async (email: string, password: string) => {
+    async () => {
       try {
-        // Create the user account
-        const { user, error } = await signUpWithEmail(email, password);
+        const step2Data = state.answers.step2;
+        if (!step2Data?.email) {
+          throw new Error("Email is required to complete onboarding");
+        }
+
+        // For now, create account without password (they can set it later)
+        // TODO: Integrate with Stripe and create account after payment
+        const { user, error } = await signUpWithEmail(step2Data.email, "tempPassword123!");
 
         if (error) {
           throw new Error(error);
+        }
+
+        // Save onboarding answers to database
+        const saveResult = await saveOnboardingData(user.id, state.answers);
+        
+        if (saveResult.error) {
+          console.error('Failed to save onboarding data:', saveResult.error);
+          // Continue anyway - don't block the user flow
         }
 
         // Mark onboarding as complete
         setState((prev) => ({
           ...prev,
           isComplete: true,
-          answers: {
-            ...prev.answers,
-            email,
-          },
         }));
-
-        // TODO: Save onboarding answers to database (future implementation)
-        // This will be added when we implement the actual questions
-        // await saveOnboardingData(user.id, state.answers);
 
         // Redirect to profile
         router.push("/profile");
@@ -116,7 +120,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         throw err;
       }
     },
-    [router]
+    [router, state.answers]
   );
 
   /**

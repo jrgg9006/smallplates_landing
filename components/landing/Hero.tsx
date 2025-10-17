@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import CTAButton from "./CTAButton";
@@ -38,7 +39,7 @@ export default function Hero() {
             every&nbsp;Recipe
           </h1>
           <p className="font-sans mt-4 text-xl sm:text-2xl md:text-3xl font-medium text-white/90 max-w-prose drop-shadow">
-            A cookbook experience designed to connect through food.
+            Create a beautifully printed cookbook that connects your favorite people through food.
           </p>
           <div className="mt-8">
             <CTAButton data-cta="hero-primary" onClick={handleGetStarted} />

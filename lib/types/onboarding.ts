@@ -15,11 +15,21 @@ export interface OnboardingAnswer {
 }
 
 export interface OnboardingData {
-  step1?: Record<string, any>;
-  step2?: Record<string, any>;
-  step3?: Record<string, any>;
-  email?: string;
-  password?: string;
+  step1?: {
+    recipeCount: string;
+  };
+  step2?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    hasPartner?: boolean;
+    partnerFirstName?: string;
+    partnerLastName?: string;
+  };
+  step3?: {
+    paymentComplete?: boolean;
+    stripeSessionId?: string;
+  };
 }
 
 export interface OnboardingState {
@@ -34,6 +44,6 @@ export interface OnboardingContextType {
   nextStep: () => void;
   previousStep: () => void;
   updateStepData: (stepId: number, data: Record<string, any>) => void;
-  completeOnboarding: (email: string, password: string) => Promise<void>;
+  completeOnboarding: () => Promise<void>;
   resetOnboarding: () => void;
 }

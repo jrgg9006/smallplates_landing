@@ -1,12 +1,67 @@
 "use client";
 
+import React from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { GuestTable } from "@/components/profile/guests/GuestTable";
+import { GuestTableControls } from "@/components/profile/guests/GuestTableControls";
+import { GuestStatisticsComponent } from "@/components/profile/guests/GuestStatistics";
+import { RecipeCollectorLink } from "@/components/profile/guests/RecipeCollectorLink";
+import { AddGuestModal } from "@/components/profile/guests/AddGuestModal";
+import { ProgressBar } from "@/components/profile/ProgressBar";
+import { getUserProgress, UserProgress } from "@/lib/supabase/progress";
+import ProfileDropdown from "@/components/profile/ProfileDropdown";
+import { Bell } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export default function ProfilePage() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [searchValue, setSearchValue] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [progressData, setProgressData] = useState<UserProgress | null>(null);
+  const [progressLoading, setProgressLoading] = useState(true);
+
+  const handleAddGuest = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const handleCloseAddModal = () => {
+    setIsAddModalOpen(false);
+  };
+
+  const handleGuestAdded = () => {
+    setRefreshTrigger(prev => prev + 1);
+    loadProgressData(); // Reload progress when guest is added
+  };
+
+  // Load user progress data
+  const loadProgressData = async () => {
+    if (!user?.id) return;
+
+    try {
+      setProgressLoading(true);
+      const { data, error } = await getUserProgress(user.id);
+      
+      if (error) {
+        console.error('Error loading progress data:', error);
+        setProgressData(null);
+      } else {
+        setProgressData(data);
+      }
+    } catch (err) {
+      console.error('Error in loadProgressData:', err);
+      setProgressData(null);
+    } finally {
+      setProgressLoading(false);
+    }
+  };
 
   useEffect(() => {
     // Redirect to home if not authenticated
@@ -14,6 +69,13 @@ export default function ProfilePage() {
       router.push("/");
     }
   }, [user, loading, router]);
+
+  // Load progress data when user is available
+  useEffect(() => {
+    if (user?.id) {
+      loadProgressData();
+    }
+  }, [user?.id]);
 
   if (loading) {
     return (
@@ -29,17 +91,99 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-          <button
-            onClick={signOut}
-            className="px-6 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
-          >
-            Sign out
-          </button>
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-8">
+              {/* Logo - Clickable to go back to landing */}
+              <Link href="/" className="hover:opacity-80 transition-opacity">
+                <Image
+                  src="/images/SmallPlates_logo_horizontal.png"
+                  alt="Small Plates & Co."
+                  width={200}
+                  height={40}
+                  className="h-14 w-auto cursor-pointer"
+                />
+              </Link>
+              {/* Divider */}
+              <div className="h-10 w-px bg-gray-300" />
+              {/* Page Title */}
+              <h1 className="text-4xl font-serif font-semibold text-gray-900">Guest List</h1>
+            </div>
+            <div className="flex items-center gap-3">
+              {/* Notification Bell */}
+              <button
+                className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5 text-gray-600" />
+                {/* Notification Badge */}
+                <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs font-medium">1</span>
+                </span>
+              </button>
+              
+              <ProfileDropdown />
+            </div>
+          </div>
         </div>
-        <p className="mt-4 text-gray-600">Welcome, {user.email}</p>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Title Section */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-serif font-bold text-gray-900 mb-8">
+            Your Cookbook is Cooking...
+          </h1>
+        </div>
+
+        {/* Statistics Section - Centered */}
+        <div className="flex justify-center mb-8">
+          <div className="w-full max-w-2xl">
+            <GuestStatisticsComponent />
+          </div>
+        </div>
+
+        {/* Progress Bar Section - Centered */}
+        <div className="flex justify-center mb-8">
+          <ProgressBar 
+            current={progressData?.current_recipes || 0}
+            goal={progressData?.goal_recipes || 40}
+            loading={progressLoading}
+          />
+        </div>
+
+        {/* Recipe Collector Section - Centered */}
+        <div className="flex justify-center mb-8">
+          <div className="w-full max-w-2xl">
+            <RecipeCollectorLink userId={user?.id} />
+          </div>
+        </div>
+
+        {/* Guest Table Controls */}
+        <GuestTableControls
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          onFilterChange={setStatusFilter}
+          onAddGuest={handleAddGuest}
+        />
+
+        {/* Guest Table */}
+        <Card>
+          <CardContent className="p-0">
+            <GuestTable key={refreshTrigger} searchValue={searchValue} statusFilter={statusFilter} />
+          </CardContent>
+        </Card>
+
+
+        {/* Add Guest Modal */}
+        <AddGuestModal
+          isOpen={isAddModalOpen}
+          onClose={handleCloseAddModal}
+          onGuestAdded={handleGuestAdded}
+        />
       </div>
     </div>
   );

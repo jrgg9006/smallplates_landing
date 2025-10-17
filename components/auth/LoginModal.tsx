@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -38,11 +39,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         if (error) {
           setError(error);
         } else {
-          setMessage("Login successful!");
-          setTimeout(() => {
-            onClose();
-            router.push("/profile");
-          }, 1000);
+          onClose();
+          router.push("/profile");
         }
       } else if (mode === "forgot-password") {
         const { error } = await resetPassword(email);
@@ -110,11 +108,11 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <h2 className="text-4xl font-serif font-semibold text-gray-900">
               {mode === "login" ? "Log in" : "Reset password"}
             </h2>
-            <p className="text-gray-600 mt-2">
-              {mode === "login"
-                ? "Welcome back!"
-                : "Enter your email to reset password"}
-            </p>
+            {mode === "forgot-password" && (
+              <p className="text-gray-600 mt-2">
+                Enter your email to reset password
+              </p>
+            )}
           </div>
 
           {/* Error/Success Messages */}
