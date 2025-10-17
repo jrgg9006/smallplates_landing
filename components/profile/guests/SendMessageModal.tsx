@@ -57,7 +57,7 @@ export function SendMessageModal({ guest, isOpen, onClose }: SendMessageModalPro
         
         <div className="space-y-6 pb-20" onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}>
           <p className="text-gray-600 text-sm">
-            We'll send the note below to your guest.
+            We&apos;ll send the note below to your guest.
           </p>
 
           {/* Email Details */}

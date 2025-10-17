@@ -39,11 +39,11 @@ export default function Guarantee() {
             {testimonials.map((testimonial) => (
               <div key={testimonial.id} className="text-center">
                 {/* Large quotation marks */}
-                <div className="font-serif text-6xl md:text-7xl text-gray-900 mb-6">"</div>
+                <div className="font-serif text-6xl md:text-7xl text-gray-900 mb-6">&ldquo;</div>
                 
                 {/* Quote text */}
                 <p className="font-serif text-lg md:text-xl text-gray-900 mb-8 px-4">
-                  "{testimonial.quote}"
+                  &ldquo;{testimonial.quote}&rdquo;
                 </p>
                 
                 {/* Author */}

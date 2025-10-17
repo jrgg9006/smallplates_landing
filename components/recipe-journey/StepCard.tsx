@@ -183,7 +183,7 @@ export default function StepCard({
               </h1>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                 Your delicious contribution will be a wonderful addition to the cookbook. 
-                You'll be redirected shortly.
+                You&apos;ll be redirected shortly.
               </p>
             </div>
           );

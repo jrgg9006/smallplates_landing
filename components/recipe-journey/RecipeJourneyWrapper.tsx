@@ -52,7 +52,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
       type: 'welcome',
       title: (
         <>
-          Congratulations! You'll be part of{' '}
+          Congratulations! You&apos;ll be part of{' '}
           <span className="font-serif text-5xl font-bold text-emerald-700 mx-1">
             {creatorName}&apos;s
           </span>{' '}

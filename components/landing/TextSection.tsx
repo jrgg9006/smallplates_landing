@@ -14,7 +14,7 @@ export default function TextSection() {
           {/* Subheading */}
           <div className="mb-8">
             <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl font-medium text-gray-900">
-              That's why we created<br />
+              That&apos;s why we created<br />
               Small Plates & Co.
             </h2>
           </div>

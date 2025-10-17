@@ -330,7 +330,7 @@ export default function CollectionLandingPage() {
                         className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors text-left"
                       >
                         <span className="text-gray-900 font-medium">
-                          I don't see my name
+                          I don&apos;t see my name
                         </span>
                         <svg 
                           className="w-5 h-5 text-gray-400" 
@@ -346,15 +346,15 @@ export default function CollectionLandingPage() {
                 ) : (
                   <div className="space-y-4">
                     <h3 className="text-lg font-medium text-gray-900">
-                      Welcome! You're not in the list yet
+                      Welcome! You&apos;re not in the list yet
                     </h3>
                     <p className="text-gray-600 mb-4">
-                      No worries! We'll add you when you submit your recipe.
+                      No worries! We&apos;ll add you when you submit your recipe.
                       {lastName.trim() && (
-                        <span> We'll use <strong>{firstName} {lastName}</strong> as your name.</span>
+                        <span> We&apos;ll use <strong>{firstName} {lastName}</strong> as your name.</span>
                       )}
                       {!lastName.trim() && (
-                        <span> We'll use <strong>{firstName}</strong> as your name.</span>
+                        <span> We&apos;ll use <strong>{firstName}</strong> as your name.</span>
                       )}
                     </p>
                     <button
@@ -380,7 +380,7 @@ export default function CollectionLandingPage() {
               {/* Instructions */}
               <div className="text-center text-sm text-gray-500 mt-6">
                 <p>
-                  After finding yourself, you'll be able to submit your favorite recipe 
+                  After finding yourself, you&apos;ll be able to submit your favorite recipe 
                   to be included in the collection.
                 </p>
               </div>
