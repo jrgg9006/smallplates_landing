@@ -66,7 +66,7 @@ export default function StepCard({
       case 'welcome':
         return (
           <div className="text-center space-y-6">
-            <div className="text-5xl mb-3">{content.icon}</div>
+            <div className="text-4xl mb-2">{content.icon}</div>
             <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 leading-tight">
               {content.title}
             </h1>
@@ -79,7 +79,7 @@ export default function StepCard({
       case 'story':
         return (
           <div className="text-center space-y-6">
-            <div className="text-5xl mb-3">{content.icon}</div>
+            <div className="text-4xl mb-2">{content.icon}</div>
             <h1 className="text-3xl md:text-4xl font-semibold text-gray-900">
               {content.title}
             </h1>
@@ -121,7 +121,7 @@ export default function StepCard({
       case 'encouragement':
         return (
           <div className="text-center space-y-6">
-            <div className="text-5xl mb-3">{content.icon}</div>
+            <div className="text-4xl mb-2">{content.icon}</div>
             <h1 className="text-3xl md:text-4xl font-semibold text-gray-900">
               {content.title}
             </h1>
@@ -275,14 +275,14 @@ export default function StepCard({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto flex flex-col h-[100vh] overflow-hidden">
+    <div className="w-full max-w-4xl mx-auto flex flex-col h-screen overflow-hidden">
       {/* Content */}
-      <div className="flex-1 flex items-center justify-center py-4">
+      <div className="flex-1 flex items-center justify-center p-4 max-h-[calc(100vh-120px)]">
         {renderContent()}
       </div>
       
-      {/* Navigation */}
-      <div className="flex justify-between items-center pb-8 px-4">
+      {/* Navigation - Fixed at bottom */}
+      <div className="flex justify-between items-center p-4 pb-8">
           <button
             onClick={onPrevious}
             disabled={!canGoPrevious}

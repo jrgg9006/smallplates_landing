@@ -7,7 +7,7 @@ export default function HowItWorks() {
       stepNumber: "STEP 1",
       title: "Select Guests and Request Recipes in One Click",
       description: "We provide smart tools to collect recipes from your friends and family",
-      image: "/images/HowItWorks_images/howitworks_1.jpg",
+      image: "/images/HowItWorks_images/howitworks_1.svg",
     },
     {
       id: 2,
@@ -46,12 +46,12 @@ export default function HowItWorks() {
 
               {/* Image Container - Make images larger */}
               <div className="px-6">
-                <div className="relative aspect-[4/3] bg-gray-200 rounded-lg overflow-hidden">
+                <div className="relative aspect-[4/3] bg-gray-50 rounded-lg overflow-visible">
                   <Image
                     src={step.image}
                     alt={step.title}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 400px"
                   />
                 </div>

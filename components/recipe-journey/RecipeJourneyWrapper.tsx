@@ -221,7 +221,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
   return (
     <div className="h-screen bg-white overflow-hidden">
       {/* Main Content */}
-      <div className="flex items-center justify-center h-screen px-4">
+      <div className="h-full">
         <StepCard
           step={currentStep}
           content={stepContent[currentStep]}

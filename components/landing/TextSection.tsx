@@ -21,7 +21,7 @@ export default function TextSection() {
           {/* Description paragraph */}
           <div className="max-w-2xl mx-auto">
             <p className="font-sans text-lg md:text-xl lg:text-2xl text-gray-900 leading-relaxed">
-              to capture the feeling of connection<br />
+              To capture the feeling of connection<br />
               that only food can create.<br />
             </p>
           </div>
