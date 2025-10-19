@@ -53,6 +53,15 @@ export default function CollectionLandingPage() {
   const router = useRouter();
   const token = params.token as string;
   
+  // Mobile debugging - log component mount
+  useEffect(() => {
+    console.log('🔥 CollectionLandingPage mounted on mobile', {
+      userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
+      token,
+      timestamp: new Date().toISOString()
+    });
+  }, [token]);
+  
   // State management
   const [tokenInfo, setTokenInfo] = useState<CollectionTokenInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,21 +78,35 @@ export default function CollectionLandingPage() {
   // Validate token on component mount
   useEffect(() => {
     async function validateToken() {
+      console.log('🔍 Mobile Debug - validateToken starting', { token });
+      
       if (!token) {
+        console.error('❌ Mobile Debug - No token provided');
         setError('No collection link provided');
         setLoading(false);
         return;
       }
 
-      const { data, error } = await validateCollectionToken(token);
-      
-      if (error || !data) {
-        setError(error || 'Invalid collection link');
-      } else {
-        setTokenInfo(data);
+      try {
+        console.log('📡 Mobile Debug - Calling validateCollectionToken');
+        const { data, error } = await validateCollectionToken(token);
+        
+        console.log('📡 Mobile Debug - validateCollectionToken response', { data, error });
+        
+        if (error || !data) {
+          console.error('❌ Mobile Debug - Token validation failed', error);
+          setError(error || 'Invalid collection link');
+        } else {
+          console.log('✅ Mobile Debug - Token validation success', data);
+          setTokenInfo(data);
+        }
+      } catch (err) {
+        console.error('💥 Mobile Debug - validateCollectionToken threw error', err);
+        setError('Failed to validate collection link');
       }
       
       setLoading(false);
+      console.log('🏁 Mobile Debug - validateToken completed');
     }
 
     validateToken();
