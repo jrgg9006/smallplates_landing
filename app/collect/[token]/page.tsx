@@ -91,7 +91,10 @@ export default function CollectionLandingPage() {
 
   // Handle guest search
   const handleSearch = async () => {
+    console.log('Mobile Debug - handleSearch called', { tokenInfo: !!tokenInfo, firstName, lastName });
+    
     if (!tokenInfo || !firstName.trim()) {
+      console.log('Mobile Debug - Search cancelled: missing tokenInfo or firstName');
       return;
     }
 
@@ -131,8 +134,15 @@ export default function CollectionLandingPage() {
       existing: true
     };
 
-    // Store guest data in session storage for the recipe form
-    sessionStorage.setItem('collectionGuestData', JSON.stringify(guestData));
+    // Store guest data in session storage for the recipe form with error handling
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        sessionStorage.setItem('collectionGuestData', JSON.stringify(guestData));
+      }
+    } catch (error) {
+      console.warn('Failed to store guest data in sessionStorage:', error);
+      // Continue anyway - we can handle missing sessionStorage in the recipe page
+    }
     
     // Navigate to recipe form
     router.push(`/collect/${token}/recipe`);
@@ -146,8 +156,15 @@ export default function CollectionLandingPage() {
       existing: false
     };
 
-    // Store guest data in session storage for the recipe form
-    sessionStorage.setItem('collectionGuestData', JSON.stringify(guestData));
+    // Store guest data in session storage for the recipe form with error handling
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        sessionStorage.setItem('collectionGuestData', JSON.stringify(guestData));
+      }
+    } catch (error) {
+      console.warn('Failed to store guest data in sessionStorage:', error);
+      // Continue anyway - we can handle missing sessionStorage in the recipe page
+    }
     
     // Navigate to recipe form
     router.push(`/collect/${token}/recipe`);
@@ -202,17 +219,17 @@ export default function CollectionLandingPage() {
       </div>
 
       {/* Main Content - Two Column Layout */}
-      <div className="min-h-[calc(100vh-4rem)] flex">
+      <div className="min-h-screen lg:min-h-[calc(100vh-4rem)] flex flex-col lg:flex-row">
         {/* Left Column - Image */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gray-100 items-center justify-center">
+        <div className="hidden lg:flex lg:w-1/2 bg-gray-100 items-center justify-center lg:min-h-[calc(100vh-4rem)]">
           <div className="w-80 h-80 bg-gray-300 rounded-lg flex items-center justify-center">
             <span className="text-gray-500 text-lg">Recipe Collection Image</span>
           </div>
         </div>
 
         {/* Right Column - Content */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-8">
-          <div className="w-full max-w-md">
+        <div className="w-full lg:w-1/2 flex items-center justify-center px-4 sm:px-6 py-8 lg:py-12 min-h-[calc(100vh-8rem)] lg:min-h-[calc(100vh-4rem)]">
+          <div className="w-full max-w-md mx-auto">
             <div className="space-y-6">
               {(() => {
                 const userName = tokenInfo?.user_name || '';
@@ -253,11 +270,17 @@ export default function CollectionLandingPage() {
                   <Input
                     id="firstName"
                     value={firstName}
-                    onChange={(e) => setFirstName(e.target.value.slice(0, 1).toUpperCase())}
+                    onChange={(e) => {
+                      const value = e.target.value.slice(0, 1).toUpperCase();
+                      console.log('Mobile Debug - firstName changed:', value);
+                      setFirstName(value);
+                    }}
                     placeholder=""
                     disabled={searching}
                     maxLength={1}
-                    className="text-left"
+                    className="text-center"
+                    autoComplete="given-name"
+                    inputMode="text"
                   />
                 </div>
                 <div className="flex-1">
@@ -267,15 +290,24 @@ export default function CollectionLandingPage() {
                   <Input
                     id="lastName"
                     value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      console.log('Mobile Debug - lastName changed:', value);
+                      setLastName(value);
+                    }}
                     placeholder=""
                     disabled={searching}
+                    autoComplete="family-name"
+                    inputMode="text"
                   />
                 </div>
                 <Button 
-                  onClick={handleSearch}
+                  onClick={() => {
+                    console.log('Mobile Debug - Search button clicked');
+                    handleSearch();
+                  }}
                   disabled={!firstName.trim() || searching}
-                  className="bg-gray-400 text-white hover:bg-gray-500 px-8 py-2 rounded-full h-10"
+                  className="bg-gray-400 text-white hover:bg-gray-500 px-4 sm:px-8 py-2 rounded-full h-10 min-w-[80px]"
                 >
                   {searching ? (
                     <>

@@ -1,30 +1,28 @@
 export default function WhatsIncluded() {
   // Features organized in two columns
   const leftFeatures = [
-    "1 hardcover cookbook credit",
+    "1 Hardcover Cookbook Credit",
     "30-day money back guarantee", 
-    "Tools to collect and curate recipes",
-    "Private submission portal for family and friends"
+    "Smart tools to collect recipes",
   ];
 
   const rightFeatures = [
-    "Up to 120 recipes included",
-    "Professional images for each recipe",
+    "Up to 120 recipes",
+    "Professional photo layout for each recipe",
     "Free shipping in the US",
-    "100% satisfaction guaranteed"
   ];
 
   return (
     <section className="bg-emerald-900 py-16 md:py-20">
       <div className="mx-auto max-w-7xl px-6 md:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-start">
           
           {/* Left Content Section */}
           <div className="lg:col-span-1">
             <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-medium text-white mb-4 leading-tight">
               What&apos;s included in your Small Plates & Co. experience?
             </h2>
-            <p className="text-lg md:text-xl text-emerald-100 mb-8 leading-relaxed">
+            <p className="text-lg md:text-xl text-emerald-100 mb-4 leading-relaxed">
               
             </p>
             
@@ -39,16 +37,16 @@ export default function WhatsIncluded() {
 
           {/* Right Features Grid */}
           <div className="lg:col-span-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
               
               {/* Left Features Column */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {leftFeatures.map((feature, index) => (
                   <div key={index} className="flex items-start gap-3">
                     {/* Checkmark Icon */}
-                    <div className="flex-shrink-0 mt-0.5">
+                    <div className="flex-shrink-0 mt-1">
                       <svg 
-                        className="w-5 h-5 text-emerald-300" 
+                        className="w-6 h-6 text-emerald-200" 
                         fill="currentColor" 
                         viewBox="0 0 20 20"
                       >
@@ -59,7 +57,7 @@ export default function WhatsIncluded() {
                         />
                       </svg>
                     </div>
-                    <span className="text-white text-lg font-medium">
+                    <span className="text-emerald-50 text-lg md:text-xl font-sans font-medium">
                       {feature}
                     </span>
                   </div>
@@ -67,13 +65,13 @@ export default function WhatsIncluded() {
               </div>
 
               {/* Right Features Column */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {rightFeatures.map((feature, index) => (
                   <div key={index} className="flex items-start gap-3">
                     {/* Checkmark Icon */}
-                    <div className="flex-shrink-0 mt-0.5">
+                    <div className="flex-shrink-0 mt-1">
                       <svg 
-                        className="w-5 h-5 text-emerald-300" 
+                        className="w-6 h-6 text-emerald-200" 
                         fill="currentColor" 
                         viewBox="0 0 20 20"
                       >
@@ -84,7 +82,7 @@ export default function WhatsIncluded() {
                         />
                       </svg>
                     </div>
-                    <span className="text-white text-lg font-medium">
+                    <span className="text-emerald-50 text-lg md:text-xl font-sans font-medium">
                       {feature}
                     </span>
                   </div>
