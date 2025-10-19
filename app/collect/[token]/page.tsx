@@ -66,10 +66,12 @@ export default function CollectionLandingPage() {
   const [tokenInfo, setTokenInfo] = useState<CollectionTokenInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [debugLogs, setDebugLogs] = useState<string[]>([]);
   
-  // Mobile debugging - console only (no visual logs)
+  // Mobile debugging - console and visual logs
   const addDebugLog = (message: string) => {
     console.log(message);
+    setDebugLogs(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
   };
   
   // Guest search state
