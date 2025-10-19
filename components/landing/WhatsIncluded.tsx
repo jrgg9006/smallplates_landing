@@ -19,7 +19,7 @@ export default function WhatsIncluded() {
           
           {/* Left Content Section */}
           <div className="lg:col-span-1">
-            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-medium text-white mb-4 leading-tight">
+            <h2 className="font-serif text-4xl sm:text-5xl md:text-4xl lg:text-5xl font-medium text-white mb-4 leading-tight">
               What&apos;s included in your Small Plates & Co. experience?
             </h2>
             <p className="text-lg md:text-xl text-emerald-100 mb-4 leading-relaxed">
