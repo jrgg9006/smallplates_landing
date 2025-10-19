@@ -43,6 +43,22 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
 
   const totalSteps = 9;
 
+  // Reset journey function - skip intro and go directly to recipe form
+  const resetJourney = () => {
+    setCurrentStep(5); // Jump directly to "What's the name of your recipe?" step
+    setRecipeData({
+      recipeName: '',
+      ingredients: '',
+      instructions: '',
+      personalNote: ''
+    });
+    setSubmitSuccess(false);
+    setSubmitError(null);
+    setSubmitting(false);
+    // Clear localStorage
+    localStorage.removeItem('recipeJourneyData');
+  };
+
   // Get the cookbook creator's name for personalization
   const creatorName = tokenInfo.user_name.split(' ')[0] || 'the cookbook creator';
 
@@ -178,14 +194,10 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
 
       // Success! Show success state
       setSubmitSuccess(true);
+      setSubmitting(false);
       
       // Clean up localStorage
       localStorage.removeItem('recipeJourneyData');
-      
-      // Redirect to success page after a short delay
-      setTimeout(() => {
-        router.push(`/collect/${token}?submitted=true`);
-      }, 2000);
 
     } catch (err) {
       console.error('Submit error:', err);
@@ -230,6 +242,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
           onNext={handleNext}
           onPrevious={handlePrevious}
           onSubmit={handleSubmit}
+          onReset={resetJourney}
           canGoNext={currentStep < totalSteps}
           canGoPrevious={currentStep > 1}
           isLastStep={currentStep === totalSteps}
