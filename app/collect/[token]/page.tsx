@@ -222,6 +222,19 @@ export default function CollectionLandingPage() {
               <p className="text-sm text-gray-500">
                 Please check the link or contact the person who shared it with you.
               </p>
+              
+              {/* Debug info for troubleshooting */}
+              <div className="mt-4 p-4 bg-gray-100 rounded text-left text-sm">
+                <p><strong>Debug Info:</strong></p>
+                <p>Token: {token}</p>
+                <p>Error: {error}</p>
+                <p>Debug Logs:</p>
+                <div className="max-h-40 overflow-y-auto bg-gray-50 p-2 rounded">
+                  {debugLogs.map((log, index) => (
+                    <div key={index} className="text-xs font-mono">{log}</div>
+                  ))}
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
