@@ -67,6 +67,13 @@ export default function CollectionLandingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
+  // Mobile debugging - show logs on screen
+  const [debugLogs, setDebugLogs] = useState<string[]>([]);
+  const addDebugLog = (message: string) => {
+    console.log(message);
+    setDebugLogs(prev => [...prev.slice(-4), `${new Date().toLocaleTimeString()}: ${message}`]);
+  };
+  
   // Guest search state
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -88,20 +95,20 @@ export default function CollectionLandingPage() {
       }
 
       try {
-        console.log('📡 Mobile Debug - Calling validateCollectionToken');
+        addDebugLog('📡 Calling validateCollectionToken');
         const { data, error } = await validateCollectionToken(token);
         
-        console.log('📡 Mobile Debug - validateCollectionToken response', { data, error });
+        addDebugLog(`📡 Response: ${error ? 'ERROR: ' + error : 'SUCCESS'}`);
         
         if (error || !data) {
-          console.error('❌ Mobile Debug - Token validation failed', error);
+          addDebugLog('❌ Token validation failed: ' + error);
           setError(error || 'Invalid collection link');
         } else {
-          console.log('✅ Mobile Debug - Token validation success', data);
+          addDebugLog('✅ Token validation success');
           setTokenInfo(data);
         }
       } catch (err) {
-        console.error('💥 Mobile Debug - validateCollectionToken threw error', err);
+        addDebugLog('💥 validateCollectionToken error: ' + String(err));
         setError('Failed to validate collection link');
       }
       
@@ -226,8 +233,18 @@ export default function CollectionLandingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Mobile Debug Logs - Only show on mobile */}
+      {debugLogs.length > 0 && (
+        <div className="lg:hidden bg-black text-white text-xs p-2 fixed top-0 left-0 right-0 z-50 max-h-32 overflow-y-auto">
+          <div className="text-yellow-300 font-bold mb-1">🔍 Mobile Debug Logs:</div>
+          {debugLogs.map((log, index) => (
+            <div key={index} className="mb-1">{log}</div>
+          ))}
+        </div>
+      )}
+
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className={`bg-white border-b border-gray-200 ${debugLogs.length > 0 ? 'mt-32 lg:mt-0' : ''}`}>
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-center">
           <Link href="/" className="hover:opacity-80 transition-opacity">
             <Image
@@ -295,7 +312,7 @@ export default function CollectionLandingPage() {
                     value={firstName}
                     onChange={(e) => {
                       const value = e.target.value.slice(0, 1).toUpperCase();
-                      console.log('Mobile Debug - firstName changed:', value);
+                      addDebugLog(`✏️ firstName: ${value}`);
                       setFirstName(value);
                     }}
                     placeholder=""
@@ -315,7 +332,7 @@ export default function CollectionLandingPage() {
                     value={lastName}
                     onChange={(e) => {
                       const value = e.target.value;
-                      console.log('Mobile Debug - lastName changed:', value);
+                      addDebugLog(`✏️ lastName: ${value}`);
                       setLastName(value);
                     }}
                     placeholder=""
@@ -326,7 +343,7 @@ export default function CollectionLandingPage() {
                 </div>
                 <Button 
                   onClick={() => {
-                    console.log('Mobile Debug - Search button clicked');
+                    addDebugLog('🔍 Search button clicked');
                     handleSearch();
                   }}
                   disabled={!firstName.trim() || searching}
