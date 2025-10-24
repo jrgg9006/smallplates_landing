@@ -190,7 +190,7 @@ export default function BooksPrinted() {
           <div className="flex-shrink-0">
             <button
               type="button"
-              className="inline-flex items-center justify-center rounded-full bg-orange-600 text-white px-8 py-4 text-lg font-semibold shadow-sm hover:bg-orange-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-600 transition-colors"
+              className="inline-flex items-center justify-center rounded-2xl bg-smallplates_red text-white px-8 py-4 text-lg font-semibold shadow-sm hover:bg-orange-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-600 transition-colors"
             >
               CREATE YOURS FOR $120
             </button>

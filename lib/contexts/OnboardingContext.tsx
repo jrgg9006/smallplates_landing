@@ -100,11 +100,13 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         }
 
         // Save onboarding answers to database
-        const saveResult = await saveOnboardingData(user.id, state.answers);
-        
-        if (saveResult.error) {
-          console.error('Failed to save onboarding data:', saveResult.error);
-          // Continue anyway - don't block the user flow
+        if (user) {
+          const saveResult = await saveOnboardingData(user.id, state.answers);
+          
+          if (saveResult.error) {
+            console.error('Failed to save onboarding data:', saveResult.error);
+            // Continue anyway - don't block the user flow
+          }
         }
 
         // Mark onboarding as complete

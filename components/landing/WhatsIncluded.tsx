@@ -13,7 +13,7 @@ export default function WhatsIncluded() {
   ];
 
   return (
-    <section className="bg-emerald-900 py-16 md:py-20">
+    <section className="bg-smallplates_green py-16 md:py-20">
       <div className="mx-auto max-w-7xl px-6 md:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-start">
           
@@ -22,14 +22,14 @@ export default function WhatsIncluded() {
             <h2 className="font-serif text-4xl sm:text-5xl md:text-4xl lg:text-5xl font-medium text-white mb-4 leading-tight">
               What&apos;s included in your Small Plates & Co. experience?
             </h2>
-            <p className="text-lg md:text-xl text-emerald-100 mb-4 leading-relaxed">
+            <p className="text-lg md:text-xl text-emerald-100 mb-10 leading-relaxed">
               
             </p>
             
             {/* CTA Button */}
             <button
               type="button"
-              className="inline-flex items-center justify-center rounded-full bg-orange-600 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:bg-orange-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-600 transition-colors"
+              className="inline-flex items-center justify-center rounded-2xl bg-smallplates_red text-white px-8 py-4 text-lg font-semibold shadow-lg hover:bg-orange-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-600 transition-colors"
             >
               CREATE YOURS FOR $120
             </button>

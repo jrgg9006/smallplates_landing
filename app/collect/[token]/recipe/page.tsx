@@ -119,33 +119,10 @@ export default function RecipeFormPage() {
     );
   }
 
-  // Main journey experience
+  // Main journey experience - fullscreen like onboarding
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <button
-            onClick={handleBack}
-            className="flex items-center space-x-2 text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            <ChevronLeft className="h-5 w-5" />
-            <span className="text-sm font-medium">Back</span>
-          </button>
-          <Link href="/" className="hover:opacity-80 transition-opacity">
-            <Image
-              src="/images/SmallPlates_logo_horizontal.png"
-              alt="Small Plates & Co"
-              width={200}
-              height={40}
-              priority
-            />
-          </Link>
-          <div className="w-16"></div>
-        </div>
-      </div>
-
-      {/* Recipe Journey */}
+    <div className="min-h-screen bg-white">
+      {/* Recipe Journey - No header, fullscreen */}
       <RecipeJourneyWrapper
         tokenInfo={tokenInfo}
         guestData={guestData}

@@ -53,10 +53,26 @@ export default function CollectionLandingPage() {
   const router = useRouter();
   const token = params.token as string;
   
+  // Mobile debugging - log component mount
+  useEffect(() => {
+    console.log('🔥 CollectionLandingPage mounted on mobile', {
+      userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
+      token,
+      timestamp: new Date().toISOString()
+    });
+  }, [token]);
+  
   // State management
   const [tokenInfo, setTokenInfo] = useState<CollectionTokenInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [debugLogs, setDebugLogs] = useState<string[]>([]);
+  
+  // Mobile debugging - console and visual logs
+  const addDebugLog = (message: string) => {
+    console.log(message);
+    setDebugLogs(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
+  };
   
   // Guest search state
   const [firstName, setFirstName] = useState('');
@@ -69,21 +85,35 @@ export default function CollectionLandingPage() {
   // Validate token on component mount
   useEffect(() => {
     async function validateToken() {
+      console.log('🔍 Mobile Debug - validateToken starting', { token });
+      
       if (!token) {
+        console.error('❌ Mobile Debug - No token provided');
         setError('No collection link provided');
         setLoading(false);
         return;
       }
 
-      const { data, error } = await validateCollectionToken(token);
-      
-      if (error || !data) {
-        setError(error || 'Invalid collection link');
-      } else {
-        setTokenInfo(data);
+      try {
+        addDebugLog('📡 Calling validateCollectionToken');
+        const { data, error } = await validateCollectionToken(token);
+        
+        addDebugLog(`📡 Response: ${error ? 'ERROR: ' + error : 'SUCCESS'}`);
+        
+        if (error || !data) {
+          addDebugLog('❌ Token validation failed: ' + error);
+          setError(error || 'Invalid collection link');
+        } else {
+          addDebugLog('✅ Token validation success');
+          setTokenInfo(data);
+        }
+      } catch (err) {
+        addDebugLog('💥 validateCollectionToken error: ' + String(err));
+        setError('Failed to validate collection link');
       }
       
       setLoading(false);
+      console.log('🏁 Mobile Debug - validateToken completed');
     }
 
     validateToken();
@@ -173,7 +203,7 @@ export default function CollectionLandingPage() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading collection...</p>
@@ -185,7 +215,7 @@ export default function CollectionLandingPage() {
   // Error state
   if (error && !tokenInfo) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <Card className="max-w-md mx-auto">
           <CardContent className="pt-6">
             <div className="text-center">
@@ -194,6 +224,19 @@ export default function CollectionLandingPage() {
               <p className="text-sm text-gray-500">
                 Please check the link or contact the person who shared it with you.
               </p>
+              
+              {/* Debug info for troubleshooting */}
+              <div className="mt-4 p-4 bg-gray-100 rounded text-left text-sm">
+                <p><strong>Debug Info:</strong></p>
+                <p>Token: {token}</p>
+                <p>Error: {error}</p>
+                <p>Debug Logs:</p>
+                <div className="max-h-40 overflow-y-auto bg-gray-50 p-2 rounded">
+                  {debugLogs.map((log, index) => (
+                    <div key={index} className="text-xs font-mono">{log}</div>
+                  ))}
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -202,7 +245,7 @@ export default function CollectionLandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-center">
@@ -272,7 +315,7 @@ export default function CollectionLandingPage() {
                     value={firstName}
                     onChange={(e) => {
                       const value = e.target.value.slice(0, 1).toUpperCase();
-                      console.log('Mobile Debug - firstName changed:', value);
+                      addDebugLog(`✏️ firstName: ${value}`);
                       setFirstName(value);
                     }}
                     placeholder=""
@@ -292,7 +335,7 @@ export default function CollectionLandingPage() {
                     value={lastName}
                     onChange={(e) => {
                       const value = e.target.value;
-                      console.log('Mobile Debug - lastName changed:', value);
+                      addDebugLog(`✏️ lastName: ${value}`);
                       setLastName(value);
                     }}
                     placeholder=""
@@ -303,7 +346,7 @@ export default function CollectionLandingPage() {
                 </div>
                 <Button 
                   onClick={() => {
-                    console.log('Mobile Debug - Search button clicked');
+                    addDebugLog('🔍 Search button clicked');
                     handleSearch();
                   }}
                   disabled={!firstName.trim() || searching}
@@ -362,7 +405,7 @@ export default function CollectionLandingPage() {
                         className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors text-left"
                       >
                         <span className="text-gray-900 font-medium">
-                          I don't see my name
+                          I don&apos;t see my name
                         </span>
                         <svg 
                           className="w-5 h-5 text-gray-400" 
@@ -378,15 +421,15 @@ export default function CollectionLandingPage() {
                 ) : (
                   <div className="space-y-4">
                     <h3 className="text-lg font-medium text-gray-900">
-                      Welcome! You're not in the list yet
+                      Welcome! You&apos;re not in the list yet
                     </h3>
                     <p className="text-gray-600 mb-4">
-                      No worries! We'll add you when you submit your recipe.
+                      No worries! We&apos;ll add you when you submit your recipe.
                       {lastName.trim() && (
-                        <span> We'll use <strong>{firstName} {lastName}</strong> as your name.</span>
+                        <span> We&apos;ll use <strong>{firstName} {lastName}</strong> as your name.</span>
                       )}
                       {!lastName.trim() && (
-                        <span> We'll use <strong>{firstName}</strong> as your name.</span>
+                        <span> We&apos;ll use <strong>{firstName}</strong> as your name.</span>
                       )}
                     </p>
                     <button
@@ -412,7 +455,7 @@ export default function CollectionLandingPage() {
               {/* Instructions */}
               <div className="text-center text-sm text-gray-500 mt-6">
                 <p>
-                  After finding yourself, you'll be able to submit your favorite recipe 
+                  After finding yourself, you&apos;ll be able to submit your favorite recipe 
                   to be included in the collection.
                 </p>
               </div>

@@ -20,6 +20,27 @@ export async function validateCollectionToken(token: string): Promise<{ data: Co
   const supabase = createSupabaseClient();
   
   try {
+    console.log('🔍 Validating token:', token);
+    
+    // First, let's check if the token exists at all (without collection_enabled filter)
+    const { data: profileCheck, error: checkError } = await supabase
+      .from('profiles')
+      .select('id, full_name, collection_enabled, collection_link_token')
+      .eq('collection_link_token', token)
+      .single();
+    
+    console.log('📊 Profile check result:', { profileCheck, checkError });
+    
+    if (checkError) {
+      console.log('❌ Token not found in database:', checkError.message);
+      return { data: null, error: 'Invalid or expired collection link' };
+    }
+    
+    if (!profileCheck.collection_enabled) {
+      console.log('❌ Collection disabled for this user');
+      return { data: null, error: 'Collection is disabled for this user' };
+    }
+
     const { data: profile, error } = await supabase
       .from('profiles')
       .select('id, full_name, collection_enabled')
@@ -28,6 +49,7 @@ export async function validateCollectionToken(token: string): Promise<{ data: Co
       .single();
 
     if (error || !profile) {
+      console.log('❌ Final validation failed:', error);
       return { data: null, error: 'Invalid or expired collection link' };
     }
 
