@@ -209,15 +209,15 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
         </div>
       )}
       
-      <div className="overflow-hidden rounded-lg border">
-        <table className="w-full border-collapse bg-background">
-          <thead className="bg-muted/50">
+      <div className="overflow-hidden">
+        <table className="w-full border-collapse bg-white">
+          <thead className="bg-gray-50">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
+                    className="px-8 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
                     {header.isPlaceholder
                       ? null
@@ -230,20 +230,20 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
               </tr>
             ))}
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody className="divide-y divide-gray-100">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-muted/50 cursor-pointer"
+                  className="hover:bg-gray-50 cursor-pointer transition-colors duration-200"
                   onClick={(e: React.MouseEvent<HTMLTableRowElement>) => {
                     e.preventDefault();
                     handleGuestClick(row.original);
                   }}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
+                    <td key={cell.id} className="px-8 py-6 whitespace-nowrap">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -256,7 +256,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="h-24 text-center text-muted-foreground"
+                  className="h-24 text-center text-gray-500 px-8 py-6"
                 >
                   No guests found.
                 </td>
@@ -267,7 +267,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
       </div>
 
       <div className="flex items-center justify-between py-4">
-        <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-gray-500">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} guest(s) selected.
         </div>
@@ -280,7 +280,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-gray-500">
             Page {table.getState().pagination.pageIndex + 1} of{" "}
             {table.getPageCount()}
           </span>
