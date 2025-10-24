@@ -15,8 +15,6 @@ import { ProgressBar } from "@/components/profile/ProgressBar";
 import { getUserProgress, UserProgress } from "@/lib/supabase/progress";
 import ProfileDropdown from "@/components/profile/ProfileDropdown";
 import { Bell } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 export default function ProfilePage() {
   const { user, loading } = useAuth();
@@ -90,7 +88,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-stone-50 text-gray-700">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-6">
@@ -134,7 +132,7 @@ export default function ProfilePage() {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Title Section */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-serif font-bold text-gray-900 mb-8">
+          <h1 className="text-5xl font-serif font-medium text-gray-900 mb-8">
             Your Cookbook is Cooking...
           </h1>
         </div>
@@ -166,16 +164,13 @@ export default function ProfilePage() {
         <GuestTableControls
           searchValue={searchValue}
           onSearchChange={setSearchValue}
-          onFilterChange={setStatusFilter}
           onAddGuest={handleAddGuest}
         />
 
         {/* Guest Table */}
-        <Card>
-          <CardContent className="p-0">
-            <GuestTable key={refreshTrigger} searchValue={searchValue} statusFilter={statusFilter} />
-          </CardContent>
-        </Card>
+        <div>
+          <GuestTable key={refreshTrigger} searchValue={searchValue} statusFilter={statusFilter} />
+        </div>
 
 
         {/* Add Guest Modal */}

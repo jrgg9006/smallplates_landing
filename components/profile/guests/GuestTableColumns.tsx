@@ -104,7 +104,7 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
         <Button
           variant="ghost"
           size="icon"
-          className={`h-8 w-8 ${!hasContactInfo ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`h-10 w-10 ${!hasContactInfo ? 'opacity-50 cursor-not-allowed' : ''}`}
           onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
             if (hasContactInfo) {
@@ -115,12 +115,12 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
           aria-label={hasContactInfo ? "Send message" : "No contact info available"}
           title={hasContactInfo ? "Send message" : "No contact info available"}
         >
-          <Mail className="h-4 w-4" />
+          <Mail className="h-6 w-6" />
         </Button>
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8"
+          className="h-10 w-10"
           onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
             if (onAddRecipe) {
@@ -130,12 +130,12 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
           aria-label="Add recipe"
           title="Add recipe"
         >
-          <ArrowUp className="h-4 w-4" />
+          <ArrowUp className="h-6 w-6" />
         </Button>
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8"
+          className="h-10 w-10"
           onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
             setShowDeleteModal(true);
@@ -143,7 +143,7 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
           aria-label="Delete guest"
           title="Delete guest"
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-6 w-6" />
         </Button>
       </div>
 
@@ -172,7 +172,7 @@ export const columns: ColumnDef<Guest>[] = [
         type="checkbox"
         checked={table.getIsAllPageRowsSelected()}
         onChange={(e) => table.toggleAllPageRowsSelected(e.target.checked)}
-        className="h-4 w-4 rounded border-gray-300 text-black focus:ring-2 focus:ring-black focus:ring-offset-2"
+        className="h-4 w-4 rounded border-gray-200 text-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
         aria-label="Select all"
       />
     ),
@@ -182,7 +182,7 @@ export const columns: ColumnDef<Guest>[] = [
         checked={row.getIsSelected()}
         onChange={(e) => row.toggleSelected(e.target.checked)}
         onClick={(e: React.MouseEvent<HTMLInputElement>) => e.stopPropagation()}
-        className="h-4 w-4 rounded border-gray-300 text-black focus:ring-2 focus:ring-black focus:ring-offset-2"
+        className="h-4 w-4 rounded border-gray-200 text-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
         aria-label="Select row"
       />
     ),
@@ -196,34 +196,34 @@ export const columns: ColumnDef<Guest>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="h-auto p-0 font-medium"
+          className="h-auto p-0 hover:bg-transparent border-0 shadow-none table-header-style justify-start"
         >
-          Name
-          <ArrowUpDown className="ml-1 h-4 w-4" />
+          <span className="table-header-style">Name</span>
+          <ArrowUpDown className="ml-2 h-3 w-3 text-white opacity-70" />
         </Button>
       );
     },
     cell: ({ row }) => {
       const guest = row.original;
       const fullName = `${guest.first_name} ${guest.last_name || ''}`.trim();
-      return <div className="font-medium">{fullName}</div>;
+      return <div className="font-normal text-lg">{fullName}</div>;
     },
   },
   {
     id: "contact",
-    header: "Email & Phone",
+    header: () => <div className="table-header-style">Email & Phone</div>,
     cell: ({ row }) => {
       const guest = row.original;
       return (
         <div className="space-y-1">
-          <div className="text-xs">
+          <div className="text-normal">
             {guest.email && guest.email.trim() ? (
               guest.email
             ) : (
               <span className="text-red-500">No email</span>
             )}
           </div>
-          <div className="text-xs">
+          <div className="text-small">
             {guest.phone && guest.phone.trim() ? (
               <span className="text-gray-500">{guest.phone}</span>
             ) : (
@@ -236,7 +236,7 @@ export const columns: ColumnDef<Guest>[] = [
   },
   {
     accessorKey: "status",
-    header: "Recipe Status",
+    header: () => <div className="table-header-style">Recipe Status</div>,
     cell: ({ row }) => {
       return <StatusBadge status={row.getValue("status")} />;
     },

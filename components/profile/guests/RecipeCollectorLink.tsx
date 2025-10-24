@@ -104,7 +104,7 @@ export function RecipeCollectorLink({ userId }: RecipeCollectorLinkProps) {
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">Your Recipe Collector</CardTitle>
+          <CardTitle className="text-xl font-normal">Your Recipe Collector</CardTitle>
           <Button 
             variant="link" 
             className="p-0 h-auto text-sm"
@@ -131,7 +131,7 @@ export function RecipeCollectorLink({ userId }: RecipeCollectorLinkProps) {
             onClick={handleCopyLink}
             variant="default"
             size="lg"
-            className="bg-black text-white hover:bg-gray-800 px-8"
+            className="bg-smallplates_red font-normal text-white hover:bg-smallplates_red/90 px-8 text-lg"
             disabled={!collectorLink}
           >
             <LinkIcon className="h-4 w-4 mr-2" />

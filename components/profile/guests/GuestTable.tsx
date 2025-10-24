@@ -208,8 +208,8 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
           Loading guests...
         </div>
       )}
-      
-      <div className="overflow-hidden">
+      {/* THIS HAS THE COLOR OF THE TABLE HEADER */}
+      <div className="overflow-hidden rounded-xl shadow-sm border border-gray-100">
         <table className="w-full border-collapse bg-white">
           <thead className="bg-gray-50">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -217,7 +217,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="px-8 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-8 py-5 text-left tracking-wide"
                   >
                     {header.isPlaceholder
                       ? null
@@ -230,13 +230,13 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
               </tr>
             ))}
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-60">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-gray-50 cursor-pointer transition-colors duration-200"
+                  className="hover:bg-gray-25 hover:bg-[#FCFCFC] cursor-pointer transition-colors duration-200"
                   onClick={(e: React.MouseEvent<HTMLTableRowElement>) => {
                     e.preventDefault();
                     handleGuestClick(row.original);
@@ -267,7 +267,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
       </div>
 
       <div className="flex items-center justify-between py-4">
-        <div className="text-sm text-gray-500">
+        <div className="text-normal text-gray-500">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} guest(s) selected.
         </div>

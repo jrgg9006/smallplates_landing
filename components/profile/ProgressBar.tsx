@@ -61,7 +61,7 @@ export function ProgressBar({ current, goal, loading = false }: ProgressBarProps
           <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
             {/* Progress fill */}
             <div 
-              className="bg-gradient-to-r from-gray-800 to-black h-2 rounded-full transition-all duration-500 ease-out"
+              className="bg-gradient-to-r from-smallplates_darkblue to-smallplates_green h-2 rounded-full transition-all duration-900 ease-out"
               style={{ width: `${progressPercentage}%` }}
             >
               {/* Subtle shine effect */}
