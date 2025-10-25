@@ -19,6 +19,7 @@ import { columns } from "./GuestTableColumns";
 import { Button } from "@/components/ui/button";
 import { GuestDetailsModal } from "./GuestDetailsModal";
 import { AddGuestModal } from "./AddGuestModal";
+import { MobileGuestCard } from "./MobileGuestCard";
 
 interface GuestTableProps {
   searchValue?: string; // External search value
@@ -208,74 +209,111 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
 
   return (
     <div className="w-full">
+      {/* Loading State */}
       {loading && (
         <div className="w-full p-4 text-center text-muted-foreground">
           Loading guests...
         </div>
       )}
-      <div className="overflow-hidden rounded-lg border border-gray-200">
-        <table className="w-full border-collapse bg-white">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className="px-8 py-5 text-left tracking-wide"
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-gray-50 cursor-pointer transition-colors duration-200"
-                  onClick={(e: React.MouseEvent<HTMLTableRowElement>) => {
-                    e.preventDefault();
-                    handleGuestClick(row.original);
-                  }}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-8 py-6 whitespace-nowrap">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
+
+      {/* Desktop Table Layout */}
+      <div className="hidden md:block">
+        <div className="overflow-hidden rounded-lg border border-gray-200">
+          <table className="w-full border-collapse bg-white">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className="px-8 py-5 text-left tracking-wide"
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </th>
                   ))}
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  className="h-24 text-center text-gray-500 px-8 py-6"
-                >
-                  No guests found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              ))}
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="hover:bg-gray-50 cursor-pointer transition-colors duration-200"
+                    onClick={(e: React.MouseEvent<HTMLTableRowElement>) => {
+                      e.preventDefault();
+                      handleGuestClick(row.original);
+                    }}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-8 py-6 whitespace-nowrap">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    className="h-24 text-center text-gray-500 px-8 py-6"
+                  >
+                    No guests found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div className="flex items-center justify-between py-4">
-        <div className="text-normal text-gray-500">
+      {/* Mobile Cards Layout */}
+      <div className="md:hidden">
+        {table.getRowModel().rows?.length ? (
+          <div className="space-y-3">
+            {table.getRowModel().rows.map((row) => (
+              <MobileGuestCard
+                key={row.id}
+                guest={row.original}
+                onModalClose={() => {
+                  console.log('Modal close triggered from mobile card, setting both flags to true');
+                  setIsModalClosing(true);
+                  isModalClosingRef.current = true;
+                  setTimeout(() => {
+                    console.log('Resetting both flags to false from mobile card');
+                    setIsModalClosing(false);
+                    isModalClosingRef.current = false;
+                  }, 500);
+                }}
+                onGuestDeleted={refreshData}
+                onAddRecipe={handleAddRecipe}
+                onRowClick={handleGuestClick}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white border border-gray-200 rounded-lg p-8 text-center text-gray-500">
+            No guests found.
+          </div>
+        )}
+      </div>
+
+      {/* Pagination - Responsive */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
+        <div className="text-sm text-gray-500 order-2 sm:order-1">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} guest(s) selected.
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 order-1 sm:order-2">
           <Button
             variant="outline"
             size="sm"
@@ -284,7 +322,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 px-2">
             Page {table.getState().pagination.pageIndex + 1} of{" "}
             {table.getPageCount()}
           </span>
@@ -299,6 +337,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
         </div>
       </div>
 
+      {/* Modals */}
       <GuestDetailsModal
         guest={selectedGuest}
         isOpen={isModalOpen}
