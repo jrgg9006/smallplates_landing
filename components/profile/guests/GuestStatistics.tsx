@@ -43,7 +43,7 @@ export function GuestStatisticsComponent({}: GuestStatisticsProps = {}) {
   // Show loading state
   if (loading) {
     return (
-      <div className="bg-gray-50 rounded-xl p-6 h-full flex items-center justify-center">
+      <div className="bg-gray-50 rounded-lg p-6 h-[88px] flex items-center justify-center w-full">
         <div className="text-sm text-gray-600">Loading statistics...</div>
       </div>
     );
@@ -52,7 +52,7 @@ export function GuestStatisticsComponent({}: GuestStatisticsProps = {}) {
   // Show error state
   if (error) {
     return (
-      <div className="bg-red-50 rounded-xl p-6 h-full flex items-center justify-center">
+      <div className="bg-red-50 rounded-lg p-6 h-[88px] flex items-center justify-center w-full">
         <div className="text-sm text-red-600">Error: {error}</div>
       </div>
     );
@@ -61,7 +61,7 @@ export function GuestStatisticsComponent({}: GuestStatisticsProps = {}) {
   // Show no data state
   if (!stats) {
     return (
-      <div className="bg-gray-50 rounded-xl p-6 h-full flex items-center justify-center">
+      <div className="bg-gray-50 rounded-lg p-6 h-[88px] flex items-center justify-center w-full">
         <div className="text-sm text-gray-600">No data available</div>
       </div>
     );
@@ -82,9 +82,9 @@ export function GuestStatisticsComponent({}: GuestStatisticsProps = {}) {
   ];
 
   return (
-    <div className="bg-gray-50 rounded-lg flex w-fit max-w-full overflow-hidden h-[88px]">
+    <div className="bg-gray-50 rounded-lg flex w-full overflow-hidden h-[88px]">
       {statItems.map((stat, index) => (
-        <div key={index} className="px-4 sm:px-6 py-6 text-center relative min-w-[100px] sm:min-w-[120px] flex flex-col justify-center">
+        <div key={index} className="flex-1 px-4 sm:px-6 py-6 text-center relative flex flex-col justify-center">
           <div className="text-lg sm:text-xl font-bold text-gray-900 mb-1">
             {stat.value}
           </div>

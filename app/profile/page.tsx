@@ -21,6 +21,7 @@ export default function ProfilePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -44,6 +45,28 @@ export default function ProfilePage() {
     setRefreshTrigger(prev => prev + 1);
     loadProgressData(); // Reload progress when guest is added
     loadGuestCounts(); // Reload guest counts when guest is added
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleLogout = () => {
+    // Add logout logic here
+    setIsMobileMenuOpen(false);
+    router.push('/');
+  };
+
+  const handleAccount = () => {
+    // Add account logic here
+    setIsMobileMenuOpen(false);
+    console.log('Account clicked');
+  };
+
+  const handleNotifications = () => {
+    // Add notifications logic here  
+    setIsMobileMenuOpen(false);
+    console.log('Notifications clicked');
   };
 
   // Load user progress data
@@ -132,9 +155,12 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-white text-gray-700">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          {/* Logo - Clickable to go back to landing */}
-          <Link href="/" className="hover:opacity-80 transition-opacity">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between lg:justify-between">
+          {/* Mobile: Empty space for balance */}
+          <div className="w-10 lg:w-auto"></div>
+          
+          {/* Logo - Centered on mobile, left on desktop */}
+          <Link href="/" className="hover:opacity-80 transition-opacity lg:absolute lg:left-6">
             <Image
               src="/images/SmallPlates_logo_horizontal.png"
               alt="Small Plates & Co."
@@ -145,7 +171,8 @@ export default function ProfilePage() {
             />
           </Link>
           
-          <div className="flex items-center gap-3">
+          {/* Desktop: Notification Bell + Profile */}
+          <div className="hidden lg:flex items-center gap-3">
             {/* Notification Bell */}
             <button
               className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
@@ -160,6 +187,67 @@ export default function ProfilePage() {
             
             <ProfileDropdown />
           </div>
+
+          {/* Mobile: Burger Menu */}
+          <div className="lg:hidden relative">
+            <button
+              onClick={toggleMobileMenu}
+              className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label="Menu"
+            >
+              <svg 
+                className="h-6 w-6 text-gray-600" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
+            {/* Mobile Menu Dropdown */}
+            {isMobileMenuOpen && (
+              <div className="absolute right-0 top-12 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                <button
+                  onClick={handleNotifications}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                >
+                  <Bell className="h-4 w-4" />
+                  Notifications
+                  <span className="ml-auto h-4 w-4 bg-red-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs">1</span>
+                  </span>
+                </button>
+                <button
+                  onClick={handleAccount}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  Account
+                </button>
+                <hr className="my-2 border-gray-200" />
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Logout
+                </button>
+              </div>
+            )}
+
+            {/* Overlay to close menu when clicking outside */}
+            {isMobileMenuOpen && (
+              <div 
+                className="fixed inset-0 z-40" 
+                onClick={() => setIsMobileMenuOpen(false)}
+              ></div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -168,16 +256,16 @@ export default function ProfilePage() {
         {/* Hero Section */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-            {/* Title section with divider - horizontal on desktop, vertical on mobile */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:gap-8 mb-4 lg:mb-0">
+            {/* Title section with divider - centered on mobile */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:gap-8 mb-4 lg:mb-0 text-center lg:text-left">
               <h1 className="text-4xl lg:text-5xl font-serif font-bold text-gray-900">Guest List</h1>
               {/* Vertical divider - only show on desktop */}
               <div className="hidden lg:block h-10 w-px bg-gray-300"></div>
               <p className="text-xl lg:text-4xl text-gray-600 font-serif-display mt-1 lg:mt-0">Your Cookbook is Cooking...</p>
             </div>
             
-            {/* Right side - Progress bar */}
-            <div className="flex-shrink-0">
+            {/* Right side - Progress bar - centered on mobile */}
+            <div className="flex-shrink-0 flex justify-center lg:justify-end">
               <ProgressBar 
                 current={progressData?.current_recipes || 0}
                 goal={progressData?.goal_recipes || 40}
@@ -188,9 +276,13 @@ export default function ProfilePage() {
         </div>
 
         {/* Statistics and Recipe Collector Section */}
-        <div className="mb-8 flex flex-col lg:flex-row gap-4 lg:gap-8 items-start">
-          <GuestStatisticsComponent />
-          <RecipeCollectorLink />
+        <div className="mb-8 flex flex-col lg:flex-row gap-4 lg:gap-8 items-stretch">
+          <div className="flex-1">
+            <GuestStatisticsComponent />
+          </div>
+          <div className="flex-1">
+            <RecipeCollectorLink />
+          </div>
         </div>
 
         {/* Guest Table Controls */}
