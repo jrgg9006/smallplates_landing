@@ -25,7 +25,8 @@ export async function addGuest(formData: GuestFormData) {
     user_id: user.id,
     first_name: formData.first_name,
     last_name: formData.last_name || '', // Provide empty string if no last name
-    email: formData.email || '', // Provide empty string if no email
+    printed_name: formData.printed_name,
+    email: formData.email || 'NO_EMAIL_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9), // Generate unique placeholder for no email
     phone: formData.phone,
     significant_other_name: formData.significant_other_name,
     number_of_recipes: formData.number_of_recipes || 1,
@@ -43,15 +44,21 @@ export async function addGuest(formData: GuestFormData) {
 }
 
 /**
- * Get all guests for the current user
+ * Get all guests for the current user, ordered by recipe submission date
+ * Guests with recipes appear first (by most recent recipe date), then guests without recipes (by creation date)
  */
 export async function getGuests(includeArchived = false): Promise<{ data: Guest[] | null; error: string | null }> {
   const supabase = createSupabaseClient();
   
+  // Get guests with their recipes using a left join
   let query = supabase
     .from('guests')
-    .select('*')
-    .order('created_at', { ascending: false });
+    .select(`
+      *,
+      guest_recipes (
+        created_at
+      )
+    `);
 
   if (!includeArchived) {
     query = query.eq('is_archived', false);
@@ -59,7 +66,49 @@ export async function getGuests(includeArchived = false): Promise<{ data: Guest[
 
   const { data, error } = await query;
 
-  return { data, error: error?.message || null };
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  // Process the data to apply custom sorting
+  const processedData = data?.map(guest => {
+    // Remove the nested guest_recipes from the main object
+    const { guest_recipes, ...guestData } = guest;
+    return {
+      ...guestData,
+      latest_recipe_date: guest_recipes && guest_recipes.length > 0 
+        ? Math.max(...guest_recipes.map((r: any) => new Date(r.created_at).getTime()))
+        : null
+    };
+  }) || [];
+
+  // Sort with custom logic: recipes first (by latest recipe date), then by creation date
+  const sortedData = processedData.sort((a, b) => {
+    const aHasRecipes = a.latest_recipe_date !== null;
+    const bHasRecipes = b.latest_recipe_date !== null;
+    
+    // If both have recipes or both don't have recipes
+    if (aHasRecipes === bHasRecipes) {
+      if (aHasRecipes) {
+        // Both have recipes - sort by latest recipe date (newest first)
+        return (b.latest_recipe_date || 0) - (a.latest_recipe_date || 0);
+      } else {
+        // Both don't have recipes - sort by creation date (newest first)
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+    }
+    
+    // One has recipes, one doesn't - recipes first
+    return aHasRecipes ? -1 : 1;
+  });
+
+  // Remove the temporary latest_recipe_date field
+  const finalData = sortedData.map(guest => {
+    const { latest_recipe_date, ...finalGuest } = guest;
+    return finalGuest;
+  });
+
+  return { data: finalData, error: null };
 }
 
 /**
@@ -140,7 +189,8 @@ export async function deleteGuest(guestId: string) {
 }
 
 /**
- * Search guests using the database function
+ * Search guests using the database function with custom ordering
+ * Applies the same ordering as getGuests: recipes first (by latest recipe date), then by creation date
  */
 export async function searchGuests(filters: GuestSearchFilters) {
   const supabase = createSupabaseClient();
@@ -150,6 +200,7 @@ export async function searchGuests(filters: GuestSearchFilters) {
     return { data: null, error: 'User not authenticated' };
   }
 
+  // First get the search results
   const { data, error } = await supabase.rpc('search_guests', {
     user_uuid: user.id,
     search_query: filters.search_query || null,
@@ -157,7 +208,63 @@ export async function searchGuests(filters: GuestSearchFilters) {
     include_archived: filters.include_archived || false,
   });
 
-  return { data, error: error?.message || null };
+  if (error || !data) {
+    return { data, error: error?.message || null };
+  }
+
+  // Now get the recipe data for each guest to apply proper sorting
+  const guestIds = data.map((guest: any) => guest.id);
+  
+  if (guestIds.length === 0) {
+    return { data, error: null };
+  }
+
+  // Get recipe data for all guests in the search results
+  const { data: recipesData, error: recipesError } = await supabase
+    .from('guest_recipes')
+    .select('guest_id, created_at')
+    .in('guest_id', guestIds);
+
+  if (recipesError) {
+    // If recipes query fails, return original data without custom sorting
+    return { data, error: null };
+  }
+
+  // Create a map of guest_id to latest recipe date
+  const recipeMap = new Map<string, number>();
+  if (recipesData) {
+    for (const recipe of recipesData) {
+      const recipeTime = new Date(recipe.created_at).getTime();
+      const currentLatest = recipeMap.get(recipe.guest_id) || 0;
+      if (recipeTime > currentLatest) {
+        recipeMap.set(recipe.guest_id, recipeTime);
+      }
+    }
+  }
+
+  // Sort the search results with the same logic as getGuests
+  const sortedData = data.sort((a: any, b: any) => {
+    const aLatestRecipe = recipeMap.get(a.id) || null;
+    const bLatestRecipe = recipeMap.get(b.id) || null;
+    const aHasRecipes = aLatestRecipe !== null;
+    const bHasRecipes = bLatestRecipe !== null;
+    
+    // If both have recipes or both don't have recipes
+    if (aHasRecipes === bHasRecipes) {
+      if (aHasRecipes) {
+        // Both have recipes - sort by latest recipe date (newest first)
+        return (bLatestRecipe || 0) - (aLatestRecipe || 0);
+      } else {
+        // Both don't have recipes - sort by creation date (newest first)
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+    }
+    
+    // One has recipes, one doesn't - recipes first
+    return aHasRecipes ? -1 : 1;
+  });
+
+  return { data: sortedData, error: null };
 }
 
 /**

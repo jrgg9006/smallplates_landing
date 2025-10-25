@@ -69,6 +69,6 @@
 
 @layer components {
   .table-header-style {
-    @apply font-normal text-gray-700 font-sans text-base;
+    @apply font-normal text-gray-900 font-sans text-base;
   }
 }

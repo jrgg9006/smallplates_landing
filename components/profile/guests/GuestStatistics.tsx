@@ -68,29 +68,35 @@ export function GuestStatisticsComponent({}: GuestStatisticsProps = {}) {
   }
   const statItems = [
     {
-      label: "Total Guests",
+      label: "Guests",
       value: stats.total_guests,
     },
     {
-      label: "Recipes Collected",
+      label: "Recipes Received",
       value: stats.recipes_received,
+    },
+    {
+      label: "Guests Pending to Send",
+      value: stats.pending_invitations || 0,
     },
   ];
 
   return (
-    <div className="flex justify-center">
-      <div className="grid grid-cols-2 gap-12 w-full max-w-md">
-        {statItems.map((stat, index) => (
-          <div key={index} className="text-center">
-            <div className="text-4xl font-normal text-gray-900 mb-2">
-              {stat.value}
-            </div>
-            <div className="text-sm text-gray-600 font-medium">
-              {stat.label}
-            </div>
+    <div className="bg-gray-50 rounded-lg flex w-fit max-w-full overflow-hidden h-[88px]">
+      {statItems.map((stat, index) => (
+        <div key={index} className="px-4 sm:px-6 py-6 text-center relative min-w-[100px] sm:min-w-[120px] flex flex-col justify-center">
+          <div className="text-lg sm:text-xl font-bold text-gray-900 mb-1">
+            {stat.value}
           </div>
-        ))}
-      </div>
+          <div className="text-xs text-gray-600 font-medium leading-tight">
+            {stat.label}
+          </div>
+          {/* Vertical divider - don't show after last item */}
+          {index < statItems.length - 1 && (
+            <div className="absolute right-0 top-1/2 transform -translate-y-1/2 h-6 w-px bg-gray-300"></div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

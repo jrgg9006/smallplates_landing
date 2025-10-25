@@ -12,21 +12,21 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Guest } from "@/lib/types/database";
 import { getGuests, searchGuests, getGuestsByStatus } from "@/lib/supabase/guests";
 import { columns } from "./GuestTableColumns";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { GuestDetailsModal } from "./GuestDetailsModal";
 import { AddGuestModal } from "./AddGuestModal";
 
 interface GuestTableProps {
   searchValue?: string; // External search value
   statusFilter?: string; // External status filter
+  onDataLoaded?: () => void; // Callback when data is loaded
 }
 
-export function GuestTable({ searchValue: externalSearchValue = '', statusFilter = 'all' }: GuestTableProps = {}) {
+export function GuestTable({ searchValue: externalSearchValue = '', statusFilter = 'all', onDataLoaded }: GuestTableProps = {}) {
   // Data management
   const [data, setData] = React.useState<Guest[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -101,6 +101,11 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
             
             setData(guests || []);
           }
+        }
+        
+        // Call the callback to update counts in parent component
+        if (onDataLoaded) {
+          onDataLoaded();
         }
       } catch (err) {
         setError('Failed to load guests');
@@ -208,10 +213,9 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
           Loading guests...
         </div>
       )}
-      {/* THIS HAS THE COLOR OF THE TABLE HEADER */}
-      <div className="overflow-hidden rounded-xl shadow-sm border border-gray-100">
+      <div className="overflow-hidden rounded-lg border border-gray-200">
         <table className="w-full border-collapse bg-white">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 border-b border-gray-200">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
@@ -230,13 +234,13 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
               </tr>
             ))}
           </thead>
-          <tbody className="divide-y divide-gray-60">
+          <tbody className="divide-y divide-gray-200">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-gray-25 hover:bg-[#FCFCFC] cursor-pointer transition-colors duration-200"
+                  className="hover:bg-gray-50 cursor-pointer transition-colors duration-200"
                   onClick={(e: React.MouseEvent<HTMLTableRowElement>) => {
                     e.preventDefault();
                     handleGuestClick(row.original);

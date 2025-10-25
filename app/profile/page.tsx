@@ -15,6 +15,7 @@ import { ProgressBar } from "@/components/profile/ProgressBar";
 import { getUserProgress, UserProgress } from "@/lib/supabase/progress";
 import ProfileDropdown from "@/components/profile/ProfileDropdown";
 import { Bell } from "lucide-react";
+import { getGuests } from "@/lib/supabase/guests";
 
 export default function ProfilePage() {
   const { user, loading } = useAuth();
@@ -25,6 +26,11 @@ export default function ProfilePage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [progressData, setProgressData] = useState<UserProgress | null>(null);
   const [progressLoading, setProgressLoading] = useState(true);
+  const [guestCounts, setGuestCounts] = useState<{all: number; pending: number; submitted: number}>({
+    all: 0,
+    pending: 0,
+    submitted: 0
+  });
 
   const handleAddGuest = () => {
     setIsAddModalOpen(true);
@@ -37,6 +43,7 @@ export default function ProfilePage() {
   const handleGuestAdded = () => {
     setRefreshTrigger(prev => prev + 1);
     loadProgressData(); // Reload progress when guest is added
+    loadGuestCounts(); // Reload guest counts when guest is added
   };
 
   // Load user progress data
@@ -61,6 +68,32 @@ export default function ProfilePage() {
     }
   };
 
+  // Load guest counts for tab badges
+  const loadGuestCounts = async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data: guests, error } = await getGuests(false);
+      
+      if (error) {
+        console.error('Error loading guest counts:', error);
+        return;
+      }
+
+      if (guests) {
+        const counts = {
+          all: guests.length,
+          pending: guests.filter(guest => guest.status === 'pending').length,
+          submitted: guests.filter(guest => guest.status === 'submitted').length,
+        };
+        console.log('Guest counts loaded:', counts); // Debug log
+        setGuestCounts(counts);
+      }
+    } catch (err) {
+      console.error('Error in loadGuestCounts:', err);
+    }
+  };
+
   useEffect(() => {
     // Redirect to home if not authenticated
     if (!loading && !user) {
@@ -72,8 +105,16 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user?.id) {
       loadProgressData();
+      loadGuestCounts();
     }
   }, [user?.id]);
+
+  // Reload guest counts when refreshTrigger changes
+  useEffect(() => {
+    if (user?.id) {
+      loadGuestCounts();
+    }
+  }, [refreshTrigger, user?.id]);
 
   if (loading) {
     return (
@@ -88,76 +129,68 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 text-gray-700">
+    <div className="min-h-screen bg-white text-gray-700">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-8">
-              {/* Logo - Clickable to go back to landing */}
-              <Link href="/" className="hover:opacity-80 transition-opacity">
-                <Image
-                  src="/images/SmallPlates_logo_horizontal.png"
-                  alt="Small Plates & Co."
-                  width={200}
-                  height={40}
-                  className="h-14 w-auto cursor-pointer"
-                />
-              </Link>
-              {/* Divider */}
-              <div className="h-10 w-px bg-gray-300" />
-              {/* Page Title */}
-              <h1 className="text-4xl font-serif font-semibold text-gray-900">Guest List</h1>
-            </div>
-            <div className="flex items-center gap-3">
-              {/* Notification Bell */}
-              <button
-                className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
-                aria-label="Notifications"
-              >
-                <Bell className="h-5 w-5 text-gray-600" />
-                {/* Notification Badge */}
-                <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs font-medium">1</span>
-                </span>
-              </button>
-              
-              <ProfileDropdown />
-            </div>
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          {/* Logo - Clickable to go back to landing */}
+          <Link href="/" className="hover:opacity-80 transition-opacity">
+            <Image
+              src="/images/SmallPlates_logo_horizontal.png"
+              alt="Small Plates & Co."
+              width={200}
+              height={40}
+              className="cursor-pointer"
+              priority
+            />
+          </Link>
+          
+          <div className="flex items-center gap-3">
+            {/* Notification Bell */}
+            <button
+              className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label="Notifications"
+            >
+              <Bell className="h-5 w-5 text-gray-600" />
+              {/* Notification Badge */}
+              <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-medium">1</span>
+              </span>
+            </button>
+            
+            <ProfileDropdown />
           </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Title Section */}
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-serif font-medium text-gray-900 mb-8">
-            Your Cookbook is Cooking...
-          </h1>
-        </div>
-
-        {/* Statistics Section - Centered */}
-        <div className="flex justify-center mb-8">
-          <div className="w-full max-w-2xl">
-            <GuestStatisticsComponent />
+        {/* Hero Section */}
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+            {/* Title section with divider - horizontal on desktop, vertical on mobile */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:gap-8 mb-4 lg:mb-0">
+              <h1 className="text-4xl lg:text-5xl font-serif font-bold text-gray-900">Guest List</h1>
+              {/* Vertical divider - only show on desktop */}
+              <div className="hidden lg:block h-10 w-px bg-gray-300"></div>
+              <p className="text-xl lg:text-4xl text-gray-600 font-serif-display mt-1 lg:mt-0">Your Cookbook is Cooking...</p>
+            </div>
+            
+            {/* Right side - Progress bar */}
+            <div className="flex-shrink-0">
+              <ProgressBar 
+                current={progressData?.current_recipes || 0}
+                goal={progressData?.goal_recipes || 40}
+                loading={progressLoading}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Progress Bar Section - Centered */}
-        <div className="flex justify-center mb-8">
-          <ProgressBar 
-            current={progressData?.current_recipes || 0}
-            goal={progressData?.goal_recipes || 40}
-            loading={progressLoading}
-          />
-        </div>
-
-        {/* Recipe Collector Section - Centered */}
-        <div className="flex justify-center mb-8">
-          <div className="w-full max-w-2xl">
-            <RecipeCollectorLink userId={user?.id} />
-          </div>
+        {/* Statistics and Recipe Collector Section */}
+        <div className="mb-8 flex flex-col lg:flex-row gap-4 lg:gap-8 items-start">
+          <GuestStatisticsComponent />
+          <RecipeCollectorLink />
         </div>
 
         {/* Guest Table Controls */}
@@ -165,11 +198,19 @@ export default function ProfilePage() {
           searchValue={searchValue}
           onSearchChange={setSearchValue}
           onAddGuest={handleAddGuest}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+          guestCounts={guestCounts}
         />
 
         {/* Guest Table */}
         <div>
-          <GuestTable key={refreshTrigger} searchValue={searchValue} statusFilter={statusFilter} />
+          <GuestTable 
+            key={refreshTrigger} 
+            searchValue={searchValue} 
+            statusFilter={statusFilter}
+            onDataLoaded={loadGuestCounts}
+          />
         </div>
 
 

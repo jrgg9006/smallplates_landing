@@ -9,66 +9,81 @@ interface GuestTableControlsProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
   onAddGuest: () => void;
+  statusFilter: string;
+  onStatusFilterChange: (status: string) => void;
+  guestCounts?: {
+    all: number;
+    pending: number;
+    submitted: number;
+  };
 }
 
 export function GuestTableControls({ 
   searchValue, 
   onSearchChange, 
-  onAddGuest 
+  onAddGuest,
+  statusFilter,
+  onStatusFilterChange,
+  guestCounts
 }: GuestTableControlsProps) {
-  const [activeToggle, setActiveToggle] = React.useState<string | null>(null);
-
-  const handleToggleClick = (toggleType: string) => {
-    // Visual toggle logic - set active state
-    setActiveToggle(activeToggle === toggleType ? null : toggleType);
-    // Note: This is visual-only for now, no query logic changes
-  };
 
   return (
     <div className="py-4">
-      {/* Single row with all controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      {/* Controls row */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-8">
+          {/* Tab Navigation */}
+          <div className="flex border-b border-gray-200">
+            <button
+              onClick={() => onStatusFilterChange('all')}
+              className={`pb-2 px-8 text-sm font-medium border-b-2 transition-colors ${
+                statusFilter === 'all'
+                  ? 'border-gray-900 text-gray-900'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              All {guestCounts && `(${guestCounts.all})`}
+            </button>
+            <button
+              onClick={() => onStatusFilterChange('pending')}
+              className={`pb-2 px-8 text-sm font-medium border-b-2 transition-colors ${
+                statusFilter === 'pending'
+                  ? 'border-gray-900 text-gray-900'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Pending {guestCounts && `(${guestCounts.pending})`}
+            </button>
+            <button
+              onClick={() => onStatusFilterChange('submitted')}
+              className={`pb-2 px-8 text-sm font-medium border-b-2 transition-colors ${
+                statusFilter === 'submitted'
+                  ? 'border-gray-900 text-gray-900'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Received {guestCounts && `(${guestCounts.submitted})`}
+            </button>
+          </div>
+          
           {/* Search Input */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
               placeholder="Search by name..."
               value={searchValue}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10 w-64 bg-white rounded-full border-gray-200"
+              className="pl-6 w-64 bg-transparent border-0 border-b border-gray-300 rounded-none focus:border-gray-900 focus:ring-0 pb-2"
             />
           </div>
-          
-          {/* Filter Toggle Buttons */}
-          <button
-            onClick={() => handleToggleClick('submitted')}
-            className={`px-6 py-2 rounded-full text-base font-medium transition-colors duration-200 ${
-              activeToggle === 'submitted'
-                ? 'bg-gray-900 text-green-500'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Recipe Submitted
-          </button>
-          <button
-            onClick={() => handleToggleClick('pending')}
-            className={`px-6 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
-              activeToggle === 'pending'
-                ? 'bg-gray-900 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Pending
-          </button>
         </div>
         
         <div className="flex items-center gap-2">
           <Button 
             onClick={onAddGuest}
-            className="bg-smallplates_green text-white hover:bg-gray-800 rounded-full px-6"
+            className="bg-teal-600 text-white hover:bg-teal-700 rounded-lg px-6"
           >
-            Add Guests & Recipes
+            Add Guests and Recipes
           </Button>
         </div>
       </div>

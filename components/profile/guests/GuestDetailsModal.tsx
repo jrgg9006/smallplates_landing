@@ -31,6 +31,7 @@ interface GuestDetailsModalProps {
 export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defaultTab = "guest-info" }: GuestDetailsModalProps) {
   const [firstName, setFirstName] = useState(guest?.first_name || '');
   const [lastName, setLastName] = useState(guest?.last_name || '');
+  const [printedName, setPrintedName] = useState(guest?.printed_name || '');
   const [email, setEmail] = useState(guest?.email || '');
   const [phone, setPhone] = useState(guest?.phone || '');
   const [loading, setLoading] = useState(false);
@@ -66,7 +67,8 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
     if (guest && isOpen) {
       setFirstName(guest.first_name);
       setLastName(guest.last_name);
-      setEmail(guest.email);
+      setPrintedName(guest.printed_name || '');
+      setEmail(guest.email?.startsWith('NO_EMAIL_') ? '' : guest.email);
       setPhone(guest.phone || '');
       setError(null); // Clear any previous errors
       setSuccessMessage(null); // Clear any previous success messages
@@ -99,7 +101,8 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
       const updates = {
         first_name: firstName.trim(),
         last_name: lastName.trim() || '',
-        email: email.trim() || '',
+        printed_name: printedName.trim() || null,
+        email: email.trim() || 'NO_EMAIL_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11),
         phone: phone.trim() || null,
       };
 
@@ -110,6 +113,25 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
         setError(error);
         setLoading(false);
         return;
+      }
+
+      // If recipe data is provided, add the recipe for the guest
+      if (recipeTitle || recipeInstructions || recipeSteps) {
+        const recipeData = {
+          recipe_name: recipeTitle || 'Untitled Recipe',
+          ingredients: recipeSteps || '',
+          instructions: recipeInstructions || '',
+          comments: recipeNotes || ''
+        };
+
+        const { error: recipeError } = await addRecipe(guest.id, recipeData);
+        
+        if (recipeError) {
+          console.error('Error adding recipe:', recipeError);
+          setError(recipeError);
+          setLoading(false);
+          return;
+        }
       }
 
       // Success! Close modal and refresh the guest list
@@ -193,7 +215,7 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
       case 'pending':
         return 'Pending';
       case 'submitted':
-        return 'Submitted';
+        return 'Received';
       case 'reached_out':
         return 'Reached Out';
       default:
@@ -206,7 +228,7 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
       case 'pending':
         return 'bg-gray-100 text-gray-700';
       case 'submitted':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-green-100 text-green-700';
       case 'reached_out':
         return 'bg-green-100 text-green-700';
       default:
@@ -265,8 +287,23 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
             </div>
             
             <div>
-              <button className="text-sm text-blue-600 hover:underline">+ Add Plus One</button>
+              <Label htmlFor="printedName" className="text-sm font-medium text-gray-600">Printed Name</Label>
+              <Input
+                id="printedName"
+                value={printedName}
+                onChange={(e) => setPrintedName(e.target.value)}
+                className="mt-1"
+                placeholder="How this person's name should appear in the book (e.g., 'Jaime y Nana', 'Chef Rodriguez')"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Leave empty to use first and last name. This is how the name will appear in the printed cookbook.
+              </p>
             </div>
+            
+            {/* Hidden temporarily - Plus One section */}
+            {/* <div>
+              <button className="text-sm text-blue-600 hover:underline">+ Add Plus One</button>
+            </div> */}
             
             <div>
               <Label className="text-sm font-medium text-gray-600">Status</Label>
@@ -431,17 +468,11 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
                     >
                       Add Image
                     </Button>
+                    <p className="text-xs text-gray-500 mt-2">
+                      This image will serve as inspiration to our image generator algorithms.
+                    </p>
                   </div>
                   
-                  <div className="pt-4">
-                    <Button 
-                      onClick={handleAddRecipe}
-                      disabled={savingRecipe}
-                      className="bg-black text-white hover:bg-gray-800 px-6 py-2 rounded-full disabled:opacity-50"
-                    >
-                      {savingRecipe ? 'Saving Recipe...' : 'Save Recipe'}
-                    </Button>
-                  </div>
                 </div>
               </div>
             </div>
@@ -469,7 +500,8 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
             disabled={loading}
             className="bg-black text-white hover:bg-gray-800 px-6 py-2 rounded-full disabled:opacity-50"
           >
-            {loading ? 'Saving...' : 'Save'}
+            {loading ? 'Saving...' : 
+             (recipeTitle || recipeInstructions || recipeSteps) ? 'Save Recipe & Guest' : 'Save Guest'}
           </Button>
         </div>
       </DialogContent>

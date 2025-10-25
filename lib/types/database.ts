@@ -54,6 +54,7 @@ export interface Database {
           user_id: string;
           first_name: string;
           last_name: string;
+          printed_name: string | null;
           email: string;
           phone: string | null;
           significant_other_name: string | null;
@@ -74,6 +75,7 @@ export interface Database {
           user_id: string;
           first_name: string;
           last_name: string;
+          printed_name?: string | null;
           email: string;
           phone?: string | null;
           significant_other_name?: string | null;
@@ -90,6 +92,7 @@ export interface Database {
         Update: {
           first_name?: string;
           last_name?: string;
+          printed_name?: string | null;
           email?: string;
           phone?: string | null;
           significant_other_name?: string | null;
@@ -271,6 +274,7 @@ export interface GuestFull extends Guest {
 export interface GuestFormData {
   first_name: string;
   last_name?: string;
+  printed_name?: string;
   email?: string;
   phone?: string;
   significant_other_name?: string;
