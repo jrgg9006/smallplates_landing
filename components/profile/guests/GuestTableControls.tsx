@@ -30,7 +30,7 @@ export function GuestTableControls({
   return (
     <div className="py-4">
       {/* Controls row */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-8">
           {/* Tab Navigation */}
           <div className="flex border-b border-gray-200">
