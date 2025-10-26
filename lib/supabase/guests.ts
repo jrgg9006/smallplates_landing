@@ -50,7 +50,13 @@ export async function addGuest(formData: GuestFormData) {
 export async function getGuests(includeArchived = false): Promise<{ data: Guest[] | null; error: string | null }> {
   const supabase = createSupabaseClient();
   
-  // Get guests with their recipes using a left join
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+  
+  // Get guests with their recipes using a left join, filtered by user_id
   let query = supabase
     .from('guests')
     .select(`
@@ -58,7 +64,8 @@ export async function getGuests(includeArchived = false): Promise<{ data: Guest[
       guest_recipes (
         created_at
       )
-    `);
+    `)
+    .eq('user_id', user.id);
 
   if (!includeArchived) {
     query = query.eq('is_archived', false);

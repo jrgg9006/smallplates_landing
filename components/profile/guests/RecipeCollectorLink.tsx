@@ -108,7 +108,7 @@ export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
         {/* Button - full width on small screens, normal width on larger screens */}
         <Button
           onClick={handleCopyLink}
-          className="bg-gray-900 text-white hover:bg-gray-800 px-3 sm:px-6 py-2 h-8 text-xs font-medium whitespace-nowrap w-full sm:w-auto sm:flex-shrink-0"
+          className="bg-gray-900 text-white hover:bg-gray-800 px-3 sm:px-6 py-2 h-8 text-sm font-medium whitespace-nowrap w-full sm:w-auto sm:flex-shrink-0"
           disabled={!collectorLink}
         >
           {copied ? "Copied!" : "Copy Form Link"}

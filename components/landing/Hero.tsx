@@ -38,8 +38,8 @@ export default function Hero() {
             The&nbsp;People&nbsp;behind<br />
             every&nbsp;Recipe
           </h1>
-          <p className="font-sans mt-4 text-xl sm:text-2xl md:text-3xl font-medium text-white/90 max-w-prose drop-shadow">
-            Create a beautifully printed cookbook that connects your favorite people through food.
+          <p className="font-sans mt-4 text-xl sm:text-2xl md:text-3xl font-normal text-white/90 max-w-prose drop-shadow">
+            Invite your loved ones to share their recipes — we turn them into your own printed cookbook.
           </p>
           <div className="mt-8">
             <CTAButton data-cta="hero-primary" onClick={handleGetStarted} />

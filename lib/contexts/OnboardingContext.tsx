@@ -9,8 +9,7 @@ import {
   useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
-import { signUpWithEmail } from "@/lib/supabase/auth";
-import { saveOnboardingData } from "@/lib/supabase/onboarding";
+import { signUpWithEmail, signInWithEmail, resetPassword } from "@/lib/supabase/auth";
 import {
   OnboardingState,
   OnboardingContextType,
@@ -85,42 +84,15 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
    */
   const completeOnboarding = useCallback(
     async () => {
-      try {
-        const step2Data = state.answers.step2;
-        if (!step2Data?.email) {
-          throw new Error("Email is required to complete onboarding");
-        }
-
-        // For now, create account without password (they can set it later)
-        // TODO: Integrate with Stripe and create account after payment
-        const { user, error } = await signUpWithEmail(step2Data.email, "tempPassword123!");
-
-        if (error) {
-          throw new Error(error);
-        }
-
-        // Save onboarding answers to database
-        if (user) {
-          const saveResult = await saveOnboardingData(user.id, state.answers);
-          
-          if (saveResult.error) {
-            console.error('Failed to save onboarding data:', saveResult.error);
-            // Continue anyway - don't block the user flow
-          }
-        }
-
-        // Mark onboarding as complete
-        setState((prev) => ({
-          ...prev,
-          isComplete: true,
-        }));
-
-        // Redirect to profile
-        router.push("/profile");
-      } catch (err) {
-        console.error("Onboarding completion error:", err);
-        throw err;
-      }
+      const step2Data = state.answers.step2;
+      const step1Data = state.answers.step1;
+      
+      // Simple flow: signup → create profile → send manual email → redirect to profile
+      const { user, error } = await signUpWithEmail(step2Data.email, "tempPassword123!");
+      await fetch('/api/create-profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, userData: { ...step2Data, recipeCount: step1Data?.recipeCount || '40-or-less' } }) });
+      await resetPassword(step2Data.email);
+      setState(prev => ({ ...prev, isComplete: true }));
+      router.push("/profile");
     },
     [router, state.answers]
   );

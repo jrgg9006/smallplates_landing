@@ -118,7 +118,6 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
-    // Redirect to home if not authenticated
     if (!loading && !user) {
       router.push("/");
     }
@@ -155,12 +154,9 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-white text-gray-700">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between lg:justify-between">
-          {/* Mobile: Empty space for balance */}
-          <div className="w-10 lg:w-auto"></div>
-          
-          {/* Logo - Centered on mobile, left on desktop */}
-          <Link href="/" className="hover:opacity-80 transition-opacity lg:absolute lg:left-6">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          {/* Logo - Aligned with content */}
+          <Link href="/" className="hover:opacity-80 transition-opacity">
             <Image
               src="/images/SmallPlates_logo_horizontal.png"
               alt="Small Plates & Co."
@@ -276,7 +272,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Statistics and Recipe Collector Section */}
-        <div className="mb-8 flex flex-col lg:flex-row gap-4 lg:gap-8 items-stretch">
+        <div className="mb-16 flex flex-col lg:flex-row gap-4 lg:gap-8 items-stretch">
           <div className="flex-1">
             <GuestStatisticsComponent />
           </div>

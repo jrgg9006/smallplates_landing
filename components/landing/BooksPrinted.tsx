@@ -22,7 +22,7 @@ export default function BooksPrinted() {
     {
       id: 1,
       title: "Banana Bread",
-      author: "by Irene and Pepe",
+      author: "Shared by Irene and Pepe",
       color: "bg-emerald-700",
       thumbnail: "/images/BooksPrinted/recipe_thumb_1.jpg",
       fullSpread: "/images/BooksPrinted/recipe_spread_1.png",
@@ -30,23 +30,23 @@ export default function BooksPrinted() {
     {
       id: 2,
       title: "Spaguetti a la bolonaise",
-      author: "by Cris and Ric",
+      author: "Shared by Cris and Ric",
       color: "bg-stone-200",
       thumbnail: "/images/BooksPrinted/recipe_thumb_2.jpg",
       fullSpread: "/images/BooksPrinted/recipe_spread_2.png",
     },
     {
       id: 3,
-      title: "My Life Stories",
-      author: "by Richard Sullivan",
+      title: "Foil-Baked Salmon",
+      author: "Shared by Cristina Rojas",
       color: "bg-slate-500",
       thumbnail: "/images/BooksPrinted/recipe_thumb_3.jpg",
       fullSpread: "/images/BooksPrinted/recipe_spread_3.png",
     },
     {
       id: 4,
-      title: "Time Well Spent",
-      author: "by William Bell",
+      title: "Pasta Cacio y Pepe",
+      author: "Shared by Henry and Patita",
       color: "bg-red-800",
       thumbnail: "/images/BooksPrinted/recipe_thumb_4.jpg",
       fullSpread: "/images/BooksPrinted/recipe_spread_4.png",
@@ -54,32 +54,32 @@ export default function BooksPrinted() {
     // Second set
     {
       id: 5,
-      title: "Sunday Roast",
-      author: "by Maria Garcia",
+      title: "Honey Soy Garlic Salmon",
+      author: "Shared by Mo Abdelhamid",
       color: "bg-amber-700",
       thumbnail: "/images/BooksPrinted/recipe_thumb_5.jpg",
       fullSpread: "/images/BooksPrinted/recipe_spread_5.png",
     },
     {
       id: 6,
-      title: "Family Secrets",
-      author: "by James Mitchell",
+      title: "Sopa Azteca",
+      author: "Shared by Alma Orozco",
       color: "bg-indigo-600",
       thumbnail: "/images/BooksPrinted/recipe_thumb_6.jpg",
       fullSpread: "/images/BooksPrinted/recipe_spread_6.png",
     },
     {
       id: 7,
-      title: "Comfort Foods",
-      author: "by Sarah Chen",
+      title: "Tapas to Get You Out of Trouble",
+      author: "Shared by Frida",
       color: "bg-rose-600",
       thumbnail: "/images/BooksPrinted/recipe_thumb_7.jpg",
       fullSpread: "/images/BooksPrinted/recipe_spread_7.png",
     },
     {
       id: 8,
-      title: "Kitchen Tales",
-      author: "by Robert Wilson",
+      title: "Double Chocolate Cookies with Sea Salt",
+      author: "Shared by Barbs and Albert",
       color: "bg-teal-700",
       thumbnail: "/images/BooksPrinted/recipe_thumb_8.jpg",
       fullSpread: "/images/BooksPrinted/recipe_spread_8.png",
@@ -87,32 +87,32 @@ export default function BooksPrinted() {
     // Third set
     {
       id: 9,
-      title: "Holiday Favorites",
-      author: "by Emily Thompson",
+      title: "Blue Cheese Salad (Perfect for Summer)",
+      author: "Shared by Nikki and Jorge",
       color: "bg-purple-700",
       thumbnail: "/images/BooksPrinted/recipe_thumb_9.jpg",
       fullSpread: "/images/BooksPrinted/recipe_spread_9.png",
     },
     {
       id: 10,
-      title: "Sweet Memories",
-      author: "by David Martinez",
+      title: "Cheesecake",
+      author: "Shared by Laura and Dany",
       color: "bg-orange-700",
       thumbnail: "/images/BooksPrinted/recipe_thumb_10.jpg",
       fullSpread: "/images/BooksPrinted/recipe_spread_10.png",
     },
     {
       id: 11,
-      title: "Garden to Table",
-      author: "by Lisa Anderson",
+      title: "Waffle Sandwiches",
+      author: "Shared by Chochos",
       color: "bg-green-700",
       thumbnail: "/images/BooksPrinted/recipe_thumb_11.jpg",
       fullSpread: "/images/BooksPrinted/recipe_spread_11.png",
     },
     {
       id: 12,
-      title: "Coastal Cuisine",
-      author: "by Michael Brown",
+      title: "Pork Ramen",
+      author: "Shared by Fany",
       color: "bg-blue-700",
       thumbnail: "/images/BooksPrinted/recipe_thumb_12.jpg",
       fullSpread: "/images/BooksPrinted/recipe_spread_12.png",
@@ -120,32 +120,32 @@ export default function BooksPrinted() {
     // Fourth set
     {
       id: 13,
-      title: "Spice Journey",
-      author: "by Priya Patel",
+      title: "Rigatoni a la Carbonara",
+      author: "Shared by Juanpis",
       color: "bg-yellow-700",
       thumbnail: "/images/BooksPrinted/recipe_thumb_13.jpg",
       fullSpread: "/images/BooksPrinted/recipe_spread_13.png",
     },
     {
       id: 14,
-      title: "Farm Fresh",
-      author: "by Thomas Green",
+      title: "Lentil Soup",
+      author: "Shared by Cris and Ric",
       color: "bg-lime-700",
       thumbnail: "/images/BooksPrinted/recipe_thumb_14.jpg",
       fullSpread: "/images/BooksPrinted/recipe_spread_14.png",
     },
     {
       id: 15,
-      title: "Baking Love",
-      author: "by Jennifer White",
+      title: "Yellow Rice",
+      author: "Shared by Jorge Llaca",
       color: "bg-pink-600",
       thumbnail: "/images/BooksPrinted/recipe_thumb_15.jpg",
       fullSpread: "/images/BooksPrinted/recipe_spread_15.png",
     },
     {
       id: 16,
-      title: "Soul Kitchen",
-      author: "by Marcus Johnson",
+      title: "Leftovers: Lobster Risotto Cakes with Fried Egg",
+      author: "Shared by Santi Creixell",
       color: "bg-gray-700",
       thumbnail: "/images/BooksPrinted/recipe_thumb_16.jpg",
       fullSpread: "/images/BooksPrinted/recipe_spread_16.png",
@@ -166,8 +166,8 @@ export default function BooksPrinted() {
   const plugin = useRef(
     Autoplay({ 
       delay: 5000, 
-      stopOnInteraction: true,
-      stopOnMouseEnter: true,
+      stopOnInteraction: false,
+      stopOnMouseEnter: false,
       stopOnFocusIn: false
     })
   );
@@ -201,6 +201,8 @@ export default function BooksPrinted() {
         <Carousel
           plugins={[plugin.current]}
           className="w-full"
+          onMouseEnter={plugin.current.stop}
+          onMouseLeave={plugin.current.reset}
           opts={{
             align: "start",
             loop: true,
