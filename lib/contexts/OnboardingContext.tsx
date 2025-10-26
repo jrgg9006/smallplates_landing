@@ -10,10 +10,10 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { signUpWithEmail, signInWithEmail, resetPassword } from "@/lib/supabase/auth";
+import { createSupabaseClient } from "@/lib/supabase/client";
 import {
   OnboardingState,
   OnboardingContextType,
-  OnboardingData,
 } from "@/lib/types/onboarding";
 
 const TOTAL_STEPS = 3;
@@ -84,15 +84,52 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
    */
   const completeOnboarding = useCallback(
     async () => {
-      const step2Data = state.answers.step2;
-      const step1Data = state.answers.step1;
-      
-      // Simple flow: signup → create profile → send manual email → redirect to profile
-      const { user, error } = await signUpWithEmail(step2Data.email, "tempPassword123!");
-      await fetch('/api/create-profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, userData: { ...step2Data, recipeCount: step1Data?.recipeCount || '40-or-less' } }) });
-      await resetPassword(step2Data.email);
-      setState(prev => ({ ...prev, isComplete: true }));
-      router.push("/profile");
+      try {
+        const step2Data = state.answers.step2;
+        const step1Data = state.answers.step1;
+        
+        if (!step2Data?.email) {
+          throw new Error("Email is required to complete onboarding");
+        }
+        
+        // Simple flow: signup → create profile → send manual email → redirect to profile
+        const { user, error } = await signUpWithEmail(step2Data.email, "tempPassword123!");
+        
+        if (error || !user) {
+          throw new Error(error || "Failed to create user account");
+        }
+        
+        // Create profile using API
+        const response = await fetch('/api/create-profile', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ 
+            userId: user.id, 
+            userData: { ...step2Data, recipeCount: step1Data?.recipeCount || '40-or-less' } 
+          }) 
+        });
+        
+        if (!response.ok) {
+          console.error('Failed to create profile');
+        }
+        
+        // Send password reset email
+        const supabase = createSupabaseClient();
+        const redirectUrl = typeof window !== 'undefined' 
+          ? `${window.location.origin}/reset-password?email=${encodeURIComponent(step2Data.email)}`
+          : `http://localhost:3000/reset-password?email=${encodeURIComponent(step2Data.email)}`;
+          
+        await supabase.auth.resetPasswordForEmail(step2Data.email, {
+          redirectTo: redirectUrl
+        });
+        
+        setState(prev => ({ ...prev, isComplete: true }));
+        router.push("/profile");
+        
+      } catch (err) {
+        console.error("Onboarding completion error:", err);
+        alert(err instanceof Error ? err.message : "Failed to complete onboarding");
+      }
     },
     [router, state.answers]
   );
