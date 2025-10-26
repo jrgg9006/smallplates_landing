@@ -20,86 +20,88 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     const handleSession = async () => {
       try {
-        // Ensure we're on the client side
         if (typeof window === 'undefined') return;
-        
+
         const supabase = createSupabaseClient();
-        
-        // Check if there are hash parameters (from email link)
-        const hash = window.location.hash;
-        console.log('🔍 URL hash:', hash);
+
+        console.log('🔍 Reset password page loaded');
         console.log('🔍 Full URL:', window.location.href);
-        
-        if (!hash) {
-          // No hash parameters, check for existing session or URL params
-          console.log('⚠️ No hash parameters, checking for existing session');
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-            console.log('✅ User already authenticated, allowing password change');
-            setSessionReady(true);
-          } else {
-            // Check if there's an email in URL params (for reused links)
-            const urlParams = new URLSearchParams(window.location.search);
-            const email = urlParams.get('email');
-            
-            if (email) {
-              console.log('ℹ️ Found email in URL params, sending fresh reset link');
-              // Send a fresh reset password email
-              const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin + '/reset-password'
-              });
-              
-              if (!resetError) {
-                setError('Se ha enviado un nuevo link de reset a tu email. Por favor revisa tu correo.');
-              } else {
-                setError('Error enviando el email. Intenta más tarde.');
-              }
-            } else {
-              setError('Link expirado o ya usado. Solicita un nuevo reset desde el login.');
-            }
-          }
+
+        // First, check if there's already an active session
+        const { data: { session: existingSession } } = await supabase.auth.getSession();
+
+        if (existingSession) {
+          console.log('✅ Existing session found, ready for password change');
+          setSessionReady(true);
           return;
         }
-        
+
+        // Check for hash parameters (from email link)
+        const hash = window.location.hash;
+        console.log('🔍 URL hash present:', !!hash && hash.length > 10);
+
+        if (!hash || hash.length < 10) {
+          console.log('❌ No hash parameters and no existing session');
+          setError('Este link de reset ha expirado o ya fue usado. Por favor, solicita un nuevo link de reset.');
+          return;
+        }
+
+        // Parse tokens from URL hash
         const hashParams = new URLSearchParams(hash.substring(1));
         const accessToken = hashParams.get('access_token');
         const refreshToken = hashParams.get('refresh_token');
-        
-        console.log('🔍 Access token:', accessToken ? 'Found' : 'Missing');
-        console.log('🔍 Refresh token:', refreshToken ? 'Found' : 'Missing');
-        console.log('🔍 All hash params:', Object.fromEntries(hashParams.entries()));
-        
-        if (accessToken && refreshToken) {
-          // Set the session using the tokens from URL
-          const { data, error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken
-          });
-          
-          if (error) {
-            console.error('Session error:', error);
-            setError('Invalid reset link. Please request a new password reset.');
-            return;
-          }
-          
-          if (data.session) {
-            console.log('✅ Session established for password reset');
-            setSessionReady(true);
-          }
-        } else {
-          console.log('⚠️ Tokens missing from hash parameters');
-          // Check if user is already authenticated
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-            console.log('✅ Found existing session, allowing password change');
-            setSessionReady(true);
-          } else {
-            setError('Los tokens del email están faltando o ya se usaron. Solicita un nuevo link de reset.');
-          }
+        const type = hashParams.get('type');
+
+        console.log('🔍 Token type:', type);
+        console.log('🔍 Access token present:', !!accessToken);
+        console.log('🔍 Refresh token present:', !!refreshToken);
+
+        if (!accessToken || !refreshToken) {
+          console.log('❌ Missing tokens in URL');
+          setError('Link de reset inválido. Por favor, solicita un nuevo link.');
+          return;
         }
+
+        // Verify it's a recovery token
+        if (type !== 'recovery') {
+          console.log('⚠️ Unexpected token type:', type);
+        }
+
+        // Set the session using tokens from URL
+        console.log('🔄 Setting session with tokens...');
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        });
+
+        if (error) {
+          console.error('❌ Session error:', error.message, error);
+
+          // Check if error is about already used token
+          if (error.message.includes('already been used') || error.message.includes('Invalid Refresh Token')) {
+            setError('Este link ya fue usado. Por favor, solicita un nuevo link de reset desde la página de inicio.');
+          } else {
+            setError(`Error estableciendo sesión: ${error.message}`);
+          }
+          return;
+        }
+
+        if (data.session) {
+          console.log('✅ Session established successfully');
+          console.log('✅ User ID:', data.session.user.id);
+          setSessionReady(true);
+
+          // Clean up URL hash to prevent token reuse issues on refresh
+          console.log('🧹 Cleaning URL hash...');
+          window.history.replaceState(null, '', window.location.pathname);
+        } else {
+          console.log('❌ No session returned from setSession');
+          setError('Error estableciendo sesión. Por favor, intenta con un nuevo link.');
+        }
+
       } catch (err) {
-        console.error('Session setup error:', err);
-        setError('Failed to initialize password reset. Please try again.');
+        console.error('❌ Session setup error:', err);
+        setError('Error al inicializar el reset de contraseña. Por favor, intenta de nuevo.');
       }
     };
 
@@ -273,8 +275,11 @@ export default function ResetPasswordPage() {
 
           {/* Error Message */}
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-              {error}
+            <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+              <p className="text-red-700 text-sm font-medium mb-2">{error}</p>
+              <p className="text-red-600 text-xs">
+                Si necesitas ayuda, contáctanos o solicita un nuevo link desde la página de inicio.
+              </p>
             </div>
           )}
 
