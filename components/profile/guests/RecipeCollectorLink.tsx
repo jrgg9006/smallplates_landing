@@ -66,16 +66,10 @@ export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
         // Use native share on mobile
         await navigator.share(shareData);
       } else {
-        // Fallback: copy to clipboard with enhanced user guidance
+        // Fallback: copy to clipboard
         await navigator.clipboard.writeText(collectorLink);
         setCopied(true);
-        setTimeout(() => setCopied(false), 3000);
-        
-        // Show helpful tip for WhatsApp users
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        if (isIOS) {
-          console.log('iOS device detected - link copied for manual sharing');
-        }
+        setTimeout(() => setCopied(false), 2000);
       }
     } catch (err) {
       // If sharing was cancelled or failed, try clipboard as fallback
@@ -162,7 +156,7 @@ export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
           disabled={!collectorLink || isSharing}
           title="Copy link to share with guests via any messaging app"
         >
-{isSharing ? "Sharing..." : copied ? "Link Copied!" : "Copy Form Link"}
+{isSharing ? "Sharing..." : copied ? "Copied!" : "Copy Form Link"}
         </Button>
       </div>
       
