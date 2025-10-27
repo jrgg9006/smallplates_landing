@@ -15,6 +15,7 @@ export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
 
   // Load collection token on component mount
   useEffect(() => {
@@ -36,17 +37,47 @@ export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
     loadToken();
   }, []);
 
-  const collectorLink = token ? `${window.location.origin}/collect/${token}` : '';
+  const collectorLink = token && typeof window !== 'undefined' ? `${window.location.origin}/collect/${token}` : '';
 
-  const handleCopyLink = async () => {
+  const handleShareLink = async () => {
     if (!collectorLink) return;
     
+    setIsSharing(true);
+    
+    const shareData = {
+      title: 'Recipe Collection Form',
+      text: 'Help me collect recipes for my cookbook! Please share your favorite recipes with me.',
+      url: collectorLink
+    };
+    
     try {
-      await navigator.clipboard.writeText(collectorLink);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      // Check if we're on mobile and Web Share API is available
+      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobile && navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        // Use native share on mobile
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(collectorLink);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
     } catch (err) {
-      console.error("Failed to copy link:", err);
+      // If sharing was cancelled or failed, try clipboard as fallback
+      if (err.name !== 'AbortError') {
+        try {
+          await navigator.clipboard.writeText(collectorLink);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } catch (clipboardErr) {
+          console.error("Failed to copy link:", clipboardErr);
+          setError("Failed to share or copy link");
+          setTimeout(() => setError(null), 3000);
+        }
+      }
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -107,11 +138,11 @@ export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
         
         {/* Button - full width on small screens, normal width on larger screens */}
         <Button
-          onClick={handleCopyLink}
+          onClick={handleShareLink}
           className="bg-gray-900 text-white hover:bg-gray-800 px-3 sm:px-6 py-2 h-8 text-sm font-medium whitespace-nowrap w-full sm:w-auto sm:flex-shrink-0"
-          disabled={!collectorLink}
+          disabled={!collectorLink || isSharing}
         >
-          {copied ? "Copied!" : "Copy Form Link"}
+          {isSharing ? "Sharing..." : copied ? "Copied!" : "Copy Form Link"}
         </Button>
       </div>
       
