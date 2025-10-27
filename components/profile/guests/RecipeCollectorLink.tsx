@@ -45,10 +45,11 @@ export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
     
     setIsSharing(true);
     
-    // Only URL for fastest sharing - let Open Graph handle the rich preview
+    // PRUEBA 1: URL estática simple (Google)
     const shareData = {
-      url: collectorLink
+      url: 'https://google.com'
     };
+    // Original: url: collectorLink
     
     try {
       // Clean Web Share API implementation per MDN guidelines
