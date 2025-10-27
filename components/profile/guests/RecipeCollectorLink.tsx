@@ -65,7 +65,7 @@ export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
       }
     } catch (err) {
       // If sharing was cancelled or failed, try clipboard as fallback
-      if (err.name !== 'AbortError') {
+      if (err instanceof Error && err.name !== 'AbortError') {
         try {
           await navigator.clipboard.writeText(collectorLink);
           setCopied(true);
