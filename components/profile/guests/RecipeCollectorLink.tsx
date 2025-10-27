@@ -53,8 +53,6 @@ export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
     }
     
     const shareData = {
-      title: 'Recipe Collection Form',
-      text: 'Help me collect recipes for my cookbook! Please share your favorite recipes with me.',
       url: collectorLink
     };
     
