@@ -1,0 +1,17 @@
+{
+  "name": "Small Plates & Company",
+  "short_name": "Small Plates",
+  "description": "A cookbook experience made with your loved ones' recipes",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/images/SmallPlates_logo_horizontal.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
