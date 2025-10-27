@@ -31,7 +31,7 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
   const [lastName, setLastName] = useState('');
   const [printedName, setPrintedName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  // const [phone, setPhone] = useState('');
   const [hasPlusOne, setHasPlusOne] = useState(false);
   const [plusOneFirstName, setPlusOneFirstName] = useState('');
   const [plusOneLastName, setPlusOneLastName] = useState('');
@@ -49,7 +49,7 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
     setLastName('');
     setPrintedName('');
     setEmail('');
-    setPhone('');
+    // setPhone('');
     setHasPlusOne(false);
     setPlusOneFirstName('');
     setPlusOneLastName('');
@@ -86,7 +86,7 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
         last_name: lastName.trim() || '',
         printed_name: printedName.trim() || undefined,
         email: email.trim() || undefined,
-        phone: phone.trim() || undefined,
+        // phone: phone.trim() || undefined,
         significant_other_name: hasPlusOne ? `${plusOneFirstName} ${plusOneLastName}`.trim() : undefined,
       };
 
@@ -258,17 +258,6 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
                   onChange={(e) => setEmail(e.target.value)}
                   className="mt-1"
                   placeholder="Email address"
-                />
-              </div>
-              <div>
-                <Label htmlFor="phone" className="text-sm font-medium text-gray-600">Phone</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="mt-1"
-                  placeholder="Phone number"
                 />
               </div>
             </div>
