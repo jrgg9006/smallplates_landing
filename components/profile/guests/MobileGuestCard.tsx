@@ -53,7 +53,7 @@ export function MobileGuestCard({
   // Guest name display logic
   const fullName = `${guest.first_name} ${guest.last_name || ''}`.trim();
   const hasPrintedName = guest.printed_name && guest.printed_name.trim();
-  const displayName = hasPrintedName ? guest.printed_name : fullName;
+  const displayName = hasPrintedName ? guest.printed_name! : fullName;
   const showSubtitle = hasPrintedName;
 
   // Contact info validation
