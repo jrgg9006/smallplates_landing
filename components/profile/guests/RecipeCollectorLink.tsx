@@ -45,10 +45,8 @@ export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
     
     setIsSharing(true);
     
-    // Proper shareData object according to MDN best practices
+    // Only URL for fastest sharing - let Open Graph handle the rich preview
     const shareData = {
-      title: 'Recipe Collection - Small Plates & Co',
-      text: 'Share your favorite recipe for our cookbook',
       url: collectorLink
     };
     
