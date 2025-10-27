@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { getCachedMetadata } from '@/lib/supabase/metadata-cache'
+import { validateCollectionToken } from '@/lib/supabase/collection'
 import CollectionForm from './CollectionForm'
 
 interface PageProps {
@@ -9,16 +9,25 @@ interface PageProps {
 export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
   const { token } = await params
   
-  // Fast metadata lookup from cache - no heavy validation
-  const { data: cachedMeta, error } = await getCachedMetadata(token)
+  // Get user info from token for personalized meta tags
+  const { data: tokenInfo, error } = await validateCollectionToken(token)
   
-  // Default metadata (used if cache miss or invalid token)
-  const defaultTitle = 'Share a Recipe to my Cookbook - SP&Co'
-  const defaultDescription = 'Share your favorite recipe for our cookbook!'
+  // Default metadata if token is invalid
+  if (error || !tokenInfo) {
+    return {
+      title: 'Share a Recipe to my Cookbook - SP&Co',
+      description: 'Share your favorite recipe for our cookbook!',
+      robots: { index: false, follow: false },
+    }
+  }
+
+  // Extract user name for personalization
+  const userName = tokenInfo.user_name || tokenInfo.raw_full_name || 'Someone'
+  const firstName = userName.split(' ')[0] || 'Someone'
   
-  // Use cached data if available, otherwise use defaults
-  const title = cachedMeta?.cached_og_title || defaultTitle
-  const description = cachedMeta?.cached_og_description || defaultDescription
+  // Generate personalized meta tags
+  const title = 'Share a Recipe to my Cookbook - SP&Co'
+  const description = `${firstName} invites you to share your favorite recipe with them! They will print a cookbook with recipes from family and friends.`
   
   return {
     title,
@@ -54,8 +63,8 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
       ],
     },
     robots: {
-      index: error ? false : true, // Don't index if token lookup failed
-      follow: error ? false : true,
+      index: true,
+      follow: true,
     },
     other: {
       'og:image:width': '1200',
