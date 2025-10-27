@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { validateCollectionToken } from '@/lib/supabase/collection'
+import { getCachedMetadata } from '@/lib/supabase/metadata-cache'
 import CollectionForm from './CollectionForm'
 
 interface PageProps {
@@ -9,33 +9,24 @@ interface PageProps {
 export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
   const { token } = await params
   
-  // Get user info from token for personalized meta tags
-  const { data: tokenInfo, error } = await validateCollectionToken(token)
+  // Fast metadata lookup from cache - no heavy validation
+  const { data: cachedMeta, error } = await getCachedMetadata(token)
   
-  // Default metadata if token is invalid
-  if (error || !tokenInfo) {
-    return {
-      title: 'Share a Recipe to my Cookbook - SP&Co',
-      description: 'Help us collect recipes for a cookbook! Share your favorite recipes with us.',
-      robots: { index: false, follow: false }, // Don't index invalid token pages
-    }
-  }
-
-  // Extract user name for personalization
-  const userName = tokenInfo.user_name || tokenInfo.raw_full_name || 'Someone'
-  const firstName = userName.split(' ')[0] || 'Someone'
+  // Default metadata (used if cache miss or invalid token)
+  const defaultTitle = 'Share a Recipe to my Cookbook - SP&Co'
+  const defaultDescription = 'Share your favorite recipe for our cookbook!'
   
-  // Generate personalized meta tags like Partiful
-  const personalizedTitle = 'Share a Recipe to my Cookbook - SP&Co'
-  const personalizedDescription = `${firstName} invites you to share your favorite recipe with them! They will print a cookbook with recipes from family and friends.`
-
+  // Use cached data if available, otherwise use defaults
+  const title = cachedMeta?.cached_og_title || defaultTitle
+  const description = cachedMeta?.cached_og_description || defaultDescription
+  
   return {
-    title: personalizedTitle,
-    description: personalizedDescription,
+    title,
+    description,
     metadataBase: new URL('https://smallplatesandcompany.com'),
     openGraph: {
-      title: personalizedTitle,
-      description: personalizedDescription,
+      title,
+      description,
       type: 'website',
       url: `/collect/${token}`,
       images: [
@@ -43,7 +34,7 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
           url: '/images/share-card.svg',
           width: 1200,
           height: 630,
-          alt: `Recipe Collection Form - ${firstName} invites you to share recipes`,
+          alt: 'Recipe Collection Form - Small Plates & Company',
           type: 'image/svg+xml',
         },
       ],
@@ -53,18 +44,18 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
     twitter: {
       card: 'summary_large_image',
       site: '@smallplatesandco',
-      title: personalizedTitle,
-      description: personalizedDescription,
+      title,
+      description,
       images: [
         {
           url: '/images/share-card.svg',
-          alt: `Recipe Collection Form - ${firstName} invites you to share recipes`,
+          alt: 'Recipe Collection Form - Small Plates & Company',
         },
       ],
     },
     robots: {
-      index: true,
-      follow: true,
+      index: error ? false : true, // Don't index if token lookup failed
+      follow: error ? false : true,
     },
     other: {
       'og:image:width': '1200',

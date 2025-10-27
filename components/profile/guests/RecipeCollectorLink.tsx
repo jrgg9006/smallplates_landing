@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getUserCollectionToken } from "@/lib/supabase/collection";
-import { createShareURL, validateWhatsAppURL, getWhatsAppTroubleshootingTips } from "@/lib/utils/sharing";
+import { createShareURL } from "@/lib/utils/sharing";
 
 interface RecipeCollectorLinkProps {
   // No props needed
@@ -45,32 +45,25 @@ export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
     
     setIsSharing(true);
     
-    // Validate URL for potential issues
-    const validation = validateWhatsAppURL(collectorLink);
-    if (!validation.isValid) {
-      console.warn('URL validation issues:', validation.issues);
-      console.info('Recommendations:', validation.recommendations);
-    }
-    
+    // Proper shareData object according to MDN best practices
     const shareData = {
+      title: 'Recipe Collection - Small Plates & Co',
+      text: 'Share your favorite recipe for our cookbook',
       url: collectorLink
     };
     
     try {
-      // Check if we're on mobile and Web Share API is available
-      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      
-      if (isMobile && navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-        // Use native share on mobile
+      // Clean Web Share API implementation per MDN guidelines
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
         await navigator.share(shareData);
       } else {
-        // Fallback: copy to clipboard
+        // Simple fallback to clipboard
         await navigator.clipboard.writeText(collectorLink);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }
     } catch (err) {
-      // If sharing was cancelled or failed, try clipboard as fallback
+      // Handle sharing errors per MDN recommendations
       if (err instanceof Error && err.name !== 'AbortError') {
         try {
           await navigator.clipboard.writeText(collectorLink);
