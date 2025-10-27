@@ -3,11 +3,11 @@ import { validateCollectionToken } from '@/lib/supabase/collection'
 import CollectionForm from './CollectionForm'
 
 interface PageProps {
-  params: { token: string }
+  params: Promise<{ token: string }>
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { token } = params
+export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
+  const { token } = await params
   
   // Get user info from token for personalized meta tags
   const { data: tokenInfo, error } = await validateCollectionToken(token)
@@ -74,6 +74,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default function CollectPage({ params }: PageProps) {
+export default async function CollectPage({ params }: PageProps) {
   return <CollectionForm />
 }
