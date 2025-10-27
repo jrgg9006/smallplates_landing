@@ -66,3 +66,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .table-header-style {
+    @apply font-normal text-gray-900 font-sans text-base;
+  }
+}

@@ -69,14 +69,14 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
       title: (
         <>
           Congratulations! You&apos;ll be part of{' '}
-          <span className="font-serif text-5xl font-bold text-emerald-700 mx-1">
+          <span className="font-serif text-5xl font-bold text-black mx-1">
             {creatorName}&apos;s
           </span>{' '}
           amazing Cookbook!
         </>
       ),
       subtitle: "",
-      icon: '🎉'
+      icon: ''
     },
     2: {
       type: 'story',

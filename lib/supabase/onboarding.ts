@@ -4,6 +4,7 @@
  */
 
 import { createSupabaseClient } from './client';
+import { createClient } from '@supabase/supabase-js';
 import { OnboardingData } from '@/lib/types/onboarding';
 
 /**
@@ -64,17 +65,31 @@ export async function saveOnboardingData(userId: string, answers: OnboardingData
       fullName = `${step2Data.firstName} ${step2Data.lastName} and ${step2Data.partnerFirstName} ${step2Data.partnerLastName}`;
     }
 
-    // Update the user's profile with onboarding data
+    // Generate collection token for the user
+    const { data: newToken, error: tokenError } = await supabase
+      .rpc('generate_collection_token');
+
+    if (tokenError || !newToken) {
+      console.error('Failed to generate collection token:', tokenError);
+      return {
+        data: null,
+        error: 'Failed to generate collection token'
+      };
+    }
+
+    // Create or update the user's profile with onboarding data using upsert
     const { data, error } = await supabase
       .from('profiles')
-      .update({
+      .upsert({
+        id: userId,
         full_name: fullName,
         email: step2Data.email,
         recipe_goal_category: recipeCount,
         recipe_goal_number: recipeGoalNumber,
+        collection_link_token: newToken,
+        collection_enabled: true,
         updated_at: new Date().toISOString()
       })
-      .eq('id', userId)
       .select();
 
     if (error) {
@@ -136,6 +151,73 @@ export async function getUserOnboardingData(userId: string) {
     return {
       data: null,
       error: err instanceof Error ? err.message : 'Unknown error occurred'
+    };
+  }
+}
+
+/**
+ * Create user profile with admin privileges (bypasses RLS)
+ * Used during onboarding when user is not yet authenticated
+ */
+export async function createUserProfileAdmin(userId: string, step2Data: any) {
+  try {
+    // Use admin client to bypass RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!, // Service role key
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    );
+
+    // Generate collection token
+    const { data: newToken, error: tokenError } = await supabaseAdmin
+      .rpc('generate_collection_token');
+
+    if (tokenError || !newToken) {
+      console.error('Failed to generate collection token:', tokenError);
+      return { data: null, error: 'Failed to generate collection token' };
+    }
+
+    // Build full name
+    let fullName = `${step2Data.firstName} ${step2Data.lastName}`;
+    if (step2Data.hasPartner && step2Data.partnerFirstName && step2Data.partnerLastName) {
+      fullName = `${step2Data.firstName} ${step2Data.lastName} and ${step2Data.partnerFirstName} ${step2Data.partnerLastName}`;
+    }
+
+    // Map recipe count to number
+    const recipeGoalNumber = mapRecipeCategoryToNumber(step2Data.recipeCount || '40');
+
+    // Create profile with admin privileges
+    const { data, error } = await supabaseAdmin
+      .from('profiles')
+      .upsert({
+        id: userId,
+        full_name: fullName,
+        email: step2Data.email,
+        recipe_goal_category: step2Data.recipeCount,
+        recipe_goal_number: recipeGoalNumber,
+        collection_link_token: newToken,
+        collection_enabled: true,
+        updated_at: new Date().toISOString()
+      })
+      .select();
+
+    if (error) {
+      console.error('Error creating profile with admin:', error);
+      return { data: null, error: error.message };
+    }
+
+    return { data: data?.[0] || null, error: null };
+
+  } catch (err) {
+    console.error('Error in createUserProfileAdmin:', err);
+    return { 
+      data: null, 
+      error: err instanceof Error ? err.message : 'Unknown error occurred' 
     };
   }
 }

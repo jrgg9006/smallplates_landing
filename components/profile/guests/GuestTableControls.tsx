@@ -1,61 +1,183 @@
 "use client";
 
-import React from "react";
-import { Search } from "lucide-react";
+import React, { useState } from "react";
+import { Search, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface GuestTableControlsProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
-  onFilterChange: (value: string) => void;
   onAddGuest: () => void;
+  statusFilter: string;
+  onStatusFilterChange: (status: string) => void;
+  guestCounts?: {
+    all: number;
+    pending: number;
+    submitted: number;
+  };
 }
 
 export function GuestTableControls({ 
   searchValue, 
   onSearchChange, 
-  onFilterChange, 
-  onAddGuest 
+  onAddGuest,
+  statusFilter,
+  onStatusFilterChange,
+  guestCounts
 }: GuestTableControlsProps) {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'all':
+        return `All ${guestCounts ? `(${guestCounts.all})` : ''}`;
+      case 'pending':
+        return `Pending ${guestCounts ? `(${guestCounts.pending})` : ''}`;
+      case 'submitted':
+        return `Received ${guestCounts ? `(${guestCounts.submitted})` : ''}`;
+      default:
+        return 'All';
+    }
+  };
+
+  const handleStatusChange = (status: string) => {
+    onStatusFilterChange(status);
+    setIsDropdownOpen(false);
+  };
+
   return (
-    <div className="flex items-center justify-between py-4">
-      <div className="flex items-center gap-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search by name..."
-            value={searchValue}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10 w-64 bg-white rounded-full border-gray-200"
-          />
+    <div className="py-4">
+      {/* Desktop Layout */}
+      <div className="hidden md:block">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-8">
+            {/* Tab Navigation */}
+            <div className="flex border-b border-gray-200">
+              <button
+                onClick={() => onStatusFilterChange('all')}
+                className={`pb-2 px-8 text-sm font-medium border-b-2 transition-colors ${
+                  statusFilter === 'all'
+                    ? 'border-gray-900 text-gray-900'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                All {guestCounts && `(${guestCounts.all})`}
+              </button>
+              <button
+                onClick={() => onStatusFilterChange('pending')}
+                className={`pb-2 px-8 text-sm font-medium border-b-2 transition-colors ${
+                  statusFilter === 'pending'
+                    ? 'border-gray-900 text-gray-900'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Pending {guestCounts && `(${guestCounts.pending})`}
+              </button>
+              <button
+                onClick={() => onStatusFilterChange('submitted')}
+                className={`pb-2 px-8 text-sm font-medium border-b-2 transition-colors ${
+                  statusFilter === 'submitted'
+                    ? 'border-gray-900 text-gray-900'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Received {guestCounts && `(${guestCounts.submitted})`}
+              </button>
+            </div>
+            
+            {/* Search Input */}
+            <div className="relative">
+              <Search className="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Input
+                placeholder="Search by name..."
+                value={searchValue}
+                onChange={(e) => onSearchChange(e.target.value)}
+                className="pl-6 w-64 bg-transparent border-0 border-b border-gray-300 rounded-none focus:border-gray-900 focus:ring-0 pb-2"
+              />
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button 
+              onClick={onAddGuest}
+              className="bg-teal-600 text-white hover:bg-teal-700 rounded-lg px-6"
+            >
+              Add Guests and Recipes
+            </Button>
+          </div>
         </div>
-        <Select onValueChange={onFilterChange} defaultValue="all">
-          <SelectTrigger className="w-40 bg-white border-gray-200 rounded-full text-sm">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="submitted">Submitted</SelectItem>
-            <SelectItem value="reached_out">Reached Out</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
-      
-      <div className="flex items-center gap-2">
+
+      {/* Mobile Layout */}
+      <div className="md:hidden space-y-4">
+        {/* Filter Dropdown + Search */}
+        <div className="flex gap-3">
+          {/* Status Filter Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              {getStatusLabel(statusFilter)}
+              <ChevronDown className="h-4 w-4" />
+            </button>
+            
+            {isDropdownOpen && (
+              <>
+                <div className="absolute top-12 left-0 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  <button
+                    onClick={() => handleStatusChange('all')}
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 ${
+                      statusFilter === 'all' ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-700'
+                    }`}
+                  >
+                    All {guestCounts && `(${guestCounts.all})`}
+                  </button>
+                  <button
+                    onClick={() => handleStatusChange('pending')}
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 ${
+                      statusFilter === 'pending' ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-700'
+                    }`}
+                  >
+                    Pending {guestCounts && `(${guestCounts.pending})`}
+                  </button>
+                  <button
+                    onClick={() => handleStatusChange('submitted')}
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 ${
+                      statusFilter === 'submitted' ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-700'
+                    }`}
+                  >
+                    Received {guestCounts && `(${guestCounts.submitted})`}
+                  </button>
+                </div>
+                {/* Overlay to close dropdown */}
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setIsDropdownOpen(false)}
+                ></div>
+              </>
+            )}
+          </div>
+
+          {/* Search Input - Full width */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Input
+              placeholder="Search by name..."
+              value={searchValue}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="pl-10 w-full border border-gray-300 rounded-lg"
+            />
+          </div>
+        </div>
+
+        {/* Add Button - Full width */}
         <Button 
           onClick={onAddGuest}
-          className="bg-black text-white hover:bg-gray-800 rounded-full px-6"
+          className="w-full bg-teal-600 text-white hover:bg-teal-700 rounded-lg py-3"
         >
-          Add Guests & Recipes
+          Add Guests and Recipes
         </Button>
       </div>
     </div>

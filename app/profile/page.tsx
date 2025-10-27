@@ -15,18 +15,23 @@ import { ProgressBar } from "@/components/profile/ProgressBar";
 import { getUserProgress, UserProgress } from "@/lib/supabase/progress";
 import ProfileDropdown from "@/components/profile/ProfileDropdown";
 import { Bell } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { getGuests } from "@/lib/supabase/guests";
 
 export default function ProfilePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [progressData, setProgressData] = useState<UserProgress | null>(null);
   const [progressLoading, setProgressLoading] = useState(true);
+  const [guestCounts, setGuestCounts] = useState<{all: number; pending: number; submitted: number}>({
+    all: 0,
+    pending: 0,
+    submitted: 0
+  });
 
   const handleAddGuest = () => {
     setIsAddModalOpen(true);
@@ -39,6 +44,29 @@ export default function ProfilePage() {
   const handleGuestAdded = () => {
     setRefreshTrigger(prev => prev + 1);
     loadProgressData(); // Reload progress when guest is added
+    loadGuestCounts(); // Reload guest counts when guest is added
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleLogout = () => {
+    // Add logout logic here
+    setIsMobileMenuOpen(false);
+    router.push('/');
+  };
+
+  const handleAccount = () => {
+    // Add account logic here
+    setIsMobileMenuOpen(false);
+    console.log('Account clicked');
+  };
+
+  const handleNotifications = () => {
+    // Add notifications logic here  
+    setIsMobileMenuOpen(false);
+    console.log('Notifications clicked');
   };
 
   // Load user progress data
@@ -63,8 +91,33 @@ export default function ProfilePage() {
     }
   };
 
+  // Load guest counts for tab badges
+  const loadGuestCounts = async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data: guests, error } = await getGuests(false);
+      
+      if (error) {
+        console.error('Error loading guest counts:', error);
+        return;
+      }
+
+      if (guests) {
+        const counts = {
+          all: guests.length,
+          pending: guests.filter(guest => guest.status === 'pending').length,
+          submitted: guests.filter(guest => guest.status === 'submitted').length,
+        };
+        console.log('Guest counts loaded:', counts); // Debug log
+        setGuestCounts(counts);
+      }
+    } catch (err) {
+      console.error('Error in loadGuestCounts:', err);
+    }
+  };
+
   useEffect(() => {
-    // Redirect to home if not authenticated
     if (!loading && !user) {
       router.push("/");
     }
@@ -74,8 +127,16 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user?.id) {
       loadProgressData();
+      loadGuestCounts();
     }
   }, [user?.id]);
+
+  // Reload guest counts when refreshTrigger changes
+  useEffect(() => {
+    if (user?.id) {
+      loadGuestCounts();
+    }
+  }, [refreshTrigger, user?.id]);
 
   if (loading) {
     return (
@@ -90,75 +151,133 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white text-gray-700">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-8">
-              {/* Logo - Clickable to go back to landing */}
-              <Link href="/" className="hover:opacity-80 transition-opacity">
-                <Image
-                  src="/images/SmallPlates_logo_horizontal.png"
-                  alt="Small Plates & Co."
-                  width={200}
-                  height={40}
-                  className="h-14 w-auto cursor-pointer"
-                />
-              </Link>
-              {/* Divider */}
-              <div className="h-10 w-px bg-gray-300" />
-              {/* Page Title */}
-              <h1 className="text-4xl font-serif font-semibold text-gray-900">Guest List</h1>
-            </div>
-            <div className="flex items-center gap-3">
-              {/* Notification Bell */}
-              <button
-                className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
-                aria-label="Notifications"
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          {/* Logo - Aligned with content */}
+          <Link href="/" className="hover:opacity-80 transition-opacity">
+            <Image
+              src="/images/SmallPlates_logo_horizontal.png"
+              alt="Small Plates & Co."
+              width={200}
+              height={40}
+              className="cursor-pointer"
+              priority
+            />
+          </Link>
+          
+          {/* Desktop: Notification Bell + Profile */}
+          <div className="hidden lg:flex items-center gap-3">
+            {/* Notification Bell */}
+            <button
+              className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label="Notifications"
+            >
+              <Bell className="h-5 w-5 text-gray-600" />
+              {/* Notification Badge */}
+              <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-medium">1</span>
+              </span>
+            </button>
+            
+            <ProfileDropdown />
+          </div>
+
+          {/* Mobile: Burger Menu */}
+          <div className="lg:hidden relative">
+            <button
+              onClick={toggleMobileMenu}
+              className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label="Menu"
+            >
+              <svg 
+                className="h-6 w-6 text-gray-600" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
               >
-                <Bell className="h-5 w-5 text-gray-600" />
-                {/* Notification Badge */}
-                <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs font-medium">1</span>
-                </span>
-              </button>
-              
-              <ProfileDropdown />
-            </div>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
+            {/* Mobile Menu Dropdown */}
+            {isMobileMenuOpen && (
+              <div className="absolute right-0 top-12 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                <button
+                  onClick={handleNotifications}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                >
+                  <Bell className="h-4 w-4" />
+                  Notifications
+                  <span className="ml-auto h-4 w-4 bg-red-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs">1</span>
+                  </span>
+                </button>
+                <button
+                  onClick={handleAccount}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  Account
+                </button>
+                <hr className="my-2 border-gray-200" />
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Logout
+                </button>
+              </div>
+            )}
+
+            {/* Overlay to close menu when clicking outside */}
+            {isMobileMenuOpen && (
+              <div 
+                className="fixed inset-0 z-40" 
+                onClick={() => setIsMobileMenuOpen(false)}
+              ></div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Title Section */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-serif font-bold text-gray-900 mb-8">
-            Your Cookbook is Cooking...
-          </h1>
-        </div>
-
-        {/* Statistics Section - Centered */}
-        <div className="flex justify-center mb-8">
-          <div className="w-full max-w-2xl">
-            <GuestStatisticsComponent />
+        {/* Hero Section */}
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+            {/* Title section with divider - centered on mobile */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:gap-8 mb-4 lg:mb-0 text-center lg:text-left">
+              <h1 className="text-4xl lg:text-5xl font-serif font-bold text-gray-900">Guest List</h1>
+              {/* Vertical divider - only show on desktop */}
+              <div className="hidden lg:block h-10 w-px bg-gray-300"></div>
+              <p className="text-xl lg:text-4xl text-gray-600 font-serif-display mt-1 lg:mt-0">Your Cookbook is Cooking...</p>
+            </div>
+            
+            {/* Right side - Progress bar - centered on mobile */}
+            <div className="flex-shrink-0 flex justify-center lg:justify-end">
+              <ProgressBar 
+                current={progressData?.current_recipes || 0}
+                goal={progressData?.goal_recipes || 40}
+                loading={progressLoading}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Progress Bar Section - Centered */}
-        <div className="flex justify-center mb-8">
-          <ProgressBar 
-            current={progressData?.current_recipes || 0}
-            goal={progressData?.goal_recipes || 40}
-            loading={progressLoading}
-          />
-        </div>
-
-        {/* Recipe Collector Section - Centered */}
-        <div className="flex justify-center mb-8">
-          <div className="w-full max-w-2xl">
-            <RecipeCollectorLink userId={user?.id} />
+        {/* Statistics and Recipe Collector Section */}
+        <div className="mb-16 flex flex-col lg:flex-row gap-4 lg:gap-8 items-stretch">
+          <div className="flex-1">
+            <GuestStatisticsComponent />
+          </div>
+          <div className="flex-1">
+            <RecipeCollectorLink />
           </div>
         </div>
 
@@ -166,16 +285,21 @@ export default function ProfilePage() {
         <GuestTableControls
           searchValue={searchValue}
           onSearchChange={setSearchValue}
-          onFilterChange={setStatusFilter}
           onAddGuest={handleAddGuest}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+          guestCounts={guestCounts}
         />
 
         {/* Guest Table */}
-        <Card>
-          <CardContent className="p-0">
-            <GuestTable key={refreshTrigger} searchValue={searchValue} statusFilter={statusFilter} />
-          </CardContent>
-        </Card>
+        <div>
+          <GuestTable 
+            key={refreshTrigger} 
+            searchValue={searchValue} 
+            statusFilter={statusFilter}
+            onDataLoaded={loadGuestCounts}
+          />
+        </div>
 
 
         {/* Add Guest Modal */}

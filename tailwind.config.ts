@@ -88,7 +88,8 @@ const config: Config = {
   				'5': 'hsl(var(--chart-5))'
   			},
   			smallplates_green: '#00676F',
-  			smallplates_red: '#E33D26'
+  			smallplates_red: '#E33D26',
+  			smallplates_darkblue: '#444459'
   		}
   	}
   },

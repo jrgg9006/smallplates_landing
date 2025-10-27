@@ -29,8 +29,9 @@ interface AddGuestModalProps {
 export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalProps) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [printedName, setPrintedName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  // const [phone, setPhone] = useState('');
   const [hasPlusOne, setHasPlusOne] = useState(false);
   const [plusOneFirstName, setPlusOneFirstName] = useState('');
   const [plusOneLastName, setPlusOneLastName] = useState('');
@@ -46,8 +47,9 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
   const resetForm = () => {
     setFirstName('');
     setLastName('');
+    setPrintedName('');
     setEmail('');
-    setPhone('');
+    // setPhone('');
     setHasPlusOne(false);
     setPlusOneFirstName('');
     setPlusOneLastName('');
@@ -82,8 +84,9 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
       const guestData: GuestFormData = {
         first_name: firstName.trim(),
         last_name: lastName.trim() || '',
+        printed_name: printedName.trim() || undefined,
         email: email.trim() || undefined,
-        phone: phone.trim() || undefined,
+        // phone: phone.trim() || undefined,
         significant_other_name: hasPlusOne ? `${plusOneFirstName} ${plusOneLastName}`.trim() : undefined,
       };
 
@@ -183,7 +186,21 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
               </div>
             </div>
 
-            {/* Add Plus One Section */}
+            <div>
+              <Label htmlFor="printedName" className="text-sm font-medium text-gray-600">Printed Name</Label>
+              <Input
+                id="printedName"
+                value={printedName}
+                onChange={(e) => setPrintedName(e.target.value)}
+                className="mt-1"
+                placeholder="How this person's name should appear in the book (e.g., 'Jaime y Nana', 'Chef Rodriguez')"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Leave empty to use first and last name. This is how the name will appear in the printed cookbook.
+              </p>
+            </div>
+
+            {/* Hidden temporarily - Add Plus One Section 
             <div>
               {!hasPlusOne ? (
                 <button 
@@ -228,6 +245,7 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
                 </div>
               )}
             </div>
+            */}
 
             {/* Contact Information */}
             <div className="space-y-3">
@@ -240,17 +258,6 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
                   onChange={(e) => setEmail(e.target.value)}
                   className="mt-1"
                   placeholder="Email address"
-                />
-              </div>
-              <div>
-                <Label htmlFor="phone" className="text-sm font-medium text-gray-600">Phone</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="mt-1"
-                  placeholder="Phone number"
                 />
               </div>
             </div>
@@ -320,6 +327,9 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
                 >
                   Add Image
                 </Button>
+                <p className="text-xs text-gray-500 mt-2">
+                  This image will serve as inspiration to our image generator algorithms.
+                </p>
               </div>
               </div>
               

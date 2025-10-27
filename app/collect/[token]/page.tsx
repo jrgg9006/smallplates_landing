@@ -287,7 +287,7 @@ export default function CollectionLandingPage() {
                     <h1 className="text-3xl font-semibold text-gray-900 mb-4">
                       {personalizedMessage.beforeName}
                       {personalizedMessage.name && (
-                        <span className="font-serif text-4xl font-bold text-gray-900 mx-1">
+                        <span className="font-semibold text-gray-900 mx-1">
                           {personalizedMessage.name}
                         </span>
                       )}
@@ -350,7 +350,11 @@ export default function CollectionLandingPage() {
                     handleSearch();
                   }}
                   disabled={!firstName.trim() || searching}
-                  className="bg-gray-400 text-white hover:bg-gray-500 px-4 sm:px-8 py-2 rounded-full h-10 min-w-[80px]"
+                  className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[80px] transition-colors ${
+                    !firstName.trim() || searching 
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                      : 'bg-black text-white hover:bg-gray-800'
+                  }`}
                 >
                   {searching ? (
                     <>
@@ -420,10 +424,10 @@ export default function CollectionLandingPage() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-sm font-medium text-gray-900">
                       Welcome! You&apos;re not in the list yet
                     </h3>
-                    <p className="text-gray-600 mb-4">
+                    <p className="text-gray-600 mb-4 text-sm">
                       No worries! We&apos;ll add you when you submit your recipe.
                       {lastName.trim() && (
                         <span> We&apos;ll use <strong>{firstName} {lastName}</strong> as your name.</span>
@@ -436,7 +440,7 @@ export default function CollectionLandingPage() {
                       onClick={handleContinueAsNew}
                       className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors text-left"
                     >
-                      <span className="text-gray-900 font-medium">
+                      <span className="text-gray-900 font-medium text-sm">
                         Continue to Recipe Form
                       </span>
                       <svg 
@@ -452,13 +456,15 @@ export default function CollectionLandingPage() {
                 )}
               </div>
             )}
-              {/* Instructions */}
-              <div className="text-center text-sm text-gray-500 mt-6">
-                <p>
-                  After finding yourself, you&apos;ll be able to submit your favorite recipe 
-                  to be included in the collection.
-                </p>
-              </div>
+              {/* Instructions - only show if search hasn't been completed or if results were found */}
+              {(!searchCompleted || (searchCompleted && searchResults.length > 0)) && (
+                <div className="text-center text-sm text-gray-500 mt-6">
+                  <p>
+                    After finding yourself, you&apos;ll be able to submit your favorite recipe 
+                    to be included in the collection.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

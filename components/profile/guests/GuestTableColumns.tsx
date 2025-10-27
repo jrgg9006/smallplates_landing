@@ -15,21 +15,27 @@ import "@/lib/types/table";
 function StatusBadge({ status }: { status: Guest["status"] }) {
   const styles = {
     pending: "bg-gray-100 text-gray-700",
-    submitted: "bg-blue-100 text-blue-700",
+    submitted: "bg-green-100 text-green-700",
     reached_out: "bg-green-100 text-green-700",
   };
 
   const labels = {
     pending: "Pending",
-    submitted: "Submitted",
+    submitted: "Received",
     reached_out: "Reached Out",
+  };
+
+  const sizeClasses = {
+    pending: "px-3 py-1 text-sm",
+    submitted: "px-3 py-1 text-sm",
+    reached_out: "px-2.5 py-0.5 text-xs",
   };
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+      className={`inline-flex items-center rounded-full font-medium ${
         styles[status]
-      }`}
+      } ${sizeClasses[status]}`}
     >
       {labels[status]}
     </span>
@@ -87,7 +93,7 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
   };
 
   // Check if guest has any contact information
-  const hasContactInfo = (guest.email && guest.email.trim()) || (guest.phone && guest.phone.trim());
+  const hasContactInfo = (guest.email && guest.email.trim() && !guest.email.startsWith('NO_EMAIL_')) || (guest.phone && guest.phone.trim());
 
   const handleCloseMessageModal = () => {
     console.log('SendMessageModal closing, calling onModalClose');
@@ -103,8 +109,7 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
       <div className="flex justify-end items-center gap-1" onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}>
         <Button
           variant="ghost"
-          size="icon"
-          className={`h-8 w-8 ${!hasContactInfo ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`h-12 w-12 ${!hasContactInfo ? 'opacity-50 cursor-not-allowed' : ''}`}
           onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
             if (hasContactInfo) {
@@ -115,12 +120,11 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
           aria-label={hasContactInfo ? "Send message" : "No contact info available"}
           title={hasContactInfo ? "Send message" : "No contact info available"}
         >
-          <Mail className="h-4 w-4" />
+          <Mail className="h-8 w-8" />
         </Button>
         <Button
           variant="ghost"
-          size="icon"
-          className="h-8 w-8"
+          className="h-12 w-12"
           onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
             if (onAddRecipe) {
@@ -130,12 +134,11 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
           aria-label="Add recipe"
           title="Add recipe"
         >
-          <ArrowUp className="h-4 w-4" />
+          <ArrowUp className="h-8 w-8" />
         </Button>
         <Button
           variant="ghost"
-          size="icon"
-          className="h-8 w-8"
+          className="h-12 w-12"
           onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
             setShowDeleteModal(true);
@@ -143,7 +146,7 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
           aria-label="Delete guest"
           title="Delete guest"
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-8 w-8" />
         </Button>
       </div>
 
@@ -172,7 +175,7 @@ export const columns: ColumnDef<Guest>[] = [
         type="checkbox"
         checked={table.getIsAllPageRowsSelected()}
         onChange={(e) => table.toggleAllPageRowsSelected(e.target.checked)}
-        className="h-4 w-4 rounded border-gray-300 text-black focus:ring-2 focus:ring-black focus:ring-offset-2"
+        className="h-4 w-4 rounded border-gray-200 text-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
         aria-label="Select all"
       />
     ),
@@ -182,7 +185,7 @@ export const columns: ColumnDef<Guest>[] = [
         checked={row.getIsSelected()}
         onChange={(e) => row.toggleSelected(e.target.checked)}
         onClick={(e: React.MouseEvent<HTMLInputElement>) => e.stopPropagation()}
-        className="h-4 w-4 rounded border-gray-300 text-black focus:ring-2 focus:ring-black focus:ring-offset-2"
+        className="h-4 w-4 rounded border-gray-200 text-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
         aria-label="Select row"
       />
     ),
@@ -196,34 +199,49 @@ export const columns: ColumnDef<Guest>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="h-auto p-0 font-medium"
+          className="h-auto p-0 hover:bg-transparent border-0 shadow-none table-header-style justify-start"
         >
-          Name
-          <ArrowUpDown className="ml-1 h-4 w-4" />
+          <span className="table-header-style">Name</span>
+          <ArrowUpDown className="ml-2 h-3 w-3 text-white opacity-70" />
         </Button>
       );
     },
     cell: ({ row }) => {
       const guest = row.original;
       const fullName = `${guest.first_name} ${guest.last_name || ''}`.trim();
-      return <div className="font-medium">{fullName}</div>;
+      const hasPrintedName = guest.printed_name && guest.printed_name.trim();
+      
+      if (hasPrintedName) {
+        return (
+          <div className="space-y-1">
+            <div className="font-normal text-lg">
+              {guest.printed_name}
+            </div>
+            <div className="text-sm text-gray-500">
+              {fullName}
+            </div>
+          </div>
+        );
+      }
+      
+      return <div className="font-normal text-lg">{fullName}</div>;
     },
   },
   {
     id: "contact",
-    header: "Email & Phone",
+    header: () => <div className="table-header-style">Email & Phone</div>,
     cell: ({ row }) => {
       const guest = row.original;
       return (
         <div className="space-y-1">
-          <div className="text-xs">
-            {guest.email && guest.email.trim() ? (
+          <div className="text-normal">
+            {guest.email && guest.email.trim() && !guest.email.startsWith('NO_EMAIL_') ? (
               guest.email
             ) : (
               <span className="text-red-500">No email</span>
             )}
           </div>
-          <div className="text-xs">
+          <div className="text-small">
             {guest.phone && guest.phone.trim() ? (
               <span className="text-gray-500">{guest.phone}</span>
             ) : (
@@ -236,9 +254,24 @@ export const columns: ColumnDef<Guest>[] = [
   },
   {
     accessorKey: "status",
-    header: "Recipe Status",
+    header: () => <div className="table-header-style">Recipe Status</div>,
     cell: ({ row }) => {
-      return <StatusBadge status={row.getValue("status")} />;
+      const guest = row.original;
+      const status = row.getValue("status") as Guest["status"];
+      const showRecipeCount = status !== 'pending';
+      
+      return (
+        <div className="flex flex-col justify-center space-y-1 h-full">
+          <div>
+            <StatusBadge status={status} />
+          </div>
+          {showRecipeCount && (
+            <div className="text-xs text-gray-500">
+              Recipes: {guest.recipes_received || 0}
+            </div>
+          )}
+        </div>
+      );
     },
   },
   {
