@@ -272,7 +272,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Statistics and Recipe Collector Section */}
-        <div className="mb-16 flex flex-col lg:flex-row gap-4 lg:gap-8 items-stretch">
+        <div className="mb-8 lg:mb-16 flex flex-col lg:flex-row gap-4 lg:gap-8 items-stretch">
           <div className="flex-1">
             <GuestStatisticsComponent />
           </div>

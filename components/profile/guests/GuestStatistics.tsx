@@ -82,20 +82,20 @@ export function GuestStatisticsComponent({}: GuestStatisticsProps = {}) {
   ];
 
   return (
-    <div className="bg-gray-50 rounded-lg flex w-full overflow-hidden h-[88px]">
+    <div className="bg-gray-50 rounded-lg flex w-full overflow-hidden h-[110px] lg:h-[88px]">
       {statItems.map((stat, index) => (
-        <div key={index} className="flex-1 px-4 sm:px-6 py-6 text-center relative flex flex-col">
+        <div key={index} className="flex-1 px-3 lg:px-6 py-4 lg:py-6 text-center relative flex flex-col">
           {/* Fixed position for numbers - always at the same height */}
-          <div className="text-lg sm:text-xl font-bold text-gray-900 mb-1 h-6 flex items-center justify-center">
+          <div className="text-lg sm:text-xl font-bold text-gray-900 mb-2 h-6 flex items-center justify-center">
             {stat.value}
           </div>
           {/* Text below numbers - can wrap to multiple lines */}
           <div className="text-xs text-gray-600 font-medium leading-tight flex-1 flex items-start justify-center">
-            <span className="text-center">{stat.label}</span>
+            <span className="text-center max-w-full">{stat.label}</span>
           </div>
           {/* Vertical divider - don't show after last item */}
           {index < statItems.length - 1 && (
-            <div className="absolute right-0 top-1/2 transform -translate-y-1/2 h-6 w-px bg-gray-300"></div>
+            <div className="absolute right-0 top-1/2 transform -translate-y-1/2 h-8 lg:h-6 w-px bg-gray-300"></div>
           )}
         </div>
       ))}

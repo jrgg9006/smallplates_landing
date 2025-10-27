@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Guest } from "@/lib/types/database";
-import { Mail, ArrowUp, Trash2, Phone, User } from "lucide-react";
+import { Mail, ArrowUp, Trash2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeleteGuestModal } from "./DeleteGuestModal";
 import { SendMessageModal } from "./SendMessageModal";
@@ -58,8 +58,7 @@ export function MobileGuestCard({
 
   // Contact info validation
   const hasEmail = guest.email && guest.email.trim() && !guest.email.startsWith('NO_EMAIL_');
-  const hasPhone = guest.phone && guest.phone.trim();
-  const hasContactInfo = hasEmail || hasPhone;
+  const hasContactInfo = hasEmail;
 
   // Recipe count display
   const showRecipeCount = guest.status !== 'pending';
@@ -153,13 +152,6 @@ export function MobileGuestCard({
             </span>
           </div>
           
-          {/* Phone */}
-          <div className="flex items-center gap-2">
-            <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
-            <span className="text-sm text-gray-600">
-              {hasPhone ? guest.phone : <span className="text-red-500">No mobile</span>}
-            </span>
-          </div>
         </div>
 
         {/* Recipe Count (if applicable) */}

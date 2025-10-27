@@ -93,7 +93,7 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
   };
 
   // Check if guest has any contact information
-  const hasContactInfo = (guest.email && guest.email.trim() && !guest.email.startsWith('NO_EMAIL_')) || (guest.phone && guest.phone.trim());
+  const hasContactInfo = (guest.email && guest.email.trim() && !guest.email.startsWith('NO_EMAIL_'));
 
   const handleCloseMessageModal = () => {
     console.log('SendMessageModal closing, calling onModalClose');
@@ -229,25 +229,16 @@ export const columns: ColumnDef<Guest>[] = [
   },
   {
     id: "contact",
-    header: () => <div className="table-header-style">Email & Phone</div>,
+    header: () => <div className="table-header-style">Email</div>,
     cell: ({ row }) => {
       const guest = row.original;
       return (
-        <div className="space-y-1">
-          <div className="text-normal">
-            {guest.email && guest.email.trim() && !guest.email.startsWith('NO_EMAIL_') ? (
-              guest.email
-            ) : (
-              <span className="text-red-500">No email</span>
-            )}
-          </div>
-          <div className="text-small">
-            {guest.phone && guest.phone.trim() ? (
-              <span className="text-gray-500">{guest.phone}</span>
-            ) : (
-              <span className="text-red-500">No mobile</span>
-            )}
-          </div>
+        <div className="text-normal">
+          {guest.email && guest.email.trim() && !guest.email.startsWith('NO_EMAIL_') ? (
+            guest.email
+          ) : (
+            <span className="text-red-500">No email</span>
+          )}
         </div>
       );
     },
