@@ -45,9 +45,11 @@ export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
     
     setIsSharing(true);
     
-    // PRUEBA 1: URL estática simple (Google)
+    // PRUEBA 2: URL de tu dominio con title y text
     const shareData = {
-      url: 'https://google.com'
+      title: 'Recipe Collection',
+      text: 'Share your recipe',
+      url: 'https://smallplatesandcompany.com'
     };
     // Original: url: collectorLink
     
