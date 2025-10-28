@@ -185,7 +185,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Mobile: Burger Menu */}
-          <div className="lg:hidden relative">
+          <div className="lg:hidden">
             <button
               onClick={toggleMobileMenu}
               className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
@@ -200,52 +200,36 @@ export default function ProfilePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-
-            {/* Mobile Menu Dropdown */}
-            {isMobileMenuOpen && (
-              <div className="absolute right-0 top-12 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                <button
-                  onClick={handleNotifications}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
-                >
-                  <Bell className="h-4 w-4" />
-                  Notifications
-                  <span className="ml-auto h-4 w-4 bg-red-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs">1</span>
-                  </span>
-                </button>
-                <button
-                  onClick={handleAccount}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
-                >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  Account
-                </button>
-                <hr className="my-2 border-gray-200" />
-                <button
-                  onClick={handleLogout}
-                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
-                >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  Logout
-                </button>
-              </div>
-            )}
-
-            {/* Overlay to close menu when clicking outside */}
-            {isMobileMenuOpen && (
-              <div 
-                className="fixed inset-0 z-40" 
-                onClick={() => setIsMobileMenuOpen(false)}
-              ></div>
-            )}
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden border-t border-gray-100 bg-white">
+          <div className="px-6 py-4 space-y-3">
+            <button
+              onClick={handleAccount}
+              className="block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+            >
+              Account
+            </button>
+            <button
+              onClick={handleNotifications}
+              className="relative block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+            >
+              Notifications
+              <span className="absolute top-2 right-6 h-2 w-2 bg-red-500 rounded-full"></span>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="block w-full text-center py-3 px-5 rounded-full bg-black text-white font-semibold hover:bg-gray-800 transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
