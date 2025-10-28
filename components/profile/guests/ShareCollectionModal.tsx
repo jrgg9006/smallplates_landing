@@ -170,7 +170,7 @@ export function ShareCollectionModal({
       <Drawer.Root open={isOpen} onOpenChange={onClose}>
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 bg-black/40" />
-          <Drawer.Content className="fixed bottom-0 left-0 right-0 z-50 mt-24 flex h-full max-h-[85vh] flex-col rounded-t-[10px] bg-white">
+          <Drawer.Content className="fixed bottom-0 left-0 right-0 z-50 mt-24 flex h-full max-h-[75vh] flex-col rounded-t-[10px] bg-white">
             <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300" />
             <div className="p-6">
               <Drawer.Title className="text-center text-lg font-semibold mb-6">
