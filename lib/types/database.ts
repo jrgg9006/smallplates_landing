@@ -192,6 +192,47 @@ export interface Database {
           retry_count?: number;
         };
       };
+      shipping_addresses: {
+        Row: {
+          id: string;
+          user_id: string;
+          recipient_name: string;
+          street_address: string;
+          apartment_unit: string | null;
+          city: string;
+          state: string;
+          postal_code: string;
+          country: string;
+          phone_number: string | null;
+          is_default: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          recipient_name: string;
+          street_address: string;
+          apartment_unit?: string | null;
+          city: string;
+          state: string;
+          postal_code: string;
+          country?: string;
+          phone_number?: string | null;
+          is_default?: boolean;
+        };
+        Update: {
+          recipient_name?: string;
+          street_address?: string;
+          apartment_unit?: string | null;
+          city?: string;
+          state?: string;
+          postal_code?: string;
+          country?: string;
+          phone_number?: string | null;
+          is_default?: boolean;
+        };
+      };
     };
     Functions: {
       get_guest_statistics: {
@@ -243,6 +284,11 @@ export interface Database {
 export type Profile = Database['public']['Tables']['profiles']['Row'];
 export type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
 export type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
+
+// Shipping Address types
+export type ShippingAddress = Database['public']['Tables']['shipping_addresses']['Row'];
+export type ShippingAddressInsert = Database['public']['Tables']['shipping_addresses']['Insert'];
+export type ShippingAddressUpdate = Database['public']['Tables']['shipping_addresses']['Update'];
 
 export type Guest = Database['public']['Tables']['guests']['Row'];
 export type GuestInsert = Database['public']['Tables']['guests']['Insert'];

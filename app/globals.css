@@ -72,3 +72,24 @@
     @apply font-normal text-gray-900 font-sans text-base;
   }
 }
+
+/* Force input backgrounds to be white */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+input[type="search"],
+input[type="url"] {
+  background-color: #ffffff !important;
+}
+
+input[type="text"]:disabled,
+input[type="email"]:disabled,
+input[type="password"]:disabled,
+input[type="tel"]:disabled,
+input[type="number"]:disabled,
+input[type="search"]:disabled,
+input[type="url"]:disabled {
+  background-color: #f9fafb !important;
+}

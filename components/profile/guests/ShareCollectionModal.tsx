@@ -153,14 +153,6 @@ export function ShareCollectionModal({
         </div>
       )}
 
-      {/* WhatsApp troubleshooting for iOS - only show on mobile */}
-      {isMobile && isIOSDevice() && (
-        <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl">
-          <p className="text-xs text-blue-700">
-            <strong>iOS tip:</strong> If WhatsApp doesn&apos;t open, make sure you have WhatsApp installed and try copying the link instead.
-          </p>
-        </div>
-      )}
     </div>
   );
 
