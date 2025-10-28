@@ -6,27 +6,36 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getUserCollectionToken } from "@/lib/supabase/collection";
 import { createShareURL } from "@/lib/utils/sharing";
+import { getCurrentProfile } from "@/lib/supabase/profiles";
+import { ShareCollectionModal } from "./ShareCollectionModal";
 
 interface RecipeCollectorLinkProps {
   // No props needed
 }
 
 export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
-  const [copied, setCopied] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isSharing, setIsSharing] = useState(false);
+  const [userFullName, setUserFullName] = useState<string | null>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
 
-  // Load collection token on component mount
+  // Load collection token and user profile on component mount
   useEffect(() => {
-    async function loadToken() {
+    async function loadData() {
       try {
-        const { data, error } = await getUserCollectionToken();
-        if (error) {
-          setError(error);
+        // Load token
+        const { data: tokenData, error: tokenError } = await getUserCollectionToken();
+        if (tokenError) {
+          setError(tokenError);
         } else {
-          setToken(data);
+          setToken(tokenData);
+        }
+        
+        // Load user profile
+        const { data: profile, error: profileError } = await getCurrentProfile();
+        if (!profileError && profile) {
+          setUserFullName(profile.full_name || null);
         }
       } catch (err) {
         setError('Failed to load collection link');
@@ -35,50 +44,26 @@ export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
       }
     }
 
-    loadToken();
+    loadData();
   }, []);
 
   const collectorLink = token && typeof window !== 'undefined' ? createShareURL(window.location.origin, token) : '';
 
-  const handleShareLink = async () => {
-    if (!collectorLink) return;
+  const handleShareLink = () => {
+    console.log('🔥 handleShareLink called!', {
+      collectorLink,
+      userAgent: navigator.userAgent,
+      timestamp: new Date().toISOString(),
+      isMobile: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+    });
     
-    setIsSharing(true);
-    
-    // PRUEBA 2: URL de tu dominio con title y text
-    const shareData = {
-      title: 'Recipe Collection',
-      text: 'Share your recipe',
-      url: 'https://smallplatesandcompany.com'
-    };
-    // Original: url: collectorLink
-    
-    try {
-      // Clean Web Share API implementation per MDN guidelines
-      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-        await navigator.share(shareData);
-      } else {
-        // Simple fallback to clipboard
-        await navigator.clipboard.writeText(collectorLink);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      }
-    } catch (err) {
-      // Handle sharing errors per MDN recommendations
-      if (err instanceof Error && err.name !== 'AbortError') {
-        try {
-          await navigator.clipboard.writeText(collectorLink);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        } catch (clipboardErr) {
-          console.error("Failed to copy link:", clipboardErr);
-          setError("Failed to share or copy link");
-          setTimeout(() => setError(null), 3000);
-        }
-      }
-    } finally {
-      setIsSharing(false);
+    if (!collectorLink) {
+      console.log('❌ No collector link available');
+      return;
     }
+    
+    console.log('✅ Opening share modal');
+    setShowShareModal(true);
   };
 
 
@@ -116,7 +101,8 @@ export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
   }
 
   return (
-    <div className="bg-gray-50 rounded-lg flex w-full overflow-hidden h-[88px]">
+    <>
+      <div className="bg-gray-50 rounded-lg flex w-full overflow-hidden h-[88px]">
       {/* Left side - Title and description */}
       <div className="px-4 sm:px-6 py-6 relative flex flex-col justify-center w-auto flex-shrink-0">
         <h3 className="text-sm font-semibold text-gray-900 mb-1">Recipe Collector</h3>
@@ -145,10 +131,10 @@ export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
         <Button
           onClick={handleShareLink}
           className="bg-gray-900 text-white hover:bg-gray-800 px-3 sm:px-6 py-2 h-8 text-sm font-medium whitespace-nowrap w-full sm:w-auto sm:flex-shrink-0"
-          disabled={!collectorLink || isSharing}
+          disabled={!collectorLink}
           title="Copy link to share with guests via any messaging app"
         >
-{isSharing ? "Sharing..." : copied ? "Copied!" : "Copy Form Link"}
+Copy Form Link
         </Button>
       </div>
       
@@ -156,5 +142,14 @@ export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
         <div className="absolute bottom-1 right-4 text-red-600 text-xs">{error}</div>
       )}
     </div>
+    
+    {/* Share Modal */}
+    <ShareCollectionModal
+      isOpen={showShareModal}
+      onClose={() => setShowShareModal(false)}
+      collectionUrl={collectorLink}
+      userName={userFullName}
+    />
+    </>
   );
 }
