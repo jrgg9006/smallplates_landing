@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Drawer } from "vaul";
 import { Button } from "@/components/ui/button";
 import { Copy, Mail, MessageCircle, Facebook } from "lucide-react";
 import { validateWhatsAppURL, getWhatsAppTroubleshootingTips, isMobileDevice, isIOSDevice } from "@/lib/utils/sharing";
@@ -112,77 +113,87 @@ export function ShareCollectionModal({
     }
   ];
 
+  // Share content component (reusable for both mobile and desktop)
+  const ShareContent = () => (
+    <div className="space-y-4">
+      {/* Share preview */}
+      <div className="p-4 bg-gray-50 rounded-xl">
+        <p className="text-sm text-gray-600 mb-2">{shareMessage}</p>
+        <p className="text-xs text-gray-500 truncate font-mono">{collectionUrl}</p>
+      </div>
+
+      {/* Share options - single column on mobile */}
+      <div className={isMobile ? "space-y-2" : "grid grid-cols-2 gap-3"}>
+        {shareOptions.map((option) => {
+          const Icon = option.icon;
+          return (
+            <Button
+              key={option.id}
+              variant="outline"
+              className={
+                isMobile 
+                  ? "w-full flex items-center justify-start gap-4 h-14 text-left border-gray-200"
+                  : "flex flex-col items-center gap-2 h-24 relative"
+              }
+              onClick={option.action}
+            >
+              <Icon className={isMobile ? "w-5 h-5" : "w-6 h-6"} />
+              <span className={isMobile ? "text-base" : "text-sm"}>
+                {option.label}
+              </span>
+            </Button>
+          );
+        })}
+      </div>
+
+      {/* Error message */}
+      {error && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+
+      {/* WhatsApp troubleshooting for iOS - only show on mobile */}
+      {isMobile && isIOSDevice() && (
+        <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl">
+          <p className="text-xs text-blue-700">
+            <strong>iOS tip:</strong> If WhatsApp doesn&apos;t open, make sure you have WhatsApp installed and try copying the link instead.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+
+  // Mobile version with Drawer
+  if (isMobile) {
+    return (
+      <Drawer.Root open={isOpen} onOpenChange={onClose}>
+        <Drawer.Portal>
+          <Drawer.Overlay className="fixed inset-0 bg-black/40" />
+          <Drawer.Content className="fixed bottom-0 left-0 right-0 z-50 mt-24 flex h-full max-h-[85vh] flex-col rounded-t-[10px] bg-white">
+            <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300" />
+            <div className="p-6">
+              <Drawer.Title className="text-center text-lg font-semibold mb-6">
+                Share Your Collection Link
+              </Drawer.Title>
+              <ShareContent />
+            </div>
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
+    );
+  }
+
+  // Desktop version with Dialog
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent 
-        className={
-          isMobile 
-            ? "fixed bottom-0 left-0 right-0 top-auto max-h-[85vh] rounded-t-3xl p-0 animate-in slide-in-from-bottom fade-in-0 duration-300 z-50 bg-white pb-safe" 
-            : "sm:max-w-md"
-        }
-      >
-        {/* Mobile drag handle */}
-        {isMobile && (
-          <div className="sticky top-0 flex justify-center pt-2 pb-1 bg-white rounded-t-3xl">
-            <div className="w-12 h-1 bg-gray-300 rounded-full" />
-          </div>
-        )}
-        
-        <div className={isMobile ? "px-6 pb-8 pb-safe" : ""}>
-          <DialogHeader className={isMobile ? "pb-4" : ""}>
-            <DialogTitle className="text-center text-lg font-semibold">
-              Share Your Collection Link
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            {/* Share preview */}
-            <div className="p-4 bg-gray-50 rounded-xl">
-              <p className="text-sm text-gray-600 mb-2">{shareMessage}</p>
-              <p className="text-xs text-gray-500 truncate font-mono">{collectionUrl}</p>
-            </div>
-
-            {/* Share options - single column on mobile */}
-            <div className={isMobile ? "space-y-2" : "grid grid-cols-2 gap-3"}>
-              {shareOptions.map((option) => {
-                const Icon = option.icon;
-                return (
-                  <Button
-                    key={option.id}
-                    variant="outline"
-                    className={
-                      isMobile 
-                        ? "w-full flex items-center justify-start gap-4 h-16 text-left border-gray-200"
-                        : "flex flex-col items-center gap-2 h-24 relative"
-                    }
-                    onClick={option.action}
-                  >
-                    <Icon className={isMobile ? "w-5 h-5" : "w-6 h-6"} />
-                    <span className={isMobile ? "text-base font-medium" : "text-sm"}>
-                      {option.label}
-                    </span>
-                  </Button>
-                );
-              })}
-            </div>
-
-            {/* Error message */}
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
-                <p className="text-sm text-red-600">{error}</p>
-              </div>
-            )}
-
-            {/* WhatsApp troubleshooting for iOS - only show on mobile */}
-            {isMobile && isIOSDevice() && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl">
-                <p className="text-xs text-blue-700">
-                  <strong>iOS tip:</strong> If WhatsApp doesn&apos;t open, make sure you have WhatsApp installed and try copying the link instead.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-center">
+            Share Your Collection Link
+          </DialogTitle>
+        </DialogHeader>
+        <ShareContent />
       </DialogContent>
     </Dialog>
   );

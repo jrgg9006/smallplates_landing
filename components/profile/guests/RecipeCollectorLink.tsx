@@ -50,19 +50,7 @@ export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
   const collectorLink = token && typeof window !== 'undefined' ? createShareURL(window.location.origin, token) : '';
 
   const handleShareLink = () => {
-    console.log('🔥 handleShareLink called!', {
-      collectorLink,
-      userAgent: navigator.userAgent,
-      timestamp: new Date().toISOString(),
-      isMobile: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-    });
-    
-    if (!collectorLink) {
-      console.log('❌ No collector link available');
-      return;
-    }
-    
-    console.log('✅ Opening share modal');
+    if (!collectorLink) return;
     setShowShareModal(true);
   };
 
