@@ -58,9 +58,13 @@ export default function ProfilePage() {
   };
 
   const handleAccount = () => {
-    // Add account logic here
     setIsMobileMenuOpen(false);
-    console.log('Account clicked');
+    router.push('/profile/account');
+  };
+
+  const handleOrders = () => {
+    setIsMobileMenuOpen(false);
+    router.push('/profile/orders');
   };
 
   const handleNotifications = () => {
@@ -212,7 +216,13 @@ export default function ProfilePage() {
               onClick={handleAccount}
               className="block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
             >
-              Account
+              Account Settings
+            </button>
+            <button
+              onClick={handleOrders}
+              className="block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+            >
+              Orders & Shipping
             </button>
             <button
               onClick={handleNotifications}
