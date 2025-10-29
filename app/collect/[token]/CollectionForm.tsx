@@ -81,6 +81,7 @@ export default function CollectionForm() {
   const [searchResults, setSearchResults] = useState<Guest[]>([]);
   const [searchCompleted, setSearchCompleted] = useState(false);
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
+  const [fullName, setFullName] = useState('');
 
   // Validate token on component mount
   useEffect(() => {
@@ -180,9 +181,13 @@ export default function CollectionForm() {
 
   // Handle continue for new guest
   const handleContinueAsNew = () => {
+    const name = (fullName || `${firstName} ${lastName}` ).trim();
+    const parts = name.split(/\s+/);
+    const derivedLast = parts.length > 1 ? parts.pop() as string : (lastName || '');
+    const derivedFirst = parts.length > 0 ? parts.join(' ') : (firstName || name);
     const guestData = {
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
+      firstName: derivedFirst.trim(),
+      lastName: derivedLast.trim(),
       existing: false
     };
 
@@ -429,16 +434,25 @@ export default function CollectionForm() {
                     </h3>
                     <p className="text-gray-600 mb-4 text-sm">
                       No worries! We&apos;ll add you when you submit your recipe.
-                      {lastName.trim() && (
-                        <span> We&apos;ll use <strong>{firstName} {lastName}</strong> as your name.</span>
-                      )}
-                      {!lastName.trim() && (
-                        <span> We&apos;ll use <strong>{firstName}</strong> as your name.</span>
-                      )}
                     </p>
+                    {/* Ask for full name inline (single field to reduce friction) */}
+                    <div className="grid grid-cols-1 gap-3">
+                      <div>
+                        <label htmlFor="fullName" className="block text-xs font-medium text-gray-700 mb-1">Name</label>
+                        <Input
+                          id="fullName"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          placeholder={firstName || lastName ? `e.g., John ${lastName}` : 'Your full name'}
+                          autoComplete="name"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500">This is how we’ll print your name in the cookbook.</p>
+                    </div>
                     <button
                       onClick={handleContinueAsNew}
-                      className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors text-left"
+                      disabled={!((fullName || firstName).trim())}
+                      className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span className="text-gray-900 font-medium text-sm">
                         Continue to Recipe Form

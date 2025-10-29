@@ -173,18 +173,18 @@ export async function submitGuestRecipe(
       }
     } else {
       // Create new guest
-      const newGuestData: GuestInsert = {
+      const newGuestData = {
         user_id: tokenInfo.user_id,
         first_name: submission.first_name.trim(),
         last_name: submission.last_name.trim(),
-        email: submission.email?.trim() || '',
+        email: submission.email?.trim() || null,
         phone: submission.phone?.trim() || null,
         status: 'submitted',
         source: 'collection',
         number_of_recipes: 1,
         recipes_received: 0,
         is_archived: false,
-      };
+      } as unknown as GuestInsert;
 
       const { data: newGuest, error: guestError } = await supabase
         .from('guests')
@@ -232,6 +232,33 @@ export async function submitGuestRecipe(
   } catch (err) {
     console.error('Error submitting guest recipe:', err);
     return { data: null, error: 'An unexpected error occurred while submitting the recipe' };
+  }
+}
+
+/**
+ * Update a guest recipe with notification preferences (optional)
+ */
+export async function updateGuestRecipeNotification(
+  recipeId: string,
+  opts: { notify_opt_in?: boolean; notify_email?: string | null }
+): Promise<{ error: string | null }> {
+  const supabase = createSupabaseClient();
+  try {
+    const update: Record<string, any> = {};
+    if (typeof opts.notify_opt_in === 'boolean') update.notify_opt_in = opts.notify_opt_in;
+    if (typeof opts.notify_email !== 'undefined') update.notify_email = opts.notify_email || null;
+
+    if (Object.keys(update).length === 0) return { error: null };
+
+    const { error } = await supabase
+      .from('guest_recipes')
+      .update(update)
+      .eq('id', recipeId);
+
+    return { error: error?.message || null };
+  } catch (err) {
+    console.error('Error updating recipe notification:', err);
+    return { error: 'Failed to update notification preferences' };
   }
 }
 

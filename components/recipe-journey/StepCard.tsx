@@ -39,7 +39,6 @@ interface StepCardProps {
   onNext: () => void;
   onPrevious: () => void;
   onSubmit: () => void;
-  onReset: () => void;
   canGoNext: boolean;
   canGoPrevious: boolean;
   isLastStep: boolean;
@@ -56,7 +55,6 @@ export default function StepCard({
   onNext,
   onPrevious,
   onSubmit,
-  onReset,
   canGoNext,
   canGoPrevious,
   isLastStep,
@@ -193,18 +191,23 @@ export default function StepCard({
       case 'summary':
         if (submitSuccess) {
           return (
-            <div className="space-y-6 text-center">
-              <div className="text-6xl">🎉</div>
+            <div className="space-y-6">
+              <div className="text-6xl text-center">🎉</div>
               <h1 className="font-serif text-3xl md:text-4xl font-semibold text-gray-900 mb-3">
                 That&apos;s it... Enjoy & Connect through Food!
               </h1>
+              <p className="text-lg text-gray-600 max-w-xl mx-auto">
+                Your delicious contribution will be a wonderful addition to the cookbook. 
+                You&apos;ll be redirected shortly.
+              </p>
             </div>
           );
         }
 
         return (
-          <div className="space-y-6 w-full max-w-lg mx-auto pt-12">
+          <div className="space-y-8 max-w-lg mx-auto">
             <div className="text-center space-y-4">
+              <div className="text-6xl text-center">🎊</div>
               <h1 className="font-serif text-3xl md:text-4xl font-semibold text-gray-900 mb-3">
                 {content.title}
               </h1>
@@ -214,8 +217,8 @@ export default function StepCard({
             </div>
             
             {/* Recipe Summary */}
-            <div className="space-y-6 text-left w-full">
-              <h2 className="text-2xl font-semibold text-gray-900 text-center mb-6">
+            <div className="space-y-6 text-left">
+              <h2 className="text-2xl font-semibold text-gray-900 text-center mb-8">
                 {recipeData.recipeName || 'Your Recipe'}
               </h2>
               
@@ -223,7 +226,8 @@ export default function StepCard({
                 <div className="border-l-4 border-gray-200 pl-6">
                   <h3 className="font-semibold text-gray-700 mb-2">Ingredients:</h3>
                   <p className="text-gray-600 whitespace-pre-line">
-                    {recipeData.ingredients}
+                    {recipeData.ingredients.slice(0, 150)}
+                    {recipeData.ingredients.length > 150 && '...'}
                   </p>
                 </div>
               )}
@@ -232,7 +236,8 @@ export default function StepCard({
                 <div className="border-l-4 border-gray-200 pl-6">
                   <h3 className="font-semibold text-gray-700 mb-2">Instructions:</h3>
                   <p className="text-gray-600 whitespace-pre-line">
-                    {recipeData.instructions}
+                    {recipeData.instructions.slice(0, 150)}
+                    {recipeData.instructions.length > 150 && '...'}
                   </p>
                 </div>
               )}
@@ -241,7 +246,8 @@ export default function StepCard({
                 <div className="border-l-4 border-gray-200 pl-6">
                   <h3 className="font-semibold text-gray-700 mb-2">Your Note:</h3>
                   <p className="text-gray-600 whitespace-pre-line italic">
-                    {recipeData.personalNote}
+                    {recipeData.personalNote.slice(0, 100)}
+                    {recipeData.personalNote.length > 100 && '...'}
                   </p>
                 </div>
               )}
@@ -267,7 +273,7 @@ export default function StepCard({
     }
     if (isLastStep) {
       if (submitting) return 'Submitting...';
-      if (submitSuccess) return 'Share Another Recipe';
+      if (submitSuccess) return 'Submitted! 🎉';
       return 'Submit Recipe 🎉';
     }
     if (step <= 4) {
@@ -284,134 +290,60 @@ export default function StepCard({
   };
 
   // Form content component - memoized to prevent unnecessary re-renders (EXACT COPY from OnboardingStep)
-  const FormContent = useMemo(() => {
-    // Allow scroll only for summary type when NOT in success state
-    const allowScroll = content.type === 'summary' && !submitSuccess;
-    
-    if (allowScroll) {
-      // Summary layout - scrollable with centered content
-      return (
-        <div className="w-full min-h-screen flex justify-center px-6 lg:px-12 py-16 lg:py-20">
-          {/* Close button - visible on mobile and desktop */}
-          <button
-            onClick={() => router.push("/")}
-            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors z-10"
-            aria-label="Close recipe journey"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-
-          <div className="max-w-lg">
-            {/* Recipe Journey Content */}
-            <div className="text-center mb-8">
-              {renderContent()}
-            </div>
-
-            {/* Navigation Buttons */}
-            <div className={`flex mt-8 ${step === 1 ? 'justify-center' : 'justify-between'} pb-8`}>
-            {/* Only show Previous button if not on first step */}
-            {step > 1 && (
-              <button
-                onClick={onPrevious}
-                disabled={!canGoPrevious}
-                className="flex items-center space-x-2 text-gray-500 hover:text-gray-700 disabled:opacity-50 bg-transparent border-none cursor-pointer disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronLeft className="w-5 h-5" />
-                <span className="text-lg">Previous</span>
-              </button>
-            )}
-            
-            <button
-              onClick={submitSuccess ? onReset : (isLastStep ? onSubmit : onNext)}
-              disabled={!canProceed() || (!isLastStep && !canGoNext) || submitting}
-              className="flex items-center space-x-3 bg-black hover:bg-gray-800 text-white px-10 py-4 rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-lg font-medium"
-            >
-              {submitting && (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              )}
-              <span>{getNextButtonText()}</span>
-              {!isLastStep && !submitting && <ChevronRight className="w-5 h-5" />}
-            </button>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // Default centered layout for other content types
-    return (
-      <div className="w-full h-full flex flex-col justify-center px-6 lg:px-12 py-8 lg:py-12">
-        {/* Close button - visible on mobile and desktop */}
-        <button
-          onClick={() => router.push("/")}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors z-10"
-          aria-label="Close recipe journey"
+  const FormContent = useMemo(() => (
+    <div className="w-full px-6 lg:px-12 py-8 lg:py-12">
+      {/* Close button - visible on mobile and desktop */}
+      <button
+        onClick={() => router.push("/")}
+        className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors z-10"
+        aria-label="Close recipe journey"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
 
-        <div className="flex-1 flex flex-col justify-center">
-          {/* Recipe Journey Content */}
-          <div className="text-center mb-8">
-            {renderContent()}
-          </div>
-
-          {/* Navigation Buttons */}
-          <div className={`flex mt-8 ${step === 1 ? 'justify-center' : 'justify-between'}`}>
-            {/* Only show Previous button if not on first step */}
-            {step > 1 && (
-              <button
-                onClick={onPrevious}
-                disabled={!canGoPrevious}
-                className="flex items-center space-x-2 text-gray-500 hover:text-gray-700 disabled:opacity-50 bg-transparent border-none cursor-pointer disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronLeft className="w-5 h-5" />
-                <span className="text-lg">Previous</span>
-              </button>
-            )}
-            
-            <button
-              onClick={submitSuccess ? onReset : (isLastStep ? onSubmit : onNext)}
-              disabled={!canProceed() || (!isLastStep && !canGoNext) || submitting}
-              className="flex items-center space-x-3 bg-black hover:bg-gray-800 text-white px-10 py-4 rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-lg font-medium"
-            >
-              {submitting && (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              )}
-              <span>{getNextButtonText()}</span>
-              {!isLastStep && !submitting && <ChevronRight className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
+      {/* Recipe Journey Content */}
+      <div className="text-center mb-8">
+        {renderContent()}
       </div>
-    );
-  }, [step, content, recipeData, onPrevious, onNext, onSubmit, onReset, canGoNext, canGoPrevious, isLastStep, submitting, submitSuccess, submitError, router, canProceed, getNextButtonText, renderContent]);
+
+      {/* Navigation Buttons */}
+      <div className="flex justify-between mt-8">
+        <button
+          onClick={onPrevious}
+          disabled={!canGoPrevious}
+          className="flex items-center space-x-2 text-gray-500 hover:text-gray-700 disabled:opacity-50 bg-transparent border-none cursor-pointer disabled:cursor-not-allowed transition-colors"
+        >
+          <ChevronLeft className="w-5 h-5" />
+          <span className="text-lg">Previous</span>
+        </button>
+        
+        <button
+          onClick={isLastStep ? onSubmit : onNext}
+          disabled={!canProceed() || (!isLastStep && !canGoNext) || submitting || submitSuccess}
+          className="flex items-center space-x-3 bg-black hover:bg-gray-800 text-white px-10 py-4 rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-lg font-medium"
+        >
+          {submitting && (
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+          )}
+          <span>{getNextButtonText()}</span>
+          {!isLastStep && !submitting && <ChevronRight className="w-5 h-5" />}
+        </button>
+      </div>
+    </div>
+  ), [step, content, recipeData, onPrevious, onNext, onSubmit, canGoNext, canGoPrevious, isLastStep, submitting, submitSuccess, submitError, router, canProceed, getNextButtonText, renderContent]);
 
   // Image component (EXACT COPY from OnboardingStep)
   const ImageSection = () => (
@@ -425,32 +357,25 @@ export default function StepCard({
           className="object-contain"
           priority
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
+          <p className="text-white text-2xl lg:text-3xl font-serif p-8 lg:p-12">
+            No matter how many, we&apos;ll make it happen
+          </p>
+        </div>
       </div>
     </div>
   );
 
   // Render two-column layout with image (EXACT COPY from OnboardingStep)
   return (
-    <div className={`min-h-screen flex flex-col lg:flex-row relative ${content.type === 'summary' ? 'overflow-hidden' : ''}`}>
+    <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Image on left for desktop, hidden on mobile - 40% width */}
       <div className="lg:w-2/5 lg:flex-shrink-0 border-r border-gray-200">
         <ImageSection />
       </div>
       {/* Form content on right - 60% width */}
-      <div className={`lg:w-3/5 relative ${content.type === 'summary' && !submitSuccess ? 'h-screen overflow-y-scroll' : 'flex items-center justify-center min-h-screen lg:min-h-0'}`}>
-        {/* Small Plates Logo - Fixed at top center of content area */}
-        <div className="fixed top-4 left-1/2 lg:left-[70%] transform -translate-x-1/2 z-20 pointer-events-none">
-          <Image
-            src="/images/SmallPlates_logo_horizontal.png"
-            alt="Small Plates & Co"
-            width={160}
-            height={32}
-            className="opacity-80"
-            priority
-          />
-        </div>
-        
-        <div className={`w-full max-w-lg ${content.type === 'summary' && !submitSuccess ? '' : 'h-full'}`}>
+      <div className="lg:w-3/5 flex items-center justify-center relative">
+        <div className="w-full max-w-lg">
           {FormContent}
         </div>
       </div>

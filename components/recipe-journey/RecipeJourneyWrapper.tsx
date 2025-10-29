@@ -1,10 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import type { CollectionTokenInfo, CollectionGuestSubmission } from '@/lib/types/database';
-import { submitGuestRecipe } from '@/lib/supabase/collection';
-import StepCard from './StepCard';
+import { submitGuestRecipe, updateGuestRecipeNotification } from '@/lib/supabase/collection';
+import Frame from './Frame';
+import IntroInfoStep from './steps/IntroInfoStep';
+import RecipeFormStep, { type RecipeData as FormRecipeData } from './steps/RecipeFormStep';
+import SummaryStep from './steps/SummaryStep';
+import SuccessStep from './steps/SuccessStep';
+import WelcomeStep from './steps/WelcomeStep';
+import { journeySteps } from '@/lib/recipe-journey/recipeJourneySteps';
 
 interface GuestData {
   id?: string;
@@ -15,12 +21,7 @@ interface GuestData {
   existing: boolean;
 }
 
-interface RecipeData {
-  recipeName: string;
-  ingredients: string;
-  instructions: string;
-  personalNote: string;
-}
+type RecipeData = FormRecipeData;
 
 interface RecipeJourneyWrapperProps {
   tokenInfo: CollectionTokenInfo;
@@ -30,7 +31,8 @@ interface RecipeJourneyWrapperProps {
 
 export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: RecipeJourneyWrapperProps) {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
+  // steps: 0=welcome, 1=introInfo, 2=recipeForm, 3=summary
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [recipeData, setRecipeData] = useState<RecipeData>({
     recipeName: '',
     ingredients: '',
@@ -40,12 +42,14 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [autosaveState, setAutosaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const isDirtyRef = useRef(false);
+  const lastRecipeIdRef = useRef<string | null>(null);
+  const totalSteps = journeySteps.length;
 
-  const totalSteps = 9;
-
-  // Reset journey function - skip intro and go directly to recipe form
+  // Reset journey: go to form
   const resetJourney = () => {
-    setCurrentStep(5); // Jump directly to "What's the name of your recipe?" step
+    setCurrentStepIndex(1);
     setRecipeData({
       recipeName: '',
       ingredients: '',
@@ -57,110 +61,45 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
     setSubmitting(false);
     // Clear localStorage
     localStorage.removeItem('recipeJourneyData');
+    isDirtyRef.current = false;
   };
 
   // Get the cookbook creator's name for personalization
   const creatorName = tokenInfo.user_name.split(' ')[0] || 'the cookbook creator';
 
-  // Step content configuration
-  const stepContent: Record<number, any> = {
-    1: {
-      type: 'welcome',
-      title: (
-        <>
-          Congratulations! You&apos;ll be part of{' '}
-          <span className="font-serif text-5xl font-bold text-black mx-1">
-            {creatorName}&apos;s
-          </span>{' '}
-          amazing Cookbook!
-        </>
-      ),
-      subtitle: "",
-      icon: ''
-    },
-    2: {
-      type: 'story',
-      title: 'We all have a recipe to share, but remember it is not only about the recipe itself...',
-      subtitle: "",
-      description: "(There are plenty of cool recipes in TikTok already)",
-      icon: '❤️'
-    },
-    3: {
-      type: 'inspiration',
-      title: 'Think of your recipe as:',
-      items: [
-        { icon: '👤', text: 'Something that only YOU eat', description: '' },
-        { icon: '📖', text: 'A Shared memory or story through Food', description: '' },
-        { icon: '✨', text: 'Something unique that transmits your humor and style', description: '' }
-      ]
-    },
-    4: {
-      type: 'encouragement',
-      title: "That's it... Enjoy & Connect through Food!",
-      subtitle: "",
-      description: "",
-      icon: '🍽️'
-    },
-    5: {
-      type: 'form',
-      field: 'recipeName',
-      title: "What's the name of your recipe?",
-      subtitle: "Give it a name that makes people curious",
-      placeholder: "e.g., Grandma's Secret Chocolate Chip Cookies",
-      description: ""
-    },
-    6: {
-      type: 'form',
-      field: 'ingredients',
-      title: "What are the ingredients?",
-      subtitle: "List everything needed to make your recipe",
-      placeholder: "• 2 cups all-purpose flour\n• 1 cup brown sugar\n• 1/2 cup butter, softened\n• 2 large eggs\n• 1 tsp vanilla extract",
-      description: "",
-      isTextarea: true,
-      rows: 8
-    },
-    7: {
-      type: 'form',
-      field: 'instructions',
-      title: "How do you make it?",
-      subtitle: "Share the steps to create your recipe",
-      placeholder: "1. Preheat oven to 375°F\n2. Mix dry ingredients in a large bowl\n3. In separate bowl, cream butter and sugar\n4. Add eggs and vanilla to butter mixture\n5. Gradually mix in dry ingredients\n6. Bake for 12-15 minutes until golden",
-      description: "Write it like you're telling a friend how to make it. They'll figure it out!",
-      isTextarea: true,
-      rows: 10
-    },
-    8: {
-      type: 'form',
-      field: 'personalNote',
-      title: `Add your personal note for ${creatorName}`,
-      subtitle: "this is optional, but it's what makes your recipe truly special!",
-      placeholder: "This recipe reminds me of Sunday mornings at my grandmother's house. She always said the secret was to not overmix the batter, and to bake them until they're just barely golden...",
-      description: "",
-      isTextarea: true,
-      rows: 6,
-      optional: true
-    },
-    9: {
-      type: 'summary',
-      title: "Perfect! Ready to share your recipe?",
-      subtitle: ``
-    }
+  const getImageUrl = () => {
+    const imageMap = {
+      1: "/images/onboarding/onboarding_step_1.jpg",
+      2: "/images/onboarding/onboarding_step_2.jpg",
+      3: "/images/onboarding/onboarding_step_3.jpg"
+    } as const;
+    const imageIndex = ((currentStepIndex) % 3) + 1;
+    return imageMap[imageIndex as keyof typeof imageMap];
   };
+
+  const focusFirstHeading = useCallback(() => {
+    // move focus to the first heading in content for a11y
+    const h = document.querySelector('main h2, main h1');
+    if (h instanceof HTMLElement) h.focus();
+  }, []);
 
   // Navigation functions
   const handleNext = () => {
-    if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
+    if (currentStepIndex < totalSteps - 1) {
+      setCurrentStepIndex(currentStepIndex + 1);
+      setTimeout(focusFirstHeading, 0);
     }
   };
 
   const handlePrevious = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+    if (currentStepIndex > 0) {
+      setCurrentStepIndex(currentStepIndex - 1);
+      setTimeout(focusFirstHeading, 0);
     }
   };
 
   const handleFormFieldChange = (field: keyof RecipeData, value: string) => {
+    isDirtyRef.current = true;
     setRecipeData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -195,6 +134,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
       // Success! Show success state
       setSubmitSuccess(true);
       setSubmitting(false);
+      isDirtyRef.current = false;
+      lastRecipeIdRef.current = data?.recipe_id || null;
       
       // Clean up localStorage
       localStorage.removeItem('recipeJourneyData');
@@ -206,22 +147,25 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
     }
   };
 
-  // Auto-save to localStorage
+  // Auto-save to localStorage with lightweight feedback
   useEffect(() => {
+    setAutosaveState('saving');
     localStorage.setItem('recipeJourneyData', JSON.stringify({
-      currentStep,
+      currentStepIndex,
       recipeData
     }));
-  }, [currentStep, recipeData]);
+    const t = setTimeout(() => setAutosaveState('saved'), 250);
+    return () => clearTimeout(t);
+  }, [currentStepIndex, recipeData]);
 
   // Load from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem('recipeJourneyData');
     if (saved) {
       try {
-        const { currentStep: savedStep, recipeData: savedData } = JSON.parse(saved);
-        if (savedStep && savedData) {
-          setCurrentStep(savedStep);
+        const { currentStepIndex: savedStep, recipeData: savedData } = JSON.parse(saved);
+        if (typeof savedStep === 'number' && savedData) {
+          setCurrentStepIndex(savedStep);
           setRecipeData(savedData);
         }
       } catch (e) {
@@ -230,27 +174,149 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
     }
   }, []);
 
-  return (
-    <div className="h-screen bg-white overflow-hidden">
-      {/* Main Content */}
-      <div className="h-full">
-        <StepCard
-          step={currentStep}
-          content={stepContent[currentStep]}
-          recipeData={recipeData}
-          onFormFieldChange={handleFormFieldChange}
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-          onSubmit={handleSubmit}
-          onReset={resetJourney}
-          canGoNext={currentStep < totalSteps}
-          canGoPrevious={currentStep > 1}
-          isLastStep={currentStep === totalSteps}
-          submitting={submitting}
-          submitSuccess={submitSuccess}
-          submitError={submitError}
-        />
-      </div>
+  // Confirm before unload if dirty and not submitted
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (isDirtyRef.current && !submitSuccess) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [submitSuccess]);
+
+  const onEditSection = (section: 'title' | 'ingredients' | 'instructions' | 'note') => {
+    setCurrentStepIndex(1);
+    setTimeout(() => {
+      const map: Record<typeof section, string> = {
+        title: 'title',
+        ingredients: 'ingredients',
+        instructions: 'instructions',
+        note: 'note',
+      };
+      const el = document.getElementById(map[section]);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 0);
+  };
+
+  const handleAddAnother = () => {
+    resetJourney();
+    const idx = journeySteps.findIndex(s => s.key === 'recipeForm');
+    if (idx !== -1) setCurrentStepIndex(idx);
+  };
+
+  const handleDone = () => {
+    router.push(`/`);
+  };
+
+  const canContinueFromForm = () =>
+    recipeData.recipeName.trim().length > 0 &&
+    recipeData.ingredients.trim().length > 0 &&
+    recipeData.instructions.trim().length > 0;
+
+  const current = journeySteps[currentStepIndex]?.key;
+
+  const bottomNav = (
+    <div className="flex items-center justify-between">
+      {current !== 'success' ? (
+        <button
+          type="button"
+          onClick={handlePrevious}
+          disabled={currentStepIndex === 0 || submitting}
+          className="px-5 py-3 rounded-full border border-gray-300 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Back
+        </button>
+      ) : null}
+
+      {current === 'success' ? (
+        <>
+          <button
+            type="button"
+            onClick={handleAddAnother}
+            className="px-6 py-3 rounded-full bg-black text-white hover:bg-gray-800"
+          >
+            Add another recipe
+          </button>
+          <button
+            type="button"
+            onClick={handleDone}
+            className="px-6 py-3 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50"
+          >
+            Done for now
+          </button>
+        </>
+      ) : currentStepIndex < totalSteps - 1 ? (
+        <button
+          type="button"
+          onClick={handleNext}
+          disabled={(currentStepIndex === 2 && !canContinueFromForm()) || submitting}
+          className="px-8 py-3 rounded-full bg-black text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Continue
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={submitting || submitSuccess}
+          className="px-8 py-3 rounded-full bg-black text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-busy={submitting}
+        >
+          {submitting ? 'Submitting…' : submitSuccess ? 'Submitted! 🎉' : 'Submit Recipe 🎉'}
+        </button>
+      )}
     </div>
+  );
+
+  // After submit, move to success screen
+  useEffect(() => {
+    if (submitSuccess) {
+      const idx = journeySteps.findIndex(s => s.key === 'success');
+      if (idx !== -1) setCurrentStepIndex(idx);
+    }
+  }, [submitSuccess]);
+
+  const handleSavePrefs = async (name?: string, email?: string, optedIn?: boolean) => {
+    const recipeId = lastRecipeIdRef.current;
+    if (!recipeId) return;
+    await updateGuestRecipeNotification(recipeId, {
+      notify_opt_in: !!optedIn,
+      notify_email: email || guestData.email || null,
+    });
+  };
+
+  return (
+    <Frame title={submitError ? 'There was an error' : undefined} bottomNav={bottomNav} showHeaderLogo leftImageSrc={getImageUrl()}>
+      {current === 'welcome' && (
+        <WelcomeStep creatorName={creatorName} />
+      )}
+      {current === 'introInfo' && (
+        <IntroInfoStep onContinue={handleNext} onBack={handlePrevious} />
+      )}
+      {current === 'recipeForm' && (
+        <RecipeFormStep data={recipeData} onChange={handleFormFieldChange} onContinue={handleNext} onBack={handlePrevious} autosaveState={autosaveState} />
+      )}
+      {current === 'summary' && (
+        <SummaryStep
+          recipeName={recipeData.recipeName}
+          ingredients={recipeData.ingredients}
+          instructions={recipeData.instructions}
+          personalNote={recipeData.personalNote}
+          onEditSection={onEditSection}
+        />
+      )}
+      {current === 'success' && (
+        <SuccessStep
+          defaultName={`${guestData.firstName} ${guestData.lastName}`.trim()}
+          defaultEmail={guestData.email}
+          onSavePrefs={handleSavePrefs}
+        />
+      )}
+      {submitError && (
+        <div className="mt-6 text-center text-red-600" role="alert" aria-live="assertive">{submitError}</div>
+      )}
+    </Frame>
   );
 }

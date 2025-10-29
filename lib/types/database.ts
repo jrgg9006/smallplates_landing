@@ -18,7 +18,7 @@ export interface Database {
       profiles: {
         Row: {
           id: string;
-          email: string;
+          email: string | null;
           full_name: string | null;
           phone_number: string | null;
           collection_link_token: string | null;
@@ -31,7 +31,7 @@ export interface Database {
         };
         Insert: {
           id: string;
-          email: string;
+          email: string | null;
           full_name?: string | null;
           phone_number?: string | null;
           collection_link_token?: string | null;
