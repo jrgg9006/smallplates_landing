@@ -90,39 +90,53 @@ export function RecipeCollectorLink({}: RecipeCollectorLinkProps = {}) {
 
   return (
     <>
-      <div className="bg-gray-50 rounded-lg flex w-full overflow-hidden h-[88px]">
-      {/* Left side - Title and description */}
-      <div className="px-4 sm:px-6 py-6 relative flex flex-col justify-center w-auto flex-shrink-0">
-        <h3 className="text-sm font-semibold text-gray-900 mb-1">Recipe Collector</h3>
-        <p className="hidden sm:block text-xs text-gray-600 leading-tight">
-          Share with guests to collect<br />their favorite recipes
-        </p>
-        <p className="sm:hidden text-xs text-gray-600 leading-tight">
-          Share link with guests
-        </p>
-      </div>
-      
-      {/* Vertical divider - hidden on very small screens */}
-      <div className="hidden sm:block w-px bg-gray-300 self-stretch my-4"></div>
-      
-      {/* Right side - Input and button on larger screens, button only on small screens */}
-      <div className="px-3 sm:px-4 py-6 pr-4 sm:pr-8 flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-        {/* Input field - hidden on very small screens */}
-        <Input
-          value={collectorLink}
-          readOnly
-          className="hidden sm:block flex-1 min-w-0 bg-white text-xs h-8 border-gray-300"
-          placeholder="Generating link..."
-        />
-        
-        {/* Button - full width on small screens, normal width on larger screens */}
+      {/* Mobile layout */}
+      <div className="sm:hidden bg-gray-50 rounded-lg p-4">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold text-gray-900">Recipe Collector</h3>
+          <p className="text-xs text-gray-600">Share link with guests</p>
+        </div>
         <Button
           onClick={handleShareLink}
-          className="bg-gray-900 text-white hover:bg-gray-800 px-3 sm:px-6 py-2 h-8 text-sm font-medium whitespace-nowrap w-full sm:w-auto sm:flex-shrink-0"
+          className="bg-gray-900 text-white hover:bg-gray-800 w-full py-3 h-auto text-sm font-medium"
           disabled={!collectorLink}
           title="Copy link to share with guests via any messaging app"
         >
-Copy Form Link
+          Copy Form Link
+        </Button>
+      </div>
+
+      {/* Desktop layout */}
+      <div className="hidden sm:flex bg-gray-50 rounded-lg w-full overflow-hidden h-[88px]">
+      {/* Left side - Title and description */}
+      <div className="px-4 sm:px-6 py-6 relative flex flex-col justify-center w-auto flex-shrink-0">
+        <h3 className="text-sm font-semibold text-gray-900 mb-1">Recipe Collector</h3>
+        <p className="text-xs text-gray-600 leading-tight">
+          Share with guests to collect<br />their favorite recipes
+        </p>
+      </div>
+      
+      {/* Vertical divider */}
+      <div className="w-px bg-gray-300 self-stretch my-4"></div>
+      
+      {/* Right side - Input and button */}
+      <div className="px-3 sm:px-4 py-6 pr-4 sm:pr-8 flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+        {/* Input field */}
+        <Input
+          value={collectorLink}
+          readOnly
+          className="flex-1 min-w-0 bg-white text-xs h-8 border-gray-300"
+          placeholder="Generating link..."
+        />
+        
+        {/* Button */}
+        <Button
+          onClick={handleShareLink}
+          className="bg-gray-900 text-white hover:bg-gray-800 px-3 sm:px-6 py-2 h-8 text-sm font-medium whitespace-nowrap sm:flex-shrink-0"
+          disabled={!collectorLink}
+          title="Copy link to share with guests via any messaging app"
+        >
+          Copy Form Link
         </Button>
       </div>
       

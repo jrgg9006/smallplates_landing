@@ -1,10 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, Mail, Trash2, ArrowUp } from "lucide-react";
+import { ArrowUpDown, Mail, Trash2, ArrowUp, MoreHorizontal } from "lucide-react";
 import { Guest } from "@/lib/types/database";
-import { useState } from "react";
 import { DeleteGuestModal } from "./DeleteGuestModal";
 import { Button } from "@/components/ui/button";
 import { SendMessageModal } from "./SendMessageModal";
@@ -52,6 +51,8 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -95,6 +96,23 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
   // Check if guest has any contact information
   const hasContactInfo = (guest.email && guest.email.trim() && !guest.email.startsWith('NO_EMAIL_'));
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
+
   const handleCloseMessageModal = () => {
     console.log('SendMessageModal closing, calling onModalClose');
     setShowMessageModal(false);
@@ -136,18 +154,38 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
         >
           <ArrowUp className="h-8 w-8" />
         </Button>
-        <Button
-          variant="ghost"
-          className="h-12 w-12"
-          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-            e.stopPropagation();
-            setShowDeleteModal(true);
-          }}
-          aria-label="Delete guest"
-          title="Delete guest"
-        >
-          <Trash2 className="h-8 w-8" />
-        </Button>
+        {/* 3 Dots Menu */}
+        <div className="relative" ref={dropdownRef}>
+          <Button
+            variant="ghost"
+            className="h-12 w-12"
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+              e.stopPropagation();
+              setShowDropdown(!showDropdown);
+            }}
+            aria-label="More options"
+            title="More options"
+          >
+            <MoreHorizontal className="h-8 w-8" />
+          </Button>
+          
+          {/* Dropdown Menu */}
+          {showDropdown && (
+            <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-[120px]">
+              <button
+                className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  e.stopPropagation();
+                  setShowDropdown(false);
+                  setShowDeleteModal(true);
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <DeleteGuestModal
@@ -225,22 +263,6 @@ export const columns: ColumnDef<Guest>[] = [
       }
       
       return <div className="font-normal text-lg">{fullName}</div>;
-    },
-  },
-  {
-    id: "contact",
-    header: () => <div className="table-header-style">Email</div>,
-    cell: ({ row }) => {
-      const guest = row.original;
-      return (
-        <div className="text-normal">
-          {guest.email && guest.email.trim() && !guest.email.startsWith('NO_EMAIL_') ? (
-            guest.email
-          ) : (
-            <span className="text-red-500">No email</span>
-          )}
-        </div>
-      );
     },
   },
   {

@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Guest } from "@/lib/types/database";
-import { Mail, ArrowUp, Trash2, User } from "lucide-react";
+import { Mail, ArrowUp, Trash2, User, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeleteGuestModal } from "./DeleteGuestModal";
 import { SendMessageModal } from "./SendMessageModal";
@@ -49,6 +49,8 @@ export function MobileGuestCard({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Guest name display logic
   const fullName = `${guest.first_name} ${guest.last_name || ''}`.trim();
@@ -62,6 +64,23 @@ export function MobileGuestCard({
 
   // Recipe count display
   const showRecipeCount = guest.status !== 'pending';
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -142,17 +161,6 @@ export function MobileGuestCard({
           </div>
         </div>
 
-        {/* Contact Info Section */}
-        <div className="space-y-2">
-          {/* Email */}
-          <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
-            <span className="text-sm text-gray-600">
-              {hasEmail ? guest.email : <span className="text-red-500">No email</span>}
-            </span>
-          </div>
-          
-        </div>
 
         {/* Recipe Count (if applicable) */}
         {showRecipeCount && (
@@ -196,19 +204,38 @@ export function MobileGuestCard({
             Add Recipe
           </Button>
           
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex items-center gap-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 ml-auto"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowDeleteModal(true);
-            }}
-            title="Delete guest"
-          >
-            <Trash2 className="h-4 w-4" />
-            Delete
-          </Button>
+          {/* 3 Dots Menu */}
+          <div className="relative ml-auto" ref={dropdownRef}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex items-center justify-center p-1 h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDropdown(!showDropdown);
+              }}
+              title="More options"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+            
+            {/* Dropdown Menu */}
+            {showDropdown && (
+              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-[120px]">
+                <button
+                  className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDropdown(false);
+                    setShowDeleteModal(true);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

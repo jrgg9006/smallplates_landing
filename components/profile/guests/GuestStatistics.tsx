@@ -69,29 +69,34 @@ export function GuestStatisticsComponent({}: GuestStatisticsProps = {}) {
   const statItems = [
     {
       label: "Guests",
+      mobileLabel: "Guests",
       value: stats.total_guests,
     },
     {
       label: "Recipes Received",
+      mobileLabel: "Recipes",
       value: stats.recipes_received,
     },
     {
       label: "Guests Pending to Send",
+      mobileLabel: "Pending",
       value: stats.pending_invitations || 0,
     },
   ];
 
   return (
-    <div className="bg-gray-50 rounded-lg flex w-full overflow-hidden h-[110px] lg:h-[88px]">
+    <div className="bg-gray-50 rounded-lg flex w-full overflow-hidden h-[80px] lg:h-[88px]">
       {statItems.map((stat, index) => (
-        <div key={index} className="flex-1 px-3 lg:px-6 py-4 lg:py-6 text-center relative flex flex-col">
+        <div key={index} className="flex-1 px-3 lg:px-6 py-3 lg:py-6 text-center relative flex flex-col justify-center">
           {/* Fixed position for numbers - always at the same height */}
-          <div className="text-lg sm:text-xl font-bold text-gray-900 mb-2 h-6 flex items-center justify-center">
+          <div className="text-lg sm:text-xl font-bold text-gray-900 mb-1 h-6 flex items-center justify-center">
             {stat.value}
           </div>
           {/* Text below numbers - can wrap to multiple lines */}
-          <div className="text-xs text-gray-600 font-medium leading-tight flex-1 flex items-start justify-center">
-            <span className="text-center max-w-full">{stat.label}</span>
+          <div className="text-xs text-gray-600 font-medium leading-tight flex items-start justify-center">
+            {/* Show mobile label on small screens, full label on larger screens */}
+            <span className="text-center max-w-full block lg:hidden">{stat.mobileLabel}</span>
+            <span className="text-center max-w-full hidden lg:block">{stat.label}</span>
           </div>
           {/* Vertical divider - don't show after last item */}
           {index < statItems.length - 1 && (
