@@ -200,3 +200,54 @@ export async function deleteAccount(currentPassword: string) {
 
   return { data, error: null };
 }
+
+/**
+ * Update custom share message
+ */
+export async function updateShareMessage(customMessage: string) {
+  const supabase = createSupabaseClient();
+  
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  // Validate message length
+  if (customMessage.length > 280) {
+    return { data: null, error: 'Message must be 280 characters or less' };
+  }
+
+  if (customMessage.trim().length === 0) {
+    return { data: null, error: 'Message cannot be empty' };
+  }
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ custom_share_message: customMessage.trim() })
+    .eq('id', user.id)
+    .select()
+    .single();
+
+  return { data, error: error?.message || null };
+}
+
+/**
+ * Reset custom share message to null (use default)
+ */
+export async function resetShareMessage() {
+  const supabase = createSupabaseClient();
+  
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ custom_share_message: null })
+    .eq('id', user.id)
+    .select()
+    .single();
+
+  return { data, error: error?.message || null };
+}

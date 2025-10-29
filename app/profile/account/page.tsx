@@ -81,8 +81,8 @@ export default function AccountPage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Back Navigation */}
-        <div className="mb-6">
+        {/* Back Navigation - Hidden on mobile */}
+        <div className="mb-6 hidden md:block">
           <button
             onClick={() => router.push('/profile')}
             className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"

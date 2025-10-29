@@ -25,6 +25,7 @@ export interface Database {
           collection_enabled: boolean;
           recipe_goal_category: string | null;
           recipe_goal_number: number | null;
+          custom_share_message: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -37,6 +38,7 @@ export interface Database {
           collection_enabled?: boolean;
           recipe_goal_category?: string | null;
           recipe_goal_number?: number | null;
+          custom_share_message?: string | null;
         };
         Update: {
           email?: string;
@@ -46,6 +48,7 @@ export interface Database {
           collection_enabled?: boolean;
           recipe_goal_category?: string | null;
           recipe_goal_number?: number | null;
+          custom_share_message?: string | null;
         };
       };
       guests: {

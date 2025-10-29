@@ -9,8 +9,9 @@ import {
 } from "@/components/ui/dialog";
 import { Drawer } from "vaul";
 import { Button } from "@/components/ui/button";
-import { Copy, Mail, MessageCircle, Facebook } from "lucide-react";
+import { Copy, Mail, MessageCircle, Facebook, Edit3, Save, X, RotateCcw } from "lucide-react";
 import { validateWhatsAppURL, getWhatsAppTroubleshootingTips, isMobileDevice, isIOSDevice } from "@/lib/utils/sharing";
+import { updateShareMessage, resetShareMessage, getCurrentProfile } from "@/lib/supabase/profiles";
 import type { LucideIcon } from "lucide-react";
 
 interface ShareOption {
@@ -36,17 +37,45 @@ export function ShareCollectionModal({
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  
+  // Message editing states
+  const [isEditingMessage, setIsEditingMessage] = useState(false);
+  const [customMessage, setCustomMessage] = useState<string | null>(null);
+  const [editingMessage, setEditingMessage] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [messageError, setMessageError] = useState<string | null>(null);
 
   // Detect mobile device
   useEffect(() => {
     setIsMobile(isMobileDevice());
   }, []);
 
+  // Load custom message when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      loadCustomMessage();
+    }
+  }, [isOpen]);
+
+  // Load custom message from profile
+  const loadCustomMessage = async () => {
+    try {
+      const { data: profile } = await getCurrentProfile();
+      if (profile?.custom_share_message) {
+        setCustomMessage(profile.custom_share_message);
+      }
+    } catch (err) {
+      console.error('Error loading custom message:', err);
+    }
+  };
+
   // Create personalized share message
   const shareTitle = "Share a Recipe to my Cookbook - SP&Co.";
-  const shareMessage = userName 
+  const defaultMessage = userName 
     ? `${userName} invites you to share your favorite recipe with them! They will print it in a cookbook.`
     : 'Share your favorite recipe with me! I will print it in a cookbook.';
+  
+  const shareMessage = customMessage || defaultMessage;
 
   const handleCopyLink = async () => {
     try {
@@ -86,6 +115,69 @@ export function ShareCollectionModal({
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
   };
 
+  // Message editing handlers
+  const handleEditMessage = () => {
+    setEditingMessage(shareMessage);
+    setIsEditingMessage(true);
+    setMessageError(null);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingMessage(false);
+    setEditingMessage('');
+    setMessageError(null);
+  };
+
+  const handleSaveMessage = async () => {
+    if (editingMessage.trim().length === 0) {
+      setMessageError('Message cannot be empty');
+      return;
+    }
+
+    if (editingMessage.length > 280) {
+      setMessageError('Message must be 280 characters or less');
+      return;
+    }
+
+    setIsSaving(true);
+    setMessageError(null);
+
+    try {
+      const { error } = await updateShareMessage(editingMessage);
+      if (error) {
+        setMessageError(error);
+      } else {
+        setCustomMessage(editingMessage);
+        setIsEditingMessage(false);
+        setEditingMessage('');
+      }
+    } catch (err) {
+      setMessageError('Failed to save message');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleResetMessage = async () => {
+    setIsSaving(true);
+    setMessageError(null);
+
+    try {
+      const { error } = await resetShareMessage();
+      if (error) {
+        setMessageError(error);
+      } else {
+        setCustomMessage(null);
+        setIsEditingMessage(false);
+        setEditingMessage('');
+      }
+    } catch (err) {
+      setMessageError('Failed to reset message');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const shareOptions: ShareOption[] = [
     {
       id: 'copy',
@@ -118,8 +210,71 @@ export function ShareCollectionModal({
     <div className="space-y-4">
       {/* Share preview */}
       <div className="p-4 bg-gray-50 rounded-xl">
-        <p className="text-sm text-gray-600 mb-2">{shareMessage}</p>
-        <p className="text-xs text-gray-500 truncate font-mono">{collectionUrl}</p>
+        {isEditingMessage ? (
+          <div className="space-y-3">
+            <textarea
+              value={editingMessage}
+              onChange={(e) => setEditingMessage(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              rows={3}
+              maxLength={280}
+              placeholder="Enter your custom message..."
+            />
+            <div className="flex justify-between items-center text-sm text-gray-500">
+              <span>{editingMessage.length}/280 characters</span>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleCancelEdit}
+                  disabled={isSaving}
+                  className="h-8"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleResetMessage}
+                  disabled={isSaving}
+                  className="h-8"
+                >
+                  <RotateCcw className="h-4 w-4 mr-1" />
+                  Reset
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSaveMessage}
+                  disabled={isSaving || editingMessage.trim().length === 0}
+                  className="h-8"
+                >
+                  <Save className="h-4 w-4 mr-1" />
+                  {isSaving ? 'Saving...' : 'Save'}
+                </Button>
+              </div>
+            </div>
+            {messageError && (
+              <div className="text-sm text-red-600">{messageError}</div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <p className="text-sm text-gray-600 mb-2">{shareMessage}</p>
+            <p className="text-xs text-gray-500 truncate font-mono">{collectionUrl}</p>
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleEditMessage}
+                className="h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+              >
+                <Edit3 className="h-4 w-4 mr-1" />
+                Edit Message
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Share options - single column on mobile */}
