@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -44,6 +44,7 @@ export function ShareCollectionModal({
   const [editingMessage, setEditingMessage] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [messageError, setMessageError] = useState<string | null>(null);
+  const isEditingRef = useRef(false);
 
   // Detect mobile device
   useEffect(() => {
@@ -54,14 +55,26 @@ export function ShareCollectionModal({
   useEffect(() => {
     if (isOpen) {
       loadCustomMessage();
+      // Reset ref when modal opens
+      isEditingRef.current = false;
+    } else {
+      // Reset editing state when modal closes
+      setIsEditingMessage(false);
+      setEditingMessage('');
+      setMessageError(null);
+      isEditingRef.current = false;
     }
   }, [isOpen]);
 
   // Load custom message from profile
   const loadCustomMessage = async () => {
+    // Don't load if user is actively editing
+    if (isEditingRef.current || isEditingMessage) {
+      return;
+    }
     try {
       const { data: profile } = await getCurrentProfile();
-      if (profile?.custom_share_message) {
+      if (profile?.custom_share_message && !isEditingRef.current) {
         setCustomMessage(profile.custom_share_message);
       }
     } catch (err) {
@@ -119,11 +132,13 @@ export function ShareCollectionModal({
   const handleEditMessage = () => {
     setEditingMessage(shareMessage);
     setIsEditingMessage(true);
+    isEditingRef.current = true;
     setMessageError(null);
   };
 
   const handleCancelEdit = () => {
     setIsEditingMessage(false);
+    isEditingRef.current = false;
     setEditingMessage('');
     setMessageError(null);
   };
@@ -149,6 +164,7 @@ export function ShareCollectionModal({
       } else {
         setCustomMessage(editingMessage);
         setIsEditingMessage(false);
+        isEditingRef.current = false;
         setEditingMessage('');
       }
     } catch (err) {
@@ -169,6 +185,7 @@ export function ShareCollectionModal({
       } else {
         setCustomMessage(null);
         setIsEditingMessage(false);
+        isEditingRef.current = false;
         setEditingMessage('');
       }
     } catch (err) {
@@ -214,8 +231,15 @@ export function ShareCollectionModal({
           <div className="space-y-2">
             <textarea
               value={editingMessage}
-              onChange={(e) => setEditingMessage(e.target.value)}
+              onChange={(e) => {
+                e.stopPropagation();
+                setEditingMessage(e.target.value);
+              }}
               onPointerDown={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              onFocus={(e) => e.stopPropagation()}
               className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows={3}
               maxLength={280}
@@ -318,9 +342,31 @@ export function ShareCollectionModal({
       <Drawer.Root open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 bg-black/40" />
-          <Drawer.Content className="fixed bottom-0 left-0 right-0 z-50 mt-24 flex h-full max-h-[75vh] flex-col rounded-t-[10px] bg-white">
+          <Drawer.Content 
+            className="fixed bottom-0 left-0 right-0 z-50 mt-24 flex h-full max-h-[75vh] flex-col rounded-t-[10px] bg-white"
+            onInteractOutside={(e) => {
+              // Prevent drawer from closing when clicking inside, especially when editing
+              if (isEditingRef.current || isEditingMessage) {
+                e.preventDefault();
+              }
+            }}
+            onEscapeKeyDown={(e) => {
+              // Prevent drawer from closing on escape when editing
+              if (isEditingRef.current || isEditingMessage) {
+                e.preventDefault();
+              }
+            }}
+          >
             <div className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-gray-300" />
-            <div className="p-5">
+            <div 
+              className="p-5"
+              onPointerDown={(e) => {
+                // Prevent drawer drag from starting when clicking on content
+                if (isEditingRef.current || isEditingMessage) {
+                  e.stopPropagation();
+                }
+              }}
+            >
               <Drawer.Title className="text-center text-lg font-semibold mb-3">
                 Share Your Collection Link
               </Drawer.Title>
