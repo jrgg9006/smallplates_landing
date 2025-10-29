@@ -43,26 +43,25 @@ export default function Frame({ title, children, bottomNav, showHeaderLogo = tru
               className="mx-auto w-full max-w-3xl px-4 py-6"
               style={{
                 // Ensure page content never hides behind the bottom nav
-                paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6rem)'
+                paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 7rem)'
               }}
             >
               {children}
             </div>
           </main>
 
-          {/* Sticky Bottom Nav */}
+          {/* Fixed Bottom Nav - always visible above browser chrome */}
           {bottomNav && (
             <footer
-              className="sticky bottom-0 z-40 w-full border-t border-gray-100 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80"
-              style={{ bottom: 'env(safe-area-inset-bottom, 0px)' }}
+              className="fixed inset-x-0 z-50 border-t border-gray-100 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]"
+              style={{ bottom: 0 }}
             >
               <div
                 className="mx-auto w-full max-w-3xl px-4 py-4"
                 style={{
-                  // Ensure the footer sits above iOS Safari bottom bar
-                  paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
-                  paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 1rem)',
-                  paddingRight: 'calc(env(safe-area-inset-right, 0px) + 1rem)'
+                  paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
+                  paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 16px)',
+                  paddingRight: 'calc(env(safe-area-inset-right, 0px) + 16px)'
                 }}
               >
                 {bottomNav}
