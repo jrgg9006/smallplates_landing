@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   signInWithEmail,
@@ -24,6 +24,18 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -77,17 +89,19 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     <>
       {/* Modal Container with Backdrop */}
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+        className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black bg-opacity-50 animate-in fade-in-0 duration-200"
         onClick={onClose}
       >
         <div
-          className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 relative"
+          className="bg-white rounded-t-3xl md:rounded-2xl shadow-xl max-w-md w-full pt-10 md:pt-8 pb-8 px-8 relative md:mx-4 max-h-[90vh] md:max-h-[85vh] overflow-y-auto transform transition-transform duration-300 ease-out animate-in slide-in-from-bottom-full md:slide-in-from-bottom-0 md:zoom-in-95"
           onClick={(e) => e.stopPropagation()}
         >
+          {/* Drag Handle - Mobile Only */}
+          <div className="md:hidden absolute top-3 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-300 rounded-full"></div>
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute top-6 md:top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
             aria-label="Close modal"
           >
             <svg
