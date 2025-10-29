@@ -39,14 +39,23 @@ export default function Frame({ title, children, bottomNav, showHeaderLogo = tru
 
           {/* Scrollable Content */}
           <main className="flex-1">
-            <div className="mx-auto w-full max-w-3xl px-4 py-6">
+            <div
+              className="mx-auto w-full max-w-3xl px-4 py-6"
+              style={{
+                // Ensure page content never hides behind the bottom nav
+                paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6rem)'
+              }}
+            >
               {children}
             </div>
           </main>
 
           {/* Sticky Bottom Nav */}
           {bottomNav && (
-            <footer className="sticky bottom-0 z-40 w-full border-t border-gray-100 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+            <footer
+              className="sticky bottom-0 z-40 w-full border-t border-gray-100 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80"
+              style={{ bottom: 'env(safe-area-inset-bottom, 0px)' }}
+            >
               <div
                 className="mx-auto w-full max-w-3xl px-4 py-4"
                 style={{
