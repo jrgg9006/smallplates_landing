@@ -220,39 +220,39 @@ export function ShareCollectionModal({
               maxLength={280}
               placeholder="Enter your custom message..."
             />
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-gray-500 whitespace-nowrap">{editingMessage.length}/280 characters</span>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleCancelEdit}
-                  disabled={isSaving}
-                  className="h-7 px-3 text-xs"
-                >
-                  <X className="h-3 w-3 mr-1" />
-                  Cancel
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleResetMessage}
-                  disabled={isSaving}
-                  className="h-7 px-3 text-xs"
-                >
-                  <RotateCcw className="h-3 w-3 mr-1" />
-                  Reset
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleSaveMessage}
-                  disabled={isSaving || editingMessage.trim().length === 0}
-                  className="h-7 px-3 text-xs"
-                >
-                  <Save className="h-3 w-3 mr-1" />
-                  {isSaving ? 'Saving...' : 'Save'}
-                </Button>
-              </div>
+            {/* Character count on its own line, left aligned */}
+            <div className="mt-1 text-[11px] leading-none text-gray-500">{editingMessage.length}/280 characters</div>
+            {/* Action buttons on a separate row, right aligned and compact */}
+            <div className="mt-1 flex justify-end gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleCancelEdit}
+                disabled={isSaving}
+                className="h-7 px-2 text-xs"
+              >
+                <X className="h-3 w-3 mr-1" />
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleResetMessage}
+                disabled={isSaving}
+                className="h-7 px-2 text-xs"
+              >
+                <RotateCcw className="h-3 w-3 mr-1" />
+                Reset
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleSaveMessage}
+                disabled={isSaving || editingMessage.trim().length === 0}
+                className="h-7 px-2 text-xs"
+              >
+                <Save className="h-3 w-3 mr-1" />
+                {isSaving ? 'Saving...' : 'Save'}
+              </Button>
             </div>
             {messageError && (
               <div className="text-sm text-red-600">{messageError}</div>
@@ -314,13 +314,13 @@ export function ShareCollectionModal({
   // Mobile version with Drawer
   if (isMobile) {
     return (
-      <Drawer.Root open={isOpen} onOpenChange={onClose}>
+      <Drawer.Root open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 bg-black/40" />
           <Drawer.Content className="fixed bottom-0 left-0 right-0 z-50 mt-24 flex h-full max-h-[75vh] flex-col rounded-t-[10px] bg-white">
-            <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300" />
-            <div className="p-6">
-              <Drawer.Title className="text-center text-lg font-semibold mb-6">
+            <div className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-gray-300" />
+            <div className="p-5">
+              <Drawer.Title className="text-center text-lg font-semibold mb-3">
                 Share Your Collection Link
               </Drawer.Title>
               <ShareContent />
@@ -333,7 +333,7 @@ export function ShareCollectionModal({
 
   // Desktop version with Dialog
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center">
