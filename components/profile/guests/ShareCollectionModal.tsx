@@ -211,7 +211,7 @@ export function ShareCollectionModal({
       {/* Share preview */}
       <div className="p-4 bg-gray-50 rounded-xl">
         {isEditingMessage ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             <textarea
               value={editingMessage}
               onChange={(e) => setEditingMessage(e.target.value)}
@@ -220,17 +220,17 @@ export function ShareCollectionModal({
               maxLength={280}
               placeholder="Enter your custom message..."
             />
-            <div className="flex justify-between items-center text-sm text-gray-500">
-              <span>{editingMessage.length}/280 characters</span>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-500 whitespace-nowrap">{editingMessage.length}/280 characters</span>
               <div className="flex gap-2">
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={handleCancelEdit}
                   disabled={isSaving}
-                  className="h-8"
+                  className="h-7 px-3 text-xs"
                 >
-                  <X className="h-4 w-4 mr-1" />
+                  <X className="h-3 w-3 mr-1" />
                   Cancel
                 </Button>
                 <Button
@@ -238,18 +238,18 @@ export function ShareCollectionModal({
                   variant="outline"
                   onClick={handleResetMessage}
                   disabled={isSaving}
-                  className="h-8"
+                  className="h-7 px-3 text-xs"
                 >
-                  <RotateCcw className="h-4 w-4 mr-1" />
+                  <RotateCcw className="h-3 w-3 mr-1" />
                   Reset
                 </Button>
                 <Button
                   size="sm"
                   onClick={handleSaveMessage}
                   disabled={isSaving || editingMessage.trim().length === 0}
-                  className="h-8"
+                  className="h-7 px-3 text-xs"
                 >
-                  <Save className="h-4 w-4 mr-1" />
+                  <Save className="h-3 w-3 mr-1" />
                   {isSaving ? 'Saving...' : 'Save'}
                 </Button>
               </div>
