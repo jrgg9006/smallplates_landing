@@ -30,40 +30,15 @@ export default function RecipeFormStep({ data, onChange, autosaveState }: Recipe
     }
   }, [autosaveState]);
 
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
 
   return (
     <div className="space-y-8" role="form" aria-labelledby="recipe-form-heading">
-      <div className="flex items-center justify-between">
+      <div className="space-y-2">
         <h2 id="recipe-form-heading" className="font-serif text-2xl md:text-3xl font-semibold text-gray-900">
           Your recipe
         </h2>
-        {autosaveLabel && (
-          <span className="text-xs text-gray-500" aria-live="polite">{autosaveLabel}</span>
-        )}
       </div>
 
-      {/* Mini index */}
-      <nav aria-label="Recipe sections" className="flex flex-wrap gap-2">
-        {[
-          { id: 'title', label: 'Título' },
-          { id: 'ingredients', label: 'Ingredientes' },
-          { id: 'instructions', label: 'Pasos' },
-          { id: 'note', label: 'Nota' },
-        ].map((s) => (
-          <button
-            key={s.id}
-            type="button"
-            className="px-3 py-1.5 rounded-full border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
-            onClick={() => scrollTo(s.id)}
-          >
-            {s.label}
-          </button>
-        ))}
-      </nav>
 
       {/* Title */}
       <section id="title" aria-labelledby="title-label" className="space-y-2">

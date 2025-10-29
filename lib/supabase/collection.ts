@@ -173,18 +173,18 @@ export async function submitGuestRecipe(
       }
     } else {
       // Create new guest
-      const newGuestData = {
+      const newGuestData: GuestInsert = {
         user_id: tokenInfo.user_id,
         first_name: submission.first_name.trim(),
         last_name: submission.last_name.trim(),
-        email: submission.email?.trim() || null,
+        email: submission.email?.trim() || '',
         phone: submission.phone?.trim() || null,
         status: 'submitted',
         source: 'collection',
         number_of_recipes: 1,
         recipes_received: 0,
         is_archived: false,
-      } as unknown as GuestInsert;
+      };
 
       const { data: newGuest, error: guestError } = await supabase
         .from('guests')

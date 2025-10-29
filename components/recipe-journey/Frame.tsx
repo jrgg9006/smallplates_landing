@@ -50,14 +50,11 @@ export default function Frame({ title, children, bottomNav, showHeaderLogo = tru
             </div>
           </main>
 
-          {/* Fixed Bottom Nav - always visible above browser chrome */}
+          {/* Sticky Bottom Nav */}
           {bottomNav && (
-            <footer
-              className="fixed inset-x-0 z-50 border-t border-gray-100 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]"
-              style={{ bottom: 0 }}
-            >
+            <footer className="lg:sticky lg:bottom-0 fixed bottom-0 inset-x-0 lg:inset-x-auto z-40 lg:z-30 w-full border-t border-gray-100 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
               <div
-                className="mx-auto w-full max-w-3xl px-4 py-4"
+                className="mx-auto w-full max-w-3xl px-4 py-4 lg:py-4"
                 style={{
                   paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
                   paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 16px)',
