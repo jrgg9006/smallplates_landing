@@ -47,7 +47,15 @@ export default function Frame({ title, children, bottomNav, showHeaderLogo = tru
           {/* Sticky Bottom Nav */}
           {bottomNav && (
             <footer className="sticky bottom-0 z-40 w-full border-t border-gray-100 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
-              <div className="mx-auto w-full max-w-3xl px-4 py-4">
+              <div
+                className="mx-auto w-full max-w-3xl px-4 py-4"
+                style={{
+                  // Ensure the footer sits above iOS Safari bottom bar
+                  paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
+                  paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 1rem)',
+                  paddingRight: 'calc(env(safe-area-inset-right, 0px) + 1rem)'
+                }}
+              >
                 {bottomNav}
               </div>
             </footer>
