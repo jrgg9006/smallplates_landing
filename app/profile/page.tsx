@@ -18,7 +18,7 @@ import { Bell } from "lucide-react";
 import { getGuests } from "@/lib/supabase/guests";
 
 export default function ProfilePage() {
-  const { user, loading } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const router = useRouter();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -51,10 +51,9 @@ export default function ProfilePage() {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleLogout = () => {
-    // Add logout logic here
+  const handleLogout = async () => {
     setIsMobileMenuOpen(false);
-    router.push('/');
+    await signOut();
   };
 
   const handleAccount = () => {
@@ -210,7 +209,7 @@ export default function ProfilePage() {
 
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden border-t border-gray-100 bg-white">
+        <div className="lg:hidden border-t border-gray-100 bg-gray-50">
           <div className="px-6 py-4 space-y-3">
             <button
               onClick={handleAccount}
