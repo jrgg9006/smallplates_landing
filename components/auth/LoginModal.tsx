@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   signInWithEmail,
@@ -25,6 +25,12 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
 
+  // Swipe-to-dismiss state (mobile)
+  const [dragStartY, setDragStartY] = useState<number | null>(null);
+  const [dragTranslateY, setDragTranslateY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartTimeRef = useRef(0);
+
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -38,6 +44,49 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  // Touch handlers for swipe-to-dismiss (mobile only)
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    // Ignore on desktop widths
+    if (typeof window !== "undefined" && window.innerWidth >= 768) return;
+    // Only start drag if touch begins near top area (handle zone ~56px)
+    const touch = e.touches[0];
+    const target = e.currentTarget;
+    const rect = target.getBoundingClientRect();
+    const localY = touch.clientY - rect.top;
+    if (localY > 56) return; // start only from header/handle area
+    setIsDragging(true);
+    setDragStartY(touch.clientY);
+    setDragTranslateY(0);
+    dragStartTimeRef.current = Date.now();
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (dragStartY === null || !isDragging) return;
+    const touch = e.touches[0];
+    const delta = touch.clientY - dragStartY;
+    if (delta > 0) {
+      // prevent page scroll while dragging down
+      e.preventDefault();
+      setDragTranslateY(delta);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (!isDragging) return;
+    const elapsed = Date.now() - dragStartTimeRef.current;
+    const distance = dragTranslateY;
+    const shouldDismiss = distance > 120 || (elapsed < 200 && distance > 60);
+    setIsDragging(false);
+    setDragStartY(null);
+    if (shouldDismiss) {
+      onClose();
+      setDragTranslateY(0);
+    } else {
+      // snap back
+      setDragTranslateY(0);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,8 +142,12 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         onClick={onClose}
       >
         <div
-          className="bg-white rounded-t-3xl md:rounded-2xl shadow-xl max-w-md w-full pt-10 md:pt-8 pb-8 px-8 relative md:mx-4 max-h-[90vh] md:max-h-[85vh] overflow-y-auto transform transition-transform duration-300 ease-out animate-in slide-in-from-bottom-full md:slide-in-from-bottom-0 md:zoom-in-95"
+          className="bg-white rounded-t-3xl md:rounded-2xl shadow-xl max-w-md w-full pt-10 md:pt-8 pb-8 px-8 relative md:mx-4 max-h-[90vh] md:max-h-[85vh] overflow-y-auto transform transition-transform ease-out animate-in slide-in-from-bottom-full md:slide-in-from-bottom-0 md:zoom-in-95"
+          style={{ transform: `translateY(${dragTranslateY}px)` }}
           onClick={(e) => e.stopPropagation()}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           {/* Drag Handle - Mobile Only */}
           <div className="md:hidden absolute top-3 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-300 rounded-full"></div>
