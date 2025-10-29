@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -207,17 +207,19 @@ export function ShareCollectionModal({
     }
   ];
 
-  // Mobile version
+  // Mobile version - Drawer that slides up from bottom
   if (isMobile) {
     return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="w-[92%] sm:max-w-md max-h-[80vh] overflow-y-auto p-5">
-          <DialogHeader>
-            <DialogTitle className="text-center text-lg font-semibold">
-              Share Your Collection Link
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
+      <Drawer.Root open={isOpen} onOpenChange={onClose}>
+        <Drawer.Portal>
+          <Drawer.Overlay className="fixed inset-0 bg-black/40" />
+          <Drawer.Content className="fixed bottom-0 left-0 right-0 z-50 mt-24 flex h-full max-h-[75vh] flex-col rounded-t-[10px] bg-white">
+            <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300" />
+            <div className="p-6">
+              <Drawer.Title className="text-center text-lg font-semibold mb-6">
+                Share Your Collection Link
+              </Drawer.Title>
+              <div className="space-y-4">
             {/* Share preview */}
             <div className="p-4 bg-gray-50 rounded-xl">
               {isEditingMessage ? (
@@ -314,9 +316,11 @@ export function ShareCollectionModal({
                 <p className="text-sm text-red-600">{error}</p>
               </div>
             )}
-          </div>
-        </DialogContent>
-      </Dialog>
+              </div>
+            </div>
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
     );
   }
 
