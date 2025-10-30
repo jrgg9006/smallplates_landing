@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface FrameProps {
   title?: string;
@@ -32,9 +33,9 @@ export default function Frame({ title, children, bottomNav, showHeaderLogo = tru
           <header className="sticky top-0 z-40 w-full border-b border-gray-100 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
             <div className="mx-auto w-full max-w-3xl px-6 h-14 flex items-center justify-center">
               {showHeaderLogo && (
-                <a href="/" aria-label="Go to home">
+                <Link href="/" aria-label="Go to home">
                   <Image src="/images/SmallPlates_logo_horizontal.png" alt="Small Plates & Co" width={180} height={28} priority />
-                </a>
+                </Link>
               )}
             </div>
           </header>
