@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { CollectionTokenInfo, CollectionGuestSubmission } from '@/lib/types/database';
 import { submitGuestRecipe, updateGuestRecipeNotification, updateGuestNotification } from '@/lib/supabase/collection';
 import Frame from './Frame';
@@ -309,46 +310,104 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
 
   return (
     <Frame title={submitError ? 'There was an error' : undefined} bottomNav={bottomNav} showHeaderLogo leftImageSrc={getImageUrl()}>
-      {current === 'welcome' && (
-        <WelcomeStep creatorName={creatorName} />
-      )}
-      {current === 'introInfo' && (
-        <IntroInfoStep onContinue={handleNext} onBack={handlePrevious} />
-      )}
-      {current === 'realBook' && (
-        <div className="min-h-[calc(100vh-180px)] flex items-center justify-center" role="region" aria-labelledby="printed-book-heading">
-          <div className="text-center px-4 md:px-6">
-            <h2 id="printed-book-heading" className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">
-              Your recipe will be printed in a real book —<br />
-              write it your way, make it yours.
-            </h2>
-          </div>
-        </div>
-      )}
-      {current === 'recipeForm' && (
-        <RecipeFormStep data={recipeData} onChange={handleFormFieldChange} onContinue={handleNext} onBack={handlePrevious} autosaveState={autosaveState} />
-      )}
-      {current === 'summary' && (
-        <SummaryStep
-          recipeName={recipeData.recipeName}
-          ingredients={recipeData.ingredients}
-          instructions={recipeData.instructions}
-          personalNote={recipeData.personalNote}
-          onEditSection={onEditSection}
-        />
-      )}
-      {current === 'success' && (
-        <SuccessStep
-          defaultName={`${guestData.firstName} ${guestData.lastName}`.trim()}
-          defaultEmail={guestData.email}
-          hasGuestOptIn={guestOptInRef.current}
-          guestOptInEmail={guestOptInEmailRef.current || undefined}
-          onSavePrefs={handleSavePrefs}
-        />
-      )}
-      {submitError && (
-        <div className="mt-6 text-center text-red-600" role="alert" aria-live="assertive">{submitError}</div>
-      )}
+      <AnimatePresence mode="wait">
+        {current === 'welcome' && (
+          <motion.div
+            key="welcome"
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
+            <WelcomeStep creatorName={creatorName} />
+          </motion.div>
+        )}
+        {current === 'introInfo' && (
+          <motion.div
+            key="introInfo"
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
+            <IntroInfoStep onContinue={handleNext} onBack={handlePrevious} />
+          </motion.div>
+        )}
+        {current === 'realBook' && (
+          <motion.div
+            key="realBook"
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
+            <div className="min-h-[calc(100vh-180px)] flex items-center justify-center" role="region" aria-labelledby="printed-book-heading">
+              <div className="text-center px-4 md:px-6">
+                <h2 id="printed-book-heading" className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">
+                  Your recipe will be printed in a real book —<br />
+                  write it your way, make it yours.
+                </h2>
+              </div>
+            </div>
+          </motion.div>
+        )}
+        {current === 'recipeForm' && (
+          <motion.div
+            key="recipeForm"
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
+            <RecipeFormStep data={recipeData} onChange={handleFormFieldChange} onContinue={handleNext} onBack={handlePrevious} autosaveState={autosaveState} />
+          </motion.div>
+        )}
+        {current === 'summary' && (
+          <motion.div
+            key="summary"
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
+            <SummaryStep
+              recipeName={recipeData.recipeName}
+              ingredients={recipeData.ingredients}
+              instructions={recipeData.instructions}
+              personalNote={recipeData.personalNote}
+              onEditSection={onEditSection}
+            />
+          </motion.div>
+        )}
+        {current === 'success' && (
+          <motion.div
+            key="success"
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
+            <SuccessStep
+              defaultName={`${guestData.firstName} ${guestData.lastName}`.trim()}
+              defaultEmail={guestData.email}
+              hasGuestOptIn={guestOptInRef.current}
+              guestOptInEmail={guestOptInEmailRef.current || undefined}
+              onSavePrefs={handleSavePrefs}
+            />
+          </motion.div>
+        )}
+        {submitError && (
+          <motion.div
+            key="error"
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
+            <div className="mt-6 text-center text-red-600" role="alert" aria-live="assertive">{submitError}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Frame>
   );
 }
