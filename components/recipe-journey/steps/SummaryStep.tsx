@@ -23,7 +23,7 @@ export default function SummaryStep({ recipeName, ingredients, instructions, per
 
   return (
     <div className="space-y-8" role="region" aria-labelledby="summary-heading">
-      <h2 id="summary-heading" className="font-serif text-2xl md:text-3xl font-semibold text-gray-900">Review your recipe</h2>
+      <h2 id="summary-heading" className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">Review your recipe</h2>
 
       <div className="space-y-6 text-left">
         <div className="border-l-4 border-gray-200 pl-6">

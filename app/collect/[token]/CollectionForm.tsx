@@ -391,7 +391,13 @@ export default function CollectionForm() {
                   <Input
                     id="fullName"
                     value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      const next = (fullName.length === 0 && raw.length > 0)
+                        ? raw.replace(/^./, (c) => c.toUpperCase())
+                        : raw;
+                      setFullName(next);
+                    }}
                     placeholder="Your full name"
                     autoComplete="name"
                     className="h-10"
@@ -475,7 +481,13 @@ export default function CollectionForm() {
                         <Input
                           id="fullName"
                           value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
+                          onChange={(e) => {
+                            const raw = e.target.value;
+                            const next = (fullName.length === 0 && raw.length > 0)
+                              ? raw.replace(/^./, (c) => c.toUpperCase())
+                              : raw;
+                            setFullName(next);
+                          }}
                           placeholder={firstName || lastName ? `e.g., John ${lastName}` : 'Your full name'}
                           autoComplete="name"
                           className="h-10"

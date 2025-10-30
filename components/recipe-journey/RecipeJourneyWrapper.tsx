@@ -6,6 +6,7 @@ import type { CollectionTokenInfo, CollectionGuestSubmission } from '@/lib/types
 import { submitGuestRecipe, updateGuestRecipeNotification, updateGuestNotification } from '@/lib/supabase/collection';
 import Frame from './Frame';
 import IntroInfoStep from './steps/IntroInfoStep';
+// inline simple hero step to avoid import resolution issues
 import RecipeFormStep, { type RecipeData as FormRecipeData } from './steps/RecipeFormStep';
 import SummaryStep from './steps/SummaryStep';
 import SuccessStep from './steps/SuccessStep';
@@ -260,10 +261,10 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
         <button
           type="button"
           onClick={handleNext}
-          disabled={(currentStepIndex === 2 && !canContinueFromForm()) || submitting}
+          disabled={(current === 'recipeForm' && !canContinueFromForm()) || submitting}
           className="px-8 py-3 rounded-full bg-black text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Continue
+          {journeySteps[currentStepIndex]?.ctaLabel ?? 'Continue'}
         </button>
       ) : (
         <button
@@ -313,6 +314,16 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
       )}
       {current === 'introInfo' && (
         <IntroInfoStep onContinue={handleNext} onBack={handlePrevious} />
+      )}
+      {current === 'realBook' && (
+        <div className="min-h-[calc(100vh-180px)] flex items-center justify-center" role="region" aria-labelledby="printed-book-heading">
+          <div className="text-center px-4 md:px-6">
+            <h2 id="printed-book-heading" className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">
+              Your recipe will be printed in a real book —<br />
+              write it your way, make it yours.
+            </h2>
+          </div>
+        </div>
       )}
       {current === 'recipeForm' && (
         <RecipeFormStep data={recipeData} onChange={handleFormFieldChange} onContinue={handleNext} onBack={handlePrevious} autosaveState={autosaveState} />

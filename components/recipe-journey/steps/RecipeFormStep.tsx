@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
 export interface RecipeData {
   recipeName: string;
@@ -18,7 +19,7 @@ interface RecipeFormStepProps {
   autosaveState?: 'saving' | 'saved' | 'idle';
 }
 
-export default function RecipeFormStep({ data, onChange, autosaveState }: RecipeFormStepProps) {
+export default function RecipeFormStep({ data, onChange, onContinue, autosaveState }: RecipeFormStepProps) {
   const autosaveLabel = useMemo(() => {
     switch (autosaveState) {
       case 'saving':
@@ -30,13 +31,21 @@ export default function RecipeFormStep({ data, onChange, autosaveState }: Recipe
     }
   }, [autosaveState]);
 
+  const [showPasteModal, setShowPasteModal] = useState(false);
+  const [pastedText, setPastedText] = useState('');
+
 
   return (
     <div className="space-y-8" role="form" aria-labelledby="recipe-form-heading">
       <div className="space-y-2">
-        <h2 id="recipe-form-heading" className="font-serif text-2xl md:text-3xl font-semibold text-gray-900">
+        <h2 id="recipe-form-heading" className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">
           Your recipe
         </h2>
+        <p className="mt-3 text-sm text-gray-600">
+          <button type="button" onClick={() => setShowPasteModal(true)} className="underline underline-offset-2 hover:text-gray-700">
+            💡 Have everything written already? Just paste your full recipe here — we’ll format it for you.
+          </button>
+        </p>
       </div>
 
 
@@ -53,7 +62,6 @@ export default function RecipeFormStep({ data, onChange, autosaveState }: Recipe
           aria-describedby="title-help"
           className="h-12"
         />
-        <p id="title-help" className="text-xs text-gray-500">A short, clear name.</p>
       </section>
 
       {/* Ingredients */}
@@ -70,7 +78,6 @@ export default function RecipeFormStep({ data, onChange, autosaveState }: Recipe
           className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical"
           aria-describedby="ingredients-help"
         />
-        <p id="ingredients-help" className="text-xs text-gray-500">One item per line with quantities.</p>
       </section>
 
       {/* Instructions */}
@@ -104,6 +111,44 @@ export default function RecipeFormStep({ data, onChange, autosaveState }: Recipe
           className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical"
         />
       </section>
+
+      {/* Paste full recipe modal */}
+      <Dialog open={showPasteModal} onOpenChange={setShowPasteModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Paste your full recipe below</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <textarea
+              value={pastedText}
+              onChange={(e) => setPastedText(e.target.value)}
+              rows={14}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical"
+              placeholder={"Paste your entire recipe text here"}
+            />
+            <p className="text-xs text-gray-500">
+              <button type="button" className="underline underline-offset-2" onClick={() => setShowPasteModal(false)}>
+                Back to structured form
+              </button>
+            </p>
+          </div>
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => {
+                if (pastedText.trim().length > 0) {
+                  onChange('instructions', pastedText);
+                }
+                setShowPasteModal(false);
+                onContinue();
+              }}
+              className="px-6 py-2 rounded-full bg-black text-white hover:bg-gray-800"
+            >
+              Continue
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
