@@ -247,7 +247,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
             Done for now
           </button>
         </>
-      ) : currentStepIndex < totalSteps - 1 ? (
+      ) : currentStepIndex < totalSteps - 2 ? (
         <button
           type="button"
           onClick={handleNext}

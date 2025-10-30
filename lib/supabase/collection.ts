@@ -117,12 +117,14 @@ export async function submitGuestRecipe(
       return { data: null, error: tokenError || 'Invalid collection link' };
     }
 
-    // Search for existing guest
-    const { data: existingGuests } = await searchGuestInCollection(
-      tokenInfo.user_id,
-      submission.first_name,
-      submission.last_name
-    );
+    // Search for existing guest ONLY if we have an email to match
+    const { data: existingGuests } = submission.email
+      ? await searchGuestInCollection(
+          tokenInfo.user_id,
+          submission.first_name,
+          submission.last_name
+        )
+      : { data: null };
 
     let guestId: string;
 
