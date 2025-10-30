@@ -9,7 +9,7 @@ interface WelcomeStepProps {
 export default function WelcomeStep({ creatorName }: WelcomeStepProps) {
   return (
     <div className="min-h-[calc(100vh-180px)] flex items-center justify-center" role="region" aria-labelledby="welcome-heading">
-      <div className="text-center px-2">
+      <div className="text-center px-4 md:px-6">
         <h1 id="welcome-heading" className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">
           Congratulations! You&apos;ll be part of{' '}
           <span className="font-serif text-5xl font-bold text-black mx-1">
@@ -17,6 +17,9 @@ export default function WelcomeStep({ creatorName }: WelcomeStepProps) {
           </span>{' '}
           amazing Cookbook!
         </h1>
+        <p className="mt-4 text-base md:text-xl text-gray-600 max-w-[38rem] mx-auto">
+          This book isn&apos;t about perfect recipes — it&apos;s about the people who make them special.
+        </p>
       </div>
     </div>
   );

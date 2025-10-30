@@ -5,20 +5,23 @@ import React, { useState } from 'react';
 interface SuccessStepProps {
   defaultName?: string;
   defaultEmail?: string;
+  hasGuestOptIn?: boolean;
+  guestOptInEmail?: string;
   onSavePrefs: (name: string | undefined, email: string | undefined, optedIn: boolean) => Promise<void> | void;
 }
 
-export default function SuccessStep({ defaultName, defaultEmail, onSavePrefs }: SuccessStepProps) {
-  const [name, setName] = useState<string>(defaultName || '');
+export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn = false, guestOptInEmail, onSavePrefs }: SuccessStepProps) {
   const [email, setEmail] = useState<string>(defaultEmail || '');
   const [optIn, setOptIn] = useState<boolean>(!!defaultEmail);
   const [showEditor, setShowEditor] = useState<boolean>(!defaultEmail);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      await onSavePrefs(name || undefined, email || undefined, optIn && !!(email || defaultEmail));
+      await onSavePrefs(undefined, email || undefined, optIn && !!(email || defaultEmail));
+      setSaved(true);
     } finally {
       setSaving(false);
     }
@@ -31,50 +34,43 @@ export default function SuccessStep({ defaultName, defaultEmail, onSavePrefs }: 
         <h2 id="thanks-heading" className="font-serif text-2xl md:text-3xl font-semibold text-gray-900">Thank you for your recipe!</h2>
         <p className="text-gray-600">It will be a wonderful addition to the cookbook.</p>
         <div className="space-y-4 mt-6">
-          <div className="rounded-xl border border-gray-200 p-4 text-left">
+          <div className="text-left">
+            {hasGuestOptIn && guestOptInEmail ? (
+              <p className="text-sm text-gray-600">We’ll email your recipe to <span className="font-medium text-gray-800">{guestOptInEmail}</span>.</p>
+            ) : (
             <label className="flex items-center gap-2 text-sm text-gray-700">
-              <input type="checkbox" className="h-4 w-4" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} />
+              <input type="checkbox" className="h-4 w-4 accent-green-600" checked={optIn} onChange={(e) => { setOptIn(e.target.checked); setSaved(false); }} />
               Email me my finalized recipe with the image.
             </label>
+            )}
 
-            {!showEditor && defaultEmail && (
+            {!optIn && defaultEmail && (
               <div className="mt-3 text-xs text-gray-500">
-                We&apos;ll use <span className="font-medium text-gray-700">{defaultEmail}</span>.{' '}
-                <button type="button" className="underline underline-offset-2 hover:text-gray-700" onClick={() => setShowEditor(true)}>Edit contact info</button>
+                You can enable this later in your profile.
               </div>
             )}
 
-            {showEditor && (
-              <div className="mt-4 grid grid-cols-1 gap-3">
-                <input
-                  type="text"
-                  placeholder="Your name (optional)"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  disabled={saving}
-                />
+            {!hasGuestOptIn && optIn && (
+              <div className="mt-3 flex items-center gap-2">
                 <input
                   type="email"
-                  placeholder="Your email (optional)"
+                  placeholder="Your email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  onChange={(e) => { setEmail(e.target.value); setSaved(false); }}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
                   disabled={saving}
                 />
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  className="px-3 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 text-sm"
+                  disabled={saving}
+                >
+                  {saving ? 'Saving…' : saved ? 'Saved' : 'Save'}
+                </button>
               </div>
             )}
 
-            <div className="mt-4">
-              <button
-                type="button"
-                onClick={handleSave}
-                className="px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                disabled={saving}
-              >
-                {saving ? 'Saving…' : 'Save preferences'}
-              </button>
-            </div>
           </div>
         </div>
       </div>

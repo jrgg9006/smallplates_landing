@@ -82,6 +82,8 @@ export default function CollectionForm() {
   const [searchCompleted, setSearchCompleted] = useState(false);
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [fullName, setFullName] = useState('');
+  // 1) Add showNameEntry state
+  const [showNameEntry, setShowNameEntry] = useState(false);
 
   // Validate token on component mount
   useEffect(() => {
@@ -180,28 +182,25 @@ export default function CollectionForm() {
   };
 
   // Handle continue for new guest
+  // 4) Update handleContinueAsNew to require fullName and derive names ONLY from there if showNameEntry is true
   const handleContinueAsNew = () => {
-    const name = (fullName || `${firstName} ${lastName}` ).trim();
+    let name = fullName.trim();
+    if (!name) return;
     const parts = name.split(/\s+/);
-    const derivedLast = parts.length > 1 ? parts.pop() as string : (lastName || '');
-    const derivedFirst = parts.length > 0 ? parts.join(' ') : (firstName || name);
+    const derivedLast = parts.length > 1 ? parts.pop() as string : '';
+    const derivedFirst = parts.length > 0 ? parts.join(' ') : name;
     const guestData = {
       firstName: derivedFirst.trim(),
       lastName: derivedLast.trim(),
       existing: false
     };
-
-    // Store guest data in session storage for the recipe form with error handling
     try {
       if (typeof window !== 'undefined' && window.sessionStorage) {
         sessionStorage.setItem('collectionGuestData', JSON.stringify(guestData));
       }
-    } catch (error) {
-      console.warn('Failed to store guest data in sessionStorage:', error);
-      // Continue anyway - we can handle missing sessionStorage in the recipe page
+    } catch {
+      // ignore
     }
-    
-    // Navigate to recipe form
     router.push(`/collect/${token}/recipe`);
   };
 
@@ -339,9 +338,12 @@ export default function CollectionForm() {
                     id="lastName"
                     value={lastName}
                     onChange={(e) => {
-                      const value = e.target.value;
-                      addDebugLog(`✏️ lastName: ${value}`);
-                      setLastName(value);
+                      const raw = e.target.value;
+                      const next = (lastName.length === 0 && raw.length > 0)
+                        ? raw.replace(/^./, (c) => c.toUpperCase())
+                        : raw;
+                      addDebugLog(`✏️ lastName: ${next}`);
+                      setLastName(next);
                     }}
                     placeholder=""
                     disabled={searching}
@@ -381,8 +383,33 @@ export default function CollectionForm() {
               </div>
             )}
 
+            {/* Name entry when user explicitly chooses "I don't see my name" */}
+            {searchCompleted && showNameEntry && (
+              <div className="space-y-2 mt-6">
+                <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <div className="flex gap-4 items-center">
+                  <Input
+                    id="fullName"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Your full name"
+                    autoComplete="name"
+                    className="h-10"
+                  />
+                  <Button
+                    onClick={handleContinueAsNew}
+                    disabled={!fullName.trim()}
+                    className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!fullName.trim() ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-black text-white hover:bg-gray-800'}`}
+                  >
+                    Continue
+                  </Button>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">This is how we’ll print your name in the cookbook.</p>
+              </div>
+            )}
+
             {/* Search Results */}
-            {searchCompleted && (
+            {searchCompleted && !showNameEntry && (
               <div className="border-t pt-6">
                 {searchResults.length > 0 ? (
                   <div className="space-y-4">
@@ -410,7 +437,13 @@ export default function CollectionForm() {
                         </button>
                       ))}
                       <button
-                        onClick={handleContinueAsNew}
+                        onClick={() => {
+                          setShowNameEntry(true);
+                          setSelectedGuest(null);
+                          setFullName('');
+                          // Optionally: scroll/focus
+                          setTimeout(() => document.getElementById('fullName')?.focus(), 100);
+                        }}
                         className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors text-left"
                       >
                         <span className="text-gray-900 font-medium">
@@ -435,43 +468,34 @@ export default function CollectionForm() {
                     <p className="text-gray-600 mb-4 text-sm">
                       No worries! We&apos;ll add you when you submit your recipe.
                     </p>
-                    {/* Ask for full name inline (single field to reduce friction) */}
-                    <div className="grid grid-cols-1 gap-3">
-                      <div>
-                        <label htmlFor="fullName" className="block text-xs font-medium text-gray-700 mb-1">Name</label>
+                    {/* Ask for full name with inline Continue button (visual match to search row) */}
+                    <div className="space-y-2">
+                      <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                      <div className="flex gap-4 items-center">
                         <Input
                           id="fullName"
                           value={fullName}
                           onChange={(e) => setFullName(e.target.value)}
                           placeholder={firstName || lastName ? `e.g., John ${lastName}` : 'Your full name'}
                           autoComplete="name"
+                          className="h-10"
                         />
+                        <Button
+                          onClick={handleContinueAsNew}
+                          disabled={!((fullName || firstName).trim())}
+                          className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!((fullName || firstName).trim()) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-black text-white hover:bg-gray-800'}`}
+                        >
+                          Continue
+                        </Button>
                       </div>
-                      <p className="text-xs text-gray-500">This is how we’ll print your name in the cookbook.</p>
+                      <p className="text-xs text-gray-500 mt-1">This is how we’ll print your name in the cookbook.</p>
                     </div>
-                    <button
-                      onClick={handleContinueAsNew}
-                      disabled={!((fullName || firstName).trim())}
-                      className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <span className="text-gray-900 font-medium text-sm">
-                        Continue to Recipe Form
-                      </span>
-                      <svg 
-                        className="w-5 h-5 text-gray-400" 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
                   </div>
                 )}
               </div>
             )}
               {/* Instructions - only show if search hasn't been completed or if results were found */}
-              {(!searchCompleted || (searchCompleted && searchResults.length > 0)) && (
+              {(!searchCompleted || (searchCompleted && searchResults.length > 0 && !showNameEntry)) && (
                 <div className="text-center text-sm text-gray-500 mt-6">
                   <p>
                     After finding yourself, you&apos;ll be able to submit your favorite recipe 

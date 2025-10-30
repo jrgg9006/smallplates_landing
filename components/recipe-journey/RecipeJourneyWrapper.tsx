@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import type { CollectionTokenInfo, CollectionGuestSubmission } from '@/lib/types/database';
-import { submitGuestRecipe, updateGuestRecipeNotification } from '@/lib/supabase/collection';
+import { submitGuestRecipe, updateGuestRecipeNotification, updateGuestNotification } from '@/lib/supabase/collection';
 import Frame from './Frame';
 import IntroInfoStep from './steps/IntroInfoStep';
 import RecipeFormStep, { type RecipeData as FormRecipeData } from './steps/RecipeFormStep';
@@ -45,6 +45,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
   const [autosaveState, setAutosaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const isDirtyRef = useRef(false);
   const lastRecipeIdRef = useRef<string | null>(null);
+  const lastGuestIdRef = useRef<string | null>(null);
+  const guestOptInRef = useRef<boolean>(false);
+  const guestOptInEmailRef = useRef<string | null>(null);
   const totalSteps = journeySteps.length;
 
   // Reset journey: go to form
@@ -95,6 +98,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
     if (currentStepIndex > 0) {
       setCurrentStepIndex(currentStepIndex - 1);
       setTimeout(focusFirstHeading, 0);
+    } else {
+      // Go back to the name search landing for this token
+      router.push(`/collect/${token}`);
     }
   };
 
@@ -136,6 +142,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
       setSubmitting(false);
       isDirtyRef.current = false;
       lastRecipeIdRef.current = data?.recipe_id || null;
+      lastGuestIdRef.current = data?.guest_id || null;
+      guestOptInRef.current = !!data?.guest_notify_opt_in;
+      guestOptInEmailRef.current = (data?.guest_notify_email as string | null) || null;
       
       // Clean up localStorage
       localStorage.removeItem('recipeJourneyData');
@@ -223,7 +232,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
         <button
           type="button"
           onClick={handlePrevious}
-          disabled={currentStepIndex === 0 || submitting}
+          disabled={submitting}
           className="px-5 py-3 rounded-full border border-gray-300 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Back
@@ -280,11 +289,21 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
 
   const handleSavePrefs = async (name?: string, email?: string, optedIn?: boolean) => {
     const recipeId = lastRecipeIdRef.current;
-    if (!recipeId) return;
-    await updateGuestRecipeNotification(recipeId, {
-      notify_opt_in: !!optedIn,
-      notify_email: email || guestData.email || null,
-    });
+    const guestId = lastGuestIdRef.current;
+    // Keep recipe-level update for completeness
+    if (recipeId) {
+      await updateGuestRecipeNotification(recipeId, {
+        notify_opt_in: !!optedIn,
+        notify_email: email || guestData.email || null,
+      });
+    }
+    // Update guest-level preference so we don't ask again
+    if (guestId) {
+      await updateGuestNotification(guestId, {
+        notify_opt_in: !!optedIn,
+        notify_email: email || guestData.email || null,
+      });
+    }
   };
 
   return (
@@ -311,6 +330,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
         <SuccessStep
           defaultName={`${guestData.firstName} ${guestData.lastName}`.trim()}
           defaultEmail={guestData.email}
+          hasGuestOptIn={guestOptInRef.current}
+          guestOptInEmail={guestOptInEmailRef.current || undefined}
           onSavePrefs={handleSavePrefs}
         />
       )}

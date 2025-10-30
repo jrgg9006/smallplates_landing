@@ -107,7 +107,7 @@ export async function searchGuestInCollection(
 export async function submitGuestRecipe(
   collectionToken: string,
   submission: CollectionGuestSubmission
-): Promise<{ data: { guest_id: string; recipe_id: string } | null; error: string | null }> {
+): Promise<{ data: { guest_id: string; recipe_id: string; guest_notify_opt_in?: boolean; guest_notify_email?: string | null } | null; error: string | null }> {
   const supabase = createSupabaseClient();
   
   try {
@@ -117,14 +117,12 @@ export async function submitGuestRecipe(
       return { data: null, error: tokenError || 'Invalid collection link' };
     }
 
-    // Search for existing guest ONLY if we have an email to match
-    const { data: existingGuests } = submission.email
-      ? await searchGuestInCollection(
-          tokenInfo.user_id,
-          submission.first_name,
-          submission.last_name
-        )
-      : { data: null };
+    // Search for existing guest by name (and later we also store email if provided)
+    const { data: existingGuests } = await searchGuestInCollection(
+      tokenInfo.user_id,
+      submission.first_name,
+      submission.last_name
+    );
 
     let guestId: string;
 
@@ -223,10 +221,19 @@ export async function submitGuestRecipe(
       return { data: null, error: recipeError?.message || 'Failed to save recipe' };
     }
 
+    // Fetch guest notify fields to drive UI (show/hide opt-in controls)
+    const { data: guestRow } = await supabase
+      .from('guests')
+      .select('notify_opt_in, notify_email')
+      .eq('id', guestId)
+      .single();
+
     return {
       data: {
         guest_id: guestId,
         recipe_id: recipe.id,
+        guest_notify_opt_in: guestRow?.notify_opt_in ?? undefined,
+        guest_notify_email: (guestRow?.notify_email as string | null) ?? undefined,
       },
       error: null
     };
@@ -261,6 +268,36 @@ export async function updateGuestRecipeNotification(
   } catch (err) {
     console.error('Error updating recipe notification:', err);
     return { error: 'Failed to update notification preferences' };
+  }
+}
+
+/**
+ * Update guest-level notification preferences
+ */
+export async function updateGuestNotification(
+  guestId: string,
+  opts: { notify_opt_in?: boolean; notify_email?: string | null }
+): Promise<{ error: string | null }> {
+  const supabase = createSupabaseClient();
+  try {
+    const update: Record<string, any> = {};
+    if (typeof opts.notify_opt_in === 'boolean') update.notify_opt_in = opts.notify_opt_in;
+    if (typeof opts.notify_email !== 'undefined') update.notify_email = opts.notify_email || null;
+    if (update.notify_opt_in === true) {
+      update.notify_opt_in_at = new Date().toISOString();
+    }
+
+    if (Object.keys(update).length === 0) return { error: null };
+
+    const { error } = await supabase
+      .from('guests')
+      .update(update)
+      .eq('id', guestId);
+
+    return { error: error?.message || null };
+  } catch (err) {
+    console.error('Error updating guest notification:', err);
+    return { error: 'Failed to update guest notification preferences' };
   }
 }
 
