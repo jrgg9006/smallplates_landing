@@ -98,9 +98,34 @@ function Step2() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [hasPartner, setHasPartner] = useState(false);
   const [partnerFirstName, setPartnerFirstName] = useState("");
   const [partnerLastName, setPartnerLastName] = useState("");
+
+  // Email validation function
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Handle email blur event
+  const handleEmailBlur = () => {
+    if (email.trim() && !validateEmail(email.trim())) {
+      setEmailError("Please enter a valid email address");
+    } else {
+      setEmailError("");
+    }
+  };
+
+  // Handle email change
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    // Clear error when user starts typing again
+    if (emailError) {
+      setEmailError("");
+    }
+  };
 
   const handleContinue = () => {
     if (firstName && lastName && email) {
@@ -118,6 +143,7 @@ function Step2() {
   };
 
   const isFormValid = firstName.trim() && lastName.trim() && email.trim() && 
+    !emailError && validateEmail(email.trim()) &&
     (!hasPartner || (partnerFirstName.trim() && partnerLastName.trim()));
 
   return (
@@ -173,10 +199,18 @@ function Step2() {
                 type="email"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all"
+                onChange={handleEmailChange}
+                onBlur={handleEmailBlur}
+                className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:border-transparent outline-none transition-all ${
+                  emailError 
+                    ? 'border-red-500 focus:ring-red-500' 
+                    : 'border-gray-300 focus:ring-black'
+                }`}
                 placeholder="you@example.com"
               />
+              {emailError && (
+                <p className="mt-1 text-sm text-red-600">{emailError}</p>
+              )}
             </div>
           </div>
 
@@ -268,127 +302,94 @@ function Step2() {
 }
 
 /**
- * Step 3 Component - Stripe Checkout Process
+ * Step 3 Component - Waitlist Signup
  */
 function Step3() {
-  const { previousStep, completeOnboarding, state } = useOnboarding();
+  const { previousStep, completeOnboarding } = useOnboarding();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
-  const handlePayment = async () => {
+  const handleJoinWaitlist = async () => {
     setLoading(true);
-    setError(null);
 
     try {
-      // TODO: Integrate with Stripe here
-      // For now, simulate payment process
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Simulate waitlist submission
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Store payment completion in onboarding context
-      // updateStepData(3, { paymentComplete: true, stripeSessionId: 'placeholder' });
-      
+      // Complete onboarding (saves data, logs to console in waitlist mode)
       await completeOnboarding();
+      
+      // Show success message - user can close modal manually
+      setSuccess(true);
+      setLoading(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Payment failed");
       setLoading(false);
     }
   };
-
-  // Get user's name for personalization
-  const step2Data = state.answers.step2;
-  const userName = step2Data?.hasPartner 
-    ? `${step2Data.firstName} and ${step2Data.partnerFirstName}`
-    : step2Data?.firstName;
-
-  const step1Data = state.answers.step1;
-  const recipeCount = step1Data?.recipeCount;
 
   return (
     <OnboardingStep
       stepNumber={3}
       totalSteps={3}
-      title="Let's complete your purchase"
+      title="Join the Waitlist"
       description="You're almost done!"
       imageUrl="/images/onboarding/onboarding_step_3.jpg"
       imageAlt="Beautiful cookbook"
       imagePosition="right"
     >
       <div className="max-w-lg mx-auto">
-        {/* Order Summary */}
-        <div className="bg-gray-50 rounded-xl p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
-          
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Customer:</span>
-              <span className="font-medium">{userName || "Guest"}</span>
+        {!success ? (
+          <>
+            {/* Waitlist Message */}
+            <div className="text-center mb-8">
+              <p className="text-lg text-gray-700 leading-relaxed">
+                You'll be the first to know when Small Plates opens. We can't wait to help you start your cookbook.
+              </p>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Recipe Goal:</span>
-              <span className="font-medium">{recipeCount || "Not specified"}</span>
-            </div>
-            <div className="border-t border-gray-200 pt-3">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Small Plates Cookbook:</span>
-                <span className="font-semibold">$29.99</span>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Stripe Placeholder */}
-        <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center mb-6">
-          <div className="space-y-4">
-            <div className="w-16 h-16 bg-gray-200 rounded-xl mx-auto flex items-center justify-center">
-              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            {/* Navigation */}
+            <div className="flex justify-between items-center">
+              <button
+                type="button"
+                onClick={previousStep}
+                disabled={loading}
+                className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors disabled:opacity-50"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                onClick={handleJoinWaitlist}
+                disabled={loading}
+                className="px-12 py-4 bg-black text-white rounded-2xl text-lg font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2 inline-block"></div>
+                    Joining...
+                  </>
+                ) : (
+                  "Count me in!"
+                )}
+              </button>
+            </div>
+          </>
+        ) : (
+          /* Success Message */
+          <div className="text-center py-12">
+            <div className="w-20 h-20 bg-green-100 rounded-full mx-auto flex items-center justify-center mb-6">
+              <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <div>
-              <h4 className="font-medium text-gray-900 mb-2">Stripe Checkout Integration</h4>
-              <p className="text-sm text-gray-500 mb-4">
-                This is where the Stripe payment form will be integrated
-              </p>
-              <p className="text-xs text-gray-400">
-                Placeholder for secure payment processing
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm mb-6">
-            {error}
+            <h3 className="text-2xl font-semibold text-gray-900 mb-3">
+              You&apos;re in!
+            </h3>
+            <p className="text-lg text-gray-600">
+              We&apos;ll be in touch soon.
+            </p>
           </div>
         )}
-
-        {/* Navigation */}
-        <div className="flex justify-between">
-          <button
-            type="button"
-            onClick={previousStep}
-            disabled={loading}
-            className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors disabled:opacity-50"
-          >
-            Back
-          </button>
-          <button
-            type="button"
-            onClick={handlePayment}
-            disabled={loading}
-            className="px-8 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
-                Processing...
-              </>
-            ) : (
-              "Complete Purchase - $29.99"
-            )}
-          </button>
-        </div>
       </div>
     </OnboardingStep>
   );

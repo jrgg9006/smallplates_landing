@@ -14,6 +14,7 @@ import {
   OnboardingState,
   OnboardingContextType,
 } from "@/lib/types/onboarding";
+import { FEATURES, ROUTES } from "@/lib/config/features";
 
 const TOTAL_STEPS = 3;
 
@@ -91,6 +92,25 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
           throw new Error("Email is required to complete onboarding");
         }
 
+        // WAITLIST MODE: Just save data locally (no redirect, user closes modal manually)
+        if (FEATURES.WAITLIST_MODE) {
+          console.log('📋 Waitlist mode: Saving user data for future processing');
+          console.log('User data:', {
+            email: step2Data.email,
+            firstName: step2Data.firstName,
+            lastName: step2Data.lastName,
+            recipeCount: step1Data?.recipeCount,
+          });
+          
+          // TODO: Send to waitlist service/database when implemented
+          // For now, just mark as complete (user stays on success screen)
+          
+          setState(prev => ({ ...prev, isComplete: true }));
+          console.log('✅ Waitlist signup complete - user can close modal');
+          return;
+        }
+
+        // FULL PAYMENT FLOW (preserved for when WAITLIST_MODE = false)
         const supabase = createSupabaseClient();
         const redirectUrl = typeof window !== 'undefined'
           ? `${window.location.origin}/reset-password`
@@ -159,7 +179,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
         // Step 4: Redirect to profile immediately (user is already logged in!)
         console.log('🎉 Redirecting to profile...');
-        router.push("/profile");
+        router.push(ROUTES.AFTER_ONBOARDING);
 
       } catch (err) {
         console.error("Onboarding completion error:", err);

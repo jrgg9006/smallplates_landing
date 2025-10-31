@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import RecipeModal from "./RecipeModal";
 import Autoplay from "embla-carousel-autoplay";
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/carousel";
 
 export default function BooksPrinted() {
+  const router = useRouter();
   const [selectedRecipe, setSelectedRecipe] = useState<typeof books[0] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -162,6 +164,10 @@ export default function BooksPrinted() {
     setSelectedRecipe(null);
   };
 
+  const handleGetStarted = () => {
+    router.push("/onboarding");
+  };
+
   // Autoplay plugin for carousel
   const plugin = useRef(
     Autoplay({ 
@@ -190,6 +196,7 @@ export default function BooksPrinted() {
           <div className="flex-shrink-0">
             <button
               type="button"
+              onClick={handleGetStarted}
               className="inline-flex items-center justify-center rounded-2xl bg-smallplates_red text-white px-8 py-4 text-lg font-semibold shadow-sm hover:bg-orange-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-600 transition-colors"
             >
               CREATE YOURS FOR $120
