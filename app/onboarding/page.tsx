@@ -343,7 +343,7 @@ function Step3() {
             {/* Waitlist Message */}
             <div className="text-center mb-8">
               <p className="text-lg text-gray-700 leading-relaxed">
-                You'll be the first to know when Small Plates opens. We can't wait to help you start your cookbook.
+                You&apos;ll be the first to know when Small Plates opens. We can&apos;t wait to help you start your cookbook.
               </p>
             </div>
 

@@ -55,6 +55,7 @@ export function ShareCollectionModal({
     if (isOpen && !isEditingMessage) {
       loadCustomMessage();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   // Load custom message from profile

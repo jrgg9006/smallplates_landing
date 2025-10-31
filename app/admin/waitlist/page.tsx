@@ -15,6 +15,7 @@ export default function AdminWaitlistPage() {
 
   useEffect(() => {
     checkAdminAndLoad();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkAdminAndLoad = async () => {

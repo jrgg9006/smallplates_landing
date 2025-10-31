@@ -132,6 +132,7 @@ export default function ProfilePage() {
       loadProgressData();
       loadGuestCounts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   // Reload guest counts when refreshTrigger changes
@@ -139,6 +140,7 @@ export default function ProfilePage() {
     if (user?.id) {
       loadGuestCounts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshTrigger, user?.id]);
 
   if (loading) {

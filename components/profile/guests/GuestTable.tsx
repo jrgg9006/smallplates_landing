@@ -117,6 +117,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
     }, searchValue.trim() ? 300 : 0); // Only debounce search, not filter changes
 
     return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchValue, statusFilter, refreshTrigger]);
 
   const handleGuestClick = (guest: Guest) => {

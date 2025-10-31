@@ -343,7 +343,8 @@ export default function StepCard({
         </button>
       </div>
     </div>
-  ), [step, content, recipeData, onPrevious, onNext, onSubmit, canGoNext, canGoPrevious, isLastStep, submitting, submitSuccess, submitError, router, canProceed, getNextButtonText, renderContent]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), [step, content, recipeData, onPrevious, onNext, onSubmit, canGoNext, canGoPrevious, isLastStep, submitting, submitSuccess, submitError, router]);
 
   // Image component (EXACT COPY from OnboardingStep)
   const ImageSection = () => (
