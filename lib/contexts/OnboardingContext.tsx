@@ -15,6 +15,7 @@ import {
   OnboardingContextType,
 } from "@/lib/types/onboarding";
 import { FEATURES, ROUTES } from "@/lib/config/features";
+import { addToWaitlist } from "@/lib/supabase/waitlist";
 
 const TOTAL_STEPS = 3;
 
@@ -92,21 +93,29 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
           throw new Error("Email is required to complete onboarding");
         }
 
-        // WAITLIST MODE: Just save data locally (no redirect, user closes modal manually)
+        // WAITLIST MODE: Save to database (no redirect, user closes modal manually)
         if (FEATURES.WAITLIST_MODE) {
-          console.log('📋 Waitlist mode: Saving user data for future processing');
-          console.log('User data:', {
+          console.log('📋 Waitlist mode: Saving user to database');
+          
+          // Save to waitlist table
+          const { success, error } = await addToWaitlist({
             email: step2Data.email,
             firstName: step2Data.firstName,
             lastName: step2Data.lastName,
-            recipeCount: step1Data?.recipeCount,
+            recipeGoalCategory: step1Data?.recipeCount,
+            hasPartner: step2Data.hasPartner,
+            partnerFirstName: step2Data.partnerFirstName,
+            partnerLastName: step2Data.partnerLastName,
           });
-          
-          // TODO: Send to waitlist service/database when implemented
-          // For now, just mark as complete (user stays on success screen)
+
+          if (!success) {
+            console.error('❌ Failed to save to waitlist:', error);
+            alert(`Error: ${error}\n\nPlease try again or contact support.`);
+            return;
+          }
           
           setState(prev => ({ ...prev, isComplete: true }));
-          console.log('✅ Waitlist signup complete - user can close modal');
+          console.log('✅ Waitlist signup complete - user saved to database');
           return;
         }
 
