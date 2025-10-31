@@ -211,6 +211,19 @@ export async function submitGuestRecipe(
       submitted_at: new Date().toISOString(),
     };
 
+    // DEBUG: Log authentication status and recipe data
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    console.log('🔍 DEBUG - Before recipe insert:', {
+      isAnonymous: currentUser === null,
+      currentUserId: currentUser?.id || 'NULL (anonymous)',
+      recipeUserId: tokenInfo.user_id,
+      guestId: guestId,
+      recipeData: {
+        recipe_name: recipeData.recipe_name,
+        user_id: recipeData.user_id,
+      }
+    });
+
     const { data: recipe, error: recipeError } = await supabase
       .from('guest_recipes')
       .insert(recipeData)
@@ -218,6 +231,12 @@ export async function submitGuestRecipe(
       .single();
 
     if (recipeError || !recipe) {
+      console.error('❌ Recipe insert failed:', {
+        error: recipeError,
+        errorMessage: recipeError?.message,
+        errorCode: recipeError?.code,
+        errorDetails: recipeError?.details,
+      });
       return { data: null, error: recipeError?.message || 'Failed to save recipe' };
     }
 
