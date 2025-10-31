@@ -9,7 +9,7 @@ DECLARE
   user_metadata JSONB;
   waitlist_user_id UUID;
 BEGIN
-  -- Get user metadata from auth.users
+  -- Get user metadata from auth.userss
   SELECT raw_user_meta_data INTO user_metadata
   FROM auth.users
   WHERE id = NEW.id;
