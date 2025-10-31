@@ -22,7 +22,7 @@
   - Include at least:
     - 1 test for expected use
     - 1 edge case
-    - 1 failure case
+    - 1 failure casee
 
 ### ✅ Task Completion
 - **Mark completed tasks in `TASK.md`** immediately after finishing them.
