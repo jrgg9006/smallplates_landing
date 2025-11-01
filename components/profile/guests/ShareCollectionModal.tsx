@@ -273,9 +273,8 @@ export function ShareCollectionModal({
                   )}
                 </div>
               ) : (
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-600 mb-2">{shareMessage}</p>
-                  <p className="text-xs text-gray-500 truncate font-mono">{collectionUrl}</p>
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600">{shareMessage}</p>
                   <div className="flex justify-end">
                     <Button
                       size="sm"
@@ -330,13 +329,13 @@ export function ShareCollectionModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-center">
+          <DialogTitle className="text-center text-lg font-semibold mb-2">
             Share Your Collection Link
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           {/* Share preview */}
-          <div className="p-4 bg-gray-50 rounded-xl">
+          <div className="p-4 bg-gray-50 rounded-lg">
             {isEditingMessage ? (
               <div className="space-y-2">
                 <textarea
@@ -387,9 +386,8 @@ export function ShareCollectionModal({
                 )}
               </div>
             ) : (
-              <div className="space-y-2">
-                <p className="text-sm text-gray-600 mb-2">{shareMessage}</p>
-                <p className="text-xs text-gray-500 truncate font-mono">{collectionUrl}</p>
+              <div className="space-y-3">
+                <p className="text-sm text-gray-600">{shareMessage}</p>
                 <div className="flex justify-end">
                   <Button
                     size="sm"
@@ -413,11 +411,11 @@ export function ShareCollectionModal({
                 <Button
                   key={option.id}
                   variant="outline"
-                  className="flex flex-col items-center gap-2 h-24 relative"
+                  className="flex flex-col items-center justify-center gap-2 h-24"
                   onClick={option.action}
                 >
                   <Icon className="w-6 h-6" />
-                  <span className="text-sm">
+                  <span className="text-sm font-medium">
                     {option.label}
                   </span>
                 </Button>

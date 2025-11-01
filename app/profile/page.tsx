@@ -223,12 +223,16 @@ export default function ProfilePage() {
         {/* Hero Section */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-            {/* Title section with divider - centered on mobile */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:gap-8 mb-4 lg:mb-0 text-center lg:text-left">
-              <h1 className="text-4xl lg:text-5xl font-serif font-bold text-gray-900">Guest List</h1>
-              {/* Vertical divider - only show on desktop */}
-              <div className="hidden lg:block h-10 w-px bg-gray-300"></div>
-              <p className="text-xl lg:text-4xl text-gray-600 font-serif-display mt-1 lg:mt-0">Your Cookbook is Cooking...</p>
+            {/* Title section with image - centered on mobile */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:gap-8 mb-4 lg:mb-0 justify-center lg:justify-start">
+              <Image
+                src="/images/profile/guest_list_image_pan.svg"
+                alt="Guest List - Your Cookbook is Cooking"
+                width={600}
+                height={80}
+                className="w-full max-w-2xl h-auto"
+                priority
+              />
             </div>
             
             {/* Right side - Progress bar - centered on mobile */}
