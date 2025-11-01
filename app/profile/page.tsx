@@ -14,7 +14,6 @@ import { AddGuestModal } from "@/components/profile/guests/AddGuestModal";
 import { ProgressBar } from "@/components/profile/ProgressBar";
 import { getUserProgress, UserProgress } from "@/lib/supabase/progress";
 import ProfileDropdown from "@/components/profile/ProfileDropdown";
-import { Bell } from "lucide-react";
 import { getGuests } from "@/lib/supabase/guests";
 
 export default function ProfilePage() {
@@ -66,11 +65,6 @@ export default function ProfilePage() {
     router.push('/profile/orders');
   };
 
-  const handleNotifications = () => {
-    // Add notifications logic here  
-    setIsMobileMenuOpen(false);
-    console.log('Notifications clicked');
-  };
 
   // Load user progress data
   const loadProgressData = async () => {
@@ -174,17 +168,6 @@ export default function ProfilePage() {
           
           {/* Desktop: Notification Bell + Profile */}
           <div className="hidden lg:flex items-center gap-3">
-            {/* Notification Bell */}
-            <button
-              className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
-              aria-label="Notifications"
-            >
-              <Bell className="h-5 w-5 text-gray-600" />
-              {/* Notification Badge */}
-              <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs font-medium">1</span>
-              </span>
-            </button>
             
             <ProfileDropdown />
           </div>
@@ -224,13 +207,6 @@ export default function ProfilePage() {
               className="block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
             >
               Orders & Shipping
-            </button>
-            <button
-              onClick={handleNotifications}
-              className="relative block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
-            >
-              Notifications
-              <span className="absolute top-2 right-6 h-2 w-2 bg-red-500 rounded-full"></span>
             </button>
             <button
               onClick={handleLogout}

@@ -8,7 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { OrderHistory } from "@/components/profile/orders/OrderHistory";
 import ProfileDropdown from "@/components/profile/ProfileDropdown";
-import { Bell, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 export default function OrdersPage() {
   const { user, loading } = useAuth();
@@ -51,17 +51,6 @@ export default function OrdersPage() {
           
           {/* Desktop: Notification Bell + Profile */}
           <div className="hidden lg:flex items-center gap-3">
-            {/* Notification Bell */}
-            <button
-              className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
-              aria-label="Notifications"
-            >
-              <Bell className="h-5 w-5 text-gray-600" />
-              {/* Notification Badge */}
-              <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs font-medium">1</span>
-              </span>
-            </button>
             
             <ProfileDropdown />
           </div>
