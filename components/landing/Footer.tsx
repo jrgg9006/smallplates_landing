@@ -23,7 +23,7 @@ export default function Footer() {
               />
             </Link>
             <p className="text-base text-gray-300 max-w-md">
-              Create a beautiful cookbook with your loved ones' recipes. We turn memories and stories into professionally printed hardcover books that last generations.
+              Create a beautiful cookbook with your loved ones&apos; recipes. We turn memories and stories into professionally printed hardcover books that last generations.
             </p>
           </div>
           

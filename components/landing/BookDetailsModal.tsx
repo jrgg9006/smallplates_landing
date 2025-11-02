@@ -89,7 +89,7 @@ export default function BookDetailsModal({ isOpen, onClose }: BookDetailsModalPr
               <p className="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto text-center">
                 Each Small Plates & Co. book is crafted with the same care that goes into the recipes it holds. 
                 Every detail—from the materials to the printing—has been thoughtfully chosen to create something 
-                you'll treasure for years.
+                you&apos;ll treasure for years.
               </p>
               
               {/* Decorative divider */}
