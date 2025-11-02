@@ -119,6 +119,7 @@ export interface Database {
           ingredients: string;
           instructions: string;
           comments: string | null;
+          raw_recipe_text: string | null;
           image_url: string | null;
           submission_status: RecipeSubmissionStatus;
           submitted_at: string | null;
@@ -134,6 +135,7 @@ export interface Database {
           ingredients: string;
           instructions: string;
           comments?: string | null;
+          raw_recipe_text?: string | null;
           image_url?: string | null;
           submission_status?: RecipeSubmissionStatus;
           submitted_at?: string | null;
@@ -144,6 +146,7 @@ export interface Database {
           ingredients?: string;
           instructions?: string;
           comments?: string | null;
+          raw_recipe_text?: string | null;
           image_url?: string | null;
           submission_status?: RecipeSubmissionStatus;
           submitted_at?: string | null;
@@ -368,6 +371,7 @@ export interface CollectionGuestSubmission {
   ingredients: string;
   instructions: string;
   comments?: string;
+  raw_recipe_text?: string;
 }
 
 export interface CollectionTokenInfo {

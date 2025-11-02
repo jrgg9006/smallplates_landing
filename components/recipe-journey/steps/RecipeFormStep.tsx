@@ -9,6 +9,7 @@ export interface RecipeData {
   ingredients: string;
   instructions: string;
   personalNote: string;
+  rawRecipeText?: string;
 }
 
 interface RecipeFormStepProps {
@@ -16,10 +17,11 @@ interface RecipeFormStepProps {
   onChange: (field: keyof RecipeData, value: string) => void;
   onContinue: () => void;
   onBack: () => void;
+  onPasteRecipe?: (rawText: string) => void;
   autosaveState?: 'saving' | 'saved' | 'idle';
 }
 
-export default function RecipeFormStep({ data, onChange, onContinue, autosaveState }: RecipeFormStepProps) {
+export default function RecipeFormStep({ data, onChange, onContinue, onPasteRecipe, autosaveState }: RecipeFormStepProps) {
   const autosaveLabel = useMemo(() => {
     switch (autosaveState) {
       case 'saving':
@@ -137,10 +139,22 @@ export default function RecipeFormStep({ data, onChange, onContinue, autosaveSta
               type="button"
               onClick={() => {
                 if (pastedText.trim().length > 0) {
-                  onChange('instructions', pastedText);
+                  // Extract recipe name from first line if possible
+                  const lines = pastedText.trim().split('\n');
+                  const firstLine = lines[0]?.trim() || 'Pasted Recipe';
+                  
+                  // Call the paste handler if provided, otherwise fallback to old behavior
+                  if (onPasteRecipe) {
+                    onChange('recipeName', firstLine);
+                    onChange('rawRecipeText', pastedText);
+                    onPasteRecipe(pastedText);
+                  } else {
+                    onChange('recipeName', firstLine);
+                    onChange('instructions', pastedText);
+                    onContinue();
+                  }
                 }
                 setShowPasteModal(false);
-                onContinue();
               }}
               className="px-6 py-2 rounded-full bg-black text-white hover:bg-gray-800"
             >

@@ -204,9 +204,10 @@ export async function submitGuestRecipe(
       guest_id: guestId,
       user_id: tokenInfo.user_id,
       recipe_name: submission.recipe_name.trim(),
-      ingredients: submission.ingredients.trim(),
-      instructions: submission.instructions.trim(),
+      ingredients: submission.raw_recipe_text ? 'See full recipe' : submission.ingredients.trim(),
+      instructions: submission.raw_recipe_text ? 'See full recipe' : submission.instructions.trim(),
       comments: submission.comments?.trim() || null,
+      raw_recipe_text: submission.raw_recipe_text?.trim() || null,
       submission_status: 'submitted',
       submitted_at: new Date().toISOString(),
     };

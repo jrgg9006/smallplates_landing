@@ -39,7 +39,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
     recipeName: '',
     ingredients: '',
     instructions: '',
-    personalNote: ''
+    personalNote: '',
+    rawRecipeText: undefined
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -106,6 +107,14 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
     setRecipeData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handlePasteRecipe = async (rawText: string) => {
+    // When user pastes a recipe, skip directly to submission
+    isDirtyRef.current = true;
+    
+    // Submit immediately with raw text
+    await handleSubmit();
+  };
+
   const handleSubmit = async () => {
     if (submitting) return;
     
@@ -120,9 +129,10 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
         email: guestData.email,
         phone: guestData.phone,
         recipe_name: recipeData.recipeName.trim(),
-        ingredients: recipeData.ingredients.trim(),
-        instructions: recipeData.instructions.trim(),
+        ingredients: recipeData.rawRecipeText ? '' : recipeData.ingredients.trim(),
+        instructions: recipeData.rawRecipeText ? '' : recipeData.instructions.trim(),
         comments: recipeData.personalNote.trim() || undefined,
+        raw_recipe_text: recipeData.rawRecipeText
       };
 
       // Submit the recipe
@@ -354,7 +364,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
             exit={{ opacity: 0, x: -16 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
           >
-            <RecipeFormStep data={recipeData} onChange={handleFormFieldChange} onContinue={handleNext} onBack={handlePrevious} autosaveState={autosaveState} />
+            <RecipeFormStep data={recipeData} onChange={handleFormFieldChange} onContinue={handleNext} onBack={handlePrevious} onPasteRecipe={handlePasteRecipe} autosaveState={autosaveState} />
           </motion.div>
         )}
         {current === 'summary' && (
