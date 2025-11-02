@@ -73,13 +73,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
   const creatorName = tokenInfo.user_name.split(' ')[0] || 'the cookbook creator';
 
   const getImageUrl = () => {
-    const imageMap = {
-      1: "/images/onboarding/onboarding_step_1.jpg",
-      2: "/images/onboarding/onboarding_step_2.jpg",
-      3: "/images/onboarding/onboarding_step_3.jpg"
-    } as const;
-    const imageIndex = ((currentStepIndex) % 3) + 1;
-    return imageMap[imageIndex as keyof typeof imageMap];
+    // Use collect_1.jpg for collection journey
+    return "/images/collect/collect_1.jpg";
   };
 
   const focusFirstHeading = useCallback(() => {

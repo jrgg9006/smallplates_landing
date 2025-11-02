@@ -214,8 +214,8 @@ function Step2() {
             </div>
           </div>
 
-          {/* Partner Option */}
-          <div className="border-t border-gray-200 pt-6">
+          {/* Partner Option - Hidden for now */}
+          {/* <div className="border-t border-gray-200 pt-6">
             <button
               type="button"
               onClick={() => setHasPartner(!hasPartner)}
@@ -236,8 +236,8 @@ function Step2() {
               </div>
             </button>
 
-            {/* Partner Fields */}
-            {hasPartner && (
+            <Partner Fields */}
+            {/* {hasPartner && (
               <div className="mt-4 p-4 bg-gray-50 rounded-xl space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -271,7 +271,7 @@ function Step2() {
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -332,7 +332,7 @@ function Step3() {
       stepNumber={3}
       totalSteps={3}
       title="Join the Waitlist"
-      description="You're almost done!"
+      description="✨ Only members of the Small Plates circle have access to the  for now. Members are those who&apos;ve already shared a recipe."
       imageUrl="/images/onboarding/onboarding_step_3.jpg"
       imageAlt="Beautiful cookbook"
       imagePosition="right"
@@ -341,9 +341,9 @@ function Step3() {
         {!success ? (
           <>
             {/* Waitlist Message */}
-            <div className="text-center mb-8">
+            <div className="text-center mb-8 space-y-4">
               <p className="text-lg text-gray-700 leading-relaxed">
-                You&apos;ll be the first to know when Small Plates opens. We can&apos;t wait to help you start your cookbook.
+                Join the waitlist — you&apos;ll be the first to know when Small Plates opens.
               </p>
             </div>
 

@@ -17,11 +17,11 @@ export default function Frame({ title, children, bottomNav, showHeaderLogo = tru
     <div className="h-screen bg-white overflow-hidden">
       <div className="grid grid-cols-1 lg:grid-cols-5 h-full">
         {/* Left image pane - desktop only */}
-        <div className="hidden lg:block lg:col-span-2 border-r border-gray-200 relative lg:sticky lg:top-0 h-screen">
+        <div className="hidden lg:block lg:col-span-2 border-r border-gray-200 relative lg:sticky lg:top-0 h-screen bg-gray-100">
           <div className="relative h-screen p-2">
-            <div className="relative w-full h-full rounded-2xl overflow-hidden bg-white shadow-sm">
+            <div className="relative w-full h-full rounded-2xl overflow-hidden">
               {leftImageSrc && (
-                <Image src={leftImageSrc} alt="Recipe journey" fill sizes="40vw" className="object-cover" priority />
+                <Image src={leftImageSrc} alt="Recipe journey" fill sizes="40vw" className="object-contain" priority />
               )}
             </div>
           </div>
@@ -44,10 +44,6 @@ export default function Frame({ title, children, bottomNav, showHeaderLogo = tru
           <main className="flex-1">
             <div
               className="mx-auto w-full max-w-3xl px-4 py-6"
-              style={{
-                // Ensure page content never hides behind the bottom nav
-                paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 7rem)'
-              }}
             >
               {children}
             </div>

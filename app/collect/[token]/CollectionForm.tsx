@@ -268,14 +268,21 @@ export default function CollectionForm() {
       {/* Main Content - Two Column Layout */}
       <div className="min-h-screen lg:min-h-[calc(100vh-4rem)] flex flex-col lg:flex-row">
         {/* Left Column - Image */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gray-100 items-center justify-center lg:min-h-[calc(100vh-4rem)]">
-          <div className="w-80 h-80 bg-gray-300 rounded-lg flex items-center justify-center">
-            <span className="text-gray-500 text-lg">Recipe Collection Image</span>
+        <div className="hidden lg:block lg:w-2/5 relative bg-gray-100 h-[calc(100vh-4rem)] p-2">
+          <div className="relative w-full h-full rounded-2xl overflow-hidden">
+            <Image
+              src="/images/collect/collect_1.jpg"
+              alt="Small Plates Cookbook Recipe Collection"
+              fill
+              sizes="40vw"
+              className="object-contain"
+              priority
+            />
           </div>
         </div>
 
         {/* Right Column - Content */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center px-4 sm:px-6 py-8 lg:py-12 min-h-[calc(100vh-8rem)] lg:min-h-[calc(100vh-4rem)]">
+        <div className="w-full lg:w-3/5 flex items-center justify-center px-4 sm:px-6 py-8 lg:py-12 min-h-[calc(100vh-8rem)] lg:min-h-[calc(100vh-4rem)]">
           <div className="w-full max-w-md mx-auto">
             <div className="space-y-6">
               {(() => {
@@ -506,15 +513,6 @@ export default function CollectionForm() {
                 )}
               </div>
             )}
-              {/* Instructions - only show if search hasn't been completed or if results were found */}
-              {(!searchCompleted || (searchCompleted && searchResults.length > 0 && !showNameEntry)) && (
-                <div className="text-center text-sm text-gray-500 mt-6">
-                  <p>
-                    After finding yourself, you&apos;ll be able to submit your favorite recipe 
-                    to be included in the collection.
-                  </p>
-                </div>
-              )}
             </div>
           </div>
         </div>
