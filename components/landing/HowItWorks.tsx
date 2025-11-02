@@ -7,7 +7,7 @@ export default function HowItWorks() {
       stepNumber: "STEP 1",
       title: "Select Guests and Request Recipes in One Click",
       description: "We provide smart tools to collect recipes from your friends and family",
-      image: "/images/HowItWorks_images/howitworks_1.svg",
+      image: "/images/HowItWorks_images/how_step1.png",
     },
     {
       id: 2,
