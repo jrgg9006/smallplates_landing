@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import BookDetailsModal from "./BookDetailsModal";
 
 export default function WhatsIncluded() {
   const router = useRouter();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleGetStarted = () => {
     router.push("/onboarding");
@@ -46,9 +49,12 @@ export default function WhatsIncluded() {
             </button>
             
             {/* Learn more text */}
-            <p className="mt-4 text-emerald-100 text-base">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="mt-4 text-emerald-100 text-base underline underline-offset-2 hover:text-white transition-colors cursor-pointer bg-transparent border-none p-0"
+            >
               Learn more about the printed-book details
-            </p>
+            </button>
           </div>
 
           {/* Right Features Grid */}
@@ -108,6 +114,12 @@ export default function WhatsIncluded() {
           </div>
         </div>
       </div>
+      
+      {/* Book Details Modal */}
+      <BookDetailsModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </section>
   );
 }

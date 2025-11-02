@@ -150,7 +150,7 @@ export function DangerZone() {
               {/* Confirmation Text */}
               <div>
                 <Label htmlFor="confirmText" className="block text-sm font-medium text-gray-700 mb-1">
-                  Type &quot;{CONFIRMATION_TEXT}&quot; to confirm *
+                  Type "{CONFIRMATION_TEXT}" to confirm *
                 </Label>
                 <Input
                   id="confirmText"
