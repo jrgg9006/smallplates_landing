@@ -44,6 +44,11 @@ export default function WhatsIncluded() {
             >
               CREATE YOURS FOR $120
             </button>
+            
+            {/* Learn more text */}
+            <p className="mt-4 text-emerald-100 text-base">
+              Learn more about the printed-book details
+            </p>
           </div>
 
           {/* Right Features Grid */}

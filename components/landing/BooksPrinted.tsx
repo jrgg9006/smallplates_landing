@@ -171,10 +171,12 @@ export default function BooksPrinted() {
   // Autoplay plugin for carousel
   const plugin = useRef(
     Autoplay({ 
-      delay: 5000, 
+      delay: 2500, 
       stopOnInteraction: false,
       stopOnMouseEnter: false,
-      stopOnFocusIn: false
+      stopOnFocusIn: false,
+      stopOnLastSnap: false,
+      playOnInit: true
     })
   );
 
@@ -208,11 +210,11 @@ export default function BooksPrinted() {
         <Carousel
           plugins={[plugin.current]}
           className="w-full"
-          onMouseEnter={plugin.current.stop}
-          onMouseLeave={plugin.current.reset}
           opts={{
             align: "start",
             loop: true,
+            skipSnaps: false,
+            dragFree: false
           }}
         >
           <CarouselContent className="-ml-2 md:-ml-4">

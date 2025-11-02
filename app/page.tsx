@@ -8,8 +8,9 @@ import TextSection from '@/components/landing/TextSection'
 import BooksPrinted from '@/components/landing/BooksPrinted'
 import WhatsIncluded from '@/components/landing/WhatsIncluded'
 import HowItWorks from '@/components/landing/HowItWorks'
-import Guarantee from '@/components/landing/Guarantee'
+// import Guarantee from '@/components/landing/Guarantee'
 import CTAButton from '@/components/landing/CTAButton'
+import Footer from '@/components/landing/Footer'
 
 export default function Home() {
   const router = useRouter();
@@ -27,15 +28,16 @@ export default function Home() {
         <BooksPrinted />
         <WhatsIncluded />
         <HowItWorks />
-        <Guarantee />
+        {/* <Guarantee /> */}
 
         {/* Repeat CTA at bottom per best practices */}
-        <section className="bg-white">
+        {/* <section className="bg-white">
           <div className="mx-auto max-w-7xl px-6 md:px-8 py-12 text-center">
             <CTAButton data-cta="footer-primary" onClick={handleGetStarted} />
           </div>
-        </section>
+        </section> */}
       </main>
+      <Footer />
     </>
   )
 }
