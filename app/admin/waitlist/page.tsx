@@ -3,13 +3,15 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseClient } from '@/lib/supabase/client';
-import { getWaitlistUsers, type WaitlistUser } from '@/lib/supabase/waitlist';
+import { getWaitlistUsers, deleteWaitlistEntry, type WaitlistUser } from '@/lib/supabase/waitlist';
 import { isAdminEmail } from '@/lib/config/admin';
+import { Trash2 } from 'lucide-react';
 
 export default function AdminWaitlistPage() {
   const [waitlist, setWaitlist] = useState<WaitlistUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [inviting, setInviting] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
 
@@ -76,6 +78,29 @@ export default function AdminWaitlistPage() {
     }
   };
 
+  const handleDelete = async (user: WaitlistUser) => {
+    const reason = prompt(
+      `Remove ${user.email} from the waitlist?\n\nOptionally, provide a reason (e.g., "duplicate email", "test entry"):`
+    );
+    
+    // User cancelled
+    if (reason === null) {
+      return;
+    }
+
+    setDeleting(user.id);
+
+    const { success, error } = await deleteWaitlistEntry(user.id, reason || undefined);
+
+    if (success) {
+      await loadWaitlist(); // Reload to update the list
+    } else {
+      alert(`❌ Error deleting entry: ${error}`);
+    }
+    
+    setDeleting(null);
+  };
+
   const getStatusBadge = (status: string) => {
     const styles = {
       pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
@@ -126,8 +151,8 @@ export default function AdminWaitlistPage() {
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-sm text-gray-600 mb-1">Total</div>
-            <div className="text-3xl font-bold">{waitlist.length}</div>
+            <div className="text-sm text-gray-600 mb-1">Total Active</div>
+            <div className="text-3xl font-bold">{waitlist.filter(u => u.status !== 'deleted').length}</div>
           </div>
           <div className="bg-yellow-50 rounded-lg shadow p-6">
             <div className="text-sm text-yellow-800 mb-1">Pending</div>
@@ -179,7 +204,7 @@ export default function AdminWaitlistPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Joined
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
                       Action
                     </th>
                   </tr>
@@ -217,24 +242,49 @@ export default function AdminWaitlistPage() {
                           {new Date(user.created_at).toLocaleTimeString()}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {user.status === 'pending' && (
-                          <button
-                            onClick={() => handleInvite(user.email, user.id)}
-                            disabled={inviting === user.id}
-                            className="px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {inviting === user.id ? 'Sending...' : 'Send Invite'}
-                          </button>
-                        )}
-                        {user.status === 'invited' && (
-                          <div className="text-sm text-gray-500">
-                            Invited {user.invited_at ? new Date(user.invited_at).toLocaleDateString() : ''}
+                      <td className="px-6 py-4 whitespace-nowrap w-48">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            {user.status === 'pending' && (
+                              <button
+                                onClick={() => handleInvite(user.email, user.id)}
+                                disabled={inviting === user.id}
+                                className="px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {inviting === user.id ? 'Sending...' : 'Send Invite'}
+                              </button>
+                            )}
+                            {user.status === 'invited' && (
+                              <div className="flex flex-col gap-2">
+                                <div className="text-sm text-gray-500">
+                                  Invited {user.invited_at ? new Date(user.invited_at).toLocaleDateString() : ''}
+                                </div>
+                                <button
+                                  onClick={() => handleInvite(user.email, user.id)}
+                                  disabled={inviting === user.id}
+                                  className="px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  {inviting === user.id ? 'Resending...' : 'Resend Invite'}
+                                </button>
+                              </div>
+                            )}
+                            {user.status === 'converted' && (
+                              <div className="text-sm text-green-600 font-medium">✓ Customer</div>
+                            )}
                           </div>
-                        )}
-                        {user.status === 'converted' && (
-                          <div className="text-sm text-green-600 font-medium">✓ Customer</div>
-                        )}
+                          
+                          {/* Delete button - fixed position */}
+                          <div className="ml-2 flex-shrink-0">
+                            <button
+                              onClick={() => handleDelete(user)}
+                              disabled={deleting === user.id}
+                              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="Remove from waitlist"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   ))}
