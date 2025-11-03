@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -45,6 +45,7 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
   const [recipeNotes, setRecipeNotes] = useState('');
 
   const resetForm = () => {
+    console.log('AddGuestModal: Resetting form');
     setFirstName('');
     setLastName('');
     setPrintedName('');
@@ -60,6 +61,15 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
     setRecipeNotes('');
   };
 
+  // Log when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      console.log('AddGuestModal: Modal opened');
+    } else {
+      console.log('AddGuestModal: Modal closed');
+    }
+  }, [isOpen]);
+
   const handleSave = async () => {
     if (!firstName.trim()) {
       setError('Please fill in First Name');
@@ -72,11 +82,20 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
     try {
       // Check if guest email already exists (only if email is provided)
       if (email.trim()) {
+        console.log('AddGuestModal: About to check if email exists:', email);
+        console.log('AddGuestModal: Check timestamp:', new Date().toISOString());
+        
         const emailExists = await checkGuestExists(email);
+        
+        console.log('AddGuestModal: Email exists check result:', emailExists);
+        
         if (emailExists) {
+          console.log('AddGuestModal: Email already exists, showing error');
           setError('A guest with this email already exists');
           setLoading(false);
           return;
+        } else {
+          console.log('AddGuestModal: Email is available, proceeding with guest creation');
         }
       }
 

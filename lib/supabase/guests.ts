@@ -332,14 +332,59 @@ export async function getGuestsByStatus(status: Guest['status'], includeArchived
  * Check if a guest email already exists for the current user
  */
 export async function checkGuestExists(email: string): Promise<boolean> {
+  // Create a fresh client to avoid any caching issues
   const supabase = createSupabaseClient();
   
-  const { data } = await supabase
-    .from('guests')
-    .select('id')
-    .eq('email', email)
-    .eq('is_archived', false)
-    .single();
-
-  return !!data;
+  // Add a small delay to ensure auth state is stable
+  await new Promise(resolve => setTimeout(resolve, 50));
+  
+  // Get the current user with a fresh session
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    console.error('checkGuestExists: No user authenticated', userError);
+    return false; // If no user is authenticated, return false
+  }
+  
+  console.log('checkGuestExists: Checking email', email, 'for user', user.id);
+  console.log('checkGuestExists: User email:', user.email);
+  console.log('checkGuestExists: Timestamp:', new Date().toISOString());
+  
+  try {
+    // Simple, direct query for the current user only
+    const { data, error } = await supabase
+      .from('guests')
+      .select('id, user_id, email, first_name, last_name')
+      .eq('user_id', user.id) // Filter by current user
+      .eq('email', email)
+      .eq('is_archived', false);
+    
+    if (error) {
+      console.error('checkGuestExists: Error querying guests for current user', error);
+      return false;
+    }
+    
+    console.log('checkGuestExists: Query results:', data);
+    console.log('checkGuestExists: Number of matching guests:', data?.length || 0);
+    
+    if (data && data.length > 0) {
+      // Log details about matching guests
+      data.forEach((guest, index) => {
+        console.log(`checkGuestExists: Match ${index + 1}:`, {
+          id: guest.id,
+          user_id: guest.user_id,
+          email: guest.email,
+          name: `${guest.first_name} ${guest.last_name}`,
+          matches_current_user: guest.user_id === user.id
+        });
+      });
+      return true;
+    }
+    
+    console.log('checkGuestExists: No matching guests found for current user');
+    return false;
+    
+  } catch (error) {
+    console.error('checkGuestExists: Unexpected error:', error);
+    return false;
+  }
 }
