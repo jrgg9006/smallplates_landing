@@ -13,12 +13,12 @@ export function OrderHistory() {
       id: '1',
       orderNumber: 'SPL-2024-001',
       date: '2024-01-15',
-      status: 'delivered',
-      total: '$49.99',
+      status: 'processing',
+      total: 'Waitlist Price',
       cookbook: {
-        title: 'Family Recipes Collection',
-        recipes: 25,
-        cover: 'Elegant Hardcover'
+        title: 'Waitlist Cookbook Print',
+        recipes: 'Unknown',
+        cover: 'Hardcover'
       }
     }
   ];
@@ -36,7 +36,7 @@ export function OrderHistory() {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'pending': return 'Pending';
-      case 'processing': return 'Processing';
+      case 'processing': return 'In progress';
       case 'shipped': return 'Shipped';
       case 'delivered': return 'Delivered';
       default: return 'Unknown';
@@ -122,7 +122,7 @@ export function OrderHistory() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
                   <div>
                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Recipes</p>
-                    <p className="text-sm font-medium text-gray-900">{order.cookbook.recipes} recipes</p>
+                    <p className="text-sm font-medium text-gray-900">{order.cookbook.recipes}</p>
                   </div>
                   <div>
                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Cover Type</p>
