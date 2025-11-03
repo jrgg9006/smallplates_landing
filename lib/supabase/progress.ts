@@ -42,11 +42,12 @@ export async function getUserProgress(userId: string) {
       };
     }
 
-    // Get total recipes collected from all guests
+    // Get total recipes collected from all guests (excluding archived/deleted guests)
     const { data: guestStats, error: statsError } = await supabase
       .from('guests')
       .select('recipes_received')
-      .eq('user_id', userId);
+      .eq('user_id', userId)
+      .eq('is_archived', false);
 
     if (statsError) {
       console.error('Error fetching guest stats:', statsError);
