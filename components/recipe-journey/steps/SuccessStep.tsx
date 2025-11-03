@@ -40,7 +40,7 @@ export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn =
             ) : (
             <label className="flex items-center gap-2 text-sm text-gray-700">
               <input type="checkbox" className="h-4 w-4 accent-green-600" checked={optIn} onChange={(e) => { setOptIn(e.target.checked); setSaved(false); }} />
-              Email me my finalized recipe with the image.
+              Share with me the finalized recipe with the image.
             </label>
             )}
 
