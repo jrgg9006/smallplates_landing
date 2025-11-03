@@ -266,9 +266,38 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
                 <tr>
                   <td
                     colSpan={columns.length}
-                    className="h-24 text-center text-gray-500 px-8 py-6"
+                    className="px-8 py-12"
                   >
-                    No guests found.
+                    <div className="text-center">
+                      <div className="mb-6">
+                        <h3 className="text-2xl font-serif font-semibold text-gray-500 mb-3">
+                          Welcome to Small Plates!
+                        </h3>
+                        <p className="text-lg text-gray-500 mb-6">
+                          You're all set! Now let's start building your recipe collection.
+                        </p>
+                      </div>
+                      
+                      <div className="bg-gray-50 rounded-xl p-6 max-w-md mx-auto mb-6">
+                        <h4 className="font-semibold text-gray-500 mb-4">Start by:</h4>
+                        <div className="space-y-3 text-left">
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 bg-gray-400 text-white rounded-full flex items-center justify-center text-sm font-bold mt-0.5">1</div>
+                            <div>
+                              <p className="font-medium text-gray-500">Adding guests and their favorite recipes</p>
+                              <p className="text-sm text-gray-500">Keep track of what everyone loves to cook</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 bg-gray-400 text-white rounded-full flex items-center justify-center text-sm font-bold mt-0.5">2</div>
+                            <div>
+                              <p className="font-medium text-gray-500">Sharing your Recipe Collector link</p>
+                              <p className="text-sm text-gray-500">Let friends and family submit their own recipes</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </td>
                 </tr>
               )}
@@ -302,8 +331,37 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
             ))}
           </div>
         ) : (
-          <div className="bg-white border border-gray-200 rounded-lg p-8 text-center text-gray-500">
-            No guests found.
+          <div className="bg-white border border-gray-200 rounded-lg p-8">
+            <div className="text-center">
+              <div className="mb-6">
+                <h3 className="text-2xl font-serif font-semibold text-gray-500 mb-3">
+                  Welcome to Small Plates!
+                </h3>
+                <p className="text-lg text-gray-500 mb-6">
+                  You're all set! Now let's start building your recipe collection.
+                </p>
+              </div>
+              
+              <div className="bg-gray-50 rounded-xl p-6 mb-6">
+                <h4 className="font-semibold text-gray-500 mb-4">Start by:</h4>
+                <div className="space-y-3 text-left">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-gray-400 text-white rounded-full flex items-center justify-center text-sm font-bold mt-0.5">1</div>
+                    <div>
+                      <p className="font-medium text-gray-500">Adding guests and their favorite recipes</p>
+                      <p className="text-sm text-gray-500">Keep track of what everyone loves to cook</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-gray-400 text-white rounded-full flex items-center justify-center text-sm font-bold mt-0.5">2</div>
+                    <div>
+                      <p className="font-medium text-gray-500">Sharing your Recipe Collector link</p>
+                      <p className="text-sm text-gray-500">Let friends and family submit their own recipes</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

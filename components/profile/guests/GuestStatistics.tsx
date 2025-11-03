@@ -70,7 +70,7 @@ export function GuestStatisticsComponent({}: GuestStatisticsProps = {}) {
     {
       label: "Guests",
       mobileLabel: "Guests",
-      value: stats.total_guests,
+      value: stats.active_guests,
     },
     {
       label: "Recipes Received",
