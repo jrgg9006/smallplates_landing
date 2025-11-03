@@ -332,7 +332,7 @@ function Step3() {
       stepNumber={3}
       totalSteps={3}
       title="Join the Waitlist"
-      description="✨ Only members of the Small Plates circle have access to the  for now. Members are those who&apos;ve already shared a recipe."
+      description="✨ Only members of the Small Plates circle have access for now. Members are those who&apos;ve already shared a recipe."
       imageUrl="/images/onboarding/onboarding_step_3.jpg"
       imageAlt="Beautiful cookbook"
       imagePosition="right"
