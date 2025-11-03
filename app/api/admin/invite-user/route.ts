@@ -54,41 +54,24 @@ export async function POST(request: Request) {
       recipe_goal: waitlistUser.recipe_goal_category
     });
 
-    // Step 2: Create user account first
-    const { data: createData, error: createError } = await supabaseAdmin.auth.admin.createUser({
-      email: email,
-      email_confirm: true,
-      user_metadata: {
-        // User metadata that will be attached to the user
-        invited_from_waitlist: true,
-        waitlist_id: waitlistId,
-        firstName: waitlistUser.first_name,
-        lastName: waitlistUser.last_name,
-        full_name: `${waitlistUser.first_name} ${waitlistUser.last_name}`,
-        hasPartner: waitlistUser.has_partner || false,
-        partnerFirstName: waitlistUser.partner_first_name || null,
-        partnerLastName: waitlistUser.partner_last_name || null,
-      }
-    });
-
-    if (createError) {
-      console.error('❌ Error creating user:', createError);
-      return NextResponse.json(
-        { error: createError.message },
-        { status: 500 }
-      );
-    }
-
-    // Step 3: Send password reset email (which respects redirectTo)
-    const { error: resetError } = await supabaseAdmin.auth.resetPasswordForEmail(
+    // Step 2: Invite user (creates user + sends "Invite User" email in one step)
+    const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
       email,
       {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/reset-password`
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/reset-password`,
+        data: {
+          // User metadata that will be attached to the user
+          invited_from_waitlist: true,
+          waitlist_id: waitlistId,
+          firstName: waitlistUser.first_name,
+          lastName: waitlistUser.last_name,
+          full_name: `${waitlistUser.first_name} ${waitlistUser.last_name}`,
+          hasPartner: waitlistUser.has_partner || false,
+          partnerFirstName: waitlistUser.partner_first_name || null,
+          partnerLastName: waitlistUser.partner_last_name || null,
+        }
       }
     );
-
-    const inviteData = createData;
-    const inviteError = resetError;
 
     if (inviteError) {
       console.error('❌ Error inviting user:', inviteError);
