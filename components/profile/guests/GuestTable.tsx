@@ -274,7 +274,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
                           Welcome to Small Plates!
                         </h3>
                         <p className="text-lg text-gray-500 mb-6">
-                          You're all set! Now let's start building your recipe collection.
+                          You&apos;re all set! Now let&apos;s start building your recipe collection.
                         </p>
                       </div>
                       
@@ -338,7 +338,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
                   Welcome to Small Plates!
                 </h3>
                 <p className="text-lg text-gray-500 mb-6">
-                  You're all set! Now let's start building your recipe collection.
+                  You&apos;re all set! Now let&apos;s start building your recipe collection.
                 </p>
               </div>
               
