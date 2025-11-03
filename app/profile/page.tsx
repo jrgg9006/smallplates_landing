@@ -283,7 +283,10 @@ export default function ProfilePage() {
             key={refreshTrigger} 
             searchValue={searchValue} 
             statusFilter={statusFilter}
-            onDataLoaded={loadGuestCounts}
+            onDataLoaded={() => {
+              loadGuestCounts();
+              loadProgressData();
+            }}
           />
         </div>
 
