@@ -225,12 +225,23 @@ export default function ProfilePage() {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
             {/* Title section with image - centered on mobile */}
             <div className="flex flex-col lg:flex-row lg:items-center lg:gap-8 mb-4 lg:mb-0 justify-center lg:justify-start">
+              {/* Mobile: Original pan image */}
               <Image
                 src="/images/profile/guest_list_image_pan.svg"
                 alt="Guest List - Your Cookbook is Cooking"
                 width={600}
                 height={80}
-                className="w-full max-w-2xl h-auto"
+                className="lg:hidden w-full max-w-2xl h-auto"
+                priority
+              />
+              
+              {/* Desktop: New horizontal image */}
+              <Image
+                src="/images/profile/Guest_list_horizontal.svg"
+                alt="Guest List - Your Cookbook is Cooking"
+                width={800}
+                height={120}
+                className="hidden lg:block w-full max-w-2xl h-auto"
                 priority
               />
             </div>
