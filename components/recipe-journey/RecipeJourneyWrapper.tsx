@@ -176,7 +176,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
         last_name: guestData.lastName,
         email: guestData.email,
         phone: guestData.phone,
-        recipe_name: recipeData.recipeName.trim(),
+        recipe_name: recipeData.recipeName.trim() || 'Full Recipe Received', // Better default for raw mode
         ingredients: '', // Empty for raw mode
         instructions: '', // Empty for raw mode
         comments: recipeData.personalNote.trim() || undefined,

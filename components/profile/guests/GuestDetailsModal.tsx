@@ -302,7 +302,7 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
                       >
                         <div className="w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0"></div>
                         <span className="text-gray-700 truncate">
-                          {recipe.recipe_name || 'Untitled Recipe'}
+                          {recipe.recipe_name || (recipe.raw_recipe_text ? 'Full Recipe Received' : 'Untitled Recipe')}
                         </span>
                         <span className="text-xs text-gray-400 flex-shrink-0">
                           ({new Date(recipe.created_at).toLocaleDateString()})
