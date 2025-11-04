@@ -111,8 +111,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
     // When user pastes a recipe, skip directly to submission
     isDirtyRef.current = true;
     
-    // Submit immediately with raw text
-    await handleSubmit();
+    // Submit immediately with the raw text passed as parameter
+    await handleSubmitWithRawText(rawText);
   };
 
   const handleSubmit = async () => {
@@ -133,6 +133,54 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
         instructions: recipeData.rawRecipeText ? '' : recipeData.instructions.trim(),
         comments: recipeData.personalNote.trim() || undefined,
         raw_recipe_text: recipeData.rawRecipeText
+      };
+
+      // Submit the recipe
+      const { data, error } = await submitGuestRecipe(token, submission);
+
+      if (error) {
+        setSubmitError(error);
+        setSubmitting(false);
+        return;
+      }
+
+      // Success! Show success state
+      setSubmitSuccess(true);
+      setSubmitting(false);
+      isDirtyRef.current = false;
+      lastRecipeIdRef.current = data?.recipe_id || null;
+      lastGuestIdRef.current = data?.guest_id || null;
+      guestOptInRef.current = !!data?.guest_notify_opt_in;
+      guestOptInEmailRef.current = (data?.guest_notify_email as string | null) || null;
+      
+      // Clean up localStorage
+      localStorage.removeItem('recipeJourneyData');
+
+    } catch (err) {
+      console.error('Submit error:', err);
+      setSubmitError('An unexpected error occurred. Please try again.');
+      setSubmitting(false);
+    }
+  };
+
+  const handleSubmitWithRawText = async (rawText: string) => {
+    if (submitting) return;
+    
+    setSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      // Prepare submission data with raw text
+      const submission: CollectionGuestSubmission = {
+        first_name: guestData.firstName,
+        last_name: guestData.lastName,
+        email: guestData.email,
+        phone: guestData.phone,
+        recipe_name: recipeData.recipeName.trim(),
+        ingredients: '', // Empty for raw mode
+        instructions: '', // Empty for raw mode
+        comments: recipeData.personalNote.trim() || undefined,
+        raw_recipe_text: rawText // Use the passed raw text directly
       };
 
       // Submit the recipe
