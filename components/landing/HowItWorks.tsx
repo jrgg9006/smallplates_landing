@@ -7,21 +7,21 @@ export default function HowItWorks() {
       stepNumber: "STEP 1",
       title: "Select Guests and Request Recipes in One Click",
       description: "We provide smart tools to collect recipes from your friends and family",
-      image: "/images/HowItWorks_images/how_step1.png",
+      image: "/images/HowitWorks_images/how_step1.png",
     },
     {
       id: 2,
       stepNumber: "STEP 2",
       title: "Track in Dashboard",
       description: "We've simplified every part of managing your guest list. Leaving only the fun part for you to do",
-      image: "/images/HowItWorks_images/how_step1.png",
+      image: "/images/HowitWorks_images/how_step1.png",
     },
     {
       id: 3,
       stepNumber: "STEP 3",
       title: "Print, Read, Cook",
       description: "We'll print and send you a beautiful, hardcover book, with professional images for each recipe.",
-      image: "/images/HowItWorks_images/how_step1.png",
+      image: "/images/HowitWorks_images/how_step1.png",
     },
   ];
 
