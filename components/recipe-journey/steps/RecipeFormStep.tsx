@@ -102,7 +102,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
       {/* Personal Note */}
       <section id="note" aria-labelledby="note-label" className="space-y-2">
         <label id="note-label" htmlFor="note-input" className="text-sm font-medium text-gray-700">
-          Personal note (optional)
+          Personal note (optional but encouraged)
         </label>
         <textarea
           id="note-input"
