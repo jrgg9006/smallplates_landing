@@ -51,16 +51,16 @@ export default function RecipeModal({ isOpen, onClose, recipe }: RecipeModalProp
 
       {/* Modal container */}
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="relative max-w-6xl w-full">
+        <div className="relative w-full max-w-screen-xl">
           {/* Close button */}
           <button
             type="button"
-            className="absolute -top-12 right-0 text-white hover:text-gray-300 focus:outline-none"
+            className="absolute -top-12 right-0 z-10 text-white hover:text-gray-300 focus:outline-none transition-colors"
             onClick={onClose}
           >
             <span className="sr-only">Close</span>
             <svg
-              className="h-8 w-8"
+              className="h-10 w-10"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -74,25 +74,28 @@ export default function RecipeModal({ isOpen, onClose, recipe }: RecipeModalProp
             </svg>
           </button>
 
-          {/* Recipe image */}
-          <div className="relative rounded-lg shadow-2xl overflow-hidden">
-            <div className="relative aspect-[3/1] w-full">
+          {/* Recipe image container */}
+          <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden">
+            {/* Recipe spread image - using better aspect ratio for cookbook spreads */}
+            <div className="relative w-full" style={{ aspectRatio: '16/10' }}>
               <Image
                 src={recipe.fullSpread}
                 alt={`${recipe.title} recipe spread`}
                 fill
-                className="object-contain"
-                sizes="(max-width: 768px) 100vw, (max-width: 1536px) 80vw, 1536px"
+                className="object-contain bg-gray-50"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
                 priority
+                quality={100}
+                unoptimized
               />
             </div>
             
-            {/* Recipe info */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6 text-white">
-              <h2 id="modal-title" className="text-2xl font-serif font-medium">
+            {/* Recipe info bar at bottom */}
+            <div className="bg-white px-6 py-4 border-t border-gray-100">
+              <h2 id="modal-title" className="text-xl font-serif font-medium text-gray-900">
                 {recipe.title}
               </h2>
-              <p className="text-sm mt-1">{recipe.author}</p>
+              <p className="text-sm text-gray-600 mt-0.5">{recipe.author}</p>
             </div>
           </div>
         </div>
