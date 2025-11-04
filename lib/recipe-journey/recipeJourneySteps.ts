@@ -8,7 +8,7 @@ export interface JourneyStepConfig {
 
 export const journeySteps: JourneyStepConfig[] = [
   { key: 'welcome', title: 'Welcome', ctaLabel: "Let's do it!" },
-  // { key: 'introInfo', title: 'How it works', ctaLabel: 'Got it!' }, // Temporarily hidden
+  { key: 'introInfo', title: 'How it works', ctaLabel: 'Got it!' },
   { key: 'realBook', title: 'Printed book', ctaLabel: 'Start writting' },
   { key: 'recipeForm', title: 'Your recipe', ctaLabel: 'Add my recipe' },
   { key: 'summary', title: 'Review' },

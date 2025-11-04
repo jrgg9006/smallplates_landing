@@ -398,7 +398,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
               <div className="text-center px-4 md:px-6">
                 <h2 id="printed-book-heading" className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">
                   Your recipe will be printed in a real book —<br />
-                  write it your way, make it yours.
+                  write it your way, make it yours -<br /> <span className="opacity-100">have fun!</span>
                 </h2>
               </div>
             </div>
