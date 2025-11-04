@@ -20,7 +20,7 @@ export default function TextSection() {
           </div>
           
           {/* Beautiful Plate Image */}
-          <div className="relative w-full max-w-md mx-auto mb-12">
+          <div className="relative w-full max-w-md mx-auto mb-8">
             <div className="relative aspect-square overflow-hidden">
               <Image
                 src="/images/other/plato_1.jpg"
