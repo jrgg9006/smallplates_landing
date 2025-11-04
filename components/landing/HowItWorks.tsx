@@ -14,7 +14,7 @@ export default function HowItWorks() {
       stepNumber: "STEP 2",
       title: "Track in Dashboard",
       description: "We've simplified every part of managing your guest list. Leaving only the fun part for you to do",
-      image: "/images/HowitWorks_images/how_step1.png",
+      image: "/images/HowitWorks_images/how_step2.png",
     },
     {
       id: 3,
