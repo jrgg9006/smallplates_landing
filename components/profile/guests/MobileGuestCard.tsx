@@ -8,6 +8,7 @@ import { DeleteGuestModal } from "./DeleteGuestModal";
 import { SendMessageModal } from "./SendMessageModal";
 import { archiveGuest } from "@/lib/supabase/guests";
 import Image from "next/image";
+import { getGuestProfileIcon } from "@/lib/utils/profileIcons";
 
 interface MobileGuestCardProps {
   guest: Guest;
@@ -144,7 +145,7 @@ export function MobileGuestCard({
             <div className="flex items-center gap-3 mb-1">
               <div className="flex-shrink-0">
                 <Image
-                  src="/images/icons_profile/chef1.png"
+                  src={getGuestProfileIcon(guest.id)}
                   alt="Chef profile icon"
                   width={48}
                   height={48}

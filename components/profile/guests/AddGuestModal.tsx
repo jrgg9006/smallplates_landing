@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button";
 import { addGuest, checkGuestExists } from "@/lib/supabase/guests";
 import { addRecipe } from "@/lib/supabase/recipes";
 import type { GuestFormData } from "@/lib/types/database";
+import Image from "next/image";
+import { getRandomProfileIcon } from "@/lib/utils/profileIcons";
 
 interface AddGuestModalProps {
   isOpen: boolean;
@@ -43,6 +45,9 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
   const [recipeSteps, setRecipeSteps] = useState('');
   const [recipeInstructions, setRecipeInstructions] = useState('');
   const [recipeNotes, setRecipeNotes] = useState('');
+  
+  // Profile icon state
+  const [previewIcon, setPreviewIcon] = useState(getRandomProfileIcon());
 
   const resetForm = () => {
     console.log('AddGuestModal: Resetting form');
@@ -59,6 +64,7 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
     setRecipeSteps('');
     setRecipeInstructions('');
     setRecipeNotes('');
+    setPreviewIcon(getRandomProfileIcon());
   };
 
   // Log when modal opens/closes
@@ -168,6 +174,33 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="font-serif text-2xl font-semibold mb-4">Add Guest</DialogTitle>
         </DialogHeader>
+        
+        {/* Guest Profile Preview Section */}
+        <div className="flex-shrink-0 flex items-center gap-4 pt-0 pb-4 border-b border-gray-200">
+          <div className="flex-shrink-0">
+            <Image
+              src={previewIcon}
+              alt="Guest profile icon preview"
+              width={80}
+              height={80}
+              className="rounded-full"
+            />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-medium text-gray-900">
+              {printedName || `${firstName} ${lastName}`.trim() || 'New Guest'}
+            </h3>
+            <p className="text-sm text-gray-500 mt-1">
+              Profile preview - this icon will be assigned to this guest
+            </p>
+            <button
+              onClick={() => setPreviewIcon(getRandomProfileIcon())}
+              className="text-xs text-blue-600 hover:underline mt-1"
+            >
+              Generate different icon
+            </button>
+          </div>
+        </div>
         
         <Tabs defaultValue="guest-info" className="w-full flex-1 flex flex-col overflow-hidden">
           <TabsList className="grid w-full grid-cols-2 bg-transparent p-0 h-auto border-b border-gray-200 flex-shrink-0">

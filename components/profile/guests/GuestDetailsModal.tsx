@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { getGuestProfileIcon } from "@/lib/utils/profileIcons";
 
 interface GuestDetailsModalProps {
   guest: Guest | null;
@@ -229,7 +230,7 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
         <div className="flex-shrink-0 flex items-center gap-4 pt-0 pb-4 border-b border-gray-200">
           <div className="flex-shrink-0">
             <Image
-              src="/images/icons_profile/chef1.png"
+              src={getGuestProfileIcon(guest.id)}
               alt="Guest profile icon"
               width={96}
               height={96}

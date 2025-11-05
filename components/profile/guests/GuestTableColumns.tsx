@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { SendMessageModal } from "./SendMessageModal";
 import { archiveGuest } from "@/lib/supabase/guests";
 import Image from "next/image";
+import { getGuestProfileIcon } from "@/lib/utils/profileIcons";
 import "@/lib/types/table";
 
 // Status badge component
@@ -259,7 +260,7 @@ export const columns: ColumnDef<Guest>[] = [
           <div className="flex items-center gap-3">
             <div className="flex-shrink-0">
               <Image
-                src="/images/icons_profile/chef1.png"
+                src={getGuestProfileIcon(guest.id)}
                 alt="Chef profile icon"
                 width={56}
                 height={56}
@@ -282,7 +283,7 @@ export const columns: ColumnDef<Guest>[] = [
         <div className="flex items-center gap-3">
           <div className="flex-shrink-0">
             <Image
-              src="/images/icons_profile/chef1.png"
+              src={getGuestProfileIcon(guest.id)}
               alt="Chef profile icon"
               width={56}
               height={56}
