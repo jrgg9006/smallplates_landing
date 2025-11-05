@@ -29,9 +29,14 @@ export default function HowItWorks() {
     <section id="how-it-works" className="bg-white py-16 md:py-24">
       <div className="mx-auto max-w-7xl px-6 md:px-8">
         {/* Section Title */}
-        <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-center font-medium text-gray-900 mb-16">
-          How it works
-        </h2>
+        <div className="text-center mb-16">
+          <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-medium text-gray-900 mb-3">
+            How it works
+          </h2>
+          <p className="text-xl md:text-3xl text-gray-500 font-light">
+            It&apos;s muuuuch easier than you think!
+          </p>
+        </div>
 
         {/* Steps Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
