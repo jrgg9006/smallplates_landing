@@ -205,10 +205,10 @@ export default function BooksPrinted() {
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
             <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-medium text-gray-900 mb-4">
-              <span className="font">With</span> <span className="italic">hundreds</span> of cookbooks printed
+              <span className="font">With</span> <span className="italic">hundreds</span> of printed cookbooks
             </h2>
             <p className="text-lg md:text-xl text-gray-900 max-w-2xl">
-            More than recipes — we help people capture the stories and moments that bring them together.
+            More than recipes — we help people know their favorite people in a unique way.
             </p>
           </motion.div>
           
