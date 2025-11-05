@@ -44,7 +44,7 @@ export default function OnboardingStep({
 
   // Form content component - memoized to prevent unnecessary re-renders
   const FormContent = useMemo(() => (
-    <div className="w-full px-6 lg:px-12 py-8 lg:py-12">
+    <div className="w-full px-6 lg:px-12 pt-12 pb-8 lg:py-12">
       {/* Close button - visible on mobile and desktop */}
       <button
         onClick={() => router.push("/")}

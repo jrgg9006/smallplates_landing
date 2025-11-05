@@ -43,7 +43,7 @@ export default function Frame({ title, children, bottomNav, showHeaderLogo = tru
           {/* Scrollable Content */}
           <main className="flex-1">
             <div
-              className="mx-auto w-full max-w-3xl px-4 py-6"
+              className="mx-auto w-full max-w-3xl px-4 py-6 pb-24 lg:pb-6"
             >
               {children}
             </div>
