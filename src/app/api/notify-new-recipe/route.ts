@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 // import { sendNewRecipeNotification } from '@/lib/postmark';
-import { createClient } from '@/utils/supabase/server';
+import { createSupabaseServer } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const supabase = await createClient();
+    const supabase = await createSupabaseServer();
     
     // Get cookbook owner details
     const { data: cookbookOwner, error: ownerError } = await supabase

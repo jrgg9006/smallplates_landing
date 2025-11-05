@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendInvitationEmail } from '@/lib/postmark';
-import { createClient } from '@/utils/supabase/server';
+// import { sendInvitationEmail } from '@/lib/postmark';
+import { createSupabaseServer } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify the user is authorized to send invitations (optional)
-    const supabase = await createClient();
+    const supabase = await createSupabaseServer();
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
@@ -25,23 +25,21 @@ export async function POST(request: NextRequest) {
     // TODO: Store invitation in database with token, email, expiry, etc.
 
     // Send the invitation email
-    const result = await sendInvitationEmail({
-      to: email,
-      confirmationUrl,
-    });
+    // TODO: Implement email sending with postmark
+    // const result = await sendInvitationEmail({
+    //   to: email,
+    //   confirmationUrl,
+    // });
 
-    if (result.success) {
-      return NextResponse.json({ 
-        success: true, 
-        message: 'Invitation sent successfully',
-        messageId: result.messageId 
-      });
-    } else {
-      return NextResponse.json({ 
-        error: 'Failed to send invitation', 
-        details: result.error 
-      }, { status: 500 });
-    }
+    // For now, just return success
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Invitation would be sent (email not configured yet)',
+      invitationDetails: {
+        email,
+        confirmationUrl
+      }
+    });
   } catch (error) {
     console.error('Error in send-invitation API:', error);
     return NextResponse.json({ 
