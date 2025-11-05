@@ -126,7 +126,7 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
 
   return (
     <>
-      <div className="flex justify-end items-center gap-1" onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}>
+      <div className="flex justify-end items-center gap-1 pr-4" onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}>
         <Button
           variant="ghost"
           className={`h-12 w-12 ${!hasContactInfo ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -209,45 +209,17 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
 
 export const columns: ColumnDef<Guest>[] = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <input
-        type="checkbox"
-        checked={table.getIsAllPageRowsSelected()}
-        onChange={(e) => table.toggleAllPageRowsSelected(e.target.checked)}
-        className="h-4 w-4 rounded border-gray-200 text-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <input
-        type="checkbox"
-        checked={row.getIsSelected()}
-        onChange={(e) => row.toggleSelected(e.target.checked)}
-        onClick={(e: React.MouseEvent<HTMLInputElement>) => e.stopPropagation()}
-        className="h-4 w-4 rounded border-gray-200 text-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     id: "name",
     header: ({ column }) => {
       return (
-        <div className="flex items-center">
-          {/* Invisible spacer to match icon width + gap */}
-          <div className="w-[68px]" aria-hidden="true"></div>
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="h-auto p-0 hover:bg-transparent border-0 shadow-none table-header-style justify-start"
-          >
-            <span className="table-header-style">Name</span>
-            <ArrowUpDown className="ml-2 h-3 w-3 text-white opacity-70" />
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-auto p-0 hover:bg-transparent border-0 shadow-none table-header-style justify-start pl-4"
+        >
+          <span className="table-header-style">Name</span>
+          <ArrowUpDown className="ml-2 h-3 w-3 text-white opacity-70" />
+        </Button>
       );
     },
     cell: ({ row }) => {
@@ -257,7 +229,7 @@ export const columns: ColumnDef<Guest>[] = [
       
       if (hasPrintedName) {
         return (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 pl-4">
             <div className="flex-shrink-0">
               <Image
                 src={getGuestProfileIcon(guest.id)}
@@ -280,7 +252,7 @@ export const columns: ColumnDef<Guest>[] = [
       }
       
       return (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 pl-4">
           <div className="flex-shrink-0">
             <Image
               src={getGuestProfileIcon(guest.id)}
