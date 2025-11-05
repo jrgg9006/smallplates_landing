@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import RecipeModal from "./RecipeModal";
 import Autoplay from "embla-carousel-autoplay";
 import {
@@ -185,25 +186,37 @@ export default function BooksPrinted() {
       <div className="mx-auto max-w-7xl px-6 md:px-8">
         {/* Header Section */}
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-12 md:mb-16">
-          <div className="mb-6 lg:mb-0">
+          <motion.div 
+            className="mb-6 lg:mb-0"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
             <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-medium text-gray-900 mb-4">
               <span className="font">With</span> <span className="italic">hundreds</span> of cookbooks printed
             </h2>
             <p className="text-lg md:text-xl text-gray-900 max-w-2xl">
             More than recipes — we help people capture the stories and moments that bring them together.
             </p>
-          </div>
+          </motion.div>
           
           {/* CTA Button */}
-          <div className="flex-shrink-0">
+          <motion.div 
+            className="flex-shrink-0"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+          >
             <button
               type="button"
               onClick={handleGetStarted}
-              className="inline-flex items-center justify-center rounded-2xl bg-smallplates_red text-white px-8 py-4 text-lg font-semibold shadow-sm hover:bg-orange-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-600 transition-colors"
+              className="inline-flex items-center justify-center rounded-2xl bg-smallplates_red text-white px-8 py-4 text-lg font-semibold shadow-sm hover:bg-orange-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-600 transition-all duration-300 hover:scale-105"
             >
               CREATE YOURS FOR $120
             </button>
-          </div>
+          </motion.div>
         </div>
 
         {/* Books Carousel */}
@@ -220,9 +233,15 @@ export default function BooksPrinted() {
           <CarouselContent className="-ml-2 md:-ml-4">
             {books.map((book) => (
               <CarouselItem key={book.id} className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/4">
-                <div
+                <motion.div
                   className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer h-full"
                   onClick={() => handleBookClick(book)}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "50px" }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
                 >
                   {/* Clean Image Display */}
                   <div className="relative aspect-[3/4] mb-4 overflow-hidden rounded-lg shadow-md">
@@ -252,7 +271,7 @@ export default function BooksPrinted() {
                       {book.author}
                     </p>
                   </div>
-                </div>
+                </motion.div>
               </CarouselItem>
             ))}
           </CarouselContent>

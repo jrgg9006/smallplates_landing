@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 export default function FAQ() {
   const faqs = [
     {
@@ -22,21 +24,39 @@ export default function FAQ() {
     <section id="faq" className="bg-gray-50 py-16 md:py-24">
       <div className="mx-auto max-w-4xl px-6 md:px-8">
         {/* Section Title */}
-        <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-center font-medium text-gray-900 mb-16">
+        <motion.h2 
+          className="font-serif text-4xl md:text-5xl lg:text-6xl text-center font-medium text-gray-900 mb-16"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
           Frequently Asked Questions
-        </h2>
+        </motion.h2>
 
         {/* FAQ List */}
         <div className="space-y-6">
           {faqs.map((faq, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-sm p-8">
+            <motion.div 
+              key={index} 
+              className="bg-white rounded-lg shadow-sm p-8 hover:shadow-md transition-shadow duration-300"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "50px" }}
+              transition={{ 
+                duration: 0.5, 
+                delay: index * 0.1, 
+                ease: "easeOut" 
+              }}
+              whileHover={{ scale: 1.02 }}
+            >
               <h3 className="font-serif text-xl md:text-2xl font-medium text-gray-900 mb-4">
                 {faq.question}
               </h3>
               <p className="text-gray-600 text-base leading-relaxed">
                 {faq.answer}
               </p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

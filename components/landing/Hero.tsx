@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import CTAButton from "./CTAButton";
 
 export default function Hero() {
@@ -34,16 +35,32 @@ export default function Hero() {
       {/* Content */}
       <div className="relative z-10 w-full px-6 md:px-12 lg:px-16 py-16 md:py-24">
         <div className="max-w-2xl">
-          <h1 id="hero-title" className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-medium tracking-tight text-white drop-shadow-lg">
+          <motion.h1 
+            id="hero-title" 
+            className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-medium tracking-tight text-white drop-shadow-lg"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          >
             The&nbsp;People&nbsp;behind<br />
             every&nbsp;Recipe
-          </h1>
-          <p className="font-sans mt-4 text-xl sm:text-2xl md:text-3xl font-normal text-white/90 max-w-prose drop-shadow">
+          </motion.h1>
+          <motion.p 
+            className="font-sans mt-4 text-xl sm:text-2xl md:text-3xl font-normal text-white/90 max-w-prose drop-shadow"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
+          >
             Invite your loved ones to share their unique recipes — we turn them into your own printed cookbook.
-          </p>
-          <div className="mt-8">
+          </motion.p>
+          <motion.div 
+            className="mt-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+          >
             <CTAButton data-cta="hero-primary" onClick={handleGetStarted} />
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
