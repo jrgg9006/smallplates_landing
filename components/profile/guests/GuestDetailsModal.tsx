@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 interface GuestDetailsModalProps {
   guest: Guest | null;
@@ -31,6 +32,7 @@ interface GuestDetailsModalProps {
 export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defaultTab = "guest-info" }: GuestDetailsModalProps) {
   const [firstName, setFirstName] = useState(guest?.first_name || '');
   const [lastName, setLastName] = useState(guest?.last_name || '');
+  const [printedName, setPrintedName] = useState(guest?.printed_name || '');
   const [email, setEmail] = useState(guest?.email || '');
   const [phone, setPhone] = useState(guest?.phone || '');
   const [loading, setLoading] = useState(false);
@@ -66,6 +68,7 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
     if (guest && isOpen) {
       setFirstName(guest.first_name);
       setLastName(guest.last_name);
+      setPrintedName(guest.printed_name || '');
       setEmail(guest.email);
       setPhone(guest.phone || '');
       setError(null); // Clear any previous errors
@@ -99,6 +102,7 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
       const updates = {
         first_name: firstName.trim(),
         last_name: lastName.trim() || '',
+        printed_name: printedName.trim() || null,
         email: email.trim() || '',
         phone: phone.trim() || null,
       };
@@ -147,7 +151,7 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
         comments: recipeNotes || ''
       };
 
-      const { data, error: recipeError } = await addRecipe(guest.id, recipeData);
+      const { error: recipeError } = await addRecipe(guest.id, recipeData);
       
       if (recipeError) {
         console.error('Recipe error:', recipeError);
@@ -221,6 +225,36 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
           <DialogTitle className="font-serif text-2xl font-semibold mb-4">Edit Guest</DialogTitle>
         </DialogHeader>
         
+        {/* Guest Profile Section */}
+        <div className="flex-shrink-0 flex items-center gap-4 pt-0 pb-4 border-b border-gray-200">
+          <div className="flex-shrink-0">
+            <Image
+              src="/images/icons_profile/chef1.png"
+              alt="Guest profile icon"
+              width={96}
+              height={96}
+              className="rounded-full"
+            />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-xl font-medium text-gray-900">
+              {guest.printed_name || `${guest.first_name} ${guest.last_name || ''}`.trim()}
+            </h3>
+            {guest.printed_name && (
+              <p className="text-sm text-gray-500 mt-1">
+                {`${guest.first_name} ${guest.last_name || ''}`.trim()}
+              </p>
+            )}
+            <div className="mt-2">
+              <span
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeStyle(guest.status)}`}
+              >
+                {getStatusLabel(guest.status)}
+              </span>
+            </div>
+          </div>
+        </div>
+        
         <Tabs 
           defaultValue={defaultTab} 
           className="w-full flex-1 flex flex-col overflow-hidden"
@@ -265,7 +299,17 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
             </div>
             
             <div>
-              <button className="text-sm text-blue-600 hover:underline">+ Add Plus One</button>
+              <Label htmlFor="printedName" className="text-sm font-medium text-gray-600">Printed Name</Label>
+              <Input
+                id="printedName"
+                value={printedName}
+                onChange={(e) => setPrintedName(e.target.value)}
+                className="mt-1"
+                placeholder="How this person's name should appear in the book (e.g., 'Jaime y Nana', 'Chef Rodriguez')"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Leave empty to use first and last name. This is how the name will appear in the printed cookbook.
+              </p>
             </div>
             
             <div>

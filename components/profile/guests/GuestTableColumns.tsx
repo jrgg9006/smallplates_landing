@@ -8,6 +8,7 @@ import { DeleteGuestModal } from "./DeleteGuestModal";
 import { Button } from "@/components/ui/button";
 import { SendMessageModal } from "./SendMessageModal";
 import { archiveGuest } from "@/lib/supabase/guests";
+import Image from "next/image";
 import "@/lib/types/table";
 
 // Status badge component
@@ -234,14 +235,18 @@ export const columns: ColumnDef<Guest>[] = [
     id: "name",
     header: ({ column }) => {
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="h-auto p-0 hover:bg-transparent border-0 shadow-none table-header-style justify-start"
-        >
-          <span className="table-header-style">Name</span>
-          <ArrowUpDown className="ml-2 h-3 w-3 text-white opacity-70" />
-        </Button>
+        <div className="flex items-center">
+          {/* Invisible spacer to match icon width + gap */}
+          <div className="w-[68px]" aria-hidden="true"></div>
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="h-auto p-0 hover:bg-transparent border-0 shadow-none table-header-style justify-start"
+          >
+            <span className="table-header-style">Name</span>
+            <ArrowUpDown className="ml-2 h-3 w-3 text-white opacity-70" />
+          </Button>
+        </div>
       );
     },
     cell: ({ row }) => {
@@ -251,18 +256,42 @@ export const columns: ColumnDef<Guest>[] = [
       
       if (hasPrintedName) {
         return (
-          <div className="space-y-1">
-            <div className="font-normal text-lg">
-              {guest.printed_name}
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0">
+              <Image
+                src="/images/icons_profile/chef1.png"
+                alt="Chef profile icon"
+                width={56}
+                height={56}
+                className="rounded-full"
+              />
             </div>
-            <div className="text-sm text-gray-500">
-              {fullName}
+            <div className="space-y-1">
+              <div className="font-normal text-lg">
+                {guest.printed_name}
+              </div>
+              <div className="text-sm text-gray-500">
+                {fullName}
+              </div>
             </div>
           </div>
         );
       }
       
-      return <div className="font-normal text-lg">{fullName}</div>;
+      return (
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0">
+            <Image
+              src="/images/icons_profile/chef1.png"
+              alt="Chef profile icon"
+              width={56}
+              height={56}
+              className="rounded-full"
+            />
+          </div>
+          <div className="font-normal text-lg">{fullName}</div>
+        </div>
+      );
     },
   },
   {

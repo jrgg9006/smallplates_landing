@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { Guest } from "@/lib/types/database";
-import { Mail, ArrowUp, Trash2, User, MoreHorizontal } from "lucide-react";
+import { Mail, ArrowUp, Trash2, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeleteGuestModal } from "./DeleteGuestModal";
 import { SendMessageModal } from "./SendMessageModal";
 import { archiveGuest } from "@/lib/supabase/guests";
+import Image from "next/image";
 
 interface MobileGuestCardProps {
   guest: Guest;
@@ -140,8 +141,16 @@ export function MobileGuestCard({
         {/* Name Section */}
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <User className="h-4 w-4 text-gray-400 flex-shrink-0" />
+            <div className="flex items-center gap-3 mb-1">
+              <div className="flex-shrink-0">
+                <Image
+                  src="/images/icons_profile/chef1.png"
+                  alt="Chef profile icon"
+                  width={48}
+                  height={48}
+                  className="rounded-full"
+                />
+              </div>
               <div>
                 <div className="font-medium text-gray-900 text-base">
                   {displayName}
