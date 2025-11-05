@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendNewRecipeNotification } from '@/lib/postmark';
+// import { sendNewRecipeNotification } from '@/lib/postmark';
 import { createClient } from '@/utils/supabase/server';
 
 export async function POST(request: NextRequest) {
@@ -39,27 +39,25 @@ export async function POST(request: NextRequest) {
     const preferencesUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/settings/notifications`;
 
     // Send the notification email
-    const result = await sendNewRecipeNotification({
-      to: cookbookOwner.email,
-      recipientName: cookbookOwner.full_name || 'Chef',
-      sharedByName,
-      recipeTitle,
-      profileUrl,
-      preferencesUrl,
-    });
+    // TODO: Implement email sending with postmark
+    // const result = await sendNewRecipeNotification({
+    //   to: cookbookOwner.email,
+    //   recipientName: cookbookOwner.full_name || 'Chef',
+    //   sharedByName,
+    //   recipeTitle,
+    //   profileUrl,
+    //   preferencesUrl,
+    // });
 
-    if (result.success) {
-      return NextResponse.json({ 
-        success: true, 
-        message: 'Recipe notification sent successfully',
-        messageId: result.messageId 
-      });
-    } else {
-      return NextResponse.json({ 
-        error: 'Failed to send notification', 
-        details: result.error 
-      }, { status: 500 });
-    }
+    // For now, just return success
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Recipe notification would be sent (email not configured yet)',
+      cookbookOwner: {
+        email: cookbookOwner.email,
+        name: cookbookOwner.full_name
+      }
+    });
   } catch (error) {
     console.error('Error in notify-new-recipe API:', error);
     return NextResponse.json({ 
