@@ -1,0 +1,10 @@
+{
+  "From": "team@smallplatesandcompany.com",
+  "To": "team@smallplatesandcompany.com",
+  "Subject": "Hello from Postmark",
+  "HtmlBody": "<strong>Hello</strong> dear Postmark user.",
+  "MessageStream": "invite-user",
+  "Variables": {
+    "ConfirmationURL": "https://smallplatesandcompany.com/confirm/test-123"
+  }
+}

@@ -8,6 +8,7 @@ import TextSection from '@/components/landing/TextSection'
 import BooksPrinted from '@/components/landing/BooksPrinted'
 import WhatsIncluded from '@/components/landing/WhatsIncluded'
 import HowItWorks from '@/components/landing/HowItWorks'
+import FAQ from '@/components/landing/FAQ'
 // import Guarantee from '@/components/landing/Guarantee'
 import CTAButton from '@/components/landing/CTAButton'
 import Footer from '@/components/landing/Footer'
@@ -28,6 +29,7 @@ export default function Home() {
         <BooksPrinted />
         <WhatsIncluded />
         <HowItWorks />
+        <FAQ />
         {/* <Guarantee /> */}
 
         {/* Repeat CTA at bottom per best practices */}

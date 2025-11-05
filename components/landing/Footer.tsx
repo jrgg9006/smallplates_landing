@@ -59,7 +59,7 @@ export default function Footer() {
           {/* Connect */}
           <div className="pt-4 lg:pt-0">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-white mb-4">
-              Connect
+              Ask us anything!
             </h3>
             <ul className="space-y-2">
               <li>
