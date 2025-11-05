@@ -24,7 +24,7 @@ export default function Hero() {
           src="/images/landing/landing_hero_image2.jpg"
           alt=""
           fill
-          className="object-cover object-right md:object-center"
+          className="object-cover"
           priority
           aria-hidden="true"
         />
