@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -18,6 +18,17 @@ export default function BooksPrinted() {
   const router = useRouter();
   const [selectedRecipe, setSelectedRecipe] = useState<typeof books[0] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Book data for the gallery - expanded to 16 items for carousel
   const books = [
@@ -233,16 +244,11 @@ export default function BooksPrinted() {
           <CarouselContent className="-ml-2 md:-ml-4">
             {books.map((book) => (
               <CarouselItem key={book.id} className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/4">
-                <motion.div
-                  className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer h-full"
-                  onClick={() => handleBookClick(book)}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.98 }}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "50px" }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
-                >
+                {isMobile ? (
+                  <div
+                    className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer h-full"
+                    onClick={() => handleBookClick(book)}
+                  >
                   {/* Clean Image Display */}
                   <div className="relative aspect-[3/4] mb-4 overflow-hidden rounded-lg shadow-md">
                     {/* Recipe thumbnail image */}
@@ -270,8 +276,49 @@ export default function BooksPrinted() {
                     <p className="text-sm text-gray-600">
                       {book.author}
                     </p>
+                    </div>
                   </div>
-                </motion.div>
+                ) : (
+                  <motion.div
+                    className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer h-full"
+                    onClick={() => handleBookClick(book)}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.98 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "50px" }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                  >
+                    {/* Clean Image Display */}
+                    <div className="relative aspect-[3/4] mb-4 overflow-hidden rounded-lg shadow-md">
+                      {/* Recipe thumbnail image */}
+                      <Image
+                        src={book.thumbnail}
+                        alt={`${book.title} recipe preview`}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      />
+                      
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+                        <span className="text-white font-semibold text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          View Recipe
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Book Info Below */}
+                    <div className="text-center">
+                      <h3 className="font-medium text-gray-900 mb-1">
+                        {book.title}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {book.author}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
               </CarouselItem>
             ))}
           </CarouselContent>
