@@ -75,6 +75,13 @@ export default function PreviewPage() {
     
     setGuestData(newGuestData);
     setShowRecipeJourney(true);
+    
+    // Scroll to top when transitioning to recipe journey, especially on mobile
+    if (typeof window !== 'undefined') {
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+    }
   };
 
   const handleBackToSearch = () => {
