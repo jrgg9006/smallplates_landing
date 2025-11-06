@@ -90,6 +90,13 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
     if (currentStepIndex < totalSteps - 1) {
       setCurrentStepIndex(currentStepIndex + 1);
       setTimeout(focusFirstHeading, 0);
+      
+      // Scroll to top on mobile for better UX
+      if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
+      }
     }
   };
 
@@ -97,6 +104,13 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
     if (currentStepIndex > 0) {
       setCurrentStepIndex(currentStepIndex - 1);
       setTimeout(focusFirstHeading, 0);
+      
+      // Scroll to top on mobile for better UX
+      if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
+      }
     } else {
       // Check if we're in preview mode
       const isPreviewMode = typeof window !== 'undefined' && sessionStorage.getItem('isPreviewMode') === 'true';

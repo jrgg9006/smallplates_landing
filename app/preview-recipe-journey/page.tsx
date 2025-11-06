@@ -94,7 +94,12 @@ export default function PreviewPage() {
 
   if (showRecipeJourney && guestData) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white relative">
+        {/* Preview indicator in top right corner of header */}
+        <div className="fixed top-4 right-6 z-50 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium border border-blue-200">
+          Preview Demo
+        </div>
+        
         <RecipeJourneyWrapper
           tokenInfo={mockTokenInfo}
           guestData={guestData}
@@ -105,7 +110,12 @@ export default function PreviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white relative">
+      {/* Preview indicator in top right corner of header */}
+      <div className="fixed top-4 right-6 z-50 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium border border-blue-200">
+        Preview Demo
+      </div>
+      
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-center">

@@ -12,7 +12,7 @@ export default function WelcomeStep({ creatorName }: WelcomeStepProps) {
       <div className="text-center px-4 md:px-6">
         <h1 id="welcome-heading" className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">
           Congratulations! You&apos;ll be part of{' '}
-          <span className="font-serif text-4xl font-bold text-black mx-1">
+          <span className="font-serif text-3xl font-semibold md:text-4xl text-black mx-1">
             {creatorName}&apos;s
           </span>{' '}
           amazing Cookbook!
