@@ -50,7 +50,7 @@ export default function PreviewPage() {
     if (!name) return;
     
     const parts = name.split(/\s+/);
-    const derivedLast = parts.length > 1 ? parts.pop() : '';
+    const derivedLast = parts.length > 1 ? parts.pop() || '' : '';
     const derivedFirst = parts.length > 0 ? parts.join(' ') : name;
     
     const newGuestData = {
@@ -208,10 +208,10 @@ export default function PreviewPage() {
                 <div className="border-t pt-6">
                   <div className="space-y-4">
                     <h3 className="text-sm font-medium text-gray-900">
-                      Welcome! You're not in the list yet
+                      Welcome! You&apos;re not in the list yet
                     </h3>
                     <p className="text-gray-600 mb-4 text-sm">
-                      No worries! We'll add you when you submit your recipe.
+                      No worries! We&apos;ll add you when you submit your recipe.
                     </p>
                     <div className="space-y-2">
                       <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
@@ -237,7 +237,7 @@ export default function PreviewPage() {
                           Continue
                         </Button>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">This is how we'll print your name in the cookbook.</p>
+                      <p className="text-xs text-gray-500 mt-1">This is how we&apos;ll print your name in the cookbook.</p>
                     </div>
                   </div>
                 </div>
