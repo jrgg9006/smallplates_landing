@@ -7,22 +7,29 @@ import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import RecipeJourneyWrapper from '@/components/recipe-journey/RecipeJourneyWrapper';
+import type { CollectionTokenInfo } from '@/lib/types/database';
+
+interface GuestData {
+  id?: string;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone?: string;
+  existing: boolean;
+}
 
 export default function PreviewPage() {
   const router = useRouter();
   const [showRecipeJourney, setShowRecipeJourney] = useState(false);
-  const [guestData, setGuestData] = useState(null);
+  const [guestData, setGuestData] = useState<GuestData | null>(null);
   
   // Mock data
-  const mockTokenInfo = {
-    id: 'preview-token',
+  const mockTokenInfo: CollectionTokenInfo = {
     user_id: 'preview-user',
     user_name: 'Your Name',
     raw_full_name: 'Your Name',
-    collection_name: 'Family Recipe Collection',
-    expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    token: 'preview-token',
+    is_valid: true
   };
 
   // Guest search state
