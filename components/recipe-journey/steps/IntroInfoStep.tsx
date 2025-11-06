@@ -15,7 +15,7 @@ export default function IntroInfoStep({ onContinue, onBack }: IntroInfoStepProps
           So forget about <span className="line-through">perfect</span> recipes
         </h2>
         <p className="mt-4 text-base md:text-xl text-gray-600 max-w-[38rem] mx-auto">
-          <span className="opacity-100">Just share something you love — breakfast, a drink, a memory...</span> ✨
+          <span className="opacity-100">Just share something YOU love — breakfast, a drink, your favorite dinner ... anything!</span> ✨
         </p>
       </div>
     </div>
