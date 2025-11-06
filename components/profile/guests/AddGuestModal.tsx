@@ -46,8 +46,8 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
   const [recipeInstructions, setRecipeInstructions] = useState('');
   const [recipeNotes, setRecipeNotes] = useState('');
   
-  // Profile icon state
-  const [previewIcon, setPreviewIcon] = useState(getRandomProfileIcon());
+  // Profile icon state - always show chef0 as default
+  const [previewIcon, setPreviewIcon] = useState('/images/icons_profile/chef0.png');
 
   const resetForm = () => {
     console.log('AddGuestModal: Resetting form');
@@ -64,7 +64,7 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
     setRecipeSteps('');
     setRecipeInstructions('');
     setRecipeNotes('');
-    setPreviewIcon(getRandomProfileIcon());
+    setPreviewIcon('/images/icons_profile/chef0.png');
   };
 
   // Log when modal opens/closes
@@ -191,14 +191,8 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
               {printedName || `${firstName} ${lastName}`.trim() || 'New Guest'}
             </h3>
             <p className="text-sm text-gray-500 mt-1">
-              Profile preview - this icon will be assigned to this guest
+              Default preview - a unique chef icon will be assigned when saved
             </p>
-            <button
-              onClick={() => setPreviewIcon(getRandomProfileIcon())}
-              className="text-xs text-blue-600 hover:underline mt-1"
-            >
-              Generate different icon
-            </button>
           </div>
         </div>
         

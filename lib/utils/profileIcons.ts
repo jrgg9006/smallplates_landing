@@ -11,6 +11,14 @@ const PROFILE_ICONS = [
   'chef5.png',
   'chef6.png',
   'chef7.png',
+  'chef8.png',
+  'chef9.png',
+  'chef10.png',
+  'chef11.png',
+  'chef12.png',
+  'chef13.png',
+  'chef14.png',
+  'chef15.png',
 ];
 
 /**
