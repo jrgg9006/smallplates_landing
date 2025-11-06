@@ -9,6 +9,7 @@ import BooksPrinted from '@/components/landing/BooksPrinted'
 import WhatsIncluded from '@/components/landing/WhatsIncluded'
 import HowItWorks from '@/components/landing/HowItWorks'
 import ShareBanner from '@/components/landing/ShareBanner'
+import MemorableExperience from '@/components/landing/MemorableExperience'
 import FAQ from '@/components/landing/FAQ'
 // import Guarantee from '@/components/landing/Guarantee'
 import CTAButton from '@/components/landing/CTAButton'
@@ -31,6 +32,7 @@ export default function Home() {
         <WhatsIncluded />
         <HowItWorks />
         <ShareBanner />
+        <MemorableExperience />
         <FAQ />
         {/* <Guarantee /> */}
 

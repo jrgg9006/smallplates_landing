@@ -10,7 +10,7 @@ export default function TextSection() {
           </h1>
           
           {/* Subheading */}
-          <div className="mb-12">
+          <div className="mb-8">
             <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl font-medium text-gray-900">
               That&apos;s why we created<br />
               Small Plates & Co.
@@ -18,7 +18,7 @@ export default function TextSection() {
           </div>
           
           {/* Decorative line */}
-          <div className="mb-12">
+          <div className="mb-8">
             <div className="w-32 h-0.5 bg-gray-900 mx-auto"></div>
           </div>
           
