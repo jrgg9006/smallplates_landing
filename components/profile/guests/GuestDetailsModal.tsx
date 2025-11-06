@@ -44,7 +44,6 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
   const [recipeSteps, setRecipeSteps] = useState('');
   const [recipeInstructions, setRecipeInstructions] = useState('');
   const [recipeNotes, setRecipeNotes] = useState('');
-  const [savingRecipe, setSavingRecipe] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [recipes, setRecipes] = useState<any[]>([]);
 
@@ -75,7 +74,6 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
       setError(null); // Clear any previous errors
       setSuccessMessage(null); // Clear any previous success messages
       setLoading(false);
-      setSavingRecipe(false);
       // Reset recipe form
       setRecipeTitle('');
       setRecipeSteps('');
@@ -117,6 +115,23 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
         return;
       }
 
+      // If recipe data is provided, add the recipe for the guest
+      if (recipeTitle || recipeInstructions || recipeSteps) {
+        const recipeData = {
+          recipe_name: recipeTitle || 'Untitled Recipe',
+          ingredients: recipeSteps || '',
+          instructions: recipeInstructions || '',
+          comments: recipeNotes || ''
+        };
+
+        const { error: recipeError } = await addRecipe(guest.id, recipeData);
+        
+        if (recipeError) {
+          // Log the error but don't fail the whole operation
+          console.error('Error adding recipe:', recipeError);
+        }
+      }
+
       // Success! Close modal and refresh the guest list
       onClose();
       
@@ -133,62 +148,6 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
     }
   };
 
-  const handleAddRecipe = async () => {
-    if (!guest) return;
-    
-    if (!recipeTitle && !recipeInstructions && !recipeSteps) {
-      setError('Please add at least some recipe information');
-      return;
-    }
-
-    setSavingRecipe(true);
-    setError(null); // Clear any previous errors
-
-    try {
-      const recipeData = {
-        recipe_name: recipeTitle || 'Untitled Recipe',
-        ingredients: recipeSteps || '',
-        instructions: recipeInstructions || '',
-        comments: recipeNotes || ''
-      };
-
-      const { error: recipeError } = await addRecipe(guest.id, recipeData);
-      
-      if (recipeError) {
-        console.error('Recipe error:', recipeError);
-        setError(recipeError);
-        setSavingRecipe(false);
-        return;
-      }
-
-      // Success! Reset recipe form
-      setRecipeTitle('');
-      setRecipeSteps('');
-      setRecipeInstructions('');
-      setRecipeNotes('');
-      
-      // Clear any lingering errors and show success
-      setError(null);
-      setSuccessMessage('Recipe added successfully!');
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(null), 3000);
-      
-      // Refresh the guest data and recipes after a short delay to ensure database is updated
-      setTimeout(() => {
-        if (onGuestUpdated) {
-          onGuestUpdated();
-        }
-        fetchRecipes(); // Refresh the recipes list
-      }, 500);
-      
-    } catch (err) {
-      console.error('Unexpected error adding recipe:', err);
-      setError('An unexpected error occurred');
-    } finally {
-      setSavingRecipe(false);
-    }
-  };
 
   if (!guest) return null;
 
@@ -478,15 +437,6 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
                     </Button>
                   </div>
                   
-                  <div className="pt-4">
-                    <Button 
-                      onClick={handleAddRecipe}
-                      disabled={savingRecipe}
-                      className="bg-black text-white hover:bg-gray-800 px-6 py-2 rounded-full disabled:opacity-50"
-                    >
-                      {savingRecipe ? 'Saving Recipe...' : 'Save Recipe'}
-                    </Button>
-                  </div>
                 </div>
               </div>
             </div>

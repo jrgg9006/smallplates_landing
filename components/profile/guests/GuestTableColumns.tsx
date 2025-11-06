@@ -209,6 +209,15 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
 
 export const columns: ColumnDef<Guest>[] = [
   {
+    accessorKey: "updated_at",
+    header: "Last Updated",
+    // Hidden column for sorting - we don't display it but use it for sorting
+    enableHiding: true,
+    meta: {
+      hidden: true,
+    },
+  },
+  {
     id: "name",
     header: ({ column }) => {
       return (

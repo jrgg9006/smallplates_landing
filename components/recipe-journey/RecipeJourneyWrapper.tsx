@@ -141,6 +141,22 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
   const handleSubmit = async () => {
     if (submitting) return;
     
+    // Check if we're in preview mode
+    const isPreviewMode = typeof window !== 'undefined' && sessionStorage.getItem('isPreviewMode') === 'true';
+    
+    if (isPreviewMode) {
+      // In preview mode, just redirect back to landing page
+      setSubmitting(true);
+      setTimeout(() => {
+        // Clean up preview session storage
+        sessionStorage.removeItem('collectionGuestData');
+        sessionStorage.removeItem('isPreviewMode');
+        // Redirect to landing page
+        window.location.href = '/';
+      }, 500);
+      return;
+    }
+    
     setSubmitting(true);
     setSubmitError(null);
 
@@ -188,6 +204,22 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
 
   const handleSubmitWithRawText = async (rawText: string) => {
     if (submitting) return;
+    
+    // Check if we're in preview mode
+    const isPreviewMode = typeof window !== 'undefined' && sessionStorage.getItem('isPreviewMode') === 'true';
+    
+    if (isPreviewMode) {
+      // In preview mode, just redirect back to landing page
+      setSubmitting(true);
+      setTimeout(() => {
+        // Clean up preview session storage
+        sessionStorage.removeItem('collectionGuestData');
+        sessionStorage.removeItem('isPreviewMode');
+        // Redirect to landing page
+        window.location.href = '/';
+      }, 500);
+      return;
+    }
     
     setSubmitting(true);
     setSubmitError(null);

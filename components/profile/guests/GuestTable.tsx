@@ -33,10 +33,10 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   
-  // Table state
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  // Table state - sort by updated_at descending to show most recently modified guests first
+  const [sorting, setSorting] = React.useState<SortingState>([{ id: 'updated_at', desc: true }]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({ updated_at: false });
   const [rowSelection, setRowSelection] = React.useState({});
   
   // Modal state
@@ -182,6 +182,11 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    initialState: {
+      pagination: {
+        pageSize: 20,
+      },
+    },
     state: {
       sorting,
       columnFilters,
