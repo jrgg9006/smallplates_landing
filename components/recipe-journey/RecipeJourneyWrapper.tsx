@@ -71,7 +71,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
   };
 
   // Get the cookbook creator's name for personalization
-  const creatorName = tokenInfo.user_name.split(' ')[0] || 'the cookbook creator';
+  const isPreviewMode = typeof window !== 'undefined' && sessionStorage?.getItem('isPreviewMode') === 'true';
+  const creatorName = isPreviewMode ? '[Your Name]' : (tokenInfo.user_name.split(' ')[0] || 'the cookbook creator');
 
   const getImageUrl = () => {
     // Use collect_1.jpg for collection journey
@@ -97,8 +98,16 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
       setCurrentStepIndex(currentStepIndex - 1);
       setTimeout(focusFirstHeading, 0);
     } else {
-      // Go back to the name search landing for this token
-      router.push(`/collect/${token}`);
+      // Check if we're in preview mode
+      const isPreviewMode = typeof window !== 'undefined' && sessionStorage.getItem('isPreviewMode') === 'true';
+      
+      if (isPreviewMode) {
+        // In preview mode, go back to the preview search page
+        window.history.back();
+      } else {
+        // Normal mode - go back to the name search landing for this token
+        router.push(`/collect/${token}`);
+      }
     }
   };
 

@@ -16,13 +16,13 @@ export default function WhatsIncluded() {
   // Features organized in two columns
   const leftFeatures = [
     "1 Hardcover Cookbook Credit",
-    "30-day money back guarantee", 
+    "30-day money back guarantee",
     "Smart tools to collect recipes",
   ];
 
   const rightFeatures = [
     "Up to 120 recipes",
-    "Professional photo layout for each recipe",
+    "Professional photo layout",
     "Free shipping in the US",
   ];
 
@@ -66,7 +66,7 @@ export default function WhatsIncluded() {
             </button>
           </motion.div>
 
-          {/* Right Features Grid */}
+          {/* Right Features Grid - Colorful Badges */}
           <motion.div 
             className="lg:col-span-2"
             initial={{ opacity: 0, x: 30 }}
@@ -74,68 +74,78 @@ export default function WhatsIncluded() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               
               {/* Left Features Column */}
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {leftFeatures.map((feature, index) => (
-                  <motion.div 
-                    key={index} 
-                    className="flex items-start gap-3"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: 0.3 + (index * 0.1), ease: "easeOut" }}
+                    transition={{ 
+                      duration: 0.4, 
+                      delay: 0.3 + (index * 0.1), 
+                      ease: "easeOut"
+                    }}
+                    whileHover={{ 
+                      x: 5,
+                      transition: { duration: 0.15 }
+                    }}
+                    className="group"
                   >
-                    {/* Checkmark Icon */}
-                    <div className="flex-shrink-0 mt-1">
-                      <svg 
-                        className="w-6 h-6 text-emerald-200" 
-                        fill="currentColor" 
-                        viewBox="0 0 20 20"
-                      >
-                        <path 
-                          fillRule="evenodd" 
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" 
-                          clipRule="evenodd" 
-                        />
-                      </svg>
+                    <div className="
+                      inline-flex items-center gap-3 px-5 py-3 
+                      rounded-2xl w-full
+                      bg-white/10 backdrop-blur-sm
+                      text-white border border-white/20
+                      font-medium text-base md:text-lg
+                      transition-all duration-200 cursor-default
+                      hover:bg-white/15 hover:border-white/30
+                    ">
+                      <div className="w-2 h-2 rounded-full bg-emerald-300/60 group-hover:bg-emerald-300/80 transition-colors"></div>
+                      <span className="font-sans">
+                        {feature}
+                      </span>
                     </div>
-                    <span className="text-emerald-50 text-lg md:text-xl font-sans font-medium">
-                      {feature}
-                    </span>
                   </motion.div>
                 ))}
               </div>
 
               {/* Right Features Column */}
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {rightFeatures.map((feature, index) => (
-                  <motion.div 
-                    key={index} 
-                    className="flex items-start gap-3"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: 0.6 + (index * 0.1), ease: "easeOut" }}
+                    transition={{ 
+                      duration: 0.4, 
+                      delay: 0.6 + (index * 0.1), 
+                      ease: "easeOut"
+                    }}
+                    whileHover={{ 
+                      x: 5,
+                      transition: { duration: 0.15 }
+                    }}
+                    className="group"
                   >
-                    {/* Checkmark Icon */}
-                    <div className="flex-shrink-0 mt-1">
-                      <svg 
-                        className="w-6 h-6 text-emerald-200" 
-                        fill="currentColor" 
-                        viewBox="0 0 20 20"
-                      >
-                        <path 
-                          fillRule="evenodd" 
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" 
-                          clipRule="evenodd" 
-                        />
-                      </svg>
+                    <div className="
+                      inline-flex items-center gap-3 px-5 py-3 
+                      rounded-2xl w-full
+                      bg-white/10 backdrop-blur-sm
+                      text-white border border-white/20
+                      font-medium text-base md:text-lg
+                      transition-all duration-200 cursor-default
+                      hover:bg-white/15 hover:border-white/30
+                    ">
+                      <div className="w-2 h-2 rounded-full bg-emerald-300/60 group-hover:bg-emerald-300/80 transition-colors"></div>
+                      <span className="font-sans">
+                        {feature}
+                      </span>
                     </div>
-                    <span className="text-emerald-50 text-lg md:text-xl font-sans font-medium">
-                      {feature}
-                    </span>
                   </motion.div>
                 ))}
               </div>
