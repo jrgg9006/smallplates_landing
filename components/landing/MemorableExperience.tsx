@@ -8,13 +8,12 @@ export default function MemorableExperience() {
       <div className="mx-auto max-w-7xl px-6 md:px-8">
         <div className="text-center">
           <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-8">
-            Built for a fun,<br />
-            <span className="text-gray-700">fast</span>, &<br />
+            Built for a fun &amp;,<br />
             <span className="text-gray-700">memorable</span><br />
             experience
           </h2>
           
-          <p className="text-xl md:text-2xl text-gray-600 font-light leading-relaxed max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-gray-600 font-light leading-relaxed max-w-2xl mx-auto">
             Average time total recipe collection<br />
             is under 2 weeks
           </p>

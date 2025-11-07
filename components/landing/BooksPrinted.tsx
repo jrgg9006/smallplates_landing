@@ -207,7 +207,7 @@ export default function BooksPrinted() {
             <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-medium text-gray-900 mb-4">
               <span className="font">With</span> <span className="italic">hundreds</span> of printed cookbooks
             </h2>
-            <p className="text-lg md:text-xl text-gray-900 max-w-2xl">
+            <p className="font-light text-lg md:text-xl lg:text-2xl text-gray-900 max-w-2xl">
             More than recipes — we help people know their favorite people in a unique way.
             </p>
           </motion.div>
@@ -225,7 +225,7 @@ export default function BooksPrinted() {
               onClick={handleGetStarted}
               className="inline-flex items-center justify-center rounded-2xl bg-smallplates_red text-white px-8 py-4 text-lg font-semibold shadow-sm hover:bg-orange-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-600 transition-all duration-300 hover:scale-105"
             >
-              CREATE YOURS FOR $120
+              CREATE YOURS FOR $79.99
             </button>
           </motion.div>
         </div>

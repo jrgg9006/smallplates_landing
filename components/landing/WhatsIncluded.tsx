@@ -15,7 +15,7 @@ export default function WhatsIncluded() {
 
   // Features organized in two columns
   const leftFeatures = [
-    "1 Hardcover Cookbook Credit",
+    "Hardcover Cookbook Credit(s)",
     "30-day money back guarantee",
     "Smart tools to collect recipes",
   ];
@@ -54,7 +54,7 @@ export default function WhatsIncluded() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              CREATE YOURS FOR $120
+              CREATE YOURS FOR $79.99
             </motion.button>
             
             {/* Learn more text */}

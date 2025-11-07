@@ -24,7 +24,7 @@ export default function ShareBanner() {
               Collect recipes with one click
             </h3>
             <p className="text-lg md:text-xl text-gray-600 font-light">
-              Your friends can easily submit recipes from any device.
+            Your friends can share their recipe through <b>our form</b>, upload a <b>photo</b>, or even record a <b>voice message</b>.
             </p>
           </div>
 

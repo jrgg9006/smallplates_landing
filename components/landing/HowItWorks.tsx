@@ -33,7 +33,7 @@ export default function HowItWorks() {
           <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-medium text-gray-900 mb-3">
             How it works
           </h2>
-          <p className="text-xl md:text-3xl text-gray-500 font-light">
+          <p className="text-lg md:text-xl lg:text-2xl text-gray-900 font-light">
             It&apos;s muuuuch easier than you think!
           </p>
         </div>
