@@ -20,10 +20,10 @@ export async function uploadRecipeDocuments(
       const fileName = `${guestId}/${timestamp}_${i}.${fileExt}`;
       const filePath = `recipe-documents/${fileName}`;
 
-      console.log(`Uploading file ${i + 1}/${files.length}: ${file.name}`);
+      console.log(`Uploading file ${i + 1}/${files.length}: ${file.name} to path: ${filePath}`);
 
       // Upload to Supabase storage
-      const { error: uploadError } = await supabase.storage
+      const { data, error: uploadError } = await supabase.storage
         .from('recipes')
         .upload(filePath, file, {
           cacheControl: '3600',
@@ -31,10 +31,17 @@ export async function uploadRecipeDocuments(
         });
 
       if (uploadError) {
-        console.error(`Error uploading file ${file.name}:`, uploadError);
+        console.error(`Error uploading file ${file.name}:`, {
+          error: uploadError,
+          filePath: filePath,
+          fileSize: file.size,
+          fileType: file.type
+        });
         // Continue with other files even if one fails
         continue;
       }
+
+      console.log(`Successfully uploaded file: ${file.name}`, { data });
 
       // Get public URL for the uploaded file
       const { data: { publicUrl } } = supabase.storage

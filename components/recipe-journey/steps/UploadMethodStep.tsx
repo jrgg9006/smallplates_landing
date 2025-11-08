@@ -44,7 +44,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-8">
         {methods.map((method) => (
           <button
             key={method.id}
@@ -52,16 +52,16 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
             onClick={() => method.available && onSelectMethod(method.id)}
             disabled={!method.available}
             className={`
-              relative group p-8 rounded-2xl border-2 transition-all duration-200
+              relative group p-4 md:p-8 rounded-xl md:rounded-2xl border-2 transition-all duration-200
               ${method.available 
                 ? 'border-gray-200 hover:border-gray-900 hover:shadow-lg cursor-pointer' 
                 : 'border-gray-100 opacity-50 cursor-not-allowed'
               }
             `}
           >
-            <div className="flex flex-col items-center space-y-4">
+            <div className="flex flex-row md:flex-col items-center space-x-4 md:space-x-0 md:space-y-4">
               <div className={`
-                p-4 rounded-full transition-colors duration-200
+                p-3 md:p-4 rounded-full transition-colors duration-200 flex-shrink-0
                 ${method.available 
                   ? 'bg-gray-50 group-hover:bg-gray-900' 
                   : 'bg-gray-50'
@@ -69,7 +69,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
               `}>
                 <method.icon 
                   className={`
-                    w-8 h-8 transition-colors duration-200
+                    w-6 h-6 md:w-8 md:h-8 transition-colors duration-200
                     ${method.available 
                       ? 'text-gray-700 group-hover:text-white' 
                       : 'text-gray-400'
@@ -77,7 +77,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
                   `} 
                 />
               </div>
-              <div className="text-center">
+              <div className="text-left md:text-center flex-1">
                 <h3 className="font-medium text-lg text-gray-900">
                   {method.title}
                 </h3>
@@ -86,7 +86,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
                 </p>
               </div>
               {!method.available && (
-                <span className="absolute top-4 right-4 text-xs font-medium text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
+                <span className="absolute top-2 right-2 md:top-4 md:right-4 text-xs font-medium text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
                   Coming soon
                 </span>
               )}
