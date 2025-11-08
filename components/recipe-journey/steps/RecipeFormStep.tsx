@@ -10,6 +10,9 @@ export interface RecipeData {
   instructions: string;
   personalNote: string;
   rawRecipeText?: string;
+  uploadMethod?: 'text' | 'audio' | 'image';
+  documentUrls?: string[];
+  audioUrl?: string;
 }
 
 interface RecipeFormStepProps {

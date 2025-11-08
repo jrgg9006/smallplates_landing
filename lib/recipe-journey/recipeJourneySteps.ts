@@ -1,4 +1,4 @@
-export type JourneyStepKey = 'welcome' | 'introInfo' | 'realBook' | 'recipeForm' | 'summary' | 'success';
+export type JourneyStepKey = 'welcome' | 'introInfo' | 'realBook' | 'uploadMethod' | 'recipeForm' | 'imageUpload' | 'summary' | 'success';
 
 export interface JourneyStepConfig {
   key: JourneyStepKey;
@@ -9,8 +9,10 @@ export interface JourneyStepConfig {
 export const journeySteps: JourneyStepConfig[] = [
   { key: 'welcome', title: 'Welcome', ctaLabel: "Let's do it!" },
   { key: 'introInfo', title: 'How it works', ctaLabel: 'Got it!' },
-  { key: 'realBook', title: 'Printed book', ctaLabel: 'Start writting' },
+  { key: 'realBook', title: 'Printed book', ctaLabel: 'Start writing' },
+  { key: 'uploadMethod', title: 'Choose format', ctaLabel: 'Continue' },
   { key: 'recipeForm', title: 'Your recipe', ctaLabel: 'Add my recipe' },
+  { key: 'imageUpload', title: 'Upload images', ctaLabel: 'Continue' },
   { key: 'summary', title: 'Review' },
   { key: 'success', title: 'Thanks' },
 ];

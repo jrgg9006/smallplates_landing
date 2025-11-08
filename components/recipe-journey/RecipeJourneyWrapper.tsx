@@ -12,7 +12,10 @@ import RecipeFormStep, { type RecipeData as FormRecipeData } from './steps/Recip
 import SummaryStep from './steps/SummaryStep';
 import SuccessStep from './steps/SuccessStep';
 import WelcomeStep from './steps/WelcomeStep';
+import UploadMethodStep from './steps/UploadMethodStep';
+import ImageUploadStep from './steps/ImageUploadStep';
 import { journeySteps } from '@/lib/recipe-journey/recipeJourneySteps';
+import { uploadRecipeDocuments } from '@/lib/supabase/storage';
 
 interface GuestData {
   id?: string;
@@ -40,12 +43,17 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
     ingredients: '',
     instructions: '',
     personalNote: '',
-    rawRecipeText: undefined
+    rawRecipeText: undefined,
+    uploadMethod: 'text',
+    documentUrls: [],
+    audioUrl: undefined
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [autosaveState, setAutosaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const isDirtyRef = useRef(false);
   const lastRecipeIdRef = useRef<string | null>(null);
   const lastGuestIdRef = useRef<string | null>(null);
@@ -60,11 +68,16 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
       recipeName: '',
       ingredients: '',
       instructions: '',
-      personalNote: ''
+      personalNote: '',
+      rawRecipeText: undefined,
+      uploadMethod: 'text',
+      documentUrls: [],
+      audioUrl: undefined
     });
     setSubmitSuccess(false);
     setSubmitError(null);
     setSubmitting(false);
+    setSelectedFiles([]);
     // Clear localStorage
     localStorage.removeItem('recipeJourneyData');
     isDirtyRef.current = false;
@@ -88,7 +101,25 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
   // Navigation functions
   const handleNext = () => {
     if (currentStepIndex < totalSteps - 1) {
-      setCurrentStepIndex(currentStepIndex + 1);
+      const currentStep = journeySteps[currentStepIndex];
+      
+      // Special handling for upload method selection
+      if (currentStep?.key === 'uploadMethod') {
+        // This is handled by handleUploadMethodSelect, don't advance here
+        return;
+      } else if (currentStep?.key === 'recipeForm') {
+        // After recipe form, go to summary (skip imageUpload)
+        const summaryIndex = journeySteps.findIndex(s => s.key === 'summary');
+        setCurrentStepIndex(summaryIndex);
+      } else if (currentStep?.key === 'imageUpload') {
+        // After image upload, go to summary
+        const summaryIndex = journeySteps.findIndex(s => s.key === 'summary');
+        setCurrentStepIndex(summaryIndex);
+      } else {
+        // Normal navigation
+        setCurrentStepIndex(currentStepIndex + 1);
+      }
+      
       setTimeout(focusFirstHeading, 0);
       
       // Scroll to top on mobile for better UX
@@ -102,7 +133,31 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
 
   const handlePrevious = () => {
     if (currentStepIndex > 0) {
-      setCurrentStepIndex(currentStepIndex - 1);
+      const currentStep = journeySteps[currentStepIndex];
+      
+      // Special handling for back navigation
+      if (currentStep?.key === 'imageUpload') {
+        // From image upload, go back to upload method selection
+        const uploadMethodIndex = journeySteps.findIndex(s => s.key === 'uploadMethod');
+        setCurrentStepIndex(uploadMethodIndex);
+      } else if (currentStep?.key === 'recipeForm') {
+        // From recipe form, go back to upload method selection
+        const uploadMethodIndex = journeySteps.findIndex(s => s.key === 'uploadMethod');
+        setCurrentStepIndex(uploadMethodIndex);
+      } else if (currentStep?.key === 'summary') {
+        // From summary, go back based on upload method
+        if (recipeData.uploadMethod === 'image') {
+          const imageUploadIndex = journeySteps.findIndex(s => s.key === 'imageUpload');
+          setCurrentStepIndex(imageUploadIndex);
+        } else {
+          const recipeFormIndex = journeySteps.findIndex(s => s.key === 'recipeForm');
+          setCurrentStepIndex(recipeFormIndex);
+        }
+      } else {
+        // Normal navigation
+        setCurrentStepIndex(currentStepIndex - 1);
+      }
+      
       setTimeout(focusFirstHeading, 0);
       
       // Scroll to top on mobile for better UX
@@ -128,6 +183,63 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
   const handleFormFieldChange = (field: keyof RecipeData, value: string) => {
     isDirtyRef.current = true;
     setRecipeData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleUploadMethodSelect = (method: 'text' | 'audio' | 'image') => {
+    setRecipeData(prev => ({ ...prev, uploadMethod: method }));
+    
+    if (method === 'text') {
+      // Go directly to recipeForm
+      const recipeFormIndex = journeySteps.findIndex(s => s.key === 'recipeForm');
+      setCurrentStepIndex(recipeFormIndex);
+    } else if (method === 'image') {
+      // Go to imageUpload step
+      const imageUploadIndex = journeySteps.findIndex(s => s.key === 'imageUpload');
+      setCurrentStepIndex(imageUploadIndex);
+    }
+    
+    setTimeout(focusFirstHeading, 0);
+    
+    // Scroll to top on mobile for better UX
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+    }
+  };
+
+  const handleFilesSelected = (files: File[]) => {
+    setSelectedFiles(files);
+  };
+
+  const handleImagesReady = async (previewUrls: string[]) => {
+    if (selectedFiles.length === 0) return;
+    
+    setUploadingImages(true);
+    try {
+      // Generate a temporary guest ID for organizing uploads
+      const tempGuestId = `temp_${Date.now()}`;
+      
+      // Upload images to Supabase Storage
+      const { urls, error } = await uploadRecipeDocuments(tempGuestId, selectedFiles);
+      
+      if (error) {
+        setSubmitError(error);
+        setUploadingImages(false);
+        return;
+      }
+      
+      // Store URLs in recipe data
+      setRecipeData(prev => ({ ...prev, documentUrls: urls }));
+      setUploadingImages(false);
+      
+      // Navigate to next step
+      handleNext();
+    } catch (err) {
+      console.error('Error uploading images:', err);
+      setSubmitError('Failed to upload images. Please try again.');
+      setUploadingImages(false);
+    }
   };
 
   const handlePasteRecipe = async (rawText: string) => {
@@ -167,11 +279,14 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
         last_name: guestData.lastName,
         email: guestData.email,
         phone: guestData.phone,
-        recipe_name: recipeData.recipeName.trim(),
+        recipe_name: recipeData.recipeName.trim() || (recipeData.uploadMethod === 'image' ? 'Recipe Images' : 'Untitled Recipe'),
         ingredients: recipeData.rawRecipeText ? '' : recipeData.ingredients.trim(),
         instructions: recipeData.rawRecipeText ? '' : recipeData.instructions.trim(),
         comments: recipeData.personalNote.trim() || undefined,
-        raw_recipe_text: recipeData.rawRecipeText
+        raw_recipe_text: recipeData.rawRecipeText,
+        upload_method: recipeData.uploadMethod,
+        document_urls: recipeData.documentUrls,
+        audio_url: recipeData.audioUrl
       };
 
       // Submit the recipe
@@ -321,7 +436,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
 
   const handleAddAnother = () => {
     resetJourney();
-    const idx = journeySteps.findIndex(s => s.key === 'recipeForm');
+    const idx = journeySteps.findIndex(s => s.key === 'uploadMethod');
     if (idx !== -1) setCurrentStepIndex(idx);
   };
 
@@ -329,10 +444,16 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
     router.push(`/`);
   };
 
-  const canContinueFromForm = () =>
-    recipeData.recipeName.trim().length > 0 &&
-    recipeData.ingredients.trim().length > 0 &&
-    recipeData.instructions.trim().length > 0;
+  const canContinueFromForm = () => {
+    if (recipeData.uploadMethod === 'image' && recipeData.documentUrls && recipeData.documentUrls.length > 0) {
+      // For image uploads, just need a name (can be auto-generated)
+      return true;
+    }
+    // For text uploads, need all fields filled
+    return recipeData.recipeName.trim().length > 0 &&
+           recipeData.ingredients.trim().length > 0 &&
+           recipeData.instructions.trim().length > 0;
+  };
 
   const current = journeySteps[currentStepIndex]?.key;
 
@@ -366,14 +487,17 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
             Done for now
           </button>
         </>
-      ) : currentStepIndex < totalSteps - 2 ? (
+      ) : currentStepIndex < totalSteps - 2 && current !== 'summary' ? (
         <button
           type="button"
-          onClick={handleNext}
-          disabled={(current === 'recipeForm' && !canContinueFromForm()) || submitting}
+          onClick={current === 'imageUpload' ? () => handleImagesReady([]) : handleNext}
+          disabled={(current === 'recipeForm' && !canContinueFromForm()) || (current === 'imageUpload' && (selectedFiles.length === 0 || uploadingImages)) || submitting}
           className="px-8 py-3 rounded-full bg-black text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {journeySteps[currentStepIndex]?.ctaLabel ?? 'Continue'}
+          {current === 'imageUpload' 
+            ? (uploadingImages ? 'Uploading...' : 'Continue with images') 
+            : (journeySteps[currentStepIndex]?.ctaLabel ?? 'Continue')
+          }
         </button>
       ) : (
         <button
@@ -459,6 +583,17 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
             </div>
           </motion.div>
         )}
+        {current === 'uploadMethod' && (
+          <motion.div
+            key="uploadMethod"
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
+            <UploadMethodStep onSelectMethod={handleUploadMethodSelect} />
+          </motion.div>
+        )}
         {current === 'recipeForm' && (
           <motion.div
             key="recipeForm"
@@ -470,6 +605,20 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
             <RecipeFormStep data={recipeData} onChange={handleFormFieldChange} onContinue={handleNext} onBack={handlePrevious} onPasteRecipe={handlePasteRecipe} autosaveState={autosaveState} />
           </motion.div>
         )}
+        {current === 'imageUpload' && (
+          <motion.div
+            key="imageUpload"
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
+            <ImageUploadStep 
+              onImagesReady={handleImagesReady}
+              onFilesSelected={handleFilesSelected}
+            />
+          </motion.div>
+        )}
         {current === 'summary' && (
           <motion.div
             key="summary"
@@ -479,9 +628,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
             transition={{ duration: 0.2, ease: 'easeOut' }}
           >
             <SummaryStep
-              recipeName={recipeData.recipeName}
-              ingredients={recipeData.ingredients}
-              instructions={recipeData.instructions}
+              recipeName={recipeData.recipeName || (recipeData.uploadMethod === 'image' ? 'Recipe Images' : 'Untitled Recipe')}
+              ingredients={recipeData.uploadMethod === 'image' ? 'Images uploaded' : recipeData.ingredients}
+              instructions={recipeData.uploadMethod === 'image' ? `${recipeData.documentUrls?.length || 0} images uploaded` : recipeData.instructions}
               personalNote={recipeData.personalNote}
               onEditSection={onEditSection}
             />

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { GuestTable } from "@/components/profile/guests/GuestTable";
 import { GuestTableControls } from "@/components/profile/guests/GuestTableControls";
 import { GuestStatisticsComponent } from "@/components/profile/guests/GuestStatistics";
@@ -223,27 +224,43 @@ export default function ProfilePage() {
         {/* Hero Section */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-            {/* Title section with image - centered on mobile */}
+            {/* Title section with editorial text - centered on mobile */}
             <div className="flex flex-col lg:flex-row lg:items-center lg:gap-8 mb-4 lg:mb-0 justify-center lg:justify-start">
+              {/* Editorial Text Version */}
+              <motion.div 
+                className="text-center lg:text-left"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
+                <h1 className="font-serif text-6xl md:text-6xl font-medium tracking-tight text-gray-900 mb-3">
+                  Guest List
+                </h1>
+                <p className="font-serif text-2xl md:text-3xl lg:text-3xl text-gray-700 font-light italic">
+                  Your cookbook is cooking...
+                </p>
+              </motion.div>
+              
+              {/* HIDDEN: Original Images - Easy to revert */}
               {/* Mobile: Original pan image */}
-              <Image
+              {/* <Image
                 src="/images/profile/guest_list_image_pan.svg"
                 alt="Guest List - Your Cookbook is Cooking"
                 width={600}
                 height={80}
                 className="lg:hidden w-full max-w-2xl h-auto"
                 priority
-              />
+              /> */}
               
               {/* Desktop: New horizontal image */}
-              <Image
+              {/* <Image
                 src="/images/profile/Guest_list_horizontal.svg"
                 alt="Guest List - Your Cookbook is Cooking"
                 width={800}
                 height={120}
                 className="hidden lg:block w-full max-w-2xl h-auto"
                 priority
-              />
+              /> */}
             </div>
             
             {/* Right side - Progress bar - centered on mobile */}

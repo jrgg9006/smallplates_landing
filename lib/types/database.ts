@@ -121,6 +121,9 @@ export interface Database {
           comments: string | null;
           raw_recipe_text: string | null;
           image_url: string | null;
+          upload_method: 'text' | 'audio' | 'image';
+          document_urls: string[] | null;
+          audio_url: string | null;
           submission_status: RecipeSubmissionStatus;
           submitted_at: string | null;
           approved_at: string | null;
@@ -137,6 +140,9 @@ export interface Database {
           comments?: string | null;
           raw_recipe_text?: string | null;
           image_url?: string | null;
+          upload_method?: 'text' | 'audio' | 'image';
+          document_urls?: string[] | null;
+          audio_url?: string | null;
           submission_status?: RecipeSubmissionStatus;
           submitted_at?: string | null;
           approved_at?: string | null;
@@ -148,6 +154,9 @@ export interface Database {
           comments?: string | null;
           raw_recipe_text?: string | null;
           image_url?: string | null;
+          upload_method?: 'text' | 'audio' | 'image';
+          document_urls?: string[] | null;
+          audio_url?: string | null;
           submission_status?: RecipeSubmissionStatus;
           submitted_at?: string | null;
           approved_at?: string | null;
@@ -372,6 +381,9 @@ export interface CollectionGuestSubmission {
   instructions: string;
   comments?: string;
   raw_recipe_text?: string;
+  upload_method?: 'text' | 'audio' | 'image';
+  document_urls?: string[];
+  audio_url?: string;
 }
 
 export interface CollectionTokenInfo {
