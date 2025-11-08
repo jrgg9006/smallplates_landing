@@ -60,19 +60,19 @@ export default function AboutUs() {
               className="space-y-8"
             >
               <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light first-letter:text-6xl first-letter:font-serif first-letter:float-left first-letter:mr-3 first-letter:mt-1">
-                Small plates are the kind of dishes we order when we're together — plates meant to be passed around, shared, and enjoyed by everyone. Where the food isn't what matters most, but the people, the laughter, the moment, the connection that stays long after the meal.
+                Small plates are the kind of dishes we order when we&apos;re together — plates meant to be passed around, shared, and enjoyed by everyone. Where the food isn&apos;t what matters most, but the people, the laughter, the moment, the connection that stays long after the meal.
               </p>
               
               <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light">
-                We believe food is the most human way to connect. Recipes aren't just instructions — they're stories, memories, and gifts passed from one person to another. The things we keep in our homes should matter — they should remind us of who we are and who we love.
+                We believe food is the most human way to connect. Recipes aren&apos;t just instructions — they&apos;re stories, memories, and gifts passed from one person to another. The things we keep in our homes should matter — they should remind us of who we are and who we love.
               </p>
               
               <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light">
-                That's why we created Small Plates & Co. Not about perfect cooking, but about the people who make life feel full. Every page holds a name, a note, a story — reminders of love and connection. More than recipes, it's memory: bound, beautiful, and meant to live in your kitchen every day.
+                That&apos;s why we created Small Plates & Co. Not about perfect cooking, but about the people who make life feel full. Every page holds a name, a note, a story — reminders of love and connection. More than recipes, it&apos;s memory: bound, beautiful, and meant to live in your kitchen every day.
               </p>
               
               <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light">
-                Because in the end, it's never just about the food. It's about the people, the laughter, the feeling of being together. That's what we want to preserve.
+                Because in the end, it&apos;s never just about the food. It&apos;s about the people, the laughter, the feeling of being together. That&apos;s what we want to preserve.
               </p>
             </motion.div>
 
