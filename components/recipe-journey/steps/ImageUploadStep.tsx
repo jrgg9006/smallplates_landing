@@ -14,7 +14,6 @@ export default function ImageUploadStep({ onImagesReady, onFilesSelected }: Imag
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Check if device is mobile
@@ -81,67 +80,68 @@ export default function ImageUploadStep({ onImagesReady, onFilesSelected }: Imag
 
         {/* Upload options */}
         {selectedFiles.length === 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-          {/* Upload files option */}
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="group p-8 rounded-2xl border-2 border-gray-200 hover:border-gray-900 hover:shadow-lg cursor-pointer transition-all duration-200"
-          >
-            <div className="flex flex-col items-center space-y-4">
-              <div className="p-4 rounded-full bg-gray-50 group-hover:bg-gray-900 transition-colors duration-200">
-                <UploadIcon className="w-8 h-8 text-gray-700 group-hover:text-white transition-colors duration-200" />
+          <>
+            {/* Mobile: Single button */}
+            {isMobile ? (
+              <div className="mt-8">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full group p-8 rounded-2xl border-2 border-gray-200 hover:border-gray-900 hover:shadow-lg cursor-pointer transition-all duration-200"
+                >
+                  <div className="flex flex-col items-center space-y-4">
+                    <div className="p-4 rounded-full bg-gray-50 group-hover:bg-gray-900 transition-colors duration-200">
+                      <UploadIcon className="w-8 h-8 text-gray-700 group-hover:text-white transition-colors duration-200" />
+                    </div>
+                    <div className="text-center">
+                      <h3 className="font-medium text-lg text-gray-900">Upload a file or take a picture</h3>
+                      <p className="mt-1 text-sm text-gray-500">Choose from your device or camera</p>
+                    </div>
+                  </div>
+                </button>
               </div>
-              <div className="text-center">
-                <h3 className="font-medium text-lg text-gray-900">Upload files</h3>
-                <p className="mt-1 text-sm text-gray-500">Select images or PDFs from your device</p>
-              </div>
-            </div>
-          </button>
+            ) : (
+              /* Desktop: Two buttons */
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                {/* Upload files option */}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="group p-8 rounded-2xl border-2 border-gray-200 hover:border-gray-900 hover:shadow-lg cursor-pointer transition-all duration-200"
+                >
+                  <div className="flex flex-col items-center space-y-4">
+                    <div className="p-4 rounded-full bg-gray-50 group-hover:bg-gray-900 transition-colors duration-200">
+                      <UploadIcon className="w-8 h-8 text-gray-700 group-hover:text-white transition-colors duration-200" />
+                    </div>
+                    <div className="text-center">
+                      <h3 className="font-medium text-lg text-gray-900">Upload files</h3>
+                      <p className="mt-1 text-sm text-gray-500">Select images or PDFs from your device</p>
+                    </div>
+                  </div>
+                </button>
 
-          {/* Take photo option */}
-          <button
-            type="button"
-            onClick={() => isMobile && cameraInputRef.current?.click()}
-            disabled={!isMobile}
-            className={`
-              relative group p-8 rounded-2xl border-2 transition-all duration-200
-              ${isMobile 
-                ? 'border-gray-200 hover:border-gray-900 hover:shadow-lg cursor-pointer' 
-                : 'border-gray-100 opacity-50 cursor-not-allowed'
-              }
-            `}
-          >
-            <div className="flex flex-col items-center space-y-4">
-              <div className={`
-                p-4 rounded-full transition-colors duration-200
-                ${isMobile 
-                  ? 'bg-gray-50 group-hover:bg-gray-900' 
-                  : 'bg-gray-50'
-                }
-              `}>
-                <CameraIcon 
-                  className={`
-                    w-8 h-8 transition-colors duration-200
-                    ${isMobile 
-                      ? 'text-gray-700 group-hover:text-white' 
-                      : 'text-gray-400'
-                    }
-                  `} 
-                />
+                {/* Take photo option - Desktop disabled */}
+                <button
+                  type="button"
+                  disabled={true}
+                  className="relative group p-8 rounded-2xl border-2 border-gray-100 opacity-50 cursor-not-allowed transition-all duration-200"
+                >
+                  <div className="flex flex-col items-center space-y-4">
+                    <div className="p-4 rounded-full bg-gray-50">
+                      <CameraIcon className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <div className="text-center">
+                      <h3 className="font-medium text-lg text-gray-900">Take a photo</h3>
+                      <p className="mt-1 text-sm text-gray-500">Use your camera to capture the recipe</p>
+                    </div>
+                    <span className="absolute top-4 right-4 text-xs font-medium text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
+                      Mobile only
+                    </span>
+                  </div>
+                </button>
               </div>
-              <div className="text-center">
-                <h3 className="font-medium text-lg text-gray-900">Take a photo</h3>
-                <p className="mt-1 text-sm text-gray-500">Use your camera to capture the recipe</p>
-              </div>
-              {!isMobile && (
-                <span className="absolute top-4 right-4 text-xs font-medium text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
-                  Mobile only
-                </span>
-              )}
-            </div>
-          </button>
-          </div>
+            )}
+          </>
         )}
 
         {/* Hidden file inputs */}
@@ -150,14 +150,6 @@ export default function ImageUploadStep({ onImagesReady, onFilesSelected }: Imag
         type="file"
         multiple
         accept="image/*,.pdf"
-        onChange={handleFileSelect}
-        className="hidden"
-      />
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
         onChange={handleFileSelect}
         className="hidden"
       />

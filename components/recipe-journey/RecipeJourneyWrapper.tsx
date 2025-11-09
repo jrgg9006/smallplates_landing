@@ -14,6 +14,8 @@ import SuccessStep from './steps/SuccessStep';
 import WelcomeStep from './steps/WelcomeStep';
 import UploadMethodStep from './steps/UploadMethodStep';
 import ImageUploadStep from './steps/ImageUploadStep';
+import RecipeTitleStep from './steps/RecipeTitleStep';
+import PersonalNoteStep from './steps/PersonalNoteStep';
 import { journeySteps } from '@/lib/recipe-journey/recipeJourneySteps';
 import { uploadRecipeDocuments } from '@/lib/supabase/storage';
 
@@ -111,10 +113,17 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
         // After recipe form, go to summary (skip imageUpload)
         const summaryIndex = journeySteps.findIndex(s => s.key === 'summary');
         setCurrentStepIndex(summaryIndex);
+      } else if (currentStep?.key === 'recipeTitle') {
+        // After recipe title, go to image upload
+        const imageUploadIndex = journeySteps.findIndex(s => s.key === 'imageUpload');
+        setCurrentStepIndex(imageUploadIndex);
       } else if (currentStep?.key === 'imageUpload') {
-        // After image upload, go to summary
-        const summaryIndex = journeySteps.findIndex(s => s.key === 'summary');
-        setCurrentStepIndex(summaryIndex);
+        // After image upload, go to personal note
+        const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
+        setCurrentStepIndex(personalNoteIndex);
+      } else if (currentStep?.key === 'personalNote') {
+        // From personal note, submit directly (handled by different button)
+        return;
       } else {
         // Normal navigation
         setCurrentStepIndex(currentStepIndex + 1);
@@ -136,10 +145,18 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
       const currentStep = journeySteps[currentStepIndex];
       
       // Special handling for back navigation
-      if (currentStep?.key === 'imageUpload') {
-        // From image upload, go back to upload method selection
+      if (currentStep?.key === 'recipeTitle') {
+        // From recipe title, go back to upload method selection
         const uploadMethodIndex = journeySteps.findIndex(s => s.key === 'uploadMethod');
         setCurrentStepIndex(uploadMethodIndex);
+      } else if (currentStep?.key === 'imageUpload') {
+        // From image upload, go back to recipe title
+        const recipeTitleIndex = journeySteps.findIndex(s => s.key === 'recipeTitle');
+        setCurrentStepIndex(recipeTitleIndex);
+      } else if (currentStep?.key === 'personalNote') {
+        // From personal note, go back to image upload
+        const imageUploadIndex = journeySteps.findIndex(s => s.key === 'imageUpload');
+        setCurrentStepIndex(imageUploadIndex);
       } else if (currentStep?.key === 'recipeForm') {
         // From recipe form, go back to upload method selection
         const uploadMethodIndex = journeySteps.findIndex(s => s.key === 'uploadMethod');
@@ -147,8 +164,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
       } else if (currentStep?.key === 'summary') {
         // From summary, go back based on upload method
         if (recipeData.uploadMethod === 'image') {
-          const imageUploadIndex = journeySteps.findIndex(s => s.key === 'imageUpload');
-          setCurrentStepIndex(imageUploadIndex);
+          const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
+          setCurrentStepIndex(personalNoteIndex);
         } else {
           const recipeFormIndex = journeySteps.findIndex(s => s.key === 'recipeForm');
           setCurrentStepIndex(recipeFormIndex);
@@ -193,9 +210,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
       const recipeFormIndex = journeySteps.findIndex(s => s.key === 'recipeForm');
       setCurrentStepIndex(recipeFormIndex);
     } else if (method === 'image') {
-      // Go to imageUpload step
-      const imageUploadIndex = journeySteps.findIndex(s => s.key === 'imageUpload');
-      setCurrentStepIndex(imageUploadIndex);
+      // Go to recipe title step first
+      const recipeTitleIndex = journeySteps.findIndex(s => s.key === 'recipeTitle');
+      setCurrentStepIndex(recipeTitleIndex);
     }
     
     setTimeout(focusFirstHeading, 0);
@@ -490,12 +507,25 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
       ) : currentStepIndex < totalSteps - 2 && current !== 'summary' ? (
         <button
           type="button"
-          onClick={current === 'imageUpload' ? () => handleImagesReady([]) : handleNext}
-          disabled={(current === 'recipeForm' && !canContinueFromForm()) || (current === 'imageUpload' && (selectedFiles.length === 0 || uploadingImages)) || submitting}
+          onClick={
+            current === 'imageUpload' 
+              ? () => handleImagesReady([]) 
+              : current === 'personalNote' 
+                ? handleSubmit 
+                : handleNext
+          }
+          disabled={
+            (current === 'recipeForm' && !canContinueFromForm()) || 
+            (current === 'recipeTitle' && !recipeData.recipeName.trim()) ||
+            (current === 'imageUpload' && (selectedFiles.length === 0 || uploadingImages)) || 
+            submitting
+          }
           className="px-8 py-3 rounded-full bg-black text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {current === 'imageUpload' 
-            ? (uploadingImages ? 'Uploading...' : 'Continue with images') 
+            ? (uploadingImages ? 'Uploading...' : 'Continue with images')
+            : current === 'personalNote'
+              ? (submitting ? 'Submitting...' : 'Submit Recipe')
             : (journeySteps[currentStepIndex]?.ctaLabel ?? 'Continue')
           }
         </button>
@@ -605,6 +635,20 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
             <RecipeFormStep data={recipeData} onChange={handleFormFieldChange} onContinue={handleNext} onBack={handlePrevious} onPasteRecipe={handlePasteRecipe} autosaveState={autosaveState} />
           </motion.div>
         )}
+        {current === 'recipeTitle' && (
+          <motion.div
+            key="recipeTitle"
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
+            <RecipeTitleStep 
+              recipeName={recipeData.recipeName}
+              onChange={(value) => setRecipeData(prev => ({ ...prev, recipeName: value }))}
+            />
+          </motion.div>
+        )}
         {current === 'imageUpload' && (
           <motion.div
             key="imageUpload"
@@ -616,6 +660,21 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
             <ImageUploadStep 
               onImagesReady={handleImagesReady}
               onFilesSelected={handleFilesSelected}
+            />
+          </motion.div>
+        )}
+        {current === 'personalNote' && (
+          <motion.div
+            key="personalNote"
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
+            <PersonalNoteStep 
+              personalNote={recipeData.personalNote}
+              onChange={(value) => setRecipeData(prev => ({ ...prev, personalNote: value }))}
+              userName={creatorName}
             />
           </motion.div>
         )}
