@@ -17,7 +17,7 @@ export default function RecipeTitleStep({ recipeName, onChange }: RecipeTitleSte
             Recipe Title
           </h2>
           <p className="mt-3 text-base text-gray-600">
-            What's the name of this recipe?
+            What&apos;s the name of this recipe?
           </p>
         </div>
 
@@ -25,7 +25,7 @@ export default function RecipeTitleStep({ recipeName, onChange }: RecipeTitleSte
           <Input
             value={recipeName}
             onChange={(e) => onChange(e.target.value)}
-            placeholder="Grandma's Secret Chocolate Chip Cookies"
+            placeholder="Grandma&apos;s Secret Chocolate Chip Cookies"
             className="h-12 text-center text-lg"
             autoFocus
           />

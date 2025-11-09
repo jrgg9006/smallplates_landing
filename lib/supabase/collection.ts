@@ -4,6 +4,7 @@
  */
 
 import { createSupabaseClient } from './client';
+import { generateSessionId, uploadFilesToStaging, moveFilesToFinalLocation, cleanupStagingFiles } from './storage';
 import type { 
   CollectionTokenInfo, 
   CollectionGuestSubmission, 
@@ -102,7 +103,207 @@ export async function searchGuestInCollection(
 }
 
 /**
+ * New improved upload flow: Create guest/recipe records first, then handle file uploads with proper hierarchy
+ */
+export async function submitGuestRecipeWithFiles(
+  collectionToken: string,
+  submission: CollectionGuestSubmission,
+  files?: File[]
+): Promise<{ 
+  data: { 
+    guest_id: string; 
+    recipe_id: string; 
+    guest_notify_opt_in?: boolean; 
+    guest_notify_email?: string | null;
+    file_urls?: string[];
+  } | null; 
+  error: string | null 
+}> {
+  const supabase = createSupabaseClient();
+  let sessionId: string | null = null;
+  let fileMetadata: Array<{originalName: string; tempPath: string; size: number; type: string}> = [];
+  
+  try {
+    // Step 1: Validate token and get user info
+    const { data: tokenInfo, error: tokenError } = await validateCollectionToken(collectionToken);
+    if (tokenError || !tokenInfo) {
+      return { data: null, error: tokenError || 'Invalid collection link' };
+    }
+
+    // Step 2: If files provided, upload to staging area first
+    if (files && files.length > 0) {
+      sessionId = generateSessionId();
+      const stagingResult = await uploadFilesToStaging(sessionId, files);
+      
+      if (stagingResult.error) {
+        return { data: null, error: stagingResult.error };
+      }
+      
+      fileMetadata = stagingResult.fileMetadata;
+      console.log(`Successfully staged ${fileMetadata.length} files with session: ${sessionId}`);
+    }
+
+    // Step 3: Handle guest creation/update (same logic as original function)
+    const { data: existingGuests } = await searchGuestInCollection(
+      tokenInfo.user_id,
+      submission.first_name,
+      submission.last_name
+    );
+
+    let guestId: string;
+    const existingGuest = existingGuests?.[0];
+
+    if (existingGuest) {
+      // Use existing guest
+      guestId = existingGuest.id;
+      
+      // Update guest recipe count if needed
+      const currentRecipeCount = existingGuest.recipes_received || 0;
+      const expectedRecipes = existingGuest.number_of_recipes || 1;
+      const willHaveRecipes = currentRecipeCount + 1;
+      
+      if (willHaveRecipes > expectedRecipes) {
+        const { error: updateExpectedError } = await supabase
+          .from('guests')
+          .update({ number_of_recipes: willHaveRecipes })
+          .eq('id', guestId);
+          
+        if (updateExpectedError) {
+          if (sessionId) await cleanupStagingFiles(sessionId);
+          return { data: null, error: 'Failed to update guest recipe limit' };
+        }
+      }
+
+      // Update status to submitted if needed
+      if (existingGuest.status === 'pending' || existingGuest.status === 'reached_out') {
+        const { error: updateError } = await supabase
+          .from('guests')
+          .update({ status: 'submitted' })
+          .eq('id', guestId);
+        
+        if (updateError) {
+          if (sessionId) await cleanupStagingFiles(sessionId);
+          return { data: null, error: updateError.message };
+        }
+      }
+    } else {
+      // Create new guest
+      const newGuestData: GuestInsert = {
+        user_id: tokenInfo.user_id,
+        first_name: submission.first_name.trim(),
+        last_name: submission.last_name.trim(),
+        email: submission.email?.trim() || '',
+        phone: submission.phone?.trim() || null,
+        status: 'submitted',
+        source: 'collection',
+        number_of_recipes: 1,
+        recipes_received: 0,
+        is_archived: false,
+      };
+
+      const { data: newGuest, error: guestError } = await supabase
+        .from('guests')
+        .insert(newGuestData)
+        .select()
+        .single();
+
+      if (guestError || !newGuest) {
+        if (sessionId) await cleanupStagingFiles(sessionId);
+        return { data: null, error: guestError?.message || 'Failed to create guest' };
+      }
+
+      guestId = newGuest.id;
+    }
+
+    // Step 4: Create recipe record
+    const recipeData: GuestRecipeInsert = {
+      guest_id: guestId,
+      user_id: tokenInfo.user_id,
+      recipe_name: submission.recipe_name.trim(),
+      ingredients: submission.raw_recipe_text ? 'See full recipe' : (submission.upload_method === 'image' ? 'See uploaded images' : submission.ingredients.trim()),
+      instructions: submission.raw_recipe_text ? 'See full recipe' : (submission.upload_method === 'image' ? 'See uploaded images' : submission.instructions.trim()),
+      comments: submission.comments?.trim() || null,
+      raw_recipe_text: submission.raw_recipe_text?.trim() || null,
+      upload_method: submission.upload_method || 'text',
+      document_urls: null, // Will be populated after file move
+      audio_url: submission.audio_url || null,
+      submission_status: 'submitted',
+      submitted_at: new Date().toISOString(),
+    };
+
+    const { data: recipe, error: recipeError } = await supabase
+      .from('guest_recipes')
+      .insert(recipeData)
+      .select()
+      .single();
+
+    if (recipeError || !recipe) {
+      if (sessionId) await cleanupStagingFiles(sessionId);
+      console.error('Recipe creation error:', recipeError);
+      return { data: null, error: recipeError?.message || 'Failed to create recipe' };
+    }
+
+    console.log('✅ Recipe created successfully:', { recipeId: recipe.id, guestId, userId: tokenInfo.user_id });
+
+    // Step 5: If files were staged, move them to final hierarchical location
+    let finalFileUrls: string[] = [];
+    if (sessionId && fileMetadata.length > 0) {
+      console.log(`Moving ${fileMetadata.length} files from staging to final location...`);
+      
+      const moveResult = await moveFilesToFinalLocation(
+        tokenInfo.user_id,
+        guestId,
+        recipe.id,
+        sessionId,
+        fileMetadata
+      );
+
+      if (moveResult.error) {
+        // If file move fails, we should clean up the recipe record too
+        await supabase.from('guest_recipes').delete().eq('id', recipe.id);
+        return { data: null, error: moveResult.error };
+      }
+
+      finalFileUrls = moveResult.urls;
+      
+      // Update recipe with final file URLs
+      const { error: updateError } = await supabase
+        .from('guest_recipes')
+        .update({ document_urls: finalFileUrls })
+        .eq('id', recipe.id);
+
+      if (updateError) {
+        console.error('Error updating recipe with file URLs:', updateError);
+        // Files are already moved, so we don't want to fail the whole submission
+        // Just log the error and continue
+      } else {
+        console.log(`✅ Updated recipe with ${finalFileUrls.length} file URLs`);
+      }
+    }
+
+    // Step 6: Return success with all IDs and URLs
+    return {
+      data: {
+        guest_id: guestId,
+        recipe_id: recipe.id,
+        guest_notify_opt_in: undefined, // These fields don't exist in current schema
+        guest_notify_email: null,
+        file_urls: finalFileUrls
+      },
+      error: null
+    };
+
+  } catch (err) {
+    console.error('Error in submitGuestRecipeWithFiles:', err);
+    // Cleanup on any error
+    if (sessionId) await cleanupStagingFiles(sessionId);
+    return { data: null, error: 'An unexpected error occurred while submitting the recipe' };
+  }
+}
+
+/**
  * Submit a recipe from a guest (either existing or new)
+ * @deprecated Use submitGuestRecipeWithFiles for new implementations
  */
 export async function submitGuestRecipe(
   collectionToken: string,

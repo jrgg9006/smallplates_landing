@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { CollectionTokenInfo, CollectionGuestSubmission } from '@/lib/types/database';
-import { submitGuestRecipe, updateGuestRecipeNotification, updateGuestNotification } from '@/lib/supabase/collection';
+import { submitGuestRecipe, submitGuestRecipeWithFiles, updateGuestRecipeNotification, updateGuestNotification } from '@/lib/supabase/collection';
 import Frame from './Frame';
 import IntroInfoStep from './steps/IntroInfoStep';
 // inline simple hero step to avoid import resolution issues
@@ -17,7 +17,6 @@ import ImageUploadStep from './steps/ImageUploadStep';
 import RecipeTitleStep from './steps/RecipeTitleStep';
 import PersonalNoteStep from './steps/PersonalNoteStep';
 import { journeySteps } from '@/lib/recipe-journey/recipeJourneySteps';
-import { uploadRecipeDocuments } from '@/lib/supabase/storage';
 
 interface GuestData {
   id?: string;
@@ -56,6 +55,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
   const [autosaveState, setAutosaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const isDirtyRef = useRef(false);
   const lastRecipeIdRef = useRef<string | null>(null);
   const lastGuestIdRef = useRef<string | null>(null);
@@ -80,6 +80,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
     setSubmitError(null);
     setSubmitting(false);
     setSelectedFiles([]);
+    setUploadingImages(false);
+    setUploadProgress(0);
     // Clear localStorage
     localStorage.removeItem('recipeJourneyData');
     isDirtyRef.current = false;
@@ -118,9 +120,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
         const imageUploadIndex = journeySteps.findIndex(s => s.key === 'imageUpload');
         setCurrentStepIndex(imageUploadIndex);
       } else if (currentStep?.key === 'imageUpload') {
-        // After image upload, go to personal note
-        const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
-        setCurrentStepIndex(personalNoteIndex);
+        // Image upload now submits directly, no need to navigate
+        return;
       } else if (currentStep?.key === 'personalNote') {
         // From personal note, submit directly (handled by different button)
         return;
@@ -162,14 +163,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
         const uploadMethodIndex = journeySteps.findIndex(s => s.key === 'uploadMethod');
         setCurrentStepIndex(uploadMethodIndex);
       } else if (currentStep?.key === 'summary') {
-        // From summary, go back based on upload method
-        if (recipeData.uploadMethod === 'image') {
-          const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
-          setCurrentStepIndex(personalNoteIndex);
-        } else {
-          const recipeFormIndex = journeySteps.findIndex(s => s.key === 'recipeForm');
-          setCurrentStepIndex(recipeFormIndex);
-        }
+        // From summary, go back to recipe form (image uploads don't use summary anymore)
+        const recipeFormIndex = journeySteps.findIndex(s => s.key === 'recipeForm');
+        setCurrentStepIndex(recipeFormIndex);
       } else {
         // Normal navigation
         setCurrentStepIndex(currentStepIndex - 1);
@@ -227,35 +223,93 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
 
   const handleFilesSelected = (files: File[]) => {
     setSelectedFiles(files);
+    // Clear any previous errors when files are selected
+    setSubmitError(null);
   };
 
-  const handleImagesReady = async (previewUrls: string[]) => {
+  const handleImagesReady = async () => {
     if (selectedFiles.length === 0) return;
     
     setUploadingImages(true);
+    setUploadProgress(20);
+    
     try {
-      // Generate a temporary guest ID for organizing uploads
-      const tempGuestId = `temp_${Date.now()}`;
+      // Prepare submission data with current form state
+      const submission: CollectionGuestSubmission = {
+        first_name: guestData.firstName,
+        last_name: guestData.lastName,
+        email: guestData.email,
+        phone: guestData.phone,
+        recipe_name: recipeData.recipeName.trim() || 'Recipe Images',
+        ingredients: 'See uploaded images',
+        instructions: `${selectedFiles.length} images uploaded`,
+        comments: recipeData.personalNote.trim() || undefined,
+        raw_recipe_text: undefined,
+        upload_method: 'image',
+        document_urls: [], // Will be populated by the new function
+        audio_url: undefined
+      };
+
+      // Simulate progress during submission
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => Math.min(prev + 15, 90));
+      }, 300);
       
-      // Upload images to Supabase Storage
-      const { urls, error } = await uploadRecipeDocuments(tempGuestId, selectedFiles);
+      console.log('Submitting recipe with files using new hierarchical structure...');
+      
+      // Use the new improved submission function
+      const { data, error } = await submitGuestRecipeWithFiles(token, submission, selectedFiles);
+      
+      clearInterval(progressInterval);
+      setUploadProgress(100);
       
       if (error) {
         setSubmitError(error);
         setUploadingImages(false);
+        setUploadProgress(0);
         return;
       }
+
+      if (!data) {
+        setSubmitError('No data returned from submission');
+        setUploadingImages(false);
+        setUploadProgress(0);
+        return;
+      }
+
+      console.log('✅ Recipe submitted successfully with new storage structure:', {
+        guestId: data.guest_id,
+        recipeId: data.recipe_id,
+        fileUrls: data.file_urls?.length || 0
+      });
       
-      // Store URLs in recipe data
-      setRecipeData(prev => ({ ...prev, documentUrls: urls }));
-      setUploadingImages(false);
+      // Store the successful submission data
+      lastRecipeIdRef.current = data.recipe_id;
+      lastGuestIdRef.current = data.guest_id;
+      guestOptInRef.current = !!data.guest_notify_opt_in;
+      guestOptInEmailRef.current = data.guest_notify_email || null;
       
-      // Navigate to next step
-      handleNext();
+      // Update recipe data with final URLs for display
+      if (data.file_urls) {
+        setRecipeData(prev => ({ ...prev, documentUrls: data.file_urls! }));
+      }
+      
+      // Show success and navigate
+      setSubmitSuccess(true);
+      isDirtyRef.current = false;
+      
+      // Small delay to show 100% completion
+      setTimeout(() => {
+        setUploadingImages(false);
+        setUploadProgress(0);
+        // Navigation to success will be handled by useEffect
+      }, 500);
+      
     } catch (err) {
-      console.error('Error uploading images:', err);
-      setSubmitError('Failed to upload images. Please try again.');
+      console.error('Error in new image upload flow:', err);
+      setSubmitError('Failed to submit recipe with images. Please try again.');
       setUploadingImages(false);
+      setUploadProgress(0);
     }
   };
 
@@ -509,7 +563,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
           type="button"
           onClick={
             current === 'imageUpload' 
-              ? () => handleImagesReady([]) 
+              ? handleImagesReady
               : current === 'personalNote' 
                 ? handleSubmit 
                 : handleNext
@@ -523,7 +577,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
           className="px-8 py-3 rounded-full bg-black text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {current === 'imageUpload' 
-            ? (uploadingImages ? 'Uploading...' : 'Continue with images')
+            ? (uploadingImages ? `Uploading... ${uploadProgress}%` : 'Submit with images')
             : current === 'personalNote'
               ? (submitting ? 'Submitting...' : 'Submit Recipe')
             : (journeySteps[currentStepIndex]?.ctaLabel ?? 'Continue')

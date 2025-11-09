@@ -25,7 +25,8 @@
       "Bash(curl:*)",
       "Bash(kill:*)",
       "Bash(rm:*)",
-      "WebFetch(domain:developer.mozilla.org)"
+      "WebFetch(domain:developer.mozilla.org)",
+      "Bash(npm run typecheck:*)"
     ],
     "deny": []
   }

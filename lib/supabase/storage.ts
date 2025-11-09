@@ -1,18 +1,238 @@
 import { createSupabaseClient } from './client';
 
 /**
- * Upload recipe documents (images/PDFs) to Supabase storage
- * Returns array of public URLs for the uploaded files
+ * Generate a unique session ID for temporary uploads
+ */
+export function generateSessionId(): string {
+  return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+/**
+ * Upload files to temporary staging area during recipe creation
+ * Returns session ID and file metadata for later processing
+ */
+export async function uploadFilesToStaging(
+  sessionId: string,
+  files: File[]
+): Promise<{ sessionId: string; fileMetadata: Array<{originalName: string; tempPath: string; size: number; type: string}>; error: string | null }> {
+  const supabase = createSupabaseClient();
+  const fileMetadata: Array<{originalName: string; tempPath: string; size: number; type: string}> = [];
+
+  try {
+    // Upload each file to temp staging area
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || '';
+      // Extract just the filename from full path and sanitize it
+      const baseFileName = file.name.split('/').pop() || file.name;
+      const sanitizedOriginalName = baseFileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const tempFileName = `${String(i + 1).padStart(3, '0')}.${fileExt}`;
+      const tempPath = `temp/uploads/${sessionId}/${tempFileName}`;
+
+      console.log(`Uploading file ${i + 1}/${files.length} to staging: ${file.name} → ${tempPath}`);
+
+      // Upload to Supabase storage
+      const { data, error: uploadError } = await supabase.storage
+        .from('recipes')
+        .upload(tempPath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error(`Error uploading file ${file.name} to staging:`, {
+          error: uploadError,
+          tempPath: tempPath,
+          fileSize: file.size,
+          fileType: file.type
+        });
+        // Cleanup any already uploaded files from this session
+        await cleanupStagingFiles(sessionId);
+        return { sessionId, fileMetadata: [], error: `Failed to upload ${file.name}: ${uploadError.message}` };
+      }
+
+      console.log(`Successfully staged file: ${file.name}`, { data });
+
+      fileMetadata.push({
+        originalName: sanitizedOriginalName,
+        tempPath: tempPath,
+        size: file.size,
+        type: file.type
+      });
+    }
+
+    if (fileMetadata.length === 0) {
+      return { sessionId, fileMetadata: [], error: 'No files were uploaded' };
+    }
+
+    return { sessionId, fileMetadata, error: null };
+  } catch (error) {
+    console.error('Error in uploadFilesToStaging:', error);
+    await cleanupStagingFiles(sessionId);
+    return { sessionId, fileMetadata: [], error: 'An unexpected error occurred while uploading files' };
+  }
+}
+
+/**
+ * Move files from staging to final hierarchical location
+ */
+export async function moveFilesToFinalLocation(
+  userId: string,
+  guestId: string,
+  recipeId: string,
+  sessionId: string,
+  fileMetadata: Array<{originalName: string; tempPath: string; size: number; type: string}>
+): Promise<{ urls: string[]; error: string | null }> {
+  const supabase = createSupabaseClient();
+  const finalUrls: string[] = [];
+
+  try {
+    for (let i = 0; i < fileMetadata.length; i++) {
+      const file = fileMetadata[i];
+      const fileExt = file.tempPath.split('.').pop();
+      const sequentialNumber = String(i + 1).padStart(3, '0');
+      
+      // Determine subfolder based on file type
+      let subfolder = 'images';
+      if (file.type.startsWith('audio/')) {
+        subfolder = 'audio';
+      } else if (file.type === 'application/pdf') {
+        subfolder = 'documents';
+      }
+
+      const finalPath = `users/${userId}/guests/${guestId}/recipes/${recipeId}/${subfolder}/${sequentialNumber}.${fileExt}`;
+
+      console.log(`Moving file from staging: ${file.tempPath} → ${finalPath}`);
+
+      // Copy from temp to final location
+      const { data: copyData, error: copyError } = await supabase.storage
+        .from('recipes')
+        .copy(file.tempPath, finalPath);
+
+      if (copyError) {
+        console.error(`Error moving file to final location:`, {
+          error: copyError,
+          tempPath: file.tempPath,
+          finalPath: finalPath
+        });
+        // Cleanup already moved files and staging files
+        await cleanupFinalFiles(userId, guestId, recipeId);
+        await cleanupStagingFiles(sessionId);
+        return { urls: [], error: `Failed to move ${file.originalName}: ${copyError.message}` };
+      }
+
+      console.log(`Successfully moved file to final location:`, { finalPath, copyData });
+
+      // Get public URL for the final location
+      const { data: { publicUrl } } = supabase.storage
+        .from('recipes')
+        .getPublicUrl(finalPath);
+
+      finalUrls.push(publicUrl);
+    }
+
+    // Cleanup staging files after successful move
+    await cleanupStagingFiles(sessionId);
+
+    return { urls: finalUrls, error: null };
+  } catch (error) {
+    console.error('Error in moveFilesToFinalLocation:', error);
+    // Cleanup on error
+    await cleanupFinalFiles(userId, guestId, recipeId);
+    await cleanupStagingFiles(sessionId);
+    return { urls: [], error: 'An unexpected error occurred while organizing files' };
+  }
+}
+
+/**
+ * Clean up staging files for a session
+ */
+export async function cleanupStagingFiles(sessionId: string): Promise<void> {
+  const supabase = createSupabaseClient();
+  
+  try {
+    console.log(`Cleaning up staging files for session: ${sessionId}`);
+    
+    // List all files in the session folder
+    const { data: files, error: listError } = await supabase.storage
+      .from('recipes')
+      .list(`temp/uploads/${sessionId}`);
+
+    if (listError) {
+      console.error('Error listing staging files:', listError);
+      return;
+    }
+
+    if (!files || files.length === 0) {
+      console.log('No staging files to cleanup');
+      return;
+    }
+
+    // Delete all files in the session folder
+    const filePaths = files.map(file => `temp/uploads/${sessionId}/${file.name}`);
+    const { error: deleteError } = await supabase.storage
+      .from('recipes')
+      .remove(filePaths);
+
+    if (deleteError) {
+      console.error('Error deleting staging files:', deleteError);
+    } else {
+      console.log(`Successfully cleaned up ${filePaths.length} staging files`);
+    }
+  } catch (error) {
+    console.error('Error in cleanupStagingFiles:', error);
+  }
+}
+
+/**
+ * Clean up final files for a recipe (used in error recovery)
+ */
+export async function cleanupFinalFiles(userId: string, guestId: string, recipeId: string): Promise<void> {
+  const supabase = createSupabaseClient();
+  
+  try {
+    console.log(`Cleaning up final files for recipe: ${recipeId}`);
+    
+    const basePath = `users/${userId}/guests/${guestId}/recipes/${recipeId}`;
+    
+    // Clean up all subfolders
+    const subfolders = ['images', 'audio', 'documents'];
+    
+    for (const subfolder of subfolders) {
+      const { data: files, error: listError } = await supabase.storage
+        .from('recipes')
+        .list(`${basePath}/${subfolder}`);
+
+      if (!listError && files && files.length > 0) {
+        const filePaths = files.map(file => `${basePath}/${subfolder}/${file.name}`);
+        await supabase.storage
+          .from('recipes')
+          .remove(filePaths);
+      }
+    }
+    
+    console.log(`Cleaned up final files for recipe: ${recipeId}`);
+  } catch (error) {
+    console.error('Error in cleanupFinalFiles:', error);
+  }
+}
+
+/**
+ * Legacy function for backward compatibility - now uses new staging approach
+ * @deprecated Use uploadFilesToStaging + moveFilesToFinalLocation instead
  */
 export async function uploadRecipeDocuments(
   guestId: string,
   files: File[]
 ): Promise<{ urls: string[]; error: string | null }> {
+  // This is kept for backward compatibility but should not be used for new uploads
+  console.warn('uploadRecipeDocuments is deprecated - use new staging approach instead');
+  
   const supabase = createSupabaseClient();
   const uploadedUrls: string[] = [];
 
   try {
-    // Upload each file
+    // Upload each file to old structure (for backward compatibility)
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const timestamp = Date.now();
@@ -37,7 +257,6 @@ export async function uploadRecipeDocuments(
           fileSize: file.size,
           fileType: file.type
         });
-        // Continue with other files even if one fails
         continue;
       }
 
