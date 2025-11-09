@@ -8,14 +8,14 @@ export function generateSessionId(): string {
 }
 
 /**
- * Upload files to temporary staging area during recipe creation
+ * Upload files to temporary staging area during recipe creation (with shared client)
  * Returns session ID and file metadata for later processing
  */
-export async function uploadFilesToStaging(
+export async function uploadFilesToStagingWithClient(
+  supabase: any, // Using any to avoid circular type dependencies
   sessionId: string,
   files: File[]
 ): Promise<{ sessionId: string; fileMetadata: Array<{originalName: string; tempPath: string; size: number; type: string}>; error: string | null }> {
-  const supabase = createSupabaseClient();
   const fileMetadata: Array<{originalName: string; tempPath: string; size: number; type: string}> = [];
 
   try {
@@ -74,16 +74,16 @@ export async function uploadFilesToStaging(
 }
 
 /**
- * Move files from staging to final hierarchical location
+ * Move files from staging to final hierarchical location (with shared client)
  */
-export async function moveFilesToFinalLocation(
+export async function moveFilesToFinalLocationWithClient(
+  supabase: any, // Using any to avoid circular type dependencies
   userId: string,
   guestId: string,
   recipeId: string,
   sessionId: string,
   fileMetadata: Array<{originalName: string; tempPath: string; size: number; type: string}>
 ): Promise<{ urls: string[]; error: string | null }> {
-  const supabase = createSupabaseClient();
   const finalUrls: string[] = [];
 
   try {
@@ -103,6 +103,20 @@ export async function moveFilesToFinalLocation(
       const finalPath = `users/${userId}/guests/${guestId}/recipes/${recipeId}/${subfolder}/${sequentialNumber}.${fileExt}`;
 
       console.log(`Moving file from staging: ${file.tempPath} → ${finalPath}`);
+
+      // First, check if source file exists
+      const { data: listData, error: listError } = await supabase.storage
+        .from('recipes')
+        .list(`temp/uploads/${sessionId}`, {
+          limit: 100,
+          offset: 0
+        });
+
+      console.log('Files in staging folder:', {
+        sessionId,
+        files: listData?.map((f: any) => f.name),
+        error: listError
+      });
 
       // Copy from temp to final location
       const { data: copyData, error: copyError } = await supabase.storage
@@ -279,6 +293,26 @@ export async function uploadRecipeDocuments(
     console.error('Error in uploadRecipeDocuments:', error);
     return { urls: [], error: 'An unexpected error occurred while uploading files' };
   }
+}
+
+// Legacy versions that create their own client (for backward compatibility)
+export async function uploadFilesToStaging(
+  sessionId: string,
+  files: File[]
+): Promise<{ sessionId: string; fileMetadata: Array<{originalName: string; tempPath: string; size: number; type: string}>; error: string | null }> {
+  const supabase = createSupabaseClient();
+  return uploadFilesToStagingWithClient(supabase, sessionId, files);
+}
+
+export async function moveFilesToFinalLocation(
+  userId: string,
+  guestId: string,
+  recipeId: string,
+  sessionId: string,
+  fileMetadata: Array<{originalName: string; tempPath: string; size: number; type: string}>
+): Promise<{ urls: string[]; error: string | null }> {
+  const supabase = createSupabaseClient();
+  return moveFilesToFinalLocationWithClient(supabase, userId, guestId, recipeId, sessionId, fileMetadata);
 }
 
 /**

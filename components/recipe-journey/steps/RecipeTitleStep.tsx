@@ -1,7 +1,6 @@
 "use client";
 
 import React from 'react';
-import { Input } from '@/components/ui/input';
 
 interface RecipeTitleStepProps {
   recipeName: string;
@@ -16,17 +15,14 @@ export default function RecipeTitleStep({ recipeName, onChange }: RecipeTitleSte
           <h2 className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">
             Recipe Title
           </h2>
-          <p className="mt-3 text-base text-gray-600">
-            What&apos;s the name of this recipe?
-          </p>
         </div>
 
         <div className="max-w-md mx-auto">
-          <Input
+          <input
             value={recipeName}
             onChange={(e) => onChange(e.target.value)}
             placeholder="Grandma&apos;s Secret Chocolate Chip Cookies"
-            className="h-12 text-center text-lg"
+            className="w-full h-12 px-4 border border-gray-300 rounded-xl text-left text-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
             autoFocus
           />
         </div>

@@ -4,7 +4,7 @@
  */
 
 import { createSupabaseClient } from './client';
-import { generateSessionId, uploadFilesToStaging, moveFilesToFinalLocation, cleanupStagingFiles } from './storage';
+import { generateSessionId, uploadFilesToStagingWithClient, moveFilesToFinalLocationWithClient, cleanupStagingFiles } from './storage';
 import type { 
   CollectionTokenInfo, 
   CollectionGuestSubmission, 
@@ -133,7 +133,9 @@ export async function submitGuestRecipeWithFiles(
     // Step 2: If files provided, upload to staging area first
     if (files && files.length > 0) {
       sessionId = generateSessionId();
-      const stagingResult = await uploadFilesToStaging(sessionId, files);
+      
+      // Pass the same supabase instance to ensure consistent auth context
+      const stagingResult = await uploadFilesToStagingWithClient(supabase, sessionId, files);
       
       if (stagingResult.error) {
         return { data: null, error: stagingResult.error };
@@ -250,7 +252,8 @@ export async function submitGuestRecipeWithFiles(
     if (sessionId && fileMetadata.length > 0) {
       console.log(`Moving ${fileMetadata.length} files from staging to final location...`);
       
-      const moveResult = await moveFilesToFinalLocation(
+      const moveResult = await moveFilesToFinalLocationWithClient(
+        supabase,
         tokenInfo.user_id,
         guestId,
         recipe.id,

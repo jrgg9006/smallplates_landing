@@ -112,19 +112,37 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
         // This is handled by handleUploadMethodSelect, don't advance here
         return;
       } else if (currentStep?.key === 'recipeForm') {
-        // After recipe form, go to summary (skip imageUpload)
-        const summaryIndex = journeySteps.findIndex(s => s.key === 'summary');
-        setCurrentStepIndex(summaryIndex);
+        // After recipe form, go to personal note
+        const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
+        setCurrentStepIndex(personalNoteIndex);
       } else if (currentStep?.key === 'recipeTitle') {
-        // After recipe title, go to image upload
-        const imageUploadIndex = journeySteps.findIndex(s => s.key === 'imageUpload');
-        setCurrentStepIndex(imageUploadIndex);
+        // After recipe title, check if we have raw text or are in image mode
+        if (recipeData.rawRecipeText) {
+          // Raw text flow: go directly to personal note
+          const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
+          setCurrentStepIndex(personalNoteIndex);
+        } else {
+          // Image flow: go to image upload
+          const imageUploadIndex = journeySteps.findIndex(s => s.key === 'imageUpload');
+          setCurrentStepIndex(imageUploadIndex);
+        }
       } else if (currentStep?.key === 'imageUpload') {
-        // Image upload now submits directly, no need to navigate
-        return;
+        // After image upload, go to personal note
+        const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
+        setCurrentStepIndex(personalNoteIndex);
       } else if (currentStep?.key === 'personalNote') {
-        // From personal note, submit directly (handled by different button)
-        return;
+        // From personal note, check flow type
+        if (recipeData.rawRecipeText) {
+          // Raw text flow: submit directly (handled by different button)
+          return;
+        } else if (recipeData.uploadMethod === 'text') {
+          // Regular text flow: go to summary
+          const summaryIndex = journeySteps.findIndex(s => s.key === 'summary');
+          setCurrentStepIndex(summaryIndex);
+        } else {
+          // Image flow: submit directly (handled by different button)
+          return;
+        }
       } else {
         // Normal navigation
         setCurrentStepIndex(currentStepIndex + 1);
@@ -155,17 +173,28 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
         const recipeTitleIndex = journeySteps.findIndex(s => s.key === 'recipeTitle');
         setCurrentStepIndex(recipeTitleIndex);
       } else if (currentStep?.key === 'personalNote') {
-        // From personal note, go back to image upload
-        const imageUploadIndex = journeySteps.findIndex(s => s.key === 'imageUpload');
-        setCurrentStepIndex(imageUploadIndex);
+        // From personal note, check which flow we're in
+        if (recipeData.uploadMethod === 'image') {
+          // Image flow: go back to image upload
+          const imageUploadIndex = journeySteps.findIndex(s => s.key === 'imageUpload');
+          setCurrentStepIndex(imageUploadIndex);
+        } else if (recipeData.rawRecipeText) {
+          // Raw text flow: go back to recipe title
+          const recipeTitleIndex = journeySteps.findIndex(s => s.key === 'recipeTitle');
+          setCurrentStepIndex(recipeTitleIndex);
+        } else {
+          // Regular text flow: go back to recipe form
+          const recipeFormIndex = journeySteps.findIndex(s => s.key === 'recipeForm');
+          setCurrentStepIndex(recipeFormIndex);
+        }
       } else if (currentStep?.key === 'recipeForm') {
         // From recipe form, go back to upload method selection
         const uploadMethodIndex = journeySteps.findIndex(s => s.key === 'uploadMethod');
         setCurrentStepIndex(uploadMethodIndex);
       } else if (currentStep?.key === 'summary') {
-        // From summary, go back to recipe form (image uploads don't use summary anymore)
-        const recipeFormIndex = journeySteps.findIndex(s => s.key === 'recipeForm');
-        setCurrentStepIndex(recipeFormIndex);
+        // From summary, go back to personal note (only text flow uses summary)
+        const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
+        setCurrentStepIndex(personalNoteIndex);
       } else {
         // Normal navigation
         setCurrentStepIndex(currentStepIndex - 1);
@@ -227,14 +256,18 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
     setSubmitError(null);
   };
 
-  const handleImagesReady = async () => {
-    if (selectedFiles.length === 0) return;
+  // This function is called when user clicks "Submit Recipe" from personal note step with images
+  const handleSubmitWithImages = async () => {
+    if (selectedFiles.length === 0) {
+      setSubmitError('Please select at least one image');
+      return;
+    }
     
     setUploadingImages(true);
     setUploadProgress(20);
     
     try {
-      // Prepare submission data with current form state
+      // Prepare submission data with current form state including personal note
       const submission: CollectionGuestSubmission = {
         first_name: guestData.firstName,
         last_name: guestData.lastName,
@@ -243,7 +276,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
         recipe_name: recipeData.recipeName.trim() || 'Recipe Images',
         ingredients: 'See uploaded images',
         instructions: `${selectedFiles.length} images uploaded`,
-        comments: recipeData.personalNote.trim() || undefined,
+        comments: recipeData.personalNote.trim() || undefined, // Now includes personal note from the step
         raw_recipe_text: undefined,
         upload_method: 'image',
         document_urls: [], // Will be populated by the new function
@@ -314,11 +347,24 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
   };
 
   const handlePasteRecipe = async (rawText: string) => {
-    // When user pastes a recipe, skip directly to submission
+    // When user pastes a recipe, store it and go to recipe title step
     isDirtyRef.current = true;
     
-    // Submit immediately with the raw text passed as parameter
-    await handleSubmitWithRawText(rawText);
+    // Store the raw text in recipe data
+    setRecipeData(prev => ({ 
+      ...prev, 
+      rawRecipeText: rawText,
+      uploadMethod: 'text'  // Ensure it's marked as text method
+    }));
+    
+    // Navigate to recipe title step
+    const recipeTitleIndex = journeySteps.findIndex(s => s.key === 'recipeTitle');
+    setCurrentStepIndex(recipeTitleIndex);
+  };
+
+  // Wrapper function for submitting raw text from button click
+  const handleSubmitRawTextFromButton = async () => {
+    await handleSubmitWithRawText();
   };
 
   const handleSubmit = async () => {
@@ -388,8 +434,15 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
     }
   };
 
-  const handleSubmitWithRawText = async (rawText: string) => {
+  const handleSubmitWithRawText = async (rawText?: string) => {
     if (submitting) return;
+    
+    // Use passed rawText or get it from recipeData
+    const textToSubmit = rawText || recipeData.rawRecipeText;
+    if (!textToSubmit) {
+      setSubmitError('No recipe text found');
+      return;
+    }
     
     // Check if we're in preview mode
     const isPreviewMode = typeof window !== 'undefined' && sessionStorage.getItem('isPreviewMode') === 'true';
@@ -420,8 +473,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
         recipe_name: recipeData.recipeName.trim() || 'Full Recipe Received', // Better default for raw mode
         ingredients: '', // Empty for raw mode
         instructions: '', // Empty for raw mode
-        comments: recipeData.personalNote.trim() || undefined,
-        raw_recipe_text: rawText // Use the passed raw text directly
+        comments: recipeData.personalNote.trim() || undefined, // Now includes personal note
+        raw_recipe_text: textToSubmit // Use the raw text
       };
 
       // Submit the recipe
@@ -563,23 +616,33 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
           type="button"
           onClick={
             current === 'imageUpload' 
-              ? handleImagesReady
+              ? handleNext  // Just navigate to personal note
               : current === 'personalNote' 
-                ? handleSubmit 
+                ? (recipeData.uploadMethod === 'image' 
+                    ? handleSubmitWithImages 
+                    : recipeData.rawRecipeText 
+                      ? handleSubmitRawTextFromButton
+                      : handleNext)  // Image: submit with images, Raw text: submit with raw text, Regular text: go to summary
                 : handleNext
           }
           disabled={
             (current === 'recipeForm' && !canContinueFromForm()) || 
             (current === 'recipeTitle' && !recipeData.recipeName.trim()) ||
-            (current === 'imageUpload' && (selectedFiles.length === 0 || uploadingImages)) || 
+            (current === 'imageUpload' && selectedFiles.length === 0) ||
+            (current === 'personalNote' && recipeData.uploadMethod === 'image' && uploadingImages) ||
+            (current === 'personalNote' && recipeData.rawRecipeText && submitting) || 
             submitting
           }
           className="px-8 py-3 rounded-full bg-black text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {current === 'imageUpload' 
-            ? (uploadingImages ? `Uploading... ${uploadProgress}%` : 'Submit with images')
+            ? 'Continue'  // Just navigate, no upload
             : current === 'personalNote'
-              ? (submitting ? 'Submitting...' : 'Submit Recipe')
+              ? (recipeData.uploadMethod === 'image' 
+                  ? (uploadingImages ? `Submitting... ${uploadProgress}%` : 'Submit Recipe')
+                  : recipeData.rawRecipeText 
+                    ? (submitting ? 'Submitting...' : 'Submit Recipe')  // Raw text flow submits directly
+                    : 'Continue to Review')  // Regular text flow continues to summary
             : (journeySteps[currentStepIndex]?.ctaLabel ?? 'Continue')
           }
         </button>
@@ -661,7 +724,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
               <div className="text-center px-4 md:px-6">
                 <h2 id="printed-book-heading" className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">
                   Your recipe will be printed in a real book —<br />
-                  write it your way, make it yours -<br /> <span className="opacity-100">have fun!</span>
+                  write it your way, make it yours.<br /> <span className="opacity-100">Have fun!</span>
                 </h2>
               </div>
             </div>
@@ -712,7 +775,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
             transition={{ duration: 0.2, ease: 'easeOut' }}
           >
             <ImageUploadStep 
-              onImagesReady={handleImagesReady}
+              onImagesReady={() => {}}  // Not used anymore, submit happens from personal note
               onFilesSelected={handleFilesSelected}
             />
           </motion.div>
