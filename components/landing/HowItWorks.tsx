@@ -30,7 +30,7 @@ export default function HowItWorks() {
       <div className="mx-auto max-w-7xl px-6 md:px-8">
         {/* Section Title */}
         <div className="text-center mb-16">
-          <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-medium text-gray-900 mb-3">
+          <h2 className="h2-section mb-3">
             How it works
           </h2>
           <p className="text-lg md:text-xl lg:text-2xl text-gray-900 font-light">

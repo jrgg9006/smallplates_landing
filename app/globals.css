@@ -71,6 +71,11 @@
   .table-header-style {
     @apply font-normal text-gray-900 font-sans text-base;
   }
+  
+  /* Section heading style - matches the "How it Works" heading */
+  .h2-section {
+    @apply font-serif text-4xl md:text-5xl lg:text-6xl font-medium text-gray-900;
+  }
 }
 
 /* Force input backgrounds to be white */
