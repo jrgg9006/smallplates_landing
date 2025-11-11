@@ -196,13 +196,10 @@ export default function AdminWaitlistPage() {
                       Recipe Goal
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Partner?
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Joined
+                      Joined Waitlist
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
                       Action
@@ -229,10 +226,14 @@ export default function AdminWaitlistPage() {
                         <div className="text-sm text-gray-900">{user.recipe_goal_category || '-'}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{user.has_partner ? '✓' : '-'}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(user.status)}
+                        <div className="flex flex-col">
+                          {getStatusBadge(user.status)}
+                          {user.status === 'converted' && user.converted_at && (
+                            <div className="text-xs text-green-600 mt-1">
+                              Converted {new Date(user.converted_at).toLocaleDateString()} at {new Date(user.converted_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">

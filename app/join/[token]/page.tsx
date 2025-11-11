@@ -285,20 +285,9 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
             Welcome to Small Plates & Co.
           </h1>
           <p className="text-lg text-gray-600 max-w-xl mx-auto">
-            Complete your invitation by creating a secure password
+            Create a password
           </p>
         </div>
-
-        {/* User Info */}
-        {invitationData && (
-          <div className="bg-gray-50 rounded-xl p-4 mb-6">
-            <div className="text-sm text-gray-600">Creating account for:</div>
-            <div className="font-semibold text-gray-900">
-              {invitationData.firstName} {invitationData.lastName}
-            </div>
-            <div className="text-gray-700">{invitationData.email}</div>
-          </div>
-        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -372,7 +361,7 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
             onClick={() => router.push("/")}
             className="text-gray-600 font-medium hover:text-gray-900 transition-colors"
           >
-            Back to Home
+            Go to Site
           </button>
         </div>
       </div>
