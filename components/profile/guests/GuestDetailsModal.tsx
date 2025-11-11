@@ -36,10 +36,20 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 640); // sm breakpoint
+    // Check immediately
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Also check on component mount with a more reliable method
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const mobile = window.innerWidth < 640;
+      setIsMobile(mobile);
+      console.log('GuestDetailsModal: Mobile detection:', mobile, 'Window width:', window.innerWidth);
+    }
+  }, [isOpen]);
 
   const [firstName, setFirstName] = useState(guest?.first_name || '');
   const [lastName, setLastName] = useState(guest?.last_name || '');
