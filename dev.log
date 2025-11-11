@@ -1,0 +1,150 @@
+
+> smallplates-landing@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.4
+   - Local:        http://localhost:3000
+   - Network:      http://10.0.0.3:3000
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 2.3s
+ ○ Compiling / ...
+(node:6608) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ Compiled / in 8.5s (1667 modules)
+ GET / 200 in 9916ms
+ ✓ Compiled in 1669ms (764 modules)
+ ○ Compiling /admin/activity ...
+ ✓ Compiled /admin/activity in 1072ms (1662 modules)
+ GET /admin/activity 200 in 1664ms
+ ○ Compiling /api/admin/activity/users ...
+ ✓ Compiled /api/admin/activity/users in 1021ms (1773 modules)
+ GET /api/admin/activity/users 200 in 2056ms
+ ✓ Compiled /api/admin/activity/users/[userId] in 456ms (1775 modules)
+ GET /api/admin/activity/users/bb4ff095-cea9-474e-878e-bd43b43e9926 200 in 2342ms
+ ✓ Compiled /api/admin/activity/users/[userId]/guests/[guestId]/recipes in 393ms (1778 modules)
+ GET /api/admin/activity/users/bb4ff095-cea9-474e-878e-bd43b43e9926/guests/23c4e206-5ec0-4cfd-b36f-b9836a37c54e/recipes 200 in 1746ms
+ GET /api/admin/activity/users/bb4ff095-cea9-474e-878e-bd43b43e9926/guests/35c7b28e-2f7b-48f0-8148-b1a5143402c7/recipes 200 in 407ms
+ ✓ Compiled /admin in 456ms (1785 modules)
+ GET /admin 200 in 622ms
+ GET / 200 in 53ms
+ ○ Compiling /profile ...
+ ✓ Compiled /profile in 2.8s (2023 modules)
+ GET /profile 200 in 3012ms
+ ○ Compiling /collect/[token] ...
+ ✓ Compiled /collect/[token] in 620ms (2035 modules)
+🔍 Validating token: gkkKDO8jKIn0B8Uu100Zn2YcXSm1ICUB
+📊 Profile check result: {
+  profileCheck: {
+    id: '72138312-c42c-4709-a84e-9319ac0953fe',
+    full_name: 'team small',
+    collection_enabled: true,
+    collection_link_token: 'gkkKDO8jKIn0B8Uu100Zn2YcXSm1ICUB'
+  },
+  checkError: null
+}
+ GET /collect/gkkKDO8jKIn0B8Uu100Zn2YcXSm1ICUB 200 in 2399ms
+ ○ Compiling /collect/[token]/recipe ...
+ ✓ Compiled /collect/[token]/recipe in 1152ms (2078 modules)
+ GET /collect/gkkKDO8jKIn0B8Uu100Zn2YcXSm1ICUB/recipe 200 in 2394ms
+ GET / 200 in 67ms
+ GET / 200 in 741ms
+ GET /admin 200 in 135ms
+ GET /admin/activity 200 in 74ms
+ ○ Compiling /api/admin/activity/users ...
+ ✓ Compiled /api/admin/activity/users in 591ms (1175 modules)
+ GET /api/admin/activity/users 200 in 1619ms
+ GET /api/admin/activity/users 200 in 650ms
+ ✓ Compiled /api/admin/activity/users/[userId] in 282ms (1177 modules)
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe 200 in 814ms
+ ✓ Compiled /api/admin/activity/users/[userId]/guests/[guestId]/recipes in 264ms (1180 modules)
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe/guests/3e8f0f33-05d4-49cb-a056-a563c5ebe42a/recipes 200 in 965ms
+ ✓ Compiled in 3.6s (2057 modules)
+ GET /admin/activity 200 in 495ms
+ GET / 200 in 504ms
+ ✓ Compiled /api/admin/activity/users/[userId]/guests/[guestId]/recipes in 303ms (1170 modules)
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe/guests/6c404b9d-f46e-4924-ac79-00761acb142b/recipes 200 in 1158ms
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe/guests/3e8f0f33-05d4-49cb-a056-a563c5ebe42a/recipes 200 in 353ms
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe/guests/f36eab05-8186-4d5d-ab0d-66c42ad59035/recipes 200 in 450ms
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe/guests/471f264c-8e6b-40c1-aa6e-7617a4f4c8e7/recipes 200 in 329ms
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe/guests/3e8f0f33-05d4-49cb-a056-a563c5ebe42a/recipes 200 in 270ms
+ ✓ Compiled /api/admin/activity/users/[userId] in 254ms (1173 modules)
+ GET /api/admin/activity/users/bb4ff095-cea9-474e-878e-bd43b43e9926 200 in 931ms
+ GET /api/admin/activity/users/bb4ff095-cea9-474e-878e-bd43b43e9926/guests/9b8211d8-df9b-4bf5-9ed0-44966fd8c1a9/recipes 200 in 385ms
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe 200 in 418ms
+ GET /api/admin/activity/users/a8497c03-5183-43b9-b5e4-a18b39a7c8b8 200 in 415ms
+ GET /api/admin/activity/users/a8497c03-5183-43b9-b5e4-a18b39a7c8b8/guests/5e8ca3f0-3d9b-4185-906a-8e0dc923533f/recipes 200 in 476ms
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe 200 in 306ms
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe/guests/3e8f0f33-05d4-49cb-a056-a563c5ebe42a/recipes 200 in 378ms
+ GET /admin/activity 200 in 505ms
+ ✓ Compiled /api/admin/activity/users in 319ms (1175 modules)
+ GET /api/admin/activity/users 200 in 1109ms
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe 200 in 773ms
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe/guests/3e8f0f33-05d4-49cb-a056-a563c5ebe42a/recipes 200 in 630ms
+ GET /api/admin/activity/users/bb4ff095-cea9-474e-878e-bd43b43e9926 200 in 1049ms
+ GET /api/admin/activity/users/bb4ff095-cea9-474e-878e-bd43b43e9926/guests/23c4e206-5ec0-4cfd-b36f-b9836a37c54e/recipes 200 in 645ms
+ GET /api/admin/activity/users/bb4ff095-cea9-474e-878e-bd43b43e9926/guests/9b8211d8-df9b-4bf5-9ed0-44966fd8c1a9/recipes 200 in 549ms
+ GET /api/admin/activity/users/bb4ff095-cea9-474e-878e-bd43b43e9926/guests/4a002e63-353b-4d57-8849-2bb51cacfc46/recipes 200 in 361ms
+ GET /api/admin/activity/users/bb4ff095-cea9-474e-878e-bd43b43e9926/guests/9b8211d8-df9b-4bf5-9ed0-44966fd8c1a9/recipes 200 in 393ms
+ ✓ Compiled in 2.1s (2087 modules)
+ GET / 200 in 232ms
+ GET /admin/activity 200 in 235ms
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe 200 in 603ms
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe/guests/3e8f0f33-05d4-49cb-a056-a563c5ebe42a/recipes 200 in 392ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ✓ Compiled in 1249ms (2087 modules)
+ GET /admin/activity 200 in 756ms
+ GET / 200 in 589ms
+ ✓ Compiled /api/admin/activity/users in 256ms (1175 modules)
+ GET /api/admin/activity/users 200 in 1241ms
+ GET /admin/activity 200 in 296ms
+ GET /api/admin/activity/users 200 in 735ms
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe 200 in 335ms
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe/guests/3e8f0f33-05d4-49cb-a056-a563c5ebe42a/recipes 200 in 466ms
+ ⚠ Found a change in next.config.js. Restarting the server to apply the changes...
+   ▲ Next.js 15.5.4
+   - Local:        http://localhost:3000
+   - Network:      http://10.0.0.3:3000
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 2.6s
+ ○ Compiling /admin/activity ...
+(node:12082) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ Compiled /admin/activity in 7.4s (803 modules)
+ ✓ Compiled in 1051ms (332 modules)
+ GET /admin/activity 200 in 2450ms
+ ○ Compiling /api/admin/activity/users ...
+ ✓ Compiled /api/admin/activity/users in 2.2s (900 modules)
+ GET /api/admin/activity/users 200 in 3721ms
+ ✓ Compiled /api/admin/activity/users/[userId] in 219ms (902 modules)
+ GET /api/admin/activity/users/bb4ff095-cea9-474e-878e-bd43b43e9926 200 in 1757ms
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe 200 in 497ms
+ ✓ Compiled /api/admin/activity/users/[userId]/guests/[guestId]/recipes in 219ms (905 modules)
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe/guests/3e8f0f33-05d4-49cb-a056-a563c5ebe42a/recipes 200 in 1540ms
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe/guests/6c404b9d-f46e-4924-ac79-00761acb142b/recipes 200 in 608ms
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe/guests/f36eab05-8186-4d5d-ab0d-66c42ad59035/recipes 200 in 375ms
+ GET /api/admin/activity/users/f2dca9f1-ef6a-4e7b-b083-e3e10c377f9a 200 in 257ms
+ GET /api/admin/activity/users/a8497c03-5183-43b9-b5e4-a18b39a7c8b8 200 in 330ms
+ GET /api/admin/activity/users/a8497c03-5183-43b9-b5e4-a18b39a7c8b8/guests/5e8ca3f0-3d9b-4185-906a-8e0dc923533f/recipes 200 in 392ms
+ GET /api/admin/activity/users/a8497c03-5183-43b9-b5e4-a18b39a7c8b8/guests/dcea0a00-e9d6-4586-804d-19091c7be539/recipes 200 in 399ms
+ GET /api/admin/activity/users/bb4ff095-cea9-474e-878e-bd43b43e9926 200 in 629ms
+ GET /api/admin/activity/users/bb4ff095-cea9-474e-878e-bd43b43e9926/guests/35c7b28e-2f7b-48f0-8148-b1a5143402c7/recipes 200 in 457ms
+ ✓ Compiled in 1796ms (917 modules)
+ GET /admin/activity 200 in 306ms
+ GET /admin/activity 200 in 392ms
+ ✓ Compiled /api/admin/activity/users in 129ms (581 modules)
+ GET /api/admin/activity/users 200 in 2500ms
+ ✓ Compiled /api/admin/activity/users/[userId] in 189ms (583 modules)
+ GET /api/admin/activity/users/bb4ff095-cea9-474e-878e-bd43b43e9926 200 in 793ms
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe 200 in 514ms
+ ✓ Compiled /api/admin/activity/users/[userId]/guests/[guestId]/recipes in 138ms (586 modules)
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe/guests/3e8f0f33-05d4-49cb-a056-a563c5ebe42a/recipes 200 in 577ms
+ GET /api/admin/activity/users/72138312-c42c-4709-a84e-9319ac0953fe/guests/6c404b9d-f46e-4924-ac79-00761acb142b/recipes 200 in 467ms
+ GET /api/admin/activity/users/bb4ff095-cea9-474e-878e-bd43b43e9926 200 in 502ms
+ GET /api/admin/activity/users/bb4ff095-cea9-474e-878e-bd43b43e9926/guests/23c4e206-5ec0-4cfd-b36f-b9836a37c54e/recipes 200 in 429ms
+ GET /api/admin/activity/users/bb4ff095-cea9-474e-878e-bd43b43e9926/guests/4a002e63-353b-4d57-8849-2bb51cacfc46/recipes 200 in 357ms
+ GET /api/admin/activity/users/bb4ff095-cea9-474e-878e-bd43b43e9926/guests/23c4e206-5ec0-4cfd-b36f-b9836a37c54e/recipes 200 in 306ms
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              [?25h
