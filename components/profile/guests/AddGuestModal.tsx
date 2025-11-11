@@ -7,6 +7,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Drawer } from "vaul";
 import {
   Tabs,
   TabsContent,
@@ -20,7 +21,6 @@ import { addGuest, checkGuestExists } from "@/lib/supabase/guests";
 import { addRecipe } from "@/lib/supabase/recipes";
 import type { GuestFormData } from "@/lib/types/database";
 import Image from "next/image";
-import { getRandomProfileIcon } from "@/lib/utils/profileIcons";
 
 interface AddGuestModalProps {
   isOpen: boolean;
@@ -34,20 +34,10 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 640); // sm breakpoint
-    // Check immediately
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-  // Also check on component mount with a more reliable method
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const mobile = window.innerWidth < 640;
-      setIsMobile(mobile);
-      console.log('AddGuestModal: Mobile detection:', mobile, 'Window width:', window.innerWidth);
-    }
-  }, [isOpen]);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -188,243 +178,281 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
     setPlusOneLastName('');
   };
 
+  // Content component to be reused in both mobile and desktop versions
+  const modalContent = (
+    <>
+      {/* Guest Profile Preview Section */}
+      <div className="flex items-center gap-4 pt-0 pb-4 border-b border-gray-200">
+        <div className="flex-shrink-0">
+          <Image
+            src={previewIcon}
+            alt="Guest profile icon preview"
+            width={80}
+            height={80}
+            className="rounded-full"
+          />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-lg font-medium text-gray-900">
+            {printedName || `${firstName} ${lastName}`.trim() || 'New Guest'}
+          </h3>
+          <p className="text-sm text-gray-500 mt-1">
+            A unique chef icon will be assigned to this guest when saved
+          </p>
+        </div>
+      </div>
+      
+      <Tabs defaultValue="guest-info" className="w-full flex-1 flex flex-col overflow-hidden">
+        <TabsList className="grid w-full grid-cols-2 bg-transparent p-0 h-auto border-b border-gray-200">
+          <TabsTrigger value="guest-info" className="bg-transparent border-0 rounded-none pb-2 px-0 text-gray-600 font-normal data-[state=active]:bg-transparent data-[state=active]:text-black data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium">
+            Guest Information
+          </TabsTrigger>
+          <TabsTrigger value="recipe" className="bg-transparent border-0 rounded-none pb-2 px-0 text-gray-600 font-normal data-[state=active]:bg-transparent data-[state=active]:text-black data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium">
+            Recipe
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="guest-info" className="flex-1 overflow-y-auto mt-6 px-2">
+          <div className="space-y-6 pb-24 pr-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="firstName" className="text-sm font-medium text-gray-600">First Name *</Label>
+              <Input
+                id="firstName"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="mt-1"
+                placeholder="First Name"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="lastName" className="text-sm font-medium text-gray-600">Last Name</Label>
+              <Input
+                id="lastName"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="mt-1"
+                placeholder="Last Name"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="printedName" className="text-sm font-medium text-gray-600">Printed Name</Label>
+            <Input
+              id="printedName"
+              value={printedName}
+              onChange={(e) => setPrintedName(e.target.value)}
+              className="mt-1"
+              placeholder="How this person's name should appear in the book (e.g., 'Jaime y Nana', 'Chef Rodriguez')"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Leave empty to use first and last name. This is how the name will appear in the printed cookbook.
+            </p>
+          </div>
+
+          {/* Hidden temporarily - Add Plus One Section 
+          <div>
+            {!hasPlusOne ? (
+              <button 
+                onClick={handleAddPlusOne}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                + Add Plus One
+              </button>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-600">Plus One Information</span>
+                  <button 
+                    onClick={handleRemovePlusOne}
+                    className="text-sm text-red-600 hover:underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="plusOneFirstName" className="text-sm font-medium text-gray-600">First Name</Label>
+                    <Input
+                      id="plusOneFirstName"
+                      value={plusOneFirstName}
+                      onChange={(e) => setPlusOneFirstName(e.target.value)}
+                      className="mt-1"
+                      placeholder="Plus One First Name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="plusOneLastName" className="text-sm font-medium text-gray-600">Last Name</Label>
+                    <Input
+                      id="plusOneLastName"
+                      value={plusOneLastName}
+                      onChange={(e) => setPlusOneLastName(e.target.value)}
+                      className="mt-1"
+                      placeholder="Plus One Last Name"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          */}
+
+          {/* Contact Information */}
+          <div className="space-y-3">
+            <div>
+              <Label htmlFor="email" className="text-sm font-medium text-gray-600">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1"
+                placeholder="Email address"
+              />
+            </div>
+          </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="recipe" className="flex-1 overflow-y-auto mt-6 px-2">
+          <div className="space-y-6 pb-24 pr-4">
+            <div className="space-y-4">
+            <div>
+              <Label htmlFor="recipeTitle" className="text-sm font-medium text-gray-600">Recipe Title</Label>
+              <Input
+                id="recipeTitle"
+                value={recipeTitle}
+                onChange={(e) => setRecipeTitle(e.target.value)}
+                className="mt-1"
+                placeholder="Recipe name"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="recipeSteps" className="text-sm font-medium text-gray-600">Ingredients</Label>
+              <textarea
+                id="recipeSteps"
+                value={recipeSteps}
+                onChange={(e) => setRecipeSteps(e.target.value)}
+                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[100px]"
+                placeholder="List the ingredients needed for this recipe"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="recipeInstructions" className="text-sm font-medium text-gray-600">Instructions</Label>
+              <textarea
+                id="recipeInstructions"
+                value={recipeInstructions}
+                onChange={(e) => setRecipeInstructions(e.target.value)}
+                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[150px]"
+                placeholder="If you have the recipe all in one single piece, just paste in here"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="recipeNotes" className="text-sm font-medium text-gray-600">Notes</Label>
+              <textarea
+                id="recipeNotes"
+                value={recipeNotes}
+                onChange={(e) => setRecipeNotes(e.target.value)}
+                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[80px]"
+                placeholder="Any additional notes about this recipe"
+              />
+            </div>
+            
+            <div className="pt-2">
+              <Label className="text-sm font-medium text-gray-600 mb-2 block">Recipe Image</Label>
+              <Button 
+                type="button"
+                onClick={() => console.log('Add image placeholder')}
+                className="bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md px-4 py-2"
+              >
+                Add Image
+              </Button>
+              <p className="text-xs text-gray-500 mt-2">
+                This image will serve as inspiration to our image generator algorithms.
+              </p>
+            </div>
+            </div>
+            
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </>
+  );
+
+  // Mobile version - Drawer that slides up from bottom
+  if (isMobile) {
+    return (
+      <Drawer.Root open={isOpen} onOpenChange={onClose}>
+        <Drawer.Portal>
+          <Drawer.Overlay className="fixed inset-0 bg-black/40" />
+          <Drawer.Content className="fixed bottom-0 left-0 right-0 z-50 mt-24 flex h-full max-h-[85vh] flex-col rounded-t-[10px] bg-white">
+            <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300" />
+            
+            <div className="p-6 flex flex-col h-full overflow-hidden">
+              <Drawer.Title className="font-serif text-2xl font-semibold mb-4">
+                Add Guest
+              </Drawer.Title>
+              
+              <div className="flex-1 overflow-hidden flex flex-col">
+                {modalContent}
+              </div>
+              
+              {/* Save Button */}
+              <div className="mt-4 pb-safe">
+                <Button 
+                  onClick={handleSave}
+                  disabled={loading}
+                  className="w-full bg-black text-white hover:bg-gray-800 py-3 rounded-full disabled:opacity-50"
+                >
+                  {loading ? 'Saving...' : 'Save'}
+                </Button>
+              </div>
+            </div>
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
+    );
+  }
+
+  // Desktop version - Sheet that slides from right
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent 
-        side={isMobile ? "bottom" : "right"} 
-        className={
-          isMobile 
-            ? "h-[85vh] w-full flex flex-col overflow-hidden rounded-t-lg" 
-            : "!w-[45%] !max-w-none h-full flex flex-col overflow-hidden"
-        }
-      >
-        <SheetHeader className="flex-shrink-0">
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent side="right" className="!w-[45%] !max-w-none h-full flex flex-col overflow-hidden">
+        <SheetHeader>
           <SheetTitle className="font-serif text-2xl font-semibold mb-4">Add Guest</SheetTitle>
         </SheetHeader>
         
-        {/* Guest Profile Preview Section */}
-        <div className="flex-shrink-0 flex items-center gap-4 pt-0 pb-4 border-b border-gray-200">
-          <div className="flex-shrink-0">
-            <Image
-              src={previewIcon}
-              alt="Guest profile icon preview"
-              width={80}
-              height={80}
-              className="rounded-full"
-            />
-          </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-medium text-gray-900">
-              {printedName || `${firstName} ${lastName}`.trim() || 'New Guest'}
-            </h3>
-            <p className="text-sm text-gray-500 mt-1">
-              A unique chef icon will be assigned to this guest when saved
-            </p>
-          </div>
-        </div>
-        
-        <Tabs defaultValue="guest-info" className="w-full flex-1 flex flex-col overflow-hidden">
-          <TabsList className="grid w-full grid-cols-2 bg-transparent p-0 h-auto border-b border-gray-200 flex-shrink-0">
-            <TabsTrigger value="guest-info" className="bg-transparent border-0 rounded-none pb-2 px-0 text-gray-600 font-normal data-[state=active]:bg-transparent data-[state=active]:text-black data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium">
-              Guest Information
-            </TabsTrigger>
-            <TabsTrigger value="recipe" className="bg-transparent border-0 rounded-none pb-2 px-0 text-gray-600 font-normal data-[state=active]:bg-transparent data-[state=active]:text-black data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium">
-              Recipe
-            </TabsTrigger>
-          </TabsList>
+        <div className="flex-1 overflow-hidden flex flex-col relative">
+          {modalContent}
           
-          <TabsContent value="guest-info" className="flex-1 overflow-y-auto mt-6 px-2">
-            <div className="space-y-6 pb-24 pr-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="firstName" className="text-sm font-medium text-gray-600">First Name *</Label>
-                <Input
-                  id="firstName"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="mt-1"
-                  placeholder="First Name"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="lastName" className="text-sm font-medium text-gray-600">Last Name</Label>
-                <Input
-                  id="lastName"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="mt-1"
-                  placeholder="Last Name"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="printedName" className="text-sm font-medium text-gray-600">Printed Name</Label>
-              <Input
-                id="printedName"
-                value={printedName}
-                onChange={(e) => setPrintedName(e.target.value)}
-                className="mt-1"
-                placeholder="How this person's name should appear in the book (e.g., 'Jaime y Nana', 'Chef Rodriguez')"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Leave empty to use first and last name. This is how the name will appear in the printed cookbook.
-              </p>
-            </div>
-
-            {/* Hidden temporarily - Add Plus One Section 
-            <div>
-              {!hasPlusOne ? (
-                <button 
-                  onClick={handleAddPlusOne}
-                  className="text-sm text-blue-600 hover:underline"
-                >
-                  + Add Plus One
-                </button>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-600">Plus One Information</span>
-                    <button 
-                      onClick={handleRemovePlusOne}
-                      className="text-sm text-red-600 hover:underline"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="plusOneFirstName" className="text-sm font-medium text-gray-600">First Name</Label>
-                      <Input
-                        id="plusOneFirstName"
-                        value={plusOneFirstName}
-                        onChange={(e) => setPlusOneFirstName(e.target.value)}
-                        className="mt-1"
-                        placeholder="Plus One First Name"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="plusOneLastName" className="text-sm font-medium text-gray-600">Last Name</Label>
-                      <Input
-                        id="plusOneLastName"
-                        value={plusOneLastName}
-                        onChange={(e) => setPlusOneLastName(e.target.value)}
-                        className="mt-1"
-                        placeholder="Plus One Last Name"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-            */}
-
-            {/* Contact Information */}
-            <div className="space-y-3">
-              <div>
-                <Label htmlFor="email" className="text-sm font-medium text-gray-600">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1"
-                  placeholder="Email address"
-                />
-              </div>
-            </div>
-
-              {/* Error Message */}
-              {error && (
-                <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                  <p className="text-sm text-red-600">{error}</p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="recipe" className="flex-1 overflow-y-auto mt-6 px-2">
-            <div className="space-y-6 pb-24 pr-4">
-              <div className="space-y-4">
-              <div>
-                <Label htmlFor="recipeTitle" className="text-sm font-medium text-gray-600">Recipe Title</Label>
-                <Input
-                  id="recipeTitle"
-                  value={recipeTitle}
-                  onChange={(e) => setRecipeTitle(e.target.value)}
-                  className="mt-1"
-                  placeholder="Recipe name"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="recipeSteps" className="text-sm font-medium text-gray-600">Ingredients</Label>
-                <textarea
-                  id="recipeSteps"
-                  value={recipeSteps}
-                  onChange={(e) => setRecipeSteps(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[100px]"
-                  placeholder="List the ingredients needed for this recipe"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="recipeInstructions" className="text-sm font-medium text-gray-600">Instructions</Label>
-                <textarea
-                  id="recipeInstructions"
-                  value={recipeInstructions}
-                  onChange={(e) => setRecipeInstructions(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[150px]"
-                  placeholder="If you have the recipe all in one single piece, just paste in here"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="recipeNotes" className="text-sm font-medium text-gray-600">Notes</Label>
-                <textarea
-                  id="recipeNotes"
-                  value={recipeNotes}
-                  onChange={(e) => setRecipeNotes(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[80px]"
-                  placeholder="Any additional notes about this recipe"
-                />
-              </div>
-              
-              <div className="pt-2">
-                <Label className="text-sm font-medium text-gray-600 mb-2 block">Recipe Image</Label>
-                <Button 
-                  type="button"
-                  onClick={() => console.log('Add image placeholder')}
-                  className="bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md px-4 py-2"
-                >
-                  Add Image
-                </Button>
-                <p className="text-xs text-gray-500 mt-2">
-                  This image will serve as inspiration to our image generator algorithms.
-                </p>
-              </div>
-              </div>
-              
-              {/* Error Message */}
-              {error && (
-                <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                  <p className="text-sm text-red-600">{error}</p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
-
-        {/* Save Button - Fixed position in bottom right */}
-        <div className="absolute bottom-6 right-6">
-          <Button 
-            onClick={handleSave}
-            disabled={loading}
-            className="bg-black text-white hover:bg-gray-800 px-6 py-2 rounded-full disabled:opacity-50"
-          >
-            {loading ? 'Saving...' : 'Save'}
-          </Button>
+          {/* Save Button - Fixed position in bottom right */}
+          <div className="absolute bottom-6 right-6">
+            <Button 
+              onClick={handleSave}
+              disabled={loading}
+              className="bg-black text-white hover:bg-gray-800 px-6 py-2 rounded-full disabled:opacity-50"
+            >
+              {loading ? 'Saving...' : 'Save'}
+            </Button>
+          </div>
         </div>
       </SheetContent>
     </Sheet>
