@@ -50,7 +50,7 @@ export default function AdminWaitlistPage() {
   };
 
   const handleInvite = async (email: string, waitlistId: string) => {
-    if (!confirm(`Send invitation email to ${email}?\n\nThey will receive a magic link to create their account.`)) {
+    if (!confirm(`Send invitation email to ${email}?\n\nThey will receive an invitation link that's valid for 7 days to create their account.`)) {
       return;
     }
 
@@ -66,7 +66,7 @@ export default function AdminWaitlistPage() {
       const result = await response.json();
 
       if (response.ok) {
-        alert(`✅ Invitation sent to ${email}!\n\nThey will receive an email with a magic link.`);
+        alert(`✅ Invitation sent to ${email}!\n\nThey will receive an email with an invitation link valid for 7 days.`);
         loadWaitlist(); // Reload to show updated status
       } else {
         alert(`❌ Error: ${result.error}`);

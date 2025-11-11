@@ -22,17 +22,20 @@ export async function sendInvitationEmail({ to, confirmationUrl }: SendInvitatio
     const result = await postmarkClient.sendEmailWithTemplate({
       From: process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com',
       To: to,
-      TemplateAlias: 'invite-user-from-waitlist', // Your template name in Postmark
+      TemplateAlias: 'invite-user-from-waitlist', // Your existing template
       TemplateModel: {
         ConfirmationURL: confirmationUrl,
       },
-      MessageStream: 'invite-user', // The stream you configured
+      MessageStream: 'invite-user', // Your existing stream
     });
 
-    console.log('Invitation email sent successfully:', result.MessageID);
+    console.log('✅ Invitation email sent successfully:', result.MessageID);
+    console.log('📧 Sent to:', to);
+    console.log('🔗 Confirmation URL:', confirmationUrl);
+    
     return { success: true, messageId: result.MessageID };
   } catch (error) {
-    console.error('Error sending invitation email:', error);
+    console.error('❌ Error sending invitation email:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }

@@ -1,11 +1,13 @@
 /**
- * Admin API Route - Invite User
- * Sends email invitation to waitlist users via Supabase Auth
+ * Admin API Route - Custom Invite User
+ * Sends invitation email using Postmark with custom token system
  */
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { updateWaitlistStatus } from '@/lib/supabase/waitlist';
+import { sendInvitationEmail } from '@/lib/postmark';
+import crypto from 'crypto';
 
 // Create Supabase Admin client (uses service role key)
 // This bypasses RLS and has full access
@@ -54,72 +56,83 @@ export async function POST(request: Request) {
       recipe_goal: waitlistUser.recipe_goal_category
     });
 
-    // Step 2: Invite user (creates user + sends "Invite User" email in one step)
-    const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
-      email,
-      {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/invitation/accept`,
-        data: {
-          // User metadata that will be attached to the user
-          invited_from_waitlist: true,
-          waitlist_id: waitlistId,
-          firstName: waitlistUser.first_name,
-          lastName: waitlistUser.last_name,
-          full_name: `${waitlistUser.first_name} ${waitlistUser.last_name}`,
-          hasPartner: waitlistUser.has_partner || false,
-          partnerFirstName: waitlistUser.partner_first_name || null,
-          partnerLastName: waitlistUser.partner_last_name || null,
-        }
-      }
-    );
+    // Step 2: Check for rate limiting (max 3 invites per email in 24h)
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data: recentInvites, error: rateError } = await supabaseAdmin
+      .from('waitlist_invitations')
+      .select('id')
+      .eq('email', email)
+      .gte('created_at', twentyFourHoursAgo);
+
+    if (!rateError && recentInvites && recentInvites.length >= 3) {
+      console.error('❌ Rate limit exceeded for email:', email);
+      return NextResponse.json(
+        { error: 'Too many invitations sent to this email. Please wait 24 hours.' },
+        { status: 429 }
+      );
+    }
+
+    // Step 3: Generate unique invitation token
+    const invitationToken = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
+
+    console.log('🔐 Generated invitation token:', invitationToken);
+    console.log('📅 Expires at:', expiresAt.toISOString());
+
+    // Step 4: Save invitation to database
+    const { error: inviteError } = await supabaseAdmin
+      .from('waitlist_invitations')
+      .insert({
+        email: email,
+        token: invitationToken,
+        waitlist_id: waitlistId,
+        first_name: waitlistUser.first_name,
+        last_name: waitlistUser.last_name,
+        expires_at: expiresAt.toISOString()
+      });
 
     if (inviteError) {
-      console.error('❌ Error inviting user:', inviteError);
+      console.error('❌ Error saving invitation:', inviteError);
       return NextResponse.json(
-        { error: inviteError.message },
+        { error: 'Failed to create invitation: ' + inviteError.message },
         { status: 500 }
       );
     }
 
-    console.log('✅ User invited successfully:', inviteData.user.id);
-    console.log('📝 User metadata stored:', {
-      waitlist_id: waitlistId,
-      full_name: `${waitlistUser.first_name} ${waitlistUser.last_name}`
+    console.log('✅ Invitation saved to database');
+
+    // Step 5: Send invitation email via Postmark
+    const confirmationUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/join/${invitationToken}`;
+    
+    const emailResult = await sendInvitationEmail({
+      to: email,
+      confirmationUrl: confirmationUrl
     });
 
-    // Step 2.5: Mark email as confirmed to prevent confirmation emails during session establishment
-    try {
-      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-        inviteData.user.id,
-        { 
-          email_confirm: true 
-        }
-      );
+    if (!emailResult.success) {
+      console.error('❌ Failed to send email:', emailResult.error);
+      // Delete the invitation since email failed
+      await supabaseAdmin
+        .from('waitlist_invitations')
+        .delete()
+        .eq('token', invitationToken);
       
-      if (updateError) {
-        console.warn('⚠️ Failed to confirm email for invited user:', updateError.message);
-        // Don't fail the invite - this is a minor issue
-      } else {
-        console.log('✅ Email marked as confirmed for invited user');
-      }
-    } catch (confirmError) {
-      console.warn('⚠️ Error confirming email:', confirmError);
-      // Don't fail the invite
+      return NextResponse.json(
+        { error: 'Failed to send invitation email: ' + emailResult.error },
+        { status: 500 }
+      );
     }
 
-    // Note: We DON'T create the profile here
-    // The profile will be created automatically when the user accepts the invitation
-    // and sets their password. At that point, our trigger will detect the new profile
-    // and automatically update the waitlist status to 'converted'
+    console.log('✅ Invitation email sent successfully');
 
-    // Step 3: Update waitlist status to 'invited'
-    const { success, error: updateError } = await updateWaitlistStatus(
+    // Step 6: Update waitlist status to 'invited'
+    const { success: statusUpdated, error: updateError } = await updateWaitlistStatus(
       waitlistId,
       'invited',
       'invited_at'
     );
 
-    if (!success) {
+    if (!statusUpdated) {
       console.error('⚠️ Failed to update waitlist status:', updateError);
       // Don't fail the request - invitation was sent successfully
     }
@@ -127,7 +140,11 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       message: `Invitation sent to ${email}`,
-      data: inviteData
+      data: {
+        email: email,
+        expiresAt: expiresAt.toISOString(),
+        invitationUrl: confirmationUrl
+      }
     });
 
   } catch (error) {
@@ -141,4 +158,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
