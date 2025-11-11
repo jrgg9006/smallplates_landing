@@ -42,16 +42,31 @@ export default function AcceptInvitationPage() {
 
         // Check for hash parameters (from invitation email link)
         const hash = window.location.hash;
+        const search = window.location.search;
+        
         console.log('🔍 URL hash present:', !!hash && hash.length > 10);
+        console.log('🔍 URL search present:', !!search && search.length > 10);
+        console.log('🔍 Full hash:', hash);
+        console.log('🔍 Full search:', search);
 
-        if (!hash || hash.length < 10) {
-          console.log('❌ No hash parameters and no existing session');
+        // Try hash first, then search params
+        let params = null;
+        if (hash && hash.length > 10) {
+          console.log('🔄 Using hash parameters...');
+          params = new URLSearchParams(hash.substring(1));
+        } else if (search && search.length > 10) {
+          console.log('🔄 Using search parameters...');
+          params = new URLSearchParams(search.substring(1));
+        }
+
+        if (!params) {
+          console.log('❌ No hash or search parameters and no existing session');
           setError('Esta invitación ha expirado o ya fue usada. Por favor, solicita una nueva invitación.');
           return;
         }
 
-        // Parse tokens from URL hash
-        const hashParams = new URLSearchParams(hash.substring(1));
+        // Parse tokens from URL parameters
+        const hashParams = params;
         const accessToken = hashParams.get('access_token');
         const refreshToken = hashParams.get('refresh_token');
         const type = hashParams.get('type');
