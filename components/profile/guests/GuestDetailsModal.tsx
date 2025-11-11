@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Guest } from "@/lib/types/database";
 import { updateGuest } from "@/lib/supabase/guests";
 import { addRecipe, getRecipesByGuest } from "@/lib/supabase/recipes";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import {
   Tabs,
   TabsContent,
@@ -31,6 +31,16 @@ interface GuestDetailsModalProps {
 }
 
 export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defaultTab = "guest-info" }: GuestDetailsModalProps) {
+  // Responsive hook to detect mobile
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640); // sm breakpoint
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const [firstName, setFirstName] = useState(guest?.first_name || '');
   const [lastName, setLastName] = useState(guest?.last_name || '');
   const [printedName, setPrintedName] = useState(guest?.printed_name || '');
@@ -179,11 +189,18 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
-        <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="font-serif text-2xl font-semibold mb-4">Edit Guest</DialogTitle>
-        </DialogHeader>
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent 
+        side={isMobile ? "bottom" : "right"} 
+        className={
+          isMobile 
+            ? "h-[85vh] w-full flex flex-col overflow-hidden rounded-t-lg" 
+            : "!w-[45%] !max-w-none h-full flex flex-col overflow-hidden"
+        }
+      >
+        <SheetHeader className="flex-shrink-0">
+          <SheetTitle className="font-serif text-2xl font-semibold mb-4">Edit Guest</SheetTitle>
+        </SheetHeader>
         
         {/* Guest Profile Section */}
         <div className="flex-shrink-0 flex items-center gap-4 pt-0 pb-4 border-b border-gray-200">
@@ -235,8 +252,8 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="guest-info" className="flex-1 overflow-y-auto mt-6 px-1">
-            <div className="space-y-4 pb-24 pr-2">
+          <TabsContent value="guest-info" className="flex-1 overflow-y-auto mt-6 px-2">
+            <div className="space-y-4 pb-24 pr-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="firstName" className="text-sm font-medium text-gray-600">First Name</Label>
@@ -326,8 +343,8 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
             </div>
           </TabsContent>
           
-          <TabsContent value="contact-info" className="flex-1 overflow-y-auto mt-6 px-1">
-            <div className="space-y-4 pb-24 pr-2">
+          <TabsContent value="contact-info" className="flex-1 overflow-y-auto mt-6 px-2">
+            <div className="space-y-4 pb-24 pr-4">
             <div>
               <Label htmlFor="email" className="text-sm font-medium text-gray-600">Email</Label>
               <Input
@@ -346,15 +363,15 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="Phone number"
+                placeholder=""
                 className="mt-1"
               />
             </div>
             </div>
           </TabsContent>
           
-          <TabsContent value="recipe-status" className="flex-1 overflow-y-auto mt-6 px-1">
-            <div className="space-y-6 pb-24 pr-2">
+          <TabsContent value="recipe-status" className="flex-1 overflow-y-auto mt-6 px-2">
+            <div className="space-y-6 pb-24 pr-4">
               <div>
                 <label className="text-sm font-medium text-gray-600">Guest Status</label>
                 <div className="mt-2">
@@ -467,7 +484,7 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
             {loading ? 'Saving...' : 'Save'}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

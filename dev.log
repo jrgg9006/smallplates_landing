@@ -174,4 +174,124 @@
  ✓ Compiled /profile in 1560ms (2023 modules)
  GET /profile 200 in 1885ms
  GET /profile 200 in 60ms
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   [?25h
+ ✓ Compiled in 993ms (891 modules)
+ GET /profile 200 in 67ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ✓ Compiled in 1046ms (1882 modules)
+ GET /profile 200 in 1583ms
+ ⨯ ./components/profile/guests/AddGuestModal.tsx
+Error:   [31mx[0m Expected '</', got 'jsx text (
+  [31m|[0m     )'
+     ,-[[36;1;4m/Users/macbook/Desktop/smallplates_landing/components/profile/guests/AddGuestModal.tsx[0m:402:1]
+ [2m399[0m |                 {loading ? 'Saving...' : 'Save'}
+ [2m400[0m |               </Button>
+ [2m401[0m |             </div>
+ [2m402[0m | [35;1m,[0m[35;1m-[0m[35;1m>[0m       </DialogContent>
+ [2m403[0m | [35;1m`[0m[35;1m-[0m[35;1m>[0m     </Dialog>
+ [2m404[0m |       );
+ [2m405[0m |     }
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/profile/guests/AddGuestModal.tsx
+./app/profile/page.tsx
+ ✓ Compiled in 968ms (1884 modules)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /profile 200 in 927ms
+ ✓ Compiled in 1334ms (1884 modules)
+ GET /profile 200 in 266ms
+ ⨯ ./components/profile/guests/GuestDetailsModal.tsx
+Error:   [31mx[0m Expected '</', got 'jsx text (
+  [31m|[0m     )'
+     ,-[[36;1;4m/Users/macbook/Desktop/smallplates_landing/components/profile/guests/GuestDetailsModal.tsx[0m:470:1]
+ [2m467[0m |                 {loading ? 'Saving...' : 'Save'}
+ [2m468[0m |               </Button>
+ [2m469[0m |             </div>
+ [2m470[0m | [35;1m,[0m[35;1m-[0m[35;1m>[0m       </DialogContent>
+ [2m471[0m | [35;1m`[0m[35;1m-[0m[35;1m>[0m     </Dialog>
+ [2m472[0m |       );
+ [2m473[0m |     }
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/profile/guests/GuestDetailsModal.tsx
+./components/profile/guests/GuestTable.tsx
+./app/profile/page.tsx
+ ✓ Compiled in 636ms (1884 modules)
+ GET /profile 200 in 125ms
+ ✓ Compiled in 1209ms (1884 modules)
+ GET /profile 200 in 260ms
+ ✓ Compiled in 808ms (1884 modules)
+ GET /profile 200 in 147ms
+ ✓ Compiled in 831ms (1884 modules)
+ GET /profile 200 in 127ms
+ ✓ Compiled in 742ms (1884 modules)
+ GET /profile 200 in 121ms
+ ✓ Compiled in 654ms (1884 modules)
+ GET /profile 200 in 108ms
+ ✓ Compiled in 492ms (1884 modules)
+ GET /profile 200 in 105ms
+ ✓ Compiled in 581ms (1884 modules)
+ GET /profile 200 in 118ms
+ ⨯ Error: Could not find the module "/Users/macbook/Desktop/smallplates_landing/node_modules/next/dist/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '3006847720'
+}
+ ⨯ Error: Could not find the module "/Users/macbook/Desktop/smallplates_landing/node_modules/next/dist/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '1402622696'
+}
+ ⨯ Error: Could not find the module "/Users/macbook/Desktop/smallplates_landing/node_modules/next/dist/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '1402622696'
+}
+ ⨯ Error: Could not find the module "/Users/macbook/Desktop/smallplates_landing/node_modules/next/dist/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '1402622696'
+}
+ ⨯ Error: Could not find the module "/Users/macbook/Desktop/smallplates_landing/node_modules/next/dist/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '3006847720'
+}
+ ⨯ Error: Could not find the module "/Users/macbook/Desktop/smallplates_landing/node_modules/next/dist/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '3006847720'
+}
+ ⨯ [TypeError: Cannot read properties of undefined (reading 'call')] {
+  digest: '3016336489'
+}
+ ⨯ Error: Could not find the module "/Users/macbook/Desktop/smallplates_landing/node_modules/next/dist/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '3006847720'
+}
+[TypeError: Cannot read properties of undefined (reading 'call')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading 'call')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading 'call')] {
+  page: '/profile'
+}
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 3.4s (2210 modules)
+ GET /profile 200 in 1865ms
+ GET /profile 200 in 44ms
+ GET /profile 500 in 8223ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ✓ Compiled in 2.5s (2224 modules)
+ GET /profile 200 in 1152ms
+ GET /profile 200 in 1073ms
+ ✓ Compiled in 1264ms (2224 modules)
+ GET /profile 200 in 164ms
+ ✓ Compiled in 1174ms (2224 modules)
+ GET /profile 200 in 181ms
+ ✓ Compiled in 682ms (2224 modules)
+ GET /profile 200 in 148ms
+[?25h

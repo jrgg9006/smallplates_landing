@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import {
   Tabs,
   TabsContent,
@@ -29,6 +29,16 @@ interface AddGuestModalProps {
 }
 
 export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalProps) {
+  // Responsive hook to detect mobile
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640); // sm breakpoint
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [printedName, setPrintedName] = useState('');
@@ -169,11 +179,18 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
-        <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="font-serif text-2xl font-semibold mb-4">Add Guest</DialogTitle>
-        </DialogHeader>
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent 
+        side={isMobile ? "bottom" : "right"} 
+        className={
+          isMobile 
+            ? "h-[85vh] w-full flex flex-col overflow-hidden rounded-t-lg" 
+            : "!w-[45%] !max-w-none h-full flex flex-col overflow-hidden"
+        }
+      >
+        <SheetHeader className="flex-shrink-0">
+          <SheetTitle className="font-serif text-2xl font-semibold mb-4">Add Guest</SheetTitle>
+        </SheetHeader>
         
         {/* Guest Profile Preview Section */}
         <div className="flex-shrink-0 flex items-center gap-4 pt-0 pb-4 border-b border-gray-200">
@@ -191,7 +208,7 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
               {printedName || `${firstName} ${lastName}`.trim() || 'New Guest'}
             </h3>
             <p className="text-sm text-gray-500 mt-1">
-              Default preview - a unique chef icon will be assigned when saved
+              A unique chef icon will be assigned to this guest when saved
             </p>
           </div>
         </div>
@@ -206,8 +223,8 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="guest-info" className="flex-1 overflow-y-auto mt-6 px-1">
-            <div className="space-y-6 pb-24 pr-2">
+          <TabsContent value="guest-info" className="flex-1 overflow-y-auto mt-6 px-2">
+            <div className="space-y-6 pb-24 pr-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="firstName" className="text-sm font-medium text-gray-600">First Name *</Label>
@@ -317,8 +334,8 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
             </div>
           </TabsContent>
           
-          <TabsContent value="recipe" className="flex-1 overflow-y-auto mt-6 px-1">
-            <div className="space-y-6 pb-24 pr-2">
+          <TabsContent value="recipe" className="flex-1 overflow-y-auto mt-6 px-2">
+            <div className="space-y-6 pb-24 pr-4">
               <div className="space-y-4">
               <div>
                 <Label htmlFor="recipeTitle" className="text-sm font-medium text-gray-600">Recipe Title</Label>
@@ -399,7 +416,7 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
             {loading ? 'Saving...' : 'Save'}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }
