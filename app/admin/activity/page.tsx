@@ -69,12 +69,14 @@ export default function ActivityPage() {
       loadGuests(selectedUser);
       setSelectedGuest(null);
       setRecipes([]);
+      setSelectedRecipe(null); // Clear recipe details when switching users
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedUser]);
 
   useEffect(() => {
     if (selectedUser && selectedGuest) {
+      setSelectedRecipe(null); // Clear recipe details when switching guests
       loadRecipes(selectedUser, selectedGuest);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
