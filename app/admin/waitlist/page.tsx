@@ -105,6 +105,7 @@ export default function AdminWaitlistPage() {
     const styles = {
       pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
       invited: 'bg-blue-100 text-blue-800 border-blue-200',
+      visited: 'bg-orange-100 text-orange-800 border-orange-200',
       converted: 'bg-green-100 text-green-800 border-green-200',
       unsubscribed: 'bg-gray-100 text-gray-800 border-gray-200'
     };
@@ -149,7 +150,7 @@ export default function AdminWaitlistPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
             <div className="text-sm text-gray-600 mb-1">Total Active</div>
             <div className="text-3xl font-bold">{waitlist.filter(u => u.status !== 'deleted').length}</div>
@@ -164,6 +165,12 @@ export default function AdminWaitlistPage() {
             <div className="text-sm text-blue-800 mb-1">Invited</div>
             <div className="text-3xl font-bold text-blue-800">
               {waitlist.filter(u => u.status === 'invited').length}
+            </div>
+          </div>
+          <div className="bg-orange-50 rounded-lg shadow p-6">
+            <div className="text-sm text-orange-800 mb-1">Visited</div>
+            <div className="text-3xl font-bold text-orange-800">
+              {waitlist.filter(u => u.status === 'visited').length}
             </div>
           </div>
           <div className="bg-green-50 rounded-lg shadow p-6">
@@ -266,6 +273,21 @@ export default function AdminWaitlistPage() {
                                   className="px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   {inviting === user.id ? 'Resending...' : 'Resend Invite'}
+                                </button>
+                              </div>
+                            )}
+                            {user.status === 'visited' && (
+                              <div className="flex flex-col gap-2">
+                                <div className="text-sm text-orange-600 font-medium">👁️ Visited page</div>
+                                <div className="text-xs text-gray-500">
+                                  Started signup but didn't complete
+                                </div>
+                                <button
+                                  onClick={() => handleInvite(user.email, user.id)}
+                                  disabled={inviting === user.id}
+                                  className="px-3 py-1 bg-orange-600 text-white text-xs font-medium rounded hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  {inviting === user.id ? 'Resending...' : 'Send Reminder'}
                                 </button>
                               </div>
                             )}

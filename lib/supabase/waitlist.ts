@@ -24,7 +24,7 @@ export interface WaitlistUser {
   has_partner: boolean;
   partner_first_name: string | null;
   partner_last_name: string | null;
-  status: 'pending' | 'invited' | 'converted' | 'unsubscribed' | 'deleted';
+  status: 'pending' | 'invited' | 'visited' | 'converted' | 'unsubscribed' | 'deleted';
   invited_at: string | null;
   converted_at: string | null;
   deleted_at: string | null;
@@ -98,7 +98,7 @@ export async function getWaitlistUsers(includeDeleted: boolean = false): Promise
       query = query.neq('status', 'deleted');
     }
     
-    const { data, error } = await query
+    const { data: waitlistData, error } = await query
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -106,7 +106,34 @@ export async function getWaitlistUsers(includeDeleted: boolean = false): Promise
       return { data: null, error: error.message };
     }
 
-    return { data };
+    if (!waitlistData) {
+      return { data: [] };
+    }
+
+    // Get invitation data to calculate visited status
+    const { data: invitationsData } = await supabase
+      .from('waitlist_invitations')
+      .select('waitlist_id, visited_at, used');
+
+    // Calculate enhanced status for each user
+    const enhancedData = waitlistData.map(user => {
+      // Find the most recent invitation for this user
+      const userInvitations = invitationsData?.filter(inv => inv.waitlist_id === user.id) || [];
+      const hasVisited = userInvitations.some(inv => inv.visited_at && !inv.used);
+      
+      // Determine enhanced status
+      let enhancedStatus = user.status;
+      if (user.status === 'invited' && hasVisited) {
+        enhancedStatus = 'visited' as const;
+      }
+      
+      return {
+        ...user,
+        status: enhancedStatus
+      };
+    });
+
+    return { data: enhancedData };
 
   } catch (err) {
     console.error('❌ Unexpected error:', err);

@@ -37,6 +37,16 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
         if (response.ok && data.status === 'valid') {
           setInvitationData(data.data);
           setStatus('valid');
+          
+          // 👁️ Track that user visited the join page
+          fetch('/api/invitations/mark-visited', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token })
+          }).catch(err => {
+            // Silent fail - don't block user experience for tracking
+            console.warn('Failed to mark invitation as visited:', err);
+          });
         } else {
           setStatus(data.status || 'invalid');
           if (data.status === 'expired' && data.expiresAt) {
