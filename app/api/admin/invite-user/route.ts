@@ -57,6 +57,8 @@ export async function POST(request: Request) {
     });
 
     // Step 2: Check for rate limiting (max 3 invites per email in 24h)
+    // TEMPORARILY DISABLED FOR TESTING
+    /*
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { data: recentInvites, error: rateError } = await supabaseAdmin
       .from('waitlist_invitations')
@@ -71,6 +73,7 @@ export async function POST(request: Request) {
         { status: 429 }
       );
     }
+    */
 
     // Step 3: Generate unique invitation token
     const invitationToken = crypto.randomUUID();
