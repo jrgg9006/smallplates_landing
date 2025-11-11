@@ -14,7 +14,7 @@ interface InvitationData {
 
 type Status = 'loading' | 'valid' | 'expired' | 'used' | 'invalid' | 'error';
 
-export default function JoinPage({ params }: { params: { token: string } }) {
+export default function JoinPage({ params }: { params: Promise<{ token: string }> }) {
   const router = useRouter();
   const [status, setStatus] = useState<Status>('loading');
   const [invitationData, setInvitationData] = useState<InvitationData | null>(null);
@@ -30,7 +30,8 @@ export default function JoinPage({ params }: { params: { token: string } }) {
   useEffect(() => {
     const verifyToken = async () => {
       try {
-        const response = await fetch(`/api/invitations/verify/${params.token}`);
+        const { token } = await params;
+        const response = await fetch(`/api/invitations/verify/${token}`);
         const data = await response.json();
 
         if (response.ok && data.status === 'valid') {
@@ -49,7 +50,7 @@ export default function JoinPage({ params }: { params: { token: string } }) {
     };
 
     verifyToken();
-  }, [params.token]);
+  }, [params]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,12 +64,13 @@ export default function JoinPage({ params }: { params: { token: string } }) {
     setError(null);
 
     try {
+      const { token } = await params;
       // Call consume API to create account
       const response = await fetch('/api/invitations/consume', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          token: params.token, 
+          token: token, 
           password 
         })
       });
