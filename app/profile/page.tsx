@@ -126,6 +126,14 @@ export default function ProfilePage() {
     if (user?.id) {
       loadProgressData();
       loadGuestCounts();
+      
+      // Check if user needs waitlist conversion (backup safety net)
+      fetch('/api/auth/check-conversion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).catch(error => {
+        console.log('Conversion check failed (non-critical):', error);
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);

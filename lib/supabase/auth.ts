@@ -92,8 +92,12 @@ export async function signInWithGoogle() {
 export async function resetPassword(email: string) {
   const supabase = createSupabaseClient();
 
+  // Use environment variable for consistent redirect URL
+  const redirectUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+    (typeof window !== 'undefined' ? window.location.origin : 'https://www.smallplatesandcompany.com');
+
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/reset-password`,
+    redirectTo: `${redirectUrl}/reset-password`,
   });
 
   if (error) {

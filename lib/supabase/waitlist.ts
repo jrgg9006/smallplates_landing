@@ -159,6 +159,51 @@ export async function updateWaitlistStatus(
 }
 
 /**
+ * Convert waitlist user to 'converted' status
+ * Called when user successfully completes signup (sets password)
+ */
+export async function convertWaitlistUser(
+  waitlistId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = createSupabaseClient();
+
+    // Only update if currently 'invited' to prevent duplicate conversions
+    const { data, error } = await supabase
+      .from('waitlist')
+      .update({
+        status: 'converted',
+        converted_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', waitlistId)
+      .eq('status', 'invited') // Only update if currently invited
+      .select('id, email, first_name, last_name')
+      .single();
+
+    if (error) {
+      console.error('❌ Error converting waitlist user:', error);
+      return { success: false, error: error.message };
+    }
+
+    if (!data) {
+      console.log(`⚠️ No waitlist user found with id ${waitlistId} in 'invited' status`);
+      return { success: false, error: 'Waitlist user not found or already converted' };
+    }
+
+    console.log(`✅ Converted waitlist user ${data.email} (${data.first_name} ${data.last_name})`);
+    return { success: true };
+
+  } catch (err) {
+    console.error('❌ Unexpected error converting waitlist user:', err);
+    return { 
+      success: false, 
+      error: err instanceof Error ? err.message : 'Failed to convert waitlist user' 
+    };
+  }
+}
+
+/**
  * Soft delete a waitlist entry
  * Marks the entry as deleted but keeps it in the database
  */

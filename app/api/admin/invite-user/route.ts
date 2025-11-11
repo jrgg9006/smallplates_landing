@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
       email,
       {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/reset-password`,
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/invitation/accept`,
         data: {
           // User metadata that will be attached to the user
           invited_from_waitlist: true,
