@@ -258,7 +258,7 @@ export default function AdminWaitlistPage() {
                             {user.status === 'invited' && (
                               <div className="flex flex-col gap-2">
                                 <div className="text-sm text-gray-500">
-                                  Invited {user.invited_at ? new Date(user.invited_at).toLocaleDateString() : ''}
+                                  Invited {user.invited_at ? `${new Date(user.invited_at).toLocaleDateString()} at ${new Date(user.invited_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}` : ''}
                                 </div>
                                 <button
                                   onClick={() => handleInvite(user.email, user.id)}
