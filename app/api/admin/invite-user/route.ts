@@ -87,6 +87,26 @@ export async function POST(request: Request) {
       full_name: `${waitlistUser.first_name} ${waitlistUser.last_name}`
     });
 
+    // Step 2.5: Mark email as confirmed to prevent confirmation emails during session establishment
+    try {
+      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+        inviteData.user.id,
+        { 
+          email_confirm: true 
+        }
+      );
+      
+      if (updateError) {
+        console.warn('⚠️ Failed to confirm email for invited user:', updateError.message);
+        // Don't fail the invite - this is a minor issue
+      } else {
+        console.log('✅ Email marked as confirmed for invited user');
+      }
+    } catch (confirmError) {
+      console.warn('⚠️ Error confirming email:', confirmError);
+      // Don't fail the invite
+    }
+
     // Note: We DON'T create the profile here
     // The profile will be created automatically when the user accepts the invitation
     // and sets their password. At that point, our trigger will detect the new profile

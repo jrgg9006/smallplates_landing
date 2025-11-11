@@ -72,72 +72,40 @@ export default function AcceptInvitationPage() {
           // Don't fail - some versions might not include type parameter
         }
 
-        // NEW APPROACH: Instead of immediately consuming tokens, verify they're valid
-        // without establishing a session until the user actually needs it
+        // NEW APPROACH: Store tokens but DON'T consume them until password submission
+        // This prevents tokens from being marked as "used" if user closes tab
         try {
-          // Validate tokens by attempting to set session, but in a non-persistent way
+          // Validate tokens by decoding JWT (basic validation without consuming)
           console.log('🔄 Validating invitation tokens...');
-          const { data, error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken
-          });
-
-          if (error) {
-            console.error('❌ Session validation error:', error.message);
-
-            // Check if error is about expired/used token
-            if (error.message.includes('already been used') ||
-                error.message.includes('Invalid Refresh Token') ||
-                error.message.includes('expired') ||
-                error.message.includes('invalid')) {
-
-              // Token is expired/invalid - try to extract email from the access token
-              try {
-                // Decode JWT to get email (tokens are JWT format)
-                const tokenPayload = JSON.parse(atob(accessToken!.split('.')[1]));
-                const email = tokenPayload.email;
-
-                console.log('📧 Extracted email from expired token:', email);
-                setUserEmail(email);
-                setTokenExpired(true);
-
-              } catch (e) {
-                console.error('Could not extract email from token:', e);
-                setTokenExpired(true);
-              }
-
-              // Clear any stored tokens since they're expired/invalid
-              localStorage.removeItem('invitation_access_token');
-              localStorage.removeItem('invitation_refresh_token');
-              
-              return;
-            } else {
-              setError(`Error estableciendo sesión: ${error.message}`);
-            }
+          const tokenPayload = JSON.parse(atob(accessToken!.split('.')[1]));
+          const tokenExpiry = tokenPayload.exp * 1000; // Convert to milliseconds
+          const now = Date.now();
+          
+          if (now > tokenExpiry) {
+            console.error('❌ Token has expired');
+            const email = tokenPayload.email;
+            setUserEmail(email);
+            setTokenExpired(true);
             return;
           }
 
-          if (data.session) {
-            console.log('✅ Invitation tokens validated successfully');
-            console.log('✅ User ID:', data.session.user.id);
-            console.log('👤 User metadata:', data.session.user.user_metadata);
-            setSessionReady(true);
+          console.log('✅ Invitation tokens are valid (not expired)');
+          console.log('📧 Email from token:', tokenPayload.email);
+          
+          // Store tokens in localStorage but DON'T call setSession yet
+          // Tokens will be consumed only when user submits password
+          localStorage.setItem('invitation_access_token', accessToken);
+          localStorage.setItem('invitation_refresh_token', refreshToken);
+          localStorage.setItem('invitation_user_email', tokenPayload.email);
 
-            // Store tokens in localStorage so they persist even if user closes tab completely
-            localStorage.setItem('invitation_access_token', accessToken);
-            localStorage.setItem('invitation_refresh_token', refreshToken);
-
-            // Clean up URL hash but keep tokens available for password setup
-            console.log('🧹 Cleaning URL hash but preserving tokens for password setup...');
-            window.history.replaceState(null, '', window.location.pathname);
-          } else {
-            console.log('❌ No session returned from setSession');
-            setError('Error estableciendo sesión. Por favor, intenta con una nueva invitación.');
-          }
+          setSessionReady(true); // Ready for password input
+          
+          // DON'T clean URL hash yet - keep it for potential retry
+          console.log('✅ Tokens stored, ready for password setup...');
 
         } catch (validationError) {
           console.error('❌ Token validation error:', validationError);
-          setError('Error al validar la invitación. Por favor, intenta de nuevo.');
+          setError('Error al validar la invitación. Los tokens parecen estar corruptos.');
         }
 
       } catch (err) {
@@ -150,31 +118,36 @@ export default function AcceptInvitationPage() {
     const handleStoredTokens = async () => {
       const storedAccessToken = localStorage.getItem('invitation_access_token');
       const storedRefreshToken = localStorage.getItem('invitation_refresh_token');
+      const storedEmail = localStorage.getItem('invitation_user_email');
       
       if (storedAccessToken && storedRefreshToken && !window.location.hash) {
-        console.log('🔄 Found stored invitation tokens, attempting to restore session...');
-        
-        const supabase = createSupabaseClient();
+        console.log('🔄 Found stored invitation tokens, validating...');
         
         try {
-          const { data, error } = await supabase.auth.setSession({
-            access_token: storedAccessToken,
-            refresh_token: storedRefreshToken
-          });
-
-          if (data.session && !error) {
-            console.log('✅ Session restored from stored tokens');
-            setSessionReady(true);
-            return;
-          } else {
-            console.log('❌ Stored tokens no longer valid, clearing...');
+          // Validate stored tokens without consuming them
+          const tokenPayload = JSON.parse(atob(storedAccessToken.split('.')[1]));
+          const tokenExpiry = tokenPayload.exp * 1000; // Convert to milliseconds
+          const now = Date.now();
+          
+          if (now > tokenExpiry) {
+            console.log('❌ Stored tokens have expired, clearing...');
             localStorage.removeItem('invitation_access_token');
             localStorage.removeItem('invitation_refresh_token');
+            localStorage.removeItem('invitation_user_email');
+            setTokenExpired(true);
+            setUserEmail(storedEmail);
+            return;
           }
-        } catch (restoreError) {
-          console.error('❌ Error restoring session from stored tokens:', restoreError);
+          
+          console.log('✅ Stored tokens are still valid, ready for password setup');
+          setSessionReady(true);
+          return;
+          
+        } catch (validationError) {
+          console.error('❌ Error validating stored tokens:', validationError);
           localStorage.removeItem('invitation_access_token');
           localStorage.removeItem('invitation_refresh_token');
+          localStorage.removeItem('invitation_user_email');
         }
       }
       
@@ -227,6 +200,47 @@ export default function AcceptInvitationPage() {
     try {
       const supabase = createSupabaseClient();
       
+      // First, establish session using invitation tokens (this is where we consume them)
+      const storedAccessToken = localStorage.getItem('invitation_access_token');
+      const storedRefreshToken = localStorage.getItem('invitation_refresh_token');
+      
+      if (!storedAccessToken || !storedRefreshToken) {
+        throw new Error("No invitation tokens found. Please use the invitation link again.");
+      }
+      
+      console.log('🔄 Establishing session with invitation tokens...');
+      const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+        access_token: storedAccessToken,
+        refresh_token: storedRefreshToken
+      });
+      
+      if (sessionError) {
+        // Check if tokens have expired since they were stored
+        if (sessionError.message.includes('expired') || 
+            sessionError.message.includes('invalid') ||
+            sessionError.message.includes('already been used')) {
+          
+          // Get email before clearing storage
+          const storedEmail = localStorage.getItem('invitation_user_email');
+          
+          // Clear expired tokens and show expiration UI
+          localStorage.removeItem('invitation_access_token');
+          localStorage.removeItem('invitation_refresh_token');
+          localStorage.removeItem('invitation_user_email');
+          
+          setUserEmail(storedEmail);
+          setTokenExpired(true);
+          return;
+        }
+        throw new Error(`Session establishment failed: ${sessionError.message}`);
+      }
+      
+      if (!sessionData.session) {
+        throw new Error("No session established from invitation tokens");
+      }
+      
+      console.log('✅ Session established, now updating password...');
+      
       // Update the user's password in Supabase Auth
       const { data, error } = await supabase.auth.updateUser({
         password: password
@@ -275,6 +289,10 @@ export default function AcceptInvitationPage() {
       // Clean up stored invitation tokens since signup is complete
       localStorage.removeItem('invitation_access_token');
       localStorage.removeItem('invitation_refresh_token');
+      localStorage.removeItem('invitation_user_email');
+      
+      // Clean up URL hash now that signup is complete
+      window.history.replaceState(null, '', window.location.pathname);
       
       // Redirect to profile after showing success message
       setTimeout(() => {
