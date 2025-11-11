@@ -285,7 +285,7 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
             Welcome to Small Plates & Co.
           </h1>
           <p className="text-lg text-gray-600 max-w-xl mx-auto">
-            Create a password
+            Create a password to access your profile
           </p>
         </div>
 
