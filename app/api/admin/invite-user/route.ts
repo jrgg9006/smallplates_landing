@@ -102,7 +102,9 @@ export async function POST(request: Request) {
     console.log('✅ Invitation saved to database');
 
     // Step 5: Send invitation email via Postmark
+    console.log('🔍 NEXT_PUBLIC_SITE_URL from process.env:', process.env.NEXT_PUBLIC_SITE_URL);
     const confirmationUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/join/${invitationToken}`;
+    console.log('🔗 Generated confirmation URL:', confirmationUrl);
     
     const emailResult = await sendInvitationEmail({
       to: email,
