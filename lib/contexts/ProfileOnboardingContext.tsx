@@ -29,11 +29,14 @@ interface ProfileOnboardingContextType {
   isFirstTimeUser: boolean;
   showWelcomeOverlay: boolean;
   showOnboardingResume: boolean;
+  showFirstRecipeExperience: boolean;
   completedSteps: OnboardingSteps[];
   currentStep: number;
   
   // Actions
   dismissWelcome: () => void;
+  startFirstRecipeExperience: () => void;
+  skipFirstRecipeExperience: () => void;
   completeStep: (stepId: OnboardingSteps) => void;
   skipOnboarding: () => void;
   resumeOnboarding: () => void;
@@ -73,6 +76,7 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
   const [showOnboardingCards, setShowOnboardingCards] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [showOnboardingResume, setShowOnboardingResume] = useState(false);
+  const [showFirstRecipeExperience, setShowFirstRecipeExperience] = useState(false);
 
   // Load onboarding state from user data
   useEffect(() => {
@@ -211,6 +215,30 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
     });
   }, [updateOnboardingState]);
 
+  const startFirstRecipeExperience = useCallback(() => {
+    console.log('Starting first recipe experience...');
+    
+    // Switch to first recipe experience
+    setShowWelcome(false);
+    setShowOnboardingCards(false);
+    setShowFirstRecipeExperience(true);
+    
+    // Update database in background
+    updateOnboardingState({
+      has_seen_welcome: true,
+      welcome_dismissed_at: new Date().toISOString(),
+      last_onboarding_shown: new Date().toISOString()
+    });
+  }, [updateOnboardingState]);
+
+  const skipFirstRecipeExperience = useCallback(() => {
+    console.log('Skipping first recipe experience...');
+    
+    // Go back to onboarding cards
+    setShowFirstRecipeExperience(false);
+    setShowOnboardingCards(true);
+  }, []);
+
   const completeStep = useCallback((stepId: OnboardingSteps) => {
     if (!onboardingState.completed_steps.includes(stepId)) {
       updateOnboardingState({
@@ -280,9 +308,12 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
     isFirstTimeUser,
     showWelcomeOverlay,
     showOnboardingResume,
+    showFirstRecipeExperience,
     completedSteps,
     currentStep,
     dismissWelcome,
+    startFirstRecipeExperience,
+    skipFirstRecipeExperience,
     completeStep,
     skipOnboarding,
     resumeOnboarding,

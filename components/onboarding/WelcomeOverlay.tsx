@@ -50,8 +50,8 @@ export function WelcomeOverlay({ userName, onStart, onDismiss, isVisible }: Welc
               </p>
               
               <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-8 max-w-xl mx-auto">
-                You&apos;re here because food connects hearts.
-                Your cookbook isn&apos;t just about recipes—it&apos;s about stories, 
+                You didn&apos;t come here just to collect recipes—you came here to connect through food.
+                This isn&apos;t just a cookbook—it&apos;s a collection of your stories, 
                 memories, and the people you love.
               </p>
               
