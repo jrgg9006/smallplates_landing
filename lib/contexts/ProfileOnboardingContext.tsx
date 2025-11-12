@@ -1,8 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { createSupabaseClient } from '@/lib/supabase/client';
+import { getCurrentProfile } from '@/lib/supabase/profiles';
 
 export enum OnboardingSteps {
   FIRST_RECIPE = 'first_recipe',
@@ -35,6 +36,7 @@ interface ProfileOnboardingContextType {
   
   // Actions
   dismissWelcome: () => void;
+  skipAllOnboarding: () => void;
   startFirstRecipeExperience: () => void;
   skipFirstRecipeExperience: () => void;
   completeStep: (stepId: OnboardingSteps) => void;
@@ -72,122 +74,205 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
     first_recipe_showcase_sent: false
   });
   const [guestCount, setGuestCount] = useState(0);
-  const [recipeCount, setRecipeCount] = useState(0);
   const [showOnboardingCards, setShowOnboardingCards] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [showOnboardingResume, setShowOnboardingResume] = useState(false);
   const [showFirstRecipeExperience, setShowFirstRecipeExperience] = useState(false);
+  const hasLoadedStateRef = useRef(false);
 
-  // Load onboarding state from user data
+  // Load onboarding state from database (only once when user loads)
   useEffect(() => {
-    if (user?.id) {
-      if (user?.onboarding_state && typeof user.onboarding_state === 'object') {
-        console.log('Loading onboarding state from user:', user.onboarding_state);
-        setOnboardingState(user.onboarding_state);
-      } else {
-        // User exists but has no onboarding state - this is a first-time user
-        console.log('User has no onboarding state, treating as first-time user');
-        // Keep the initial state which has has_seen_welcome: false
+    if (!user?.id || hasLoadedStateRef.current) return;
+    
+    let cancelled = false;
+    
+    const loadState = async () => {
+      const { data: profile, error } = await getCurrentProfile();
+      
+      if (cancelled) return;
+      
+      if (error) {
+        console.error('Failed to load onboarding state:', error);
+        hasLoadedStateRef.current = true; // Mark as loaded even on error to prevent infinite retries
+        return;
       }
-    }
-  }, [user?.id, user?.onboarding_state]);
+      
+      // Type assertion needed because Profile type doesn't include onboarding_state in TypeScript
+      const profileWithOnboarding = profile as any;
+      if (profileWithOnboarding?.onboarding_state && typeof profileWithOnboarding.onboarding_state === 'object') {
+        const dbState = profileWithOnboarding.onboarding_state as OnboardingState;
+        console.log('Loading onboarding state from database:', dbState);
+        setOnboardingState(dbState);
+      } else {
+        console.log('No onboarding state in database, using defaults');
+      }
+      
+      hasLoadedStateRef.current = true;
+    };
+    
+    loadState();
+    return () => { cancelled = true; };
+  }, [user?.id]);
 
-  // Load guest and recipe counts and determine what to show
-  useEffect(() => {
-    const loadCounts = async () => {
-      if (!user?.id) return;
-
+  // Update onboarding state in database
+  const updateOnboardingState = useCallback(async (updates: Partial<OnboardingState>) => {
+    if (!user?.id) return;
+    
+    setOnboardingState(prev => {
+      const updated = { ...prev, ...updates };
+      
+      // Save to database (fire and forget, but log errors)
       const supabase = createSupabaseClient();
+      void supabase
+        .from('profiles')
+        .update({ onboarding_state: updated })
+        .eq('id', user.id)
+        .then(({ error }) => {
+          if (error) {
+            console.error('Failed to save onboarding state:', error);
+          } else {
+            console.log('Successfully saved onboarding state:', updated);
+          }
+        });
+      
+      return updated;
+    });
+  }, [user?.id]);
 
-      // Get guest count
+  // Simple helper function to check if user has guests (excluding self)
+  const checkHasGuests = useCallback(async (userId: string): Promise<boolean> => {
+    const supabase = createSupabaseClient();
+    const { count } = await supabase
+      .from('guests')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('is_self', false)
+      .eq('is_archived', false);
+    return (count || 0) > 0;
+  }, []);
+
+  // Simple helper function to check if user has their own recipe
+  const checkHasOwnRecipe = useCallback(async (userId: string): Promise<boolean> => {
+    const supabase = createSupabaseClient();
+    const { data: selfGuest, error } = await supabase
+      .from('guests')
+      .select('id, recipes_received')
+      .eq('user_id', userId)
+      .eq('is_self', true)
+      .eq('is_archived', false)
+      .single();
+    
+    if (error || !selfGuest) {
+      return false;
+    }
+    
+    return (selfGuest.recipes_received || 0) > 0;
+  }, []);
+
+  // Auto-sync: Check reality and complete steps accordingly
+  useEffect(() => {
+    const syncOnboardingState = async () => {
+      if (!user?.id || !hasLoadedStateRef.current) return; // Wait for initial state load
+
+      const currentCompletedSteps = onboardingState.completed_steps;
+      const hasCompletedOnboarding = currentCompletedSteps.length === 3;
+
+      // Early return: if onboarding is complete, just load counts for UI
+      if (hasCompletedOnboarding) {
+        const supabase = createSupabaseClient();
+        const { count: guestTotal } = await supabase
+          .from('guests')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('is_archived', false);
+        
+        setGuestCount(guestTotal || 0);
+        setShowWelcome(false);
+        setShowOnboardingCards(false);
+        setShowOnboardingResume(false);
+        return;
+      }
+
+      // Check reality and auto-complete steps
+      const stepsToComplete: OnboardingSteps[] = [];
+      
+      // Check if user has their own recipe
+      if (!currentCompletedSteps.includes(OnboardingSteps.FIRST_RECIPE)) {
+        const hasRecipe = await checkHasOwnRecipe(user.id);
+        if (hasRecipe) {
+          stepsToComplete.push(OnboardingSteps.FIRST_RECIPE);
+        }
+      }
+      
+      // Check if user has guests (excluding self)
+      if (!currentCompletedSteps.includes(OnboardingSteps.FIRST_GUEST)) {
+        const hasGuests = await checkHasGuests(user.id);
+        if (hasGuests) {
+          stepsToComplete.push(OnboardingSteps.FIRST_GUEST);
+        }
+      }
+
+      // Auto-complete steps if needed
+      if (stepsToComplete.length > 0) {
+        const updatedSteps = [...currentCompletedSteps, ...stepsToComplete];
+        updateOnboardingState({
+          completed_steps: updatedSteps
+        });
+      }
+
+      // Load guest count for UI
+      const supabase = createSupabaseClient();
       const { count: guestTotal } = await supabase
         .from('guests')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
-
-      // Get recipe count
-      const { count: recipeTotal } = await supabase
-        .from('recipes')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
-
-      const gCount = guestTotal || 0;
-      const rCount = recipeTotal || 0;
+        .eq('user_id', user.id)
+        .eq('is_archived', false);
       
-      setGuestCount(gCount);
-      setRecipeCount(rCount);
+      setGuestCount(guestTotal || 0);
 
-      // Determine what to show based on counts and onboarding state
-      const isEmpty = gCount === 0;
+      // Determine what to show based on onboarding completion
+      const finalCompletedSteps = stepsToComplete.length > 0 
+        ? [...currentCompletedSteps, ...stepsToComplete]
+        : currentCompletedSteps;
+      
       const hasSeenWelcome = onboardingState.has_seen_welcome;
-      const completedSteps = onboardingState.completed_steps.length;
+      const finalCompletedCount = finalCompletedSteps.length;
       const dismissalCount = onboardingState.dismissal_count;
-      const hasCompletedOnboarding = completedSteps === 3;
+      const finalHasCompletedOnboarding = finalCompletedCount === 3;
       const hasBeenDismissedTooManyTimes = dismissalCount >= 3;
       
-      if (isEmpty && !hasSeenWelcome) {
-        // First time user - show welcome
+      if (!hasSeenWelcome) {
         setShowWelcome(true);
         setShowOnboardingCards(false);
         setShowOnboardingResume(false);
-      } else if (isEmpty && hasSeenWelcome && dismissalCount === 0) {
-        // User has seen welcome but hasn't dismissed - show onboarding cards
+      } else if (hasSeenWelcome && !finalHasCompletedOnboarding && dismissalCount === 0) {
         setShowWelcome(false);
         setShowOnboardingCards(true);
         setShowOnboardingResume(false);
-      } else if (isEmpty && hasSeenWelcome && !hasCompletedOnboarding && !hasBeenDismissedTooManyTimes) {
-        // User dismissed but can resume - show resume component
+      } else if (hasSeenWelcome && !finalHasCompletedOnboarding && !hasBeenDismissedTooManyTimes) {
         setShowWelcome(false);
         setShowOnboardingCards(false);
         setShowOnboardingResume(true);
       } else {
-        // User has guests, completed onboarding, or dismissed too many times - show normal interface
         setShowWelcome(false);
         setShowOnboardingCards(false);
         setShowOnboardingResume(false);
       }
     };
 
-    loadCounts();
-  }, [user?.id, onboardingState.has_seen_welcome, onboardingState.dismissal_count, onboardingState.completed_steps.length]);
-
-  // Update onboarding state in database
-  const updateOnboardingState = useCallback(async (newState: Partial<OnboardingState>) => {
-    if (!user?.id) return;
-
-    const updatedState = { ...onboardingState, ...newState };
-    setOnboardingState(updatedState);
-
-    try {
-      const supabase = createSupabaseClient();
-      const { error } = await supabase
-        .from('profiles')
-        .update({ onboarding_state: updatedState })
-        .eq('id', user.id);
-
-      if (error) {
-        console.error('Failed to update onboarding state:', error);
-        // Don't revert the local state - the user can still continue
-        // but log that the database update failed
-      } else {
-        console.log('Successfully updated onboarding state:', updatedState);
-      }
-    } catch (err) {
-      console.error('Error updating onboarding state:', err);
-    }
-  }, [user?.id, onboardingState]);
+    syncOnboardingState();
+  }, [user?.id, onboardingState.has_seen_welcome, onboardingState.dismissal_count, onboardingState.completed_steps, checkHasGuests, checkHasOwnRecipe, updateOnboardingState]);
 
   // Simple state - use our local state instead of complex logic
   const shouldShowOnboarding = showOnboardingCards;
   const showWelcomeOverlay = showWelcome;
-  const isFirstTimeUser = guestCount === 0 && recipeCount === 0;
+  const isFirstTimeUser = guestCount === 0;
 
   // Debug logging with more detail
   useEffect(() => {
     console.log('=== ONBOARDING DEBUG ===');
     console.log('User ID:', user?.id);
     console.log('Guest Count:', guestCount);
-    console.log('Recipe Count:', recipeCount);
     console.log('Onboarding State:', onboardingState);
     console.log('Has Seen Welcome:', onboardingState.has_seen_welcome);
     console.log('Welcome Dismissed At:', onboardingState.welcome_dismissed_at);
@@ -198,7 +283,7 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
     console.log('Is First Time User:', isFirstTimeUser);
     console.log('Show Welcome Overlay:', showWelcomeOverlay);
     console.log('========================');
-  }, [guestCount, recipeCount, onboardingState, isFirstTimeUser, showWelcomeOverlay, user?.id, showWelcome, showOnboardingCards, showOnboardingResume, shouldShowOnboarding]);
+  }, [guestCount, onboardingState, isFirstTimeUser, showWelcomeOverlay, user?.id, showWelcome, showOnboardingCards, showOnboardingResume, shouldShowOnboarding]);
 
   const dismissWelcome = useCallback(() => {
     console.log('Dismissing welcome overlay...');
@@ -239,13 +324,41 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
     setShowOnboardingCards(true);
   }, []);
 
+  const skipAllOnboarding = useCallback(() => {
+    console.log('Skipping all onboarding...');
+    
+    // Hide all onboarding components
+    setShowWelcome(false);
+    setShowOnboardingCards(false);
+    setShowFirstRecipeExperience(false);
+    
+    // Update database to mark onboarding as dismissed
+    updateOnboardingState({
+      has_seen_welcome: true,
+      welcome_dismissed_at: new Date().toISOString(),
+      last_onboarding_shown: new Date().toISOString(),
+      dismissal_count: onboardingState.dismissal_count + 1
+    });
+  }, [updateOnboardingState, onboardingState.dismissal_count]);
+
   const completeStep = useCallback((stepId: OnboardingSteps) => {
-    if (!onboardingState.completed_steps.includes(stepId)) {
+    setOnboardingState(prev => {
+      // Only update if step is not already completed
+      if (prev.completed_steps.includes(stepId)) {
+        return prev;
+      }
+      
+      const updatedSteps = [...prev.completed_steps, stepId];
       updateOnboardingState({
-        completed_steps: [...onboardingState.completed_steps, stepId]
+        completed_steps: updatedSteps
       });
-    }
-  }, [onboardingState.completed_steps, updateOnboardingState]);
+      
+      return {
+        ...prev,
+        completed_steps: updatedSteps
+      };
+    });
+  }, [updateOnboardingState]);
 
   const skipOnboarding = useCallback(() => {
     console.log('Skipping onboarding...');
@@ -312,6 +425,7 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
     completedSteps,
     currentStep,
     dismissWelcome,
+    skipAllOnboarding,
     startFirstRecipeExperience,
     skipFirstRecipeExperience,
     completeStep,

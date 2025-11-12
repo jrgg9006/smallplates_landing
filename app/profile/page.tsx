@@ -20,11 +20,12 @@ import { useProfileOnboarding, OnboardingSteps } from "@/lib/contexts/ProfileOnb
 import { WelcomeOverlay } from "@/components/onboarding/WelcomeOverlay";
 import { OnboardingCards } from "@/components/onboarding/OnboardingCards";
 import { FirstRecipeExperience } from "@/components/onboarding/FirstRecipeExperience";
-import { OnboardingResume } from "@/components/profile/OnboardingResume";
-import { EmptyStateBanner } from "@/components/profile/EmptyStateBanner";
 import { FirstRecipeModal, RecipeData } from "@/components/profile/FirstRecipeModal";
-import { CustomizeCollectorModal } from "@/components/profile/CustomizeCollectorModal";
+import { ShareCollectionModal } from "@/components/profile/guests/ShareCollectionModal";
 import { addUserRecipe, UserRecipeData } from "@/lib/supabase/recipes";
+import { getUserCollectionToken } from "@/lib/supabase/collection";
+import { createShareURL } from "@/lib/utils/sharing";
+import { getCurrentProfile } from "@/lib/supabase/profiles";
 
 export default function ProfilePage() {
   const { user, loading, signOut } = useAuth();
@@ -33,15 +34,14 @@ export default function ProfilePage() {
     shouldShowOnboarding, 
     completedSteps,
     showWelcomeOverlay,
-    showOnboardingResume,
     showFirstRecipeExperience,
     dismissWelcome,
+    skipAllOnboarding,
     startFirstRecipeExperience,
     skipFirstRecipeExperience,
     completeStep,
     skipOnboarding,
-    resumeOnboarding,
-    permanentlyDismissOnboarding
+    resumeOnboarding
   } = useProfileOnboarding();
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -57,7 +57,9 @@ export default function ProfilePage() {
     submitted: 0
   });
   const [isFirstRecipeModalOpen, setIsFirstRecipeModalOpen] = useState(false);
-  const [isCustomizeCollectorOpen, setIsCustomizeCollectorOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [collectionUrl, setCollectionUrl] = useState<string>('');
+  const [userFullName, setUserFullName] = useState<string | null>(null);
 
   const handleAddGuest = () => {
     setIsAddModalOpen(true);
@@ -71,14 +73,16 @@ export default function ProfilePage() {
     setRefreshTrigger(prev => prev + 1);
     loadProgressData(); // Reload progress when guest is added
     loadGuestCounts(); // Reload guest counts when guest is added
-    // Complete the onboarding step if this is their first guest
-    if (guestCounts.all === 0) {
+    
+    // Auto-sync will detect the new guest and complete the step automatically
+    // But we can also complete it directly for immediate UI feedback
+    if (!completedSteps.includes(OnboardingSteps.FIRST_GUEST)) {
       completeStep(OnboardingSteps.FIRST_GUEST);
     }
   };
 
   // Handle onboarding actions
-  const handleOnboardingAction = (stepId: OnboardingSteps) => {
+  const handleOnboardingAction = async (stepId: OnboardingSteps) => {
     switch (stepId) {
       case OnboardingSteps.FIRST_RECIPE:
         // Show first recipe experience (this also hides onboarding cards)
@@ -88,7 +92,20 @@ export default function ProfilePage() {
         setIsAddModalOpen(true);
         break;
       case OnboardingSteps.CUSTOMIZE_COLLECTOR:
-        setIsCustomizeCollectorOpen(true);
+        // Load collection token and user profile, then open share modal
+        try {
+          const { data: tokenData } = await getUserCollectionToken();
+          const { data: profile } = await getCurrentProfile();
+          
+          if (tokenData && typeof window !== 'undefined') {
+            const url = createShareURL(window.location.origin, tokenData);
+            setCollectionUrl(url);
+            setUserFullName(profile?.full_name || null);
+            setIsShareModalOpen(true);
+          }
+        } catch (err) {
+          console.error('Error loading collection data:', err);
+        }
         break;
     }
   };
@@ -119,10 +136,6 @@ export default function ProfilePage() {
       console.error('Error saving recipe:', err);
       throw err; // Let the component handle the error display
     }
-  };
-
-  const handleUploadFirstRecipe = () => {
-    setIsFirstRecipeModalOpen(true);
   };
 
   const toggleMobileMenu = () => {
@@ -246,7 +259,7 @@ export default function ProfilePage() {
         <WelcomeOverlay
           userName={user.email?.split('@')[0] || 'there'}
           onStart={startFirstRecipeExperience}
-          onDismiss={dismissWelcome}
+          onDismiss={skipAllOnboarding}
           isVisible={showWelcomeOverlay}
         />
       )}
@@ -370,8 +383,18 @@ export default function ProfilePage() {
               /> */}
             </div>
             
-            {/* Right side - Progress bar - centered on mobile */}
-            <div className="flex-shrink-0 flex justify-center lg:justify-end">
+            {/* Right side - Complete Onboarding button + Progress bar - centered on mobile */}
+            <div className="flex-shrink-0 flex items-center gap-4 justify-center lg:justify-end">
+              {/* Complete Onboarding Button - Only show if onboarding is not complete */}
+              {completedSteps.length < 3 && (
+                <button
+                  onClick={resumeOnboarding}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-white transition-all hover:opacity-90 shadow-sm"
+                  style={{ backgroundColor: '#464665' }}
+                >
+                  Complete Onboarding
+                </button>
+              )}
               <ProgressBar 
                 current={progressData?.current_recipes || 0}
                 goal={progressData?.goal_recipes || 40}
@@ -381,25 +404,8 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Onboarding Resume Component */}
-        {showOnboardingResume && (
-          <OnboardingResume
-            completedSteps={completedSteps}
-            onResume={resumeOnboarding}
-            onDismiss={permanentlyDismissOnboarding}
-          />
-        )}
-
-        {/* Empty State Banner (subtle reminder) */}
-        {!shouldShowOnboarding && !showOnboardingResume && isEmptyState && (
-          <EmptyStateBanner
-            hasFirstRecipe={hasFirstRecipe}
-            onUploadRecipe={handleUploadFirstRecipe}
-          />
-        )}
-
         {/* Main Content - Conditional rendering based on onboarding state */}
-        {shouldShowOnboarding && isEmptyState ? (
+        {shouldShowOnboarding ? (
           <div className="fixed inset-0 z-40 bg-white/90 backdrop-blur-sm">
             <div className="flex h-full items-center justify-center p-8">
               <div className="max-w-6xl w-full">
@@ -411,7 +417,7 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-        ) : !showOnboardingResume ? (
+        ) : (
           <>
             {/* Statistics and Recipe Collector Section */}
             <div className="mb-8 lg:mb-16 flex flex-col lg:flex-row gap-4 lg:gap-8 items-stretch">
@@ -446,7 +452,7 @@ export default function ProfilePage() {
               />
             </div>
           </>
-        ) : null}
+        )}
 
 
         {/* Add Guest Modal */}
@@ -454,6 +460,7 @@ export default function ProfilePage() {
           isOpen={isAddModalOpen}
           onClose={handleCloseAddModal}
           onGuestAdded={handleGuestAdded}
+          isFirstGuest={guestCounts.all === 0}
         />
 
         {/* First Recipe Modal */}
@@ -464,16 +471,21 @@ export default function ProfilePage() {
           isFirstRecipe={true}
         />
 
-        {/* Customize Collector Modal */}
-        <CustomizeCollectorModal
-          isOpen={isCustomizeCollectorOpen}
-          onClose={() => setIsCustomizeCollectorOpen(false)}
-          onSave={() => {
-            setIsCustomizeCollectorOpen(false);
-            completeStep(OnboardingSteps.CUSTOMIZE_COLLECTOR);
-            setRefreshTrigger(prev => prev + 1);
-          }}
-        />
+        {/* Share Collection Modal */}
+        {collectionUrl && (
+          <ShareCollectionModal
+            isOpen={isShareModalOpen}
+            onClose={() => {
+              setIsShareModalOpen(false);
+            }}
+            collectionUrl={collectionUrl}
+            userName={userFullName}
+            isOnboardingStep={shouldShowOnboarding && !completedSteps.includes(OnboardingSteps.CUSTOMIZE_COLLECTOR)}
+            onStepComplete={() => {
+              completeStep(OnboardingSteps.CUSTOMIZE_COLLECTOR);
+            }}
+          />
+        )}
       </div>
     </div>
   );

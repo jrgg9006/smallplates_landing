@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { RecipeData } from '@/components/profile/FirstRecipeModal';
+import { OnboardingBadge } from '@/components/onboarding/OnboardingBadge';
 
 interface FirstRecipeExperienceProps {
   onSubmit: (data: RecipeData) => void;
@@ -97,12 +98,12 @@ export function FirstRecipeExperience({ onSubmit, onSkip }: FirstRecipeExperienc
               {/* Left column - Instructions */}
               <div className="flex flex-col lg:col-span-2">
                 <p className="text-sm font-medium text-gray-500 mb-2">
-                  STEP 1
+                  STEP 1: ADD YOUR OWN
                 </p>
                 <h1 className="font-light text-4xl md:text-5xl mb-6 tracking-tight">
                   Your First Recipe
                 </h1>
-                <div className="text-lg md:text-xl text-gray-700 leading-relaxed mb-8 max-w-xl mx-auto">
+                <div className="text-lg md:text-xl text-gray-700 leading-relaxed mb-6 max-w-xl mx-auto">
                   <p className="mb-6">
                     Don&apos;t overthink it! Just keep it simple.
                   </p>
@@ -110,9 +111,16 @@ export function FirstRecipeExperience({ onSubmit, onSkip }: FirstRecipeExperienc
                     What did you have for breakfast yesterday? What&apos;s your favorite dinner? A simple bar drink you love?
                   </p>
                   <p className="text-gray-600">
-                    We&apos;ll show you how this recipe looks in your book printed with an image. It&apos;s magical!
+                    Try it out! We&apos;ll show you how this recipe looks in your book printed with an image.
                   </p>
                 </div>
+                
+                {/* Onboarding Badge */}
+                <OnboardingBadge
+                  stepNumber={1}
+                  title="Step 1 of Onboarding"
+                  message="Add your first recipe to see how it will look in your printed cookbook. Keep it simple and fun!"
+                />
               </div>
 
               {/* Right column - Form */}

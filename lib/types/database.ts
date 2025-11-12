@@ -390,6 +390,7 @@ export interface CollectionTokenInfo {
   user_id: string;
   user_name: string;
   raw_full_name: string | null;
+  custom_share_message: string | null;
   token: string;
   is_valid: boolean;
 }

@@ -105,7 +105,7 @@ export function OnboardingCards({ completedSteps, onAction, onExit }: Onboarding
               onClick={onExit}
               className="text-sm text-gray-500 hover:text-gray-700 transition-colors border-b border-transparent hover:border-gray-400"
             >
-              Exit tutorial
+              Exit onboarding
             </button>
           </div>
         </div>
