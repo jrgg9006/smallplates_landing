@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { AuthProvider } from '@/lib/contexts/AuthContext'
+import { ProfileOnboardingProvider } from '@/lib/contexts/ProfileOnboardingContext'
 
 export const metadata: Metadata = {
   title: 'Small Plates & Company — The People Behind Every Recipe',
@@ -66,7 +67,9 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-white text-gray-900">
         <AuthProvider>
-          {children}
+          <ProfileOnboardingProvider>
+            {children}
+          </ProfileOnboardingProvider>
         </AuthProvider>
       </body>
     </html>

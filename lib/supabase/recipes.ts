@@ -6,6 +6,14 @@ import type {
   RecipeFormData,
 } from '@/lib/types/database';
 
+// User recipe types
+export interface UserRecipeData {
+  recipeName: string;
+  ingredients: string;
+  instructions: string;
+  personalNote?: string;
+}
+
 /**
  * Add a new recipe for a guest
  */
@@ -197,6 +205,78 @@ export async function deleteRecipe(recipeId: string) {
     .eq('id', recipeId);
 
   return { data: null, error: error?.message || null };
+}
+
+/**
+ * Add a user's own recipe to their collection
+ */
+export async function addUserRecipe(recipeData: UserRecipeData) {
+  const supabase = createSupabaseClient();
+  
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  try {
+    // For user recipes, we'll store them in the guest_recipes table
+    // but with a special guest_id that represents the user themselves
+    // First, check if user has a "self" guest entry
+    let { data: selfGuest, error: selfGuestError } = await supabase
+      .from('guests')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('is_self', true)
+      .single();
+
+    // If no self guest exists, create one
+    if (selfGuestError || !selfGuest) {
+      const { data: newSelfGuest, error: createError } = await supabase
+        .from('guests')
+        .insert({
+          user_id: user.id,
+          first_name: user.user_metadata.firstName || 'My',
+          last_name: 'Recipes',
+          email: user.email,
+          is_self: true,
+          status: 'submitted'
+        })
+        .select('id')
+        .single();
+
+      if (createError) {
+        console.error('Failed to create self guest:', createError);
+        return { data: null, error: 'Failed to create recipe collection' };
+      }
+
+      selfGuest = newSelfGuest;
+    }
+
+    // Add the recipe
+    const { data, error } = await supabase
+      .from('guest_recipes')
+      .insert({
+        guest_id: selfGuest.id,
+        recipe_name: recipeData.recipeName,
+        recipe_ingredients: recipeData.ingredients,
+        recipe_instructions: recipeData.instructions,
+        personal_note: recipeData.personalNote || '',
+        submission_status: 'approved' // User's own recipes are auto-approved
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Failed to add user recipe:', error);
+      return { data: null, error: error.message };
+    }
+
+    return { data, error: null };
+  } catch (err) {
+    console.error('Unexpected error in addUserRecipe:', err);
+    return { data: null, error: 'An unexpected error occurred' };
+  }
 }
 
 /**
