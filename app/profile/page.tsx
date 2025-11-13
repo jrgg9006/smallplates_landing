@@ -353,12 +353,12 @@ export default function ProfilePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
               >
-                <h1 className="font-serif text-6xl md:text-6xl font-medium tracking-tight text-gray-900 mb-3">
+                <h1 className="font-serif text-6xl md:text-6xl font-medium tracking-tight text-gray-900 mb-1">
                   Guest List
                 </h1>
-                <p className="font-serif text-2xl md:text-3xl lg:text-3xl text-gray-700 font-light italic">
+                <h3 className="text-lg font-light text-gray-600">
                   Your cookbook is cooking...
-                </p>
+                </h3>
               </motion.div>
               
               {/* HIDDEN: Original Images - Easy to revert */}
