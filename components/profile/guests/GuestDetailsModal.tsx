@@ -474,17 +474,6 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
             <p className="text-sm text-green-600">{successMessage}</p>
           </div>
         )}
-        
-        {/* Save Button - Fixed position in bottom right */}
-        <div className="absolute bottom-6 right-6">
-          <Button 
-            onClick={handleSave}
-            disabled={loading}
-            className="bg-black text-white hover:bg-gray-800 px-6 py-2 rounded-full disabled:opacity-50"
-          >
-            {loading ? 'Saving...' : 'Save'}
-          </Button>
-        </div>
     </>
   );
 

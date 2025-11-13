@@ -235,6 +235,8 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
                       className={`px-8 py-5 tracking-wide ${
                         header.column.id === 'status' || header.column.id === 'recipes_received' 
                           ? 'text-center' 
+                          : header.column.id === 'actions'
+                          ? 'text-right'
                           : 'text-left'
                       }`}
                     >
@@ -264,10 +266,14 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
                     {row.getVisibleCells().map((cell) => {
                       // Center align for status and recipes_received columns
                       const isCenteredColumn = cell.column.id === 'status' || cell.column.id === 'recipes_received';
+                      // Right align for actions column
+                      const isRightAlignedColumn = cell.column.id === 'actions';
                       return (
                         <td 
                           key={cell.id} 
-                          className={`px-8 py-6 whitespace-nowrap ${isCenteredColumn ? 'text-center' : ''}`}
+                          className={`px-8 py-6 whitespace-nowrap ${
+                            isCenteredColumn ? 'text-center' : isRightAlignedColumn ? 'text-right' : ''
+                          }`}
                         >
                           {flexRender(
                             cell.column.columnDef.cell,

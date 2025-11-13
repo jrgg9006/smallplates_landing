@@ -389,10 +389,10 @@ export default function ProfilePage() {
               {completedSteps.length < 3 && (
                 <button
                   onClick={resumeOnboarding}
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-white transition-all hover:opacity-90 shadow-sm"
+                  className="px-16 py-2 rounded-full text-sm font-light tracking-wide text-white transition-all duration-200 hover:opacity-95 hover:shadow-lg shadow-lg"
                   style={{ backgroundColor: '#464665' }}
                 >
-                  Complete Onboarding
+                  Finish Onboarding
                 </button>
               )}
               <ProgressBar 

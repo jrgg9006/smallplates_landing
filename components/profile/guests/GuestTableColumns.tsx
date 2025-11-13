@@ -308,7 +308,7 @@ export const columns: ColumnDef<Guest>[] = [
   },
   {
     id: "actions",
-    header: "",
+    header: () => <div className="table-header-style text-right pr-4">Actions</div>,
     cell: ({ row, table }) => {
       const guest = row.original;
       const onModalClose = table.options.meta?.onModalClose;
