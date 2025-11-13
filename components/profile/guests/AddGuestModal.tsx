@@ -7,7 +7,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Drawer } from "vaul";
 import {
   Tabs,
   TabsContent,
@@ -408,38 +407,35 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded, isFirstGuest = fa
     </>
   );
 
-  // Mobile version - Drawer that slides up from bottom
+  // Mobile version - Sheet that slides up from bottom
   if (isMobile) {
     return (
-      <Drawer.Root open={isOpen} onOpenChange={onClose}>
-        <Drawer.Portal>
-          <Drawer.Overlay className="fixed inset-0 bg-black/40" />
-          <Drawer.Content className="fixed bottom-0 left-0 right-0 z-50 mt-24 flex h-full max-h-[85vh] flex-col rounded-t-[10px] bg-white">
-            <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300" />
+      <Sheet open={isOpen} onOpenChange={onClose}>
+        <SheetContent side="bottom" className="!h-[85vh] !max-h-[85vh] rounded-t-[20px] flex flex-col overflow-hidden p-0">
+          <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300" />
+          
+          <div className="p-6 flex flex-col h-full overflow-hidden">
+            <SheetHeader className="px-0">
+              <SheetTitle className="font-serif text-2xl font-semibold mb-4">Add Guest</SheetTitle>
+            </SheetHeader>
             
-            <div className="p-6 flex flex-col h-full overflow-hidden">
-              <Drawer.Title className="font-serif text-2xl font-semibold mb-4">
-                Add Guest
-              </Drawer.Title>
-              
-              <div className="flex-1 overflow-hidden flex flex-col">
-                {modalContent}
-              </div>
-              
-              {/* Save Button */}
-              <div className="mt-4 pb-safe">
-                <Button 
-                  onClick={handleSave}
-                  disabled={loading}
-                  className="w-full bg-black text-white hover:bg-gray-800 py-3 rounded-full disabled:opacity-50"
-                >
-                  {loading ? 'Saving...' : 'Save'}
-                </Button>
-              </div>
+            <div className="flex-1 overflow-hidden flex flex-col">
+              {modalContent}
             </div>
-          </Drawer.Content>
-        </Drawer.Portal>
-      </Drawer.Root>
+            
+            {/* Save Button */}
+            <div className="mt-4 pb-safe">
+              <Button 
+                onClick={handleSave}
+                disabled={loading}
+                className="w-full bg-black text-white hover:bg-gray-800 py-3 rounded-full disabled:opacity-50"
+              >
+                {loading ? 'Saving...' : 'Save'}
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     );
   }
 
