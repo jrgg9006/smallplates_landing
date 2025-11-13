@@ -46,7 +46,7 @@ export function WelcomeOverlay({ userName, onStart, onDismiss, isVisible }: Welc
               </h1>
               
               <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-2">
-                Hello {userName} 👋
+                Hello there! 👋
               </p>
               
               <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-8 max-w-xl mx-auto">
