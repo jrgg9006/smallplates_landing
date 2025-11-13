@@ -150,7 +150,9 @@ export function FirstRecipeExperience({ onSubmit, onSkip }: FirstRecipeExperienc
                       id="ingredients"
                       value={formData.ingredients}
                       onChange={(e) => handleFieldChange('ingredients', e.target.value)}
-                      placeholder="• 2 eggs\n• 1 slice of bread\n• Butter"
+                      placeholder={`• 2 eggs
+• 1 slice of bread
+• Butter`}
                       rows={5}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical"
                       required
@@ -166,7 +168,9 @@ export function FirstRecipeExperience({ onSubmit, onSkip }: FirstRecipeExperienc
                       id="instructions"
                       value={formData.instructions}
                       onChange={(e) => handleFieldChange('instructions', e.target.value)}
-                      placeholder="1. Heat the pan\n2. Fry the eggs\n3. Toast the bread"
+                      placeholder={`1. Heat the pan
+2. Fry the eggs
+3. Toast the bread`}
                       rows={6}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical"
                       required
