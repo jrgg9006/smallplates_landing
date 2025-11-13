@@ -188,8 +188,17 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
         
         setGuestCount(guestTotal || 0);
         setShowWelcome(false);
-        setShowOnboardingCards(false);
-        setShowOnboardingResume(false);
+        // Don't automatically hide onboarding cards - let user explicitly exit
+        // Only hide if user has explicitly dismissed it
+        const dismissalCount = onboardingState.dismissal_count;
+        if (dismissalCount > 0) {
+          setShowOnboardingCards(false);
+          setShowOnboardingResume(false);
+        } else {
+          // Keep showing cards even if all steps are complete, until user exits
+          setShowOnboardingCards(true);
+          setShowOnboardingResume(false);
+        }
         return;
       }
 
@@ -245,7 +254,8 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
         setShowWelcome(true);
         setShowOnboardingCards(false);
         setShowOnboardingResume(false);
-      } else if (hasSeenWelcome && !finalHasCompletedOnboarding && dismissalCount === 0) {
+      } else if (hasSeenWelcome && dismissalCount === 0) {
+        // Show onboarding cards as long as user hasn't dismissed, even if steps are completed
         setShowWelcome(false);
         setShowOnboardingCards(true);
         setShowOnboardingResume(false);
