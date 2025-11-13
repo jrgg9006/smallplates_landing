@@ -207,7 +207,7 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
         <div className="flex-shrink-0 flex items-center gap-4 pt-0 pb-4 border-b border-gray-200">
           <div className="flex-shrink-0">
             <Image
-              src={getGuestProfileIcon(guest.id)}
+              src={getGuestProfileIcon(guest.id, guest.is_self)}
               alt="Guest profile icon"
               width={96}
               height={96}

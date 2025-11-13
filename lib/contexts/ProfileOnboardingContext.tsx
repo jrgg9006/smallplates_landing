@@ -239,7 +239,7 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
       const finalCompletedCount = finalCompletedSteps.length;
       const dismissalCount = onboardingState.dismissal_count;
       const finalHasCompletedOnboarding = finalCompletedCount === 3;
-      const hasBeenDismissedTooManyTimes = dismissalCount >= 3;
+      const hasBeenDismissedTooManyTimes = dismissalCount >= 5;
       
       if (!hasSeenWelcome) {
         setShowWelcome(true);

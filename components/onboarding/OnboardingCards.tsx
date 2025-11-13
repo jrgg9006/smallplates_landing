@@ -38,7 +38,7 @@ const CARD_CONFIGS: CardConfig[] = [
     description: 'Add an important person in your life. Just add their name - you won\'t send anything yet.',
     reassurance: 'Just add their name - you won\'t send anything yet',
     cta: '+ Add my first guest',
-    backgroundGradient: 'from-gray-200 to-gray-100'
+    image: '/images/profile_onboarding/first_guest.png'
   },
   {
     id: OnboardingSteps.CUSTOMIZE_COLLECTOR,
@@ -46,7 +46,7 @@ const CARD_CONFIGS: CardConfig[] = [
     title: 'PERSONALIZE YOUR LINK',
     description: 'This is your main tool to gather recipes. Make it your style and share it with friends.',
     cta: 'Personalize my link',
-    backgroundGradient: 'from-gray-200 to-gray-100'
+    image: '/images/profile_onboarding/first_recipe_collector.png'
   }
 ];
 

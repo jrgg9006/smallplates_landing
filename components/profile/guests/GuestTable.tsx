@@ -232,7 +232,11 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-8 py-5 text-left tracking-wide"
+                      className={`px-8 py-5 tracking-wide ${
+                        header.column.id === 'status' || header.column.id === 'recipes_received' 
+                          ? 'text-center' 
+                          : 'text-left'
+                      }`}
                     >
                       {header.isPlaceholder
                         ? null
@@ -257,14 +261,21 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
                       handleGuestClick(row.original);
                     }}
                   >
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="px-8 py-6 whitespace-nowrap">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </td>
-                    ))}
+                    {row.getVisibleCells().map((cell) => {
+                      // Center align for status and recipes_received columns
+                      const isCenteredColumn = cell.column.id === 'status' || cell.column.id === 'recipes_received';
+                      return (
+                        <td 
+                          key={cell.id} 
+                          className={`px-8 py-6 whitespace-nowrap ${isCenteredColumn ? 'text-center' : ''}`}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))
               ) : (

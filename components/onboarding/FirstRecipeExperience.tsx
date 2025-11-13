@@ -78,17 +78,17 @@ export function FirstRecipeExperience({ onSubmit, onSkip }: FirstRecipeExperienc
                 <div className="mb-6">
                   <div className="text-6xl mb-4">✨</div>
                   <h2 className="font-light text-3xl md:text-4xl mb-4 tracking-tight">
-                    Enviado
+                    Recipe Sent
                   </h2>
                 </div>
                 <p className="text-lg text-gray-700 leading-relaxed mb-8">
-                  Te enviaremos cómo se ve tu receta a tu correo pronto.
+                  We will send you a preview of your recipe soon.
                 </p>
                 <Button
                   onClick={onSkip}
                   className="bg-black text-white px-8 py-4 text-lg hover:bg-gray-800 transition-colors"
                 >
-                  Continuar
+                  Continue
                 </Button>
               </div>
             </div>

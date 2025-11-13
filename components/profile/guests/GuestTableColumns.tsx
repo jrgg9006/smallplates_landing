@@ -241,7 +241,7 @@ export const columns: ColumnDef<Guest>[] = [
           <div className="flex items-center gap-3 pl-4">
             <div className="flex-shrink-0">
               <Image
-                src={getGuestProfileIcon(guest.id)}
+                src={getGuestProfileIcon(guest.id, guest.is_self)}
                 alt="Chef profile icon"
                 width={56}
                 height={56}
@@ -264,7 +264,7 @@ export const columns: ColumnDef<Guest>[] = [
         <div className="flex items-center gap-3 pl-4">
           <div className="flex-shrink-0">
             <Image
-              src={getGuestProfileIcon(guest.id)}
+              src={getGuestProfileIcon(guest.id, guest.is_self)}
               alt="Chef profile icon"
               width={56}
               height={56}
@@ -278,22 +278,30 @@ export const columns: ColumnDef<Guest>[] = [
   },
   {
     accessorKey: "status",
-    header: () => <div className="table-header-style">Recipe Status</div>,
+    header: () => <div className="table-header-style text-center">Recipe Status</div>,
     cell: ({ row }) => {
       const guest = row.original;
       const status = row.getValue("status") as Guest["status"];
-      const showRecipeCount = status !== 'pending';
       
       return (
-        <div className="flex flex-col justify-center space-y-1 h-full">
-          <div>
-            <StatusBadge status={status} />
-          </div>
-          {showRecipeCount && (
-            <div className="text-xs text-gray-500">
-              Recipes: {guest.recipes_received || 0}
-            </div>
-          )}
+        <div className="flex items-center justify-center h-full w-full">
+          <StatusBadge status={status} />
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "recipes_received",
+    header: () => <div className="table-header-style text-center">Recipes</div>,
+    cell: ({ row }) => {
+      const guest = row.original;
+      const recipeCount = guest.recipes_received || 0;
+      
+      return (
+        <div className="flex items-center justify-center h-full w-full">
+          <span className="text-sm font-medium text-gray-900">
+            {recipeCount}
+          </span>
         </div>
       );
     },

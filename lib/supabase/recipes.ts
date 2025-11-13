@@ -1,4 +1,5 @@
 import { createSupabaseClient } from '@/lib/supabase/client';
+import { getCurrentProfile } from '@/lib/supabase/profiles';
 import type {
   GuestRecipe,
   GuestRecipeInsert,
@@ -220,9 +221,20 @@ export async function addUserRecipe(recipeData: UserRecipeData) {
   }
 
   try {
-    // For user recipes, we'll store them in the guest_recipes table
-    // but with a special guest_id that represents the user themselves
-    // First, check if user has a "self" guest entry
+    // Get user's profile to get their name
+    const { data: profile, error: profileError } = await getCurrentProfile();
+    if (profileError) {
+      console.error('Failed to get user profile:', profileError);
+      return { data: null, error: 'Failed to get user profile' };
+    }
+
+    // Extract name from profile
+    const fullName = profile?.full_name || '';
+    const nameParts = fullName.split(' ');
+    const firstName = nameParts[0] || 'My';
+    const lastName = nameParts.slice(1).join(' ') || 'Recipes';
+
+    // Check if user has a "self" guest entry
     let { data: selfGuest, error: selfGuestError } = await supabase
       .from('guests')
       .select('id')
@@ -230,15 +242,15 @@ export async function addUserRecipe(recipeData: UserRecipeData) {
       .eq('is_self', true)
       .single();
 
-    // If no self guest exists, create one
+    // If no self guest exists, create one with user's name
     if (selfGuestError || !selfGuest) {
       const { data: newSelfGuest, error: createError } = await supabase
         .from('guests')
         .insert({
           user_id: user.id,
-          first_name: user.user_metadata.firstName || 'My',
-          last_name: 'Recipes',
-          email: user.email,
+          first_name: firstName,
+          last_name: lastName,
+          email: user.email || '',
           is_self: true,
           status: 'submitted'
         })
@@ -253,16 +265,20 @@ export async function addUserRecipe(recipeData: UserRecipeData) {
       selfGuest = newSelfGuest;
     }
 
-    // Add the recipe
+    // Add the recipe with correct column names
+    // Use 'submitted' status so the trigger increments recipes_received
+    // User's own recipes are auto-approved but stored as 'submitted' for consistency
     const { data, error } = await supabase
       .from('guest_recipes')
       .insert({
         guest_id: selfGuest.id,
+        user_id: user.id,
         recipe_name: recipeData.recipeName,
-        recipe_ingredients: recipeData.ingredients,
-        recipe_instructions: recipeData.instructions,
-        personal_note: recipeData.personalNote || '',
-        submission_status: 'approved' // User's own recipes are auto-approved
+        ingredients: recipeData.ingredients,
+        instructions: recipeData.instructions,
+        comments: recipeData.personalNote || null,
+        submission_status: 'submitted',
+        submitted_at: new Date().toISOString()
       })
       .select()
       .single();
