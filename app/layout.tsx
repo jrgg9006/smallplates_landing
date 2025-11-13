@@ -3,6 +3,7 @@ import './globals.css'
 import { AuthProvider } from '@/lib/contexts/AuthContext'
 import { ProfileOnboardingProvider } from '@/lib/contexts/ProfileOnboardingContext'
 import { QueryProvider } from '@/lib/providers/QueryProvider'
+import { Analytics } from '@vercel/analytics/react'
 
 export const metadata: Metadata = {
   title: 'Small Plates & Company — The People Behind Every Recipe',
@@ -74,6 +75,7 @@ export default function RootLayout({
             </ProfileOnboardingProvider>
           </AuthProvider>
         </QueryProvider>
+        <Analytics />
       </body>
     </html>
   )
