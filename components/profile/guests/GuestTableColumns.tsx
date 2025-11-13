@@ -232,7 +232,7 @@ export const columns: ColumnDef<Guest>[] = [
       );
     },
     cell: ({ row }) => {
-      const guest = row.original;
+      const guest: Guest = row.original;
       const fullName = `${guest.first_name} ${guest.last_name || ''}`.trim();
       const hasPrintedName = guest.printed_name && guest.printed_name.trim();
       

@@ -17,11 +17,10 @@ export function OnboardingBadge({
 }: OnboardingBadgeProps) {
   return (
     <div 
-      className={`p-5 rounded-xl shadow-lg relative z-10 ring-1 ${className}`}
+      className={`p-5 rounded-xl shadow-lg relative z-10 ring-1 ring-[#5a5a7a] ${className}`}
       style={{ 
         backgroundColor: '#464665',
-        borderColor: '#5a5a7a',
-        ringColor: '#5a5a7a'
+        borderColor: '#5a5a7a'
       }}
     >
       <div className="flex items-start gap-4">

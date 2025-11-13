@@ -171,7 +171,7 @@ export function CustomizeCollectorModal({
                 placeholder="Tell your guests why you're collecting recipes..."
               />
               <p className="text-xs text-gray-500 mt-1">
-                Explain why you're collecting recipes and make it personal
+                Explain why you&apos;re collecting recipes and make it personal
               </p>
             </div>
 

@@ -280,7 +280,7 @@ export default function AdminWaitlistPage() {
                               <div className="flex flex-col gap-2">
                                 <div className="text-sm text-orange-600 font-medium">👁️ Visited page</div>
                                 <div className="text-xs text-gray-500">
-                                  Started signup but didn't complete
+                                  Started signup but didn&apos;t complete
                                 </div>
                                 <button
                                   onClick={() => handleInvite(user.email, user.id)}
