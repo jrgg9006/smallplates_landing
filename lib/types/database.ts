@@ -70,6 +70,7 @@ export interface Database {
           tags: string[] | null;
           source: GuestSource;
           is_archived: boolean;
+          is_self: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -91,6 +92,7 @@ export interface Database {
           tags?: string[] | null;
           source?: GuestSource;
           is_archived?: boolean;
+          is_self?: boolean;
         };
         Update: {
           first_name?: string;
@@ -108,6 +110,7 @@ export interface Database {
           tags?: string[] | null;
           source?: GuestSource;
           is_archived?: boolean;
+          is_self?: boolean;
         };
       };
       guest_recipes: {
@@ -390,6 +393,7 @@ export interface CollectionTokenInfo {
   user_id: string;
   user_name: string;
   raw_full_name: string | null;
+  custom_share_message: string | null;
   token: string;
   is_valid: boolean;
 }

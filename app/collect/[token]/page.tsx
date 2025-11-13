@@ -26,8 +26,10 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
   const firstName = userName.split(' ')[0] || 'Someone'
   
   // Generate personalized meta tags
+  // Use custom_share_message if available, otherwise use default
   const title = 'Share a Recipe to my Cookbook - SP&Co'
-  const description = `${firstName} invites you to share your favorite recipe with them! They will print a cookbook with recipes from family and friends.`
+  const defaultDescription = `${firstName} invites you to share your favorite recipe with them! They will print a cookbook with recipes from family and friends.`
+  const description = tokenInfo.custom_share_message || defaultDescription
   
   return {
     title,

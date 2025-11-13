@@ -21,14 +21,16 @@ import { addGuest, checkGuestExists } from "@/lib/supabase/guests";
 import { addRecipe } from "@/lib/supabase/recipes";
 import type { GuestFormData } from "@/lib/types/database";
 import Image from "next/image";
+import { OnboardingBadge } from "@/components/onboarding/OnboardingBadge";
 
 interface AddGuestModalProps {
   isOpen: boolean;
   onClose: () => void;
   onGuestAdded?: () => void; // Callback to refresh the guest list
+  isFirstGuest?: boolean; // Show onboarding badge for first guest
 }
 
-export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalProps) {
+export function AddGuestModal({ isOpen, onClose, onGuestAdded, isFirstGuest = false }: AddGuestModalProps) {
   // Responsive hook to detect mobile
   const [isMobile, setIsMobile] = useState(false);
 
@@ -214,6 +216,15 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded }: AddGuestModalPr
         
         <TabsContent value="guest-info" className="flex-1 overflow-y-auto mt-6 px-2">
           <div className="space-y-6 pb-24 pr-4">
+            {/* Onboarding Badge - Show only for first guest */}
+            {isFirstGuest && (
+              <OnboardingBadge
+                stepNumber={2}
+                title="Step 2 of Onboarding"
+                message="Your first guest! Nothing will be sent yet. Just add their name and click save to continue your journey."
+              />
+            )}
+            
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="firstName" className="text-sm font-medium text-gray-600">First Name *</Label>

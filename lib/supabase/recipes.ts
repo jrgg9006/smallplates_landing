@@ -1,10 +1,19 @@
 import { createSupabaseClient } from '@/lib/supabase/client';
+import { getCurrentProfile } from '@/lib/supabase/profiles';
 import type {
   GuestRecipe,
   GuestRecipeInsert,
   GuestRecipeUpdate,
   RecipeFormData,
 } from '@/lib/types/database';
+
+// User recipe types
+export interface UserRecipeData {
+  recipeName: string;
+  ingredients: string;
+  instructions: string;
+  personalNote?: string;
+}
 
 /**
  * Add a new recipe for a guest
@@ -197,6 +206,93 @@ export async function deleteRecipe(recipeId: string) {
     .eq('id', recipeId);
 
   return { data: null, error: error?.message || null };
+}
+
+/**
+ * Add a user's own recipe to their collection
+ */
+export async function addUserRecipe(recipeData: UserRecipeData) {
+  const supabase = createSupabaseClient();
+  
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  try {
+    // Get user's profile to get their name
+    const { data: profile, error: profileError } = await getCurrentProfile();
+    if (profileError) {
+      console.error('Failed to get user profile:', profileError);
+      return { data: null, error: 'Failed to get user profile' };
+    }
+
+    // Extract name from profile
+    const fullName = profile?.full_name || '';
+    const nameParts = fullName.split(' ');
+    const firstName = nameParts[0] || 'My';
+    const lastName = nameParts.slice(1).join(' ') || 'Recipes';
+
+    // Check if user has a "self" guest entry
+    let { data: selfGuest, error: selfGuestError } = await supabase
+      .from('guests')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('is_self', true)
+      .single();
+
+    // If no self guest exists, create one with user's name
+    if (selfGuestError || !selfGuest) {
+      const { data: newSelfGuest, error: createError } = await supabase
+        .from('guests')
+        .insert({
+          user_id: user.id,
+          first_name: firstName,
+          last_name: lastName,
+          email: user.email || '',
+          is_self: true,
+          status: 'submitted'
+        })
+        .select('id')
+        .single();
+
+      if (createError) {
+        console.error('Failed to create self guest:', createError);
+        return { data: null, error: 'Failed to create recipe collection' };
+      }
+
+      selfGuest = newSelfGuest;
+    }
+
+    // Add the recipe with correct column names
+    // Use 'submitted' status so the trigger increments recipes_received
+    // User's own recipes are auto-approved but stored as 'submitted' for consistency
+    const { data, error } = await supabase
+      .from('guest_recipes')
+      .insert({
+        guest_id: selfGuest.id,
+        user_id: user.id,
+        recipe_name: recipeData.recipeName,
+        ingredients: recipeData.ingredients,
+        instructions: recipeData.instructions,
+        comments: recipeData.personalNote || null,
+        submission_status: 'submitted',
+        submitted_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Failed to add user recipe:', error);
+      return { data: null, error: error.message };
+    }
+
+    return { data, error: null };
+  } catch (err) {
+    console.error('Unexpected error in addUserRecipe:', err);
+    return { data: null, error: 'An unexpected error occurred' };
+  }
 }
 
 /**

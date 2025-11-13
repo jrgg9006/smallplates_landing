@@ -27,11 +27,17 @@ const PROFILE_ICONS = [
  * 
  * Args:
  *   guestId (string): The unique ID of the guest
+ *   isSelf (boolean, optional): Whether this is the user's own guest (is_self = true)
  * 
  * Returns:
  *   string: The full path to the profile icon
  */
-export function getGuestProfileIcon(guestId: string): string {
+export function getGuestProfileIcon(guestId: string, isSelf?: boolean): string {
+  // If this is the user's own guest, always use chef_you.png
+  if (isSelf) {
+    return '/images/icons_profile/chef_you.png';
+  }
+  
   // Convert guest ID to a number for deterministic selection
   let hash = 0;
   for (let i = 0; i < guestId.length; i++) {

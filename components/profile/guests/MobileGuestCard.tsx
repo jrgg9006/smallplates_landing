@@ -145,7 +145,7 @@ export function MobileGuestCard({
             <div className="flex items-center gap-3 mb-1">
               <div className="flex-shrink-0">
                 <Image
-                  src={getGuestProfileIcon(guest.id)}
+                  src={getGuestProfileIcon(guest.id, guest.is_self)}
                   alt="Chef profile icon"
                   width={48}
                   height={48}
