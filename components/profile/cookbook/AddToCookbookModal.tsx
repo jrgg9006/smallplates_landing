@@ -207,7 +207,7 @@ export function AddToCookbookModal({
           </DialogTitle>
           {recipe && (
             <DialogDescription>
-              Add "{recipe.recipe_name}" to a cookbook
+              Add &quot;{recipe.recipe_name}&quot; to a cookbook
             </DialogDescription>
           )}
         </DialogHeader>

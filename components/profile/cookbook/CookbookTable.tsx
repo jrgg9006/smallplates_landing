@@ -126,7 +126,7 @@ export function CookbookTable({
 
     const timeoutId = setTimeout(loadRecipes, searchValue.trim() ? 300 : 0);
     return () => clearTimeout(timeoutId);
-  }, [cookbookId, searchValue, refreshTrigger]);
+  }, [cookbookId, searchValue, refreshTrigger, onDataLoaded]);
 
   const refreshData = () => {
     setRefreshTrigger(prev => prev + 1);

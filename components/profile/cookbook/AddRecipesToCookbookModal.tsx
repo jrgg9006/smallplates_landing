@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -36,14 +36,7 @@ export function AddRecipesToCookbookModal({
   const [successCount, setSuccessCount] = useState(0);
   const [failedCount, setFailedCount] = useState(0);
 
-  // Load all recipes and cookbook recipes when modal opens
-  useEffect(() => {
-    if (isOpen && cookbookId) {
-      loadRecipes();
-    }
-  }, [isOpen, cookbookId]);
-
-  const loadRecipes = async () => {
+  const loadRecipes = useCallback(async () => {
     if (!cookbookId) return;
 
     setRecipesLoading(true);
@@ -83,7 +76,14 @@ export function AddRecipesToCookbookModal({
     } finally {
       setRecipesLoading(false);
     }
-  };
+  }, [cookbookId]);
+
+  // Load all recipes and cookbook recipes when modal opens
+  useEffect(() => {
+    if (isOpen && cookbookId) {
+      loadRecipes();
+    }
+  }, [isOpen, cookbookId, loadRecipes]);
 
   const resetForm = () => {
     setSelectedRecipeIds(new Set());
