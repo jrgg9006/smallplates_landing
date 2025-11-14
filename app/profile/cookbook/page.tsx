@@ -12,10 +12,13 @@ import { CookbookTableControls } from "@/components/profile/cookbook/CookbookTab
 import { CreateCookbookModal } from "@/components/profile/cookbook/CreateCookbookModal";
 import { AddNoteModal } from "@/components/profile/cookbook/AddNoteModal";
 import { EditCookbookNameModal } from "@/components/profile/cookbook/EditCookbookNameModal";
+import { AddRecipesToCookbookModal } from "@/components/profile/cookbook/AddRecipesToCookbookModal";
+import { AddRecipeModal } from "@/components/profile/recipes/AddRecipeModal";
 import ProfileDropdown from "@/components/profile/ProfileDropdown";
+import ProfileNavigation from "@/components/profile/ProfileNavigation";
 import { getAllCookbooks, getOrCreateDefaultCookbook } from "@/lib/supabase/cookbooks";
 import { Cookbook, RecipeInCookbook } from "@/lib/types/database";
-import { Pencil } from "lucide-react";
+import { Pencil, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function CookbookPage() {
@@ -25,6 +28,8 @@ export default function CookbookPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [isEditNameModalOpen, setIsEditNameModalOpen] = useState(false);
+  const [isAddRecipesModalOpen, setIsAddRecipesModalOpen] = useState(false);
+  const [isAddNewRecipeModalOpen, setIsAddNewRecipeModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [searchValue, setSearchValue] = useState('');
@@ -83,6 +88,28 @@ export default function CookbookPage() {
 
   const handleRecipesAdded = () => {
     setRefreshTrigger(prev => prev + 1);
+  };
+
+  const handleAddExistingRecipe = () => {
+    setIsAddRecipesModalOpen(true);
+  };
+
+  const handleAddNewRecipe = () => {
+    setIsAddNewRecipeModalOpen(true);
+  };
+
+  const handleCloseAddRecipesModal = () => {
+    setIsAddRecipesModalOpen(false);
+  };
+
+  const handleCloseAddNewRecipeModal = () => {
+    setIsAddNewRecipeModalOpen(false);
+  };
+
+  const handlePurchaseCookbook = () => {
+    // TODO: Implement purchase flow
+    console.log('Purchase cookbook clicked - placeholder');
+    // This will navigate to purchase page in the future
   };
 
   const toggleMobileMenu = () => {
@@ -186,8 +213,9 @@ export default function CookbookPage() {
             />
           </Link>
           
-          {/* Desktop: Notification Bell + Profile */}
-          <div className="hidden lg:flex items-center gap-3">
+          {/* Desktop: Navigation + Profile */}
+          <div className="hidden lg:flex items-center gap-6">
+            <ProfileNavigation variant="desktop" />
             <ProfileDropdown />
           </div>
 
@@ -214,13 +242,21 @@ export default function CookbookPage() {
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
         <div className="lg:hidden border-t border-gray-100 bg-gray-50">
-          <div className="px-6 py-4 space-y-3">
-            <button
-              onClick={handleAccount}
-              className="block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
-            >
-              Account Settings
-            </button>
+          <div className="px-6 py-4">
+            {/* Navigation Links */}
+            <ProfileNavigation 
+              variant="mobile" 
+              onNavigate={() => setIsMobileMenuOpen(false)}
+            />
+            
+            {/* Account Actions */}
+            <div className="space-y-3">
+              <button
+                onClick={handleAccount}
+                className="block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Account Settings
+              </button>
             <button
               onClick={handleOrders}
               className="block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
@@ -233,6 +269,7 @@ export default function CookbookPage() {
             >
               Logout
             </button>
+            </div>
           </div>
         </div>
       )}
@@ -272,6 +309,18 @@ export default function CookbookPage() {
                 </h3>
               </motion.div>
             </div>
+            
+            {/* Right side - Action buttons - centered on mobile */}
+            <div className="flex-shrink-0 flex items-center gap-4 justify-center lg:justify-end">
+              {/* Purchase Cookbook Button */}
+              <Button
+                onClick={handlePurchaseCookbook}
+                className="bg-teal-600 text-white hover:bg-teal-700 rounded-lg px-8 py-3 text-base font-medium flex items-center gap-2"
+              >
+                <ShoppingCart className="h-5 w-5" />
+                Purchase your Cookbook!
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -283,7 +332,8 @@ export default function CookbookPage() {
           selectedCookbookId={selectedCookbookId}
           onCookbookChange={handleCookbookChange}
           onCreateCookbook={handleCreateCookbook}
-          onRecipesAdded={handleRecipesAdded}
+          onAddExistingRecipe={handleAddExistingRecipe}
+          onAddNewRecipe={handleAddNewRecipe}
         />
 
         {/* Cookbook Table */}
@@ -326,6 +376,22 @@ export default function CookbookPage() {
           onClose={handleCloseEditNameModal}
           cookbook={selectedCookbookId ? cookbooks.find(cb => cb.id === selectedCookbookId) || null : null}
           onCookbookUpdated={handleCookbookNameUpdated}
+        />
+
+        {/* Add Existing Recipes Modal */}
+        <AddRecipesToCookbookModal
+          isOpen={isAddRecipesModalOpen}
+          onClose={handleCloseAddRecipesModal}
+          cookbookId={selectedCookbookId}
+          onRecipesAdded={handleRecipesAdded}
+        />
+
+        {/* Add New Recipe Modal */}
+        <AddRecipeModal
+          isOpen={isAddNewRecipeModalOpen}
+          onClose={handleCloseAddNewRecipeModal}
+          cookbookId={selectedCookbookId}
+          onRecipeAdded={handleRecipesAdded}
         />
       </div>
     </div>

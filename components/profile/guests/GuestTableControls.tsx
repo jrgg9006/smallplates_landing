@@ -2,13 +2,12 @@
 
 import React, { useState } from "react";
 import { Search, ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RecipeCollectorButton } from "./RecipeCollectorButton";
 
 interface GuestTableControlsProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
-  onAddGuest: () => void;
   statusFilter: string;
   onStatusFilterChange: (status: string) => void;
   guestCounts?: {
@@ -21,7 +20,6 @@ interface GuestTableControlsProps {
 export function GuestTableControls({ 
   searchValue, 
   onSearchChange, 
-  onAddGuest,
   statusFilter,
   onStatusFilterChange,
   guestCounts
@@ -98,13 +96,9 @@ export function GuestTableControls({
             </div>
           </div>
           
+          {/* Invite Guest Link Button - Secondary */}
           <div className="flex items-center gap-2">
-            <Button 
-              onClick={onAddGuest}
-              className="bg-teal-600 text-white hover:bg-teal-700 rounded-lg px-6"
-            >
-              Add Guests and Recipes
-            </Button>
+            <RecipeCollectorButton label="Invite Guest Link" className="rounded-lg px-6" />
           </div>
         </div>
       </div>
@@ -172,13 +166,10 @@ export function GuestTableControls({
           </div>
         </div>
 
-        {/* Add Button - Full width */}
-        <Button 
-          onClick={onAddGuest}
-          className="w-full bg-teal-600 text-white hover:bg-teal-700 rounded-lg py-3"
-        >
-          Add Guests and Recipes
-        </Button>
+        {/* Invite Guest Link Button - Mobile */}
+        <div className="flex gap-3">
+          <RecipeCollectorButton label="Invite Guest Link" className="w-full rounded-lg py-3" />
+        </div>
       </div>
     </div>
   );

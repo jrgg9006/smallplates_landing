@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, ChevronDown, ShoppingCart, BookOpen, Plus } from "lucide-react";
+import { Search, ChevronDown, Plus, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Cookbook } from "@/lib/types/database";
-import { AddRecipesToCookbookModal } from "./AddRecipesToCookbookModal";
-import { AddRecipeModal } from "@/components/profile/recipes/AddRecipeModal";
 
 interface CookbookTableControlsProps {
   searchValue: string;
@@ -21,7 +19,8 @@ interface CookbookTableControlsProps {
   selectedCookbookId: string | null;
   onCookbookChange: (cookbookId: string) => void;
   onCreateCookbook: () => void;
-  onRecipesAdded?: () => void;
+  onAddExistingRecipe: () => void;
+  onAddNewRecipe: () => void;
 }
 
 export function CookbookTableControls({ 
@@ -31,45 +30,16 @@ export function CookbookTableControls({
   selectedCookbookId,
   onCookbookChange,
   onCreateCookbook,
-  onRecipesAdded
+  onAddExistingRecipe,
+  onAddNewRecipe
 }: CookbookTableControlsProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isAddRecipesModalOpen, setIsAddRecipesModalOpen] = useState(false);
-  const [isAddNewRecipeModalOpen, setIsAddNewRecipeModalOpen] = useState(false);
 
   const selectedCookbook = cookbooks.find(cb => cb.id === selectedCookbookId);
-
-  const handleAddExistingRecipe = () => {
-    setIsAddRecipesModalOpen(true);
-  };
-
-  const handleAddNewRecipe = () => {
-    setIsAddNewRecipeModalOpen(true);
-  };
-
-  const handleCloseAddRecipesModal = () => {
-    setIsAddRecipesModalOpen(false);
-  };
-
-  const handleCloseAddNewRecipeModal = () => {
-    setIsAddNewRecipeModalOpen(false);
-  };
-
-  const handleRecipesAdded = () => {
-    if (onRecipesAdded) {
-      onRecipesAdded();
-    }
-  };
 
   const handleCookbookChange = (cookbookId: string) => {
     onCookbookChange(cookbookId);
     setIsDropdownOpen(false);
-  };
-
-  const handlePurchaseCookbook = () => {
-    // TODO: Implement purchase flow
-    console.log('Purchase cookbook clicked - placeholder');
-    // This will navigate to purchase page in the future
   };
 
   return (
@@ -143,9 +113,8 @@ export function CookbookTableControls({
             </div>
           </div>
 
-          {/* Action Buttons */}
+          {/* Add Recipe Button - Secondary, smaller */}
           <div className="flex items-center gap-3">
-            {/* Add Recipe Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -158,23 +127,14 @@ export function CookbookTableControls({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem onClick={handleAddExistingRecipe}>
+                <DropdownMenuItem onClick={onAddExistingRecipe}>
                   Add an existing recipe
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleAddNewRecipe}>
+                <DropdownMenuItem onClick={onAddNewRecipe}>
                   Add a new recipe
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            
-            {/* Purchase Cookbook Button */}
-            <Button
-              onClick={handlePurchaseCookbook}
-              className="bg-teal-600 text-white hover:bg-teal-700 rounded-lg px-6 py-2 text-sm font-medium flex items-center gap-2"
-            >
-              <ShoppingCart className="h-4 w-4" />
-              Purchase your Cookbook!
-            </Button>
           </div>
         </div>
       </div>
@@ -236,39 +196,30 @@ export function CookbookTableControls({
             )}
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-3">
-            {/* Add Recipe Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center gap-2 flex-1"
-                >
-                  <BookOpen className="h-4 w-4" />
-                  Add Recipe
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem onClick={handleAddExistingRecipe}>
-                  Add an existing recipe
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleAddNewRecipe}>
-                  Add a new recipe
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            
-            {/* Purchase Button */}
-            <Button
-              onClick={handlePurchaseCookbook}
-              className="bg-teal-600 text-white hover:bg-teal-700 rounded-lg px-4 py-2 text-sm font-medium flex items-center gap-2 flex-1"
-            >
-              <ShoppingCart className="h-4 w-4" />
-              Purchase
-            </Button>
-          </div>
+        </div>
+
+        {/* Add Recipe Button - Mobile */}
+        <div className="flex gap-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center gap-2 flex-1"
+              >
+                <BookOpen className="h-4 w-4" />
+                Add Recipe
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem onClick={onAddExistingRecipe}>
+                Add an existing recipe
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onAddNewRecipe}>
+                Add a new recipe
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Search Input - Full width */}
@@ -282,22 +233,6 @@ export function CookbookTableControls({
           />
         </div>
       </div>
-
-      {/* Add Existing Recipes Modal */}
-      <AddRecipesToCookbookModal
-        isOpen={isAddRecipesModalOpen}
-        onClose={handleCloseAddRecipesModal}
-        cookbookId={selectedCookbookId}
-        onRecipesAdded={handleRecipesAdded}
-      />
-
-      {/* Add New Recipe Modal */}
-      <AddRecipeModal
-        isOpen={isAddNewRecipeModalOpen}
-        onClose={handleCloseAddNewRecipeModal}
-        cookbookId={selectedCookbookId}
-        onRecipeAdded={handleRecipesAdded}
-      />
     </div>
   );
 }

@@ -12,15 +12,13 @@ import { RecipeTableControls } from "@/components/profile/recipes/RecipeTableCon
 import { AddRecipeModal } from "@/components/profile/recipes/AddRecipeModal";
 import { BulkActionsBar } from "@/components/profile/recipes/BulkActionsBar";
 import { BulkAddToCookbookModal } from "@/components/profile/recipes/BulkAddToCookbookModal";
-import { ShareCollectionModal } from "@/components/profile/guests/ShareCollectionModal";
+import { RecipeCollectorButton } from "@/components/profile/guests/RecipeCollectorButton";
 import ProfileDropdown from "@/components/profile/ProfileDropdown";
-import { Plus, Link2, Share2 } from "lucide-react";
+import ProfileNavigation from "@/components/profile/ProfileNavigation";
+import { Plus, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getAllRecipes } from "@/lib/supabase/recipes";
 import { RecipeWithGuest } from "@/lib/types/database";
-import { getUserCollectionToken } from "@/lib/supabase/collection";
-import { getCurrentProfile } from "@/lib/supabase/profiles";
-import { createShareURL } from "@/lib/utils/sharing";
 
 export default function RecipesPage() {
   const { user, loading, signOut } = useAuth();
@@ -29,9 +27,6 @@ export default function RecipesPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isBulkAddToCookbookModalOpen, setIsBulkAddToCookbookModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [isShareCollectionModalOpen, setIsShareCollectionModalOpen] = useState(false);
-  const [collectionUrl, setCollectionUrl] = useState<string>('');
-  const [userFullName, setUserFullName] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [clearSelectionTrigger, setClearSelectionTrigger] = useState(0);
@@ -91,26 +86,6 @@ export default function RecipesPage() {
   const handleShareRecipes = () => {
     // Placeholder - will be implemented later
     console.log('Share recipes clicked');
-  };
-
-  const handleShareCollectionLink = async () => {
-    try {
-      const { data: tokenData } = await getUserCollectionToken();
-      const { data: profile } = await getCurrentProfile();
-      
-      if (tokenData && typeof window !== 'undefined') {
-        const url = createShareURL(window.location.origin, tokenData);
-        setCollectionUrl(url);
-        setUserFullName(profile?.full_name || null);
-        setIsShareCollectionModalOpen(true);
-      }
-    } catch (err) {
-      console.error('Error loading collection data:', err);
-    }
-  };
-
-  const handleCloseShareCollectionModal = () => {
-    setIsShareCollectionModalOpen(false);
   };
 
   const toggleMobileMenu = () => {
@@ -192,8 +167,9 @@ export default function RecipesPage() {
             />
           </Link>
           
-          {/* Desktop: Notification Bell + Profile */}
-          <div className="hidden lg:flex items-center gap-3">
+          {/* Desktop: Navigation + Profile */}
+          <div className="hidden lg:flex items-center gap-6">
+            <ProfileNavigation variant="desktop" />
             <ProfileDropdown />
           </div>
 
@@ -220,13 +196,21 @@ export default function RecipesPage() {
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
         <div className="lg:hidden border-t border-gray-100 bg-gray-50">
-          <div className="px-6 py-4 space-y-3">
-            <button
-              onClick={handleAccount}
-              className="block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
-            >
-              Account Settings
-            </button>
+          <div className="px-6 py-4">
+            {/* Navigation Links */}
+            <ProfileNavigation 
+              variant="mobile" 
+              onNavigate={() => setIsMobileMenuOpen(false)}
+            />
+            
+            {/* Account Actions */}
+            <div className="space-y-3">
+              <button
+                onClick={handleAccount}
+                className="block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Account Settings
+              </button>
             <button
               onClick={handleOrders}
               className="block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
@@ -239,6 +223,7 @@ export default function RecipesPage() {
             >
               Logout
             </button>
+            </div>
           </div>
         </div>
       )}
@@ -275,14 +260,7 @@ export default function RecipesPage() {
                 <Share2 className="h-5 w-5" />
                 Share Recipes
               </Button>
-              <Button
-                onClick={handleShareCollectionLink}
-                variant="outline"
-                className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg px-8 py-3 text-base font-medium flex items-center gap-2"
-              >
-                <Link2 className="h-5 w-5" />
-                Get Recipes from Friends
-              </Button>
+              <RecipeCollectorButton label="Get Recipes from Friends" />
               <Button
                 onClick={handleAddRecipe}
                 className="bg-teal-600 text-white hover:bg-teal-700 rounded-full w-16 h-16 flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow p-0"
@@ -360,15 +338,6 @@ export default function RecipesPage() {
           </div>
         )}
 
-        {/* Share Collection Modal */}
-        {collectionUrl && (
-          <ShareCollectionModal
-            isOpen={isShareCollectionModalOpen}
-            onClose={handleCloseShareCollectionModal}
-            collectionUrl={collectionUrl}
-            userName={userFullName}
-          />
-        )}
       </div>
     </div>
   );

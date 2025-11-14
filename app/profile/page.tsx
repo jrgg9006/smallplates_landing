@@ -15,6 +15,7 @@ import { AddGuestModal } from "@/components/profile/guests/AddGuestModal";
 import { ProgressBar } from "@/components/profile/ProgressBar";
 import { getUserProgress, UserProgress } from "@/lib/supabase/progress";
 import ProfileDropdown from "@/components/profile/ProfileDropdown";
+import ProfileNavigation from "@/components/profile/ProfileNavigation";
 import { getGuests } from "@/lib/supabase/guests";
 import { useProfileOnboarding, OnboardingSteps } from "@/lib/contexts/ProfileOnboardingContext";
 import { WelcomeOverlay } from "@/components/onboarding/WelcomeOverlay";
@@ -26,6 +27,9 @@ import { addUserRecipe, UserRecipeData } from "@/lib/supabase/recipes";
 import { getUserCollectionToken } from "@/lib/supabase/collection";
 import { createShareURL } from "@/lib/utils/sharing";
 import { getCurrentProfile } from "@/lib/supabase/profiles";
+import { RecipeCollectorButton } from "@/components/profile/guests/RecipeCollectorButton";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 export default function ProfilePage() {
   const { user, loading, signOut } = useAuth();
@@ -287,9 +291,9 @@ export default function ProfilePage() {
             />
           </Link>
           
-          {/* Desktop: Notification Bell + Profile */}
-          <div className="hidden lg:flex items-center gap-3">
-            
+          {/* Desktop: Navigation + Profile */}
+          <div className="hidden lg:flex items-center gap-6">
+            <ProfileNavigation variant="desktop" />
             <ProfileDropdown />
           </div>
 
@@ -316,13 +320,21 @@ export default function ProfilePage() {
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
         <div className="lg:hidden border-t border-gray-100 bg-gray-50">
-          <div className="px-6 py-4 space-y-3">
-            <button
-              onClick={handleAccount}
-              className="block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
-            >
-              Account Settings
-            </button>
+          <div className="px-6 py-4">
+            {/* Navigation Links */}
+            <ProfileNavigation 
+              variant="mobile" 
+              onNavigate={() => setIsMobileMenuOpen(false)}
+            />
+            
+            {/* Account Actions */}
+            <div className="space-y-3">
+              <button
+                onClick={handleAccount}
+                className="block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Account Settings
+              </button>
             <button
               onClick={handleOrders}
               className="block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
@@ -335,6 +347,7 @@ export default function ProfilePage() {
             >
               Logout
             </button>
+            </div>
           </div>
         </div>
       )}
@@ -357,7 +370,7 @@ export default function ProfilePage() {
                   Guest List
                 </h1>
                 <h3 className="text-lg font-light text-gray-600">
-                  Your cookbook is cooking...
+                  The people behind every recipe
                 </h3>
               </motion.div>
               
@@ -383,23 +396,32 @@ export default function ProfilePage() {
               /> */}
             </div>
             
-            {/* Right side - Complete Onboarding button + Progress bar - centered on mobile */}
+            {/* Right side - Action buttons + Complete Onboarding button - centered on mobile */}
             <div className="flex-shrink-0 flex items-center gap-4 justify-center lg:justify-end">
               {/* Complete Onboarding Button - Only show if onboarding is not complete */}
               {completedSteps.length < 3 && (
-                <button
+                <Button
                   onClick={resumeOnboarding}
-                  className="px-16 py-2 rounded-full text-sm font-light tracking-wide text-white transition-all duration-200 hover:opacity-95 hover:shadow-lg shadow-lg"
-                  style={{ backgroundColor: '#464665' }}
+                  className="bg-[#464665] text-white hover:bg-[#3a3a52] rounded-lg px-8 py-3 text-base font-medium flex items-center gap-2"
                 >
                   Finish Onboarding
-                </button>
+                </Button>
               )}
-              <ProgressBar 
+              
+              {/* Add Guests Button - Green Circle */}
+              <Button
+                onClick={handleAddGuest}
+                className="bg-teal-600 text-white hover:bg-teal-700 rounded-full w-16 h-16 flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow p-0"
+              >
+                <Plus className="h-12 w-12" />
+              </Button>
+              
+              {/* Progress Bar - HIDDEN FOR NOW */}
+              {/* <ProgressBar 
                 current={progressData?.current_recipes || 0}
                 goal={progressData?.goal_recipes || 40}
                 loading={progressLoading}
-              />
+              /> */}
             </div>
           </div>
         </div>
@@ -419,21 +441,20 @@ export default function ProfilePage() {
           </div>
         ) : (
           <>
-            {/* Statistics and Recipe Collector Section */}
-            <div className="mb-8 lg:mb-16 flex flex-col lg:flex-row gap-4 lg:gap-8 items-stretch">
+            {/* Statistics and Recipe Collector Section - HIDDEN FOR NOW */}
+            {/* <div className="mb-8 lg:mb-16 flex flex-col lg:flex-row gap-4 lg:gap-8 items-stretch">
               <div className="flex-1">
                 <GuestStatisticsComponent />
               </div>
               <div className="flex-1">
                 <RecipeCollectorLink />
               </div>
-            </div>
+            </div> */}
 
             {/* Guest Table Controls */}
             <GuestTableControls
               searchValue={searchValue}
               onSearchChange={setSearchValue}
-              onAddGuest={handleAddGuest}
               statusFilter={statusFilter}
               onStatusFilterChange={setStatusFilter}
               guestCounts={guestCounts}
