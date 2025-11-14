@@ -22,6 +22,7 @@ function ActionsCell({ recipe, onRecipeDeleted, onRecipeAddedToCookbook }: {
   const [showAddToCookbookModal, setShowAddToCookbookModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [justClosedModal, setJustClosedModal] = useState(false);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -54,7 +55,37 @@ function ActionsCell({ recipe, onRecipeDeleted, onRecipeAddedToCookbook }: {
 
   return (
     <>
-      <div className="flex justify-end items-center gap-1 pr-4" onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}>
+      <div 
+        className="flex justify-end items-center gap-2 pr-4" 
+        onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
+        onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
+      >
+        {/* Add to Cookbook Button - Visible */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation();
+            e.preventDefault();
+            setJustClosedModal(false);
+            setShowAddToCookbookModal(true);
+          }}
+          onMouseDown={(e: React.MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          title="Add to Cookbook"
+        >
+          <BookOpen className="h-4 w-4" />
+        </Button>
+
         {/* 3 Dots Menu */}
         <div className="relative">
           <Button
@@ -74,17 +105,6 @@ function ActionsCell({ recipe, onRecipeDeleted, onRecipeAddedToCookbook }: {
           {showDropdown && (
             <>
               <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-[160px]">
-                <button
-                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                    e.stopPropagation();
-                    setShowDropdown(false);
-                    setShowAddToCookbookModal(true);
-                  }}
-                >
-                  <BookOpen className="h-4 w-4" />
-                  Add to Cookbook
-                </button>
                 <button
                   className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                   onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
@@ -117,7 +137,14 @@ function ActionsCell({ recipe, onRecipeDeleted, onRecipeAddedToCookbook }: {
 
       <AddToCookbookModal
         isOpen={showAddToCookbookModal}
-        onClose={() => setShowAddToCookbookModal(false)}
+        onClose={() => {
+          setJustClosedModal(true);
+          setShowAddToCookbookModal(false);
+          // Reset the flag after a short delay to prevent row click
+          setTimeout(() => {
+            setJustClosedModal(false);
+          }, 100);
+        }}
         recipe={recipe}
         onRecipeAdded={onRecipeAddedToCookbook}
       />
@@ -169,13 +196,15 @@ export const columns: ColumnDef<RecipeWithGuest>[] = [
   {
     id: "name",
     header: () => <div className="table-header-style pl-4">Name</div>,
+    size: 250,
+    minSize: 220,
     cell: ({ row }) => {
       const recipe: RecipeWithGuest = row.original;
       const guest = recipe.guests;
       
       if (!guest) {
         return (
-          <div className="flex items-center gap-3 pl-4">
+          <div className="flex items-center gap-3 pl-4 whitespace-nowrap">
             <div className="font-normal text-base text-gray-400">Unknown Guest</div>
           </div>
         );
@@ -186,7 +215,7 @@ export const columns: ColumnDef<RecipeWithGuest>[] = [
       
       if (hasPrintedName) {
         return (
-          <div className="flex items-center gap-3 pl-4">
+          <div className="flex items-center gap-3 pl-4 whitespace-nowrap">
             <div className="flex-shrink-0">
               <Image
                 src={getGuestProfileIcon(recipe.guest_id, recipe.guests?.is_self === true)}
@@ -196,11 +225,11 @@ export const columns: ColumnDef<RecipeWithGuest>[] = [
                 className="rounded-full"
               />
             </div>
-            <div className="space-y-0.5">
-              <div className="font-normal text-base">
+            <div className="space-y-0.5 min-w-0">
+              <div className="font-normal text-base whitespace-nowrap">
                 {guest.printed_name}
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-500 whitespace-nowrap">
                 {fullName}
               </div>
             </div>
@@ -209,7 +238,7 @@ export const columns: ColumnDef<RecipeWithGuest>[] = [
       }
       
       return (
-        <div className="flex items-center gap-3 pl-4">
+        <div className="flex items-center gap-3 pl-4 whitespace-nowrap">
           <div className="flex-shrink-0">
             <Image
               src={getGuestProfileIcon(recipe.guest_id, recipe.guests?.is_self === true)}
@@ -219,7 +248,7 @@ export const columns: ColumnDef<RecipeWithGuest>[] = [
               className="rounded-full"
             />
           </div>
-          <div className="font-normal text-base">{fullName}</div>
+          <div className="font-normal text-base whitespace-nowrap">{fullName}</div>
         </div>
       );
     },
@@ -227,6 +256,8 @@ export const columns: ColumnDef<RecipeWithGuest>[] = [
   {
     accessorKey: "recipe_name",
     header: () => <div className="table-header-style">Recipe Name</div>,
+    size: 250,
+    minSize: 200,
     cell: ({ row }) => {
       const recipe = row.original;
       return (
@@ -239,6 +270,8 @@ export const columns: ColumnDef<RecipeWithGuest>[] = [
   {
     id: "notes",
     header: () => <div className="table-header-style">Notes for you</div>,
+    size: 200,
+    maxSize: 250,
     cell: ({ row }) => {
       const recipe = row.original;
       const notes = recipe.comments;

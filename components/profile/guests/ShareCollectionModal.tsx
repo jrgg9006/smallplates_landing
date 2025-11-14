@@ -363,7 +363,19 @@ export function ShareCollectionModal({
 
                 {/* Share options */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-gray-900">Share via</h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-medium text-gray-900">Share via</h3>
+                    <button
+                      onClick={() => {
+                        if (collectionUrl && typeof window !== 'undefined') {
+                          window.open(collectionUrl, '_blank', 'noopener,noreferrer');
+                        }
+                      }}
+                      className="text-sm text-gray-600 hover:text-gray-900 underline transition-colors"
+                    >
+                      Preview Form
+                    </button>
+                  </div>
                   <div className="space-y-2">
                     {shareOptions.map((option) => {
                       const Icon = option.icon;
@@ -535,7 +547,19 @@ export function ShareCollectionModal({
 
             {/* Share options */}
             <div className="space-y-4">
-              <h3 className="text-sm font-medium text-gray-900">Share via</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-gray-900">Share via</h3>
+                <button
+                  onClick={() => {
+                    if (collectionUrl && typeof window !== 'undefined') {
+                      window.open(collectionUrl, '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                  className="text-sm text-gray-600 hover:text-gray-900 underline transition-colors"
+                >
+                  Preview Form
+                </button>
+              </div>
               <div className="space-y-2">
                 {shareOptions.map((option) => {
                   const Icon = option.icon;

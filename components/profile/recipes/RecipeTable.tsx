@@ -265,8 +265,14 @@ export function RecipeTable({ searchValue: externalSearchValue = '', filterType 
                             !isNotesColumn && !isSelectColumn ? 'whitespace-nowrap' : ''
                           }`}
                           onClick={(e) => {
-                            // Prevent row click when clicking on checkbox
-                            if (isSelectColumn) {
+                            // Prevent row click when clicking on checkbox or actions column
+                            if (isSelectColumn || isRightAlignedColumn) {
+                              e.stopPropagation();
+                            }
+                          }}
+                          onMouseDown={(e) => {
+                            // Also prevent on mousedown for actions column to prevent any event propagation
+                            if (isRightAlignedColumn) {
                               e.stopPropagation();
                             }
                           }}

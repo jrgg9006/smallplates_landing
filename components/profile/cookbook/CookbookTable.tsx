@@ -338,10 +338,13 @@ export function CookbookTable({
                         {row.getVisibleCells().map((cell) => {
                           const isRightAlignedColumn = cell.column.id === 'actions';
                           const isDragHandleColumn = cell.column.id === 'drag-handle';
+                          const isNoteColumn = cell.column.id === 'note';
                           return (
                             <td 
                               key={cell.id} 
-                              className={`px-8 py-6 align-top ${
+                              className={`px-8 py-4 ${
+                                isNoteColumn ? 'align-top' : ''
+                              } ${
                                 isRightAlignedColumn ? 'text-right' : ''
                               } ${isDragHandleColumn ? 'w-12' : ''}`}
                               onClick={(e) => {

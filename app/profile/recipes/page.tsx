@@ -12,11 +12,15 @@ import { RecipeTableControls } from "@/components/profile/recipes/RecipeTableCon
 import { AddRecipeModal } from "@/components/profile/recipes/AddRecipeModal";
 import { BulkActionsBar } from "@/components/profile/recipes/BulkActionsBar";
 import { BulkAddToCookbookModal } from "@/components/profile/recipes/BulkAddToCookbookModal";
+import { ShareCollectionModal } from "@/components/profile/guests/ShareCollectionModal";
 import ProfileDropdown from "@/components/profile/ProfileDropdown";
-import { Plus } from "lucide-react";
+import { Plus, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getAllRecipes } from "@/lib/supabase/recipes";
 import { RecipeWithGuest } from "@/lib/types/database";
+import { getUserCollectionToken } from "@/lib/supabase/collection";
+import { getCurrentProfile } from "@/lib/supabase/profiles";
+import { createShareURL } from "@/lib/utils/sharing";
 
 export default function RecipesPage() {
   const { user, loading, signOut } = useAuth();
@@ -25,6 +29,9 @@ export default function RecipesPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isBulkAddToCookbookModalOpen, setIsBulkAddToCookbookModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isShareCollectionModalOpen, setIsShareCollectionModalOpen] = useState(false);
+  const [collectionUrl, setCollectionUrl] = useState<string>('');
+  const [userFullName, setUserFullName] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [clearSelectionTrigger, setClearSelectionTrigger] = useState(0);
@@ -79,6 +86,26 @@ export default function RecipesPage() {
 
   const handleCloseShareModal = () => {
     setIsShareModalOpen(false);
+  };
+
+  const handleShareCollectionLink = async () => {
+    try {
+      const { data: tokenData } = await getUserCollectionToken();
+      const { data: profile } = await getCurrentProfile();
+      
+      if (tokenData && typeof window !== 'undefined') {
+        const url = createShareURL(window.location.origin, tokenData);
+        setCollectionUrl(url);
+        setUserFullName(profile?.full_name || null);
+        setIsShareCollectionModalOpen(true);
+      }
+    } catch (err) {
+      console.error('Error loading collection data:', err);
+    }
+  };
+
+  const handleCloseShareCollectionModal = () => {
+    setIsShareCollectionModalOpen(false);
   };
 
   const toggleMobileMenu = () => {
@@ -234,8 +261,16 @@ export default function RecipesPage() {
               </motion.div>
             </div>
             
-            {/* Right side - Add Recipe button - centered on mobile */}
+            {/* Right side - Action buttons - centered on mobile */}
             <div className="flex-shrink-0 flex items-center gap-4 justify-center lg:justify-end">
+              <Button
+                onClick={handleShareCollectionLink}
+                variant="outline"
+                className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg px-8 py-3 text-base font-medium flex items-center gap-2"
+              >
+                <Link2 className="h-5 w-5" />
+                Recipe Collector Link
+              </Button>
               <Button
                 onClick={handleAddRecipe}
                 className="bg-teal-600 text-white hover:bg-teal-700 rounded-lg px-8 py-3 text-base font-medium flex items-center gap-2 shadow-lg hover:shadow-xl transition-shadow"
@@ -312,6 +347,16 @@ export default function RecipesPage() {
               </Button>
             </div>
           </div>
+        )}
+
+        {/* Share Collection Modal */}
+        {collectionUrl && (
+          <ShareCollectionModal
+            isOpen={isShareCollectionModalOpen}
+            onClose={handleCloseShareCollectionModal}
+            collectionUrl={collectionUrl}
+            userName={userFullName}
+          />
         )}
       </div>
     </div>
