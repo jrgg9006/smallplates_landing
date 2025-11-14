@@ -34,7 +34,7 @@ function Step1() {
   return (
     <OnboardingStep
       stepNumber={1}
-      totalSteps={3}
+      totalSteps={4}
       title="Let's get started"
       imageUrl="/images/onboarding/onboarding_step_1.jpg"
       imageAlt="Friends cooking together"
@@ -91,9 +91,89 @@ function Step1() {
 }
 
 /**
- * Step 2 Component - Personal Information Collection
+ * Step 2 Component - Use Case Question
  */
 function Step2() {
+  const { nextStep, previousStep, updateStepData } = useOnboarding();
+  const [selectedUseCase, setSelectedUseCase] = useState<string>("");
+
+  const useCaseOptions = [
+    { value: "gift", label: "A Gift" },
+    { value: "personal", label: "For me" },
+  ];
+
+  const handleSelection = (value: string) => {
+    setSelectedUseCase(value);
+    // Store the answer in onboarding context
+    updateStepData(2, { useCase: value });
+  };
+
+  const handleContinue = () => {
+    if (selectedUseCase) {
+      nextStep();
+    }
+  };
+
+  return (
+    <OnboardingStep
+      stepNumber={2}
+      totalSteps={4}
+      title="Use Case"
+      imageUrl="/images/onboarding/onboarding_step_2.jpg"
+      imageAlt="Cookbook use case"
+    >
+      <div className="max-w-lg mx-auto">
+        {/* Question */}
+        <div className="text-center mb-8">
+          <h2 className="text-xl font-medium text-gray-900 mb-2">
+            I want the cookbook for:
+          </h2>
+        </div>
+
+        {/* Selection Cards */}
+        <div className="space-y-3 mb-8">
+          {useCaseOptions.map((option) => (
+            <SelectionCard
+              key={option.value}
+              value={option.value}
+              label={option.label}
+              isSelected={selectedUseCase === option.value}
+              onClick={handleSelection}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <div className="flex justify-between mt-8">
+        <button
+          type="button"
+          onClick={previousStep}
+          className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors"
+        >
+          Back
+        </button>
+        <button
+          type="button"
+          onClick={handleContinue}
+          disabled={!selectedUseCase}
+          className={`px-8 py-3 rounded-xl font-semibold transition-colors ${
+            selectedUseCase
+              ? "bg-black text-white hover:bg-gray-800"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+          }`}
+        >
+          Continue
+        </button>
+      </div>
+    </OnboardingStep>
+  );
+}
+
+/**
+ * Step 3 Component - Personal Information Collection
+ */
+function Step3() {
   const { nextStep, previousStep, updateStepData } = useOnboarding();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -130,7 +210,7 @@ function Step2() {
   const handleContinue = () => {
     if (firstName && lastName && email) {
       // Store the answers in onboarding context
-      updateStepData(2, {
+      updateStepData(3, {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim(),
@@ -148,8 +228,8 @@ function Step2() {
 
   return (
     <OnboardingStep
-      stepNumber={2}
-      totalSteps={3}
+      stepNumber={3}
+      totalSteps={4}
       title="Personal Information"
       description="Let's save your info"
       imageUrl="/images/onboarding/onboarding_step_2.jpg"
@@ -302,9 +382,9 @@ function Step2() {
 }
 
 /**
- * Step 3 Component - Waitlist Signup
+ * Step 4 Component - Waitlist Signup
  */
-function Step3() {
+function Step4() {
   const { previousStep, completeOnboarding } = useOnboarding();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -329,8 +409,8 @@ function Step3() {
 
   return (
     <OnboardingStep
-      stepNumber={3}
-      totalSteps={3}
+      stepNumber={4}
+      totalSteps={4}
       title="Join the Waitlist"
       description={!success ? "✨ Only members of the Small Plates circle have access for now. Members are those who&apos;ve already shared a recipe." : undefined}
       imageUrl="/images/onboarding/onboarding_step_3.jpg"
@@ -397,7 +477,7 @@ function Step3() {
 
 /**
  * Main Onboarding Page Component
- * Manages the 3-step questionnaire flow
+ * Manages the 4-step questionnaire flow
  */
 function OnboardingContent() {
   const { state } = useOnboarding();
@@ -407,6 +487,7 @@ function OnboardingContent() {
       {state.currentStep === 1 && <Step1 />}
       {state.currentStep === 2 && <Step2 />}
       {state.currentStep === 3 && <Step3 />}
+      {state.currentStep === 4 && <Step4 />}
     </div>
   );
 }

@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
         email: userData.email,
         recipe_goal_category: userData.recipeCount,
         recipe_goal_number: recipeGoalNumber,
+        use_case: userData.useCase || null,
         collection_link_token: newToken,
         collection_enabled: true,
         updated_at: new Date().toISOString()

@@ -10,6 +10,7 @@ export interface WaitlistData {
   firstName: string;
   lastName: string;
   recipeGoalCategory?: string;
+  useCase?: string;
   hasPartner?: boolean;
   partnerFirstName?: string;
   partnerLastName?: string;
@@ -21,6 +22,7 @@ export interface WaitlistUser {
   first_name: string;
   last_name: string;
   recipe_goal_category: string | null;
+  use_case: string | null;
   has_partner: boolean;
   partner_first_name: string | null;
   partner_last_name: string | null;
@@ -50,6 +52,7 @@ export async function addToWaitlist(data: WaitlistData): Promise<{ success: bool
         first_name: data.firstName,
         last_name: data.lastName,
         recipe_goal_category: data.recipeGoalCategory || null,
+        use_case: data.useCase || null,
         has_partner: data.hasPartner || false,
         partner_first_name: data.partnerFirstName || null,
         partner_last_name: data.partnerLastName || null,

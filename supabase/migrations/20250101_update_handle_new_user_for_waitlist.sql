@@ -49,6 +49,7 @@ BEGIN
           full_name,
           recipe_goal_category,
           recipe_goal_number,
+          use_case,
           collection_link_token,
           collection_enabled
         )
@@ -58,6 +59,7 @@ BEGIN
           COALESCE(NEW.raw_user_meta_data->>'full_name', waitlist_data.first_name || ' ' || waitlist_data.last_name),
           waitlist_data.recipe_goal_category,
           recipe_goal_num,
+          waitlist_data.use_case,
           new_token,
           TRUE
         );

@@ -17,7 +17,7 @@ import {
 import { FEATURES, ROUTES } from "@/lib/config/features";
 import { addToWaitlist } from "@/lib/supabase/waitlist";
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 
 const initialState: OnboardingState = {
   currentStep: 1,
@@ -64,7 +64,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
    * Update data for a specific step
    *
    * Args:
-   *   stepId (number): The step number (1, 2, or 3)
+   *   stepId (number): The step number (1, 2, 3, or 4)
    *   data (Record<string, any>): The data to store for this step
    */
   const updateStepData = useCallback(
@@ -86,10 +86,11 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const completeOnboarding = useCallback(
     async () => {
       try {
-        const step2Data = state.answers.step2;
+        const step3Data = state.answers.step3;
         const step1Data = state.answers.step1;
+        const step2Data = state.answers.step2;
 
-        if (!step2Data?.email) {
+        if (!step3Data?.email) {
           throw new Error("Email is required to complete onboarding");
         }
 
@@ -99,13 +100,14 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
           
           // Save to waitlist table
           const { success, error } = await addToWaitlist({
-            email: step2Data.email,
-            firstName: step2Data.firstName,
-            lastName: step2Data.lastName,
+            email: step3Data.email,
+            firstName: step3Data.firstName,
+            lastName: step3Data.lastName,
             recipeGoalCategory: step1Data?.recipeCount,
-            hasPartner: step2Data.hasPartner,
-            partnerFirstName: step2Data.partnerFirstName,
-            partnerLastName: step2Data.partnerLastName,
+            useCase: step2Data?.useCase,
+            hasPartner: step3Data.hasPartner,
+            partnerFirstName: step3Data.partnerFirstName,
+            partnerLastName: step3Data.partnerLastName,
           });
 
           if (!success) {
@@ -136,13 +138,13 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
         // Step 1: Create user with signUp (user will be auto-logged in)
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email: step2Data.email,
+          email: step3Data.email,
           password: `temp_${Math.random().toString(36).substring(2, 15)}`, // Random temp password
           options: {
             emailRedirectTo: redirectUrl,
             data: {
-              firstName: step2Data.firstName,
-              lastName: step2Data.lastName,
+              firstName: step3Data.firstName,
+              lastName: step3Data.lastName,
             }
           }
         });
@@ -159,7 +161,11 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userId: signUpData.user.id,
-            userData: { ...step2Data, recipeCount: step1Data?.recipeCount || '40-or-less' }
+            userData: { 
+              ...step3Data, 
+              recipeCount: step1Data?.recipeCount || '40-or-less',
+              useCase: step2Data?.useCase
+            }
           })
         });
 
@@ -173,7 +179,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         // This runs in the background, doesn't block the user experience
         console.log('📧 Sending password setup email...');
         const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-          step2Data.email,
+          step3Data.email,
           { redirectTo: redirectUrl }
         );
 

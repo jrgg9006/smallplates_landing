@@ -374,6 +374,7 @@ export function RecipeTable({ searchValue: externalSearchValue = '', filterType 
         recipe={selectedRecipe}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+        onRecipeUpdated={refreshData}
       />
     </div>
   );

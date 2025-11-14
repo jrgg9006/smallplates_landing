@@ -26,6 +26,7 @@ export interface Database {
           recipe_goal_category: string | null;
           recipe_goal_number: number | null;
           custom_share_message: string | null;
+          use_case: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -39,6 +40,7 @@ export interface Database {
           recipe_goal_category?: string | null;
           recipe_goal_number?: number | null;
           custom_share_message?: string | null;
+          use_case?: string | null;
         };
         Update: {
           email?: string;
@@ -49,6 +51,7 @@ export interface Database {
           recipe_goal_category?: string | null;
           recipe_goal_number?: number | null;
           custom_share_message?: string | null;
+          use_case?: string | null;
         };
       };
       guests: {

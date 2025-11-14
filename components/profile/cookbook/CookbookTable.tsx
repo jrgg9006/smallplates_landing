@@ -19,6 +19,7 @@ import { getCookbookRecipes, updateCookbookRecipeOrder } from "@/lib/supabase/co
 import { createCookbookColumns } from "./CookbookTableColumns";
 import { Button } from "@/components/ui/button";
 import { MobileCookbookCard } from "./MobileCookbookCard";
+import { RecipeDetailsModal } from "@/components/profile/recipes/RecipeDetailsModal";
 import {
   DndContext,
   closestCenter,
@@ -61,6 +62,10 @@ export function CookbookTable({
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({ updated_at: false });
   
   const [refreshTrigger, setRefreshTrigger] = React.useState(0);
+  
+  // Modal state
+  const [selectedRecipe, setSelectedRecipe] = React.useState<RecipeInCookbook | null>(null);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
   
   const searchValue = externalSearchValue;
 
@@ -125,6 +130,16 @@ export function CookbookTable({
 
   const refreshData = () => {
     setRefreshTrigger(prev => prev + 1);
+  };
+
+  const handleRecipeClick = (recipe: RecipeInCookbook) => {
+    setSelectedRecipe(recipe);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedRecipe(null);
   };
 
   // Handle drag end event
@@ -331,9 +346,13 @@ export function CookbookTable({
                       <tr
                         key={row.id}
                         data-state={row.getIsSelected() && "selected"}
-                        className={`hover:bg-gray-50 transition-colors duration-200 ${
+                        className={`hover:bg-gray-50 transition-colors duration-200 cursor-pointer ${
                           isReordering ? 'opacity-50' : ''
                         }`}
+                        onClick={(e: React.MouseEvent<HTMLTableRowElement>) => {
+                          e.preventDefault();
+                          handleRecipeClick(row.original);
+                        }}
                       >
                         {row.getVisibleCells().map((cell) => {
                           const isRightAlignedColumn = cell.column.id === 'actions';
@@ -348,7 +367,13 @@ export function CookbookTable({
                                 isRightAlignedColumn ? 'text-right' : ''
                               } ${isDragHandleColumn ? 'w-12' : ''}`}
                               onClick={(e) => {
-                                if (isDragHandleColumn) {
+                                if (isDragHandleColumn || isRightAlignedColumn) {
+                                  e.stopPropagation();
+                                }
+                              }}
+                              onMouseDown={(e) => {
+                                // Also prevent on mousedown for actions column to prevent any event propagation
+                                if (isRightAlignedColumn) {
                                   e.stopPropagation();
                                 }
                               }}
@@ -399,6 +424,7 @@ export function CookbookTable({
                 cookbookId={cookbookId}
                 onRecipeRemoved={onRecipeRemoved || refreshData}
                 onAddNote={onAddNote}
+                onRecipeClick={handleRecipeClick}
               />
             ))}
           </div>
@@ -446,6 +472,14 @@ export function CookbookTable({
           </Button>
         </div>
       </div>
+
+      {/* Recipe Details Modal */}
+      <RecipeDetailsModal
+        recipe={selectedRecipe}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onRecipeUpdated={refreshData}
+      />
     </div>
   );
 }

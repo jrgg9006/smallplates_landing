@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Trash2, MoreHorizontal, BookOpen } from "lucide-react";
 import { RecipeWithGuest } from "@/lib/types/database";
@@ -23,6 +23,10 @@ function ActionsCell({ recipe, onRecipeDeleted, onRecipeAddedToCookbook }: {
   const [deleting, setDeleting] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [justClosedModal, setJustClosedModal] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; right: number } | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -51,6 +55,76 @@ function ActionsCell({ recipe, onRecipeDeleted, onRecipeAddedToCookbook }: {
 
   const handleCloseDeleteModal = () => {
     setShowDeleteModal(false);
+  };
+
+  const closeDropdown = () => {
+    setShowDropdown(false);
+    setDropdownPosition(null);
+  };
+
+  const handleToggleDropdown = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    
+    if (!showDropdown) {
+      // Calculate position immediately based on button position
+      if (buttonRef.current) {
+        const buttonRect = buttonRef.current.getBoundingClientRect();
+        const estimatedDropdownHeight = 50; // Approximate height of dropdown
+        const spaceBelow = window.innerHeight - buttonRect.bottom;
+        const spaceAbove = buttonRect.top;
+        
+        // Calculate right position (distance from right edge of viewport)
+        const rightPosition = window.innerWidth - buttonRect.right;
+        
+        // Determine if we should open upward and set position accordingly
+        if (spaceBelow < estimatedDropdownHeight + 10 && spaceAbove > estimatedDropdownHeight + 10) {
+          setOpenUpward(true);
+          // Position above the button
+          setDropdownPosition({
+            top: buttonRect.top - estimatedDropdownHeight - 4, // 4px gap
+            right: rightPosition
+          });
+        } else {
+          setOpenUpward(false);
+          // Position below the button
+          setDropdownPosition({
+            top: buttonRect.bottom + 4, // 4px gap
+            right: rightPosition
+          });
+        }
+        
+        // Now show the dropdown with the calculated position
+        setShowDropdown(true);
+        
+        // Optionally refine position after dropdown renders (for more accurate height)
+        setTimeout(() => {
+          if (buttonRef.current && dropdownRef.current) {
+            const actualButtonRect = buttonRef.current.getBoundingClientRect();
+            const actualDropdownHeight = dropdownRef.current.offsetHeight;
+            const actualSpaceBelow = window.innerHeight - actualButtonRect.bottom;
+            const actualSpaceAbove = actualButtonRect.top;
+            const actualRightPosition = window.innerWidth - actualButtonRect.right;
+            
+            // Refine position if needed
+            if (actualSpaceBelow < actualDropdownHeight + 10 && actualSpaceAbove > actualDropdownHeight + 10) {
+              setOpenUpward(true);
+              setDropdownPosition({
+                top: actualButtonRect.top - actualDropdownHeight - 4,
+                right: actualRightPosition
+              });
+            } else {
+              setOpenUpward(false);
+              setDropdownPosition({
+                top: actualButtonRect.bottom + 4,
+                right: actualRightPosition
+              });
+            }
+          }
+        }, 10);
+      }
+    } else {
+      closeDropdown();
+    }
   };
 
   return (
@@ -89,27 +163,32 @@ function ActionsCell({ recipe, onRecipeDeleted, onRecipeAddedToCookbook }: {
         {/* 3 Dots Menu */}
         <div className="relative">
           <Button
+            ref={buttonRef}
             variant="ghost"
             className="h-10 w-10"
-            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-              e.stopPropagation();
-              setShowDropdown(!showDropdown);
-            }}
+            onClick={handleToggleDropdown}
             aria-label="More options"
             title="More options"
           >
             <MoreHorizontal className="h-5 w-5" />
           </Button>
           
-          {/* Dropdown Menu */}
-          {showDropdown && (
+          {/* Dropdown Menu - Using fixed positioning to escape overflow-hidden container */}
+          {showDropdown && dropdownPosition && (
             <>
-              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-[160px]">
+              <div 
+                ref={dropdownRef}
+                className="fixed bg-white border border-gray-200 rounded-md shadow-lg z-50 min-w-[160px]"
+                style={{
+                  top: `${dropdownPosition.top}px`,
+                  right: `${dropdownPosition.right}px`
+                }}
+              >
                 <button
                   className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                   onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                     e.stopPropagation();
-                    setShowDropdown(false);
+                    closeDropdown();
                     setShowDeleteModal(true);
                   }}
                 >
@@ -119,8 +198,8 @@ function ActionsCell({ recipe, onRecipeDeleted, onRecipeAddedToCookbook }: {
               </div>
               {/* Overlay to close dropdown */}
               <div 
-                className="fixed inset-0 z-[5]" 
-                onClick={() => setShowDropdown(false)}
+                className="fixed inset-0 z-40" 
+                onClick={closeDropdown}
               ></div>
             </>
           )}

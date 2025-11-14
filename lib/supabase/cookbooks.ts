@@ -48,7 +48,9 @@ export async function getOrCreateDefaultCookbook() {
 
     if (createError) {
       console.error('Failed to create default cookbook:', createError);
-      return { data: null, error: createError.message };
+      // Return a more descriptive error message
+      const errorMessage = createError.message || 'Failed to create default cookbook';
+      return { data: null, error: errorMessage };
     }
 
     return { data: createdCookbook, error: null };
@@ -230,18 +232,20 @@ export async function addRecipeToCookbook(cookbookId: string, recipeId: string, 
     }
 
     // Check if recipe is already in cookbook
+    // Use maybeSingle() to avoid errors when recipe doesn't exist (returns null instead of throwing)
     const { data: existing } = await supabase
       .from('cookbook_recipes')
       .select('id')
       .eq('cookbook_id', cookbookId)
       .eq('recipe_id', recipeId)
-      .single();
+      .maybeSingle();
 
     if (existing) {
       return { data: null, error: 'Recipe is already in this cookbook' };
     }
 
     // Get the current max display_order to append new recipe at the end
+    // Use maybeSingle() instead of single() to handle empty cookbooks (returns null instead of throwing)
     const { data: maxOrderData } = await supabase
       .from('cookbook_recipes')
       .select('display_order')
@@ -249,8 +253,9 @@ export async function addRecipeToCookbook(cookbookId: string, recipeId: string, 
       .eq('user_id', user.id)
       .order('display_order', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
+    // Handle the case where cookbook is empty (maxOrderData will be null)
     const nextDisplayOrder = maxOrderData?.display_order != null 
       ? (maxOrderData.display_order + 1) 
       : 0;

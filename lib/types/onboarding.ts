@@ -19,6 +19,9 @@ export interface OnboardingData {
     recipeCount: string;
   };
   step2?: {
+    useCase: string;
+  };
+  step3?: {
     firstName: string;
     lastName: string;
     email: string;
@@ -26,7 +29,7 @@ export interface OnboardingData {
     partnerFirstName?: string;
     partnerLastName?: string;
   };
-  step3?: {
+  step4?: {
     paymentComplete?: boolean;
     stripeSessionId?: string;
   };

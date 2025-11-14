@@ -14,7 +14,7 @@ import { BulkActionsBar } from "@/components/profile/recipes/BulkActionsBar";
 import { BulkAddToCookbookModal } from "@/components/profile/recipes/BulkAddToCookbookModal";
 import { ShareCollectionModal } from "@/components/profile/guests/ShareCollectionModal";
 import ProfileDropdown from "@/components/profile/ProfileDropdown";
-import { Plus, Link2 } from "lucide-react";
+import { Plus, Link2, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getAllRecipes } from "@/lib/supabase/recipes";
 import { RecipeWithGuest } from "@/lib/types/database";
@@ -86,6 +86,11 @@ export default function RecipesPage() {
 
   const handleCloseShareModal = () => {
     setIsShareModalOpen(false);
+  };
+
+  const handleShareRecipes = () => {
+    // Placeholder - will be implemented later
+    console.log('Share recipes clicked');
   };
 
   const handleShareCollectionLink = async () => {
@@ -253,7 +258,7 @@ export default function RecipesPage() {
                 transition={{ duration: 0.8, ease: "easeOut" }}
               >
                 <h1 className="font-serif text-6xl md:text-6xl font-medium tracking-tight text-gray-900 mb-1">
-                  Recipes
+                  My Recipes
                 </h1>
                 <h3 className="text-lg font-light text-gray-600">
                   Your cookbook is cooking...
@@ -264,19 +269,25 @@ export default function RecipesPage() {
             {/* Right side - Action buttons - centered on mobile */}
             <div className="flex-shrink-0 flex items-center gap-4 justify-center lg:justify-end">
               <Button
+                onClick={handleShareRecipes}
+                className="bg-purple-700 text-white hover:bg-purple-900 rounded-lg px-8 py-3 text-base font-medium flex items-center gap-2"
+              >
+                <Share2 className="h-5 w-5" />
+                Share Recipes
+              </Button>
+              <Button
                 onClick={handleShareCollectionLink}
                 variant="outline"
                 className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg px-8 py-3 text-base font-medium flex items-center gap-2"
               >
                 <Link2 className="h-5 w-5" />
-                Recipe Collector Link
+                Get Recipes from Friends
               </Button>
               <Button
                 onClick={handleAddRecipe}
-                className="bg-teal-600 text-white hover:bg-teal-700 rounded-lg px-8 py-3 text-base font-medium flex items-center gap-2 shadow-lg hover:shadow-xl transition-shadow"
+                className="bg-teal-600 text-white hover:bg-teal-700 rounded-full w-16 h-16 flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow p-0"
               >
-                <Plus className="h-6 w-6" />
-                Add Recipe
+                <Plus className="h-12 w-12" />
               </Button>
             </div>
           </div>

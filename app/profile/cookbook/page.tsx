@@ -81,6 +81,10 @@ export default function CookbookPage() {
     setRefreshTrigger(prev => prev + 1);
   };
 
+  const handleRecipesAdded = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -107,8 +111,13 @@ export default function CookbookPage() {
 
       setCookbooksLoading(true);
       try {
-        // First, ensure default cookbook exists
-        const { data: defaultCookbook } = await getOrCreateDefaultCookbook();
+        // First, try to ensure default cookbook exists
+        const { data: defaultCookbook, error: defaultError } = await getOrCreateDefaultCookbook();
+        
+        if (defaultError) {
+          console.warn('Could not create default cookbook:', defaultError);
+          // Continue anyway - user might not have permission or there might be a constraint issue
+        }
         
         // Then load all cookbooks
         const { data: allCookbooks, error } = await getAllCookbooks();
@@ -120,12 +129,14 @@ export default function CookbookPage() {
         
         setCookbooks(allCookbooks || []);
         
-        // Select default cookbook if available
+        // Select default cookbook if available, otherwise select first cookbook
         if (defaultCookbook) {
           setSelectedCookbookId(defaultCookbook.id);
         } else if (allCookbooks && allCookbooks.length > 0) {
           setSelectedCookbookId(allCookbooks[0].id);
         }
+        // If no cookbooks exist, selectedCookbookId will remain null
+        // The CookbookTable component handles this case
       } catch (err) {
         console.error('Error loading cookbooks:', err);
       } finally {
@@ -272,6 +283,7 @@ export default function CookbookPage() {
           selectedCookbookId={selectedCookbookId}
           onCookbookChange={handleCookbookChange}
           onCreateCookbook={handleCreateCookbook}
+          onRecipesAdded={handleRecipesAdded}
         />
 
         {/* Cookbook Table */}

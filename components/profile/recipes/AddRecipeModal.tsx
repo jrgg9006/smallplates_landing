@@ -11,7 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { addRecipe, addUserRecipe } from "@/lib/supabase/recipes";
+import { addRecipeToCookbook } from "@/lib/supabase/cookbooks";
 import { getGuests } from "@/lib/supabase/guests";
+import { getCurrentProfile } from "@/lib/supabase/profiles";
 import { Guest } from "@/lib/types/database";
 import { ChevronDown } from "lucide-react";
 
@@ -19,9 +21,10 @@ interface AddRecipeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onRecipeAdded?: () => void; // Callback to refresh the recipe list
+  cookbookId?: string | null; // Optional cookbook ID to auto-add recipe after creation
 }
 
-export function AddRecipeModal({ isOpen, onClose, onRecipeAdded }: AddRecipeModalProps) {
+export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: AddRecipeModalProps) {
   // Responsive hook to detect mobile
   const [isMobile, setIsMobile] = useState(false);
 
@@ -43,14 +46,29 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded }: AddRecipeModa
   const [recipeNotes, setRecipeNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>('');
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
-  // Load guests when modal opens
+  // Load guests and user profile when modal opens
   useEffect(() => {
     if (isOpen) {
       loadGuests();
+      loadUserProfile();
     }
   }, [isOpen]);
+
+  const loadUserProfile = async () => {
+    try {
+      const { data: profile, error: profileError } = await getCurrentProfile();
+      if (profileError || !profile) {
+        console.error('Error loading user profile:', profileError);
+        return;
+      }
+      setUserName(profile.full_name || '');
+    } catch (err) {
+      console.error('Error loading user profile:', err);
+    }
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -132,6 +150,8 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded }: AddRecipeModa
     setError(null);
 
     try {
+      let createdRecipeId: string | null = null;
+
       if (isMyOwnRecipe) {
         // Use addUserRecipe for own recipes
         const userRecipeData = {
@@ -141,13 +161,15 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded }: AddRecipeModa
           personalNote: recipeNotes.trim() || undefined,
         };
 
-        const { error: recipeError } = await addUserRecipe(userRecipeData);
+        const { data: userRecipeData_result, error: recipeError } = await addUserRecipe(userRecipeData);
         
         if (recipeError) {
           setError(recipeError);
           setLoading(false);
           return;
         }
+
+        createdRecipeId = userRecipeData_result?.id || null;
       } else {
         // Use addRecipe for guest recipes
         const recipeData = {
@@ -157,12 +179,25 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded }: AddRecipeModa
           comments: recipeNotes.trim() || undefined,
         };
 
-        const { error: recipeError } = await addRecipe(selectedGuestId, recipeData);
+        const { data: recipeData_result, error: recipeError } = await addRecipe(selectedGuestId, recipeData);
         
         if (recipeError) {
           setError(recipeError);
           setLoading(false);
           return;
+        }
+
+        createdRecipeId = recipeData_result?.id || null;
+      }
+
+      // If cookbookId is provided and recipe was created successfully, add it to the cookbook
+      if (cookbookId && createdRecipeId) {
+        const { error: addToCookbookError } = await addRecipeToCookbook(cookbookId, createdRecipeId);
+        
+        if (addToCookbookError) {
+          // Log error but don't fail the whole operation - recipe was created successfully
+          console.error('Failed to add recipe to cookbook:', addToCookbookError);
+          // Optionally show a warning, but still proceed with success
         }
       }
 
@@ -191,7 +226,170 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded }: AddRecipeModa
     return `${guest.first_name} ${guest.last_name || ''}`.trim();
   };
 
-  // Content component to be reused in both mobile and desktop versions
+  // Desktop content component - styled to match RecipeDetailsModal
+  const desktopContent = (
+    <div className="flex-1 overflow-y-auto flex flex-col">
+      {/* Guest Selector Section */}
+      <div className="flex-shrink-0 pb-8 mb-8 border-b border-gray-200">
+        <div>
+          <Label htmlFor="guest" className="text-sm font-medium text-gray-600">
+            Guest {!isMyOwnRecipe && '*'}
+          </Label>
+          {!isMyOwnRecipe && (
+            <>
+              {guestsLoading ? (
+                <div className="mt-1 text-sm text-gray-500">Loading guests...</div>
+              ) : guests.length === 0 ? (
+                <div className="mt-1">
+                  <p className="text-sm text-gray-500 mb-2">No guests available. Please add a guest first.</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      onClose();
+                      // Navigate to guest list or trigger add guest modal
+                      // This could be handled by parent component
+                    }}
+                    className="text-sm"
+                  >
+                    Add Guest
+                  </Button>
+                </div>
+              ) : (
+                <div className="relative mt-1" ref={dropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setShowGuestDropdown(!showGuestDropdown)}
+                    className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                  >
+                    <span className={selectedGuestId ? 'text-gray-900' : 'text-gray-500'}>
+                      {selectedGuestId && selectedGuest
+                        ? getGuestDisplayName(selectedGuest)
+                        : 'Select a guest'}
+                    </span>
+                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                  </button>
+                  
+                  {showGuestDropdown && (
+                    <>
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                        {guests.map((guest) => (
+                          <button
+                            key={guest.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedGuestId(guest.id);
+                              setShowGuestDropdown(false);
+                            }}
+                            className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 ${
+                              selectedGuestId === guest.id
+                                ? 'bg-gray-100 text-gray-900 font-medium'
+                                : 'text-gray-700'
+                            }`}
+                          >
+                            {getGuestDisplayName(guest)}
+                          </button>
+                        ))}
+                      </div>
+                      {/* Overlay to close dropdown */}
+                      <div 
+                        className="fixed inset-0 z-[5]" 
+                        onClick={() => setShowGuestDropdown(false)}
+                      ></div>
+                    </>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+          
+          {/* "This is my own recipe" checkbox */}
+          <div className="mt-3">
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isMyOwnRecipe}
+                onChange={(e) => {
+                  setIsMyOwnRecipe(e.target.checked);
+                  if (e.target.checked) {
+                    setSelectedGuestId('');
+                    setShowGuestDropdown(false);
+                  }
+                }}
+                className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black focus:ring-2"
+              />
+              <span className="text-sm text-gray-700">This is my own recipe</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      {/* Recipe Title Section */}
+      <div className="flex-shrink-0 mb-8 pb-6 border-b border-gray-200">
+        <input
+          type="text"
+          value={recipeTitle}
+          onChange={(e) => setRecipeTitle(e.target.value)}
+          placeholder="Recipe name"
+          className="w-full font-serif text-4xl font-semibold text-gray-900 leading-tight bg-transparent border-0 border-b-2 border-gray-300 px-0 py-2 focus:outline-none focus:border-black placeholder:text-gray-400"
+          required
+        />
+        {/* Subtitle - Shared by guest name or user name */}
+        {!isMyOwnRecipe && selectedGuest && (
+          <p className="font-serif italic text-lg text-gray-700 mt-2">
+            Shared by {selectedGuest.printed_name || `${selectedGuest.first_name} ${selectedGuest.last_name || ''}`.trim()}
+          </p>
+        )}
+        {isMyOwnRecipe && userName && (
+          <p className="font-serif italic text-lg text-gray-700 mt-2">
+            Shared by {userName}
+          </p>
+        )}
+      </div>
+
+      {/* Notes Section - Full width above ingredients and instructions */}
+      <div className="flex-shrink-0 mb-8">
+        <textarea
+          value={recipeNotes}
+          onChange={(e) => setRecipeNotes(e.target.value)}
+          placeholder="Any additional notes about this recipe"
+          className="w-full font-sans font-light text-base text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black placeholder:text-gray-400 resize-vertical min-h-[80px]"
+        />
+      </div>
+
+      {/* Two Column Layout: Ingredients (left) and Instructions (right) */}
+      <div className="flex-1 grid grid-cols-[30%_70%] gap-8 pb-6">
+        {/* Left Column - Ingredients */}
+        <div className="flex flex-col min-w-0 overflow-hidden">
+          <textarea
+            value={recipeIngredients}
+            onChange={(e) => setRecipeIngredients(e.target.value)}
+            placeholder="List the ingredients needed for this recipe"
+            className="w-full font-sans font-light text-base text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black placeholder:text-gray-400 resize-vertical min-h-[200px]"
+          />
+        </div>
+
+        {/* Right Column - Instructions */}
+        <div className="flex flex-col min-w-0 overflow-hidden">
+          <textarea
+            value={recipeInstructions}
+            onChange={(e) => setRecipeInstructions(e.target.value)}
+            placeholder="If you have the recipe all in one single piece, just paste in here"
+            className="w-full font-serif text-lg text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black placeholder:text-gray-400 resize-vertical min-h-[200px]"
+          />
+        </div>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-6">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+    </div>
+  );
+
+  // Mobile content component - keep original form layout
   const modalContent = (
     <>
       <div className="space-y-6 pb-24 pr-4">
@@ -379,13 +577,13 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded }: AddRecipeModa
   // Desktop version - Sheet that slides from right
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="!w-[45%] !max-w-none h-full flex flex-col overflow-hidden">
-        <SheetHeader>
-          <SheetTitle className="font-serif text-2xl font-semibold mb-4">Add Recipe</SheetTitle>
+      <SheetContent side="right" className="!w-[60%] !max-w-none h-full flex flex-col overflow-hidden p-8">
+        <SheetHeader className="flex-shrink-0 mb-6">
+          <SheetTitle className="font-serif text-2xl font-semibold">Add Recipe</SheetTitle>
         </SheetHeader>
         
         <div className="flex-1 overflow-hidden flex flex-col relative overflow-y-auto">
-          {modalContent}
+          {desktopContent}
           
           {/* Save Button - Fixed position in bottom right */}
           <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 mt-auto">
