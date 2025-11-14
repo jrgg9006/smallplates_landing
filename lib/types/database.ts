@@ -251,6 +251,53 @@ export interface Database {
           is_default?: boolean;
         };
       };
+      cookbooks: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          description: string | null;
+          is_default: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name?: string;
+          description?: string | null;
+          is_default?: boolean;
+        };
+        Update: {
+          name?: string;
+          description?: string | null;
+          is_default?: boolean;
+        };
+      };
+      cookbook_recipes: {
+        Row: {
+          id: string;
+          cookbook_id: string;
+          recipe_id: string;
+          user_id: string;
+          note: string | null;
+          display_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          cookbook_id: string;
+          recipe_id: string;
+          user_id: string;
+          note?: string | null;
+          display_order?: number;
+        };
+        Update: {
+          note?: string | null;
+          display_order?: number;
+        };
+      };
     };
     Functions: {
       get_guest_statistics: {
@@ -320,6 +367,14 @@ export type CommunicationLog = Database['public']['Tables']['communication_log']
 export type CommunicationLogInsert = Database['public']['Tables']['communication_log']['Insert'];
 export type CommunicationLogUpdate = Database['public']['Tables']['communication_log']['Update'];
 
+export type Cookbook = Database['public']['Tables']['cookbooks']['Row'];
+export type CookbookInsert = Database['public']['Tables']['cookbooks']['Insert'];
+export type CookbookUpdate = Database['public']['Tables']['cookbooks']['Update'];
+
+export type CookbookRecipe = Database['public']['Tables']['cookbook_recipes']['Row'];
+export type CookbookRecipeInsert = Database['public']['Tables']['cookbook_recipes']['Insert'];
+export type CookbookRecipeUpdate = Database['public']['Tables']['cookbook_recipes']['Update'];
+
 // Extended types with relationships
 export interface GuestWithRecipes extends Guest {
   guest_recipes: GuestRecipe[];
@@ -332,6 +387,35 @@ export interface GuestWithCommunications extends Guest {
 export interface GuestFull extends Guest {
   guest_recipes: GuestRecipe[];
   communication_log: CommunicationLog[];
+}
+
+// Recipe with guest information
+export interface RecipeWithGuest extends GuestRecipe {
+  guests: {
+    first_name: string;
+    last_name: string;
+    printed_name: string | null;
+    email: string;
+    is_self: boolean;
+  } | null;
+}
+
+// Cookbook with recipes
+export interface CookbookWithRecipes extends Cookbook {
+  cookbook_recipes: (CookbookRecipe & {
+    guest_recipes: RecipeWithGuest;
+  })[];
+}
+
+// Recipe in cookbook with full information
+export interface RecipeInCookbook extends RecipeWithGuest {
+  cookbook_recipes: {
+    id: string;
+    note: string | null;
+    display_order: number;
+    created_at: string;
+    updated_at: string;
+  } | null;
 }
 
 // Form data types for UI components

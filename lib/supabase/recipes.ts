@@ -119,12 +119,108 @@ export async function getAllRecipes() {
       guests (
         first_name,
         last_name,
-        email
+        printed_name,
+        email,
+        is_self
       )
     `)
-    .order('created_at', { ascending: false });
+    .order('updated_at', { ascending: false });
 
   return { data, error: error?.message || null };
+}
+
+/**
+ * Search recipes by recipe name, guest name, or ingredients
+ */
+export async function searchRecipes(searchQuery: string) {
+  const supabase = createSupabaseClient();
+  
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  if (!searchQuery.trim()) {
+    // If search query is empty, return all recipes
+    return getAllRecipes();
+  }
+
+  const searchTerm = searchQuery.trim();
+
+  try {
+    // First, find guests that match the search query
+    const { data: matchingGuests, error: guestsError } = await supabase
+      .from('guests')
+      .select('id')
+      .eq('user_id', user.id)
+      .or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,printed_name.ilike.%${searchTerm}%`);
+
+    const guestIds = matchingGuests?.map(g => g.id) || [];
+
+    // Search recipes by recipe name, ingredients, or instructions
+    const { data: recipesByContent, error: recipesError } = await supabase
+      .from('guest_recipes')
+      .select(`
+        *,
+        guests (
+          first_name,
+          last_name,
+          printed_name,
+          email,
+          is_self
+        )
+      `)
+      .eq('user_id', user.id)
+      .or(`recipe_name.ilike.%${searchTerm}%,ingredients.ilike.%${searchTerm}%,instructions.ilike.%${searchTerm}%`)
+      .order('updated_at', { ascending: false });
+
+    if (recipesError) {
+      return { data: null, error: recipesError.message };
+    }
+
+    // If we found matching guests, also get their recipes
+    let recipesByGuest: any[] = [];
+    if (guestIds.length > 0) {
+      const { data: guestRecipes, error: guestRecipesError } = await supabase
+        .from('guest_recipes')
+        .select(`
+          *,
+          guests (
+            first_name,
+            last_name,
+            printed_name,
+            email,
+            is_self
+          )
+        `)
+        .eq('user_id', user.id)
+        .in('guest_id', guestIds)
+        .order('updated_at', { ascending: false });
+
+      if (!guestRecipesError && guestRecipes) {
+        recipesByGuest = guestRecipes;
+      }
+    }
+
+    // Combine and deduplicate recipes
+    const allRecipes = [...(recipesByContent || []), ...recipesByGuest];
+    const uniqueRecipes = Array.from(
+      new Map(allRecipes.map(recipe => [recipe.id, recipe])).values()
+    );
+
+    // Sort by updated_at descending (most recently updated first)
+    uniqueRecipes.sort((a, b) => {
+      const aDate = new Date(a.updated_at).getTime();
+      const bDate = new Date(b.updated_at).getTime();
+      return bDate - aDate;
+    });
+
+    return { data: uniqueRecipes, error: null };
+  } catch (err) {
+    console.error('Error searching recipes:', err);
+    return { data: null, error: 'Failed to search recipes' };
+  }
 }
 
 /**
@@ -140,11 +236,13 @@ export async function getRecipesByStatus(status: GuestRecipe['submission_status'
       guests (
         first_name,
         last_name,
-        email
+        printed_name,
+        email,
+        is_self
       )
-    `)
-    .eq('submission_status', status)
-    .order('created_at', { ascending: false });
+      `)
+      .eq('submission_status', status)
+      .order('updated_at', { ascending: false });
 
   return { data, error: error?.message || null };
 }
@@ -242,8 +340,12 @@ export async function addUserRecipe(recipeData: UserRecipeData) {
       .eq('is_self', true)
       .single();
 
-    // If no self guest exists, create one with user's name
+    // If no self guest exists, create a NEW one
+    // IMPORTANT: We do NOT update existing guests to is_self = true
+    // because that would make all their recipes appear as "My Own"
+    // even if they were added in a different context
     if (selfGuestError || !selfGuest) {
+      // Try to create a new self guest
       const { data: newSelfGuest, error: createError } = await supabase
         .from('guests')
         .insert({
@@ -252,17 +354,72 @@ export async function addUserRecipe(recipeData: UserRecipeData) {
           last_name: lastName,
           email: user.email || '',
           is_self: true,
-          status: 'submitted'
+          status: 'submitted',
+          number_of_recipes: 1,
+          recipes_received: 0,
+          is_archived: false,
+          source: 'manual'
         })
         .select('id')
         .single();
 
       if (createError) {
+        // If it fails due to unique constraint, a guest with this email already exists
+        // But we should NOT update it - instead, we need to handle this edge case
         console.error('Failed to create self guest:', createError);
-        return { data: null, error: 'Failed to create recipe collection' };
+        const errorMessage = createError.message || createError.details || 'Failed to create recipe collection';
+        
+        // Check if it's a unique constraint violation
+        if (errorMessage.includes('unique_guest_per_user')) {
+          // A guest with this email exists but is NOT a self guest
+          // We cannot create a new one due to unique constraint
+          // We also cannot update it because it might have recipes from other contexts
+          // Best solution: return a helpful error message
+          return { 
+            data: null, 
+            error: 'Unable to create your recipe collection. A guest with your email already exists. Please contact support to resolve this issue.' 
+          };
+        }
+        
+        return { data: null, error: errorMessage };
+      }
+
+      if (!newSelfGuest) {
+        return { data: null, error: 'Failed to create recipe collection: No guest returned' };
       }
 
       selfGuest = newSelfGuest;
+    }
+
+    // Before adding the recipe, ensure number_of_recipes is sufficient
+    // Get current guest data to check if we need to increase expected recipe count
+    const { data: guestData, error: guestFetchError } = await supabase
+      .from('guests')
+      .select('recipes_received, number_of_recipes')
+      .eq('id', selfGuest.id)
+      .single();
+      
+    if (guestFetchError) {
+      console.error('Failed to fetch guest data:', guestFetchError);
+      return { data: null, error: 'Failed to fetch guest data' };
+    }
+    
+    const currentRecipes = guestData?.recipes_received || 0;
+    const expectedRecipes = guestData?.number_of_recipes || 1;
+    const willHaveRecipes = currentRecipes + 1;
+    
+    // If we need more expected recipes, update that first (same logic as addRecipe)
+    if (willHaveRecipes > expectedRecipes) {
+      console.log(`Updating number_of_recipes from ${expectedRecipes} to ${willHaveRecipes}`);
+      const { error: updateExpectedError } = await supabase
+        .from('guests')
+        .update({ number_of_recipes: willHaveRecipes })
+        .eq('id', selfGuest.id);
+        
+      if (updateExpectedError) {
+        console.error('Failed to update number_of_recipes:', updateExpectedError);
+        return { data: null, error: 'Failed to update guest recipe limit' };
+      }
     }
 
     // Add the recipe with correct column names

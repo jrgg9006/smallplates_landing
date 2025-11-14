@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useState, useRef, useEffect } from "react";
-import { User, LogOut, Package } from "lucide-react";
+import { User, LogOut, Package, BookOpen } from "lucide-react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -62,6 +62,16 @@ export default function ProfileDropdown() {
           >
             <Package className="h-4 w-4" />
             Orders
+          </button>
+          <button
+            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+            onClick={() => {
+              router.push('/profile/cookbook');
+              setIsOpen(false);
+            }}
+          >
+            <BookOpen className="h-4 w-4" />
+            My Cookbook
           </button>
           <hr className="my-1 border-gray-200" />
           <button
