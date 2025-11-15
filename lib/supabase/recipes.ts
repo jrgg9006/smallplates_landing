@@ -131,7 +131,8 @@ export async function getAllRecipes() {
         last_name,
         printed_name,
         email,
-        is_self
+        is_self,
+        source
       )
     `)
     .order('updated_at', { ascending: false });
@@ -178,7 +179,8 @@ export async function searchRecipes(searchQuery: string) {
           last_name,
           printed_name,
           email,
-          is_self
+          is_self,
+          source
         )
       `)
       .eq('user_id', user.id)
@@ -201,7 +203,8 @@ export async function searchRecipes(searchQuery: string) {
             last_name,
             printed_name,
             email,
-            is_self
+            is_self,
+            source
           )
         `)
         .eq('user_id', user.id)

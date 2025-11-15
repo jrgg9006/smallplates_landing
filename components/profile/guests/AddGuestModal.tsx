@@ -7,17 +7,10 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { addGuest, checkGuestExists } from "@/lib/supabase/guests";
-import { addRecipe } from "@/lib/supabase/recipes";
 import type { GuestFormData } from "@/lib/types/database";
 import Image from "next/image";
 import { OnboardingBadge } from "@/components/onboarding/OnboardingBadge";
@@ -25,7 +18,7 @@ import { OnboardingBadge } from "@/components/onboarding/OnboardingBadge";
 interface AddGuestModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onGuestAdded?: () => void; // Callback to refresh the guest list
+  onGuestAdded?: (guestId?: string) => void; // Callback to refresh the guest list, optionally with new guest ID
   isFirstGuest?: boolean; // Show onboarding badge for first guest
 }
 
@@ -51,12 +44,6 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded, isFirstGuest = fa
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Recipe state
-  const [recipeTitle, setRecipeTitle] = useState('');
-  const [recipeSteps, setRecipeSteps] = useState('');
-  const [recipeInstructions, setRecipeInstructions] = useState('');
-  const [recipeNotes, setRecipeNotes] = useState('');
-  
   // Profile icon state - always show chef0 as default
   const [previewIcon, setPreviewIcon] = useState('/images/icons_profile/chef0.png');
 
@@ -71,10 +58,6 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded, isFirstGuest = fa
     setPlusOneFirstName('');
     setPlusOneLastName('');
     setError(null);
-    setRecipeTitle('');
-    setRecipeSteps('');
-    setRecipeInstructions('');
-    setRecipeNotes('');
     setPreviewIcon('/images/icons_profile/chef0.png');
   };
 
@@ -135,30 +118,13 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded, isFirstGuest = fa
         return;
       }
 
-      // If recipe data is provided, add the recipe for the guest
-      if (newGuest && (recipeTitle || recipeInstructions || recipeSteps)) {
-        const recipeData = {
-          recipe_name: recipeTitle || 'Untitled Recipe',
-          ingredients: recipeSteps || '',
-          instructions: recipeInstructions || '',
-          comments: recipeNotes || ''
-        };
-
-        const { error: recipeError } = await addRecipe(newGuest.id, recipeData);
-        
-        if (recipeError) {
-          // Log the error but don't fail the whole operation
-          console.error('Error adding recipe:', recipeError);
-        }
-      }
-
       // Success! Reset form and close modal
       resetForm();
       onClose();
       
-      // Refresh the guest list if callback provided
+      // Refresh the guest list if callback provided, passing the new guest ID
       if (onGuestAdded) {
-        onGuestAdded();
+        onGuestAdded(newGuest?.id);
       }
 
     } catch (err) {
@@ -203,17 +169,8 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded, isFirstGuest = fa
         </div>
       </div>
       
-      <Tabs defaultValue="guest-info" className="w-full flex-1 flex flex-col overflow-hidden">
-        <TabsList className="grid w-full grid-cols-2 bg-transparent p-0 h-auto border-b border-gray-200">
-          <TabsTrigger value="guest-info" className="bg-transparent border-0 rounded-none pb-2 px-0 text-gray-600 font-normal data-[state=active]:bg-transparent data-[state=active]:text-black data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium">
-            Guest Information
-          </TabsTrigger>
-          <TabsTrigger value="recipe" className="bg-transparent border-0 rounded-none pb-2 px-0 text-gray-600 font-normal data-[state=active]:bg-transparent data-[state=active]:text-black data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium">
-            Recipe
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="guest-info" className="flex-1 overflow-y-auto mt-6 px-2">
+      <div className="w-full flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto mt-6 px-2">
           <div className="space-y-6 pb-24 pr-4">
             {/* Onboarding Badge - Show only for first guest */}
             {isFirstGuest && (
@@ -331,79 +288,8 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded, isFirstGuest = fa
               </div>
             )}
           </div>
-        </TabsContent>
-        
-        <TabsContent value="recipe" className="flex-1 overflow-y-auto mt-6 px-2">
-          <div className="space-y-6 pb-24 pr-4">
-            <div className="space-y-4">
-            <div>
-              <Label htmlFor="recipeTitle" className="text-sm font-medium text-gray-600">Recipe Title</Label>
-              <Input
-                id="recipeTitle"
-                value={recipeTitle}
-                onChange={(e) => setRecipeTitle(e.target.value)}
-                className="mt-1"
-                placeholder="Recipe name"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="recipeSteps" className="text-sm font-medium text-gray-600">Ingredients</Label>
-              <textarea
-                id="recipeSteps"
-                value={recipeSteps}
-                onChange={(e) => setRecipeSteps(e.target.value)}
-                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[100px]"
-                placeholder="List the ingredients needed for this recipe"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="recipeInstructions" className="text-sm font-medium text-gray-600">Instructions</Label>
-              <textarea
-                id="recipeInstructions"
-                value={recipeInstructions}
-                onChange={(e) => setRecipeInstructions(e.target.value)}
-                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[150px]"
-                placeholder="If you have the recipe all in one single piece, just paste in here"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="recipeNotes" className="text-sm font-medium text-gray-600">Notes</Label>
-              <textarea
-                id="recipeNotes"
-                value={recipeNotes}
-                onChange={(e) => setRecipeNotes(e.target.value)}
-                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[80px]"
-                placeholder="Any additional notes about this recipe"
-              />
-            </div>
-            
-            <div className="pt-2">
-              <Label className="text-sm font-medium text-gray-600 mb-2 block">Recipe Image</Label>
-              <Button 
-                type="button"
-                onClick={() => console.log('Add image placeholder')}
-                className="bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md px-4 py-2"
-              >
-                Add Image
-              </Button>
-              <p className="text-xs text-gray-500 mt-2">
-                This image will serve as inspiration to our image generator algorithms.
-              </p>
-            </div>
-            </div>
-            
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                <p className="text-sm text-red-600">{error}</p>
-              </div>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </>
   );
 

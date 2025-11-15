@@ -329,7 +329,8 @@ export async function getCookbookRecipes(cookbookId: string) {
           last_name,
           printed_name,
           email,
-          is_self
+          is_self,
+          source
         )
       )
     `)

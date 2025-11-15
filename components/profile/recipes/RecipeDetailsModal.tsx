@@ -121,7 +121,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
     }
   };
 
-  const isOwnRecipe = recipe?.guests?.is_self === true;
+  const isOwnRecipe = recipe?.guests?.is_self === true || (recipe?.guests?.is_self === false && recipe?.guests?.source === 'manual');
 
   if (!recipe) return null;
 

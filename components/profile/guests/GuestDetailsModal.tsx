@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Guest } from "@/lib/types/database";
 import { updateGuest } from "@/lib/supabase/guests";
-import { addRecipe, getRecipesByGuest } from "@/lib/supabase/recipes";
+import { getRecipesByGuest } from "@/lib/supabase/recipes";
 import {
   Sheet,
   SheetContent,
@@ -58,12 +58,6 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
   const [phone, setPhone] = useState(guest?.phone || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // Recipe state
-  const [recipeTitle, setRecipeTitle] = useState('');
-  const [recipeSteps, setRecipeSteps] = useState('');
-  const [recipeInstructions, setRecipeInstructions] = useState('');
-  const [recipeNotes, setRecipeNotes] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [recipes, setRecipes] = useState<any[]>([]);
 
@@ -94,11 +88,6 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
       setError(null); // Clear any previous errors
       setSuccessMessage(null); // Clear any previous success messages
       setLoading(false);
-      // Reset recipe form
-      setRecipeTitle('');
-      setRecipeSteps('');
-      setRecipeInstructions('');
-      setRecipeNotes('');
       // Fetch recipes for this guest
       fetchRecipes();
     }
@@ -133,23 +122,6 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
         setError(error);
         setLoading(false);
         return;
-      }
-
-      // If recipe data is provided, add the recipe for the guest
-      if (recipeTitle || recipeInstructions || recipeSteps) {
-        const recipeData = {
-          recipe_name: recipeTitle || 'Untitled Recipe',
-          ingredients: recipeSteps || '',
-          instructions: recipeInstructions || '',
-          comments: recipeNotes || ''
-        };
-
-        const { error: recipeError } = await addRecipe(guest.id, recipeData);
-        
-        if (recipeError) {
-          // Log the error but don't fail the whole operation
-          console.error('Error adding recipe:', recipeError);
-        }
       }
 
       // Success! Close modal and refresh the guest list
@@ -392,68 +364,6 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
                       <div className="mt-1 text-gray-700">{guest.notes}</div>
                     </div>
                   )}
-                </div>
-              </div>
-
-              {/* Add Recipe Form */}
-              <div className="border-t pt-6">
-                <h3 className="text-sm font-medium text-gray-900 mb-4">Add Recipe</h3>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="recipeTitle" className="text-sm font-medium text-gray-600">Recipe Title</Label>
-                    <Input
-                      id="recipeTitle"
-                      value={recipeTitle}
-                      onChange={(e) => setRecipeTitle(e.target.value)}
-                      className="mt-1"
-                      placeholder="Recipe name"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="recipeSteps" className="text-sm font-medium text-gray-600">Ingredients</Label>
-                    <textarea
-                      id="recipeSteps"
-                      value={recipeSteps}
-                      onChange={(e) => setRecipeSteps(e.target.value)}
-                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[100px]"
-                      placeholder="List the ingredients needed for this recipe"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="recipeInstructions" className="text-sm font-medium text-gray-600">Instructions</Label>
-                    <textarea
-                      id="recipeInstructions"
-                      value={recipeInstructions}
-                      onChange={(e) => setRecipeInstructions(e.target.value)}
-                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[150px]"
-                      placeholder="If you have the recipe all in one single piece, just paste in here"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="recipeNotes" className="text-sm font-medium text-gray-600">Notes</Label>
-                    <textarea
-                      id="recipeNotes"
-                      value={recipeNotes}
-                      onChange={(e) => setRecipeNotes(e.target.value)}
-                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[80px]"
-                      placeholder="Any additional notes about this recipe"
-                    />
-                  </div>
-                  
-                  <div className="pt-2">
-                    <Label className="text-sm font-medium text-gray-600 mb-2 block">Recipe Image</Label>
-                    <Button 
-                      type="button"
-                      onClick={() => console.log('Add image placeholder')}
-                      className="bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md px-4 py-2"
-                    >
-                      Add Image
-                    </Button>
-                  </div>
-                  
                 </div>
               </div>
             </div>

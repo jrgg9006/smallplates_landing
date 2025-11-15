@@ -15,8 +15,9 @@ import { addRecipeToCookbook } from "@/lib/supabase/cookbooks";
 import { getGuests } from "@/lib/supabase/guests";
 import { getCurrentProfile } from "@/lib/supabase/profiles";
 import { Guest } from "@/lib/types/database";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Plus } from "lucide-react";
 import { RecipeImageUpload } from "./RecipeImageUpload";
+import { AddGuestModal } from "@/components/profile/guests/AddGuestModal";
 
 interface AddRecipeModalProps {
   isOpen: boolean;
@@ -40,6 +41,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
   const [guests, setGuests] = useState<Guest[]>([]);
   const [guestsLoading, setGuestsLoading] = useState(false);
   const [showGuestDropdown, setShowGuestDropdown] = useState(false);
+  const [showAddGuestModal, setShowAddGuestModal] = useState(false);
   const [isMyOwnRecipe, setIsMyOwnRecipe] = useState(false);
   const [uploadMethod, setUploadMethod] = useState<'text' | 'image'>('text');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -114,6 +116,19 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
     } finally {
       setGuestsLoading(false);
     }
+  };
+
+  const handleGuestAdded = async (newGuestId?: string) => {
+    // Refresh the guest list
+    await loadGuests();
+    
+    // Auto-select the newly created guest if ID is provided
+    if (newGuestId) {
+      setSelectedGuestId(newGuestId);
+    }
+    
+    // Close the AddGuestModal
+    setShowAddGuestModal(false);
   };
 
   const resetForm = () => {
@@ -341,6 +356,19 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
                             {getGuestDisplayName(guest)}
                           </button>
                         ))}
+                        <div className="border-t border-gray-200 mt-1 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowGuestDropdown(false);
+                              setShowAddGuestModal(true);
+                            }}
+                            className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                          >
+                            <Plus className="h-4 w-4" />
+                            Add New Guest
+                          </button>
+                        </div>
                       </div>
                       {/* Overlay to close dropdown */}
                       <div 
@@ -566,6 +594,19 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
                             {getGuestDisplayName(guest)}
                           </button>
                         ))}
+                        <div className="border-t border-gray-200 mt-1 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowGuestDropdown(false);
+                              setShowAddGuestModal(true);
+                            }}
+                            className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                          >
+                            <Plus className="h-4 w-4" />
+                            Add New Guest
+                          </button>
+                        </div>
                       </div>
                       {/* Overlay to close dropdown */}
                       <div 
@@ -722,24 +763,61 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
   // Mobile version - Sheet that slides up from bottom
   if (isMobile) {
     return (
-      <Sheet open={isOpen} onOpenChange={onClose}>
-        <SheetContent side="bottom" className="!h-[85vh] !max-h-[85vh] rounded-t-[20px] flex flex-col overflow-hidden p-0">
-          <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300" />
-          
-          <div className="p-6 flex flex-col h-full overflow-hidden">
-            <SheetHeader className="px-0">
-              <SheetTitle className="font-serif text-2xl font-semibold mb-4">Add Recipe</SheetTitle>
-            </SheetHeader>
+      <>
+        <Sheet open={isOpen} onOpenChange={onClose}>
+          <SheetContent side="bottom" className="!h-[85vh] !max-h-[85vh] rounded-t-[20px] flex flex-col overflow-hidden p-0">
+            <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300" />
             
-            <div className="flex-1 overflow-hidden flex flex-col overflow-y-auto">
-              {modalContent}
+            <div className="p-6 flex flex-col h-full overflow-hidden">
+              <SheetHeader className="px-0">
+                <SheetTitle className="font-serif text-2xl font-semibold mb-4">Add Recipe</SheetTitle>
+              </SheetHeader>
+              
+              <div className="flex-1 overflow-hidden flex flex-col overflow-y-auto">
+                {modalContent}
+              </div>
+              
+              {/* Save Button */}
+              <div className="mt-4 pb-safe">
+                <Button 
+                  onClick={handleSave}
+                  disabled={loading || guests.length === 0}
+                  className="w-full bg-black text-white hover:bg-gray-800 py-3 rounded-full disabled:opacity-50"
+                >
+                  {loading ? 'Saving...' : 'Save'}
+                </Button>
+              </div>
             </div>
+          </SheetContent>
+        </Sheet>
+        
+        {/* Nested AddGuestModal */}
+        <AddGuestModal
+          isOpen={showAddGuestModal}
+          onClose={() => setShowAddGuestModal(false)}
+          onGuestAdded={handleGuestAdded}
+        />
+      </>
+    );
+  }
+
+  // Desktop version - Sheet that slides from right
+  return (
+    <>
+      <Sheet open={isOpen} onOpenChange={onClose}>
+        <SheetContent side="right" className="!w-[70%] !max-w-none h-full flex flex-col overflow-hidden p-10">
+          <SheetHeader className="flex-shrink-0 mb-6">
+            <SheetTitle className="font-serif text-2xl font-semibold">Add Recipe</SheetTitle>
+          </SheetHeader>
+          
+          <div className="flex-1 overflow-hidden flex flex-col relative overflow-y-auto">
+            {desktopContent}
             
-            {/* Save Button */}
-            <div className="mt-4 pb-safe">
+            {/* Save Button - Fixed position in bottom right */}
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 mt-auto">
               <Button 
                 onClick={handleSave}
-                disabled={loading || guests.length === 0}
+                disabled={loading || (!isMyOwnRecipe && guests.length === 0)}
                 className="w-full bg-black text-white hover:bg-gray-800 py-3 rounded-full disabled:opacity-50"
               >
                 {loading ? 'Saving...' : 'Save'}
@@ -748,33 +826,14 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
           </div>
         </SheetContent>
       </Sheet>
-    );
-  }
-
-  // Desktop version - Sheet that slides from right
-  return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="!w-[70%] !max-w-none h-full flex flex-col overflow-hidden p-10">
-        <SheetHeader className="flex-shrink-0 mb-6">
-          <SheetTitle className="font-serif text-2xl font-semibold">Add Recipe</SheetTitle>
-        </SheetHeader>
-        
-        <div className="flex-1 overflow-hidden flex flex-col relative overflow-y-auto">
-          {desktopContent}
-          
-          {/* Save Button - Fixed position in bottom right */}
-          <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 mt-auto">
-            <Button 
-              onClick={handleSave}
-              disabled={loading || (!isMyOwnRecipe && guests.length === 0)}
-              className="w-full bg-black text-white hover:bg-gray-800 py-3 rounded-full disabled:opacity-50"
-            >
-              {loading ? 'Saving...' : 'Save'}
-            </Button>
-          </div>
-        </div>
-      </SheetContent>
-    </Sheet>
+      
+      {/* Nested AddGuestModal */}
+      <AddGuestModal
+        isOpen={showAddGuestModal}
+        onClose={() => setShowAddGuestModal(false)}
+        onGuestAdded={handleGuestAdded}
+      />
+    </>
   );
 }
 

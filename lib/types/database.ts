@@ -400,6 +400,7 @@ export interface RecipeWithGuest extends GuestRecipe {
     printed_name: string | null;
     email: string;
     is_self: boolean;
+    source: GuestSource;
   } | null;
 }
 
