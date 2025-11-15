@@ -778,7 +778,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
               </div>
               
               {/* Save Button */}
-              <div className="mt-4 pb-safe">
+              <div className="mt-2 pb-safe">
                 <Button 
                   onClick={handleSave}
                   disabled={loading || guests.length === 0}
@@ -814,7 +814,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
             {desktopContent}
             
             {/* Save Button - Fixed position in bottom right */}
-            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 mt-auto">
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 pt-3 pb-2 mt-auto">
               <Button 
                 onClick={handleSave}
                 disabled={loading || (!isMyOwnRecipe && guests.length === 0)}
