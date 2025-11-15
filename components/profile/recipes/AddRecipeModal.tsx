@@ -10,12 +10,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { addRecipe, addUserRecipe } from "@/lib/supabase/recipes";
+import { addRecipe, addUserRecipe, addRecipeWithFiles } from "@/lib/supabase/recipes";
 import { addRecipeToCookbook } from "@/lib/supabase/cookbooks";
 import { getGuests } from "@/lib/supabase/guests";
 import { getCurrentProfile } from "@/lib/supabase/profiles";
 import { Guest } from "@/lib/types/database";
 import { ChevronDown } from "lucide-react";
+import { RecipeImageUpload } from "./RecipeImageUpload";
 
 interface AddRecipeModalProps {
   isOpen: boolean;
@@ -40,6 +41,9 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
   const [guestsLoading, setGuestsLoading] = useState(false);
   const [showGuestDropdown, setShowGuestDropdown] = useState(false);
   const [isMyOwnRecipe, setIsMyOwnRecipe] = useState(false);
+  const [uploadMethod, setUploadMethod] = useState<'text' | 'image'>('text');
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [recipeTitle, setRecipeTitle] = useState('');
   const [recipeIngredients, setRecipeIngredients] = useState('');
   const [recipeInstructions, setRecipeInstructions] = useState('');
@@ -115,6 +119,9 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
   const resetForm = () => {
     setSelectedGuestId('');
     setIsMyOwnRecipe(false);
+    setUploadMethod('text');
+    setSelectedFiles([]);
+    setUploadProgress(0);
     setRecipeTitle('');
     setRecipeIngredients('');
     setRecipeInstructions('');
@@ -141,19 +148,64 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
       return;
     }
 
+    // Validation based on upload method
+    if (uploadMethod === 'image') {
+      if (selectedFiles.length === 0) {
+        setError('Please upload at least one image');
+        return;
+      }
+    } else {
     if (!recipeIngredients.trim() || !recipeInstructions.trim()) {
       setError('Please fill in Ingredients and Instructions');
       return;
+      }
     }
 
     setLoading(true);
     setError(null);
+    setUploadProgress(0);
 
     try {
       let createdRecipeId: string | null = null;
 
+      if (uploadMethod === 'image') {
+        // Image mode: use addRecipeWithFiles
+        setUploadProgress(20);
+        
+        const formData = isMyOwnRecipe
+          ? {
+              recipeName: recipeTitle.trim(),
+              ingredients: '', // Not used in image mode, but required by type
+              instructions: '', // Not used in image mode, but required by type
+              personalNote: recipeNotes.trim() || undefined,
+            }
+          : {
+              recipe_name: recipeTitle.trim(),
+              ingredients: '', // Not used in image mode, but required by type
+              instructions: '', // Not used in image mode, but required by type
+              comments: recipeNotes.trim() || undefined,
+            };
+
+        const { data: recipeResult, error: recipeError } = await addRecipeWithFiles(
+          isMyOwnRecipe ? null : selectedGuestId,
+          formData,
+          selectedFiles,
+          isMyOwnRecipe
+        );
+
+        setUploadProgress(100);
+
+        if (recipeError) {
+          setError(recipeError);
+          setLoading(false);
+          setUploadProgress(0);
+          return;
+        }
+
+        createdRecipeId = recipeResult?.id || null;
+      } else {
+        // Text mode: use existing functions
       if (isMyOwnRecipe) {
-        // Use addUserRecipe for own recipes
         const userRecipeData = {
           recipeName: recipeTitle.trim(),
           ingredients: recipeIngredients.trim(),
@@ -171,7 +223,6 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
 
         createdRecipeId = userRecipeData_result?.id || null;
       } else {
-        // Use addRecipe for guest recipes
         const recipeData = {
           recipe_name: recipeTitle.trim(),
           ingredients: recipeIngredients.trim(),
@@ -188,6 +239,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
         }
 
         createdRecipeId = recipeData_result?.id || null;
+        }
       }
 
       // If cookbookId is provided and recipe was created successfully, add it to the cookbook
@@ -195,9 +247,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
         const { error: addToCookbookError } = await addRecipeToCookbook(cookbookId, createdRecipeId);
         
         if (addToCookbookError) {
-          // Log error but don't fail the whole operation - recipe was created successfully
           console.error('Failed to add recipe to cookbook:', addToCookbookError);
-          // Optionally show a warning, but still proceed with success
         }
       }
 
@@ -215,6 +265,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
       console.error('Error adding recipe:', err);
     } finally {
       setLoading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -230,7 +281,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
   const desktopContent = (
     <div className="flex-1 overflow-y-auto flex flex-col">
       {/* Guest Selector Section */}
-      <div className="flex-shrink-0 pb-8 mb-8 border-b border-gray-200">
+      <div className="flex-shrink-0 pb-4 mb-2">
         <div>
           <Label htmlFor="guest" className="text-sm font-medium text-gray-600">
             Guest {!isMyOwnRecipe && '*'}
@@ -324,6 +375,41 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
         </div>
       </div>
 
+      {/* Upload Method Toggle */}
+      <div className="flex-shrink-0 pb-2 mb-2">
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setUploadMethod('text');
+              setSelectedFiles([]);
+            }}
+            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              uploadMethod === 'text'
+                ? 'bg-white border-2 border-black text-black'
+                : 'bg-gray-50 border-2 border-gray-200 text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            Type Recipe
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setUploadMethod('image');
+              setRecipeIngredients('');
+              setRecipeInstructions('');
+            }}
+            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              uploadMethod === 'image'
+                ? 'bg-white border-2 border-black text-black'
+                : 'bg-gray-50 border-2 border-gray-200 text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            Upload Images
+          </button>
+        </div>
+      </div>
+
       {/* Recipe Title Section */}
       <div className="flex-shrink-0 mb-8 pb-6 border-b border-gray-200">
         <input
@@ -347,7 +433,32 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
         )}
       </div>
 
-      {/* Notes Section - Full width above ingredients and instructions */}
+      {/* Conditional Form Fields Based on Upload Method */}
+      {uploadMethod === 'image' ? (
+        <>
+          {/* Image Mode: Notes and Image Upload */}
+          <div className="flex-shrink-0 mb-8">
+            <textarea
+              value={recipeNotes}
+              onChange={(e) => setRecipeNotes(e.target.value)}
+              placeholder="Any additional notes about this recipe (optional)"
+              className="w-full font-sans font-light text-base text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black placeholder:text-gray-400 resize-vertical min-h-[80px]"
+            />
+          </div>
+
+          {/* Image Upload Section */}
+          <div className="flex-1 mb-8">
+            <Label className="text-sm font-medium text-gray-600 mb-3 block">Recipe Images *</Label>
+            <RecipeImageUpload
+              onFilesSelected={setSelectedFiles}
+              selectedFiles={selectedFiles}
+              error={error}
+            />
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Text Mode: Notes, Ingredients, and Instructions */}
       <div className="flex-shrink-0 mb-8">
         <textarea
           value={recipeNotes}
@@ -358,27 +469,29 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
       </div>
 
       {/* Two Column Layout: Ingredients (left) and Instructions (right) */}
-      <div className="flex-1 grid grid-cols-[30%_70%] gap-8 pb-6">
+      <div className="flex-1 grid grid-cols-[3fr_7fr] gap-8 pb-6">
         {/* Left Column - Ingredients */}
-        <div className="flex flex-col min-w-0 overflow-hidden">
+            <div className="flex flex-col">
           <textarea
             value={recipeIngredients}
             onChange={(e) => setRecipeIngredients(e.target.value)}
             placeholder="List the ingredients needed for this recipe"
-            className="w-full font-sans font-light text-base text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black placeholder:text-gray-400 resize-vertical min-h-[200px]"
+                className="w-full font-sans font-light text-base text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black placeholder:text-gray-400 resize-vertical min-h-[240px]"
           />
         </div>
 
         {/* Right Column - Instructions */}
-        <div className="flex flex-col min-w-0 overflow-hidden">
+            <div className="flex flex-col">
           <textarea
             value={recipeInstructions}
             onChange={(e) => setRecipeInstructions(e.target.value)}
             placeholder="If you have the recipe all in one single piece, just paste in here"
-            className="w-full font-serif text-lg text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black placeholder:text-gray-400 resize-vertical min-h-[200px]"
+                className="w-full font-serif text-lg text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black placeholder:text-gray-400 resize-vertical min-h-[240px]"
           />
         </div>
       </div>
+        </>
+      )}
 
       {/* Error Message */}
       {error && (
@@ -486,7 +599,42 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
           </div>
         </div>
 
-        {/* Recipe Fields */}
+        {/* Upload Method Toggle */}
+        <div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setUploadMethod('text');
+                setSelectedFiles([]);
+              }}
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                uploadMethod === 'text'
+                  ? 'bg-white border-2 border-black text-black'
+                  : 'bg-gray-50 border-2 border-gray-200 text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              Type Recipe
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setUploadMethod('image');
+                setRecipeIngredients('');
+                setRecipeInstructions('');
+              }}
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                uploadMethod === 'image'
+                  ? 'bg-white border-2 border-black text-black'
+                  : 'bg-gray-50 border-2 border-gray-200 text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              Upload Images
+            </button>
+          </div>
+        </div>
+
+        {/* Recipe Title */}
         <div>
           <Label htmlFor="recipeTitle" className="text-sm font-medium text-gray-600">Recipe Title *</Label>
           <Input
@@ -499,13 +647,40 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
           />
         </div>
         
+        {/* Conditional Form Fields Based on Upload Method */}
+        {uploadMethod === 'image' ? (
+          <>
+            {/* Image Mode: Notes and Image Upload */}
+            <div>
+              <Label htmlFor="recipeNotes" className="text-sm font-medium text-gray-600">Notes</Label>
+              <textarea
+                id="recipeNotes"
+                value={recipeNotes}
+                onChange={(e) => setRecipeNotes(e.target.value)}
+                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[80px]"
+                placeholder="Any additional notes about this recipe (optional)"
+              />
+            </div>
+            
+            <div>
+              <Label className="text-sm font-medium text-gray-600 mb-3 block">Recipe Images *</Label>
+              <RecipeImageUpload
+                onFilesSelected={setSelectedFiles}
+                selectedFiles={selectedFiles}
+                error={error}
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Text Mode: Ingredients, Instructions, and Notes */}
         <div>
           <Label htmlFor="recipeIngredients" className="text-sm font-medium text-gray-600">Ingredients</Label>
           <textarea
             id="recipeIngredients"
             value={recipeIngredients}
             onChange={(e) => setRecipeIngredients(e.target.value)}
-            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[100px]"
+                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[120px]"
             placeholder="List the ingredients needed for this recipe"
           />
         </div>
@@ -516,7 +691,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
             id="recipeInstructions"
             value={recipeInstructions}
             onChange={(e) => setRecipeInstructions(e.target.value)}
-            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[150px]"
+                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[180px]"
             placeholder="If you have the recipe all in one single piece, just paste in here"
           />
         </div>
@@ -531,6 +706,8 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
             placeholder="Any additional notes about this recipe"
           />
         </div>
+          </>
+        )}
 
         {/* Error Message */}
         {error && (
@@ -577,7 +754,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
   // Desktop version - Sheet that slides from right
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="!w-[60%] !max-w-none h-full flex flex-col overflow-hidden p-8">
+      <SheetContent side="right" className="!w-[70%] !max-w-none h-full flex flex-col overflow-hidden p-10">
         <SheetHeader className="flex-shrink-0 mb-6">
           <SheetTitle className="font-serif text-2xl font-semibold">Add Recipe</SheetTitle>
         </SheetHeader>
@@ -586,7 +763,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
           {desktopContent}
           
           {/* Save Button - Fixed position in bottom right */}
-          <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 mt-auto">
+          <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 mt-auto">
             <Button 
               onClick={handleSave}
               disabled={loading || (!isMyOwnRecipe && guests.length === 0)}

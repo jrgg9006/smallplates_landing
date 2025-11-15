@@ -199,8 +199,53 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
         </div>
       )}
 
+      {/* Uploaded Files Section - if document_urls exist */}
+      {recipe.document_urls && recipe.document_urls.length > 0 && (
+        <div className="flex-shrink-0 mb-8">
+          <h3 className="text-sm font-medium text-gray-600 mb-3">Uploaded Files</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {recipe.document_urls.map((url, index) => {
+              const isPDF = url.toLowerCase().endsWith('.pdf') || url.includes('application/pdf');
+              return (
+                <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200">
+                  {isPDF ? (
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center justify-center h-full text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                    >
+                      <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span className="text-xs font-medium">PDF</span>
+                      <span className="text-xs text-gray-500 mt-1">Click to view</span>
+                    </a>
+                  ) : (
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative w-full h-full"
+                    >
+                      <Image
+                        src={url}
+                        alt={`Uploaded file ${index + 1}`}
+                        fill
+                        className="object-cover hover:opacity-90 transition-opacity"
+                        sizes="(max-width: 768px) 50vw, 33vw"
+                      />
+                    </a>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Two Column Layout: Ingredients (left) and Instructions (right) */}
-      <div className="flex-1 grid grid-cols-[30%_70%] gap-8 pb-6">
+      <div className="flex-1 grid grid-cols-[3fr_7fr] gap-8 pb-6">
         {/* Left Column - Ingredients */}
         <div className="flex flex-col min-w-0 overflow-hidden">
           {recipe.ingredients && recipe.ingredients.trim() ? (
@@ -291,6 +336,51 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
         </div>
       )}
 
+      {/* Uploaded Files Section - if document_urls exist */}
+      {recipe.document_urls && recipe.document_urls.length > 0 && (
+        <div className="flex-shrink-0 mb-6">
+          <h3 className="text-sm font-medium text-gray-600 mb-3">Uploaded Files</h3>
+          <div className="grid grid-cols-2 gap-3">
+            {recipe.document_urls.map((url, index) => {
+              const isPDF = url.toLowerCase().endsWith('.pdf') || url.includes('application/pdf');
+              return (
+                <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200">
+                  {isPDF ? (
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center justify-center h-full text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                    >
+                      <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span className="text-xs font-medium">PDF</span>
+                      <span className="text-xs text-gray-500 mt-1">Click to view</span>
+                    </a>
+                  ) : (
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative w-full h-full"
+                    >
+                      <Image
+                        src={url}
+                        alt={`Uploaded file ${index + 1}`}
+                        fill
+                        className="object-cover hover:opacity-90 transition-opacity"
+                        sizes="50vw"
+                      />
+                    </a>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Stacked Layout for Mobile */}
       <div className="flex-1 space-y-6 pb-6">
         {/* Ingredients */}
@@ -377,7 +467,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
       </div>
 
       {/* Two Column Layout: Ingredients (left) and Instructions (right) */}
-      <div className="flex-1 grid grid-cols-[30%_70%] gap-8 pb-6">
+      <div className="flex-1 grid grid-cols-[3fr_7fr] gap-8 pb-6">
         {/* Left Column - Ingredients */}
         <div className="flex flex-col min-w-0 overflow-hidden">
           <textarea

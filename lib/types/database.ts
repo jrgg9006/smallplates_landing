@@ -439,6 +439,8 @@ export interface RecipeFormData {
   ingredients: string;
   instructions: string;
   comments?: string;
+  upload_method?: 'text' | 'image';
+  document_urls?: string[];
 }
 
 // Statistics and analytics types

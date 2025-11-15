@@ -122,7 +122,7 @@ export function CookbookTableControls({
                   className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg px-6 py-2 text-sm font-medium flex items-center gap-2"
                 >
                   <BookOpen className="h-4 w-4" />
-                  Add a Recipe
+                  Add a Recipe to this Cookbook
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
