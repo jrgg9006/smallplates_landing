@@ -251,21 +251,27 @@ export default function RecipesPage() {
               </motion.div>
             </div>
             
-            {/* Right side - Action buttons - centered on mobile */}
-            <div className="flex-shrink-0 flex items-center gap-4 justify-center lg:justify-end">
+            {/* Right side - Action buttons - centered on mobile, stacked vertically */}
+            <div className="flex-shrink-0 flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:justify-end w-full lg:w-auto">
               <Button
                 onClick={handleShareRecipes}
-                className="bg-purple-700 text-white hover:bg-purple-900 rounded-lg px-8 py-3 text-base font-medium flex items-center gap-2"
+                className="w-full lg:w-auto bg-purple-700 text-white hover:bg-purple-900 rounded-lg px-8 py-3 text-base font-medium flex items-center justify-center gap-2"
               >
                 <Share2 className="h-5 w-5" />
                 Share Recipes
               </Button>
-              <RecipeCollectorButton label="Get Recipes from Friends" />
+              <div className="w-full lg:w-auto">
+                <RecipeCollectorButton 
+                  label="Get Recipes from Friends"
+                  className="w-full lg:w-auto border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg px-8 py-3 text-base font-medium flex items-center justify-center gap-2"
+                />
+              </div>
               <Button
                 onClick={handleAddRecipe}
-                className="bg-teal-600 text-white hover:bg-teal-700 rounded-full w-16 h-16 flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow p-0"
+                className="w-full lg:w-16 bg-teal-600 text-white hover:bg-teal-700 rounded-lg lg:rounded-full h-12 lg:h-16 flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow p-0"
               >
-                <Plus className="h-12 w-12" />
+                <Plus className="h-6 w-6 lg:h-12 lg:w-12" />
+                <span className="lg:hidden ml-2">Add Recipe</span>
               </Button>
             </div>
           </div>

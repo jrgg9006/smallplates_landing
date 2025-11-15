@@ -318,7 +318,7 @@ export default function CookbookPage() {
                 className="bg-teal-600 text-white hover:bg-teal-700 rounded-lg px-8 py-3 text-base font-medium flex items-center gap-2"
               >
                 <ShoppingCart className="h-5 w-5" />
-                Purchase your Cookbook!
+                Print your Cookbook!
               </Button>
             </div>
           </div>
