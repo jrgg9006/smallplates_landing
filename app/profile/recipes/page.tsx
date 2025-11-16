@@ -230,25 +230,14 @@ export default function RecipesPage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Mobile: Add Recipe button at top */}
-        <div className="lg:hidden mb-6">
-          <Button
-            onClick={handleAddRecipe}
-            className="w-full bg-teal-600 text-white hover:bg-teal-700 rounded-lg h-12 flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow"
-          >
-            <Plus className="h-6 w-6 mr-2" />
-            Add Recipe
-          </Button>
-        </div>
-
         {/* Hero Section */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
             {/* Title section with editorial text - centered on mobile */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:gap-8 mb-4 lg:mb-0 justify-center lg:justify-start">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:gap-8 mb-4 lg:mb-0 justify-center lg:justify-start w-full lg:w-auto">
               {/* Editorial Text Version */}
               <motion.div 
-                className="text-center lg:text-left"
+                className="text-center lg:text-left w-full lg:w-auto"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
@@ -256,10 +245,21 @@ export default function RecipesPage() {
                 <h1 className="font-serif text-6xl md:text-6xl font-medium tracking-tight text-gray-900 mb-1">
                   My Recipes
                 </h1>
-                <h3 className="text-lg font-light text-gray-600">
+                <h3 className="text-lg font-light text-gray-600 mb-4 lg:mb-0">
                   Your cookbook is cooking...
                 </h3>
               </motion.div>
+
+              {/* Mobile: Add Recipe button - positioned after subtitle */}
+              <div className="lg:hidden mb-4">
+                <Button
+                  onClick={handleAddRecipe}
+                  className="w-full bg-teal-600 text-white hover:bg-teal-700 rounded-lg h-12 flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow"
+                >
+                  <Plus className="h-6 w-6 mr-2" />
+                  Add Recipe
+                </Button>
+              </div>
             </div>
             
             {/* Right side - Action buttons - centered on mobile, stacked vertically */}
