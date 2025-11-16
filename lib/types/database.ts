@@ -301,6 +301,38 @@ export interface Database {
           display_order?: number;
         };
       };
+      recipe_production_status: {
+        Row: {
+          id: string;
+          recipe_id: string;
+          text_finalized_in_indesign: boolean;
+          image_generated: boolean;
+          image_placed_in_indesign: boolean;
+          operations_notes: string | null;
+          production_completed_at: string | null;
+          needs_review: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          recipe_id: string;
+          text_finalized_in_indesign?: boolean;
+          image_generated?: boolean;
+          image_placed_in_indesign?: boolean;
+          operations_notes?: string | null;
+          production_completed_at?: string | null;
+          needs_review?: boolean;
+        };
+        Update: {
+          text_finalized_in_indesign?: boolean;
+          image_generated?: boolean;
+          image_placed_in_indesign?: boolean;
+          operations_notes?: string | null;
+          production_completed_at?: string | null;
+          needs_review?: boolean;
+        };
+      };
     };
     Functions: {
       get_guest_statistics: {
@@ -377,6 +409,10 @@ export type CookbookUpdate = Database['public']['Tables']['cookbooks']['Update']
 export type CookbookRecipe = Database['public']['Tables']['cookbook_recipes']['Row'];
 export type CookbookRecipeInsert = Database['public']['Tables']['cookbook_recipes']['Insert'];
 export type CookbookRecipeUpdate = Database['public']['Tables']['cookbook_recipes']['Update'];
+
+export type RecipeProductionStatus = Database['public']['Tables']['recipe_production_status']['Row'];
+export type RecipeProductionStatusInsert = Database['public']['Tables']['recipe_production_status']['Insert'];
+export type RecipeProductionStatusUpdate = Database['public']['Tables']['recipe_production_status']['Update'];
 
 // Extended types with relationships
 export interface GuestWithRecipes extends Guest {

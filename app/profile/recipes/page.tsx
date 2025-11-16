@@ -230,6 +230,17 @@ export default function RecipesPage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Mobile: Add Recipe button at top */}
+        <div className="lg:hidden mb-6">
+          <Button
+            onClick={handleAddRecipe}
+            className="w-full bg-teal-600 text-white hover:bg-teal-700 rounded-lg h-12 flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow"
+          >
+            <Plus className="h-6 w-6 mr-2" />
+            Add Recipe
+          </Button>
+        </div>
+
         {/* Hero Section */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
@@ -255,7 +266,7 @@ export default function RecipesPage() {
             <div className="flex-shrink-0 flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:justify-end w-full lg:w-auto">
               <Button
                 onClick={handleShareRecipes}
-                className="w-full lg:w-auto bg-purple-700 text-white hover:bg-purple-900 rounded-lg px-8 py-3 text-base font-medium flex items-center justify-center gap-2"
+                className="hidden lg:flex w-full lg:w-auto bg-purple-700 text-white hover:bg-purple-900 rounded-lg px-8 py-3 text-base font-medium items-center justify-center gap-2"
               >
                 <Share2 className="h-5 w-5" />
                 Share Recipes
@@ -268,10 +279,9 @@ export default function RecipesPage() {
               </div>
               <Button
                 onClick={handleAddRecipe}
-                className="w-full lg:w-16 bg-teal-600 text-white hover:bg-teal-700 rounded-lg lg:rounded-full h-12 lg:h-16 flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow p-0"
+                className="hidden lg:flex w-full lg:w-16 bg-teal-600 text-white hover:bg-teal-700 rounded-lg lg:rounded-full h-12 lg:h-16 items-center justify-center shadow-lg hover:shadow-xl transition-shadow p-0"
               >
                 <Plus className="h-6 w-6 lg:h-12 lg:w-12" />
-                <span className="lg:hidden ml-2">Add Recipe</span>
               </Button>
             </div>
           </div>
