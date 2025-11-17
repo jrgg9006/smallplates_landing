@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { addRecipe, addUserRecipe, addRecipeWithFiles } from "@/lib/supabase/recipes";
 import { addRecipeToCookbook } from "@/lib/supabase/cookbooks";
+import { addRecipeToGroupCookbook, addRecipeToGroup } from "@/lib/supabase/groupRecipes";
 import { getGuests } from "@/lib/supabase/guests";
 import { getCurrentProfile } from "@/lib/supabase/profiles";
 import { Guest } from "@/lib/types/database";
@@ -24,9 +25,16 @@ interface AddRecipeModalProps {
   onClose: () => void;
   onRecipeAdded?: () => void; // Callback to refresh the recipe list
   cookbookId?: string | null; // Optional cookbook ID to auto-add recipe after creation
+  groupId?: string | null; // Optional group ID to create recipe directly in group
 }
 
-export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: AddRecipeModalProps) {
+export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, groupId }: AddRecipeModalProps) {
+  // Debug: Log when modal opens with different contexts
+  React.useEffect(() => {
+    if (isOpen) {
+      console.log('DEBUG: AddRecipeModal opened with context:', { cookbookId, groupId });
+    }
+  }, [isOpen, cookbookId, groupId]);
   // Responsive hook to detect mobile
   const [isMobile, setIsMobile] = useState(false);
 
@@ -183,86 +191,202 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId }: A
     try {
       let createdRecipeId: string | null = null;
 
-      if (uploadMethod === 'image') {
-        // Image mode: use addRecipeWithFiles
-        setUploadProgress(20);
-        
-        const formData = isMyOwnRecipe
-          ? {
-              recipeName: recipeTitle.trim(),
-              ingredients: '', // Not used in image mode, but required by type
-              instructions: '', // Not used in image mode, but required by type
-              personalNote: recipeNotes.trim() || undefined,
+      // If groupId is provided, create recipe directly in the group
+      console.log('DEBUG: Recipe creation starting', { groupId, isMyOwnRecipe, uploadMethod });
+      if (groupId) {
+        console.log('DEBUG: Creating recipe for group', groupId);
+        if (uploadMethod === 'image') {
+          // For groups with image uploads, we need to use a different approach
+          // First create the recipe with files, then add it to the group
+          setUploadProgress(20);
+          
+          const formData = isMyOwnRecipe
+            ? {
+                recipeName: recipeTitle.trim(),
+                ingredients: '', // Not used in image mode, but required by type
+                instructions: '', // Not used in image mode, but required by type
+                personalNote: recipeNotes.trim() || undefined,
+              }
+            : {
+                recipe_name: recipeTitle.trim(),
+                ingredients: '', // Not used in image mode, but required by type
+                instructions: '', // Not used in image mode, but required by type
+                comments: recipeNotes.trim() || undefined,
+              };
+
+          const { data: recipeResult, error: recipeError } = await addRecipeWithFiles(
+            isMyOwnRecipe ? null : selectedGuestId,
+            formData,
+            selectedFiles,
+            isMyOwnRecipe
+          );
+
+          setUploadProgress(50);
+
+          if (recipeError) {
+            setError(recipeError);
+            setLoading(false);
+            setUploadProgress(0);
+            return;
+          }
+
+          createdRecipeId = recipeResult?.id || null;
+          
+          // Add the recipe to the group
+          if (createdRecipeId) {
+            const { error: groupError } = await addRecipeToGroup(groupId, createdRecipeId);
+            if (groupError) {
+              console.error('Failed to add recipe to group:', groupError);
+              // Recipe was created but not added to group - still continue
             }
-          : {
+          }
+
+          setUploadProgress(100);
+        } else {
+          // Text mode: create recipe using existing functions, then add to group
+          if (isMyOwnRecipe) {
+            const userRecipeData = {
+              recipeName: recipeTitle.trim(),
+              ingredients: recipeIngredients.trim(),
+              instructions: recipeInstructions.trim(),
+              personalNote: recipeNotes.trim() || undefined,
+            };
+
+            const { data: userRecipeData_result, error: recipeError } = await addUserRecipe(userRecipeData);
+            
+            if (recipeError) {
+              setError(recipeError);
+              setLoading(false);
+              return;
+            }
+
+            createdRecipeId = userRecipeData_result?.id || null;
+          } else {
+            const recipeData = {
               recipe_name: recipeTitle.trim(),
-              ingredients: '', // Not used in image mode, but required by type
-              instructions: '', // Not used in image mode, but required by type
+              ingredients: recipeIngredients.trim(),
+              instructions: recipeInstructions.trim(),
               comments: recipeNotes.trim() || undefined,
             };
 
-        const { data: recipeResult, error: recipeError } = await addRecipeWithFiles(
-          isMyOwnRecipe ? null : selectedGuestId,
-          formData,
-          selectedFiles,
-          isMyOwnRecipe
-        );
+            const { data: recipeData_result, error: recipeError } = await addRecipe(selectedGuestId, recipeData);
+            
+            if (recipeError) {
+              setError(recipeError);
+              setLoading(false);
+              return;
+            }
 
-        setUploadProgress(100);
-
-        if (recipeError) {
-          setError(recipeError);
-          setLoading(false);
-          setUploadProgress(0);
-          return;
+            createdRecipeId = recipeData_result?.id || null;
+          }
+          
+          // Add the recipe to the group
+          if (createdRecipeId) {
+            const { error: groupError } = await addRecipeToGroup(groupId, createdRecipeId);
+            if (groupError) {
+              console.error('Failed to add recipe to group:', groupError);
+              // Recipe was created but not added to group - still continue
+            }
+          }
         }
 
-        createdRecipeId = recipeResult?.id || null;
+        // Always add group recipes to the group's shared cookbook
+        if (createdRecipeId) {
+          console.log('DEBUG: Adding recipe to group cookbook', { recipeId: createdRecipeId, groupId });
+          const { error: addToCookbookError } = await addRecipeToGroupCookbook(createdRecipeId, groupId);
+          if (addToCookbookError) {
+            console.error('Failed to add recipe to group cookbook:', addToCookbookError);
+            setError(`Recipe created but failed to add to shared cookbook: ${addToCookbookError}`);
+            setLoading(false);
+            return;
+          }
+          console.log('DEBUG: Successfully added recipe to group cookbook');
+        } else {
+          console.log('DEBUG: No createdRecipeId, skipping cookbook addition');
+        }
       } else {
-        // Text mode: use existing functions
-      if (isMyOwnRecipe) {
-        const userRecipeData = {
-          recipeName: recipeTitle.trim(),
-          ingredients: recipeIngredients.trim(),
-          instructions: recipeInstructions.trim(),
-          personalNote: recipeNotes.trim() || undefined,
-        };
+        // Regular recipe creation (not for a group)
+        if (uploadMethod === 'image') {
+          // Image mode: use addRecipeWithFiles
+          setUploadProgress(20);
+          
+          const formData = isMyOwnRecipe
+            ? {
+                recipeName: recipeTitle.trim(),
+                ingredients: '', // Not used in image mode, but required by type
+                instructions: '', // Not used in image mode, but required by type
+                personalNote: recipeNotes.trim() || undefined,
+              }
+            : {
+                recipe_name: recipeTitle.trim(),
+                ingredients: '', // Not used in image mode, but required by type
+                instructions: '', // Not used in image mode, but required by type
+                comments: recipeNotes.trim() || undefined,
+              };
 
-        const { data: userRecipeData_result, error: recipeError } = await addUserRecipe(userRecipeData);
-        
-        if (recipeError) {
-          setError(recipeError);
-          setLoading(false);
-          return;
+          const { data: recipeResult, error: recipeError } = await addRecipeWithFiles(
+            isMyOwnRecipe ? null : selectedGuestId,
+            formData,
+            selectedFiles,
+            isMyOwnRecipe
+          );
+
+          setUploadProgress(100);
+
+          if (recipeError) {
+            setError(recipeError);
+            setLoading(false);
+            setUploadProgress(0);
+            return;
+          }
+
+          createdRecipeId = recipeResult?.id || null;
+        } else {
+          // Text mode: use existing functions
+          if (isMyOwnRecipe) {
+            const userRecipeData = {
+              recipeName: recipeTitle.trim(),
+              ingredients: recipeIngredients.trim(),
+              instructions: recipeInstructions.trim(),
+              personalNote: recipeNotes.trim() || undefined,
+            };
+
+            const { data: userRecipeData_result, error: recipeError } = await addUserRecipe(userRecipeData);
+            
+            if (recipeError) {
+              setError(recipeError);
+              setLoading(false);
+              return;
+            }
+
+            createdRecipeId = userRecipeData_result?.id || null;
+          } else {
+            const recipeData = {
+              recipe_name: recipeTitle.trim(),
+              ingredients: recipeIngredients.trim(),
+              instructions: recipeInstructions.trim(),
+              comments: recipeNotes.trim() || undefined,
+            };
+
+            const { data: recipeData_result, error: recipeError } = await addRecipe(selectedGuestId, recipeData);
+            
+            if (recipeError) {
+              setError(recipeError);
+              setLoading(false);
+              return;
+            }
+
+            createdRecipeId = recipeData_result?.id || null;
+          }
         }
 
-        createdRecipeId = userRecipeData_result?.id || null;
-      } else {
-        const recipeData = {
-          recipe_name: recipeTitle.trim(),
-          ingredients: recipeIngredients.trim(),
-          instructions: recipeInstructions.trim(),
-          comments: recipeNotes.trim() || undefined,
-        };
-
-        const { data: recipeData_result, error: recipeError } = await addRecipe(selectedGuestId, recipeData);
-        
-        if (recipeError) {
-          setError(recipeError);
-          setLoading(false);
-          return;
-        }
-
-        createdRecipeId = recipeData_result?.id || null;
-        }
-      }
-
-      // If cookbookId is provided and recipe was created successfully, add it to the cookbook
-      if (cookbookId && createdRecipeId) {
-        const { error: addToCookbookError } = await addRecipeToCookbook(cookbookId, createdRecipeId);
-        
-        if (addToCookbookError) {
-          console.error('Failed to add recipe to cookbook:', addToCookbookError);
+        // If cookbookId is provided and recipe was created successfully, add it to the cookbook
+        if (cookbookId && createdRecipeId) {
+          const { error: addToCookbookError } = await addRecipeToCookbook(cookbookId, createdRecipeId);
+          
+          if (addToCookbookError) {
+            console.error('Failed to add recipe to cookbook:', addToCookbookError);
+          }
         }
       }
 

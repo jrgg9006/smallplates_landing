@@ -13,21 +13,20 @@ import { AddRecipeModal } from "@/components/profile/recipes/AddRecipeModal";
 import { BulkActionsBar } from "@/components/profile/recipes/BulkActionsBar";
 import { BulkAddToCookbookModal } from "@/components/profile/recipes/BulkAddToCookbookModal";
 import { RecipeCollectorButton } from "@/components/profile/guests/RecipeCollectorButton";
-import ProfileDropdown from "@/components/profile/ProfileDropdown";
-import ProfileNavigation from "@/components/profile/ProfileNavigation";
+import { ProfileHeader } from "@/components/profile/ProfileHeader";
+import { AddButton } from "@/components/ui/AddButton";
 import { Plus, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getAllRecipes } from "@/lib/supabase/recipes";
 import { RecipeWithGuest } from "@/lib/types/database";
 
 export default function RecipesPage() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isBulkAddToCookbookModalOpen, setIsBulkAddToCookbookModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [clearSelectionTrigger, setClearSelectionTrigger] = useState(0);
   const [searchValue, setSearchValue] = useState('');
@@ -88,25 +87,6 @@ export default function RecipesPage() {
     console.log('Share recipes clicked');
   };
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const handleLogout = async () => {
-    setIsMobileMenuOpen(false);
-    await signOut();
-  };
-
-  const handleAccount = () => {
-    setIsMobileMenuOpen(false);
-    router.push('/profile/account');
-  };
-
-  const handleOrders = () => {
-    setIsMobileMenuOpen(false);
-    router.push('/profile/orders');
-  };
-
   useEffect(() => {
     if (!loading && !user) {
       router.push("/");
@@ -152,81 +132,7 @@ export default function RecipesPage() {
 
   return (
     <div className="min-h-screen bg-white text-gray-700">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          {/* Logo - Aligned with content */}
-          <Link href="/" className="hover:opacity-80 transition-opacity">
-            <Image
-              src="/images/SmallPlates_logo_horizontal.png"
-              alt="Small Plates & Co."
-              width={200}
-              height={40}
-              className="cursor-pointer"
-              priority
-            />
-          </Link>
-          
-          {/* Desktop: Navigation + Profile */}
-          <div className="hidden lg:flex items-center gap-6">
-            <ProfileNavigation variant="desktop" />
-            <ProfileDropdown />
-          </div>
-
-          {/* Mobile: Burger Menu */}
-          <div className="lg:hidden">
-            <button
-              onClick={toggleMobileMenu}
-              className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
-              aria-label="Menu"
-            >
-              <svg 
-                className="h-6 w-6 text-gray-600" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Menu Dropdown */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden border-t border-gray-100 bg-gray-50">
-          <div className="px-6 py-4">
-            {/* Navigation Links */}
-            <ProfileNavigation 
-              variant="mobile" 
-              onNavigate={() => setIsMobileMenuOpen(false)}
-            />
-            
-            {/* Account Actions */}
-            <div className="space-y-3">
-              <button
-                onClick={handleAccount}
-                className="block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
-              >
-                Account Settings
-              </button>
-            <button
-              onClick={handleOrders}
-              className="block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
-            >
-              Orders & Shipping
-            </button>
-            <button
-              onClick={handleLogout}
-              className="block w-full text-center py-3 px-5 rounded-full bg-black text-white font-semibold hover:bg-gray-800 transition-colors"
-            >
-              Logout
-            </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ProfileHeader />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -277,12 +183,11 @@ export default function RecipesPage() {
                   className="w-full lg:w-auto border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg px-8 py-3 text-base font-medium flex items-center justify-center gap-2"
                 />
               </div>
-              <Button
+              <AddButton
                 onClick={handleAddRecipe}
-                className="hidden lg:flex w-full lg:w-16 bg-teal-600 text-white hover:bg-teal-700 rounded-lg lg:rounded-full h-12 lg:h-16 items-center justify-center shadow-lg hover:shadow-xl transition-shadow p-0"
-              >
-                <Plus className="h-6 w-6 lg:h-12 lg:w-12" />
-              </Button>
+                title="Add Recipe"
+                className="hidden lg:flex"
+              />
             </div>
           </div>
         </div>

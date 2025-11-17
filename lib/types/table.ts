@@ -10,6 +10,7 @@ declare module '@tanstack/react-table' {
     onRecipeDeleted?: () => void;
     onRecipeClick?: (recipe: RecipeWithGuest) => void;
     onRecipeRemoved?: () => void;
+    onRecipeCopied?: () => void;
     onAddNote?: (recipe: RecipeInCookbook) => void;
     onRecipeAddedToCookbook?: () => void;
   }

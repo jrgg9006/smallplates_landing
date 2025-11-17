@@ -4,6 +4,7 @@ import { AuthProvider } from '@/lib/contexts/AuthContext'
 import { ProfileOnboardingProvider } from '@/lib/contexts/ProfileOnboardingContext'
 import { QueryProvider } from '@/lib/providers/QueryProvider'
 import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 export const metadata: Metadata = {
   title: 'Small Plates & Company — The People Behind Every Recipe',
@@ -76,6 +77,7 @@ export default function RootLayout({
           </AuthProvider>
         </QueryProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )

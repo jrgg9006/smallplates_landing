@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, ChefHat, BookOpen } from "lucide-react";
+import { Users, ChefHat, BookOpen, Users2 } from "lucide-react";
 
 interface ProfileNavigationProps {
   variant?: "desktop" | "mobile";
@@ -17,9 +17,10 @@ export default function ProfileNavigation({
   const pathname = usePathname();
 
   // Determine active states
-  const isGuestsActive = pathname === "/profile" || (pathname.startsWith("/profile/") && !pathname.startsWith("/profile/recipes") && !pathname.startsWith("/profile/cookbook") && !pathname.startsWith("/profile/account") && !pathname.startsWith("/profile/orders"));
+  const isGuestsActive = pathname === "/profile" || (pathname.startsWith("/profile/") && !pathname.startsWith("/profile/recipes") && !pathname.startsWith("/profile/cookbook") && !pathname.startsWith("/profile/groups") && !pathname.startsWith("/profile/account") && !pathname.startsWith("/profile/orders"));
   const isRecipesActive = pathname === "/profile/recipes" || pathname.startsWith("/profile/recipes/");
   const isCookbookActive = pathname === "/profile/cookbook" || pathname.startsWith("/profile/cookbook/");
+  const isGroupsActive = pathname === "/profile/groups" || pathname.startsWith("/profile/groups/");
 
   const navItems = [
     {
@@ -39,6 +40,12 @@ export default function ProfileNavigation({
       href: "/profile/cookbook",
       icon: BookOpen,
       isActive: isCookbookActive
+    },
+    {
+      label: "Groups",
+      href: "/profile/groups",
+      icon: Users2,
+      isActive: isGroupsActive
     },
   ];
 

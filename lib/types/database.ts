@@ -11,6 +11,11 @@ export type CommunicationType = 'invitation' | 'reminder' | 'thank_you' | 'custo
 export type CommunicationChannel = 'email' | 'sms' | 'whatsapp';
 export type CommunicationStatus = 'pending' | 'sent' | 'delivered' | 'failed' | 'opened';
 
+// Groups feature types
+export type GroupVisibility = 'private' | 'public';
+export type MemberRole = 'owner' | 'admin' | 'member';
+export type InvitationStatus = 'pending' | 'accepted' | 'declined' | 'expired';
+
 // Main database types
 export interface Database {
   public: {
@@ -133,6 +138,7 @@ export interface Database {
           submission_status: RecipeSubmissionStatus;
           submitted_at: string | null;
           approved_at: string | null;
+          group_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -152,6 +158,7 @@ export interface Database {
           submission_status?: RecipeSubmissionStatus;
           submitted_at?: string | null;
           approved_at?: string | null;
+          group_id?: string | null;
         };
         Update: {
           recipe_name?: string;
@@ -166,6 +173,7 @@ export interface Database {
           submission_status?: RecipeSubmissionStatus;
           submitted_at?: string | null;
           approved_at?: string | null;
+          group_id?: string | null;
         };
       };
       communication_log: {
@@ -261,6 +269,8 @@ export interface Database {
           name: string;
           description: string | null;
           is_default: boolean;
+          is_group_cookbook: boolean;
+          group_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -270,11 +280,15 @@ export interface Database {
           name?: string;
           description?: string | null;
           is_default?: boolean;
+          is_group_cookbook?: boolean;
+          group_id?: string | null;
         };
         Update: {
           name?: string;
           description?: string | null;
           is_default?: boolean;
+          is_group_cookbook?: boolean;
+          group_id?: string | null;
         };
       };
       cookbook_recipes: {
@@ -331,6 +345,76 @@ export interface Database {
           operations_notes?: string | null;
           production_completed_at?: string | null;
           needs_review?: boolean;
+        };
+      };
+      groups: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          created_by: string;
+          visibility: GroupVisibility;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          created_by?: string;
+          visibility?: GroupVisibility;
+        };
+        Update: {
+          name?: string;
+          description?: string | null;
+          created_by?: string;
+          visibility?: GroupVisibility;
+        };
+      };
+      group_members: {
+        Row: {
+          group_id: string;
+          profile_id: string;
+          role: MemberRole;
+          joined_at: string;
+          invited_by: string | null;
+        };
+        Insert: {
+          group_id: string;
+          profile_id: string;
+          role?: MemberRole;
+          invited_by?: string | null;
+        };
+        Update: {
+          role?: MemberRole;
+          invited_by?: string | null;
+        };
+      };
+      group_invitations: {
+        Row: {
+          id: string;
+          group_id: string;
+          email: string;
+          name: string | null;
+          invited_by: string;
+          status: InvitationStatus;
+          token: string;
+          expires_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          group_id: string;
+          email: string;
+          name?: string | null;
+          invited_by: string;
+          status?: InvitationStatus;
+          token: string;
+          expires_at: string;
+        };
+        Update: {
+          status?: InvitationStatus;
+          expires_at?: string;
         };
       };
     };
@@ -414,6 +498,19 @@ export type RecipeProductionStatus = Database['public']['Tables']['recipe_produc
 export type RecipeProductionStatusInsert = Database['public']['Tables']['recipe_production_status']['Insert'];
 export type RecipeProductionStatusUpdate = Database['public']['Tables']['recipe_production_status']['Update'];
 
+// Groups convenience types
+export type Group = Database['public']['Tables']['groups']['Row'];
+export type GroupInsert = Database['public']['Tables']['groups']['Insert'];
+export type GroupUpdate = Database['public']['Tables']['groups']['Update'];
+
+export type GroupMember = Database['public']['Tables']['group_members']['Row'];
+export type GroupMemberInsert = Database['public']['Tables']['group_members']['Insert'];
+export type GroupMemberUpdate = Database['public']['Tables']['group_members']['Update'];
+
+export type GroupInvitation = Database['public']['Tables']['group_invitations']['Row'];
+export type GroupInvitationInsert = Database['public']['Tables']['group_invitations']['Insert'];
+export type GroupInvitationUpdate = Database['public']['Tables']['group_invitations']['Update'];
+
 // Extended types with relationships
 export interface GuestWithRecipes extends Guest {
   guest_recipes: GuestRecipe[];
@@ -458,6 +555,35 @@ export interface RecipeInCookbook extends RecipeWithGuest {
   } | null;
 }
 
+// Groups extended types with relationships
+export interface GroupMemberWithProfile extends GroupMember {
+  profiles: Profile;
+}
+
+export interface GroupWithMembers extends Group {
+  group_members: GroupMemberWithProfile[];
+  cookbook?: Cookbook;
+  recipe_count?: number;
+  member_count?: number;
+}
+
+export interface GroupWithInvitations extends Group {
+  group_invitations: GroupInvitation[];
+}
+
+export interface GroupFull extends GroupWithMembers {
+  group_invitations: GroupInvitation[];
+}
+
+// Recipe with group information
+export interface RecipeWithGroup extends RecipeWithGuest {
+  groups?: {
+    id: string;
+    name: string;
+    description: string | null;
+  } | null;
+}
+
 // Form data types for UI components
 export interface GuestFormData {
   first_name: string;
@@ -478,6 +604,18 @@ export interface RecipeFormData {
   comments?: string;
   upload_method?: 'text' | 'image';
   document_urls?: string[];
+}
+
+// Groups form data types
+export interface GroupFormData {
+  name: string;
+  description?: string;
+  visibility?: GroupVisibility;
+}
+
+export interface GroupInvitationFormData {
+  email: string;
+  name?: string;
 }
 
 // Statistics and analytics types
