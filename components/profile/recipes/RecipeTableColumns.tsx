@@ -273,8 +273,22 @@ export const columns: ColumnDef<RecipeWithGuest>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: "recipe_name",
+    header: () => <div className="table-header-style">Recipe Name</div>,
+    size: 250,
+    minSize: 200,
+    cell: ({ row }) => {
+      const recipe = row.original;
+      return (
+        <div className="font-normal text-base text-gray-900">
+          {recipe.recipe_name}
+        </div>
+      );
+    },
+  },
+  {
     id: "name",
-    header: () => <div className="table-header-style pl-4">Name</div>,
+    header: () => <div className="table-header-style pl-4">Chef's Name</div>,
     size: 250,
     minSize: 220,
     cell: ({ row }) => {
@@ -328,20 +342,6 @@ export const columns: ColumnDef<RecipeWithGuest>[] = [
             />
           </div>
           <div className="font-normal text-base whitespace-nowrap">{fullName}</div>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "recipe_name",
-    header: () => <div className="table-header-style">Recipe Name</div>,
-    size: 250,
-    minSize: 200,
-    cell: ({ row }) => {
-      const recipe = row.original;
-      return (
-        <div className="font-normal text-base text-gray-900">
-          {recipe.recipe_name}
         </div>
       );
     },

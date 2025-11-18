@@ -14,7 +14,7 @@ import {
   Row,
 } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { RecipeInCookbook } from "@/lib/types/database";
+import { RecipeInCookbook, Cookbook } from "@/lib/types/database";
 import { getCookbookRecipes, updateCookbookRecipeOrder } from "@/lib/supabase/cookbooks";
 import { createCookbookColumns } from "./CookbookTableColumns";
 import { Button } from "@/components/ui/button";
@@ -56,6 +56,7 @@ export function CookbookTable({
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [isReordering, setIsReordering] = React.useState(false);
+  const [cookbook, setCookbook] = React.useState<{is_group_cookbook: boolean; user_id: string; group_id: string | null} | null>(null);
   
   const [sorting, setSorting] = React.useState<SortingState>([]); // Disable sorting when using drag and drop
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -97,12 +98,15 @@ export function CookbookTable({
         setLoading(true);
         setError(null);
 
-        const { data: recipes, error: recipesError } = await getCookbookRecipes(cookbookId);
+        const { data: recipes, cookbook: cookbookInfo, error: recipesError } = await getCookbookRecipes(cookbookId);
         
         if (recipesError) {
           setError(recipesError);
           return;
         }
+        
+        // Set cookbook info
+        setCookbook(cookbookInfo || null);
         
         // Sort by display_order (ascending) to maintain the order
         const sortedRecipes = (recipes || []).sort((a, b) => {
@@ -230,9 +234,10 @@ export function CookbookTable({
       cookbookId, 
       onRecipeRemoved || refreshData, 
       onAddNote,
-      !!searchValue.trim()
+      !!searchValue.trim(),
+      cookbook?.is_group_cookbook || false
     );
-  }, [cookbookId, onRecipeRemoved, onAddNote, searchValue]);
+  }, [cookbookId, onRecipeRemoved, onAddNote, searchValue, cookbook]);
 
   const table = useReactTable<RecipeInCookbook>({
     data: filteredData,

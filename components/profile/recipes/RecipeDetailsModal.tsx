@@ -13,6 +13,7 @@ import { Edit } from "lucide-react";
 import Image from "next/image";
 import { getGuestProfileIcon } from "@/lib/utils/profileIcons";
 import { updateRecipe } from "@/lib/supabase/recipes";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 interface RecipeDetailsModalProps {
   recipe: RecipeWithGuest | null;
@@ -22,6 +23,8 @@ interface RecipeDetailsModalProps {
 }
 
 export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }: RecipeDetailsModalProps) {
+  const { user } = useAuth();
+  
   // Responsive hook to detect mobile
   const [isMobile, setIsMobile] = useState(false);
   
@@ -121,7 +124,8 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
     }
   };
 
-  const isOwnRecipe = recipe?.guests?.is_self === true || (recipe?.guests?.is_self === false && recipe?.guests?.source === 'manual');
+  // Check if current user created this recipe (can edit recipes they created, regardless of guest attribution)
+  const isOwnRecipe = user && recipe && recipe.user_id === user.id;
 
   if (!recipe) return null;
 

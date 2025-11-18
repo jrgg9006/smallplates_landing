@@ -215,7 +215,8 @@ export function createCookbookColumns(
   cookbookId: string,
   onRecipeRemoved?: () => void,
   onAddNote?: (recipe: RecipeInCookbook) => void,
-  isSearchActive?: boolean
+  isSearchActive?: boolean,
+  isGroupCookbook?: boolean
 ): ColumnDef<RecipeInCookbook>[] {
   return [
     {
@@ -238,8 +239,22 @@ export function createCookbookColumns(
       size: 32,
     },
     {
+      accessorKey: "recipe_name",
+      header: () => <div className="table-header-style">Recipe Name</div>,
+      size: 300,
+      minSize: 250,
+      cell: ({ row }) => {
+        const recipe = row.original;
+        return (
+          <div className="font-normal text-base text-gray-900 whitespace-nowrap">
+            {recipe.recipe_name}
+          </div>
+        );
+      },
+    },
+    {
       id: "name",
-      header: () => <div className="table-header-style pl-4">Name</div>,
+      header: () => <div className="table-header-style pl-4">Chef's Name</div>,
       size: 250,
       minSize: 220,
       cell: ({ row }) => {
@@ -297,25 +312,67 @@ export function createCookbookColumns(
         );
       },
     },
-    {
-      accessorKey: "recipe_name",
-      header: () => <div className="table-header-style">Recipe Name</div>,
-      size: 300,
-      minSize: 250,
-      cell: ({ row }) => {
+    // Conditionally include "Added By" column for group cookbooks
+    ...(isGroupCookbook ? [{
+      id: "added_by",
+      header: () => <div className="table-header-style">Added By</div>,
+      size: 140,
+      minSize: 120,
+      cell: ({ row }: { row: any }) => {
         const recipe = row.original;
+        const addedByUser = recipe.added_by_user;
+        
+        if (!addedByUser) {
+          return (
+            <div className="text-sm text-gray-400 italic">Unknown</div>
+          );
+        }
+
+        // Special handling for current user
+        if (addedByUser.is_current_user || addedByUser.full_name === 'You') {
+          return (
+            <div className="flex items-center gap-2">
+              <div className="flex-shrink-0">
+                <Image
+                  src="/images/icons_profile/chef_you.png"
+                  alt="Your profile"
+                  width={24}
+                  height={24}
+                  className="rounded-full"
+                />
+              </div>
+              <div className="text-sm text-gray-700 font-medium">
+                Added by You
+              </div>
+            </div>
+          );
+        }
+
+        const displayName = addedByUser.full_name || addedByUser.email || 'Unknown';
+        
         return (
-          <div className="font-normal text-base text-gray-900 whitespace-nowrap">
-            {recipe.recipe_name}
+          <div className="flex items-center gap-2">
+            <div className="flex-shrink-0">
+              <Image
+                src={getGuestProfileIcon(addedByUser.id, false)}
+                alt={`${displayName}'s profile`}
+                width={24}
+                height={24}
+                className="rounded-full"
+              />
+            </div>
+            <div className="text-sm text-gray-700">
+              {displayName}
+            </div>
           </div>
         );
       },
-    },
+    }] : []),
     {
       id: "note",
       header: () => <div className="table-header-style">Personal Printed Note</div>,
-      size: 180,
-      maxSize: 220,
+      size: 140, // Reduced from 180
+      maxSize: 180, // Reduced from 220
       cell: ({ row }) => {
         const recipe = row.original;
         const note = recipe.cookbook_recipes?.note;

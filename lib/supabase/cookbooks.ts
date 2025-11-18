@@ -318,7 +318,21 @@ export async function getCookbookRecipes(cookbookId: string) {
     return { data: null, error: 'User not authenticated' };
   }
 
-  const { data, error } = await supabase
+  // First check if this is a group cookbook
+  const { data: cookbook, error: cookbookError } = await supabase
+    .from('cookbooks')
+    .select('is_group_cookbook, user_id, group_id')
+    .eq('id', cookbookId)
+    .single();
+
+  if (cookbookError) {
+    return { data: null, error: cookbookError.message };
+  }
+
+  console.log('Cookbook info:', cookbook);
+
+  // Build the query based on cookbook type
+  let query = supabase
     .from('cookbook_recipes')
     .select(`
       *,
@@ -334,8 +348,15 @@ export async function getCookbookRecipes(cookbookId: string) {
         )
       )
     `)
-    .eq('cookbook_id', cookbookId)
-    .eq('user_id', user.id)
+    .eq('cookbook_id', cookbookId);
+
+  // For personal cookbooks, only show recipes added by the cookbook owner
+  // For group cookbooks, show all recipes added by any group member
+  if (!cookbook.is_group_cookbook) {
+    query = query.eq('user_id', cookbook.user_id);
+  }
+
+  const { data, error } = await query
     .order('display_order', { ascending: true })
     .order('created_at', { ascending: false });
 
@@ -343,20 +364,68 @@ export async function getCookbookRecipes(cookbookId: string) {
     return { data: null, error: error.message };
   }
 
-  // Transform the data to match RecipeInCookbook type
-  const recipes: RecipeInCookbook[] = (data || []).map((item: any) => ({
-    ...item.guest_recipes,
-    guests: item.guest_recipes.guests,
-    cookbook_recipes: {
-      id: item.id,
-      note: item.note,
-      display_order: item.display_order,
-      created_at: item.created_at,
-      updated_at: item.updated_at,
-    },
-  }));
+  // Get unique user IDs from cookbook_recipes to fetch user profiles
+  const userIds = [...new Set((data || []).map((item: any) => item.user_id))];
+  
+  // Fetch user profiles for the "Added By" information
+  let userProfiles: any = {};
+  if (userIds.length > 0 && cookbook.is_group_cookbook) {
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, full_name, email')
+      .in('id', userIds);
+    
+    if (profilesError) {
+      console.error('Error fetching profiles for Added By:', profilesError);
+    }
+    
+    if (!profilesError && profiles) {
+      userProfiles = profiles.reduce((acc: any, profile: any) => {
+        acc[profile.id] = profile;
+        return acc;
+      }, {});
+      console.log('Fetched user profiles:', userProfiles);
+    }
+  }
 
-  return { data: recipes, error: null };
+  // Transform the data to match RecipeInCookbook type
+  const recipes: RecipeInCookbook[] = (data || []).map((item: any) => {
+    let addedByUser = null;
+    
+    // For group cookbooks, show who added the recipe
+    if (cookbook.is_group_cookbook) {
+      if (item.user_id === user.id) {
+        // Current user added this recipe
+        addedByUser = {
+          id: user.id,
+          full_name: 'You',
+          email: user.email,
+          is_current_user: true
+        };
+      } else {
+        // Someone else added this recipe
+        addedByUser = userProfiles[item.user_id] || null;
+      }
+    }
+    
+    console.log('Recipe user_id:', item.user_id, 'Current user:', user.id, 'Added by user:', addedByUser);
+    
+    return {
+      ...item.guest_recipes,
+      guests: item.guest_recipes.guests,
+      cookbook_recipes: {
+        id: item.id,
+        user_id: item.user_id,
+        note: item.note,
+        display_order: item.display_order,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+      },
+      added_by_user: addedByUser,
+    };
+  });
+
+  return { data: recipes, cookbook, error: null };
 }
 
 /**

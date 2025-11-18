@@ -197,6 +197,15 @@ export default function CookbookPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
               >
+                {/* Privacy indicator */}
+                {selectedCookbook && (
+                  <div className="mb-2">
+                    <span className="text-sm font-light text-gray-500 tracking-widest uppercase">
+                      {selectedCookbook.is_group_cookbook || selectedCookbook.group_id ? 'SHARED COOKBOOK' : 'PRIVATE COOKBOOK'}
+                    </span>
+                  </div>
+                )}
+                
                 <div className="flex items-center gap-3 justify-center lg:justify-start">
                   <h1 className="font-serif text-6xl md:text-6xl font-medium tracking-tight text-gray-900 mb-1">
                     {selectedCookbook?.name || 'My Cookbook'}

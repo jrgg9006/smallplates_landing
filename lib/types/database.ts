@@ -535,6 +535,8 @@ export interface RecipeWithGuest extends GuestRecipe {
     is_self: boolean;
     source: GuestSource;
   } | null;
+  added_by_user?: Profile | null; // For group recipes - who added this recipe to the group
+  added_at?: string; // For group recipes - when it was added to the group
 }
 
 // Cookbook with recipes
@@ -548,11 +550,13 @@ export interface CookbookWithRecipes extends Cookbook {
 export interface RecipeInCookbook extends RecipeWithGuest {
   cookbook_recipes: {
     id: string;
+    user_id: string;
     note: string | null;
     display_order: number;
     created_at: string;
     updated_at: string;
   } | null;
+  added_by_user?: Profile | null; // Profile of the user who added this recipe to the cookbook
 }
 
 // Groups extended types with relationships

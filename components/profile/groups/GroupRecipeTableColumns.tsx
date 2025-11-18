@@ -232,8 +232,8 @@ export const createGroupRecipeColumns = (groupId: string): ColumnDef<RecipeWithG
   {
     accessorKey: "recipe_name",
     header: () => <div className="table-header-style pl-4">Recipe Name</div>,
-    size: 300,
-    minSize: 250,
+    size: 220,
+    minSize: 180,
     cell: ({ row }) => {
       const recipe = row.original;
       return (
@@ -244,10 +244,10 @@ export const createGroupRecipeColumns = (groupId: string): ColumnDef<RecipeWithG
     },
   },
   {
-    id: "author",
-    header: () => <div className="table-header-style">Added by</div>,
-    size: 250,
-    minSize: 220,
+    id: "chef",
+    header: () => <div className="table-header-style pl-4">Chef's Name</div>,
+    size: 200,
+    minSize: 180,
     cell: ({ row }) => {
       const recipe: RecipeWithGuest = row.original;
       const guest = recipe.guests;
@@ -299,6 +299,61 @@ export const createGroupRecipeColumns = (groupId: string): ColumnDef<RecipeWithG
             />
           </div>
           <div className="font-normal text-base whitespace-nowrap">{fullName}</div>
+        </div>
+      );
+    },
+  },
+  {
+    id: "added_by",
+    header: () => <div className="table-header-style">Added by</div>,
+    size: 180,
+    minSize: 150,
+    cell: ({ row }: { row: any }) => {
+      const recipe = row.original;
+      const addedByUser = recipe.added_by_user;
+      
+      if (!addedByUser) {
+        return (
+          <div className="text-sm text-gray-400 italic">Unknown</div>
+        );
+      }
+
+      // Special handling for current user
+      if (addedByUser.is_current_user || addedByUser.full_name === 'You') {
+        return (
+          <div className="flex items-center gap-2">
+            <div className="flex-shrink-0">
+              <Image
+                src="/images/icons_profile/chef_you.png"
+                alt="Your profile"
+                width={24}
+                height={24}
+                className="rounded-full"
+              />
+            </div>
+            <div className="text-sm text-gray-700 font-medium">
+              Added by You
+            </div>
+          </div>
+        );
+      }
+
+      const displayName = addedByUser.full_name || addedByUser.email || 'Unknown';
+      
+      return (
+        <div className="flex items-center gap-2">
+          <div className="flex-shrink-0">
+            <Image
+              src={getGuestProfileIcon(addedByUser.id, false)}
+              alt={`${displayName}'s profile`}
+              width={24}
+              height={24}
+              className="rounded-full"
+            />
+          </div>
+          <div className="text-sm text-gray-700">
+            {displayName}
+          </div>
         </div>
       );
     },

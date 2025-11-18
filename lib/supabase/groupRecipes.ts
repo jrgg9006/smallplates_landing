@@ -17,6 +17,23 @@ export async function getGroupRecipes(groupId: string): Promise<{ data: RecipeWi
     return { data: null, error: 'User not authenticated' };
   }
 
+  // Get recipes through the join table with added_by information
+  const { data: groupRecipes, error: groupRecipesError } = await supabase
+    .from('group_recipes')
+    .select('recipe_id, added_by, added_at')
+    .eq('group_id', groupId);
+
+  if (groupRecipesError) {
+    return { data: null, error: groupRecipesError.message };
+  }
+
+  if (!groupRecipes || groupRecipes.length === 0) {
+    return { data: [], error: null };
+  }
+
+  const recipeIds = groupRecipes.map(gr => gr.recipe_id);
+
+  // Get full recipe details
   const { data, error } = await supabase
     .from('guest_recipes')
     .select(`
@@ -30,20 +47,76 @@ export async function getGroupRecipes(groupId: string): Promise<{ data: RecipeWi
         source
       )
     `)
-    .eq('group_id', groupId)
+    .in('id', recipeIds)
     .order('created_at', { ascending: false });
 
   if (error) {
     return { data: null, error: error.message };
   }
 
-  return { data: data as RecipeWithGuest[], error: null };
+  // Get unique user IDs from group_recipes to fetch user profiles for "Added by"
+  const userIds = [...new Set(groupRecipes.map(gr => gr.added_by))];
+  
+  // Fetch user profiles for the "Added By" information
+  let userProfiles: any = {};
+  if (userIds.length > 0) {
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, full_name, email')
+      .in('id', userIds);
+    
+    if (profilesError) {
+      console.error('Error fetching profiles for Added By:', profilesError);
+    }
+    
+    if (!profilesError && profiles) {
+      userProfiles = profiles.reduce((acc: any, profile: any) => {
+        acc[profile.id] = profile;
+        return acc;
+      }, {});
+    }
+  }
+
+  // Create a map of recipe_id to group_recipes info
+  const groupRecipeMap = groupRecipes.reduce((acc: any, gr: any) => {
+    acc[gr.recipe_id] = gr;
+    return acc;
+  }, {});
+
+  // Transform the data to include added_by information
+  const recipes = (data || []).map((recipe: any) => {
+    const groupRecipeInfo = groupRecipeMap[recipe.id];
+    let addedByUser = null;
+    
+    if (groupRecipeInfo?.added_by) {
+      if (groupRecipeInfo.added_by === user.id) {
+        // Current user added this recipe
+        addedByUser = {
+          id: user.id,
+          full_name: 'You',
+          email: user.email,
+          is_current_user: true
+        };
+      } else {
+        // Someone else added this recipe
+        addedByUser = userProfiles[groupRecipeInfo.added_by] || null;
+      }
+    }
+    
+    return {
+      ...recipe,
+      added_by_user: addedByUser,
+      added_at: groupRecipeInfo?.added_at || recipe.created_at
+    };
+  });
+
+  return { data: recipes as RecipeWithGuest[], error: null };
 }
 
 /**
- * Add an existing recipe to a group
+ * Add an existing recipe to a group (now supports multiple groups)
  */
-export async function addRecipeToGroup(groupId: string, recipeId: string) {
+export async function addRecipeToGroup(groupId: string, recipeId: string, note?: string) {
   const supabase = createSupabaseClient();
   
   // Get the current user
@@ -52,10 +125,37 @@ export async function addRecipeToGroup(groupId: string, recipeId: string) {
     return { data: null, error: 'User not authenticated' };
   }
 
-  const { data, error } = await supabase
+  // Check if recipe is already in this group
+  const { data: existing } = await supabase
+    .from('group_recipes')
+    .select('*')
+    .eq('group_id', groupId)
+    .eq('recipe_id', recipeId)
+    .single();
+
+  if (existing) {
+    return { data: null, error: 'Recipe is already in this group' };
+  }
+
+  // Add recipe to group using the join table
+  const { data: groupRecipe, error: insertError } = await supabase
+    .from('group_recipes')
+    .insert({
+      group_id: groupId,
+      recipe_id: recipeId,
+      added_by: user.id,
+      note
+    })
+    .select()
+    .single();
+
+  if (insertError) {
+    return { data: null, error: insertError.message };
+  }
+
+  // Return the recipe with its details
+  const { data: recipe, error: recipeError } = await supabase
     .from('guest_recipes')
-    .update({ group_id: groupId })
-    .eq('id', recipeId)
     .select(`
       *,
       guests(
@@ -67,13 +167,14 @@ export async function addRecipeToGroup(groupId: string, recipeId: string) {
         source
       )
     `)
+    .eq('id', recipeId)
     .single();
 
-  return { data, error: error?.message || null };
+  return { data: recipe, error: recipeError?.message || null };
 }
 
 /**
- * Remove a recipe from a group (only the recipe owner or group admins can do this)
+ * Remove a recipe from a group (recipe can remain in other groups)
  */
 export async function removeRecipeFromGroup(recipeId: string, groupId: string) {
   const supabase = createSupabaseClient();
@@ -84,15 +185,14 @@ export async function removeRecipeFromGroup(recipeId: string, groupId: string) {
     return { data: null, error: 'User not authenticated' };
   }
 
-  const { data, error } = await supabase
-    .from('guest_recipes')
-    .update({ group_id: null })
-    .eq('id', recipeId)
-    .eq('group_id', groupId)
-    .select()
-    .single();
+  // Remove from the join table
+  const { error } = await supabase
+    .from('group_recipes')
+    .delete()
+    .eq('recipe_id', recipeId)
+    .eq('group_id', groupId);
 
-  return { data, error: error?.message || null };
+  return { data: null, error: error?.message || null };
 }
 
 /**
@@ -144,7 +244,6 @@ export async function copyRecipeToPersonal(recipeId: string) {
     document_urls: originalRecipe.document_urls,
     audio_url: originalRecipe.audio_url,
     submission_status: 'approved', // Personal copies are automatically approved
-    group_id: null, // Personal copy shouldn't be associated with a group initially
   };
 
   const { data, error } = await supabase
@@ -169,7 +268,7 @@ export async function copyRecipeToPersonal(recipeId: string) {
 /**
  * Create a new recipe and add it to a group
  */
-export async function createRecipeInGroup(recipeData: Omit<GuestRecipeInsert, 'user_id' | 'group_id'>, groupId: string) {
+export async function createRecipeInGroup(recipeData: Omit<GuestRecipeInsert, 'user_id'>, groupId: string) {
   const supabase = createSupabaseClient();
   
   // Get the current user
@@ -181,10 +280,9 @@ export async function createRecipeInGroup(recipeData: Omit<GuestRecipeInsert, 'u
   const fullRecipeData: GuestRecipeInsert = {
     ...recipeData,
     user_id: user.id,
-    group_id: groupId,
   };
 
-  const { data, error } = await supabase
+  const { data: recipe, error: recipeError } = await supabase
     .from('guest_recipes')
     .insert(fullRecipeData)
     .select(`
@@ -200,13 +298,31 @@ export async function createRecipeInGroup(recipeData: Omit<GuestRecipeInsert, 'u
     `)
     .single();
 
-  return { data, error: error?.message || null };
+  if (recipeError) {
+    return { data: null, error: recipeError.message };
+  }
+
+  // Add the recipe to the group
+  const { error: groupError } = await supabase
+    .from('group_recipes')
+    .insert({
+      group_id: groupId,
+      recipe_id: recipe.id,
+      added_by: user.id,
+    });
+
+  if (groupError) {
+    return { data: null, error: groupError.message };
+  }
+
+  return { data: recipe, error: null };
 }
 
 /**
  * Get user's personal recipes that can be added to a group
+ * Now returns all user's recipes since they can be in multiple groups
  */
-export async function getUserRecipesForGroup(): Promise<{ data: RecipeWithGuest[] | null; error: string | null }> {
+export async function getUserRecipesForGroup(excludeGroupId?: string): Promise<{ data: RecipeWithGuest[] | null; error: string | null }> {
   const supabase = createSupabaseClient();
   
   // Get the current user
@@ -215,7 +331,7 @@ export async function getUserRecipesForGroup(): Promise<{ data: RecipeWithGuest[
     return { data: null, error: 'User not authenticated' };
   }
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('guest_recipes')
     .select(`
       *,
@@ -229,8 +345,114 @@ export async function getUserRecipesForGroup(): Promise<{ data: RecipeWithGuest[
       )
     `)
     .eq('user_id', user.id)
-    .is('group_id', null) // Only recipes not already in a group
     .order('created_at', { ascending: false });
+
+  // If excludeGroupId is provided, filter out recipes already in that group
+  if (excludeGroupId) {
+    const { data: groupRecipes } = await supabase
+      .from('group_recipes')
+      .select('recipe_id')
+      .eq('group_id', excludeGroupId);
+
+    if (groupRecipes && groupRecipes.length > 0) {
+      const excludeIds = groupRecipes.map(gr => gr.recipe_id);
+      query = query.not('id', 'in', `(${excludeIds.join(',')})`)  ;
+    }
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: data as RecipeWithGuest[], error: null };
+}
+
+/**
+ * Get all groups that a recipe belongs to
+ */
+export async function getRecipeGroups(recipeId: string): Promise<{ data: Array<{ group_id: string; group_name: string; added_at: string; added_by_name: string }> | null; error: string | null }> {
+  const supabase = createSupabaseClient();
+  
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  const { data, error } = await supabase
+    .rpc('get_recipe_groups', { p_recipe_id: recipeId });
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data, error: null };
+}
+
+/**
+ * Check if a recipe is in a specific group
+ */
+export async function isRecipeInGroup(recipeId: string, groupId: string): Promise<{ data: boolean; error: string | null }> {
+  const supabase = createSupabaseClient();
+
+  const { data, error } = await supabase
+    .rpc('is_recipe_in_group', { 
+      p_recipe_id: recipeId, 
+      p_group_id: groupId 
+    });
+
+  if (error) {
+    return { data: false, error: error.message };
+  }
+
+  return { data: data || false, error: null };
+}
+
+/**
+ * Get recipes that are available to add to a specific group
+ * (excludes recipes already in that group)
+ */
+export async function getAvailableRecipesForGroup(groupId: string): Promise<{ data: RecipeWithGuest[] | null; error: string | null }> {
+  const supabase = createSupabaseClient();
+  
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  // Get recipes already in this group
+  const { data: groupRecipes } = await supabase
+    .from('group_recipes')
+    .select('recipe_id')
+    .eq('group_id', groupId);
+
+  const excludeIds = groupRecipes?.map(gr => gr.recipe_id) || [];
+
+  let query = supabase
+    .from('guest_recipes')
+    .select(`
+      *,
+      guests(
+        first_name,
+        last_name,
+        printed_name,
+        email,
+        is_self,
+        source
+      )
+    `)
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+
+  // Exclude recipes already in this group
+  if (excludeIds.length > 0) {
+    query = query.not('id', 'in', `(${excludeIds.join(',')})`);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     return { data: null, error: error.message };
@@ -393,6 +615,23 @@ export async function searchGroupRecipes(groupId: string, searchQuery: string): 
     return { data: null, error: 'User not authenticated' };
   }
 
+  // Get recipes in this group through the join table
+  const { data: groupRecipes, error: groupRecipesError } = await supabase
+    .from('group_recipes')
+    .select('recipe_id')
+    .eq('group_id', groupId);
+
+  if (groupRecipesError) {
+    return { data: null, error: groupRecipesError.message };
+  }
+
+  if (!groupRecipes || groupRecipes.length === 0) {
+    return { data: [], error: null };
+  }
+
+  const recipeIds = groupRecipes.map(gr => gr.recipe_id);
+
+  // Search within those recipes
   const { data, error } = await supabase
     .from('guest_recipes')
     .select(`
@@ -406,7 +645,7 @@ export async function searchGroupRecipes(groupId: string, searchQuery: string): 
         source
       )
     `)
-    .eq('group_id', groupId)
+    .in('id', recipeIds)
     .or(`recipe_name.ilike.%${searchQuery}%, ingredients.ilike.%${searchQuery}%, instructions.ilike.%${searchQuery}%`)
     .order('created_at', { ascending: false });
 

@@ -14,6 +14,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { createGroup } from "@/lib/supabase/groups";
 import type { GroupFormData, GroupVisibility } from "@/lib/types/database";
 
+const MAX_NAME_LENGTH = 30;
+const MAX_DESCRIPTION_LENGTH = 280;
+
 interface CreateGroupModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -53,6 +56,14 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
   }, [isOpen]);
 
   const handleInputChange = (field: keyof GroupFormData, value: string) => {
+    // Apply character limits
+    if (field === 'name' && value.length > MAX_NAME_LENGTH) {
+      return; // Don't update if name exceeds limit
+    }
+    if (field === 'description' && value.length > MAX_DESCRIPTION_LENGTH) {
+      return; // Don't update if description exceeds limit
+    }
+    
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -72,6 +83,11 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
     // Validate required fields
     if (!formData.name.trim()) {
       setError('Group name is required');
+      return;
+    }
+
+    if (formData.name.length > MAX_NAME_LENGTH) {
+      setError(`Group name cannot exceed ${MAX_NAME_LENGTH} characters`);
       return;
     }
 
@@ -111,34 +127,76 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
         <div className="flex-1 space-y-6">
           {/* Group Name */}
           <div className="space-y-2">
-            <Label htmlFor="groupName" className="text-base font-medium">
-              Group Name *
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="groupName" className="text-base font-medium">
+                Group Name *
+              </Label>
+              <span className={`text-xs ${
+                formData.name.length > MAX_NAME_LENGTH 
+                  ? 'text-red-600 font-medium' 
+                  : formData.name.length > MAX_NAME_LENGTH * 0.9 
+                    ? 'text-orange-600' 
+                    : 'text-gray-500'
+              }`}>
+                {formData.name.length}/{MAX_NAME_LENGTH}
+              </span>
+            </div>
             <Input
               id="groupName"
               type="text"
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
-              placeholder="e.g., Family Recipes, Book Club, Holiday Traditions"
-              className="text-base"
+              placeholder="e.g., Family Recipes, Book Club"
+              className={`text-base ${
+                formData.name.length > MAX_NAME_LENGTH 
+                  ? 'border-red-300 focus:ring-red-500' 
+                  : ''
+              }`}
+              maxLength={MAX_NAME_LENGTH}
               required
               disabled={loading}
             />
+            {formData.name.length > MAX_NAME_LENGTH && (
+              <p className="text-xs text-red-600">
+                Group name cannot exceed {MAX_NAME_LENGTH} characters.
+              </p>
+            )}
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="groupDescription" className="text-base font-medium">
-              Description
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="groupDescription" className="text-base font-medium">
+                Description
+              </Label>
+              <span className={`text-xs ${
+                (formData.description || '').length > MAX_DESCRIPTION_LENGTH 
+                  ? 'text-red-600 font-medium' 
+                  : (formData.description || '').length > MAX_DESCRIPTION_LENGTH * 0.9 
+                    ? 'text-orange-600' 
+                    : 'text-gray-500'
+              }`}>
+                {(formData.description || '').length}/{MAX_DESCRIPTION_LENGTH}
+              </span>
+            </div>
             <textarea
               id="groupDescription"
               value={formData.description || ''}
               onChange={(e) => handleInputChange('description', e.target.value)}
               placeholder="What's this group about? (optional)"
-              className="w-full p-3 border border-gray-300 rounded-md text-base min-h-[100px] resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`w-full p-3 border rounded-md text-base min-h-[100px] resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                (formData.description || '').length > MAX_DESCRIPTION_LENGTH 
+                  ? 'border-red-300 focus:ring-red-500' 
+                  : 'border-gray-300'
+              }`}
+              maxLength={MAX_DESCRIPTION_LENGTH}
               disabled={loading}
             />
+            {(formData.description || '').length > MAX_DESCRIPTION_LENGTH && (
+              <p className="text-xs text-red-600">
+                Description cannot exceed {MAX_DESCRIPTION_LENGTH} characters.
+              </p>
+            )}
           </div>
 
           {/* Visibility */}
@@ -185,9 +243,9 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
           <Button
             type="submit"
             className="w-full bg-black text-white hover:bg-gray-800 py-3 rounded-full disabled:opacity-50"
-            disabled={loading || !formData.name.trim()}
+            disabled={loading || !formData.name.trim() || formData.name.length > MAX_NAME_LENGTH}
           >
-            {loading ? 'Creating...' : 'Create Group'}
+            {loading ? 'Creating...' : 'Create New Group'}
           </Button>
         </div>
       </form>

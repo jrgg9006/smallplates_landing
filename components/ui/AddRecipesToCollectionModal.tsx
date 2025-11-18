@@ -20,6 +20,7 @@ export interface AddRecipesToCollectionModalProps {
   collectionType: "cookbook" | "group";
   onAddRecipe: (collectionId: string, recipeId: string) => Promise<{ error?: string; data?: any }>;
   onGetExistingRecipes: (collectionId: string) => Promise<{ data?: any[]; error?: string }>;
+  onGetAvailableRecipes?: (collectionId: string) => Promise<{ data?: RecipeWithGuest[]; error?: string }>;
   onRecipesAdded?: () => void;
   // Optional text overrides
   title?: string;
@@ -34,6 +35,7 @@ export function AddRecipesToCollectionModal({
   collectionType,
   onAddRecipe,
   onGetExistingRecipes,
+  onGetAvailableRecipes,
   onRecipesAdded,
   title,
   description,
@@ -67,40 +69,56 @@ export function AddRecipesToCollectionModal({
     setError(null);
 
     try {
-      // Load all user recipes
-      const { data: allRecipesData, error: allRecipesError } = await getAllRecipes();
-      
-      if (allRecipesError) {
-        setError('Failed to load recipes');
-        console.error('Error loading recipes:', allRecipesError);
-        setRecipesLoading(false);
-        return;
+      if (onGetAvailableRecipes) {
+        // Use the optimized function that already excludes recipes in the collection
+        const { data: availableRecipes, error: availableError } = await onGetAvailableRecipes(collectionId);
+        
+        if (availableError) {
+          setError(`Failed to load available recipes for ${collectionName}`);
+          console.error(`Error loading available recipes for ${collectionName}:`, availableError);
+          setRecipesLoading(false);
+          return;
+        }
+
+        setAllRecipes(availableRecipes || []);
+        setExistingRecipeIds(new Set()); // All loaded recipes are available, none are existing
+      } else {
+        // Fallback to the old method for backward compatibility
+        // Load all user recipes
+        const { data: allRecipesData, error: allRecipesError } = await getAllRecipes();
+        
+        if (allRecipesError) {
+          setError('Failed to load recipes');
+          console.error('Error loading recipes:', allRecipesError);
+          setRecipesLoading(false);
+          return;
+        }
+
+        // Load recipes already in collection
+        const { data: existingRecipes, error: existingError } = await onGetExistingRecipes(collectionId);
+        
+        if (existingError) {
+          setError(`Failed to load ${collectionName} recipes`);
+          console.error(`Error loading ${collectionName} recipes:`, existingError);
+          setRecipesLoading(false);
+          return;
+        }
+
+        // Create a set of recipe IDs already in the collection
+        const existingIds = new Set(
+          (existingRecipes || []).map(recipe => recipe.id)
+        );
+
+        setAllRecipes(allRecipesData || []);
+        setExistingRecipeIds(existingIds);
       }
-
-      // Load recipes already in collection
-      const { data: existingRecipes, error: existingError } = await onGetExistingRecipes(collectionId);
-      
-      if (existingError) {
-        setError(`Failed to load ${collectionName} recipes`);
-        console.error(`Error loading ${collectionName} recipes:`, existingError);
-        setRecipesLoading(false);
-        return;
-      }
-
-      // Create a set of recipe IDs already in the collection
-      const existingIds = new Set(
-        (existingRecipes || []).map(recipe => recipe.id)
-      );
-
-      setAllRecipes(allRecipesData || []);
-      setExistingRecipeIds(existingIds);
     } catch (err) {
       setError('An unexpected error occurred');
       console.error('Error loading recipes:', err);
     } finally {
       setRecipesLoading(false);
     }
-  }, [collectionId, onGetExistingRecipes, collectionName]);
+  }, [collectionId, onGetExistingRecipes, onGetAvailableRecipes, collectionName]);
 
   // Load all recipes when modal opens
   useEffect(() => {
@@ -177,8 +195,11 @@ export function AddRecipesToCollectionModal({
         
         if (addError) {
           // If recipe is already in collection, count as success (idempotent)
-          if (addError.includes(`already in this ${collectionName}`)) {
+          if (addError.includes(`already in this ${collectionName}`) || 
+              addError.includes('already in the group cookbook') ||
+              addError.includes('Recipe is already in')) {
             success++;
+            console.log(`Recipe ${recipeId} already exists - counting as success`);
           } else {
             failed++;
             console.error(`Failed to add recipe ${recipeId}:`, addError);

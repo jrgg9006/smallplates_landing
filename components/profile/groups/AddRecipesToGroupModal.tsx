@@ -31,13 +31,20 @@ export function AddRecipesToGroupModal({
     // Then, add recipe to the group's shared cookbook
     const cookbookResult = await addRecipeToGroupCookbook(recipeId, groupId);
     if (cookbookResult.error) {
-      console.error('Recipe added to group but failed to add to shared cookbook:', cookbookResult.error);
+      // Check if it's just a duplicate error (which is fine)
+      if (cookbookResult.error.includes('already in the group cookbook')) {
+        console.log('DEBUG: Recipe already in cookbook - this is fine');
+      } else {
+        console.error('Recipe added to group but failed to add to shared cookbook:', cookbookResult.error);
+        // Still don't return this as an error since the main operation (adding to group) succeeded
+      }
       // Don't return error here - recipe was successfully added to group
     } else {
       console.log('DEBUG: Successfully added recipe to both group and shared cookbook');
     }
     
-    return { data: groupResult.data, error: groupResult.error || undefined };
+    // Always return success if the group addition worked, regardless of cookbook status
+    return { data: groupResult.data, error: undefined };
   };
 
   // Wrapper function to get existing recipes in the group
@@ -45,6 +52,9 @@ export function AddRecipesToGroupModal({
     const result = await getGroupRecipes(groupId);
     return { data: result.data || undefined, error: result.error || undefined };
   };
+
+  // Don't provide onGetAvailableRecipes to enable "Already added" functionality
+  // The component will fall back to showing all recipes with "Already added" indicators
 
   return (
     <AddRecipesToCollectionModal

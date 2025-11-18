@@ -226,7 +226,7 @@ export const columns: ColumnDef<Guest>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="h-auto p-0 hover:bg-transparent border-0 shadow-none table-header-style justify-start pl-4"
         >
-          <span className="table-header-style">Name</span>
+          <span className="table-header-style">Chef's Name</span>
           <ArrowUpDown className="ml-2 h-3 w-3 text-white opacity-70" />
         </Button>
       );
@@ -238,21 +238,21 @@ export const columns: ColumnDef<Guest>[] = [
       
       if (hasPrintedName) {
         return (
-          <div className="flex items-center gap-3 pl-4">
+          <div className="flex items-center gap-3 pl-4 whitespace-nowrap">
             <div className="flex-shrink-0">
               <Image
                 src={getGuestProfileIcon(guest.id, guest.is_self)}
                 alt="Chef profile icon"
-                width={56}
-                height={56}
+                width={44}
+                height={44}
                 className="rounded-full"
               />
             </div>
-            <div className="space-y-1">
-              <div className="font-normal text-lg">
+            <div className="space-y-0.5 min-w-0">
+              <div className="font-normal text-base whitespace-nowrap">
                 {guest.printed_name}
               </div>
-              <div className="text-sm text-gray-500">
+              <div className="text-xs text-gray-500 whitespace-nowrap">
                 {fullName}
               </div>
             </div>
@@ -261,17 +261,17 @@ export const columns: ColumnDef<Guest>[] = [
       }
       
       return (
-        <div className="flex items-center gap-3 pl-4">
+        <div className="flex items-center gap-3 pl-4 whitespace-nowrap">
           <div className="flex-shrink-0">
             <Image
               src={getGuestProfileIcon(guest.id, guest.is_self)}
               alt="Chef profile icon"
-              width={56}
-              height={56}
+              width={44}
+              height={44}
               className="rounded-full"
             />
           </div>
-          <div className="font-normal text-lg">{fullName}</div>
+          <div className="font-normal text-base whitespace-nowrap">{fullName}</div>
         </div>
       );
     },

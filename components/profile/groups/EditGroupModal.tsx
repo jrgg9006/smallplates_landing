@@ -21,6 +21,7 @@ interface EditGroupModalProps {
 }
 
 const MAX_DESCRIPTION_LENGTH = 280;
+const MAX_NAME_LENGTH = 30;
 
 export function EditGroupModal({ 
   isOpen, 
@@ -55,6 +56,11 @@ export function EditGroupModal({
     
     if (!name.trim()) {
       setError('Please enter a group name');
+      return;
+    }
+
+    if (name.length > MAX_NAME_LENGTH) {
+      setError(`Group name cannot exceed ${MAX_NAME_LENGTH} characters`);
       return;
     }
 
@@ -118,16 +124,37 @@ export function EditGroupModal({
         <div className="space-y-4 py-4">
           {/* Name Field */}
           <div>
-            <Label htmlFor="edit-name" className="text-sm font-medium text-gray-600">
-              Group Name *
-            </Label>
+            <div className="flex items-center justify-between mb-1">
+              <Label htmlFor="edit-name" className="text-sm font-medium text-gray-600">
+                Group Name *
+              </Label>
+              <span className={`text-xs ${
+                name.length > MAX_NAME_LENGTH 
+                  ? 'text-red-600 font-medium' 
+                  : name.length > MAX_NAME_LENGTH * 0.9 
+                    ? 'text-orange-600' 
+                    : 'text-gray-500'
+              }`}>
+                {name.length}/{MAX_NAME_LENGTH}
+              </span>
+            </div>
             <Input
               id="edit-name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="mt-1"
-              placeholder="e.g., Family Recipes, Book Club, Holiday Traditions"
+              onChange={(e) => {
+                const newValue = e.target.value;
+                if (newValue.length <= MAX_NAME_LENGTH) {
+                  setName(newValue);
+                }
+              }}
+              className={`mt-1 ${
+                name.length > MAX_NAME_LENGTH 
+                  ? 'border-red-300 focus:ring-red-500' 
+                  : ''
+              }`}
+              placeholder="e.g., Family Recipes, Book Club"
               required
+              maxLength={MAX_NAME_LENGTH}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && name.trim() && !e.shiftKey) {
                   e.preventDefault();
@@ -136,6 +163,11 @@ export function EditGroupModal({
               }}
               autoFocus
             />
+            {name.length > MAX_NAME_LENGTH && (
+              <p className="mt-1 text-xs text-red-600">
+                Group name cannot exceed {MAX_NAME_LENGTH} characters.
+              </p>
+            )}
           </div>
 
           {/* Description Field */}
@@ -197,7 +229,7 @@ export function EditGroupModal({
           </Button>
           <Button 
             onClick={handleSave}
-            disabled={loading || !name.trim()}
+            disabled={loading || !name.trim() || name.length > MAX_NAME_LENGTH}
             className="bg-black text-white hover:bg-gray-800"
           >
             {loading ? 'Saving...' : 'Save'}

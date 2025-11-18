@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Search, ChevronDown, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { AddRecipeDropdown } from "@/components/ui/AddRecipeDropdown";
+import { CookbookMembersDropdown } from "@/components/profile/cookbook/CookbookMembersDropdown";
 import { Cookbook } from "@/lib/types/database";
 
 interface CookbookTableControlsProps {
@@ -107,8 +108,20 @@ export function CookbookTableControls({
             </div>
           </div>
 
-          {/* Add Recipe Button - Secondary, smaller */}
+          {/* Members and Add Recipe Buttons */}
           <div className="flex items-center gap-3">
+            {/* Members Dropdown - Only for shared cookbooks */}
+            {selectedCookbook && (
+              <CookbookMembersDropdown
+                cookbook={selectedCookbook}
+                onInviteFriend={() => {
+                  // TODO: Implement invite functionality - could open a modal or navigate to group management
+                  console.log('Add member to cookbook:', selectedCookbook.name);
+                }}
+              />
+            )}
+            
+            {/* Add Recipe Button */}
             <AddRecipeDropdown
               buttonText="Add a Recipe to this Cookbook"
               onAddExistingRecipe={onAddExistingRecipe}
@@ -177,8 +190,20 @@ export function CookbookTableControls({
 
         </div>
 
-        {/* Add Recipe Button - Mobile */}
+        {/* Members and Add Recipe Buttons - Mobile */}
         <div className="flex gap-3">
+          {/* Members Dropdown - Mobile, only for shared cookbooks */}
+          {selectedCookbook && (
+            <CookbookMembersDropdown
+              cookbook={selectedCookbook}
+              onInviteFriend={() => {
+                // TODO: Implement invite functionality
+                console.log('Add member to cookbook (mobile):', selectedCookbook.name);
+              }}
+            />
+          )}
+          
+          {/* Add Recipe Button - Mobile */}
           <AddRecipeDropdown
             buttonText="Add Recipe"
             onAddExistingRecipe={onAddExistingRecipe}

@@ -232,7 +232,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className={`px-8 py-5 tracking-wide ${
+                      className={`px-8 py-3 tracking-wide ${
                         header.column.id === 'status' || header.column.id === 'recipes_received' 
                           ? 'text-center' 
                           : header.column.id === 'actions'
@@ -271,7 +271,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
                       return (
                         <td 
                           key={cell.id} 
-                          className={`px-8 py-6 whitespace-nowrap ${
+                          className={`px-8 py-4 whitespace-nowrap ${
                             isCenteredColumn ? 'text-center' : isRightAlignedColumn ? 'text-right' : ''
                           }`}
                         >
