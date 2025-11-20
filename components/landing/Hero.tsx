@@ -51,7 +51,7 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
           >
-            Invite your favorite people to share their unique recipes — we turn them into a <b>printed cookbook</b>.
+            Bring the people you love into your kitchen with their recipes printed in a<b> beautiful cookbook</b>.
           </motion.p>
           <motion.div 
             className="mt-8"
