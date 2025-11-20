@@ -229,9 +229,9 @@ export default function ResetPasswordPage() {
       
       setSuccess(true);
       
-      // Redirect to profile after showing success message
+      // Redirect to groups page after showing success message
       setTimeout(() => {
-        router.push("/profile");
+        router.push("/profile/groups");
       }, 2000);
       
     } catch (err) {

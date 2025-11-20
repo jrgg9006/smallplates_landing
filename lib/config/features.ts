@@ -11,6 +11,6 @@ export const FEATURES = {
 } as const;
 
 export const ROUTES = {
-  AFTER_ONBOARDING: FEATURES.WAITLIST_MODE ? '/' : '/profile',
+  AFTER_ONBOARDING: FEATURES.WAITLIST_MODE ? '/' : '/profile/groups',
 } as const;
 

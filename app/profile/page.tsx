@@ -190,6 +190,12 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!loading && !user) {
       router.push("/");
+    } else if (!loading && user && typeof window !== 'undefined') {
+      // Redirect authenticated users to groups page instead of guests page
+      // Only redirect if we're on the /profile path (not already on /profile/groups)
+      if (window.location.pathname === '/profile') {
+        router.replace("/profile/groups");
+      }
     }
   }, [user, loading, router]);
 
