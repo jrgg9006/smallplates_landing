@@ -1,6 +1,6 @@
 /**
  * API Route - Send Group Invitations
- * Allows group owners and admins to invite new members to a group
+ * Allows group members to invite new members to a group
  */
 
 import { NextResponse } from 'next/server';
@@ -89,7 +89,7 @@ export async function POST(
     console.log('👥 Inviting to group:', groupId);
     console.log('📧 Inviting email:', email);
 
-    // Check if user is a member of the group and has permission to invite
+    // Check if user is a member of the group
     const { data: membership, error: membershipError } = await supabaseAdmin
       .from('group_members')
       .select('role, groups(*)')
@@ -105,16 +105,7 @@ export async function POST(
       );
     }
 
-    // Check if user has permission to invite (owner or admin)
-    if (membership.role !== 'owner' && membership.role !== 'admin') {
-      console.error('❌ Insufficient permissions:', membership.role);
-      return NextResponse.json(
-        { error: 'Only group owners and admins can send invitations' },
-        { status: 403 }
-      );
-    }
-
-    console.log('✅ User has permission to invite (role: ' + membership.role + ')');
+    console.log('✅ User is a member of the group (role: ' + membership.role + ')');
 
     // Check if user is already a member of the group
     const { data: existingMember, error: existingMemberError } = await supabaseAdmin

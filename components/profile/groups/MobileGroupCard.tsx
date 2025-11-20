@@ -34,7 +34,7 @@ export function MobileGroupCard({
   const isOwner = userRole === 'owner';
   const canEdit = isOwner;
   const canDelete = isOwner;
-  const canInvite = isOwner;
+  const canInvite = !!userRole; // All members can invite
 
   // Close dropdown when clicking outside
   useEffect(() => {
