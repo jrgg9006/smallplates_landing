@@ -14,6 +14,7 @@ import Image from "next/image";
 import { getGuestProfileIcon } from "@/lib/utils/profileIcons";
 import { updateRecipe } from "@/lib/supabase/recipes";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { getCookbooksForRecipe } from "@/lib/supabase/cookbooks";
 
 interface RecipeDetailsModalProps {
   recipe: RecipeWithGuest | null;
@@ -36,6 +37,10 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
   const [recipeNotes, setRecipeNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Cookbooks state
+  const [cookbookNames, setCookbookNames] = useState<string[]>([]);
+  const [loadingCookbooks, setLoadingCookbooks] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 640); // sm breakpoint
@@ -70,6 +75,34 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
       setError(null);
     }
   }, [recipe, isEditMode]);
+
+  // Load cookbooks for the recipe when modal opens
+  useEffect(() => {
+    const loadCookbooks = async () => {
+      if (!recipe || !isOpen) {
+        setCookbookNames([]);
+        return;
+      }
+
+      setLoadingCookbooks(true);
+      try {
+        const { data, error } = await getCookbooksForRecipe(recipe.id);
+        if (error) {
+          console.error('Error loading cookbooks:', error);
+          setCookbookNames([]);
+        } else {
+          setCookbookNames(data || []);
+        }
+      } catch (err) {
+        console.error('Unexpected error loading cookbooks:', err);
+        setCookbookNames([]);
+      } finally {
+        setLoadingCookbooks(false);
+      }
+    };
+
+    loadCookbooks();
+  }, [recipe?.id, isOpen]);
 
   const handleCancel = () => {
     setIsEditMode(false);
@@ -142,6 +175,20 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
     ? 'Collected from link'
     : 'Added manually';
 
+  // Format cookbooks text
+  const formatCookbooksText = () => {
+    if (loadingCookbooks) {
+      return '';
+    }
+    if (cookbookNames.length === 0) {
+      return '';
+    }
+    if (cookbookNames.length === 1) {
+      return `. Active in Cookbook: ${cookbookNames[0]}`;
+    }
+    return `. Active in Cookbooks: ${cookbookNames.join(', ')}`;
+  };
+
   // Content component for desktop - two column layout
   const desktopContent = (
     <div className="flex-1 overflow-y-auto flex flex-col">
@@ -170,7 +217,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
               year: 'numeric',
               month: 'long',
               day: 'numeric'
-            })}
+            })}{formatCookbooksText()}
           </p>
         </div>
       </div>
@@ -307,7 +354,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
               year: 'numeric',
               month: 'long',
               day: 'numeric'
-            })}
+            })}{formatCookbooksText()}
           </p>
         </div>
       </div>
@@ -444,7 +491,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
               year: 'numeric',
               month: 'long',
               day: 'numeric'
-            })}
+            })}{formatCookbooksText()}
           </p>
         </div>
       </div>
@@ -534,7 +581,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
               year: 'numeric',
               month: 'long',
               day: 'numeric'
-            })}
+            })}{formatCookbooksText()}
           </p>
         </div>
       </div>

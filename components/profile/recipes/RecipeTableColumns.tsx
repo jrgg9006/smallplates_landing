@@ -166,7 +166,7 @@ function ActionsCell({ recipe, onRecipeDeleted, onRecipeAddedToCookbook }: {
         <Button
           variant="ghost"
           size="sm"
-          className="px-3 py-1 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+          className="px-3 py-1 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 flex flex-col items-center justify-center leading-none gap-1"
           onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
             e.preventDefault();
@@ -179,7 +179,8 @@ function ActionsCell({ recipe, onRecipeDeleted, onRecipeAddedToCookbook }: {
           }}
           title="Add to Cookbook"
         >
-          Add to Cookbook
+          <span className="leading-none">Add to</span>
+          <span className="leading-none -mt-0.5">Cookbook</span>
         </Button>
 
         {/* 3 Dots Menu */}

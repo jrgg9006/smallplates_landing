@@ -169,23 +169,35 @@ export function GroupJoinForm({
       setSuccess(true);
       setGroupName(result.data?.groupName || groupData?.name || 'the group');
 
-      // Sign in the user automatically if they're new
-      if (result.data?.isNewUser) {
-        const supabase = createSupabaseClient();
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password
-        });
+      // Sign in the user automatically (both new and existing users)
+      // API has already verified password for existing users, so we can log them in
+      const supabase = createSupabaseClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: formData.email.trim(),
+        password: formData.password
+      });
 
-        if (signInError) {
-          console.error('Auto sign-in failed:', signInError);
-          // Don't block the flow - user can sign in manually
-        }
+      if (signInError) {
+        console.error('Auto sign-in failed:', signInError);
+        // Don't block the flow - user can sign in manually
+        // But show an error message
+        setError('Successfully joined group, but auto-login failed. Please log in manually.');
+        setTimeout(() => {
+          router.push('/');
+        }, 3000);
+        return;
       }
 
+      console.log('✅ User logged in successfully, redirecting to groups page');
+
       // Redirect to groups page after a brief delay
+      // For better UX, we could redirect directly to the specific group if we have the groupId
+      const redirectPath = result.data?.groupId 
+        ? `/profile/groups?group=${result.data.groupId}`
+        : '/profile/groups';
+      
       setTimeout(() => {
-        router.push('/profile/groups');
+        router.push(redirectPath);
       }, 2000);
 
     } catch (err) {

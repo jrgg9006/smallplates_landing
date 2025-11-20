@@ -700,3 +700,112 @@ export async function updateCookbookRecipeOrder(
   return { data, error: error?.message || null };
 }
 
+/**
+ * Get all cookbooks that contain a specific recipe
+ * Returns an array of cookbook names
+ */
+export async function getCookbooksForRecipe(recipeId: string): Promise<{ data: string[] | null; error: string | null }> {
+  const supabase = createSupabaseClient();
+  
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  try {
+    // Get all cookbook_recipes entries for this recipe
+    const { data: cookbookRecipes, error: cookbookRecipesError } = await supabase
+      .from('cookbook_recipes')
+      .select('cookbook_id')
+      .eq('recipe_id', recipeId);
+
+    if (cookbookRecipesError) {
+      console.error('Error fetching cookbook recipes:', cookbookRecipesError);
+      return { data: null, error: cookbookRecipesError.message };
+    }
+
+    if (!cookbookRecipes || cookbookRecipes.length === 0) {
+      return { data: [], error: null };
+    }
+
+    // Get unique cookbook IDs
+    const cookbookIds = [...new Set(cookbookRecipes.map(cr => cr.cookbook_id))];
+
+    // Get cookbook information
+    const { data: cookbooks, error: cookbooksError } = await supabase
+      .from('cookbooks')
+      .select('id, name, is_group_cookbook, group_id')
+      .in('id', cookbookIds);
+
+    if (cookbooksError) {
+      console.error('Error fetching cookbooks:', cookbooksError);
+      return { data: null, error: cookbooksError.message };
+    }
+
+    const cookbookNames: string[] = [];
+    const groupIdsToFetch: string[] = [];
+
+    // Process cookbooks
+    if (cookbooks) {
+      for (const cookbook of cookbooks) {
+        if (cookbook.is_group_cookbook && cookbook.group_id) {
+          // This is a group cookbook, we need to get the group name
+          groupIdsToFetch.push(cookbook.group_id);
+        } else {
+          // This is a personal cookbook, use the cookbook name
+          if (cookbook.name) {
+            cookbookNames.push(cookbook.name);
+          }
+        }
+      }
+    }
+
+    // Get group names for group cookbooks
+    if (groupIdsToFetch.length > 0) {
+      const { data: groups, error: groupsError } = await supabase
+        .from('groups')
+        .select('id, name')
+        .in('id', groupIdsToFetch);
+
+      if (groupsError) {
+        console.error('Error fetching groups:', groupsError);
+        // Continue with what we have, don't fail completely
+      } else if (groups) {
+        for (const group of groups) {
+          if (group.name) {
+            cookbookNames.push(group.name);
+          }
+        }
+      }
+    }
+
+    // Also check if any cookbook_id is actually a group_id (not in cookbooks table)
+    // This handles the case where cookbook_id directly references a group
+    const cookbookIdsInCookbooks = new Set(cookbooks?.map(c => c.id) || []);
+    const missingCookbookIds = cookbookIds.filter(id => !cookbookIdsInCookbooks.has(id));
+
+    if (missingCookbookIds.length > 0) {
+      // These might be direct group IDs
+      const { data: directGroups, error: directGroupsError } = await supabase
+        .from('groups')
+        .select('id, name')
+        .in('id', missingCookbookIds);
+
+      if (!directGroupsError && directGroups) {
+        for (const group of directGroups) {
+          if (group.name) {
+            cookbookNames.push(group.name);
+          }
+        }
+      }
+    }
+
+    // Sort alphabetically and return
+    cookbookNames.sort();
+    return { data: cookbookNames, error: null };
+  } catch (err) {
+    console.error('Unexpected error in getCookbooksForRecipe:', err);
+    return { data: null, error: 'An unexpected error occurred' };
+  }
+}
+

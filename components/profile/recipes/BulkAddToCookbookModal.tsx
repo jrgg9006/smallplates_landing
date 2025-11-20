@@ -10,11 +10,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getAllCookbooks, createCookbook, addRecipeToCookbook } from "@/lib/supabase/cookbooks";
+import { getAllCookbooks, addRecipeToCookbook } from "@/lib/supabase/cookbooks";
 import { Cookbook, RecipeWithGuest } from "@/lib/types/database";
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 interface BulkAddToCookbookModalProps {
   isOpen: boolean;
@@ -34,9 +33,6 @@ export function BulkAddToCookbookModal({
   const [cookbooksLoading, setCookbooksLoading] = useState(false);
   const [selectedCookbookId, setSelectedCookbookId] = useState<string>('');
   const [showCookbookDropdown, setShowCookbookDropdown] = useState(false);
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [newCookbookName, setNewCookbookName] = useState('');
-  const [creatingCookbook, setCreatingCookbook] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successCount, setSuccessCount] = useState(0);
   const [failedCount, setFailedCount] = useState(0);
@@ -96,8 +92,6 @@ export function BulkAddToCookbookModal({
 
   const resetForm = () => {
     setSelectedCookbookId('');
-    setShowCreateForm(false);
-    setNewCookbookName('');
     setError(null);
     setSuccessCount(0);
     setFailedCount(0);
@@ -108,39 +102,6 @@ export function BulkAddToCookbookModal({
       resetForm();
     }
   }, [isOpen]);
-
-  const handleCreateCookbook = async () => {
-    if (!newCookbookName.trim()) {
-      setError('Please enter a cookbook name');
-      return;
-    }
-
-    setCreatingCookbook(true);
-    setError(null);
-
-    try {
-      const { data, error: createError } = await createCookbook(newCookbookName.trim());
-      
-      if (createError) {
-        setError(createError);
-        setCreatingCookbook(false);
-        return;
-      }
-
-      // Add the new cookbook to the list and select it
-      if (data) {
-        setCookbooks(prev => [data, ...prev]);
-        setSelectedCookbookId(data.id);
-        setShowCreateForm(false);
-        setNewCookbookName('');
-      }
-    } catch (err) {
-      setError('An unexpected error occurred');
-      console.error('Error creating cookbook:', err);
-    } finally {
-      setCreatingCookbook(false);
-    }
-  };
 
   const handleAddToCookbook = async () => {
     if (recipes.length === 0) {
@@ -289,61 +250,6 @@ export function BulkAddToCookbookModal({
                 )}
               </div>
             )}
-
-            {/* Create New Cookbook Button */}
-            <div className="mt-3">
-              {!showCreateForm ? (
-                <button
-                  type="button"
-                  onClick={() => setShowCreateForm(true)}
-                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
-                >
-                  <Plus className="h-4 w-4" />
-                  Create New Cookbook
-                </button>
-              ) : (
-                <div className="space-y-2">
-                  <Input
-                    placeholder="Cookbook name"
-                    value={newCookbookName}
-                    onChange={(e) => setNewCookbookName(e.target.value)}
-                    className="text-sm"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleCreateCookbook();
-                      } else if (e.key === 'Escape') {
-                        setShowCreateForm(false);
-                        setNewCookbookName('');
-                      }
-                    }}
-                    autoFocus
-                  />
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      onClick={handleCreateCookbook}
-                      disabled={creatingCookbook || !newCookbookName.trim()}
-                      className="text-sm py-1 px-3 h-auto"
-                      size="sm"
-                    >
-                      {creatingCookbook ? 'Creating...' : 'Create'}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setShowCreateForm(false);
-                        setNewCookbookName('');
-                      }}
-                      className="text-sm py-1 px-3 h-auto"
-                      size="sm"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
 
           {/* Success/Error Messages */}
