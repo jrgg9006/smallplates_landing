@@ -155,7 +155,11 @@ export async function getGuests(includeArchived = false): Promise<{ data: GuestW
     return { data: null, error: error.message };
   }
 
-  return { data: mapGuestsWithLatestRecipe(data, { sortByLatest: true }), error: null };
+  if (!data) {
+    return { data: null, error: null };
+  }
+
+  return { data: mapGuestsWithLatestRecipe(data as unknown as GuestWithRecipeRelation[], { sortByLatest: true }), error: null };
 }
 
 /**
@@ -267,16 +271,25 @@ export async function searchGuests(filters: GuestSearchFilters): Promise<{ data:
   }
 
   // Get recipe data for all guests in the search results
-  let { data: recipesData, error: recipesError } = await supabase
+  type RecipeData = Array<{ guest_id: string; created_at: string; source?: GuestSource | null }> | null;
+  let recipesData: RecipeData;
+  let recipesError: { message: string } | null;
+  
+  const initialResult = await supabase
     .from('guest_recipes')
     .select('guest_id, created_at, source')
     .in('guest_id', guestIds);
+  
+  recipesData = initialResult.data as RecipeData;
+  recipesError = initialResult.error;
 
   if (recipesError && isMissingGuestRecipeSourceError(recipesError)) {
-    ({ data: recipesData, error: recipesError } = await supabase
+    const fallbackResult = await supabase
       .from('guest_recipes')
       .select('guest_id, created_at')
-      .in('guest_id', guestIds));
+      .in('guest_id', guestIds);
+    recipesData = fallbackResult.data as RecipeData;
+    recipesError = fallbackResult.error;
   }
 
   if (recipesError) {
@@ -414,7 +427,11 @@ export async function getGuestsByStatus(status: Guest['status'], includeArchived
     return { data: null, error: error?.message || null };
   }
 
-  return { data: mapGuestsWithLatestRecipe(data), error: null };
+  if (!data) {
+    return { data: null, error: null };
+  }
+
+  return { data: mapGuestsWithLatestRecipe(data as unknown as GuestWithRecipeRelation[]), error: null };
 }
 
 /**
