@@ -107,6 +107,20 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
     if (currentStepIndex < totalSteps - 1) {
       const currentStep = journeySteps[currentStepIndex];
       
+      // Special handling for welcome step - skip to uploadMethod directly (hiding introInfo and realBook)
+      if (currentStep?.key === 'welcome') {
+        const uploadMethodIndex = journeySteps.findIndex(s => s.key === 'uploadMethod');
+        setCurrentStepIndex(uploadMethodIndex);
+        setTimeout(focusFirstHeading, 0);
+        // Scroll to top on mobile for better UX
+        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 100);
+        }
+        return;
+      }
+      
       // Special handling for upload method selection
       if (currentStep?.key === 'uploadMethod') {
         // This is handled by handleUploadMethodSelect, don't advance here
@@ -162,6 +176,20 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
   const handlePrevious = () => {
     if (currentStepIndex > 0) {
       const currentStep = journeySteps[currentStepIndex];
+      
+      // Special handling for uploadMethod - go back to welcome directly (skipping introInfo and realBook)
+      if (currentStep?.key === 'uploadMethod') {
+        const welcomeIndex = journeySteps.findIndex(s => s.key === 'welcome');
+        setCurrentStepIndex(welcomeIndex);
+        setTimeout(focusFirstHeading, 0);
+        // Scroll to top on mobile for better UX
+        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 100);
+        }
+        return;
+      }
       
       // Special handling for back navigation
       if (currentStep?.key === 'recipeTitle') {

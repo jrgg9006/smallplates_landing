@@ -1,0 +1,272 @@
+/**
+ * API Route - Accept Group Invitation
+ * Handles group invitation acceptance for both new and existing users
+ * Creates account if needed, adds user to group, marks invitation as accepted
+ */
+
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+// Create Supabase Admin client for admin operations
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+);
+
+export async function POST(request: Request) {
+  try {
+    const { token, password, firstName, lastName, email: providedEmail } = await request.json();
+
+    // Validate input
+    if (!token) {
+      return NextResponse.json(
+        { error: 'Token is required' },
+        { status: 400 }
+      );
+    }
+
+    console.log('🔐 Accepting group invitation with token:', token);
+
+    // Step 1: Verify invitation is valid and get details
+    const { data: invitation, error: inviteError } = await supabaseAdmin
+      .from('group_invitations')
+      .select(`
+        *,
+        groups (
+          id,
+          name,
+          description,
+          visibility
+        )
+      `)
+      .eq('token', token)
+      .single();
+
+    if (inviteError || !invitation) {
+      console.error('❌ Invalid group invitation:', inviteError);
+      return NextResponse.json(
+        { error: 'Invalid invitation link' },
+        { status: 404 }
+      );
+    }
+
+    // Check if expired
+    const now = new Date();
+    const expiresAt = new Date(invitation.expires_at);
+    
+    if (now > expiresAt) {
+      console.error('❌ Group invitation expired');
+      return NextResponse.json(
+        { error: 'This invitation has expired' },
+        { status: 410 }
+      );
+    }
+
+    // Check if already used
+    if (invitation.status === 'accepted') {
+      console.error('❌ Group invitation already accepted');
+      return NextResponse.json(
+        { error: 'This invitation has already been accepted' },
+        { status: 410 }
+      );
+    }
+
+    console.log('✅ Group invitation is valid for:', invitation.email);
+
+    // Use email from invitation (trusted source) or provided email
+    const email = invitation.email || providedEmail;
+
+    if (!email) {
+      return NextResponse.json(
+        { error: 'Email is required' },
+        { status: 400 }
+      );
+    }
+
+    // Check if user already exists in Supabase Auth
+    const { data: { users }, error: getUsersError } = await supabaseAdmin.auth.admin.listUsers();
+    const existingUser = users?.find(u => u.email === email);
+    
+    let userId: string;
+    let isNewUser = false;
+
+    if (existingUser) {
+      // User exists - we'll add them to the group
+      userId = existingUser.id;
+      console.log('👤 Existing user found:', userId);
+      
+      // Check if user is already a member of this group
+      const { data: existingMember } = await supabaseAdmin
+        .from('group_members')
+        .select('profile_id')
+        .eq('group_id', invitation.group_id)
+        .eq('profile_id', userId)
+        .single();
+
+      if (existingMember) {
+        console.error('❌ User already a member of group');
+        
+        // Mark invitation as accepted anyway
+        await supabaseAdmin
+          .from('group_invitations')
+          .update({
+            status: 'accepted'
+          })
+          .eq('token', token);
+
+        return NextResponse.json({
+          success: true,
+          message: 'You are already a member of this group',
+          data: {
+            userId,
+            isNewUser: false,
+            groupId: invitation.group_id,
+            groupName: invitation.groups.name,
+            alreadyMember: true
+          }
+        });
+      }
+
+    } else {
+      // New user - create account
+      if (!password) {
+        return NextResponse.json(
+          { error: 'Password is required for new users' },
+          { status: 400 }
+        );
+      }
+
+      if (password.length < 8) {
+        return NextResponse.json(
+          { error: 'Password must be at least 8 characters long' },
+          { status: 400 }
+        );
+      }
+
+      if (!firstName?.trim()) {
+        return NextResponse.json(
+          { error: 'First name is required' },
+          { status: 400 }
+        );
+      }
+
+      const fullName = `${firstName.trim()} ${(lastName || '').trim()}`.trim();
+
+      console.log('👤 Creating new user account for:', email);
+
+      const { data: signUpData, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
+        email: email,
+        password: password,
+        email_confirm: true, // Auto-confirm email since it's from invitation
+        user_metadata: {
+          invited_from_group: true,
+          group_id: invitation.group_id,
+          group_name: invitation.groups.name,
+          firstName: firstName.trim(),
+          lastName: lastName?.trim() || '',
+          full_name: fullName
+        }
+      });
+
+      if (signUpError) {
+        console.error('❌ Error creating user:', signUpError);
+        
+        // Handle duplicate email
+        if (signUpError.message?.includes('already registered')) {
+          return NextResponse.json(
+            { error: 'This email is already registered. If you already have an account, please login and use the invitation link again.' },
+            { status: 409 }
+          );
+        }
+        
+        return NextResponse.json(
+          { error: signUpError.message || 'Failed to create account' },
+          { status: 500 }
+        );
+      }
+
+      if (!signUpData.user) {
+        console.error('❌ No user data returned');
+        return NextResponse.json(
+          { error: 'Failed to create account' },
+          { status: 500 }
+        );
+      }
+
+      userId = signUpData.user.id;
+      isNewUser = true;
+
+      console.log('✅ New user created successfully:', userId);
+    }
+
+    // Step 2: Add user to group as member
+    const { error: memberError } = await supabaseAdmin
+      .from('group_members')
+      .insert({
+        group_id: invitation.group_id,
+        profile_id: userId,
+        role: 'member',
+        invited_by: invitation.invited_by
+      });
+
+    if (memberError) {
+      console.error('❌ Error adding user to group:', memberError);
+      
+      // If it's a duplicate error, that's actually fine
+      if (memberError.code === '23505') {
+        console.log('ℹ️ User already in group (duplicate key), continuing...');
+      } else {
+        return NextResponse.json(
+          { error: 'Failed to add user to group' },
+          { status: 500 }
+        );
+      }
+    } else {
+      console.log('✅ User added to group successfully');
+    }
+
+    // Step 3: Mark invitation as accepted
+    const { error: updateError } = await supabaseAdmin
+      .from('group_invitations')
+      .update({
+        status: 'accepted'
+      })
+      .eq('token', token);
+
+    if (updateError) {
+      console.error('⚠️ Failed to mark invitation as accepted:', updateError);
+      // Don't fail the request - user was created and added to group successfully
+    }
+
+    console.log('✅ Group invitation acceptance complete');
+
+    // Return success with user data
+    return NextResponse.json({
+      success: true,
+      message: isNewUser ? 'Account created and added to group successfully' : 'Added to group successfully',
+      data: {
+        userId,
+        email,
+        isNewUser,
+        groupId: invitation.group_id,
+        groupName: invitation.groups.name,
+        groupDescription: invitation.groups.description
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Unexpected error in group invitation acceptance:', error);
+    return NextResponse.json(
+      { 
+        error: error instanceof Error ? error.message : 'Failed to accept invitation'
+      },
+      { status: 500 }
+    );
+  }
+}

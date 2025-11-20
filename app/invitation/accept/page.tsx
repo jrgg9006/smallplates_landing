@@ -291,9 +291,9 @@ export default function AcceptInvitationPage() {
       localStorage.removeItem('invitation_access_token');
       localStorage.removeItem('invitation_refresh_token');
       
-      // Redirect to profile after showing success message
+      // Redirect to groups section after showing success message
       setTimeout(() => {
-        router.push("/profile");
+        router.push("/profile/groups");
       }, 2000);
       
     } catch (err) {

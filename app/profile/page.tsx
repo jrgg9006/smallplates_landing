@@ -25,7 +25,7 @@ import { createShareURL } from "@/lib/utils/sharing";
 import { getCurrentProfile } from "@/lib/supabase/profiles";
 import { RecipeCollectorButton } from "@/components/profile/guests/RecipeCollectorButton";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
-import { AddButton } from "@/components/ui/AddButton";
+import { AddGuestDropdown } from "@/components/ui/AddGuestDropdown";
 import { Button } from "@/components/ui/button";
 
 export default function ProfilePage() {
@@ -311,10 +311,10 @@ export default function ProfilePage() {
                 </Button>
               )}
               
-              {/* Add Guests Button - Teal Circle */}
-              <AddButton
-                onClick={handleAddGuest}
-                title="Add Guest"
+              {/* Add Guests Button - Teal Circle with Dropdown */}
+              <AddGuestDropdown
+                onAddGuest={handleAddGuest}
+                title="Guest actions"
               />
               
               {/* Progress Bar - HIDDEN FOR NOW */}

@@ -197,8 +197,9 @@ export async function removeRecipeFromGroup(recipeId: string, groupId: string) {
 
 /**
  * Copy a group recipe to user's personal collection (create a duplicate)
+ * Preserves original chef attribution and tracks discovery source
  */
-export async function copyRecipeToPersonal(recipeId: string) {
+export async function copyRecipeToPersonal(recipeId: string, sourceUserId?: string) {
   const supabase = createSupabaseClient();
   
   // Get the current user
@@ -230,14 +231,64 @@ export async function copyRecipeToPersonal(recipeId: string) {
     return { data: null, error: 'Could not find user\'s self guest record' };
   }
 
-  // Create a copy of the recipe for the current user
+  // Check if recipe is already in user's personal collection
+  const { data: existingRecipe } = await supabase
+    .from('guest_recipes')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('recipe_name', originalRecipe.recipe_name)
+    .eq('guest_id', selfGuest.id)
+    .maybeSingle();
+
+  if (existingRecipe) {
+    return { data: null, error: 'This recipe is already in your collection' };
+  }
+
+  // Get original chef information
+  const { data: originalGuest } = await supabase
+    .from('guests')
+    .select('first_name, last_name, printed_name')
+    .eq('id', originalRecipe.guest_id)
+    .single();
+
+  // Get source user information if provided
+  let sourceUserName = 'someone';
+  if (sourceUserId) {
+    const { data: sourceUser } = await supabase
+      .from('profiles')
+      .select('full_name, email')
+      .eq('id', sourceUserId)
+      .single();
+    
+    if (sourceUser) {
+      sourceUserName = sourceUser.full_name || sourceUser.email || 'someone';
+    }
+  }
+
+  // Create enhanced discovery tag with both source and original chef information
+  const originalComments = originalRecipe.comments || '';
+  let originalChefName = 'Unknown Chef';
+  if (originalGuest) {
+    originalChefName = originalGuest.printed_name || 
+      `${originalGuest.first_name} ${originalGuest.last_name || ''}`.trim();
+  }
+  
+  const discoveryTag = sourceUserId 
+    ? `[DISCOVERED_FROM_GROUP:${sourceUserName}] [ORIGINAL_CHEF:${originalChefName}]`
+    : `[DISCOVERED_FROM_GROUP] [ORIGINAL_CHEF:${originalChefName}]`;
+  
+  const newComments = originalComments.includes('[DISCOVERED_FROM_GROUP') 
+    ? originalComments 
+    : `${discoveryTag} ${originalComments}`.trim();
+
+  // Create a copy using user's self guest record (for RLS compliance) but with original chef info in comments
   const recipeData: GuestRecipeInsert = {
-    guest_id: selfGuest.id,
-    user_id: user.id,
+    guest_id: selfGuest.id, // Use current user's guest record for RLS compliance
+    user_id: user.id, // Current user owns this copy
     recipe_name: originalRecipe.recipe_name,
     ingredients: originalRecipe.ingredients,
     instructions: originalRecipe.instructions,
-    comments: `Copied from group recipe: ${originalRecipe.comments || ''}`,
+    comments: newComments,
     raw_recipe_text: originalRecipe.raw_recipe_text,
     image_url: originalRecipe.image_url,
     upload_method: originalRecipe.upload_method,
@@ -566,7 +617,26 @@ export async function addRecipeToGroupCookbook(recipeId: string, groupId: string
     .select()
     .single();
 
-  return { data, error: error?.message || null };
+  if (error) {
+    console.error('Error adding recipe to group cookbook:', error);
+    // Check if it was actually inserted despite the error
+    const { data: existingEntry } = await supabase
+      .from('cookbook_recipes')
+      .select('id')
+      .eq('cookbook_id', cookbook.id)
+      .eq('recipe_id', recipeId)
+      .maybeSingle();
+    
+    if (existingEntry) {
+      // Recipe was actually inserted, so treat as success
+      console.log('Recipe was successfully inserted despite error message');
+      return { data: existingEntry, error: null };
+    }
+    
+    return { data: null, error: error.message };
+  }
+
+  return { data, error: null };
 }
 
 /**

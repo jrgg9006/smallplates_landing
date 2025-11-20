@@ -1,0 +1,414 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createSupabaseClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Users, CheckCircle } from "lucide-react";
+import Image from "next/image";
+
+interface GroupInfo {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+interface GroupJoinFormProps {
+  // Content customization
+  title: string;
+  groupData: GroupInfo | null;
+  inviterName?: string; // Optional - shows "John invited you to join:" if provided
+  subtitle?: string; // Optional custom subtitle
+  
+  // Pre-filled form data
+  preFilledData?: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+  };
+  
+  // Form submission
+  onJoin: (formData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+  }) => Promise<{ success: boolean; data?: any; error?: string }>;
+  
+  // Loading states
+  verifying?: boolean;
+  verifyMessage?: string;
+  
+  // Error states
+  verifyError?: string | null;
+  errorTitle?: string;
+  
+  // Footer text
+  footerText?: string;
+  
+  // Auto-focus first input
+  autoFocus?: boolean;
+}
+
+export function GroupJoinForm({
+  title,
+  groupData,
+  inviterName,
+  subtitle,
+  preFilledData,
+  onJoin,
+  verifying = false,
+  verifyMessage = "Loading...",
+  verifyError = null,
+  errorTitle = "Error",
+  footerText = "By joining this cookbook, you agree to share recipes and collaborate with group members.",
+  autoFocus = false
+}: GroupJoinFormProps) {
+  const router = useRouter();
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    firstName: preFilledData?.firstName || '',
+    lastName: preFilledData?.lastName || '',
+    email: preFilledData?.email || '',
+    password: '',
+    confirmPassword: ''
+  });
+
+  // Update form when pre-filled data changes
+  useEffect(() => {
+    if (preFilledData) {
+      setFormData(prev => ({
+        ...prev,
+        firstName: preFilledData.firstName || prev.firstName,
+        lastName: preFilledData.lastName || prev.lastName,
+        email: preFilledData.email || prev.email,
+      }));
+    }
+  }, [preFilledData]);
+
+  // UI state
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [groupName, setGroupName] = useState<string>('');
+
+  const handleInputChange = (field: keyof typeof formData, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    // Clear error when user starts typing
+    if (error) {
+      setError(null);
+    }
+  };
+
+  const handleJoinGroup = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate form
+    if (!formData.firstName.trim()) {
+      setError('First name is required');
+      return;
+    }
+
+    if (!formData.email.trim()) {
+      setError('Email is required');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    if (!formData.password) {
+      setError('Password is required');
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const result = await onJoin({
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        email: formData.email.trim(),
+        password: formData.password
+      });
+
+      if (!result.success) {
+        // Handle already member case
+        if (result.data?.alreadyMember) {
+          setError('You are already a member of this group');
+          setTimeout(() => {
+            router.push('/profile/groups');
+          }, 2000);
+          return;
+        }
+        setError(result.error || 'Failed to join group');
+        return;
+      }
+
+      // Success! Show success message briefly, then redirect
+      setSuccess(true);
+      setGroupName(result.data?.groupName || groupData?.name || 'the group');
+
+      // Sign in the user automatically if they're new
+      if (result.data?.isNewUser) {
+        const supabase = createSupabaseClient();
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password
+        });
+
+        if (signInError) {
+          console.error('Auto sign-in failed:', signInError);
+          // Don't block the flow - user can sign in manually
+        }
+      }
+
+      // Redirect to groups page after a brief delay
+      setTimeout(() => {
+        router.push('/profile/groups');
+      }, 2000);
+
+    } catch (err) {
+      console.error('Error joining group:', err);
+      setError('An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Loading verification state
+  if (verifying) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-gray-600">{verifyMessage}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state (verification failed)
+  if (verifyError && !groupData) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="h-12 w-12 text-red-500 mx-auto mb-4 flex items-center justify-center">
+            <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-serif font-semibold text-gray-900 mb-4">
+            {errorTitle}
+          </h1>
+          <p className="text-gray-600 mb-6">
+            {verifyError}
+          </p>
+          <Button 
+            onClick={() => router.push('/')}
+            className="bg-black text-white hover:bg-gray-800"
+          >
+            Go to Home Page
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Success state
+  if (success) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-6">
+          <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-serif font-semibold text-gray-900 mb-4">
+            Welcome to the Group!
+          </h1>
+          <p className="text-gray-600 mb-6">
+            You&apos;ve successfully joined <span className="font-medium">{groupName}</span>.
+            Redirecting to your groups page...
+          </p>
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Main join form
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <div className="border-b border-gray-200">
+        <div className="max-w-md mx-auto px-6 h-14 flex items-center justify-center">
+          <Image
+            src="/images/SmallPlates_logo_horizontal.png"
+            alt="Small Plates & Co."
+            width={180}
+            height={28}
+            className="mx-auto"
+          />
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-md mx-auto px-6 py-8">
+        <div className="text-center mb-8">
+          <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-serif font-semibold text-gray-900 mb-2">
+            {title}
+          </h2>
+          {subtitle && (
+            <p className="text-gray-600 mb-4">{subtitle}</p>
+          )}
+          {groupData && (
+            <div className="space-y-2 mt-4">
+              {inviterName ? (
+                <p className="text-gray-600">
+                  <span className="font-medium">{inviterName}</span> invited you to join:
+                </p>
+              ) : (
+                <p className="text-gray-600">
+                  You&apos;ve been invited to join:
+                </p>
+              )}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h3 className="font-medium text-gray-900">{groupData.name}</h3>
+                {groupData.description && (
+                  <p className="text-sm text-gray-600 mt-1">{groupData.description}</p>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleJoinGroup} className="space-y-4">
+          {/* Name Fields */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="firstName" className="text-sm font-medium">
+                First Name *
+              </Label>
+              <Input
+                id="firstName"
+                type="text"
+                value={formData.firstName}
+                onChange={(e) => handleInputChange('firstName', e.target.value)}
+                placeholder="First name"
+                required
+                disabled={loading}
+                autoFocus={autoFocus}
+              />
+            </div>
+            <div>
+              <Label htmlFor="lastName" className="text-sm font-medium">
+                Last Name
+              </Label>
+              <Input
+                id="lastName"
+                type="text"
+                value={formData.lastName}
+                onChange={(e) => handleInputChange('lastName', e.target.value)}
+                placeholder="Last name"
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          {/* Email Field */}
+          <div>
+            <Label htmlFor="email" className="text-sm font-medium">
+              Email Address *
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
+              placeholder="your@email.com"
+              required
+              disabled={loading}
+            />
+          </div>
+
+          {/* Password Fields */}
+          <div>
+            <Label htmlFor="password" className="text-sm font-medium">
+              Password *
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              value={formData.password}
+              onChange={(e) => handleInputChange('password', e.target.value)}
+              placeholder="Create a password"
+              required
+              disabled={loading}
+              minLength={8}
+            />
+            <p className="text-xs text-gray-500 mt-1">Must be at least 8 characters</p>
+          </div>
+
+          <div>
+            <Label htmlFor="confirmPassword" className="text-sm font-medium">
+              Confirm Password *
+            </Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+              placeholder="Confirm your password"
+              required
+              disabled={loading}
+            />
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-3">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            className="w-full bg-black text-white hover:bg-gray-800 py-3"
+            disabled={loading}
+          >
+            {loading ? 'Joining Group...' : 'Join Group'}
+          </Button>
+        </form>
+
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <p className="text-xs text-gray-500">
+            {footerText}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+

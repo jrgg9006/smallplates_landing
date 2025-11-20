@@ -82,12 +82,12 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
     
     // Validate required fields
     if (!formData.name.trim()) {
-      setError('Group name is required');
+      setError('Cookbook name is required');
       return;
     }
 
     if (formData.name.length > MAX_NAME_LENGTH) {
-      setError(`Group name cannot exceed ${MAX_NAME_LENGTH} characters`);
+      setError(`Cookbook name cannot exceed ${MAX_NAME_LENGTH} characters`);
       return;
     }
 
@@ -108,8 +108,8 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
         onGroupCreated();
       }
     } catch (err) {
-      console.error('Error creating group:', err);
-      setError('Failed to create group. Please try again.');
+      console.error('Error creating cookbook:', err);
+      setError('Failed to create cookbook. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -119,7 +119,7 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
     <div className="h-full flex flex-col">
       {/* Header */}
       <SheetHeader className="pb-6">
-        <SheetTitle className="text-2xl font-serif">Create New Group</SheetTitle>
+        <SheetTitle className="text-2xl font-serif">Create New Cookbook</SheetTitle>
       </SheetHeader>
 
       {/* Form */}
@@ -129,7 +129,7 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="groupName" className="text-base font-medium">
-                Group Name *
+                Cookbook Name *
               </Label>
               <span className={`text-xs ${
                 formData.name.length > MAX_NAME_LENGTH 
@@ -158,7 +158,7 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
             />
             {formData.name.length > MAX_NAME_LENGTH && (
               <p className="text-xs text-red-600">
-                Group name cannot exceed {MAX_NAME_LENGTH} characters.
+                Cookbook name cannot exceed {MAX_NAME_LENGTH} characters.
               </p>
             )}
           </div>
@@ -183,7 +183,7 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
               id="groupDescription"
               value={formData.description || ''}
               onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="What's this group about? (optional)"
+              placeholder="What's this cookbook about? (optional)"
               className={`w-full p-3 border rounded-md text-base min-h-[100px] resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                 (formData.description || '').length > MAX_DESCRIPTION_LENGTH 
                   ? 'border-red-300 focus:ring-red-500' 
@@ -216,13 +216,13 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
                 <SelectItem value="private">
                   <div>
                     <div className="font-medium">Private</div>
-                    <div className="text-sm text-gray-500">Only invited members can see this group</div>
+                    <div className="text-sm text-gray-500">Only invited members can see this cookbook</div>
                   </div>
                 </SelectItem>
                 <SelectItem value="public" disabled className="opacity-50 cursor-not-allowed">
                   <div>
                     <div className="font-medium text-gray-400">Public</div>
-                    <div className="text-sm text-gray-400">Anyone can find and join this group</div>
+                    <div className="text-sm text-gray-400">Anyone can find and join this cookbook</div>
                     <div className="text-xs text-gray-400 mt-1 font-medium">Coming soon</div>
                   </div>
                 </SelectItem>
@@ -245,7 +245,7 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
             className="w-full bg-black text-white hover:bg-gray-800 py-3 rounded-full disabled:opacity-50"
             disabled={loading || !formData.name.trim() || formData.name.length > MAX_NAME_LENGTH}
           >
-            {loading ? 'Creating...' : 'Create New Group'}
+            {loading ? 'Creating...' : 'Create New Cookbook'}
           </Button>
         </div>
       </form>

@@ -12,8 +12,9 @@ import { AddNoteModal } from "@/components/profile/cookbook/AddNoteModal";
 import { EditCookbookNameModal } from "@/components/profile/cookbook/EditCookbookNameModal";
 import { AddRecipesToCookbookModal } from "@/components/profile/cookbook/AddRecipesToCookbookModal";
 import { AddRecipeModal } from "@/components/profile/recipes/AddRecipeModal";
+import { DeleteCookbookModal } from "@/components/profile/cookbook/DeleteCookbookModal";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
-import { getAllCookbooks, getOrCreateDefaultCookbook } from "@/lib/supabase/cookbooks";
+import { getAllCookbooks, getOrCreateDefaultCookbook, deleteCookbook, exitSharedCookbook } from "@/lib/supabase/cookbooks";
 import { Cookbook, RecipeInCookbook } from "@/lib/types/database";
 import { Pencil, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,9 @@ export default function CookbookPage() {
   const [isEditNameModalOpen, setIsEditNameModalOpen] = useState(false);
   const [isAddRecipesModalOpen, setIsAddRecipesModalOpen] = useState(false);
   const [isAddNewRecipeModalOpen, setIsAddNewRecipeModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [cookbooks, setCookbooks] = useState<Cookbook[]>([]);
   const [selectedCookbookId, setSelectedCookbookId] = useState<string | null>(null);
@@ -111,6 +114,66 @@ export default function CookbookPage() {
     // TODO: Implement purchase flow
     console.log('Purchase cookbook clicked - placeholder');
     // This will navigate to purchase page in the future
+  };
+
+  const handleDeleteCookbook = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleExitCookbook = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedCookbook) return;
+    
+    setIsDeleting(true);
+    try {
+      const isGroupCookbook = selectedCookbook.is_group_cookbook;
+      
+      if (isGroupCookbook) {
+        const { error } = await exitSharedCookbook(selectedCookbook.id);
+        if (error) {
+          console.error('Failed to exit shared cookbook:', error);
+          // TODO: Show error toast
+          return;
+        }
+      } else {
+        const { error } = await deleteCookbook(selectedCookbook.id);
+        if (error) {
+          console.error('Failed to delete cookbook:', error);
+          // TODO: Show error toast
+          return;
+        }
+      }
+
+      // Refresh cookbooks list
+      const { data: allCookbooks, error: loadError } = await getAllCookbooks();
+      if (!loadError && allCookbooks) {
+        setCookbooks(allCookbooks);
+        
+        // If we deleted/exited the currently selected cookbook, select another one
+        if (allCookbooks.length > 0) {
+          const defaultCookbook = allCookbooks.find(cb => cb.is_default);
+          setSelectedCookbookId(defaultCookbook?.id || allCookbooks[0].id);
+        } else {
+          setSelectedCookbookId(null);
+        }
+      }
+      
+      setRefreshTrigger(prev => prev + 1);
+      setIsDeleteModalOpen(false);
+      
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      // TODO: Show error toast
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
   };
 
 
@@ -252,6 +315,8 @@ export default function CookbookPage() {
           onCreateCookbook={handleCreateCookbook}
           onAddExistingRecipe={handleAddExistingRecipe}
           onAddNewRecipe={handleAddNewRecipe}
+          onDeleteCookbook={handleDeleteCookbook}
+          onExitCookbook={handleExitCookbook}
         />
 
         {/* Cookbook Table */}
@@ -311,6 +376,15 @@ export default function CookbookPage() {
           cookbookId={selectedCookbook?.is_group_cookbook ? null : selectedCookbookId}
           groupId={selectedCookbook?.is_group_cookbook ? selectedCookbook.group_id : null}
           onRecipeAdded={handleRecipesAdded}
+        />
+
+        {/* Delete/Exit Cookbook Modal */}
+        <DeleteCookbookModal
+          isOpen={isDeleteModalOpen}
+          onClose={handleCloseDeleteModal}
+          cookbook={selectedCookbook || null}
+          onConfirm={handleConfirmDelete}
+          loading={isDeleting}
         />
       </div>
     </div>

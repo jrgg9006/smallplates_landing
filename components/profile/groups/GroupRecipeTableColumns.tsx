@@ -30,6 +30,11 @@ function ActionsCell({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Check if this recipe was added by the current user (they shouldn't copy their own recipes)
+  const isOwnRecipe = recipe.added_by_user?.is_current_user || 
+                      recipe.added_by_user?.full_name === 'You' ||
+                      recipe.guests?.is_self === true;
+
   const closeDropdown = () => {
     setShowDropdown(false);
     setDropdownPosition(null);
@@ -105,13 +110,21 @@ function ActionsCell({
     closeDropdown();
     
     try {
-      const { error } = await copyRecipeToPersonal(recipe.id);
+      // Pass the source user ID (who added it to the group) if available
+      const sourceUserId = recipe.added_by_user?.id;
+      const { error } = await copyRecipeToPersonal(recipe.id, sourceUserId);
       
       if (error) {
         console.error('Error copying recipe to personal:', error);
-        setCopying(false);
+        // Could show a toast error here in the future
+        alert(error); // Temporary feedback
         return;
       }
+      
+      // Show success feedback
+      console.log('Recipe copied successfully to your personal collection');
+      // Could show a toast success here in the future
+      alert('Recipe added to your collection! You can find it in "Discovered" recipes.'); // Temporary feedback
       
       if (onRecipeCopied) {
         onRecipeCopied();
@@ -119,6 +132,7 @@ function ActionsCell({
       
     } catch (err) {
       console.error('Unexpected error copying recipe:', err);
+      alert('An unexpected error occurred while copying the recipe.'); // Temporary feedback
     } finally {
       setCopying(false);
     }
@@ -184,17 +198,20 @@ function ActionsCell({
                 right: `${dropdownPosition.right}px`
               }}
             >
-              <button
-                className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                  e.stopPropagation();
-                  handleCopyToPersonal();
-                }}
-                disabled={copying}
-              >
-                <Copy className="h-4 w-4" />
-                {copying ? 'Adding...' : 'Add to my recipes'}
-              </button>
+              {/* Only show "Add to my recipes" if it's not the user's own recipe */}
+              {!isOwnRecipe && (
+                <button
+                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                    e.stopPropagation();
+                    handleCopyToPersonal();
+                  }}
+                  disabled={copying}
+                >
+                  <Copy className="h-4 w-4" />
+                  {copying ? 'Adding...' : 'Add to my recipes'}
+                </button>
+              )}
               <button
                 className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                 onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
@@ -245,7 +262,7 @@ export const createGroupRecipeColumns = (groupId: string): ColumnDef<RecipeWithG
   },
   {
     id: "chef",
-    header: () => <div className="table-header-style pl-4">Chef's Name</div>,
+    header: () => <div className="table-header-style pl-4">Chef&apos;s Name</div>,
     size: 200,
     minSize: 180,
     cell: ({ row }) => {

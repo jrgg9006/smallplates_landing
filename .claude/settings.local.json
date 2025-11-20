@@ -27,7 +27,8 @@
       "Bash(rm:*)",
       "WebFetch(domain:developer.mozilla.org)",
       "Bash(npm run typecheck:*)",
-      "Bash(supabase status:*)"
+      "Bash(supabase status:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }

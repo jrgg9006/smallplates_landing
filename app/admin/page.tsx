@@ -122,24 +122,30 @@ export default function AdminHomePage() {
             </div>
           </Link>
 
+          {/* Invitations Management - Active */}
+          <Link href="/admin/invitations" className="group">
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-black cursor-pointer h-full">
+              <div className="text-5xl mb-4">📨</div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Invitations</h2>
+              <p className="text-gray-600 mb-4">
+                Monitor group invitations and collaboration analytics
+              </p>
+              <div className="flex items-center text-sm text-gray-500 group-hover:text-black transition-colors">
+                <span>View invitations</span>
+                <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </Link>
+
+
           {/* Orders Management - Coming Soon */}
           <div className="bg-gray-100 rounded-xl p-8 opacity-60 cursor-not-allowed h-full">
             <div className="text-5xl mb-4 grayscale">📦</div>
             <h2 className="text-2xl font-bold text-gray-500 mb-2">Orders</h2>
             <p className="text-gray-400 mb-4">
               Track and manage cookbook orders
-            </p>
-            <div className="text-sm text-gray-400">
-              Coming soon
-            </div>
-          </div>
-
-          {/* Analytics - Coming Soon */}
-          <div className="bg-gray-100 rounded-xl p-8 opacity-60 cursor-not-allowed h-full">
-            <div className="text-5xl mb-4 grayscale">📊</div>
-            <h2 className="text-2xl font-bold text-gray-500 mb-2">Analytics</h2>
-            <p className="text-gray-400 mb-4">
-              View platform metrics and insights
             </p>
             <div className="text-sm text-gray-400">
               Coming soon

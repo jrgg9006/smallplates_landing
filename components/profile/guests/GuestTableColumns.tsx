@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, Mail, Trash2, ArrowUp, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, Mail, Trash2, MoreHorizontal } from "lucide-react";
 import { Guest } from "@/lib/types/database";
 import { DeleteGuestModal } from "./DeleteGuestModal";
 import { Button } from "@/components/ui/button";
@@ -144,7 +144,7 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
         </Button>
         <Button
           variant="ghost"
-          className="h-12 w-12"
+          className="px-3 py-1 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
           onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
             if (onAddRecipe) {
@@ -154,7 +154,7 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
           aria-label="Add recipe"
           title="Add recipe"
         >
-          <ArrowUp className="h-8 w-8" />
+          Add Recipe
         </Button>
         {/* 3 Dots Menu */}
         <div className="relative" ref={dropdownRef}>
@@ -226,7 +226,7 @@ export const columns: ColumnDef<Guest>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="h-auto p-0 hover:bg-transparent border-0 shadow-none table-header-style justify-start pl-4"
         >
-          <span className="table-header-style">Chef's Name</span>
+          <span className="table-header-style">Chef&apos;s Name</span>
           <ArrowUpDown className="ml-2 h-3 w-3 text-white opacity-70" />
         </Button>
       );

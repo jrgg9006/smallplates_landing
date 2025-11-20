@@ -91,8 +91,14 @@ export function RecipeTable({ searchValue: externalSearchValue = '', filterType 
           // Filter for recipes where guest.is_self === false (or null)
           filteredRecipes = recipes.filter(recipe => recipe.guests?.is_self === false || recipe.guests?.is_self === null);
         } else if (filterType === 'discovered') {
-          // Placeholder - currently shows all recipes, will be implemented later
-          filteredRecipes = recipes;
+          // Filter for recipes that were discovered/copied from groups
+          filteredRecipes = recipes.filter(recipe => 
+            recipe.comments && (
+              recipe.comments.includes('[DISCOVERED_FROM_GROUP]') || 
+              recipe.comments.includes('[DISCOVERED_FROM_GROUP:') ||
+              recipe.comments.includes('[ORIGINAL_CHEF:')
+            )
+          );
         }
         // If filterType === 'all', no additional filtering needed
         
@@ -143,6 +149,8 @@ export function RecipeTable({ searchValue: externalSearchValue = '', filterType 
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    columnResizeMode: 'onChange',
+    enableColumnResizing: false,
     initialState: {
       pagination: {
         pageSize: 20,
@@ -223,6 +231,15 @@ export function RecipeTable({ searchValue: externalSearchValue = '', filterType 
                           ? 'w-12'
                           : 'text-left'
                       }`}
+                      style={{
+                        width: header.column.id === 'recipe_name' 
+                          ? '180px' 
+                          : header.column.id === 'name'
+                          ? '250px'
+                          : header.column.id === 'select'
+                          ? '48px'
+                          : 'auto'
+                      }}
                     >
                       {header.isPlaceholder
                         ? null
@@ -264,6 +281,15 @@ export function RecipeTable({ searchValue: externalSearchValue = '', filterType 
                           } ${isSelectColumn ? 'w-12' : ''} ${
                             !isNotesColumn && !isSelectColumn ? 'whitespace-nowrap' : ''
                           }`}
+                          style={{
+                            width: cell.column.id === 'recipe_name' 
+                              ? '180px' 
+                              : cell.column.id === 'name'
+                              ? '250px'
+                              : cell.column.id === 'select'
+                              ? '48px'
+                              : 'auto'
+                          }}
                           onClick={(e) => {
                             // Prevent row click when clicking on checkbox or actions column
                             if (isSelectColumn || isRightAlignedColumn) {

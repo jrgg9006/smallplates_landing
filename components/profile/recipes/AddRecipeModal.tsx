@@ -7,6 +7,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -26,9 +32,10 @@ interface AddRecipeModalProps {
   onRecipeAdded?: () => void; // Callback to refresh the recipe list
   cookbookId?: string | null; // Optional cookbook ID to auto-add recipe after creation
   groupId?: string | null; // Optional group ID to create recipe directly in group
+  preselectedGuestId?: string | null; // Optional guest ID to pre-select
 }
 
-export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, groupId }: AddRecipeModalProps) {
+export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, groupId, preselectedGuestId }: AddRecipeModalProps) {
   // Debug: Log when modal opens with different contexts
   React.useEffect(() => {
     if (isOpen) {
@@ -70,6 +77,14 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
       loadUserProfile();
     }
   }, [isOpen]);
+
+  // Set preselected guest when modal opens with a preselected guest
+  useEffect(() => {
+    if (isOpen && preselectedGuestId) {
+      setSelectedGuestId(preselectedGuestId);
+      setIsMyOwnRecipe(false); // Ensure "My Own Recipe" is unchecked when preselecting a guest
+    }
+  }, [isOpen, preselectedGuestId]);
 
   const loadUserProfile = async () => {
     try {
@@ -296,11 +311,10 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
           const { error: addToCookbookError } = await addRecipeToGroupCookbook(createdRecipeId, groupId);
           if (addToCookbookError) {
             console.error('Failed to add recipe to group cookbook:', addToCookbookError);
-            setError(`Recipe created but failed to add to shared cookbook: ${addToCookbookError}`);
-            setLoading(false);
-            return;
+            console.warn('Recipe was created successfully, but there was an issue adding it to the shared cookbook. The recipe may still have been added.');
+            // Continue with success flow - don't block the user if recipe was likely added
           }
-          console.log('DEBUG: Successfully added recipe to group cookbook');
+          console.log('DEBUG: Group cookbook addition completed');
         } else {
           console.log('DEBUG: No createdRecipeId, skipping cookbook addition');
         }
@@ -416,98 +430,100 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
     return `${guest.first_name} ${guest.last_name || ''}`.trim();
   };
 
-  // Desktop content component - styled to match RecipeDetailsModal
+  // Desktop content component - restructured to look like a recipe page
   const desktopContent = (
-    <div className="flex-1 overflow-y-auto flex flex-col">
-      {/* Guest Selector Section */}
-      <div className="flex-shrink-0 pb-4 mb-2">
-        <div>
-          <Label htmlFor="guest" className="text-sm font-medium text-gray-600">
-            Guest {!isMyOwnRecipe && '*'}
-          </Label>
-          {!isMyOwnRecipe && (
-            <>
-              {guestsLoading ? (
-                <div className="mt-1 text-sm text-gray-500">Loading guests...</div>
-              ) : guests.length === 0 ? (
-                <div className="mt-1">
-                  <p className="text-sm text-gray-500 mb-2">No guests available. Please add a guest first.</p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      onClose();
-                      // Navigate to guest list or trigger add guest modal
-                      // This could be handled by parent component
-                    }}
-                    className="text-sm"
-                  >
-                    Add Guest
-                  </Button>
-                </div>
-              ) : (
-                <div className="relative mt-1" ref={dropdownRef}>
-                  <button
-                    type="button"
-                    onClick={() => setShowGuestDropdown(!showGuestDropdown)}
-                    className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                  >
-                    <span className={selectedGuestId ? 'text-gray-900' : 'text-gray-500'}>
-                      {selectedGuestId && selectedGuest
-                        ? getGuestDisplayName(selectedGuest)
-                        : 'Select a guest'}
-                    </span>
-                    <ChevronDown className="h-4 w-4 text-gray-400" />
-                  </button>
-                  
-                  {showGuestDropdown && (
-                    <>
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
-                        {guests.map((guest) => (
-                          <button
-                            key={guest.id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedGuestId(guest.id);
-                              setShowGuestDropdown(false);
-                            }}
-                            className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 ${
-                              selectedGuestId === guest.id
-                                ? 'bg-gray-100 text-gray-900 font-medium'
-                                : 'text-gray-700'
-                            }`}
-                          >
-                            {getGuestDisplayName(guest)}
-                          </button>
-                        ))}
-                        <div className="border-t border-gray-200 mt-1 pt-1">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setShowGuestDropdown(false);
-                              setShowAddGuestModal(true);
-                            }}
-                            className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                          >
-                            <Plus className="h-4 w-4" />
-                            Add New Guest
-                          </button>
+    <div className="flex-1 overflow-y-auto flex flex-col min-w-0">
+      {/* Top Section: Split Left/Right */}
+      <div className="flex-shrink-0 grid grid-cols-[1fr_4fr] gap-4 mb-8 pb-8 border-b border-gray-200">
+        {/* Left Side: Guest, Checkbox, Recipe Type */}
+        <div className="flex flex-col space-y-4">
+          {/* Guest Selector */}
+          <div>
+            <Label htmlFor="guest" className="text-sm font-medium text-gray-600">
+              Guest {!isMyOwnRecipe && '*'}
+            </Label>
+            {!isMyOwnRecipe && (
+              <>
+                {guestsLoading ? (
+                  <div className="mt-1 text-sm text-gray-500">Loading guests...</div>
+                ) : guests.length === 0 ? (
+                  <div className="mt-1">
+                    <p className="text-sm text-gray-500 mb-2">No guests available. Please add a guest first.</p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        onClose();
+                      }}
+                      className="text-sm"
+                    >
+                      Add Guest
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="relative mt-1" ref={dropdownRef}>
+                    <button
+                      type="button"
+                      onClick={() => setShowGuestDropdown(!showGuestDropdown)}
+                      className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50 focus:outline-none focus:border-gray-500"
+                    >
+                      <span className={selectedGuestId ? 'text-gray-900' : 'text-gray-500'}>
+                        {selectedGuestId && selectedGuest
+                          ? getGuestDisplayName(selectedGuest)
+                          : 'Select a guest'}
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-gray-400" />
+                    </button>
+                    
+                    {showGuestDropdown && (
+                      <>
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                          {guests.map((guest) => (
+                            <button
+                              key={guest.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedGuestId(guest.id);
+                                setShowGuestDropdown(false);
+                              }}
+                              className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 ${
+                                selectedGuestId === guest.id
+                                  ? 'bg-gray-100 text-gray-900 font-medium'
+                                  : 'text-gray-700'
+                              }`}
+                            >
+                              {getGuestDisplayName(guest)}
+                            </button>
+                          ))}
+                          <div className="border-t border-gray-200 mt-1 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowGuestDropdown(false);
+                                setShowAddGuestModal(true);
+                              }}
+                              className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                            >
+                              <Plus className="h-4 w-4" />
+                              Add New Guest
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                      {/* Overlay to close dropdown */}
-                      <div 
-                        className="fixed inset-0 z-[5]" 
-                        onClick={() => setShowGuestDropdown(false)}
-                      ></div>
-                    </>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-          
+                        {/* Overlay to close dropdown */}
+                        <div 
+                          className="fixed inset-0 z-[5]" 
+                          onClick={() => setShowGuestDropdown(false)}
+                        ></div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
           {/* "This is my own recipe" checkbox */}
-          <div className="mt-3">
+          <div>
             <label className="flex items-center space-x-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -519,131 +535,125 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                     setShowGuestDropdown(false);
                   }
                 }}
-                className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black focus:ring-2"
+                className="w-4 h-4 text-black border-gray-300 rounded focus:ring-gray-400 focus:ring-1"
               />
               <span className="text-sm text-gray-700">This is my own recipe</span>
             </label>
           </div>
+
+          {/* Recipe Type Toggle */}
+          <div>
+            <Label className="text-sm font-medium text-gray-600 mb-2 block">Recipe type</Label>
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setUploadMethod('text');
+                  setSelectedFiles([]);
+                }}
+                className={`w-full px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  uploadMethod === 'text'
+                    ? 'bg-white border-2 border-black text-black'
+                    : 'bg-gray-50 border-2 border-gray-200 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                Type Recipe
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setUploadMethod('image');
+                  setRecipeIngredients('');
+                  setRecipeInstructions('');
+                }}
+                className={`w-full px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  uploadMethod === 'image'
+                    ? 'bg-white border-2 border-black text-black'
+                    : 'bg-gray-50 border-2 border-gray-200 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                Upload Images
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Upload Method Toggle */}
-      <div className="flex-shrink-0 pb-2 mb-2">
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              setUploadMethod('text');
-              setSelectedFiles([]);
-            }}
-            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              uploadMethod === 'text'
-                ? 'bg-white border-2 border-black text-black'
-                : 'bg-gray-50 border-2 border-gray-200 text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            Type Recipe
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setUploadMethod('image');
-              setRecipeIngredients('');
-              setRecipeInstructions('');
-            }}
-            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              uploadMethod === 'image'
-                ? 'bg-white border-2 border-black text-black'
-                : 'bg-gray-50 border-2 border-gray-200 text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            Upload Images
-          </button>
-        </div>
-      </div>
+        {/* Right Side: Complete recipe form structure (from image) */}
+        <div className="flex flex-col space-y-6 min-w-0">
+          {/* Recipe Name - at top, large serif */}
+          <div>
+            <div className="flex items-center justify-between">
+              <input
+                type="text"
+                value={recipeTitle}
+                onChange={(e) => setRecipeTitle(e.target.value)}
+                placeholder="Recipe Name"
+                maxLength={50}
+                className="w-full font-serif text-3xl font-semibold text-gray-900 leading-tight border-0 border-b border-gray-300 px-0 py-2 focus:outline-none focus:border-gray-500 bg-transparent placeholder:text-gray-400"
+                required
+              />
+              <span className="text-xs text-gray-400 ml-2 whitespace-nowrap">
+                {recipeTitle.length}/50
+              </span>
+            </div>
+            {/* Subtitle - Shared by guest name or user name */}
+            {!isMyOwnRecipe && selectedGuest && (
+              <p className="font-serif italic text-lg text-gray-700 mt-2">
+                Shared by {selectedGuest.printed_name || `${selectedGuest.first_name} ${selectedGuest.last_name || ''}`.trim()}
+              </p>
+            )}
+            {isMyOwnRecipe && userName && (
+              <p className="font-serif italic text-lg text-gray-700 mt-2">
+                Shared by {userName}
+              </p>
+            )}
+          </div>
 
-      {/* Recipe Title Section */}
-      <div className="flex-shrink-0 mb-8 pb-6 border-b border-gray-200">
-        <input
-          type="text"
-          value={recipeTitle}
-          onChange={(e) => setRecipeTitle(e.target.value)}
-          placeholder="Recipe name"
-          className="w-full font-serif text-4xl font-semibold text-gray-900 leading-tight bg-transparent border-0 border-b-2 border-gray-300 px-0 py-2 focus:outline-none focus:border-black placeholder:text-gray-400"
-          required
-        />
-        {/* Subtitle - Shared by guest name or user name */}
-        {!isMyOwnRecipe && selectedGuest && (
-          <p className="font-serif italic text-lg text-gray-700 mt-2">
-            Shared by {selectedGuest.printed_name || `${selectedGuest.first_name} ${selectedGuest.last_name || ''}`.trim()}
-          </p>
-        )}
-        {isMyOwnRecipe && userName && (
-          <p className="font-serif italic text-lg text-gray-700 mt-2">
-            Shared by {userName}
-          </p>
-        )}
-      </div>
-
-      {/* Conditional Form Fields Based on Upload Method */}
-      {uploadMethod === 'image' ? (
-        <>
-          {/* Image Mode: Notes and Image Upload */}
-          <div className="flex-shrink-0 mb-8">
+          {/* Additional Notes - full width textarea */}
+          <div>
             <textarea
               value={recipeNotes}
               onChange={(e) => setRecipeNotes(e.target.value)}
-              placeholder="Any additional notes about this recipe (optional)"
-              className="w-full font-sans font-light text-base text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black placeholder:text-gray-400 resize-vertical min-h-[80px]"
+              placeholder="Any additional notes about this recipe (optional...but encouraged!)"
+              className="w-full font-sans font-light text-base text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 placeholder:text-gray-400 resize-vertical min-h-[60px]"
             />
           </div>
 
-          {/* Image Upload Section */}
-          <div className="flex-1 mb-8">
-            <Label className="text-sm font-medium text-gray-600 mb-3 block">Recipe Images *</Label>
-            <RecipeImageUpload
-              onFilesSelected={setSelectedFiles}
-              selectedFiles={selectedFiles}
-              error={error}
-            />
-          </div>
-        </>
-      ) : (
-        <>
-          {/* Text Mode: Notes, Ingredients, and Instructions */}
-      <div className="flex-shrink-0 mb-8">
-        <textarea
-          value={recipeNotes}
-          onChange={(e) => setRecipeNotes(e.target.value)}
-          placeholder="Any additional notes about this recipe"
-          className="w-full font-sans font-light text-base text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black placeholder:text-gray-400 resize-vertical min-h-[80px]"
-        />
-      </div>
+          {/* Two Columns: Ingredients (left) and Steps (right) */}
+          {uploadMethod === 'image' ? (
+            <div className="flex-1">
+              <Label className="text-sm font-medium text-gray-600 mb-3 block">Recipe Images *</Label>
+              <RecipeImageUpload
+                onFilesSelected={setSelectedFiles}
+                selectedFiles={selectedFiles}
+                error={error}
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-[3fr_7fr] gap-4">
+              {/* Left Column - Ingredients */}
+              <div className="flex flex-col">
+                <textarea
+                  value={recipeIngredients}
+                  onChange={(e) => setRecipeIngredients(e.target.value)}
+                  placeholder="List the ingredients needed for this recipe"
+                  className="w-full font-sans font-light text-base text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 placeholder:text-gray-400 resize-vertical min-h-[400px]"
+                />
+              </div>
 
-      {/* Two Column Layout: Ingredients (left) and Instructions (right) */}
-      <div className="flex-1 grid grid-cols-[3fr_7fr] gap-8 pb-6">
-        {/* Left Column - Ingredients */}
-            <div className="flex flex-col">
-          <textarea
-            value={recipeIngredients}
-            onChange={(e) => setRecipeIngredients(e.target.value)}
-            placeholder="List the ingredients needed for this recipe"
-                className="w-full font-sans font-light text-base text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black placeholder:text-gray-400 resize-vertical min-h-[240px]"
-          />
-        </div>
-
-        {/* Right Column - Instructions */}
-            <div className="flex flex-col">
-          <textarea
-            value={recipeInstructions}
-            onChange={(e) => setRecipeInstructions(e.target.value)}
-            placeholder="If you have the recipe all in one single piece, just paste in here"
-                className="w-full font-serif text-lg text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black placeholder:text-gray-400 resize-vertical min-h-[240px]"
-          />
+              {/* Right Column - Steps (Instructions) */}
+              <div className="flex flex-col">
+                <textarea
+                  value={recipeInstructions}
+                  onChange={(e) => setRecipeInstructions(e.target.value)}
+                  placeholder="List the steps needed to make this recipe - make it simple, easy and fun to follow!"
+                  className="w-full font-serif text-lg text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 placeholder:text-gray-400 resize-vertical min-h-[400px]"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
-        </>
-      )}
 
       {/* Error Message */}
       {error && (
@@ -757,7 +767,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                     setShowGuestDropdown(false);
                   }
                 }}
-                className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black focus:ring-2"
+                className="w-4 h-4 text-black border-gray-300 rounded focus:ring-gray-400 focus:ring-1"
               />
               <span className="text-sm text-gray-700">This is my own recipe</span>
             </label>
@@ -801,11 +811,17 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
 
         {/* Recipe Title */}
         <div>
-          <Label htmlFor="recipeTitle" className="text-sm font-medium text-gray-600">Recipe Title *</Label>
+          <div className="flex items-center justify-between mb-1">
+            <Label htmlFor="recipeTitle" className="text-sm font-medium text-gray-600">Recipe Title *</Label>
+            <span className="text-xs text-gray-400">
+              {recipeTitle.length}/50
+            </span>
+          </div>
           <Input
             id="recipeTitle"
             value={recipeTitle}
             onChange={(e) => setRecipeTitle(e.target.value)}
+            maxLength={50}
             className="mt-1"
             placeholder="Recipe name"
             required
@@ -822,7 +838,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                 id="recipeNotes"
                 value={recipeNotes}
                 onChange={(e) => setRecipeNotes(e.target.value)}
-                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[80px]"
+                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 resize-vertical min-h-[80px]"
                 placeholder="Any additional notes about this recipe (optional)"
               />
             </div>
@@ -845,7 +861,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
             id="recipeIngredients"
             value={recipeIngredients}
             onChange={(e) => setRecipeIngredients(e.target.value)}
-                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[120px]"
+                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 resize-vertical min-h-[120px]"
             placeholder="List the ingredients needed for this recipe"
           />
         </div>
@@ -856,7 +872,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
             id="recipeInstructions"
             value={recipeInstructions}
             onChange={(e) => setRecipeInstructions(e.target.value)}
-                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[180px]"
+                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 resize-vertical min-h-[180px]"
             placeholder="If you have the recipe all in one single piece, just paste in here"
           />
         </div>
@@ -925,31 +941,31 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
     );
   }
 
-  // Desktop version - Sheet that slides from right
+  // Desktop version - Dialog popup (centered)
   return (
     <>
-      <Sheet open={isOpen} onOpenChange={onClose}>
-        <SheetContent side="right" className="!w-[70%] !max-w-none h-full flex flex-col overflow-hidden p-10">
-          <SheetHeader className="flex-shrink-0 mb-6">
-            <SheetTitle className="font-serif text-2xl font-semibold">Add Recipe</SheetTitle>
-          </SheetHeader>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-7xl w-[95vw] h-[90vh] max-h-[90vh] flex flex-col overflow-hidden overflow-x-hidden p-0 gap-0">
+          <DialogHeader className="flex-shrink-0 px-8 pt-6 pb-4 border-b border-gray-200">
+            <DialogTitle className="font-serif text-2xl font-semibold">Add a Recipe</DialogTitle>
+          </DialogHeader>
           
-          <div className="flex-1 overflow-hidden flex flex-col relative overflow-y-auto">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col px-8 py-6 min-w-0">
             {desktopContent}
-            
-            {/* Save Button - Fixed position in bottom right */}
-            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 pt-3 pb-2 mt-auto">
-              <Button 
-                onClick={handleSave}
-                disabled={loading || (!isMyOwnRecipe && guests.length === 0)}
-                className="w-full bg-black text-white hover:bg-gray-800 py-3 rounded-full disabled:opacity-50"
-              >
-                {loading ? 'Saving...' : 'Save'}
-              </Button>
-            </div>
           </div>
-        </SheetContent>
-      </Sheet>
+          
+          {/* Save Button - Fixed position at bottom */}
+          <div className="flex-shrink-0 bg-white border-t border-gray-200 px-8 py-4">
+            <Button 
+              onClick={handleSave}
+              disabled={loading || (!isMyOwnRecipe && guests.length === 0)}
+              className="w-full bg-black text-white hover:bg-gray-800 py-3 rounded-full disabled:opacity-50"
+            >
+              {loading ? 'Saving...' : 'Save'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       
       {/* Nested AddGuestModal */}
       <AddGuestModal

@@ -48,11 +48,28 @@ export async function getMyGroups(): Promise<{ data: GroupWithMembers[] | null; 
     return { data: null, error: 'User not authenticated' };
   }
 
+  // First, get groups where user is a member
+  const { data: userGroups, error: userGroupsError } = await supabase
+    .from('group_members')
+    .select('group_id')
+    .eq('profile_id', user.id);
+
+  if (userGroupsError) {
+    return { data: null, error: userGroupsError.message };
+  }
+
+  if (!userGroups || userGroups.length === 0) {
+    return { data: [], error: null };
+  }
+
+  const groupIds = userGroups.map(ug => ug.group_id);
+
+  // Then get all group details including ALL members
   const { data, error } = await supabase
     .from('groups')
     .select(`
       *,
-      group_members!inner(
+      group_members(
         *,
         profiles!group_members_profile_id_fkey(
           id,
@@ -68,7 +85,7 @@ export async function getMyGroups(): Promise<{ data: GroupWithMembers[] | null; 
         group_id
       )
     `)
-    .eq('group_members.profile_id', user.id)
+    .in('id', groupIds)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -173,12 +190,69 @@ export async function deleteGroup(groupId: string) {
     return { data: null, error: 'User not authenticated' };
   }
 
+  // Check if user is the owner
+  const { data: member } = await supabase
+    .from('group_members')
+    .select('role')
+    .eq('group_id', groupId)
+    .eq('profile_id', user.id)
+    .single();
+
+  if (!member || member.role !== 'owner') {
+    return { data: null, error: 'Only group owners can delete groups' };
+  }
+
+  // Delete the group (cascade should handle related records)
   const { error } = await supabase
     .from('groups')
     .delete()
-    .eq('id', groupId);
+    .eq('id', groupId)
+    .eq('created_by', user.id); // Extra safety check
 
-  return { data: null, error: error?.message || null };
+  return { data: { success: true }, error: error?.message || null };
+}
+
+/**
+ * Exit a group (remove current user from group members)
+ */
+export async function exitGroup(groupId: string) {
+  const supabase = createSupabaseClient();
+  
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  // Check if user is a member of the group
+  const { data: member } = await supabase
+    .from('group_members')
+    .select('role')
+    .eq('group_id', groupId)
+    .eq('profile_id', user.id)
+    .single();
+
+  if (!member) {
+    return { data: null, error: 'You are not a member of this group' };
+  }
+
+  // Prevent the group owner from exiting (they must delete or transfer ownership)
+  if (member.role === 'owner') {
+    return { data: null, error: 'Group owners cannot exit the group. You must delete the group or transfer ownership first.' };
+  }
+
+  // Remove user from group
+  const { error: removeError } = await supabase
+    .from('group_members')
+    .delete()
+    .eq('group_id', groupId)
+    .eq('profile_id', user.id);
+
+  if (removeError) {
+    return { data: null, error: removeError.message };
+  }
+
+  return { data: { success: true }, error: null };
 }
 
 /**

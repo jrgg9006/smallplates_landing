@@ -8,9 +8,10 @@ import { motion } from "framer-motion";
 import { GroupsSection, type GroupsSectionRef } from "@/components/profile/groups/GroupsSection";
 import type { GroupWithMembers } from "@/lib/types/database";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
-import { AddButton } from "@/components/ui/AddButton";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
+import { AddGroupDropdown } from "@/components/ui/AddGroupDropdown";
+import { AddGroupPageDropdown } from "@/components/ui/AddGroupPageDropdown";
 
 export default function GroupsPage() {
   const { user, loading } = useAuth();
@@ -20,6 +21,10 @@ export default function GroupsPage() {
 
   const handleAddGroup = () => {
     groupsSectionRef.current?.openCreateModal();
+  };
+
+  const handleInviteFriend = () => {
+    groupsSectionRef.current?.openInviteModal();
   };
 
   const handleEditGroup = () => {
@@ -59,7 +64,7 @@ export default function GroupsPage() {
       <ProfileHeader />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Hero Section */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
@@ -76,30 +81,55 @@ export default function GroupsPage() {
                 {selectedGroup && (
                   <div className="mb-2">
                     <span className="text-sm font-light text-gray-500 tracking-widest uppercase">
-                      {selectedGroup.visibility === 'public' ? 'SHARED GROUP' : 'PRIVATE GROUP'}
+                      COOKBOOK
+                      {/* {selectedGroup.visibility === 'public' ? 'SHARED GROUP' : 'PRIVATE GROUP'} */}
                     </span>
                   </div>
                 )}
                 
                 <div className="flex items-center gap-3 justify-center lg:justify-start">
-                  <h1 className="font-serif text-6xl md:text-6xl font-medium tracking-tight text-gray-900 mb-1">
-                    {selectedGroup?.name || 'My Groups'}
+                  <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-medium tracking-tight text-gray-900 mb-1">
+                    {selectedGroup?.name || 'My Cookbooks'}
                   </h1>
+                  {/* Desktop edit icon - hidden on mobile */}
                   {selectedGroup && (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={handleEditGroup}
-                      className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900 hover:bg-gray-100"
-                      title="Edit group name"
+                      className="hidden lg:flex h-8 w-8 p-0 text-gray-500 hover:text-gray-900 hover:bg-gray-100"
+                      title="Edit cookbook name"
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
                   )}
                 </div>
-                <h3 className="text-lg font-light text-gray-600 mb-4 lg:mb-0">
-                  {selectedGroup?.description?.trim() || 'Collaborative recipes'}
-                </h3>
+                <div className="flex flex-col items-center lg:items-start">
+                  <h3 className="text-lg font-light text-gray-600 mb-2 lg:mb-0">
+                    {selectedGroup?.description?.trim() || 'Collaborative recipes'}
+                  </h3>
+                  {/* Mobile edit icon - shown only on mobile, below description */}
+                  {selectedGroup && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleEditGroup}
+                      className="lg:hidden h-6 w-6 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 self-center mb-4"
+                      title="Edit cookbook name"
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+
+                {/* Mobile: Add Group dropdown - positioned after subtitle */}
+                <div className="lg:hidden mb-0 flex justify-center">
+                  <AddGroupPageDropdown
+                    onCreateNewGroup={handleAddGroup}
+                    onInviteFriend={handleInviteFriend}
+                    title="Group actions"
+                  />
+                </div>
               </motion.div>
             </div>
             
@@ -110,9 +140,10 @@ export default function GroupsPage() {
 
             {/* Desktop: Add Group button */}
             <div className="hidden lg:block">
-              <AddButton
-                onClick={handleAddGroup}
-                title="Create new group"
+              <AddGroupDropdown
+                onCreateNewGroup={handleAddGroup}
+                onInviteFriend={handleInviteFriend}
+                title="Group actions"
               />
             </div>
           </div>

@@ -49,6 +49,8 @@ export function AddRecipesToCollectionModal({
   const [error, setError] = useState<string | null>(null);
   const [successCount, setSuccessCount] = useState(0);
   const [failedCount, setFailedCount] = useState(0);
+  const [showAdded, setShowAdded] = useState(false);
+  const [filterType, setFilterType] = useState<'all' | 'myOwn' | 'collected'>('all');
 
   // Dynamic text generation
   const collectionName = collectionType === "cookbook" ? "cookbook" : "group";
@@ -132,6 +134,7 @@ export function AddRecipesToCollectionModal({
     setError(null);
     setSuccessCount(0);
     setFailedCount(0);
+    setShowAdded(false);
   };
 
   useEffect(() => {
@@ -158,7 +161,7 @@ export function AddRecipesToCollectionModal({
   };
 
   const handleSelectAll = () => {
-    const availableRecipes = allRecipes.filter(
+    const availableRecipes = getFilteredRecipes().filter(
       recipe => !existingRecipeIds.has(recipe.id)
     );
     const allAvailableIds = new Set(availableRecipes.map(r => r.id));
@@ -214,15 +217,28 @@ export function AddRecipesToCollectionModal({
 
       // If all succeeded or some succeeded, show success message and close
       if (success > 0) {
-        // Wait a moment to show the success message
-        setTimeout(() => {
-          resetForm();
-          onClose();
-          
-          if (onRecipesAdded) {
-            onRecipesAdded();
-          }
-        }, collectionType === "cookbook" ? 1000 : 1500);
+        // Show "Added!" for groups
+        if (collectionType === "group") {
+          setShowAdded(true);
+          setTimeout(() => {
+            resetForm();
+            onClose();
+            
+            if (onRecipesAdded) {
+              onRecipesAdded();
+            }
+          }, 1500);
+        } else {
+          // Keep existing behavior for cookbooks
+          setTimeout(() => {
+            resetForm();
+            onClose();
+            
+            if (onRecipesAdded) {
+              onRecipesAdded();
+            }
+          }, 1000);
+        }
       } else {
         setError(`Failed to add recipes to ${collectionName}`);
         setLoading(false);
@@ -234,8 +250,22 @@ export function AddRecipesToCollectionModal({
     }
   };
 
+  // Filter recipes based on filter type
+  const getFilteredRecipes = () => {
+    let filtered = allRecipes;
+    
+    if (filterType === 'myOwn') {
+      filtered = allRecipes.filter(recipe => recipe.guests?.is_self === true);
+    } else if (filterType === 'collected') {
+      filtered = allRecipes.filter(recipe => recipe.guests?.is_self === false || recipe.guests?.is_self === null);
+    }
+    
+    return filtered;
+  };
+
   // Count available recipes (not already in collection)
-  const availableRecipes = allRecipes.filter(
+  const filteredRecipes = getFilteredRecipes();
+  const availableRecipes = filteredRecipes.filter(
     recipe => !existingRecipeIds.has(recipe.id)
   );
   const availableCount = availableRecipes.length;
@@ -274,12 +304,56 @@ export function AddRecipesToCollectionModal({
         </DialogHeader>
 
         <div className="flex-1 overflow-hidden flex flex-col space-y-4 py-4">
+          {/* Filter Tabs */}
+          {allRecipes.length > 0 && (
+            <div className="flex items-center justify-between border-b">
+              <div className="flex">
+                <button
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    filterType === 'all'
+                      ? 'border-black text-gray-900'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                  onClick={() => {
+                    setFilterType('all');
+                    setSelectedRecipeIds(new Set());
+                  }}
+                >
+                  All Recipes
+                </button>
+                <button
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    filterType === 'myOwn'
+                      ? 'border-black text-gray-900'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                  onClick={() => {
+                    setFilterType('myOwn');
+                    setSelectedRecipeIds(new Set());
+                  }}
+                >
+                  My Own Recipes
+                </button>
+                <button
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    filterType === 'collected'
+                      ? 'border-black text-gray-900'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                  onClick={() => {
+                    setFilterType('collected');
+                    setSelectedRecipeIds(new Set());
+                  }}
+                >
+                  Collected Recipes
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Select All / Deselect All */}
           {allRecipes.length > 0 && (
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-600">
-                {selectedRecipeIds.size} of {availableCount} available
-              </div>
+            <div className="flex justify-end">
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -325,7 +399,7 @@ export function AddRecipesToCollectionModal({
               </div>
             ) : (
               <div className="divide-y divide-gray-200">
-                {allRecipes.map((recipe) => {
+                {filteredRecipes.map((recipe) => {
                   const isSelected = selectedRecipeIds.has(recipe.id);
                   const isInCollection = existingRecipeIds.has(recipe.id);
 
@@ -365,26 +439,20 @@ export function AddRecipesToCollectionModal({
             )}
           </div>
 
+          {/* Selection Counter at Bottom */}
+          {allRecipes.length > 0 && availableCount > 0 && (
+            <div className="text-sm text-gray-600 text-center">
+              {selectedRecipeIds.size} of {availableCount} available
+            </div>
+          )}
+
           {/* Success/Error Messages */}
-          {successCount > 0 && (
-            <div className={`${
-              collectionType === "cookbook" ? "bg-green-50 border border-green-200 rounded-md p-3" : "mt-4 p-4 bg-green-50 border border-green-200 rounded-md"
-            }`}>
-              <p className={`${
-                collectionType === "cookbook" ? "text-sm text-green-600" : "text-green-600"
-              }`}>
-                {collectionType === "cookbook"
-                  ? `Successfully added ${successCount} ${successCount === 1 ? 'recipe' : 'recipes'} to ${collectionName}${
-                      failedCount > 0 ? ` (${failedCount} failed)` : ''
-                    }`
-                  : `Successfully added ${successCount} recipe${successCount > 1 ? 's' : ''} to the ${collectionName}!`
-                }
+          {successCount > 0 && collectionType === "cookbook" && (
+            <div className="bg-green-50 border border-green-200 rounded-md p-3">
+              <p className="text-sm text-green-600">
+                Successfully added {successCount} {successCount === 1 ? 'recipe' : 'recipes'} to {collectionName}
+                {failedCount > 0 ? ` (${failedCount} failed)` : ''}
               </p>
-              {failedCount > 0 && collectionType === "group" && (
-                <p className="text-red-600 mt-1">
-                  Failed to add {failedCount} recipe{failedCount > 1 ? 's' : ''}.
-                </p>
-              )}
             </div>
           )}
 
@@ -415,14 +483,21 @@ export function AddRecipesToCollectionModal({
               e.stopPropagation();
               handleAddToCollection();
             }}
-            disabled={loading || selectedRecipeIds.size === 0 || !collectionId}
-            className="bg-black text-white hover:bg-gray-800"
+            disabled={loading || selectedRecipeIds.size === 0 || !collectionId || showAdded}
+            className={`${
+              showAdded && collectionType === "group" 
+                ? "bg-green-700 text-white hover:bg-green-700" 
+                : "bg-black text-white hover:bg-gray-800"
+            }`}
           >
             {collectionType === "cookbook"
               ? (loading 
                   ? `Adding ${selectedRecipeIds.size} recipe${selectedRecipeIds.size === 1 ? '' : 's'}...` 
                   : `Add ${selectedRecipeIds.size === 0 ? 'to' : selectedRecipeIds.size} ${selectedRecipeIds.size === 1 ? 'Recipe' : 'Recipes'} to this ${collectionName}`)
-              : (loading ? 'Adding...' : `Add ${selectedRecipeIds.size} Recipe${selectedRecipeIds.size !== 1 ? 's' : ''}`)
+              : (showAdded 
+                  ? 'Added!' 
+                  : (loading ? 'Adding...' : `Add ${selectedRecipeIds.size} Recipe${selectedRecipeIds.size !== 1 ? 's' : ''}`)
+                )
             }
           </Button>
         </DialogFooter>

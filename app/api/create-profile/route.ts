@@ -82,6 +82,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Ensure user has a default group (safety check in case trigger didn't run)
+    const { data: existingGroups, error: groupsCheckError } = await supabaseAdmin
+      .from('groups')
+      .select('id')
+      .eq('created_by', userId)
+      .limit(1);
+
+    if (!groupsCheckError && (!existingGroups || existingGroups.length === 0)) {
+      // User doesn't have any groups, create default group
+      const { error: groupError } = await supabaseAdmin
+        .from('groups')
+        .insert({
+          name: 'My First Cookbook',
+          description: 'Add recipes and invite friends to build your Cookbook',
+          created_by: userId,
+          visibility: 'private'
+        });
+
+      if (groupError) {
+        console.error('Error creating default group:', groupError);
+        // Don't fail the request, just log the error
+      } else {
+        console.log('Default group created for user:', userId);
+      }
+    }
+
     return NextResponse.json({ 
       success: true, 
       data: data?.[0] || null 

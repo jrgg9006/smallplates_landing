@@ -35,7 +35,7 @@ export function RecipeTableControls({
       case 'collected':
         return `Collected by you ${recipeCounts ? `(${recipeCounts.collected})` : ''}`;
       case 'discovered':
-        return `Discovered ${recipeCounts ? `(${recipeCounts.discovered})` : ''}`;
+        return `From groups ${recipeCounts ? `(${recipeCounts.discovered})` : ''}`;
       default:
         return 'All';
     }
@@ -92,7 +92,7 @@ export function RecipeTableControls({
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                Discovered {recipeCounts && `(${recipeCounts.discovered})`}
+                From groups {recipeCounts && `(${recipeCounts.discovered})`}
               </button>
             </div>
             
@@ -157,7 +157,7 @@ export function RecipeTableControls({
                       filterType === 'discovered' ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-700'
                     }`}
                   >
-                    Discovered {recipeCounts && `(${recipeCounts.discovered})`}
+                    From groups {recipeCounts && `(${recipeCounts.discovered})`}
                   </button>
                 </div>
                 {/* Overlay to close dropdown */}

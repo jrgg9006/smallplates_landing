@@ -5,6 +5,7 @@ import { Search, ChevronDown, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { AddRecipeDropdown } from "@/components/ui/AddRecipeDropdown";
 import { CookbookMembersDropdown } from "@/components/profile/cookbook/CookbookMembersDropdown";
+import { CookbookActionsDropdown } from "@/components/profile/cookbook/CookbookActionsDropdown";
 import { Cookbook } from "@/lib/types/database";
 
 interface CookbookTableControlsProps {
@@ -16,6 +17,8 @@ interface CookbookTableControlsProps {
   onCreateCookbook: () => void;
   onAddExistingRecipe: () => void;
   onAddNewRecipe: () => void;
+  onDeleteCookbook: () => void;
+  onExitCookbook: () => void;
 }
 
 export function CookbookTableControls({ 
@@ -26,7 +29,9 @@ export function CookbookTableControls({
   onCookbookChange,
   onCreateCookbook,
   onAddExistingRecipe,
-  onAddNewRecipe
+  onAddNewRecipe,
+  onDeleteCookbook,
+  onExitCookbook
 }: CookbookTableControlsProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -127,6 +132,15 @@ export function CookbookTableControls({
               onAddExistingRecipe={onAddExistingRecipe}
               onAddNewRecipe={onAddNewRecipe}
             />
+
+            {/* Cookbook Actions Dropdown - Three dots menu */}
+            {selectedCookbook && (
+              <CookbookActionsDropdown
+                cookbook={selectedCookbook}
+                onDeleteCookbook={onDeleteCookbook}
+                onExitCookbook={onExitCookbook}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -210,6 +224,15 @@ export function CookbookTableControls({
             onAddNewRecipe={onAddNewRecipe}
             className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center gap-2 flex-1"
           />
+
+          {/* Cookbook Actions Dropdown - Mobile */}
+          {selectedCookbook && (
+            <CookbookActionsDropdown
+              cookbook={selectedCookbook}
+              onDeleteCookbook={onDeleteCookbook}
+              onExitCookbook={onExitCookbook}
+            />
+          )}
         </div>
 
         {/* Search Input - Full width */}

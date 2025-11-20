@@ -12,10 +12,10 @@ import { RecipeTableControls } from "@/components/profile/recipes/RecipeTableCon
 import { AddRecipeModal } from "@/components/profile/recipes/AddRecipeModal";
 import { BulkActionsBar } from "@/components/profile/recipes/BulkActionsBar";
 import { BulkAddToCookbookModal } from "@/components/profile/recipes/BulkAddToCookbookModal";
-import { RecipeCollectorButton } from "@/components/profile/guests/RecipeCollectorButton";
+import { ShareCollectionModal } from "@/components/profile/guests/ShareCollectionModal";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
-import { AddButton } from "@/components/ui/AddButton";
-import { Plus, Share2 } from "lucide-react";
+import { AddRecipePageDropdown } from "@/components/ui/AddRecipePageDropdown";
+import { Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getAllRecipes } from "@/lib/supabase/recipes";
 import { RecipeWithGuest } from "@/lib/types/database";
@@ -27,6 +27,9 @@ export default function RecipesPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isBulkAddToCookbookModalOpen, setIsBulkAddToCookbookModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
+  const [collectionUrl, setCollectionUrl] = useState<string>('');
+  const [userFullName, setUserFullName] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [clearSelectionTrigger, setClearSelectionTrigger] = useState(0);
   const [searchValue, setSearchValue] = useState('');
@@ -87,6 +90,27 @@ export default function RecipesPage() {
     console.log('Share recipes clicked');
   };
 
+  const handleGetRecipesFromFriends = async () => {
+    // Same logic as RecipeCollectorButton - open collection modal
+    try {
+      const { getUserCollectionToken } = await import("@/lib/supabase/collection");
+      const { getCurrentProfile } = await import("@/lib/supabase/profiles");
+      const { createShareURL } = await import("@/lib/utils/sharing");
+      
+      const { data: tokenData } = await getUserCollectionToken();
+      const { data: profile } = await getCurrentProfile();
+      
+      if (tokenData && typeof window !== 'undefined') {
+        const url = createShareURL(window.location.origin, tokenData);
+        setCollectionUrl(url);
+        setUserFullName(profile?.full_name || null);
+        setIsCollectionModalOpen(true);
+      }
+    } catch (err) {
+      console.error('Error loading collection data:', err);
+    }
+  };
+
   useEffect(() => {
     if (!loading && !user) {
       router.push("/");
@@ -107,7 +131,13 @@ export default function RecipesPage() {
         const all = allRecipes.length;
         const myOwn = allRecipes.filter((recipe: RecipeWithGuest) => recipe.guests?.is_self === true).length;
         const collected = allRecipes.filter((recipe: RecipeWithGuest) => recipe.guests?.is_self === false || recipe.guests?.is_self === null).length;
-        const discovered = 0; // Placeholder - will be implemented later
+        const discovered = allRecipes.filter((recipe: RecipeWithGuest) => 
+          recipe.comments && (
+            recipe.comments.includes('[DISCOVERED_FROM_GROUP]') ||
+            recipe.comments.includes('[DISCOVERED_FROM_GROUP:') ||
+            recipe.comments.includes('[ORIGINAL_CHEF:')
+          )
+        ).length;
 
         setRecipeCounts({ all, myOwn, collected, discovered });
       } catch (err) {
@@ -156,15 +186,13 @@ export default function RecipesPage() {
                 </h3>
               </motion.div>
 
-              {/* Mobile: Add Recipe button - positioned after subtitle */}
-              <div className="lg:hidden mb-4">
-                <Button
-                  onClick={handleAddRecipe}
-                  className="w-full bg-teal-600 text-white hover:bg-teal-700 rounded-lg h-12 flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow"
-                >
-                  <Plus className="h-6 w-6 mr-2" />
-                  Add Recipe
-                </Button>
+              {/* Mobile: Add Recipe dropdown - positioned after subtitle */}
+              <div className="lg:hidden mb-4 flex justify-center">
+                <AddRecipePageDropdown
+                  onAddRecipe={handleAddRecipe}
+                  onGetRecipesFromFriends={handleGetRecipesFromFriends}
+                  title="Add Recipe"
+                />
               </div>
             </div>
             
@@ -172,19 +200,14 @@ export default function RecipesPage() {
             <div className="flex-shrink-0 flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:justify-end w-full lg:w-auto">
               <Button
                 onClick={handleShareRecipes}
-                className="hidden lg:flex w-full lg:w-auto bg-purple-700 text-white hover:bg-purple-900 rounded-lg px-8 py-3 text-base font-medium items-center justify-center gap-2"
+                className="hidden w-full lg:w-auto bg-purple-700 text-white hover:bg-purple-900 rounded-lg px-8 py-3 text-base font-medium items-center justify-center gap-2"
               >
                 <Share2 className="h-5 w-5" />
                 Share Recipes
               </Button>
-              <div className="w-full lg:w-auto">
-                <RecipeCollectorButton 
-                  label="Get Recipes from Friends"
-                  className="w-full lg:w-auto border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg px-8 py-3 text-base font-medium flex items-center justify-center gap-2"
-                />
-              </div>
-              <AddButton
-                onClick={handleAddRecipe}
+              <AddRecipePageDropdown
+                onAddRecipe={handleAddRecipe}
+                onGetRecipesFromFriends={handleGetRecipesFromFriends}
                 title="Add Recipe"
                 className="hidden lg:flex"
               />
@@ -257,6 +280,16 @@ export default function RecipesPage() {
               </Button>
             </div>
           </div>
+        )}
+
+        {/* Collection Modal */}
+        {collectionUrl && (
+          <ShareCollectionModal
+            isOpen={isCollectionModalOpen}
+            onClose={() => setIsCollectionModalOpen(false)}
+            collectionUrl={collectionUrl}
+            userName={userFullName}
+          />
         )}
 
       </div>

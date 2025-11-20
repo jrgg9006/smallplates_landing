@@ -109,7 +109,7 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
         // Signed in successfully
         setSuccess(true);
         setTimeout(() => {
-          router.push('/profile');
+          router.push('/profile/groups');
         }, 2000);
       }
       

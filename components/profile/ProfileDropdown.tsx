@@ -2,9 +2,10 @@
 
 import React from "react";
 import { useState, useRef, useEffect } from "react";
-import { User, LogOut, Package, BookOpen } from "lucide-react";
+import { User, LogOut, Package, BookOpen, Users, ChefHat } from "lucide-react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,12 +30,16 @@ export default function ProfileDropdown() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         onMouseEnter={() => setIsOpen(true)}
-        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors overflow-hidden"
         aria-label="Profile menu"
       >
-        <span className="text-gray-700 font-medium text-sm">
-          {user?.email?.[0]?.toUpperCase() || "U"}
-        </span>
+        <Image
+          src="/images/icons_profile/chef_you.png"
+          alt="Your profile"
+          width={40}
+          height={40}
+          className="w-10 h-10 rounded-full object-cover"
+        />
       </button>
 
       {/* Dropdown Menu */}
@@ -63,7 +68,7 @@ export default function ProfileDropdown() {
             <Package className="h-4 w-4" />
             Orders
           </button>
-          <button
+          {/* <button
             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
             onClick={() => {
               router.push('/profile/cookbook');
@@ -72,6 +77,26 @@ export default function ProfileDropdown() {
           >
             <BookOpen className="h-4 w-4" />
             My Cookbook
+          </button> */}
+          <button
+            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+            onClick={() => {
+              router.push('/profile');
+              setIsOpen(false);
+            }}
+          >
+            <Users className="h-4 w-4" />
+            Guests
+          </button>
+          <button
+            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+            onClick={() => {
+              router.push('/profile/recipes');
+              setIsOpen(false);
+            }}
+          >
+            <ChefHat className="h-4 w-4" />
+            Recipes
           </button>
           <hr className="my-1 border-gray-200" />
           <button

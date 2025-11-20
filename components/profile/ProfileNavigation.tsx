@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, ChefHat, BookOpen, Users2 } from "lucide-react";
+import { BookOpen, Users2, ChefHat, Users } from "lucide-react";
 
 interface ProfileNavigationProps {
   variant?: "desktop" | "mobile";
@@ -17,32 +17,23 @@ export default function ProfileNavigation({
   const pathname = usePathname();
 
   // Determine active states
-  const isGuestsActive = pathname === "/profile" || (pathname.startsWith("/profile/") && !pathname.startsWith("/profile/recipes") && !pathname.startsWith("/profile/cookbook") && !pathname.startsWith("/profile/groups") && !pathname.startsWith("/profile/account") && !pathname.startsWith("/profile/orders"));
-  const isRecipesActive = pathname === "/profile/recipes" || pathname.startsWith("/profile/recipes/");
   const isCookbookActive = pathname === "/profile/cookbook" || pathname.startsWith("/profile/cookbook/");
   const isGroupsActive = pathname === "/profile/groups" || pathname.startsWith("/profile/groups/");
+  const isRecipesActive = pathname === "/profile/recipes" || pathname.startsWith("/profile/recipes/");
+  const isGuestsActive = pathname === "/profile" && !pathname.startsWith("/profile/") || 
+                         (pathname !== "/profile/account" && pathname !== "/profile/orders" && 
+                          pathname !== "/profile/groups" && pathname !== "/profile/recipes" && 
+                          pathname.startsWith("/profile/"));
 
   const navItems = [
+    // {
+    //   label: "Cookbook",
+    //   href: "/profile/cookbook",
+    //   icon: BookOpen,
+    //   isActive: isCookbookActive
+    // },
     {
-      label: "Guests",
-      href: "/profile",
-      icon: Users,
-      isActive: isGuestsActive
-    },
-    {
-      label: "Recipes",
-      href: "/profile/recipes",
-      icon: ChefHat,
-      isActive: isRecipesActive
-    },
-    {
-      label: "Cookbook",
-      href: "/profile/cookbook",
-      icon: BookOpen,
-      isActive: isCookbookActive
-    },
-    {
-      label: "Groups",
+      label: "My Cookbooks",
       href: "/profile/groups",
       icon: Users2,
       isActive: isGroupsActive
@@ -79,7 +70,6 @@ export default function ProfileNavigation({
   return (
     <nav className="flex items-center gap-8" aria-label="Main navigation">
       {navItems.map((item) => {
-        const Icon = item.icon;
         return (
           <Link
             key={item.href}

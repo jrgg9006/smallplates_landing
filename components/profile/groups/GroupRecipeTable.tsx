@@ -19,6 +19,8 @@ import { createGroupRecipeColumns } from "./GroupRecipeTableColumns";
 import { GroupRecipeTableControls } from "./GroupRecipeTableControls";
 import { Button } from "@/components/ui/button";
 import { RecipeDetailsModal } from "@/components/profile/recipes/RecipeDetailsModal";
+import { AddFriendToGroupModal } from "./AddFriendToGroupModal";
+import { MobileGroupRecipeCard } from "./MobileGroupRecipeCard";
 import "@/lib/types/table";
 
 interface GroupRecipeTableProps {
@@ -29,6 +31,9 @@ interface GroupRecipeTableProps {
   onRecipeAdded?: () => void;
   onAddExistingRecipe?: () => void;
   onAddNewRecipe?: () => void;
+  onDeleteGroup?: () => void;
+  onExitGroup?: () => void;
+  userRole?: string | null;
 }
 
 export function GroupRecipeTable({ 
@@ -38,7 +43,10 @@ export function GroupRecipeTable({
   onCreateGroup,
   onRecipeAdded,
   onAddExistingRecipe,
-  onAddNewRecipe 
+  onAddNewRecipe,
+  onDeleteGroup,
+  onExitGroup,
+  userRole
 }: GroupRecipeTableProps) {
   // Data management
   const [data, setData] = React.useState<RecipeWithGuest[]>([]);
@@ -59,6 +67,7 @@ export function GroupRecipeTable({
   // Modal state
   const [selectedRecipe, setSelectedRecipe] = React.useState<RecipeWithGuest | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = React.useState(false);
 
   // Create columns with group ID
   const columns = React.useMemo(() => createGroupRecipeColumns(group.id), [group.id]);
@@ -152,8 +161,7 @@ export function GroupRecipeTable({
   };
 
   const handleInviteFriend = () => {
-    // TODO: Implement invite member functionality
-    console.log('Invite friend clicked');
+    setIsInviteModalOpen(true);
   };
 
   // Show loading state
@@ -170,6 +178,9 @@ export function GroupRecipeTable({
           onInviteFriend={handleInviteFriend}
           onAddExistingRecipe={onAddExistingRecipe || (() => {})}
           onAddNewRecipe={onAddNewRecipe || (() => {})}
+          onDeleteGroup={onDeleteGroup || (() => {})}
+          onExitGroup={onExitGroup || (() => {})}
+          userRole={userRole}
         />
         <div className="bg-white border border-gray-200 rounded-lg p-8">
           <div className="text-center">
@@ -194,6 +205,9 @@ export function GroupRecipeTable({
           onInviteFriend={handleInviteFriend}
           onAddExistingRecipe={onAddExistingRecipe || (() => {})}
           onAddNewRecipe={onAddNewRecipe || (() => {})}
+          onDeleteGroup={onDeleteGroup || (() => {})}
+          onExitGroup={onExitGroup || (() => {})}
+          userRole={userRole}
         />
         <div className="bg-white border border-gray-200 rounded-lg p-8">
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
@@ -212,7 +226,7 @@ export function GroupRecipeTable({
   }
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-6">
       {/* Controls */}
       <GroupRecipeTableControls
         searchValue={searchValue}
@@ -307,109 +321,65 @@ export function GroupRecipeTable({
           </div>
 
           {/* Mobile Cards */}
-          <div className="md:hidden space-y-3">
+          <div className="md:hidden space-y-4 px-1">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <div
+                <MobileGroupRecipeCard
                   key={row.id}
-                  className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors"
-                  onClick={() => handleRowClick(row.original)}
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-base text-gray-900 truncate">
-                          {row.original.recipe_name}
-                        </h4>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Added by {row.original.guests?.first_name || 'Unknown'} {row.original.guests?.last_name || ''}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {new Date(row.original.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div onClick={(e) => e.stopPropagation()}>
-                        {/* Actions would go here */}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  recipe={row.original}
+                  onRecipeClick={handleRowClick}
+                  onRecipeRemoved={() => {
+                    // Call the meta function to handle recipe removal
+                    table.options.meta?.onRecipeRemoved?.();
+                  }}
+                  onRecipeCopied={() => {
+                    // Call the meta function to handle recipe copying
+                    table.options.meta?.onRecipeCopied?.();
+                  }}
+                />
               ))
             ) : (
               <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
-                <p className="text-gray-500">No results found.</p>
+                <div className="text-center max-w-sm mx-auto">
+                  <h3 className="text-lg font-medium text-gray-500 mb-2">
+                    No recipes yet
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Start adding recipes to this cookbook to see them here.
+                  </p>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Pagination */}
+          {/* Pagination - Responsive */}
           {table.getPageCount() > 1 && (
-            <div className="flex items-center justify-between py-4">
-              <div className="flex-1 text-sm text-gray-500">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
+              <div className="text-sm text-gray-500 order-2 sm:order-1">
                 {table.getFilteredSelectedRowModel().rows.length} of{" "}
                 {table.getFilteredRowModel().rows.length} recipe(s) selected.
               </div>
-              <div className="flex items-center space-x-6 lg:space-x-8">
-                <div className="flex items-center space-x-2">
-                  <p className="text-sm font-medium">Rows per page</p>
-                  <select
-                    value={table.getState().pagination.pageSize}
-                    onChange={(e) => {
-                      table.setPageSize(Number(e.target.value))
-                    }}
-                    className="h-8 w-16 rounded border border-gray-300 text-sm"
-                  >
-                    {[10, 20, 30, 40, 50].map(pageSize => (
-                      <option key={pageSize} value={pageSize}>
-                        {pageSize}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex w-24 items-center justify-center text-sm font-medium">
+              <div className="flex items-center gap-2 order-1 sm:order-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm text-gray-500 px-2">
                   Page {table.getState().pagination.pageIndex + 1} of{" "}
                   {table.getPageCount()}
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    className="hidden h-8 w-8 p-0 lg:flex"
-                    onClick={() => table.setPageIndex(0)}
-                    disabled={!table.getCanPreviousPage()}
-                  >
-                    <span className="sr-only">Go to first page</span>
-                    <ChevronLeft className="h-4 w-4" />
-                    <ChevronLeft className="h-4 w-4 -ml-1" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-8 w-8 p-0"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
-                  >
-                    <span className="sr-only">Go to previous page</span>
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-8 w-8 p-0"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                  >
-                    <span className="sr-only">Go to next page</span>
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="hidden h-8 w-8 p-0 lg:flex"
-                    onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                    disabled={!table.getCanNextPage()}
-                  >
-                    <span className="sr-only">Go to last page</span>
-                    <ChevronRight className="h-4 w-4" />
-                    <ChevronRight className="h-4 w-4 -ml-1" />
-                  </Button>
-                </div>
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           )}
@@ -427,6 +397,17 @@ export function GroupRecipeTable({
           }}
         />
       )}
+
+      {/* Add Friend to Group Modal */}
+      <AddFriendToGroupModal
+        isOpen={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+        group={group}
+        onInviteSent={() => {
+          console.log('Invite sent successfully!');
+          // Could trigger a refresh of group members here if needed
+        }}
+      />
     </div>
   );
 }

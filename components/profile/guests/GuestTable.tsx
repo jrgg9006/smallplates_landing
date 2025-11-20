@@ -19,6 +19,7 @@ import { columns } from "./GuestTableColumns";
 import { Button } from "@/components/ui/button";
 import { GuestDetailsModal } from "./GuestDetailsModal";
 import { AddGuestModal } from "./AddGuestModal";
+import { AddRecipeModal } from "@/components/profile/recipes/AddRecipeModal";
 import { MobileGuestCard } from "./MobileGuestCard";
 
 interface GuestTableProps {
@@ -44,6 +45,8 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [modalDefaultTab, setModalDefaultTab] = React.useState<string>("guest-info");
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
+  const [isAddRecipeModalOpen, setIsAddRecipeModalOpen] = React.useState(false);
+  const [selectedGuestForRecipe, setSelectedGuestForRecipe] = React.useState<Guest | null>(null);
   const [isModalClosing, setIsModalClosing] = React.useState(false);
   const isModalClosingRef = React.useRef(false);
   
@@ -142,9 +145,8 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
   };
 
   const handleAddRecipe = (guest: Guest) => {
-    setSelectedGuest(guest);
-    setModalDefaultTab("recipe-status");
-    setIsModalOpen(true);
+    setSelectedGuestForRecipe(guest);
+    setIsAddRecipeModalOpen(true);
   };
 
   const refreshData = () => {
@@ -153,6 +155,16 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
 
   const handleCloseAddModal = () => {
     setIsAddModalOpen(false);
+  };
+
+  const handleCloseAddRecipeModal = () => {
+    setIsAddRecipeModalOpen(false);
+    setSelectedGuestForRecipe(null);
+  };
+
+  const handleRecipeAdded = () => {
+    refreshData(); // Refresh guest data to update recipe counts
+    handleCloseAddRecipeModal();
   };
 
   const table = useReactTable({
@@ -431,6 +443,13 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
         isOpen={isAddModalOpen}
         onClose={handleCloseAddModal}
         onGuestAdded={refreshData}
+      />
+
+      <AddRecipeModal
+        isOpen={isAddRecipeModalOpen}
+        onClose={handleCloseAddRecipeModal}
+        onRecipeAdded={handleRecipeAdded}
+        preselectedGuestId={selectedGuestForRecipe?.id || null}
       />
     </div>
   );

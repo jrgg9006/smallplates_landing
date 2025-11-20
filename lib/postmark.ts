@@ -17,6 +17,14 @@ export interface SendNewRecipeNotificationParams {
   preferencesUrl: string;
 }
 
+export interface SendGroupInvitationEmailParams {
+  to: string;
+  inviterName: string;
+  groupName: string;
+  groupDescription?: string;
+  invitationUrl: string;
+}
+
 export async function sendInvitationEmail({ to, confirmationUrl }: SendInvitationEmailParams) {
   try {
     const result = await postmarkClient.sendEmailWithTemplate({
@@ -67,6 +75,40 @@ export async function sendNewRecipeNotification({
     return { success: true, messageId: result.MessageID };
   } catch (error) {
     console.error('Error sending recipe notification:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+export async function sendGroupInvitationEmail({
+  to,
+  inviterName,
+  groupName,
+  groupDescription,
+  invitationUrl,
+}: SendGroupInvitationEmailParams) {
+  try {
+    const result = await postmarkClient.sendEmailWithTemplate({
+      From: process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com',
+      To: to,
+      TemplateAlias: 'Invite-to-group', // Your Postmark template alias
+      TemplateModel: {
+        InviterName: inviterName,
+        GroupName: groupName,
+        GroupDescription: groupDescription || '',
+        InvitationURL: invitationUrl,
+      },
+      MessageStream: 'invite-to-group', // Your Postmark message stream
+    });
+
+    console.log('✅ Group invitation email sent successfully:', result.MessageID);
+    console.log('📧 Sent to:', to);
+    console.log('👥 Group:', groupName);
+    console.log('👤 Invited by:', inviterName);
+    console.log('🔗 Invitation URL:', invitationUrl);
+    
+    return { success: true, messageId: result.MessageID };
+  } catch (error) {
+    console.error('❌ Error sending group invitation email:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }

@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getAllCookbooks, createCookbook, addRecipeToCookbook } from "@/lib/supabase/cookbooks";
+import { addRecipeToGroup } from "@/lib/supabase/groupRecipes";
 import { Cookbook } from "@/lib/types/database";
 import { ChevronDown, Plus } from "lucide-react";
 import { RecipeWithGuest } from "@/lib/types/database";
@@ -39,6 +40,7 @@ export function AddToCookbookModal({
   const [newCookbookName, setNewCookbookName] = useState('');
   const [creatingCookbook, setCreatingCookbook] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isAdded, setIsAdded] = useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
   // Load cookbooks when modal opens
@@ -98,6 +100,7 @@ export function AddToCookbookModal({
     setShowCreateForm(false);
     setNewCookbookName('');
     setError(null);
+    setIsAdded(false);
   };
 
   useEffect(() => {
@@ -154,7 +157,8 @@ export function AddToCookbookModal({
     setError(null);
 
     try {
-      const { error: addError } = await addRecipeToCookbook(selectedCookbookId, recipe.id);
+      // Since we're now showing Groups as "Cookbooks", use addRecipeToGroup
+      const { error: addError } = await addRecipeToGroup(selectedCookbookId, recipe.id);
       
       if (addError) {
         setError(addError);
@@ -162,17 +166,23 @@ export function AddToCookbookModal({
         return;
       }
 
-      // Success! Close modal and refresh
-      resetForm();
-      handleClose();
+      // Success! Show confirmation state
+      setIsAdded(true);
+      setLoading(false);
       
-      if (onRecipeAdded) {
-        onRecipeAdded();
-      }
+      // Close modal after a brief delay to show confirmation
+      setTimeout(() => {
+        resetForm();
+        handleClose();
+        
+        if (onRecipeAdded) {
+          onRecipeAdded();
+        }
+      }, 1000); // 1 second delay to show "Added" state
+      
     } catch (err) {
       setError('An unexpected error occurred');
-      console.error('Error adding recipe to cookbook:', err);
-    } finally {
+      console.error('Error adding recipe to group (cookbook):', err);
       setLoading(false);
     }
   };
@@ -282,60 +292,6 @@ export function AddToCookbookModal({
               </div>
             )}
 
-            {/* Create New Cookbook Button */}
-            <div className="mt-3">
-              {!showCreateForm ? (
-                <button
-                  type="button"
-                  onClick={() => setShowCreateForm(true)}
-                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
-                >
-                  <Plus className="h-4 w-4" />
-                  Create New Cookbook
-                </button>
-              ) : (
-                <div className="space-y-2">
-                  <Input
-                    placeholder="Cookbook name"
-                    value={newCookbookName}
-                    onChange={(e) => setNewCookbookName(e.target.value)}
-                    className="text-sm"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleCreateCookbook();
-                      } else if (e.key === 'Escape') {
-                        setShowCreateForm(false);
-                        setNewCookbookName('');
-                      }
-                    }}
-                    autoFocus
-                  />
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      onClick={handleCreateCookbook}
-                      disabled={creatingCookbook || !newCookbookName.trim()}
-                      className="text-sm py-1 px-3 h-auto"
-                      size="sm"
-                    >
-                      {creatingCookbook ? 'Creating...' : 'Create'}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setShowCreateForm(false);
-                        setNewCookbookName('');
-                      }}
-                      className="text-sm py-1 px-3 h-auto"
-                      size="sm"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
 
           {/* Error Message */}
@@ -360,12 +316,18 @@ export function AddToCookbookModal({
           <Button
             onClick={(e) => {
               e.stopPropagation();
-              handleAddToCookbook();
+              if (!isAdded) {
+                handleAddToCookbook();
+              }
             }}
             disabled={loading || !selectedCookbookId || !recipe}
-            className="bg-black text-white hover:bg-gray-800"
+            className={
+              isAdded 
+                ? "bg-green-600 text-white hover:bg-green-600" 
+                : "bg-black text-white hover:bg-gray-800"
+            }
           >
-            {loading ? 'Adding...' : 'Add to Cookbook'}
+            {loading ? 'Adding...' : isAdded ? 'Added' : 'Add to Cookbook'}
           </Button>
         </DialogFooter>
       </DialogContent>

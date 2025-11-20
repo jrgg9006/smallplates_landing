@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { Search, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { RecipeCollectorButton } from "./RecipeCollectorButton";
 
 interface GuestTableControlsProps {
   searchValue: string;
@@ -96,10 +95,6 @@ export function GuestTableControls({
             </div>
           </div>
           
-          {/* Invite Guest Link Button - Secondary */}
-          <div className="flex items-center gap-2">
-            <RecipeCollectorButton label="Invite Guest Link" className="rounded-lg px-6" />
-          </div>
         </div>
       </div>
 
@@ -166,10 +161,6 @@ export function GuestTableControls({
           </div>
         </div>
 
-        {/* Invite Guest Link Button - Mobile */}
-        <div className="flex gap-3">
-          <RecipeCollectorButton label="Invite Guest Link" className="w-full rounded-lg py-3" />
-        </div>
       </div>
     </div>
   );

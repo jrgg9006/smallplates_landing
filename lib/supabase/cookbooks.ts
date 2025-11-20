@@ -61,7 +61,7 @@ export async function getOrCreateDefaultCookbook() {
 }
 
 /**
- * Get all cookbooks for the current user
+ * Get all cookbooks for the current user (now returns Groups since we renamed Groups to Cookbooks in UI)
  */
 export async function getAllCookbooks() {
   const supabase = createSupabaseClient();
@@ -71,14 +71,73 @@ export async function getAllCookbooks() {
     return { data: null, error: 'User not authenticated' };
   }
 
-  const { data, error } = await supabase
-    .from('cookbooks')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('is_default', { ascending: false })
-    .order('created_at', { ascending: false });
+  console.log('🔍 Loading Groups (renamed to Cookbooks) for user:', user.email);
 
-  return { data, error: error?.message || null };
+  try {
+    // Get all groups where the user is a member (these are displayed as "Cookbooks" in UI)
+    const { data: userGroups, error: groupsError } = await supabase
+      .from('group_members')
+      .select(`
+        groups!inner(
+          id,
+          name,
+          description,
+          created_at,
+          updated_at,
+          visibility,
+          created_by
+        )
+      `)
+      .eq('profile_id', user.id);
+
+    if (groupsError) {
+      console.error('Error fetching user groups:', groupsError);
+      return { data: null, error: 'Failed to load cookbooks' };
+    }
+
+    console.log('Raw groups data:', userGroups);
+
+    // Flatten and transform groups to look like cookbooks
+    const allCookbooks: any[] = [];
+    
+    (userGroups || []).forEach(item => {
+      let group;
+      
+      // Handle potential array structure
+      if (Array.isArray(item)) {
+        group = item[0]?.groups;
+      } else {
+        group = item?.groups;
+      }
+      
+      if (group && group.id && group.name) {
+        // Transform group to cookbook-like object for consistency
+        allCookbooks.push({
+          id: group.id,
+          name: group.name,
+          description: group.description,
+          created_at: group.created_at,
+          updated_at: group.updated_at,
+          is_default: false, // Groups are never default
+          is_group_cookbook: true, // Mark as group cookbook for compatibility
+          group_id: group.id, // Store original group ID
+          user_id: group.created_by, // Store creator
+        });
+      }
+    });
+
+    console.log('Transformed groups (as cookbooks):', allCookbooks.map(cb => ({ id: cb.id, name: cb.name })));
+
+    // Sort by creation date (newest first)
+    allCookbooks.sort((a, b) => {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+
+    return { data: allCookbooks, error: null };
+  } catch (err) {
+    console.error('Error in getAllCookbooks (Groups):', err);
+    return { data: null, error: 'Failed to load cookbooks' };
+  }
 }
 
 /**
@@ -150,8 +209,15 @@ export async function updateCookbook(cookbookId: string, updates: CookbookUpdate
     return { data: null, error: 'User not authenticated' };
   }
 
-  // If setting as default, unset other default cookbooks first
-  if (updates.is_default === true) {
+  // First check what type of cookbook this is
+  const { data: cookbook } = await supabase
+    .from('cookbooks')
+    .select('is_group_cookbook, user_id')
+    .eq('id', cookbookId)
+    .single();
+
+  // If setting as default, unset other default cookbooks first (only for personal cookbooks)
+  if (updates.is_default === true && !cookbook?.is_group_cookbook) {
     const { error: unsetError } = await supabase
       .from('cookbooks')
       .update({ is_default: false })
@@ -164,19 +230,24 @@ export async function updateCookbook(cookbookId: string, updates: CookbookUpdate
     }
   }
 
-  const { data, error } = await supabase
+  // For group cookbooks, don't filter by user_id (let RLS handle permissions)
+  // For personal cookbooks, only allow the owner to update
+  let query = supabase
     .from('cookbooks')
     .update(updates)
-    .eq('id', cookbookId)
-    .eq('user_id', user.id)
-    .select()
-    .single();
+    .eq('id', cookbookId);
+
+  if (!cookbook?.is_group_cookbook) {
+    query = query.eq('user_id', user.id);
+  }
+
+  const { data, error } = await query.select().single();
 
   return { data, error: error?.message || null };
 }
 
 /**
- * Delete a cookbook
+ * Delete a cookbook (only for personal cookbooks)
  */
 export async function deleteCookbook(cookbookId: string) {
   const supabase = createSupabaseClient();
@@ -186,25 +257,92 @@ export async function deleteCookbook(cookbookId: string) {
     return { data: null, error: 'User not authenticated' };
   }
 
-  // Check if it's the default cookbook
-  const { data: cookbook } = await supabase
+  // Get cookbook info first
+  const { data: cookbook, error: cookbookError } = await supabase
     .from('cookbooks')
-    .select('is_default')
+    .select('is_default, is_group_cookbook, user_id')
     .eq('id', cookbookId)
-    .eq('user_id', user.id)
     .single();
 
-  if (cookbook?.is_default) {
-    return { data: null, error: 'Cannot delete the default cookbook' };
+  if (cookbookError || !cookbook) {
+    return { data: null, error: 'Cookbook not found' };
   }
 
+  // Cannot delete group cookbooks - they should use exitSharedCookbook instead
+  if (cookbook.is_group_cookbook) {
+    return { data: null, error: 'Cannot delete shared cookbooks. Use exit functionality instead.' };
+  }
+
+  // Can only delete own cookbooks
+  if (cookbook.user_id !== user.id) {
+    return { data: null, error: 'You can only delete your own cookbooks' };
+  }
+
+  // Check if it's the default cookbook - allow deletion but warn user
+  if (cookbook.is_default) {
+    console.log('Deleting default cookbook - a new one will be created automatically');
+  }
+
+  // Delete the cookbook (cascade should handle related records)
   const { error } = await supabase
     .from('cookbooks')
     .delete()
     .eq('id', cookbookId)
     .eq('user_id', user.id);
 
-  return { data: null, error: error?.message || null };
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  // If we deleted the default cookbook, ensure user has a new default
+  if (cookbook.is_default) {
+    const { error: defaultError } = await getOrCreateDefaultCookbook();
+    if (defaultError) {
+      console.warn('Failed to create new default cookbook after deletion:', defaultError);
+    }
+  }
+
+  return { data: { success: true }, error: null };
+}
+
+/**
+ * Exit a shared cookbook (remove user from group that owns the cookbook)
+ */
+export async function exitSharedCookbook(cookbookId: string) {
+  const supabase = createSupabaseClient();
+  
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  // Get cookbook info to find the associated group
+  const { data: cookbook, error: cookbookError } = await supabase
+    .from('cookbooks')
+    .select('group_id, is_group_cookbook')
+    .eq('id', cookbookId)
+    .single();
+
+  if (cookbookError || !cookbook) {
+    return { data: null, error: 'Cookbook not found' };
+  }
+
+  if (!cookbook.is_group_cookbook || !cookbook.group_id) {
+    return { data: null, error: 'This is not a shared cookbook' };
+  }
+
+  // Remove user from the group (which effectively removes access to the cookbook)
+  const { error: removeError } = await supabase
+    .from('group_members')
+    .delete()
+    .eq('group_id', cookbook.group_id)
+    .eq('profile_id', user.id);
+
+  if (removeError) {
+    return { data: null, error: removeError.message };
+  }
+
+  return { data: { success: true }, error: null };
 }
 
 /**
@@ -218,21 +356,49 @@ export async function addRecipeToCookbook(cookbookId: string, recipeId: string, 
     return { data: null, error: 'User not authenticated' };
   }
 
+  console.log('🔍 Adding recipe to group (cookbook):', { cookbookId, recipeId, user: user.email });
+
   try {
-    // Verify the recipe belongs to the user
-    const { data: recipe, error: recipeError } = await supabase
+    // Since we changed to show Groups as "Cookbooks", cookbookId is actually a groupId
+    // Check if this group exists and user is a member
+    const { data: groupMember, error: groupCheckError } = await supabase
+      .from('group_members')
+      .select(`
+        groups!inner(
+          id,
+          name
+        )
+      `)
+      .eq('group_id', cookbookId)
+      .eq('profile_id', user.id)
+      .single();
+
+    if (groupCheckError || !groupMember) {
+      console.error('Group check failed:', groupCheckError);
+      return { data: null, error: 'Cookbook not found or access denied' };
+    }
+
+    console.log('Group found:', groupMember.groups);
+
+    // Verify the recipe exists and user has access to it
+    let recipeQuery = supabase
       .from('guest_recipes')
       .select('id')
-      .eq('id', recipeId)
-      .eq('user_id', user.id)
-      .single();
+      .eq('id', recipeId);
+
+    // For personal cookbooks, only allow user's own recipes
+    // For group cookbooks, allow recipes user has access to (RLS will handle this)
+    if (!cookbook.is_group_cookbook) {
+      recipeQuery = recipeQuery.eq('user_id', user.id);
+    }
+
+    const { data: recipe, error: recipeError } = await recipeQuery.single();
 
     if (recipeError || !recipe) {
       return { data: null, error: 'Recipe not found or access denied' };
     }
 
     // Check if recipe is already in cookbook
-    // Use maybeSingle() to avoid errors when recipe doesn't exist (returns null instead of throwing)
     const { data: existing } = await supabase
       .from('cookbook_recipes')
       .select('id')
@@ -244,13 +410,11 @@ export async function addRecipeToCookbook(cookbookId: string, recipeId: string, 
       return { data: null, error: 'Recipe is already in this cookbook' };
     }
 
-    // Get the current max display_order to append new recipe at the end
-    // Use maybeSingle() instead of single() to handle empty cookbooks (returns null instead of throwing)
+    // Get the current max display_order for this cookbook
     const { data: maxOrderData } = await supabase
       .from('cookbook_recipes')
       .select('display_order')
       .eq('cookbook_id', cookbookId)
-      .eq('user_id', user.id)
       .order('display_order', { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -331,41 +495,63 @@ export async function getCookbookRecipes(cookbookId: string) {
 
   console.log('Cookbook info:', cookbook);
 
-  // Build the query based on cookbook type
-  let query = supabase
+  // Get cookbook recipes first
+  let cookbookQuery = supabase
     .from('cookbook_recipes')
-    .select(`
-      *,
-      guest_recipes (
-        *,
-        guests (
-          first_name,
-          last_name,
-          printed_name,
-          email,
-          is_self,
-          source
-        )
-      )
-    `)
+    .select('*')
     .eq('cookbook_id', cookbookId);
 
   // For personal cookbooks, only show recipes added by the cookbook owner
   // For group cookbooks, show all recipes added by any group member
   if (!cookbook.is_group_cookbook) {
-    query = query.eq('user_id', cookbook.user_id);
+    cookbookQuery = cookbookQuery.eq('user_id', cookbook.user_id);
   }
 
-  const { data, error } = await query
+  const { data: cookbookRecipes, error: cookbookRecipesError } = await cookbookQuery
     .order('display_order', { ascending: true })
     .order('created_at', { ascending: false });
 
-  if (error) {
-    return { data: null, error: error.message };
+  if (cookbookRecipesError) {
+    console.error('Error fetching cookbook recipes:', cookbookRecipesError);
+    return { data: null, error: cookbookRecipesError.message };
   }
 
+  if (!cookbookRecipes || cookbookRecipes.length === 0) {
+    return { data: [], error: null };
+  }
+
+  // Get the recipe IDs
+  const recipeIds = cookbookRecipes.map(cr => cr.recipe_id);
+
+  // Now get the full recipe details separately
+  const { data: recipes, error: recipesError } = await supabase
+    .from('guest_recipes')
+    .select(`
+      *,
+      guests (
+        first_name,
+        last_name,
+        printed_name,
+        email,
+        is_self,
+        source
+      )
+    `)
+    .in('id', recipeIds);
+
+  if (recipesError) {
+    console.error('Error fetching recipe details:', recipesError);
+    return { data: null, error: recipesError.message };
+  }
+
+  // Create a map of recipe_id to cookbook_recipes info for easier lookup
+  const cookbookRecipeMap = cookbookRecipes.reduce((acc: any, cr: any) => {
+    acc[cr.recipe_id] = cr;
+    return acc;
+  }, {});
+
   // Get unique user IDs from cookbook_recipes to fetch user profiles
-  const userIds = [...new Set((data || []).map((item: any) => item.user_id))];
+  const userIds = [...new Set(cookbookRecipes.map((item: any) => item.user_id))];
   
   // Fetch user profiles for the "Added By" information
   let userProfiles: any = {};
@@ -389,12 +575,13 @@ export async function getCookbookRecipes(cookbookId: string) {
   }
 
   // Transform the data to match RecipeInCookbook type
-  const recipes: RecipeInCookbook[] = (data || []).map((item: any) => {
+  const transformedRecipes: RecipeInCookbook[] = (recipes || []).map((recipe: any) => {
+    const cookbookRecipe = cookbookRecipeMap[recipe.id];
     let addedByUser = null;
     
     // For group cookbooks, show who added the recipe
-    if (cookbook.is_group_cookbook) {
-      if (item.user_id === user.id) {
+    if (cookbook.is_group_cookbook && cookbookRecipe?.user_id) {
+      if (cookbookRecipe.user_id === user.id) {
         // Current user added this recipe
         addedByUser = {
           id: user.id,
@@ -404,28 +591,41 @@ export async function getCookbookRecipes(cookbookId: string) {
         };
       } else {
         // Someone else added this recipe
-        addedByUser = userProfiles[item.user_id] || null;
+        addedByUser = userProfiles[cookbookRecipe.user_id] || null;
       }
     }
     
-    console.log('Recipe user_id:', item.user_id, 'Current user:', user.id, 'Added by user:', addedByUser);
+    console.log('Recipe user_id:', cookbookRecipe?.user_id, 'Current user:', user.id, 'Added by user:', addedByUser);
     
     return {
-      ...item.guest_recipes,
-      guests: item.guest_recipes.guests,
+      ...recipe,
+      guests: recipe.guests,
       cookbook_recipes: {
-        id: item.id,
-        user_id: item.user_id,
-        note: item.note,
-        display_order: item.display_order,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
+        id: cookbookRecipe?.id,
+        user_id: cookbookRecipe?.user_id,
+        note: cookbookRecipe?.note,
+        display_order: cookbookRecipe?.display_order,
+        created_at: cookbookRecipe?.created_at,
+        updated_at: cookbookRecipe?.updated_at,
       },
       added_by_user: addedByUser,
     };
   });
 
-  return { data: recipes, cookbook, error: null };
+  // Sort by display_order to maintain cookbook order
+  transformedRecipes.sort((a, b) => {
+    const aOrder = a.cookbook_recipes?.display_order || 999;
+    const bOrder = b.cookbook_recipes?.display_order || 999;
+    if (aOrder !== bOrder) {
+      return aOrder - bOrder;
+    }
+    // If same order, sort by created_at
+    const aDate = new Date(a.cookbook_recipes?.created_at || a.created_at).getTime();
+    const bDate = new Date(b.cookbook_recipes?.created_at || b.created_at).getTime();
+    return bDate - aDate;
+  });
+
+  return { data: transformedRecipes, cookbook, error: null };
 }
 
 /**
@@ -443,14 +643,26 @@ export async function updateCookbookRecipeNote(
     return { data: null, error: 'User not authenticated' };
   }
 
-  const { data, error } = await supabase
+  // Check if this is a group cookbook - if so, don't filter by user_id
+  const { data: cookbook } = await supabase
+    .from('cookbooks')
+    .select('is_group_cookbook')
+    .eq('id', cookbookId)
+    .single();
+
+  let query = supabase
     .from('cookbook_recipes')
     .update({ note })
     .eq('cookbook_id', cookbookId)
-    .eq('recipe_id', recipeId)
-    .eq('user_id', user.id)
-    .select()
-    .single();
+    .eq('recipe_id', recipeId);
+
+  // For personal cookbooks, only allow the cookbook owner to edit notes
+  // For group cookbooks, any group member can edit notes (RLS handles access control)
+  if (!cookbook?.is_group_cookbook) {
+    query = query.eq('user_id', user.id);
+  }
+
+  const { data, error } = await query.select().single();
 
   return { data, error: error?.message || null };
 }
@@ -470,14 +682,26 @@ export async function updateCookbookRecipeOrder(
     return { data: null, error: 'User not authenticated' };
   }
 
-  const { data, error } = await supabase
+  // Check if this is a group cookbook - if so, don't filter by user_id
+  const { data: cookbook } = await supabase
+    .from('cookbooks')
+    .select('is_group_cookbook')
+    .eq('id', cookbookId)
+    .single();
+
+  let query = supabase
     .from('cookbook_recipes')
     .update({ display_order: displayOrder })
     .eq('cookbook_id', cookbookId)
-    .eq('recipe_id', recipeId)
-    .eq('user_id', user.id)
-    .select()
-    .single();
+    .eq('recipe_id', recipeId);
+
+  // For personal cookbooks, only allow the cookbook owner to reorder
+  // For group cookbooks, any group member can reorder (RLS handles access control)
+  if (!cookbook?.is_group_cookbook) {
+    query = query.eq('user_id', user.id);
+  }
+
+  const { data, error } = await query.select().single();
 
   return { data, error: error?.message || null };
 }

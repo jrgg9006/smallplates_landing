@@ -254,7 +254,7 @@ export function createCookbookColumns(
     },
     {
       id: "name",
-      header: () => <div className="table-header-style pl-4">Chef's Name</div>,
+      header: () => <div className="table-header-style pl-4">Chef&apos;s Name</div>,
       size: 250,
       minSize: 220,
       cell: ({ row }) => {

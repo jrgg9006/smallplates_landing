@@ -110,7 +110,7 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
       <DropdownMenuContent align="start" className="w-80">
         <DropdownMenuLabel className="flex items-center gap-2">
           <Users className="h-4 w-4" />
-          Group Members
+          Cookbook Members
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         
@@ -127,7 +127,7 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
               className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50"
             >
               <UserPlus className="h-4 w-4" />
-              Invite a friend to this group
+              Invite a friend to this Cookbook
             </DropdownMenuItem>
           </>
         ) : sortedMembers.length === 0 ? (
@@ -143,7 +143,7 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
               className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50"
             >
               <UserPlus className="h-4 w-4" />
-              Invite a friend to this group
+              Invite a friend to this Cookbook
             </DropdownMenuItem>
           </>
         ) : (
@@ -186,7 +186,7 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
               className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50"
             >
               <UserPlus className="h-4 w-4" />
-              Invite a friend to this group
+              Invite a friend to this Cookbook
             </DropdownMenuItem>
           </>
         )}

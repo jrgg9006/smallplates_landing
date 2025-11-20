@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AddRecipeDropdown } from "@/components/ui/AddRecipeDropdown";
 import { GroupMembersDropdown } from "./GroupMembersDropdown";
+import { GroupActionsDropdown } from "./GroupActionsDropdown";
 import { GroupWithMembers } from "@/lib/types/database";
 
 interface GroupRecipeTableControlsProps {
@@ -18,6 +19,9 @@ interface GroupRecipeTableControlsProps {
   onInviteFriend: () => void;
   onAddExistingRecipe: () => void;
   onAddNewRecipe: () => void;
+  onDeleteGroup: () => void;
+  onExitGroup: () => void;
+  userRole?: string | null;
 }
 
 export function GroupRecipeTableControls({ 
@@ -29,7 +33,10 @@ export function GroupRecipeTableControls({
   onCreateGroup,
   onInviteFriend,
   onAddExistingRecipe,
-  onAddNewRecipe
+  onAddNewRecipe,
+  onDeleteGroup,
+  onExitGroup,
+  userRole
 }: GroupRecipeTableControlsProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -50,7 +57,7 @@ export function GroupRecipeTableControls({
                 className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 min-w-[200px] justify-between"
               >
                 <span className="truncate">
-                  {selectedGroup ? selectedGroup.name : 'Select Group'}
+                  {selectedGroup ? selectedGroup.name : 'Select Cookbook'}
                 </span>
                 <ChevronDown className="h-4 w-4 flex-shrink-0" />
               </button>
@@ -81,7 +88,7 @@ export function GroupRecipeTableControls({
                         className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                       >
                         <Plus className="h-4 w-4" />
-                        Create New Group
+                        Create New Cookbook
                       </button>
                     </div>
                   </div>
@@ -101,7 +108,7 @@ export function GroupRecipeTableControls({
             <div className="relative">
               <Search className="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
-                placeholder="Search recipes in this group..."
+                placeholder="Search recipes in this cookbook..."
                 value={searchValue}
                 onChange={(e) => onSearchChange(e.target.value)}
                 className="pl-6 w-96 bg-transparent border-0 border-b border-gray-300 rounded-none focus:border-gray-900 focus:ring-0 pb-2"
@@ -109,45 +116,57 @@ export function GroupRecipeTableControls({
             </div>
           </div>
 
-          {/* Add Recipe Dropdown */}
-          <AddRecipeDropdown
-            buttonText="Add a Recipe to this Group"
-            onAddExistingRecipe={onAddExistingRecipe}
-            onAddNewRecipe={onAddNewRecipe}
-          />
+          {/* Action Buttons */}
+          <div className="flex items-center gap-3">
+            {/* Add Recipe Dropdown */}
+            <AddRecipeDropdown
+              buttonText="Add a Recipe to this Cookbook"
+              onAddExistingRecipe={onAddExistingRecipe}
+              onAddNewRecipe={onAddNewRecipe}
+            />
+
+            {/* Group Actions Dropdown - Three dots menu */}
+            {selectedGroup && (
+              <GroupActionsDropdown
+                group={selectedGroup}
+                userRole={userRole}
+                onDeleteGroup={onDeleteGroup}
+                onExitGroup={onExitGroup}
+              />
+            )}
+          </div>
         </div>
       </div>
 
       {/* Mobile Layout */}
-      <div className="md:hidden space-y-4">
-        {/* Group Selector, Members and Search */}
-        <div className="flex gap-3">
-          {/* Group Selector Dropdown */}
+      <div className="md:hidden">
+        <div className="space-y-4">
+          {/* Group Selector - Full Width */}
           <div className="relative">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 min-w-[140px] justify-between"
+              className="w-full flex items-center justify-between px-4 py-3 border border-gray-300 rounded-lg bg-white text-base font-medium text-gray-700 hover:bg-gray-50"
             >
-              <span className="truncate">
-                {selectedGroup ? selectedGroup.name : 'Group'}
+              <span className="truncate text-left">
+                {selectedGroup ? selectedGroup.name : 'Select Cookbook'}
               </span>
-              <ChevronDown className="h-4 w-4 flex-shrink-0" />
+              <ChevronDown className="h-5 w-5 flex-shrink-0 text-gray-400" />
             </button>
             
             {isDropdownOpen && (
               <>
-                <div className="absolute top-12 left-0 w-60 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                <div className="absolute top-full mt-2 left-0 right-0 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 max-h-64 overflow-y-auto">
                   {groups.map((group) => (
                     <button
                       key={group.id}
                       onClick={() => handleGroupChange(group)}
-                      className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2 ${
+                      className={`w-full px-4 py-3 text-left text-base hover:bg-gray-50 flex items-center gap-3 ${
                         selectedGroup?.id === group.id
-                          ? 'bg-gray-100 text-gray-900 font-medium'
+                          ? 'bg-gray-50 text-gray-900 font-medium'
                           : 'text-gray-700'
                       }`}
                     >
-                      <Users className="h-4 w-4 flex-shrink-0" />
+                      <Users className="h-5 w-5 flex-shrink-0 text-gray-400" />
                       <span className="truncate">{group.name}</span>
                     </button>
                   ))}
@@ -157,10 +176,10 @@ export function GroupRecipeTableControls({
                         setIsDropdownOpen(false);
                         onCreateGroup();
                       }}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                      className="w-full px-4 py-3 text-left text-base text-gray-700 hover:bg-gray-50 flex items-center gap-3"
                     >
-                      <Plus className="h-4 w-4" />
-                      Create New Group
+                      <Plus className="h-5 w-5 text-gray-400" />
+                      Create New Cookbook
                     </button>
                   </div>
                 </div>
@@ -173,29 +192,49 @@ export function GroupRecipeTableControls({
             )}
           </div>
 
-          {/* Members Dropdown */}
-          {selectedGroup && <GroupMembersDropdown group={selectedGroup} onInviteFriend={onInviteFriend} />}
+          {/* Members and Search Row */}
+          <div className="flex gap-3">
+            {/* Members Dropdown */}
+            {selectedGroup && (
+              <div className="flex-shrink-0">
+                <GroupMembersDropdown group={selectedGroup} onInviteFriend={onInviteFriend} />
+              </div>
+            )}
 
-          {/* Search Input - Full width */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <Input
-              placeholder="Search recipes in this group..."
-              value={searchValue}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10 w-full border border-gray-300 rounded-lg"
-            />
+            {/* Search Input - Full width */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Input
+                placeholder="Search recipes..."
+                value={searchValue}
+                onChange={(e) => onSearchChange(e.target.value)}
+                className="pl-9 pr-4 py-2 w-full border border-gray-300 rounded-lg text-base"
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col gap-3">
-          {/* Add Recipe Dropdown */}
-          <AddRecipeDropdown
-            buttonText="Add a Recipe to this Group"
-            onAddExistingRecipe={onAddExistingRecipe}
-            onAddNewRecipe={onAddNewRecipe}
-          />
+          {/* Action Buttons */}
+          <div className="space-y-3">
+            {/* Add Recipe Button - Full Width */}
+            <AddRecipeDropdown
+              buttonText="Add a Recipe to this Cookbook"
+              onAddExistingRecipe={onAddExistingRecipe}
+              onAddNewRecipe={onAddNewRecipe}
+              className="w-full"
+            />
+
+            {/* Group Actions - Centered */}
+            {selectedGroup && (
+              <div className="flex justify-center">
+                <GroupActionsDropdown
+                  group={selectedGroup}
+                  userRole={userRole}
+                  onDeleteGroup={onDeleteGroup}
+                  onExitGroup={onExitGroup}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

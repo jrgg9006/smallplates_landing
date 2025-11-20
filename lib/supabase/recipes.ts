@@ -117,10 +117,16 @@ export async function getRecipesByGuest(guestId: string) {
 }
 
 /**
- * Get all recipes for the current user
+ * Get all recipes for the current user (personal recipes only, not group recipes)
  */
 export async function getAllRecipes() {
   const supabase = createSupabaseClient();
+  
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
   
   const { data, error } = await supabase
     .from('guest_recipes')
@@ -135,6 +141,7 @@ export async function getAllRecipes() {
         source
       )
     `)
+    .eq('user_id', user.id) // Only get recipes owned by current user
     .order('updated_at', { ascending: false });
 
   return { data, error: error?.message || null };

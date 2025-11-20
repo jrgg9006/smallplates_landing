@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { Trash2, MoreHorizontal, BookOpen } from "lucide-react";
+import { Trash2, MoreHorizontal } from "lucide-react";
 import { RecipeWithGuest } from "@/lib/types/database";
 import { DeleteRecipeModal } from "./DeleteRecipeModal";
 import { AddToCookbookModal } from "@/components/profile/cookbook/AddToCookbookModal";
@@ -11,6 +11,28 @@ import { deleteRecipe } from "@/lib/supabase/recipes";
 import Image from "next/image";
 import { getGuestProfileIcon } from "@/lib/utils/profileIcons";
 import "@/lib/types/table";
+
+// Helper function to parse discovery information from comments
+function parseDiscoveryInfo(comments?: string | null): { 
+  isDiscovered: boolean; 
+  discoveredFrom?: string; 
+  originalChef?: string;
+} {
+  if (!comments) return { isDiscovered: false };
+  
+  const discoveryMatch = comments.match(/\[DISCOVERED_FROM_GROUP:(.+?)\]/);
+  const originalChefMatch = comments.match(/\[ORIGINAL_CHEF:(.+?)\]/);
+  
+  if (discoveryMatch || comments.includes('[DISCOVERED_FROM_GROUP]')) {
+    return { 
+      isDiscovered: true, 
+      discoveredFrom: discoveryMatch?.[1],
+      originalChef: originalChefMatch?.[1]
+    };
+  }
+  
+  return { isDiscovered: false };
+}
 
 // Actions cell component  
 function ActionsCell({ recipe, onRecipeDeleted, onRecipeAddedToCookbook }: { 
@@ -140,11 +162,11 @@ function ActionsCell({ recipe, onRecipeDeleted, onRecipeAddedToCookbook }: {
           e.preventDefault();
         }}
       >
-        {/* Add to Cookbook Button - Visible */}
+        {/* Add to Cookbook Button - Text */}
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-8 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+          className="px-3 py-1 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
           onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
             e.preventDefault();
@@ -157,7 +179,7 @@ function ActionsCell({ recipe, onRecipeDeleted, onRecipeAddedToCookbook }: {
           }}
           title="Add to Cookbook"
         >
-          <BookOpen className="h-4 w-4" />
+          Add to Cookbook
         </Button>
 
         {/* 3 Dots Menu */}
@@ -275,8 +297,8 @@ export const columns: ColumnDef<RecipeWithGuest>[] = [
   {
     accessorKey: "recipe_name",
     header: () => <div className="table-header-style">Recipe Name</div>,
-    size: 250,
-    minSize: 200,
+    size: 180,
+    minSize: 150,
     cell: ({ row }) => {
       const recipe = row.original;
       return (
@@ -288,7 +310,7 @@ export const columns: ColumnDef<RecipeWithGuest>[] = [
   },
   {
     id: "name",
-    header: () => <div className="table-header-style pl-4">Chef's Name</div>,
+    header: () => <div className="table-header-style pl-4">Chef&apos;s Name</div>,
     size: 250,
     minSize: 220,
     cell: ({ row }) => {
@@ -305,30 +327,14 @@ export const columns: ColumnDef<RecipeWithGuest>[] = [
 
       const fullName = `${guest.first_name} ${guest.last_name || ''}`.trim();
       const hasPrintedName = guest.printed_name && guest.printed_name.trim();
+      const discoveryInfo = parseDiscoveryInfo(recipe.comments);
       
-      if (hasPrintedName) {
-        return (
-          <div className="flex items-center gap-3 pl-4 whitespace-nowrap">
-            <div className="flex-shrink-0">
-              <Image
-                src={getGuestProfileIcon(recipe.guest_id, recipe.guests?.is_self === true)}
-                alt="Chef profile icon"
-                width={44}
-                height={44}
-                className="rounded-full"
-              />
-            </div>
-            <div className="space-y-0.5 min-w-0">
-              <div className="font-normal text-base whitespace-nowrap">
-                {guest.printed_name}
-              </div>
-              <div className="text-xs text-gray-500 whitespace-nowrap">
-                {fullName}
-              </div>
-            </div>
-          </div>
-        );
-      }
+      // For discovered recipes, show the original chef name instead of current user
+      const displayName = discoveryInfo.isDiscovered && discoveryInfo.originalChef 
+        ? discoveryInfo.originalChef 
+        : (hasPrintedName ? guest.printed_name : fullName);
+      
+      const showSubtitle = hasPrintedName && !discoveryInfo.isDiscovered;
       
       return (
         <div className="flex items-center gap-3 pl-4 whitespace-nowrap">
@@ -341,7 +347,24 @@ export const columns: ColumnDef<RecipeWithGuest>[] = [
               className="rounded-full"
             />
           </div>
-          <div className="font-normal text-base whitespace-nowrap">{fullName}</div>
+          <div className="space-y-0.5 min-w-0">
+            <div className="font-normal text-base whitespace-nowrap">
+              {displayName}
+            </div>
+            {showSubtitle && (
+              <div className="text-xs text-gray-500 whitespace-nowrap">
+                {fullName}
+              </div>
+            )}
+            {discoveryInfo.isDiscovered && (
+              <div className="text-xs text-blue-600 italic whitespace-nowrap">
+                {discoveryInfo.discoveredFrom 
+                  ? `Discovered from ${discoveryInfo.discoveredFrom}`
+                  : 'Discovered from group'
+                }
+              </div>
+            )}
+          </div>
         </div>
       );
     },

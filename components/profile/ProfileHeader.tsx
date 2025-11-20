@@ -3,7 +3,7 @@
 import React from "react";
 import { useState } from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import ProfileDropdown from "@/components/profile/ProfileDropdown";
@@ -12,6 +12,7 @@ import ProfileNavigation from "@/components/profile/ProfileNavigation";
 export function ProfileHeader() {
   const { signOut } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -32,6 +33,32 @@ export function ProfileHeader() {
     setIsMobileMenuOpen(false);
     router.push('/profile/orders');
   };
+
+  const handleRecipes = () => {
+    setIsMobileMenuOpen(false);
+    router.push('/profile/recipes');
+  };
+
+  const handleGuests = () => {
+    setIsMobileMenuOpen(false);
+    router.push('/profile');
+  };
+
+  const handleCookbooks = () => {
+    setIsMobileMenuOpen(false);
+    router.push('/profile/groups');
+  };
+
+  // Determine active states for mobile menu
+  const isCookbooksActive = pathname === '/profile/groups' || pathname.startsWith('/profile/groups/');
+  const isRecipesActive = pathname === '/profile/recipes' || pathname.startsWith('/profile/recipes/');
+  const isGuestsActive = pathname === '/profile' || 
+                         (pathname.startsWith('/profile/') && 
+                          !pathname.startsWith('/profile/account') && 
+                          !pathname.startsWith('/profile/orders') && 
+                          !pathname.startsWith('/profile/groups') && 
+                          !pathname.startsWith('/profile/recipes'));
+  const isOrdersActive = pathname === '/profile/orders' || pathname.startsWith('/profile/orders/');
 
   return (
     <>
@@ -80,25 +107,51 @@ export function ProfileHeader() {
       {isMobileMenuOpen && (
         <div className="lg:hidden border-t border-gray-100 bg-gray-50">
           <div className="px-6 py-4">
-            {/* Navigation Links */}
-            <ProfileNavigation 
-              variant="mobile" 
-              onNavigate={() => setIsMobileMenuOpen(false)}
-            />
+            {/* Navigation Links - All in button style */}
+            <div className="space-y-3 pb-3 mb-3 border-b border-gray-200">
+              <button
+                onClick={handleCookbooks}
+                className={`block w-full text-center py-3 px-5 rounded-full border font-semibold transition-colors ${
+                  isCookbooksActive
+                    ? "bg-gray-100 border-gray-400 text-gray-900"
+                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                My Cookbooks
+              </button>
+              <button
+                onClick={handleRecipes}
+                className={`block w-full text-center py-3 px-5 rounded-full border font-semibold transition-colors ${
+                  isRecipesActive
+                    ? "bg-gray-100 border-gray-400 text-gray-900"
+                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                My Recipes
+              </button>
+              <button
+                onClick={handleGuests}
+                className={`block w-full text-center py-3 px-5 rounded-full border font-semibold transition-colors ${
+                  isGuestsActive
+                    ? "bg-gray-100 border-gray-400 text-gray-900"
+                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                My Guests
+              </button>
+            </div>
             
             {/* Account Actions */}
             <div className="space-y-3">
               <button
-                onClick={handleAccount}
-                className="block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
-              >
-                Account Settings
-              </button>
-              <button
                 onClick={handleOrders}
-                className="block w-full text-center py-3 px-5 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+                className={`block w-full text-center py-3 px-5 rounded-full border font-semibold transition-colors ${
+                  isOrdersActive
+                    ? "bg-gray-100 border-gray-400 text-gray-900"
+                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                }`}
               >
-                Orders & Shipping
+                Orders
               </button>
               <button
                 onClick={handleLogout}
