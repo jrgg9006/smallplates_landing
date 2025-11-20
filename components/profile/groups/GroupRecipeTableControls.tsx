@@ -45,7 +45,7 @@ export function GroupRecipeTableControls({
     setIsDropdownOpen(false);
   };
   return (
-    <div className="py-4">
+    <div className="pt-4 pb-2">
       {/* Desktop Layout - Large screens (1024px+) */}
       <div className="hidden lg:block">
         <div className="flex items-center justify-between mb-3">
@@ -140,7 +140,7 @@ export function GroupRecipeTableControls({
 
       {/* Medium Screen Layout - Tablets (768px-1023px) */}
       <div className="hidden md:block lg:hidden">
-        <div className="space-y-3">
+        <div className="space-y-2">
           {/* Top Row: Group Selector, Members, and Search */}
           <div className="flex items-center gap-3 flex-wrap">
             {/* Group Selector */}

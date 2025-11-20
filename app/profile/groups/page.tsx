@@ -12,12 +12,28 @@ import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import { AddGroupDropdown } from "@/components/ui/AddGroupDropdown";
 import { AddGroupPageDropdown } from "@/components/ui/AddGroupPageDropdown";
+import { useProfileOnboarding, OnboardingSteps } from "@/lib/contexts/ProfileOnboardingContext";
+import { WelcomeOverlay } from "@/components/onboarding/WelcomeOverlay";
+import { FirstRecipeExperience } from "@/components/onboarding/FirstRecipeExperience";
+import { FirstRecipeModal, RecipeData } from "@/components/profile/FirstRecipeModal";
+import { addUserRecipe, UserRecipeData } from "@/lib/supabase/recipes";
 
 export default function GroupsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const groupsSectionRef = useRef<GroupsSectionRef>(null);
   const [selectedGroup, setSelectedGroup] = useState<GroupWithMembers | null>(null);
+  
+  // Onboarding context
+  const { 
+    showWelcomeOverlay,
+    showFirstRecipeExperience,
+    dismissWelcome,
+    skipAllOnboarding,
+    startFirstRecipeExperience,
+    skipFirstRecipeExperience,
+    completeStep
+  } = useProfileOnboarding();
 
   const handleAddGroup = () => {
     groupsSectionRef.current?.openCreateModal();
@@ -33,6 +49,32 @@ export default function GroupsPage() {
 
   const handleGroupChange = (group: GroupWithMembers | null) => {
     setSelectedGroup(group);
+  };
+
+  const handleFirstRecipeSubmit = async (recipeData: RecipeData) => {
+    try {
+      const userRecipeData: UserRecipeData = {
+        recipeName: recipeData.recipeName,
+        ingredients: recipeData.ingredients,
+        instructions: recipeData.instructions,
+        personalNote: recipeData.personalNote
+      };
+
+      const { data, error } = await addUserRecipe(userRecipeData);
+      
+      if (error) {
+        console.error('Failed to add recipe:', error);
+        throw new Error('Failed to save recipe. Please try again.');
+      }
+
+      // Complete the onboarding step
+      completeStep(OnboardingSteps.FIRST_RECIPE);
+      
+      // The FirstRecipeExperience component will handle showing the confirmation message
+    } catch (err) {
+      console.error('Error saving recipe:', err);
+      throw err; // Let the component handle the error display
+    }
   };
 
   // Redirect to login if not authenticated
@@ -61,6 +103,24 @@ export default function GroupsPage() {
 
   return (
     <div className="min-h-screen bg-white text-gray-700">
+      {/* Welcome Overlay */}
+      {showWelcomeOverlay && (
+        <WelcomeOverlay
+          userName={user.email?.split('@')[0] || 'there'}
+          onStart={startFirstRecipeExperience}
+          onDismiss={skipAllOnboarding}
+          isVisible={showWelcomeOverlay}
+        />
+      )}
+
+      {/* First Recipe Experience */}
+      {showFirstRecipeExperience && (
+        <FirstRecipeExperience
+          onSubmit={handleFirstRecipeSubmit}
+          onSkip={skipFirstRecipeExperience}
+        />
+      )}
+
       <ProfileHeader />
 
       {/* Main Content */}
