@@ -20,6 +20,28 @@ const supabaseAdmin = createClient(
   }
 );
 
+const resolveBaseUrl = (request: Request) => {
+  const envUrl = process.env.NEXT_PUBLIC_BASE_URL?.trim();
+  if (envUrl) {
+    return envUrl.replace(/\/$/, '');
+  }
+
+  const vercelUrl = process.env.NEXT_PUBLIC_VERCEL_URL?.trim() || process.env.VERCEL_URL?.trim();
+  if (vercelUrl) {
+    const normalized = vercelUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    return `https://${normalized}`;
+  }
+
+  const host = request.headers.get('host');
+  if (host) {
+    const normalizedHost = host.replace(/\/$/, '');
+    const protocol = normalizedHost.includes('localhost') ? 'http' : 'https';
+    return `${protocol}://${normalizedHost}`;
+  }
+
+  return 'http://localhost:3000';
+};
+
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ groupId: string }> }
@@ -181,7 +203,7 @@ export async function POST(
     const inviterName = inviterProfile?.full_name || inviterProfile?.email || 'Someone';
 
     // Generate invitation URL
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl = resolveBaseUrl(request);
     const invitationUrl = `${baseUrl}/invitations/group/${token}`;
 
     console.log('🔗 Invitation URL:', invitationUrl);

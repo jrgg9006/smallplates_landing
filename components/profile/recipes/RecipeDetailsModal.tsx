@@ -138,6 +138,10 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
     : null;
   const guestEmail = guest?.email || null;
 
+  const sourceLabel = recipe.guests?.source === 'collection'
+    ? 'Collected from link'
+    : 'Added manually';
+
   // Content component for desktop - two column layout
   const desktopContent = (
     <div className="flex-1 overflow-y-auto flex flex-col">
@@ -162,7 +166,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
             </p>
           )}
           <p className="text-xs text-gray-400 mt-1 font-sans">
-            Added on {new Date(recipe.created_at).toLocaleDateString('en-US', {
+            ({sourceLabel}). Added on {new Date(recipe.created_at).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
               day: 'numeric'
@@ -299,7 +303,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
             </p>
           )}
           <p className="text-xs text-gray-400 mt-1 font-sans">
-            Added on {new Date(recipe.created_at).toLocaleDateString('en-US', {
+            ({sourceLabel}). Added on {new Date(recipe.created_at).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
               day: 'numeric'

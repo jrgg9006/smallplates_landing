@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useState, useRef, useEffect } from "react";
-import { User, LogOut, Package, BookOpen, Users, ChefHat } from "lucide-react";
+import { User, LogOut, Package, BookOpen, Users, ChefHat, HelpCircle } from "lucide-react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -97,6 +97,16 @@ export default function ProfileDropdown() {
           >
             <ChefHat className="h-4 w-4" />
             Recipes
+          </button>
+          <button
+            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+            onClick={() => {
+              router.push('/how-it-works');
+              setIsOpen(false);
+            }}
+          >
+            <HelpCircle className="h-4 w-4" />
+            How It Works
           </button>
           <hr className="my-1 border-gray-200" />
           <button

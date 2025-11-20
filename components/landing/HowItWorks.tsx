@@ -1,4 +1,6 @@
 import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 export default function HowItWorks() {
   const steps = [
@@ -73,6 +75,17 @@ export default function HowItWorks() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Learn More Link */}
+        <div className="text-center mt-12">
+          <Link
+            href="/how-it-works"
+            className="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 text-lg font-light underline underline-offset-2 transition-colors"
+          >
+            Learn more about how it works
+            <ArrowRight className="h-5 w-5" />
+          </Link>
         </div>
       </div>
     </section>

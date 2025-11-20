@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+
 export default function TextSection() {
   return (
     <section className="bg-white py-16 md:py-32">
@@ -28,6 +31,17 @@ export default function TextSection() {
               to capture the feeling of connection<br />
               that only food can create.<br />
             </p>
+          </div>
+
+          {/* More About Us Link */}
+          <div className="text-center mt-12">
+            <Link
+              href="/about"
+              className="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 text-lg font-light underline underline-offset-2 transition-colors"
+            >
+              More about us
+              <ArrowRight className="h-5 w-5" />
+            </Link>
           </div>
         </div>
       </div>

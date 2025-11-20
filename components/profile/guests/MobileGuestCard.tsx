@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Guest } from "@/lib/types/database";
+import { GuestSource, GuestWithMeta } from "@/lib/types/database";
 import { Mail, ArrowUp, Trash2, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeleteGuestModal } from "./DeleteGuestModal";
@@ -11,32 +11,40 @@ import Image from "next/image";
 import { getGuestProfileIcon } from "@/lib/utils/profileIcons";
 
 interface MobileGuestCardProps {
-  guest: Guest;
+  guest: GuestWithMeta;
   onModalClose?: () => void;
   onGuestDeleted?: () => void;
-  onAddRecipe?: (guest: Guest) => void;
-  onRowClick?: (guest: Guest) => void;
+  onAddRecipe?: (guest: GuestWithMeta) => void;
+  onRowClick?: (guest: GuestWithMeta) => void;
 }
 
 // Status badge component for mobile
-function MobileStatusBadge({ status }: { status: Guest["status"] }) {
+function MobileStatusBadge({ status, source }: { status: GuestWithMeta["status"]; source?: GuestSource | null }) {
   const styles = {
     pending: "bg-gray-100 text-gray-700",
     submitted: "bg-green-100 text-green-700", 
     reached_out: "bg-green-100 text-green-700",
   };
 
-  const labels = {
+  const labels: Record<GuestWithMeta["status"], string> = {
     pending: "Pending",
     submitted: "Received",
     reached_out: "Reached Out",
   };
 
+  const sourceLabels: Record<GuestSource, string> = {
+    manual: "Added Manually",
+    collection: "Collection Link",
+  };
+
+  const displayLabel =
+    status === 'submitted' && source ? sourceLabels[source] : labels[status];
+
   return (
     <span
       className={`inline-flex items-center rounded-full font-medium px-3 py-1 text-sm ${styles[status]}`}
     >
-      {labels[status]}
+      {displayLabel}
     </span>
   );
 }
@@ -167,7 +175,7 @@ export function MobileGuestCard({
           
           {/* Status Badge */}
           <div className="flex-shrink-0">
-            <MobileStatusBadge status={guest.status} />
+            <MobileStatusBadge status={guest.status} source={guest.latest_recipe_source} />
           </div>
         </div>
 

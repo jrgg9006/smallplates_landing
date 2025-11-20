@@ -76,7 +76,7 @@ export default function Banner() {
             <div className="flex items-center gap-4">
               {user ? (
                 <Link
-                  href="/profile"
+                  href="/profile/groups"
                   className="inline-flex items-center justify-center rounded-full bg-black text-white px-5 py-2 text-sm font-semibold hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black"
                 >
                   Go to Profile
@@ -107,7 +107,7 @@ export default function Banner() {
             <div className="px-6 py-4 space-y-3">
               {user ? (
                 <Link
-                  href="/profile"
+                  href="/profile/groups"
                   onClick={closeMobileMenu}
                   className="block w-full text-center py-3 px-5 rounded-full bg-black text-white font-semibold hover:bg-gray-800 transition-colors"
                 >

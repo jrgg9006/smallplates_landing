@@ -453,7 +453,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        onClose();
+                        setShowAddGuestModal(true);
                       }}
                       className="text-sm"
                     >
@@ -684,9 +684,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                     type="button"
                     variant="outline"
                     onClick={() => {
-                      onClose();
-                      // Navigate to guest list or trigger add guest modal
-                      // This could be handled by parent component
+                      setShowAddGuestModal(true);
                     }}
                     className="text-sm"
                   >

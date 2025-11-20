@@ -139,6 +139,7 @@ export interface Database {
           submitted_at: string | null;
           approved_at: string | null;
           group_id: string | null;
+          source: GuestSource;
           created_at: string;
           updated_at: string;
         };
@@ -159,6 +160,7 @@ export interface Database {
           submitted_at?: string | null;
           approved_at?: string | null;
           group_id?: string | null;
+          source?: GuestSource;
         };
         Update: {
           recipe_name?: string;
@@ -174,6 +176,7 @@ export interface Database {
           submitted_at?: string | null;
           approved_at?: string | null;
           group_id?: string | null;
+          source?: GuestSource;
         };
       };
       communication_log: {
@@ -477,6 +480,9 @@ export type ShippingAddressUpdate = Database['public']['Tables']['shipping_addre
 export type Guest = Database['public']['Tables']['guests']['Row'];
 export type GuestInsert = Database['public']['Tables']['guests']['Insert'];
 export type GuestUpdate = Database['public']['Tables']['guests']['Update'];
+export type GuestWithMeta = Guest & {
+  latest_recipe_source?: GuestSource | null;
+};
 
 export type GuestRecipe = Database['public']['Tables']['guest_recipes']['Row'];
 export type GuestRecipeInsert = Database['public']['Tables']['guest_recipes']['Insert'];

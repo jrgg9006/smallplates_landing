@@ -7,7 +7,7 @@ export default function PlayModeSelection() {
   const playModeContent = [
     {
       number: "01",
-      title: "For Yourself",
+      title: "Create a Cookbook for Yourself",
       description: "Create your book by yourself collecting recipes from all your friends and family.",
       additionalText: "Perfect for personal milestones, family heritage, or when you want full creative control over your cookbook's narrative.",
       image: "/images/play_mode/For_yourself.jpg",
@@ -15,7 +15,7 @@ export default function PlayModeSelection() {
     },
     {
       number: "02",
-      title: "For a Group",
+      title: "Create a Shared Cookbook - in a Group",
       description: "Bring your favorite people together and share your favorite recipes. All get a copy of this book.",
       additionalText: "Ideal for clubs, communities, or friend groups who want to create something meaningful together.",
       image: "/images/play_mode/For_a_group.jpg",

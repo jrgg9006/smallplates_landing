@@ -13,7 +13,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Guest } from "@/lib/types/database";
+import { Guest, GuestWithMeta } from "@/lib/types/database";
 import { getGuests, searchGuests, getGuestsByStatus } from "@/lib/supabase/guests";
 import { columns } from "./GuestTableColumns";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,7 @@ interface GuestTableProps {
 
 export function GuestTable({ searchValue: externalSearchValue = '', statusFilter = 'all', onDataLoaded }: GuestTableProps = {}) {
   // Data management
-  const [data, setData] = React.useState<Guest[]>([]);
+  const [data, setData] = React.useState<GuestWithMeta[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   
@@ -41,12 +41,12 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
   const [rowSelection, setRowSelection] = React.useState({});
   
   // Modal state
-  const [selectedGuest, setSelectedGuest] = React.useState<Guest | null>(null);
+  const [selectedGuest, setSelectedGuest] = React.useState<GuestWithMeta | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [modalDefaultTab, setModalDefaultTab] = React.useState<string>("guest-info");
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
   const [isAddRecipeModalOpen, setIsAddRecipeModalOpen] = React.useState(false);
-  const [selectedGuestForRecipe, setSelectedGuestForRecipe] = React.useState<Guest | null>(null);
+  const [selectedGuestForRecipe, setSelectedGuestForRecipe] = React.useState<GuestWithMeta | null>(null);
   const [isModalClosing, setIsModalClosing] = React.useState(false);
   const isModalClosingRef = React.useRef(false);
   
@@ -123,7 +123,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchValue, statusFilter, refreshTrigger]);
 
-  const handleGuestClick = (guest: Guest) => {
+  const handleGuestClick = (guest: GuestWithMeta) => {
     console.log('handleGuestClick called, isModalClosing:', isModalClosing, 'isModalClosingRef:', isModalClosingRef.current);
     // Prevent opening if a modal just closed
     if (isModalClosing || isModalClosingRef.current) {
@@ -144,7 +144,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
     setModalDefaultTab("guest-info"); // Reset to default tab
   };
 
-  const handleAddRecipe = (guest: Guest) => {
+  const handleAddRecipe = (guest: GuestWithMeta) => {
     setSelectedGuestForRecipe(guest);
     setIsAddRecipeModalOpen(true);
   };
@@ -236,8 +236,8 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
 
       {/* Desktop Table Layout */}
       <div className="hidden md:block">
-        <div className="overflow-hidden rounded-lg border border-gray-200">
-          <table className="w-full border-collapse bg-white">
+        <div className="rounded-lg border border-gray-200 bg-white overflow-x-auto">
+          <table className="w-full border-collapse table-fixed">
             <thead className="bg-gray-50 border-b border-gray-200">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
@@ -274,6 +274,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
                       e.preventDefault();
                       handleGuestClick(row.original);
                     }}
+                    style={{ overflow: 'visible' }}
                   >
                     {row.getVisibleCells().map((cell) => {
                       // Center align for status and recipes_received columns
@@ -286,6 +287,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
                           className={`px-8 py-4 whitespace-nowrap ${
                             isCenteredColumn ? 'text-center' : isRightAlignedColumn ? 'text-right' : ''
                           }`}
+                          style={{ overflow: 'visible' }}
                         >
                           {flexRender(
                             cell.column.columnDef.cell,

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, Mail, Trash2, MoreHorizontal } from "lucide-react";
-import { Guest } from "@/lib/types/database";
+import { Guest, GuestSource, GuestWithMeta } from "@/lib/types/database";
 import { DeleteGuestModal } from "./DeleteGuestModal";
 import { Button } from "@/components/ui/button";
 import { SendMessageModal } from "./SendMessageModal";
@@ -13,18 +13,26 @@ import { getGuestProfileIcon } from "@/lib/utils/profileIcons";
 import "@/lib/types/table";
 
 // Status badge component
-function StatusBadge({ status }: { status: Guest["status"] }) {
+function StatusBadge({ status, source }: { status: Guest["status"]; source?: GuestSource | null }) {
   const styles = {
     pending: "bg-gray-100 text-gray-700",
     submitted: "bg-green-100 text-green-700",
     reached_out: "bg-green-100 text-green-700",
   };
 
-  const labels = {
+  const labels: Record<Guest["status"], string> = {
     pending: "Pending",
     submitted: "Received",
     reached_out: "Reached Out",
   };
+
+  const sourceLabels: Record<GuestSource, string> = {
+    manual: "Added Manually",
+    collection: "Collection Link",
+  };
+
+  const displayLabel =
+    status === 'submitted' && source ? sourceLabels[source] : labels[status];
 
   const sizeClasses = {
     pending: "px-3 py-1 text-sm",
@@ -38,14 +46,14 @@ function StatusBadge({ status }: { status: Guest["status"] }) {
         styles[status]
       } ${sizeClasses[status]}`}
     >
-      {labels[status]}
+      {displayLabel}
     </span>
   );
 }
 
 // Actions cell component  
 function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: { 
-  guest: Guest; 
+  guest: GuestWithMeta; 
   onModalClose?: () => void; 
   onGuestDeleted?: () => void;
   onAddRecipe?: (guest: Guest) => void;
@@ -54,6 +62,9 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; right: number } | null>(null);
+  const [openUpward, setOpenUpward] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleDelete = async () => {
@@ -98,22 +109,66 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
   // Check if guest has any contact information
   const hasContactInfo = (guest.email && guest.email.trim() && !guest.email.startsWith('NO_EMAIL_'));
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
+  const closeDropdown = () => {
+    setShowDropdown(false);
+    setDropdownPosition(null);
+  };
+
+  const handleToggleDropdown = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+
+    if (!showDropdown) {
+      if (buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect();
+        const estimatedHeight = 60;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        const rightPosition = window.innerWidth - rect.right;
+
+        if (spaceBelow < estimatedHeight + 10 && spaceAbove > estimatedHeight + 10) {
+          setOpenUpward(true);
+          setDropdownPosition({
+            top: rect.top - estimatedHeight - 4,
+            right: rightPosition,
+          });
+        } else {
+          setOpenUpward(false);
+          setDropdownPosition({
+            top: rect.bottom + 4,
+            right: rightPosition,
+          });
+        }
+
+        setShowDropdown(true);
+
+        setTimeout(() => {
+          if (buttonRef.current && dropdownRef.current) {
+            const actualRect = buttonRef.current.getBoundingClientRect();
+            const actualHeight = dropdownRef.current.offsetHeight;
+            const actualSpaceBelow = window.innerHeight - actualRect.bottom;
+            const actualSpaceAbove = actualRect.top;
+            const actualRight = window.innerWidth - actualRect.right;
+
+            if (actualSpaceBelow < actualHeight + 10 && actualSpaceAbove > actualHeight + 10) {
+              setOpenUpward(true);
+              setDropdownPosition({
+                top: actualRect.top - actualHeight - 4,
+                right: actualRight,
+              });
+            } else {
+              setOpenUpward(false);
+              setDropdownPosition({
+                top: actualRect.bottom + 4,
+                right: actualRight,
+              });
+            }
+          }
+        }, 10);
       }
-    };
-
-    if (showDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      closeDropdown();
     }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showDropdown]);
+  };
 
   const handleCloseMessageModal = () => {
     console.log('SendMessageModal closing, calling onModalClose');
@@ -126,7 +181,11 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
 
   return (
     <>
-      <div className="flex justify-end items-center gap-1 pr-4" onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}>
+      <div
+        className="flex justify-end items-center gap-1 pr-4"
+        onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
+        style={{ position: 'relative', zIndex: 0 }}
+      >
         <Button
           variant="ghost"
           className={`h-12 w-12 ${!hasContactInfo ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -157,35 +216,42 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
           Add Recipe
         </Button>
         {/* 3 Dots Menu */}
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative">
           <Button
+            ref={buttonRef}
             variant="ghost"
             className="h-12 w-12"
-            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-              e.stopPropagation();
-              setShowDropdown(!showDropdown);
-            }}
+            onClick={handleToggleDropdown}
             aria-label="More options"
             title="More options"
           >
             <MoreHorizontal className="h-8 w-8" />
           </Button>
           
-          {/* Dropdown Menu */}
-          {showDropdown && (
-            <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-[120px]">
-              <button
-                className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                  e.stopPropagation();
-                  setShowDropdown(false);
-                  setShowDeleteModal(true);
+          {showDropdown && dropdownPosition && (
+            <>
+              <div
+                ref={dropdownRef}
+                className="fixed bg-white border border-gray-200 rounded-md shadow-lg z-50 min-w-[140px]"
+                style={{
+                  top: dropdownPosition.top,
+                  right: dropdownPosition.right,
                 }}
               >
-                <Trash2 className="h-4 w-4" />
-                Delete
-              </button>
-            </div>
+                <button
+                  className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                    e.stopPropagation();
+                    closeDropdown();
+                    setShowDeleteModal(true);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </button>
+              </div>
+              <div className="fixed inset-0 z-40" onClick={closeDropdown}></div>
+            </>
           )}
         </div>
       </div>
@@ -207,7 +273,7 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
   );
 }
 
-export const columns: ColumnDef<Guest>[] = [
+export const columns: ColumnDef<GuestWithMeta>[] = [
   {
     accessorKey: "updated_at",
     header: "Last Updated",
@@ -232,7 +298,7 @@ export const columns: ColumnDef<Guest>[] = [
       );
     },
     cell: ({ row }) => {
-      const guest: Guest = row.original;
+      const guest = row.original;
       const fullName = `${guest.first_name} ${guest.last_name || ''}`.trim();
       const hasPrintedName = guest.printed_name && guest.printed_name.trim();
       
@@ -285,7 +351,7 @@ export const columns: ColumnDef<Guest>[] = [
       
       return (
         <div className="flex items-center justify-center h-full w-full">
-          <StatusBadge status={status} />
+          <StatusBadge status={status} source={guest.latest_recipe_source} />
         </div>
       );
     },
