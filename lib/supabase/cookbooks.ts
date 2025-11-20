@@ -381,18 +381,12 @@ export async function addRecipeToCookbook(cookbookId: string, recipeId: string, 
     console.log('Group found:', groupMember.groups);
 
     // Verify the recipe exists and user has access to it
-    let recipeQuery = supabase
+    // For group cookbooks, allow recipes user has access to (RLS will handle this)
+    const { data: recipe, error: recipeError } = await supabase
       .from('guest_recipes')
       .select('id')
-      .eq('id', recipeId);
-
-    // For personal cookbooks, only allow user's own recipes
-    // For group cookbooks, allow recipes user has access to (RLS will handle this)
-    if (!cookbook.is_group_cookbook) {
-      recipeQuery = recipeQuery.eq('user_id', user.id);
-    }
-
-    const { data: recipe, error: recipeError } = await recipeQuery.single();
+      .eq('id', recipeId)
+      .single();
 
     if (recipeError || !recipe) {
       return { data: null, error: 'Recipe not found or access denied' };

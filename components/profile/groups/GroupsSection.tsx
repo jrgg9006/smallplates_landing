@@ -287,11 +287,11 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
               </div>
             ) : (
               <div className="space-y-3">
-                {groups.map((group) => (
+                {groups.map((group: GroupWithMembers) => (
                   <MobileGroupCard
                     key={group.id}
                     group={group}
-                    isSelected={selectedGroup ? selectedGroup.id === group.id : false}
+                    isSelected={false}
                     onGroupClick={handleGroupChange}
                     onEditGroup={() => {
                       setSelectedGroup(group);

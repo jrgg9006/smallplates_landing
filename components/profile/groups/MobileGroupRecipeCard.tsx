@@ -98,7 +98,7 @@ export function MobileGroupRecipeCard({
           />
         </div>
         <div className="flex-1">
-          <div className="text-sm text-gray-600 mb-0.5">Chef's Name:</div>
+          <div className="text-sm text-gray-600 mb-0.5">Chef&apos;s Name:</div>
           <div className="font-medium text-gray-900 text-base">
             {displayName}
           </div>

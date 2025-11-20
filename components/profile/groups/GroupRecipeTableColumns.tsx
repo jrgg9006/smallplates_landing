@@ -31,8 +31,7 @@ function ActionsCell({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Check if this recipe was added by the current user (they shouldn't copy their own recipes)
-  const isOwnRecipe = recipe.added_by_user?.is_current_user || 
-                      recipe.added_by_user?.full_name === 'You' ||
+  const isOwnRecipe = recipe.added_by_user?.full_name === 'You' ||
                       recipe.guests?.is_self === true;
 
   const closeDropdown = () => {
@@ -336,7 +335,7 @@ export const createGroupRecipeColumns = (groupId: string): ColumnDef<RecipeWithG
       }
 
       // Special handling for current user
-      if (addedByUser.is_current_user || addedByUser.full_name === 'You') {
+      if (addedByUser.full_name === 'You') {
         return (
           <div className="flex items-center gap-2">
             <div className="flex-shrink-0">

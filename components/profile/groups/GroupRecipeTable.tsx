@@ -238,6 +238,9 @@ export function GroupRecipeTable({
         onInviteFriend={handleInviteFriend}
         onAddExistingRecipe={onAddExistingRecipe || (() => {})}
         onAddNewRecipe={onAddNewRecipe || (() => {})}
+        onDeleteGroup={onDeleteGroup || (() => {})}
+        onExitGroup={onExitGroup || (() => {})}
+        userRole={userRole}
       />
 
       {/* Empty State */}
