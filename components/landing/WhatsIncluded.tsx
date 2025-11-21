@@ -4,10 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import BookDetailsModal from "./BookDetailsModal";
+import BookPreviewModal from "./BookPreview/BookPreviewModal";
 
 export default function WhatsIncluded() {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
   const handleGetStarted = () => {
     router.push("/onboarding");
@@ -57,10 +59,21 @@ export default function WhatsIncluded() {
               CREATE YOURS FOR $79.99
             </motion.button>
             
+            {/* Preview Cookbook button */}
+            <motion.button
+              type="button"
+              onClick={() => setIsPreviewModalOpen(true)}
+              className="mt-4 inline-flex items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm text-white border border-white/30 px-6 py-3 text-base font-medium hover:bg-white/20 transition-all duration-300"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Preview Cookbook
+            </motion.button>
+            
             {/* Learn more text */}
             <button
               onClick={() => setIsModalOpen(true)}
-              className="mt-4 text-emerald-100 text-base underline underline-offset-2 hover:text-white transition-colors cursor-pointer bg-transparent border-none p-0"
+              className="mt-4 block text-emerald-100 text-base underline underline-offset-2 hover:text-white transition-colors cursor-pointer bg-transparent border-none p-0"
             >
               Learn more about the printed-book details
             </button>
@@ -158,6 +171,12 @@ export default function WhatsIncluded() {
       <BookDetailsModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+      />
+      
+      {/* Book Preview Modal */}
+      <BookPreviewModal
+        isOpen={isPreviewModalOpen}
+        onClose={() => setIsPreviewModalOpen(false)}
       />
     </section>
   );
