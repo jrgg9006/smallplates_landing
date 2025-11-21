@@ -131,6 +131,7 @@ export function CookbookTableControls({
               buttonText="Add a Recipe to this Cookbook"
               onAddExistingRecipe={onAddExistingRecipe}
               onAddNewRecipe={onAddNewRecipe}
+              cookbookId={selectedCookbookId}
             />
 
             {/* Cookbook Actions Dropdown - Three dots menu */}
@@ -223,6 +224,7 @@ export function CookbookTableControls({
             onAddExistingRecipe={onAddExistingRecipe}
             onAddNewRecipe={onAddNewRecipe}
             className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg px-4 py-2 text-sm font-medium flex items-center gap-2 flex-1"
+            cookbookId={selectedCookbookId}
           />
 
           {/* Cookbook Actions Dropdown - Mobile */}

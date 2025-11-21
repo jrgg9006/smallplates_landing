@@ -86,8 +86,29 @@ export function getWhatsAppTroubleshootingTips(): string[] {
 /**
  * Create a properly encoded share URL for messaging apps
  */
-export function createShareURL(baseUrl: string, token: string): string {
+export function createShareURL(
+  baseUrl: string, 
+  token: string, 
+  context?: { cookbookId?: string | null; groupId?: string | null }
+): string {
   // Ensure the token is properly encoded (though our tokens are already URL-safe)
   const encodedToken = encodeURIComponent(token);
-  return `${baseUrl}/collect/${encodedToken}`;
+  let url = `${baseUrl}/collect/${encodedToken}`;
+  
+  // Add query parameters if context is provided
+  if (context) {
+    const params = new URLSearchParams();
+    if (context.cookbookId) {
+      params.append('cookbook', context.cookbookId);
+    }
+    if (context.groupId) {
+      params.append('group', context.groupId);
+    }
+    
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+  }
+  
+  return url;
 }

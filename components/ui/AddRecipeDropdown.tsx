@@ -21,6 +21,8 @@ interface AddRecipeDropdownProps {
   onAddNewRecipe: () => void;
   className?: string;
   disabled?: boolean;
+  cookbookId?: string | null; // Optional cookbook ID for collection link context
+  groupId?: string | null; // Optional group ID for collection link context
 }
 
 export function AddRecipeDropdown({
@@ -28,7 +30,9 @@ export function AddRecipeDropdown({
   onAddExistingRecipe,
   onAddNewRecipe,
   className,
-  disabled = false
+  disabled = false,
+  cookbookId = null,
+  groupId = null
 }: AddRecipeDropdownProps) {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [collectionUrl, setCollectionUrl] = useState<string>('');
@@ -40,7 +44,7 @@ export function AddRecipeDropdown({
       const { data: profile } = await getCurrentProfile();
       
       if (tokenData && typeof window !== 'undefined') {
-        const url = createShareURL(window.location.origin, tokenData);
+        const url = createShareURL(window.location.origin, tokenData, { cookbookId, groupId });
         setCollectionUrl(url);
         setUserFullName(profile?.full_name || null);
         setIsShareModalOpen(true);

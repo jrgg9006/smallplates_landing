@@ -611,6 +611,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
 
           {/* Additional Notes - full width textarea */}
           <div>
+            <p className="text-xs text-gray-400 mb-1">Comments</p>
             <textarea
               value={recipeNotes}
               onChange={(e) => setRecipeNotes(e.target.value)}
@@ -633,6 +634,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
             <div className="grid grid-cols-[3fr_7fr] gap-4">
               {/* Left Column - Ingredients */}
               <div className="flex flex-col">
+                <p className="text-xs text-gray-400 mb-1">Ingredients</p>
                 <textarea
                   value={recipeIngredients}
                   onChange={(e) => setRecipeIngredients(e.target.value)}
@@ -643,6 +645,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
 
               {/* Right Column - Steps (Instructions) */}
               <div className="flex flex-col">
+                <p className="text-xs text-gray-400 mb-1">Instructions</p>
                 <textarea
                   value={recipeInstructions}
                   onChange={(e) => setRecipeInstructions(e.target.value)}

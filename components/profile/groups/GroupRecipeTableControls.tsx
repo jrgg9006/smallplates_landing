@@ -123,6 +123,7 @@ export function GroupRecipeTableControls({
               buttonText="Add a Recipe to this Cookbook"
               onAddExistingRecipe={onAddExistingRecipe}
               onAddNewRecipe={onAddNewRecipe}
+              groupId={selectedGroup?.id || null}
             />
 
             {/* Group Actions Dropdown - Three dots menu */}
@@ -220,6 +221,7 @@ export function GroupRecipeTableControls({
               buttonText="Add Recipe"
               onAddExistingRecipe={onAddExistingRecipe}
               onAddNewRecipe={onAddNewRecipe}
+              groupId={selectedGroup?.id || null}
             />
 
             {/* Group Actions Dropdown - Three dots menu */}
@@ -318,6 +320,7 @@ export function GroupRecipeTableControls({
               onAddExistingRecipe={onAddExistingRecipe}
               onAddNewRecipe={onAddNewRecipe}
               className="w-full"
+              groupId={selectedGroup?.id || null}
             />
 
             {/* Group Actions - Centered */}

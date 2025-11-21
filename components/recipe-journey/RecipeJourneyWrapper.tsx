@@ -33,9 +33,11 @@ interface RecipeJourneyWrapperProps {
   tokenInfo: CollectionTokenInfo;
   guestData: GuestData;
   token: string;
+  cookbookId?: string | null;
+  groupId?: string | null;
 }
 
-export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: RecipeJourneyWrapperProps) {
+export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cookbookId, groupId }: RecipeJourneyWrapperProps) {
   const router = useRouter();
   // steps: 0=welcome, 1=introInfo, 2=recipeForm, 3=summary
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -318,8 +320,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
       
       console.log('Submitting recipe with files using new hierarchical structure...');
       
-      // Use the new improved submission function
-      const { data, error } = await submitGuestRecipeWithFiles(token, submission, selectedFiles);
+      // Use the new improved submission function with cookbook/group context
+      const { data, error } = await submitGuestRecipeWithFiles(token, submission, selectedFiles, { cookbookId, groupId });
       
       clearInterval(progressInterval);
       setUploadProgress(100);
@@ -434,8 +436,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
         audio_url: recipeData.audioUrl
       };
 
-      // Submit the recipe
-      const { data, error } = await submitGuestRecipe(token, submission);
+      // Submit the recipe with cookbook/group context
+      const { data, error } = await submitGuestRecipe(token, submission, { cookbookId, groupId });
 
       if (error) {
         setSubmitError(error);
@@ -505,8 +507,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token }: Re
         raw_recipe_text: textToSubmit // Use the raw text
       };
 
-      // Submit the recipe
-      const { data, error } = await submitGuestRecipe(token, submission);
+      // Submit the recipe with cookbook/group context
+      const { data, error } = await submitGuestRecipe(token, submission, { cookbookId, groupId });
 
       if (error) {
         setSubmitError(error);

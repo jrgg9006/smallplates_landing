@@ -109,7 +109,8 @@ export async function searchGuestInCollection(
 export async function submitGuestRecipeWithFiles(
   collectionToken: string,
   submission: CollectionGuestSubmission,
-  files?: File[]
+  files?: File[],
+  context?: { cookbookId?: string | null; groupId?: string | null }
 ): Promise<{ 
   data: { 
     guest_id: string; 
@@ -232,6 +233,7 @@ export async function submitGuestRecipeWithFiles(
       audio_url: submission.audio_url || null,
       submission_status: 'submitted',
       submitted_at: new Date().toISOString(),
+      source: 'collection',
     };
 
     const { data: recipe, error: recipeError } = await supabase
@@ -285,7 +287,38 @@ export async function submitGuestRecipeWithFiles(
       }
     }
 
-    // Step 6: Return success with all IDs and URLs
+    // Step 6: Automatically add recipe to cookbook/group if context is provided
+    // Use API endpoint to bypass RLS (since we're in anonymous context)
+    // Check if we have at least one valid context value (cookbookId OR groupId)
+    const hasValidContext = context && (context.cookbookId || context.groupId);
+    
+    if (hasValidContext && recipe.id && tokenInfo) {
+      
+      try {
+        const response = await fetch('/api/collection/link-recipe', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            recipeId: recipe.id,
+            cookbookId: context.cookbookId || null,
+            groupId: context.groupId || null,
+            collectionToken: collectionToken,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.warn('❌ Failed to link recipe to cookbook/group:', errorData.error || 'Unknown error');
+        }
+      } catch (linkError) {
+        console.error('Error linking recipe to cookbook/group:', linkError);
+        // Don't fail the submission - recipe is still created
+      }
+    }
+
+    // Step 7: Return success with all IDs and URLs
     return {
       data: {
         guest_id: guestId,
@@ -311,7 +344,8 @@ export async function submitGuestRecipeWithFiles(
  */
 export async function submitGuestRecipe(
   collectionToken: string,
-  submission: CollectionGuestSubmission
+  submission: CollectionGuestSubmission,
+  context?: { cookbookId?: string | null; groupId?: string | null }
 ): Promise<{ data: { guest_id: string; recipe_id: string; guest_notify_opt_in?: boolean; guest_notify_email?: string | null } | null; error: string | null }> {
   const supabase = createSupabaseClient();
   
@@ -418,20 +452,8 @@ export async function submitGuestRecipe(
       audio_url: submission.audio_url || null,
       submission_status: 'submitted',
       submitted_at: new Date().toISOString(),
+      source: 'collection',
     };
-
-    // DEBUG: Log authentication status and recipe data
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
-    console.log('🔍 DEBUG - Before recipe insert:', {
-      isAnonymous: currentUser === null,
-      currentUserId: currentUser?.id || 'NULL (anonymous)',
-      recipeUserId: tokenInfo.user_id,
-      guestId: guestId,
-      recipeData: {
-        recipe_name: recipeData.recipe_name,
-        user_id: recipeData.user_id,
-      }
-    });
 
     const { data: recipe, error: recipeError } = await supabase
       .from('guest_recipes')
@@ -455,6 +477,37 @@ export async function submitGuestRecipe(
       .select('notify_opt_in, notify_email')
       .eq('id', guestId)
       .single();
+
+    // Automatically add recipe to cookbook/group if context is provided
+    // Use API endpoint to bypass RLS (since we're in anonymous context)
+    // Check if we have at least one valid context value (cookbookId OR groupId)
+    const hasValidContext = context && (context.cookbookId || context.groupId);
+
+    if (hasValidContext && recipe.id && tokenInfo) {
+      
+      try {
+        const response = await fetch('/api/collection/link-recipe', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            recipeId: recipe.id,
+            cookbookId: context.cookbookId || null,
+            groupId: context.groupId || null,
+            collectionToken: collectionToken,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.warn('❌ Failed to link recipe to cookbook/group:', errorData.error || 'Unknown error');
+        }
+      } catch (linkError) {
+        console.error('Error linking recipe to cookbook/group:', linkError);
+        // Don't fail the submission - recipe is still created
+      }
+    }
 
     return {
       data: {

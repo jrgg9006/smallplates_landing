@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { validateCollectionToken, searchGuestInCollection } from '@/lib/supabase/collection';
@@ -51,7 +51,12 @@ function generatePersonalizedMessage(fullName: string, rawFullName: string | nul
 export default function CollectionForm() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const token = params.token as string;
+  
+  // Get cookbook/group context from query parameters to preserve during navigation
+  const cookbookId = searchParams.get('cookbook');
+  const groupId = searchParams.get('group');
   
   // Mobile debugging - log component mount
   useEffect(() => {
@@ -167,18 +172,23 @@ export default function CollectionForm() {
       existing: true
     };
 
-    // Store guest data in session storage for the recipe form with error handling
+    // Store guest data AND context in session storage for the recipe form with error handling
     try {
       if (typeof window !== 'undefined' && window.sessionStorage) {
         sessionStorage.setItem('collectionGuestData', JSON.stringify(guestData));
+        // Store cookbook/group context as backup
+        if (cookbookId || groupId) {
+          sessionStorage.setItem('collectionContext', JSON.stringify({ cookbookId, groupId }));
+        }
       }
     } catch (error) {
-      console.warn('Failed to store guest data in sessionStorage:', error);
+      console.warn('Failed to store data in sessionStorage:', error);
       // Continue anyway - we can handle missing sessionStorage in the recipe page
     }
     
-    // Navigate to recipe form
-    router.push(`/collect/${token}/recipe`);
+    // Navigate to recipe form, preserving query parameters
+    const queryString = cookbookId ? `?cookbook=${cookbookId}` : groupId ? `?group=${groupId}` : '';
+    router.push(`/collect/${token}/recipe${queryString}`);
   };
 
   // Handle continue for new guest
@@ -197,11 +207,17 @@ export default function CollectionForm() {
     try {
       if (typeof window !== 'undefined' && window.sessionStorage) {
         sessionStorage.setItem('collectionGuestData', JSON.stringify(guestData));
+        // Store cookbook/group context as backup
+        if (cookbookId || groupId) {
+          sessionStorage.setItem('collectionContext', JSON.stringify({ cookbookId, groupId }));
+        }
       }
     } catch {
       // ignore
     }
-    router.push(`/collect/${token}/recipe`);
+    // Navigate to recipe form, preserving query parameters
+    const queryString = cookbookId ? `?cookbook=${cookbookId}` : groupId ? `?group=${groupId}` : '';
+    router.push(`/collect/${token}/recipe${queryString}`);
   };
 
   // Loading state

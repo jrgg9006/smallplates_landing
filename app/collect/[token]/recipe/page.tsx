@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -22,11 +22,18 @@ interface GuestData {
 export default function RecipeFormPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const token = params.token as string;
+  
+  // Get cookbook/group context from query parameters OR sessionStorage (fallback)
+  const cookbookIdFromParams = searchParams.get('cookbook');
+  const groupIdFromParams = searchParams.get('group');
   
   // State management
   const [tokenInfo, setTokenInfo] = useState<CollectionTokenInfo | null>(null);
   const [guestData, setGuestData] = useState<GuestData | null>(null);
+  const [cookbookId, setCookbookId] = useState<string | null>(cookbookIdFromParams);
+  const [groupId, setGroupId] = useState<string | null>(groupIdFromParams);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,11 +60,32 @@ export default function RecipeFormPage() {
       const parsedGuestData = JSON.parse(storedGuestData) as GuestData;
       setGuestData(parsedGuestData);
       
+      // Get context from query params OR sessionStorage (fallback)
+      let finalCookbookId = cookbookIdFromParams;
+      let finalGroupId = groupIdFromParams;
+      
+      // If query params are missing, try sessionStorage
+      if (!finalCookbookId && !finalGroupId) {
+        const storedContext = sessionStorage.getItem('collectionContext');
+        if (storedContext) {
+          try {
+            const context = JSON.parse(storedContext);
+            finalCookbookId = context.cookbookId || null;
+            finalGroupId = context.groupId || null;
+          } catch (e) {
+            console.warn('Failed to parse stored context:', e);
+          }
+        }
+      }
+      
+      setCookbookId(finalCookbookId);
+      setGroupId(finalGroupId);
+      
       setLoading(false);
     }
 
     initialize();
-  }, [token, router]);
+  }, [token, router, cookbookIdFromParams, groupIdFromParams]);
 
   // Handle back navigation
   const handleBack = () => {
@@ -127,6 +155,8 @@ export default function RecipeFormPage() {
         tokenInfo={tokenInfo}
         guestData={guestData}
         token={token}
+        cookbookId={cookbookId}
+        groupId={groupId}
       />
     </div>
   );
