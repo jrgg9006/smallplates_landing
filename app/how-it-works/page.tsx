@@ -156,9 +156,6 @@ export default function HowItWorksPage() {
                 <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light">
                   Real breakfasts. Real dinners. Real drinks. Real stories.
                 </p>
-                <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light">
-                  Simple and messy recipes are perfect.
-                </p>
                 <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light font-medium">
                   Get to know your people in a unique way.
                 </p>

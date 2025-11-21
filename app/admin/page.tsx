@@ -5,11 +5,24 @@ import { createSupabaseClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { isAdminEmail } from '@/lib/config/admin';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 export default function AdminHomePage() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState('');
+  const [showDeletePasswordModal, setShowDeletePasswordModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -32,6 +45,27 @@ export default function AdminHomePage() {
     setIsAdmin(true);
     setUserName(user.email || '');
     setLoading(false);
+  };
+
+  const handleDeleteUsersClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowDeletePasswordModal(true);
+    setDeletePassword('');
+    setPasswordError(null);
+  };
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (deletePassword === 'DELETE!') {
+      setShowDeletePasswordModal(false);
+      setDeletePassword('');
+      setPasswordError(null);
+      router.push('/admin/users');
+    } else {
+      setPasswordError('Incorrect password');
+      setDeletePassword('');
+    }
   };
 
   if (loading) {
@@ -139,6 +173,23 @@ export default function AdminHomePage() {
             </div>
           </Link>
 
+          {/* Delete Users - Active */}
+          <div onClick={handleDeleteUsersClick} className="group">
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-red-600 cursor-pointer h-full">
+              <div className="text-5xl mb-4">🗑️</div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Delete Users</h2>
+              <p className="text-gray-600 mb-4">
+                Delete user accounts and all associated data
+              </p>
+              <div className="flex items-center text-sm text-gray-500 group-hover:text-red-600 transition-colors">
+                <span>Manage users</span>
+                <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
 
           {/* Orders Management - Coming Soon */}
           <div className="bg-gray-100 rounded-xl p-8 opacity-60 cursor-not-allowed h-full">
@@ -201,6 +252,61 @@ export default function AdminHomePage() {
           </div>
         </div>
       </div>
+
+      {/* Password Modal */}
+      <Dialog open={showDeletePasswordModal} onOpenChange={setShowDeletePasswordModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-2xl font-semibold">
+              Confirm Access
+            </DialogTitle>
+            <DialogDescription>
+              This is a sensitive operation. Please enter the password to continue.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handlePasswordSubmit} className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-medium">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={deletePassword}
+                onChange={(e) => {
+                  setDeletePassword(e.target.value);
+                  setPasswordError(null);
+                }}
+                placeholder="Enter password"
+                autoFocus
+                className={passwordError ? 'border-red-500' : ''}
+              />
+              {passwordError && (
+                <p className="text-sm text-red-600">{passwordError}</p>
+              )}
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowDeletePasswordModal(false);
+                  setDeletePassword('');
+                  setPasswordError(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="bg-red-600 text-white hover:bg-red-700"
+              >
+                Continue
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

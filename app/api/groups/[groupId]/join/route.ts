@@ -2,6 +2,7 @@
  * API Route - Join Group (Direct Link)
  * Handles group joining via direct link without token
  * Creates account if needed, adds user to group
+ * For existing users, verifies password before adding to group
  * Similar to token-based join but without invitation tracking
  */
 
@@ -82,10 +83,50 @@ export async function POST(
     let isNewUser = false;
 
     if (existingUser) {
-      // User exists - check if already a member
+      // User exists - verify password before adding them to the group
       userId = existingUser.id;
       console.log('👤 Existing user found:', userId);
       
+      // Verify password for existing users
+      if (!password) {
+        return NextResponse.json(
+          { error: 'Password is required to verify your account' },
+          { status: 400 }
+        );
+      }
+
+      // Try to sign in with the provided password to verify it's correct
+      const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
+        email: email.toLowerCase(),
+        password: password
+      });
+
+      if (signInError || !signInData.user) {
+        console.error('❌ Password verification failed:', signInError);
+        return NextResponse.json(
+          { error: 'Invalid password. Please check your password and try again.' },
+          { status: 401 }
+        );
+      }
+
+      // Verify that the signed-in user matches the existing user
+      if (signInData.user.id !== userId) {
+        console.error('❌ User ID mismatch during password verification');
+        // Sign out to clean up
+        await supabaseAdmin.auth.signOut();
+        return NextResponse.json(
+          { error: 'Authentication error. Please try again.' },
+          { status: 401 }
+        );
+      }
+
+      console.log('✅ Password verified for existing user');
+      
+      // Sign out after verification - frontend will create its own session
+      // This ensures no server-side session is left hanging
+      await supabaseAdmin.auth.signOut();
+      
+      // Check if user is already a member of this group
       const { data: existingMember } = await supabaseAdmin
         .from('group_members')
         .select('profile_id')

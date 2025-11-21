@@ -34,9 +34,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const supabase = createSupabaseClient();
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+    // Get initial session - handle errors silently
+    // This prevents console errors when refresh tokens are invalid/expired
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        // Silently handle invalid refresh token errors
+        // This is expected when there's no valid session (e.g., on landing page)
+        // Common errors: "Invalid Refresh Token: Refresh Token Not Found"
+        setUser(null);
+      } else {
+        setUser(session?.user ?? null);
+      }
+      setLoading(false);
+    }).catch((err) => {
+      // Catch any unexpected errors and handle gracefully
+      // This ensures the app doesn't break if there's an auth error
+      setUser(null);
       setLoading(false);
     });
 
