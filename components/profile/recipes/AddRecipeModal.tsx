@@ -922,7 +922,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
               <div className="mt-2 pb-safe">
                 <Button 
                   onClick={handleSave}
-                  disabled={loading || guests.length === 0}
+                  disabled={loading || (!isMyOwnRecipe && guests.length === 0)}
                   className="w-full bg-black text-white hover:bg-gray-800 py-3 rounded-full disabled:opacity-50"
                 >
                   {loading ? 'Saving...' : 'Save'}
