@@ -53,7 +53,7 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
           >
-            Bring the people you love into your kitchen with their recipes printed in a<b> beautiful cookbook</b>.
+            Bring the people you love into your kitchen with their recipes printed in a<b> unique cookbook</b>.
           </motion.p>
           <motion.div 
             className="mt-8 flex flex-col items-start"
