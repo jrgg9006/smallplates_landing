@@ -15,8 +15,8 @@ export default function TextSection() {
           {/* Subheading */}
           <div className="mb-8">
             <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl font-medium text-gray-900">
-              That&apos;s why we created<br />
-              Small Plates & Co.
+              In Small Plates, it&apos;s never about the<br />
+              perfect recipe
             </h2>
           </div>
           
@@ -28,8 +28,8 @@ export default function TextSection() {
           {/* Description paragraph */}
           <div className="max-w-2xl mx-auto">
             <p className="font-sans font-light text-lg md:text-xl lg:text-2xl text-gray-900 leading-relaxed">
-              to capture the feeling of connection<br />
-              that only food can create.<br />
+              It&apos;s about the people behind it, <br />
+              and the feeling it carries.<br />
             </p>
           </div>
 
