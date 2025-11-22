@@ -52,22 +52,22 @@ export default function WhatsIncluded() {
             <motion.button
               type="button"
               onClick={handleGetStarted}
-              className="inline-flex items-center justify-center rounded-2xl bg-smallplates_red text-white px-8 py-4 text-lg font-semibold shadow-lg hover:bg-orange-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-600 transition-all duration-300"
+              className="w-full inline-flex items-center justify-center rounded-2xl bg-smallplates_red text-white px-8 py-4 text-lg font-semibold shadow-lg hover:bg-orange-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-600 transition-all duration-300"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              CREATE YOURS FOR $79.99
+              CREATE YOURS FOR $79
             </motion.button>
             
             {/* Preview Cookbook button */}
             <motion.button
               type="button"
               onClick={() => setIsPreviewModalOpen(true)}
-              className="mt-4 inline-flex items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm text-white border border-white/30 px-6 py-3 text-base font-medium hover:bg-white/20 transition-all duration-300"
+              className="mt-4 w-full inline-flex items-center justify-center rounded-2xl bg-white text-black px-6 py-3 text-base font-medium hover:bg-gray-100 transition-all duration-300"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              Preview Cookbook
+              PREVIEW COOKBOOK
             </motion.button>
             
             {/* Learn more text */}

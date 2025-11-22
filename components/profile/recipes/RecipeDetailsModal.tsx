@@ -102,7 +102,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
     };
 
     loadCookbooks();
-  }, [recipe?.id, isOpen]);
+  }, [recipe, isOpen]);
 
   const handleCancel = () => {
     setIsEditMode(false);

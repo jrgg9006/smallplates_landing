@@ -1,13 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import CTAButton from "./CTAButton";
+import BookPreviewModal from "./BookPreview/BookPreviewModal";
 
 export default function Hero() {
   const router = useRouter();
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
   const handleGetStarted = () => {
     router.push("/onboarding");
@@ -54,15 +56,33 @@ export default function Hero() {
             Bring the people you love into your kitchen with their recipes printed in a<b> beautiful cookbook</b>.
           </motion.p>
           <motion.div 
-            className="mt-8"
+            className="mt-8 flex flex-col items-start"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
           >
             <CTAButton data-cta="hero-primary" onClick={handleGetStarted} />
+            
+            {/* Preview Link - Appears below CTA */}
+            <motion.button
+              type="button"
+              onClick={() => setIsPreviewModalOpen(true)}
+              className="mt-2 text-base md:text-lg font-sans font-normal text-white/90 hover:text-white underline underline-offset-2 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent rounded"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.0, ease: "easeOut" }}
+            >
+              Quick Book Preview
+            </motion.button>
           </motion.div>
         </div>
       </div>
+
+      {/* Book Preview Modal */}
+      <BookPreviewModal
+        isOpen={isPreviewModalOpen}
+        onClose={() => setIsPreviewModalOpen(false)}
+      />
     </section>
   );
 }

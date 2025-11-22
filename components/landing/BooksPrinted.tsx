@@ -225,7 +225,7 @@ export default function BooksPrinted() {
               onClick={handleGetStarted}
               className="inline-flex items-center justify-center rounded-2xl bg-smallplates_red text-white px-8 py-4 text-lg font-semibold shadow-sm hover:bg-orange-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-600 transition-all duration-300 hover:scale-105"
             >
-              CREATE YOURS FOR $79.99
+              CREATE YOURS FOR 79$
             </button>
           </motion.div>
         </div>

@@ -1,0 +1,502 @@
+/* Book Container */
+.book-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Flipbook wrapper - Center when showing single page */
+.cookbook-flipbook {
+  margin: 0 auto;
+  max-width: 100%;
+  /* React-pageflip automatically handles spreads - 
+     when closed shows single page (cover),
+     when open shows two pages side by side */
+}
+
+/* Center the flipbook container wrapper */
+.cookbook-flipbook > div {
+  margin: 0 auto;
+}
+
+/* Ensure the book viewport is centered for single page */
+.cookbook-flipbook .stf__block {
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+}
+
+/* When showing single page (cover), center it */
+.cookbook-flipbook .stf__item {
+  margin: 0 auto;
+}
+
+/* Cover Styles - Image-based covers with hardcover book depth */
+.cover {
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  border-radius: 10px 5px 5px 10px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Multiple shadows for depth - creates the "book sitting on surface" effect */
+  box-shadow: 
+    /* Outer shadow - book lifting off the page */
+    0 8px 16px rgba(0, 0, 0, 0.15),
+    0 4px 8px rgba(0, 0, 0, 0.1),
+    /* Deeper shadow for more depth */
+    0 12px 24px rgba(0, 0, 0, 0.08),
+    /* Soft ambient shadow */
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    /* Inset shadow for cover texture/depth */
+    inset 0 0 20px rgba(0, 0, 0, 0.08);
+  
+  /* Add subtle border to define edges */
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  
+  /* Subtle texture overlay for book cover feel */
+  background: 
+    /* Slight gradient overlay for depth */
+    linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.05) 100%);
+}
+
+.cover-front,
+.cover-back {
+  /* Enhance the 3D effect */
+  transform-style: preserve-3d;
+}
+
+/* Full cover image styles */
+.cover-image-full {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  
+  /* Add subtle filter for book-like texture */
+  filter: contrast(1.02) brightness(0.98);
+}
+
+/* Enhanced spine effect - more realistic book spine */
+.book-spine {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 18px;
+  background: linear-gradient(
+    90deg, 
+    rgba(0, 0, 0, 0.4) 0%, 
+    rgba(0, 0, 0, 0.25) 50%,
+    transparent 100%
+  );
+  border-radius: 10px 0 0 10px;
+  z-index: 2;
+  pointer-events: none;
+  
+  /* Add inner shadow for spine depth */
+  box-shadow: inset -2px 0 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Add subtle edge highlight for book thickness */
+.cover::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  z-index: 3;
+  pointer-events: none;
+  border-radius: 10px 0 0 10px;
+}
+
+/* Add top edge highlight */
+.cover::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    transparent 100%
+  );
+  z-index: 3;
+  pointer-events: none;
+  border-radius: 10px 5px 0 0;
+}
+
+/* Additional visual enhancements */
+/* The inset shadow is now included in the main cover box-shadow above */
+
+/* Legacy styles - kept for reference but not used with images */
+.cover-content {
+  padding: 30px 25px;
+  z-index: 1;
+}
+
+.cover-title {
+  font-family: 'Minion Pro', 'Georgia', serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  margin-bottom: 0.75rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  line-height: 1.2;
+}
+
+.cover-subtitle {
+  font-family: 'Minion Pro', 'Georgia', serif;
+  font-size: 0.875rem;
+  opacity: 0.9;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+/* Page Styles - Paper look with realistic book shadows */
+.page {
+  background-color: #fdfbf7;
+  border: 1px solid #e5ddd5;
+  padding: 25px 20px;
+  box-sizing: border-box;
+  /* Multiple shadows for realistic book page depth when open */
+  box-shadow: 
+    /* Inset shadow for paper texture */
+    inset 0 0 15px rgba(0, 0, 0, 0.05),
+    /* Outer shadow - page lifting off surface */
+    0 6px 12px rgba(0, 0, 0, 0.12),
+    0 3px 6px rgba(0, 0, 0, 0.08),
+    /* Deeper shadow for more depth */
+    0 8px 16px rgba(0, 0, 0, 0.06),
+    /* Soft ambient shadow */
+    0 2px 4px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Full-page image styles with realistic shadows */
+.image-page {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  background: transparent;
+  /* Add realistic shadows for image pages when book is open */
+  box-shadow: 
+    /* Outer shadow - page lifting off surface */
+    0 6px 12px rgba(0, 0, 0, 0.12),
+    0 3px 6px rgba(0, 0, 0, 0.08),
+    /* Deeper shadow for more depth */
+    0 8px 16px rgba(0, 0, 0, 0.06),
+    /* Soft ambient shadow */
+    0 2px 4px rgba(0, 0, 0, 0.04);
+  /* Add subtle border to define page edges */
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Subtle edge highlights for pages when book is open (similar to covers but lighter) */
+.page::before,
+.image-page::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  z-index: 2;
+  pointer-events: none;
+}
+
+.page::after,
+.image-page::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    transparent 100%
+  );
+  z-index: 2;
+  pointer-events: none;
+}
+
+.page-image-full {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.page-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Page Header */
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.page-title {
+  font-family: 'Minion Pro', 'Georgia', serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.page-category {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: lowercase;
+  font-style: italic;
+}
+
+/* Page Image */
+.page-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.recipe-image {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+  object-fit: cover;
+}
+
+/* Page Text Sections */
+.page-text {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+  margin-top: 10px;
+}
+
+.ingredients-section,
+.instructions-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section-title {
+  font-family: 'Minion Pro', 'Georgia', serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+  text-transform: capitalize;
+  border-bottom: 1px solid #d1d5db;
+  padding-bottom: 3px;
+}
+
+.ingredients-text,
+.instructions-text {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: #4b5563;
+  white-space: pre-wrap;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Page Footer */
+.page-footer {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid #e5ddd5;
+  text-align: center;
+}
+
+.page-number {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+/* Table of Contents Styles */
+.toc-page {
+  background-color: #fdfbf7;
+}
+
+.toc-content {
+  padding: 25px 20px;
+}
+
+.toc-title {
+  font-family: 'Minion Pro', 'Georgia', serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  text-align: center;
+  text-transform: lowercase;
+  color: #1f2937;
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #d1d5db;
+}
+
+.toc-section {
+  margin-bottom: 25px;
+}
+
+.toc-section-title {
+  font-family: 'Minion Pro', 'Georgia', serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: #374151;
+  margin-bottom: 10px;
+}
+
+.toc-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toc-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.toc-item-image-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid #e5ddd5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toc-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.toc-item-name {
+  font-size: 0.75rem;
+  color: #4b5563;
+  flex: 1;
+  text-transform: lowercase;
+}
+
+.toc-item-page {
+  font-size: 0.6875rem;
+  color: #9ca3af;
+  text-transform: lowercase;
+}
+
+/* Large items for right page */
+.toc-items-large {
+  gap: 16px;
+}
+
+.toc-item-large {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.toc-item-image-rect {
+  width: 120px;
+  height: 80px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 2px solid #e5ddd5;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.toc-image-large {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.toc-section-right {
+  margin-bottom: 30px;
+}
+
+/* Tap to flip hint */
+.tap-to-flip-hint {
+  margin-top: 16px;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-align: center;
+  text-transform: lowercase;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .cover-title {
+    font-size: 1.75rem;
+  }
+
+  .cover-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .page {
+    padding: 30px 20px;
+  }
+
+  .toc-content {
+    padding: 30px 25px;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .toc-title {
+    font-size: 1.25rem;
+  }
+}
+
