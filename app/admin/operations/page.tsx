@@ -78,6 +78,7 @@ export default function OperationsPage() {
   const [cookbooks, setCookbooks] = useState<Cookbook[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeWithProductionStatus | null>(null);
+  const [copiedSection, setCopiedSection] = useState<string | null>(null);
   
   // Filters
   const [statusFilter, setStatusFilter] = useState<'all' | 'no_action' | 'in_progress' | 'ready_to_print'>('all');
@@ -99,10 +100,11 @@ export default function OperationsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, cookbookFilter, userFilter, isAdmin]);
 
-  // Load all users once on initial mount (not from filtered results)
+  // Load all users and cookbooks once on initial mount (not from filtered results)
   useEffect(() => {
     if (isAdmin) {
       loadAllUsers();
+      loadAllCookbooks();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
@@ -133,6 +135,40 @@ export default function OperationsPage() {
     }
   };
 
+  const loadAllCookbooks = async () => {
+    try {
+      // Load all recipes without filters to get all cookbooks
+      const response = await fetch('/api/admin/operations/recipes');
+      
+      if (!response.ok) {
+        return;
+      }
+      
+      const data = await response.json();
+      
+      // Extract unique cookbooks from all recipes
+      const uniqueCookbooks = new Map<string, Cookbook>();
+      data.forEach((recipe: RecipeWithProductionStatus) => {
+        if (recipe.cookbook && recipe.profiles) {
+          uniqueCookbooks.set(recipe.cookbook.id, {
+            id: recipe.cookbook.id,
+            name: recipe.cookbook.name,
+            user_id: recipe.profiles.id,
+            user_name: recipe.profiles.full_name,
+            user_email: recipe.profiles.email,
+          });
+        }
+      });
+      setCookbooks(Array.from(uniqueCookbooks.values()).sort((a, b) => {
+        const nameA = a.name || '';
+        const nameB = b.name || '';
+        return nameA.localeCompare(nameB);
+      }));
+    } catch (error) {
+      console.error('Error loading cookbooks:', error);
+    }
+  };
+
   const loadRecipes = async () => {
     try {
       const params = new URLSearchParams();
@@ -156,21 +192,6 @@ export default function OperationsPage() {
       
       const data = await response.json();
       setRecipes(data);
-      
-      // Extract unique cookbooks from recipes
-      const uniqueCookbooks = new Map<string, Cookbook>();
-      data.forEach((recipe: RecipeWithProductionStatus) => {
-        if (recipe.cookbook && recipe.profiles) {
-          uniqueCookbooks.set(recipe.cookbook.id, {
-            id: recipe.cookbook.id,
-            name: recipe.cookbook.name,
-            user_id: recipe.profiles.id,
-            user_name: recipe.profiles.full_name,
-            user_email: recipe.profiles.email,
-          });
-        }
-      });
-      setCookbooks(Array.from(uniqueCookbooks.values()));
     } catch (error) {
       console.error('Error loading recipes:', error);
     }
@@ -228,6 +249,38 @@ export default function OperationsPage() {
     loadStats();
   };
 
+  const copyToClipboard = async (text: string, section: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedSection(section);
+      setTimeout(() => setCopiedSection(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      alert('Failed to copy to clipboard');
+    }
+  };
+
+  const copyEntireRecipe = async () => {
+    if (!selectedRecipe) return;
+    
+    const recipeText = `Recipe Title: ${selectedRecipe.recipe_name || 'Untitled Recipe'}
+
+Ingredients:
+${selectedRecipe.ingredients || 'No ingredients provided'}
+
+Steps:
+${selectedRecipe.instructions || 'No instructions provided'}`;
+
+    try {
+      await navigator.clipboard.writeText(recipeText);
+      setCopiedSection('entire-recipe');
+      setTimeout(() => setCopiedSection(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      alert('Failed to copy recipe to clipboard');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -244,7 +297,7 @@ export default function OperationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="bg-white border-b px-6 py-4">
         <div className="flex items-center justify-between">
@@ -262,21 +315,39 @@ export default function OperationsPage() {
       </div>
 
       {/* Dashboard Stats */}
-      <div className="bg-white border-b px-6 py-4">
+      <div className="bg-white border-b px-6 py-2">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="text-sm text-red-600 font-medium mb-1">Recipes Needing Action</div>
-            <div className="text-3xl font-bold text-red-900">{stats.recipesNeedingAction}</div>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <div className="text-sm text-red-600 font-medium">
+              Recipes Needing Action: <span className="text-red-900 font-semibold">{stats.recipesNeedingAction}</span>
+            </div>
           </div>
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <div className="text-sm text-green-600 font-medium mb-1">Recipes Ready to Print</div>
-            <div className="text-3xl font-bold text-green-900">{stats.recipesReadyToPrint}</div>
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+            <div className="text-sm text-green-600 font-medium">
+              Recipes Ready to Print: <span className="text-green-900 font-semibold">{stats.recipesReadyToPrint}</span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Filters */}
       <div className="bg-white border-b px-6 py-3 flex items-center gap-4 flex-wrap">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">Group:</label>
+          <select
+            value={cookbookFilter}
+            onChange={(e) => setCookbookFilter(e.target.value)}
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent min-w-[250px]"
+          >
+            <option value="all">All Groups</option>
+            <option value="not_in_cookbook">Not in Group</option>
+            {cookbooks.map((cookbook) => (
+              <option key={cookbook.id} value={cookbook.id}>
+                ({cookbook.user_name || cookbook.user_email}) {cookbook.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium text-gray-700">User:</label>
           <select
@@ -305,31 +376,15 @@ export default function OperationsPage() {
             <option value="ready_to_print">Ready to Print</option>
           </select>
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700">Cookbook:</label>
-          <select
-            value={cookbookFilter}
-            onChange={(e) => setCookbookFilter(e.target.value)}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-          >
-            <option value="all">All</option>
-            <option value="not_in_cookbook">Not in Cookbook</option>
-            {cookbooks.map((cookbook) => (
-              <option key={cookbook.id} value={cookbook.id}>
-                ({cookbook.user_name || cookbook.user_email}) {cookbook.name}
-              </option>
-            ))}
-          </select>
-        </div>
         <div className="text-sm text-gray-600 ml-auto">
           {recipes.length} recipe{recipes.length !== 1 ? 's' : ''}
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex h-[calc(100vh-280px)]">
+      <div className="relative flex-1 overflow-hidden">
         {/* Recipe Table */}
-        <div className="flex-1 bg-white overflow-y-auto">
+        <div className="h-full bg-white overflow-y-auto">
           <div className="p-6">
             <RecipeOperationsTable
               recipes={recipes}
@@ -339,128 +394,209 @@ export default function OperationsPage() {
           </div>
         </div>
 
-        {/* Recipe Detail Panel */}
+        {/* Recipe Detail Sheet - Right Side Overlay */}
         {selectedRecipe && (
-          <div className="w-96 bg-white border-l overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900">{selectedRecipe.recipe_name}</h2>
-                <button
-                  onClick={() => setSelectedRecipe(null)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  ✕
-                </button>
-              </div>
-              
-              {selectedRecipe.image_url && (
-                <div className="mb-6">
-                  <div className="relative aspect-square max-w-full rounded-lg overflow-hidden bg-gray-100">
-                    <Image
-                      src={selectedRecipe.image_url}
-                      alt={selectedRecipe.recipe_name}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 384px) 100vw, 384px"
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Cookbook</h3>
-                  <p className="text-sm text-gray-700">
-                    {selectedRecipe.cookbook?.name || 'Not in Cookbook'}
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Ingredients</h3>
-                  <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700 bg-gray-50 p-4 rounded-lg">
-                    {selectedRecipe.ingredients || 'No ingredients provided'}
-                  </pre>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Instructions</h3>
-                  <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700 bg-gray-50 p-4 rounded-lg">
-                    {selectedRecipe.instructions || 'No instructions provided'}
-                  </pre>
-                </div>
-
-                {selectedRecipe.comments && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Comments</h3>
-                    <p className="text-sm text-gray-700 bg-yellow-50 p-4 rounded-lg">
-                      {selectedRecipe.comments}
-                    </p>
-                  </div>
-                )}
-
-                {selectedRecipe.document_urls && selectedRecipe.document_urls.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Uploaded Files</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      {selectedRecipe.document_urls.map((url, index) => {
-                        const isPDF = url.toLowerCase().endsWith('.pdf') || url.includes('application/pdf');
-                        return (
-                          <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
-                            {isPDF ? (
-                              <a
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex flex-col items-center justify-center h-full text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
-                              >
-                                <svg className="w-16 h-16 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <span className="text-sm font-medium">PDF</span>
-                                <span className="text-xs text-gray-500 mt-1">Click to view</span>
-                              </a>
-                            ) : (
-                              <Image
-                                src={url}
-                                alt={`Uploaded image ${index + 1}`}
-                                fill
-                                className="object-cover"
-                                sizes="(max-width: 384px) 50vw, 25vw"
-                              />
-                            )}
-                          </div>
-                        );
-                      })}
+          <>
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 bg-black bg-opacity-40 z-40 transition-opacity"
+              onClick={() => setSelectedRecipe(null)}
+            />
+            
+            {/* Sheet */}
+            <div className="fixed right-0 top-0 h-full w-[65%] max-w-5xl bg-white shadow-2xl z-50 overflow-y-auto">
+              {/* Sticky Header */}
+              <div className="sticky top-0 bg-white border-b border-gray-200 z-10 shadow-sm">
+                <div className="px-10 py-6">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-3xl font-bold text-gray-900 pr-4">
+                      {selectedRecipe.recipe_name || 'Untitled Recipe'}
+                    </h2>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={copyEntireRecipe}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                        title="Copy entire recipe"
+                      >
+                        {copiedSection === 'entire-recipe' ? (
+                          <>
+                            <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span className="text-green-600">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            <span>Copy Entire Recipe</span>
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => setSelectedRecipe(null)}
+                        className="text-gray-400 hover:text-gray-600 text-3xl font-light w-12 h-12 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors flex-shrink-0"
+                        aria-label="Close"
+                      >
+                        ✕
+                      </button>
                     </div>
                   </div>
-                )}
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Production Status</h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2">
+                </div>
+                {/* Info Bar */}
+                <div className="px-10 py-3 bg-gray-50 border-t border-gray-200 flex items-center gap-6 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">Cookbook:</span>
+                    <span>{selectedRecipe.cookbook?.name || 'Not in Cookbook'}</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1.5">
                       <span className={selectedRecipe.production_status?.text_finalized_in_indesign ? 'text-green-600' : 'text-gray-400'}>
                         {selectedRecipe.production_status?.text_finalized_in_indesign ? '✓' : '○'}
                       </span>
-                      <span>Text Finalized in InDesign</span>
+                      <span>Text Finalized</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <span className={selectedRecipe.production_status?.image_generated ? 'text-green-600' : 'text-gray-400'}>
                         {selectedRecipe.production_status?.image_generated ? '✓' : '○'}
                       </span>
                       <span>Image Generated</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <span className={selectedRecipe.production_status?.image_placed_in_indesign ? 'text-green-600' : 'text-gray-400'}>
                         {selectedRecipe.production_status?.image_placed_in_indesign ? '✓' : '○'}
                       </span>
-                      <span>Image Placed in InDesign</span>
+                      <span>Image Placed</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="px-10 py-8 space-y-8">
+                {/* Recipe Image */}
+                {selectedRecipe.image_url && (
+                  <div className="rounded-xl overflow-hidden shadow-lg bg-gray-100">
+                    <div className="relative aspect-video w-full">
+                      <Image
+                        src={selectedRecipe.image_url}
+                        alt={selectedRecipe.recipe_name}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 1280px) 65vw, 50vw"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Notes Section */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-2xl font-semibold text-gray-900">
+                      Notes
+                    </h3>
+                    <button
+                      onClick={() => copyToClipboard(selectedRecipe.comments || '', 'notes')}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                      title="Copy to clipboard"
+                    >
+                      {copiedSection === 'notes' ? (
+                        <>
+                          <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span className="text-green-600">Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          <span>Copy</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <div className="bg-gray-50 border border-gray-200 p-8 rounded-lg shadow-sm">
+                    <div className="text-base text-gray-800 whitespace-pre-wrap leading-relaxed select-text font-sans">
+                      {selectedRecipe.comments || 'No notes provided'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ingredients Section */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-2xl font-semibold text-gray-900">
+                      Ingredients
+                    </h3>
+                    <button
+                      onClick={() => copyToClipboard(selectedRecipe.ingredients || '', 'ingredients')}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                      title="Copy to clipboard"
+                    >
+                      {copiedSection === 'ingredients' ? (
+                        <>
+                          <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span className="text-green-600">Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          <span>Copy</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <div className="bg-gray-50 border border-gray-200 p-8 rounded-lg shadow-sm">
+                    <div className="text-base text-gray-800 whitespace-pre-wrap leading-relaxed select-text font-sans">
+                      {selectedRecipe.ingredients || 'No ingredients provided'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Steps/Instructions Section */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-2xl font-semibold text-gray-900">
+                      Steps
+                    </h3>
+                    <button
+                      onClick={() => copyToClipboard(selectedRecipe.instructions || '', 'steps')}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                      title="Copy to clipboard"
+                    >
+                      {copiedSection === 'steps' ? (
+                        <>
+                          <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span className="text-green-600">Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          <span>Copy</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <div className="bg-gray-50 border border-gray-200 p-8 rounded-lg shadow-sm">
+                    <div className="text-base text-gray-800 whitespace-pre-wrap leading-relaxed select-text font-sans">
+                      {selectedRecipe.instructions || 'No instructions provided'}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

@@ -58,8 +58,6 @@ export function RecipeOperationsTable({
   onStatusUpdate 
 }: RecipeOperationsTableProps) {
   const [updatingRecipeId, setUpdatingRecipeId] = useState<string | null>(null);
-  const [expandedNotesId, setExpandedNotesId] = useState<string | null>(null);
-  const [notesValue, setNotesValue] = useState<Record<string, string>>({});
 
   const handleCheckboxChange = async (
     recipeId: string,
@@ -93,34 +91,6 @@ export function RecipeOperationsTable({
     }
   };
 
-  const handleNotesSave = async (recipeId: string) => {
-    setUpdatingRecipeId(recipeId);
-    
-    try {
-      const response = await fetch(`/api/admin/operations/recipes/${recipeId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ operations_notes: notesValue[recipeId] || null }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        alert(`Error saving notes: ${error.error}`);
-        return;
-      }
-
-      // Trigger refresh
-      if (onStatusUpdate) {
-        onStatusUpdate();
-      }
-    } catch (error) {
-      console.error('Error saving notes:', error);
-      alert('Failed to save notes');
-    } finally {
-      setUpdatingRecipeId(null);
-      setExpandedNotesId(null);
-    }
-  };
 
   const handleMarkAsReviewed = async (recipeId: string) => {
     if (!confirm('Mark this recipe as reviewed? This will clear the needs review flag.')) {
@@ -200,13 +170,13 @@ export function RecipeOperationsTable({
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Recipe
             </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider max-w-[250px]">
               Guest
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               User
             </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider max-w-[250px]">
               Cookbook
             </th>
             <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -222,13 +192,7 @@ export function RecipeOperationsTable({
               Status
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Notes
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Created
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Actions
             </th>
           </tr>
         </thead>
@@ -236,13 +200,12 @@ export function RecipeOperationsTable({
           {recipes.map((recipe) => {
             const productionStatus = recipe.production_status;
             const isUpdating = updatingRecipeId === recipe.id;
-            const isNotesExpanded = expandedNotesId === recipe.id;
-            const currentNotes = notesValue[recipe.id] ?? productionStatus?.operations_notes ?? '';
 
             return (
               <tr
                 key={recipe.id}
-                className={`hover:bg-gray-50 ${isUpdating ? 'opacity-50' : ''}`}
+                onClick={() => onRecipeClick?.(recipe)}
+                className={`hover:bg-gray-50 cursor-pointer ${isUpdating ? 'opacity-50' : ''}`}
               >
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex items-center gap-2">
@@ -264,8 +227,8 @@ export function RecipeOperationsTable({
                     </div>
                   </div>
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">
+                <td className="px-4 py-3 max-w-[250px]">
+                  <div className="text-sm text-gray-900 break-words">
                     {recipe.guests?.printed_name || 
                      `${recipe.guests?.first_name || ''} ${recipe.guests?.last_name || ''}`.trim() || 
                      'Unknown'}
@@ -276,8 +239,8 @@ export function RecipeOperationsTable({
                     {recipe.profiles?.full_name || recipe.profiles?.email || 'Unknown'}
                   </div>
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <div className="text-sm text-gray-500">
+                <td className="px-4 py-3 max-w-[250px]">
+                  <div className="text-sm text-gray-500 break-words">
                     {recipe.cookbook?.name || 'Not in Cookbook'}
                   </div>
                 </td>
@@ -289,6 +252,7 @@ export function RecipeOperationsTable({
                       e.stopPropagation();
                       handleCheckboxChange(recipe.id, 'text_finalized_in_indesign', e.target.checked);
                     }}
+                    onClick={(e) => e.stopPropagation()}
                     disabled={isUpdating}
                     className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
                   />
@@ -301,6 +265,7 @@ export function RecipeOperationsTable({
                       e.stopPropagation();
                       handleCheckboxChange(recipe.id, 'image_generated', e.target.checked);
                     }}
+                    onClick={(e) => e.stopPropagation()}
                     disabled={isUpdating}
                     className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
                   />
@@ -313,6 +278,7 @@ export function RecipeOperationsTable({
                       e.stopPropagation();
                       handleCheckboxChange(recipe.id, 'image_placed_in_indesign', e.target.checked);
                     }}
+                    onClick={(e) => e.stopPropagation()}
                     disabled={isUpdating}
                     className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
                   />
@@ -334,60 +300,8 @@ export function RecipeOperationsTable({
                     )}
                   </div>
                 </td>
-                <td className="px-4 py-3">
-                  {isNotesExpanded ? (
-                    <div onClick={(e) => e.stopPropagation()} className="space-y-1">
-                      <textarea
-                        value={currentNotes}
-                        onChange={(e) => setNotesValue({ ...notesValue, [recipe.id]: e.target.value })}
-                        placeholder="Add notes..."
-                        className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-black focus:border-transparent"
-                        rows={2}
-                        autoFocus
-                      />
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => handleNotesSave(recipe.id)}
-                          className="text-xs px-2 py-1 bg-black text-white rounded hover:bg-gray-800"
-                          disabled={isUpdating}
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={() => {
-                            setExpandedNotesId(null);
-                            setNotesValue({ ...notesValue, [recipe.id]: productionStatus?.operations_notes ?? '' });
-                          }}
-                          className="text-xs px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setExpandedNotesId(recipe.id);
-                        setNotesValue({ ...notesValue, [recipe.id]: productionStatus?.operations_notes ?? '' });
-                      }}
-                      className="text-xs text-gray-600 cursor-pointer hover:text-gray-900 max-w-xs truncate"
-                    >
-                      {productionStatus?.operations_notes || 'Click to add notes...'}
-                    </div>
-                  )}
-                </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                   {new Date(recipe.created_at).toLocaleDateString()}
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <button
-                    onClick={() => onRecipeClick?.(recipe)}
-                    className="text-xs px-3 py-1.5 bg-black text-white rounded hover:bg-gray-800 transition-colors font-medium"
-                    disabled={isUpdating}
-                  >
-                    See Details
-                  </button>
                 </td>
               </tr>
             );
