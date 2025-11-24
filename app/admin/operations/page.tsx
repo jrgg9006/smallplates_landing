@@ -78,6 +78,7 @@ export default function OperationsPage() {
   const [cookbooks, setCookbooks] = useState<Cookbook[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeWithProductionStatus | null>(null);
+  const [updatingField, setUpdatingField] = useState<string | null>(null);
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   
   // Filters
@@ -281,6 +282,49 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
     }
   };
 
+  const handleProductionToggle = async (
+    recipeId: string,
+    field: 'text_finalized_in_indesign' | 'image_generated' | 'image_placed_in_indesign',
+    value: boolean
+  ) => {
+    setUpdatingField(field);
+    setSelectedRecipe((prev) =>
+      prev
+        ? {
+            ...prev,
+            production_status: {
+              ...(prev.production_status || {
+                id: '',
+                text_finalized_in_indesign: false,
+                image_generated: false,
+                image_placed_in_indesign: false,
+                operations_notes: null,
+                production_completed_at: null,
+                needs_review: false,
+              }),
+              [field]: value,
+            },
+          }
+        : prev
+    );
+    try {
+      const response = await fetch(`/api/admin/operations/recipes/${recipeId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [field]: value }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update production status');
+      }
+      handleStatusUpdate();
+    } catch (error) {
+      console.error('Error updating production status from modal:', error);
+      alert('Failed to update status from modal');
+    } finally {
+      setUpdatingField(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -404,14 +448,31 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
             />
             
             {/* Sheet */}
-            <div className="fixed right-0 top-0 h-full w-[65%] max-w-5xl bg-white shadow-2xl z-50 overflow-y-auto">
+            <div className="fixed right-0 top-0 h-full w-[75%] max-w-6xl bg-white shadow-2xl z-50 overflow-y-auto">
               {/* Sticky Header */}
               <div className="sticky top-0 bg-white border-b border-gray-200 z-10 shadow-sm">
                 <div className="px-10 py-6">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-3xl font-bold text-gray-900 pr-4">
-                      {selectedRecipe.recipe_name || 'Untitled Recipe'}
-                    </h2>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-3xl font-bold text-gray-900 pr-2">
+                        {selectedRecipe.recipe_name || 'Untitled Recipe'}
+                      </h2>
+                      <button
+                        onClick={() => copyToClipboard(selectedRecipe.recipe_name || 'Untitled Recipe', 'title')}
+                        className="p-2 text-gray-500 hover:text-gray-900 rounded-full hover:bg-gray-100 transition-colors"
+                        title="Copy title"
+                      >
+                        {copiedSection === 'title' ? (
+                          <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
                     <div className="flex items-center gap-3">
                       <button
                         onClick={copyEntireRecipe}
@@ -445,30 +506,56 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
                   </div>
                 </div>
                 {/* Info Bar */}
-                <div className="px-10 py-3 bg-gray-50 border-t border-gray-200 flex items-center gap-6 text-sm text-gray-600">
+                <div className="px-10 py-3 bg-gray-50 border-t border-gray-200 flex items-center gap-6 text-sm text-gray-600 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">Shared by:</span>
+                    <span>
+                      {selectedRecipe.guests?.printed_name ||
+                        `${selectedRecipe.guests?.first_name || ''} ${selectedRecipe.guests?.last_name || ''}`.trim() ||
+                        'Unknown'}
+                    </span>
+                  </div>
                   <div className="flex items-center gap-2">
                     <span className="font-medium">Cookbook:</span>
                     <span>{selectedRecipe.cookbook?.name || 'Not in Cookbook'}</span>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1.5">
-                      <span className={selectedRecipe.production_status?.text_finalized_in_indesign ? 'text-green-600' : 'text-gray-400'}>
-                        {selectedRecipe.production_status?.text_finalized_in_indesign ? '✓' : '○'}
-                      </span>
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <label className="flex items-center gap-1.5">
+                      <input
+                        type="checkbox"
+                        checked={selectedRecipe.production_status?.text_finalized_in_indesign || false}
+                        onChange={(e) =>
+                          handleProductionToggle(selectedRecipe.id, 'text_finalized_in_indesign', e.target.checked)
+                        }
+                        disabled={updatingField !== null}
+                        className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
+                      />
                       <span>Text Finalized</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className={selectedRecipe.production_status?.image_generated ? 'text-green-600' : 'text-gray-400'}>
-                        {selectedRecipe.production_status?.image_generated ? '✓' : '○'}
-                      </span>
+                    </label>
+                    <label className="flex items-center gap-1.5">
+                      <input
+                        type="checkbox"
+                        checked={selectedRecipe.production_status?.image_generated || false}
+                        onChange={(e) =>
+                          handleProductionToggle(selectedRecipe.id, 'image_generated', e.target.checked)
+                        }
+                        disabled={updatingField !== null}
+                        className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
+                      />
                       <span>Image Generated</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className={selectedRecipe.production_status?.image_placed_in_indesign ? 'text-green-600' : 'text-gray-400'}>
-                        {selectedRecipe.production_status?.image_placed_in_indesign ? '✓' : '○'}
-                      </span>
+                    </label>
+                    <label className="flex items-center gap-1.5">
+                      <input
+                        type="checkbox"
+                        checked={selectedRecipe.production_status?.image_placed_in_indesign || false}
+                        onChange={(e) =>
+                          handleProductionToggle(selectedRecipe.id, 'image_placed_in_indesign', e.target.checked)
+                        }
+                        disabled={updatingField !== null}
+                        className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
+                      />
                       <span>Image Placed</span>
-                    </div>
+                    </label>
                   </div>
                 </div>
               </div>
