@@ -73,7 +73,7 @@ export default function HowItWorksPage() {
                 How it works!
               </h1>
               <div className="w-24 h-px bg-gray-300 mx-auto mb-8"></div>
-              <h2 className="font-serif text-2xl md:text-3xl text-gray-700 font-light italic">
+              <h2 className="font-serif text-xl md:text-xl text-gray-700 font-light italic">
                 Everything you need to create your cookbook — beautifully, easily, and with the people you love.
               </h2>
             </motion.div>

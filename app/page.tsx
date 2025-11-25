@@ -4,6 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import Banner from '@/components/landing/Banner'
 import Hero from '@/components/landing/Hero'
+import FeatureGrid from '@/components/landing/FeatureGrid'
 import TextSection from '@/components/landing/TextSection'
 import BooksPrinted from '@/components/landing/BooksPrinted'
 import WhatsIncluded from '@/components/landing/WhatsIncluded'
@@ -28,6 +29,7 @@ export default function Home() {
       <Banner />
       <main className="min-h-screen">
         <Hero />
+        <FeatureGrid />
         <TextSection />
         <BooksPrinted />
         <WhatsIncluded />

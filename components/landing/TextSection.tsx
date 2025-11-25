@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 
 export default function TextSection() {
   return (
-    <section className="bg-white py-16 md:py-32">
+    <section className="bg-white pt-12 md:pt-16 pb-16 md:pb-32">
       <div className="mx-auto max-w-7xl px-6 md:px-8">
         <div className="mx-auto max-w-5xl text-center">
           {/* Main headline */}
