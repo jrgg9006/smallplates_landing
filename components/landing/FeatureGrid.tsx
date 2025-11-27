@@ -72,7 +72,7 @@ export default function FeatureGrid() {
           
           {/* Column 1 - Title/Subtitle (spans 2 rows on desktop, no horizontal divide, vertically centered) */}
           <div className="col-span-1 md:col-span-1 md:row-span-2 border-b md:border-b-0 md:border-r border-gray-200 p-6 md:p-8 text-center md:text-left flex flex-col justify-center relative z-20">
-            <h2 className="font-serif font-bold text-[22px] md:text-[26px] leading-[115%] tracking-tighter text-gray-900">
+            <h2 className="font-serif font-bold text-[26px] md:text-[26px] leading-[115%] tracking-tighter text-gray-900">
               Everything you need
               <br />
               to create a your own
