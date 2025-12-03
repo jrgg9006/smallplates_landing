@@ -5,7 +5,7 @@ interface CTAButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export default function CTAButton({
-  label = "Create your Cookbook",
+  label = "Start Gathering",
   className = "",
   onClick,
   ...props

@@ -23,7 +23,7 @@ export default function Footer() {
               />
             </Link>
             <p className="text-base text-gray-300 max-w-md">
-              Create a unique cookbook with your loved ones&apos; recipes. We make it easy to turn memories and stories into professionally printed hardcover books.
+              Create a unique book with your loved ones&apos; small plates. We make it easy to turn memories and stories into professionally printed hardcover books.
             </p>
           </div>
           
