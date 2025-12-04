@@ -74,10 +74,10 @@ export default function WellWhatIf() {
           ref={carouselRef}
           className="whitespace-nowrap will-change-transform flex"
         >
-          <span className="font-serif font-light text-xl md:text-2xl text-gray-900 inline-block pr-8">
+          <span className="font-serif font-light text-xl md:text-xl text-gray-900 inline-block pr-8">
             FOOD STILL BELONGS TO PEOPLE  • FOOD STILL BELONGS TO PEOPLE  • FOOD STILL BELONGS TO PEOPLE  • FOOD STILL BELONGS TO PEOPLE  • 
           </span>
-          <span className="font-serif font-light text-xl md:text-2xl text-gray-900 inline-block pr-8">
+          <span className="font-serif font-light text-xl md:text-xl text-gray-900 inline-block pr-8">
             FOOD STILL BELONGS TO PEOPLE  • FOOD STILL BELONGS TO PEOPLE  • FOOD STILL BELONGS TO PEOPLE  • FOOD STILL BELONGS TO PEOPLE  • 
           </span>
         </div>

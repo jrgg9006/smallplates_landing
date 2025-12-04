@@ -1,56 +1,111 @@
+"use client";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 
 export default function TextSection() {
+  const logoRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const logo = logoRef.current;
+    if (!logo) return;
+
+    // Respect user's motion preferences
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    let t = 0;
+    let animationId: number;
+
+    // Organic, breathing animation inspired by handcrafted warmth
+    function animateLogo() {
+      if (!logo) return;
+      
+      t += 0.05; // Very slow progression for calm, editorial feel
+
+      // Gentle vertical breathing (like a resting heartbeat)
+      const breatheY = Math.sin(t * 0.8) * 4;
+
+      // Subtle horizontal sway (like gentle wind)
+      const swayX = Math.sin(t * 0.6) * 2;
+
+      // Micro-rotation for organic imperfection
+      const rotate = Math.sin(t * 0.4) * 1;
+
+      // Breathing scale (almost imperceptible)
+      const breatheScale = 1 + Math.sin(t * 0.7) * 0.1;
+
+      // Apply transform with smooth interpolation
+      logo.style.transform = `translate(${swayX}px, ${breatheY}px) rotate(${rotate}deg) scale(${breatheScale})`;
+
+      animationId = requestAnimationFrame(animateLogo);
+    }
+
+    // Start animation with slight delay for natural feel
+    const startTimeout = setTimeout(() => {
+      animateLogo();
+    }, 500);
+
+    // Cleanup
+    return () => {
+      clearTimeout(startTimeout);
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+    };
+  }, []);
+
   return (
     <section className="bg-white py-16 md:py-32">
       <div className="mx-auto max-w-7xl px-6 md:px-8">
         <div className="mx-auto max-w-5xl text-center">
-          {/* Main headline */}
-          <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-bold text-gray-900 leading-tight mb-12">
-            We believe people<br />
-            connect through Food
-          </h1>
-          
-          {/* Subheading */}
-          <div className="mb-8">
-            <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl font-medium text-gray-900">
-              That&apos;s why we created<br />
-              Small Plates & Co.
-            </h2>
+          {/* SmallPlates Logo with Organic Animation */}
+          <div className="mb-16">
+            <Image
+              ref={logoRef}
+              src="/images/logo_svg/SmallPlates_vertical_ungrouped.svg"
+              alt="Small Plates & Co."
+              width={400}
+              height={360}
+              className="logo-organic mx-auto"
+              style={{
+                willChange: 'transform',
+                transformOrigin: 'center center',
+              }}
+              priority
+            />
           </div>
           
-          {/* Beautiful Plate Image */}
-          <div className="relative w-full max-w-md mx-auto mb-12">
-            <div className="relative aspect-square overflow-hidden">
-              <Image
-                src="/images/other/plato_1.jpg"
-                alt="Artisanal ceramic plate"
-                fill
-                className="object-contain"
-                sizes="(max-width: 768px) 100vw, 400px"
-                priority
-              />
-              {/* Subtle gradient only at the very edge */}
-              <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white/40 to-transparent pointer-events-none"></div>
-            </div>
-            {/* Subtle shadow for depth */}
-            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-2/3 h-6 bg-gradient-to-b from-gray-100/10 to-transparent rounded-[50%] blur-2xl"></div>
-          </div>
-          
-          {/* Decorative line */}
-          <div className="mb-12">
-            <div className="w-32 h-0.5 bg-gray-900 mx-auto"></div>
-          </div>
-          
-          {/* Description paragraph */}
-          <div className="max-w-2xl mx-auto">
-            <p className="font-sans text-lg md:text-xl lg:text-2xl text-gray-900 leading-relaxed">
-              To capture the feeling of connection<br />
-              that only food can create.<br />
+          {/* Tagline */}
+          <div className="w-full mx-auto px-4">
+            <p className="font-serif text-4xl sm:text-5xl md:text-4xl lg:text-5xl xl:text-6xl text-gray-900 leading-tight text-center md:whitespace-nowrap">
+              Food is just the excuse.{' '}
+              <span className="block md:inline">
+                <em className="font-serif italic">People are the Point.</em>
+              </span>
             </p>
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .logo-organic {
+          transition: transform 0.08s ease-out;
+          filter: contrast(1.02) saturate(1.01);
+        }
+        
+        /* Performance optimization */
+        @media (prefers-reduced-motion: reduce) {
+          .logo-organic {
+            transform: none !important;
+          }
+        }
+        
+        /* Subtle enhancement on hover */
+        .logo-organic:hover {
+          filter: contrast(1.03) saturate(1.02);
+        }
+      `}</style>
     </section>
   );
 }
