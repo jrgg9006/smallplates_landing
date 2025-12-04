@@ -13,7 +13,7 @@ export default function WhatsIncluded() {
   ];
 
   return (
-    <section className="bg-smallplates_green py-16 md:py-20">
+    <section className="hidden bg-smallplates_green py-16 md:py-20">
       <div className="mx-auto max-w-7xl px-6 md:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-start">
           
