@@ -2,13 +2,11 @@
 
 import React, { useState } from "react";
 import { Search, ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 interface GuestTableControlsProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
-  onAddGuest: () => void;
   statusFilter: string;
   onStatusFilterChange: (status: string) => void;
   guestCounts?: {
@@ -21,7 +19,6 @@ interface GuestTableControlsProps {
 export function GuestTableControls({ 
   searchValue, 
   onSearchChange, 
-  onAddGuest,
   statusFilter,
   onStatusFilterChange,
   guestCounts
@@ -33,9 +30,9 @@ export function GuestTableControls({
       case 'all':
         return `All ${guestCounts ? `(${guestCounts.all})` : ''}`;
       case 'pending':
-        return `Pending ${guestCounts ? `(${guestCounts.pending})` : ''}`;
+        return `Guests with no recipes ${guestCounts ? `(${guestCounts.pending})` : ''}`;
       case 'submitted':
-        return `Received ${guestCounts ? `(${guestCounts.submitted})` : ''}`;
+        return `Guests with recipes ${guestCounts ? `(${guestCounts.submitted})` : ''}`;
       default:
         return 'All';
     }
@@ -72,7 +69,7 @@ export function GuestTableControls({
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                Pending {guestCounts && `(${guestCounts.pending})`}
+                Guests with no recipes {guestCounts && `(${guestCounts.pending})`}
               </button>
               <button
                 onClick={() => onStatusFilterChange('submitted')}
@@ -82,7 +79,7 @@ export function GuestTableControls({
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                Received {guestCounts && `(${guestCounts.submitted})`}
+                Guests with recipes {guestCounts && `(${guestCounts.submitted})`}
               </button>
             </div>
             
@@ -98,14 +95,6 @@ export function GuestTableControls({
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Button 
-              onClick={onAddGuest}
-              className="bg-teal-600 text-white hover:bg-teal-700 rounded-lg px-6"
-            >
-              Add Guests and Recipes
-            </Button>
-          </div>
         </div>
       </div>
 
@@ -140,7 +129,7 @@ export function GuestTableControls({
                       statusFilter === 'pending' ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-700'
                     }`}
                   >
-                    Pending {guestCounts && `(${guestCounts.pending})`}
+                    Guests with no recipes {guestCounts && `(${guestCounts.pending})`}
                   </button>
                   <button
                     onClick={() => handleStatusChange('submitted')}
@@ -148,7 +137,7 @@ export function GuestTableControls({
                       statusFilter === 'submitted' ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-700'
                     }`}
                   >
-                    Received {guestCounts && `(${guestCounts.submitted})`}
+                    Guests with recipes {guestCounts && `(${guestCounts.submitted})`}
                   </button>
                 </div>
                 {/* Overlay to close dropdown */}
@@ -172,13 +161,6 @@ export function GuestTableControls({
           </div>
         </div>
 
-        {/* Add Button - Full width */}
-        <Button 
-          onClick={onAddGuest}
-          className="w-full bg-teal-600 text-white hover:bg-teal-700 rounded-lg py-3"
-        >
-          Add Guests and Recipes
-        </Button>
       </div>
     </div>
   );

@@ -33,7 +33,7 @@ export default function ProfileNavigation({
     //   isActive: isCookbookActive
     // },
     {
-      label: "My Cookbooks",
+      label: "My Books",
       href: "/profile/groups",
       icon: Users2,
       isActive: isGroupsActive

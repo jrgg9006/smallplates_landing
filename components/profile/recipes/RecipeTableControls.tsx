@@ -72,7 +72,7 @@ export function RecipeTableControls({
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                My Own {recipeCounts && `(${recipeCounts.myOwn})`}
+                My own {recipeCounts && `(${recipeCounts.myOwn})`}
               </button>
               <button
                 onClick={() => onFilterTypeChange('collected')}
@@ -173,7 +173,7 @@ export function RecipeTableControls({
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
-              placeholder="Search by plate name, guest name, or ingredients..."
+              placeholder="Search by recipe name, guest name, or ingredients..."
               value={searchValue}
               onChange={(e) => onSearchChange(e.target.value)}
               className="pl-10 w-full border border-gray-300 rounded-lg"
@@ -184,4 +184,3 @@ export function RecipeTableControls({
     </div>
   );
 }
-

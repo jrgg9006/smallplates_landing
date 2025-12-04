@@ -94,7 +94,7 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
       });
 
       // Send invitation via API
-      const response = await fetch(`/api/v1/groups/${group.id}/invitations`, {
+      const response = await fetch(`/api/groups/${group.id}/invitations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

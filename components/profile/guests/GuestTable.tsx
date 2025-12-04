@@ -13,12 +13,13 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Guest } from "@/lib/types/database";
+import { Guest, GuestWithMeta } from "@/lib/types/database";
 import { getGuests, searchGuests, getGuestsByStatus } from "@/lib/supabase/guests";
 import { columns } from "./GuestTableColumns";
 import { Button } from "@/components/ui/button";
 import { GuestDetailsModal } from "./GuestDetailsModal";
 import { AddGuestModal } from "./AddGuestModal";
+import { AddRecipeModal } from "@/components/profile/recipes/AddRecipeModal";
 import { MobileGuestCard } from "./MobileGuestCard";
 
 interface GuestTableProps {
@@ -29,21 +30,23 @@ interface GuestTableProps {
 
 export function GuestTable({ searchValue: externalSearchValue = '', statusFilter = 'all', onDataLoaded }: GuestTableProps = {}) {
   // Data management
-  const [data, setData] = React.useState<Guest[]>([]);
+  const [data, setData] = React.useState<GuestWithMeta[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   
-  // Table state
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  // Table state - sort by updated_at descending to show most recently modified guests first
+  const [sorting, setSorting] = React.useState<SortingState>([{ id: 'updated_at', desc: true }]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({ updated_at: false });
   const [rowSelection, setRowSelection] = React.useState({});
   
   // Modal state
-  const [selectedGuest, setSelectedGuest] = React.useState<Guest | null>(null);
+  const [selectedGuest, setSelectedGuest] = React.useState<GuestWithMeta | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [modalDefaultTab, setModalDefaultTab] = React.useState<string>("guest-info");
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
+  const [isAddRecipeModalOpen, setIsAddRecipeModalOpen] = React.useState(false);
+  const [selectedGuestForRecipe, setSelectedGuestForRecipe] = React.useState<GuestWithMeta | null>(null);
   const [isModalClosing, setIsModalClosing] = React.useState(false);
   const isModalClosingRef = React.useRef(false);
   
@@ -117,9 +120,10 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
     }, searchValue.trim() ? 300 : 0); // Only debounce search, not filter changes
 
     return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchValue, statusFilter, refreshTrigger]);
 
-  const handleGuestClick = (guest: Guest) => {
+  const handleGuestClick = (guest: GuestWithMeta) => {
     console.log('handleGuestClick called, isModalClosing:', isModalClosing, 'isModalClosingRef:', isModalClosingRef.current);
     // Prevent opening if a modal just closed
     if (isModalClosing || isModalClosingRef.current) {
@@ -140,10 +144,9 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
     setModalDefaultTab("guest-info"); // Reset to default tab
   };
 
-  const handleAddRecipe = (guest: Guest) => {
-    setSelectedGuest(guest);
-    setModalDefaultTab("recipe-status");
-    setIsModalOpen(true);
+  const handleAddRecipe = (guest: GuestWithMeta) => {
+    setSelectedGuestForRecipe(guest);
+    setIsAddRecipeModalOpen(true);
   };
 
   const refreshData = () => {
@@ -152,6 +155,16 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
 
   const handleCloseAddModal = () => {
     setIsAddModalOpen(false);
+  };
+
+  const handleCloseAddRecipeModal = () => {
+    setIsAddRecipeModalOpen(false);
+    setSelectedGuestForRecipe(null);
+  };
+
+  const handleRecipeAdded = () => {
+    refreshData(); // Refresh guest data to update recipe counts
+    handleCloseAddRecipeModal();
   };
 
   const table = useReactTable({
@@ -181,6 +194,11 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    initialState: {
+      pagination: {
+        pageSize: 20,
+      },
+    },
     state: {
       sorting,
       columnFilters,
@@ -218,15 +236,21 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
 
       {/* Desktop Table Layout */}
       <div className="hidden md:block">
-        <div className="overflow-hidden rounded-lg border border-gray-200">
-          <table className="w-full border-collapse bg-white">
+        <div className="rounded-lg border border-gray-200 bg-white overflow-x-auto">
+          <table className="w-full border-collapse table-fixed">
             <thead className="bg-gray-50 border-b border-gray-200">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-8 py-5 text-left tracking-wide"
+                      className={`px-8 py-3 tracking-wide ${
+                        header.column.id === 'status' || header.column.id === 'recipes_received' 
+                          ? 'text-center' 
+                          : header.column.id === 'actions'
+                          ? 'text-right'
+                          : 'text-left'
+                      }`}
                     >
                       {header.isPlaceholder
                         ? null
@@ -250,24 +274,66 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
                       e.preventDefault();
                       handleGuestClick(row.original);
                     }}
+                    style={{ overflow: 'visible' }}
                   >
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="px-8 py-6 whitespace-nowrap">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </td>
-                    ))}
+                    {row.getVisibleCells().map((cell) => {
+                      // Center align for status and recipes_received columns
+                      const isCenteredColumn = cell.column.id === 'status' || cell.column.id === 'recipes_received';
+                      // Right align for actions column
+                      const isRightAlignedColumn = cell.column.id === 'actions';
+                      return (
+                        <td 
+                          key={cell.id} 
+                          className={`px-8 py-4 whitespace-nowrap ${
+                            isCenteredColumn ? 'text-center' : isRightAlignedColumn ? 'text-right' : ''
+                          }`}
+                          style={{ overflow: 'visible' }}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td
                     colSpan={columns.length}
-                    className="h-24 text-center text-gray-500 px-8 py-6"
+                    className="px-8 py-12"
                   >
-                    No guests found.
+                    <div className="text-center">
+                      <div className="mb-6">
+                        <h3 className="text-2xl font-serif font-semibold text-gray-500 mb-3">
+                          Welcome to Small Plates!
+                        </h3>
+                        <p className="text-lg text-gray-500 mb-6">
+                          You&apos;re all set! Now let&apos;s start building your recipe collection.
+                        </p>
+                      </div>
+                      
+                      <div className="bg-gray-50 rounded-xl p-6 max-w-md mx-auto mb-6">
+                        <h4 className="font-semibold text-gray-500 mb-4">Start by:</h4>
+                        <div className="space-y-3 text-left">
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 bg-gray-400 text-white rounded-full flex items-center justify-center text-sm font-bold mt-0.5">1</div>
+                            <div>
+                              <p className="font-medium text-gray-500">Adding guests and their favorite recipes</p>
+                              <p className="text-sm text-gray-500">Keep track of what everyone loves to cook</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 bg-gray-400 text-white rounded-full flex items-center justify-center text-sm font-bold mt-0.5">2</div>
+                            <div>
+                              <p className="font-medium text-gray-500">Sharing your Recipe Collector link</p>
+                              <p className="text-sm text-gray-500">Let friends and family submit their own recipes</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </td>
                 </tr>
               )}
@@ -301,8 +367,37 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
             ))}
           </div>
         ) : (
-          <div className="bg-white border border-gray-200 rounded-lg p-8 text-center text-gray-500">
-            No guests found.
+          <div className="bg-white border border-gray-200 rounded-lg p-8">
+            <div className="text-center">
+              <div className="mb-6">
+                <h3 className="text-2xl font-serif font-semibold text-gray-500 mb-3">
+                  Welcome to Small Plates!
+                </h3>
+                <p className="text-lg text-gray-500 mb-6">
+                  You&apos;re all set! Now let&apos;s start building your recipe collection.
+                </p>
+              </div>
+              
+              <div className="bg-gray-50 rounded-xl p-6 mb-6">
+                <h4 className="font-semibold text-gray-500 mb-4">Start by:</h4>
+                <div className="space-y-3 text-left">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-gray-400 text-white rounded-full flex items-center justify-center text-sm font-bold mt-0.5">1</div>
+                    <div>
+                      <p className="font-medium text-gray-500">Adding guests and their favorite recipes</p>
+                      <p className="text-sm text-gray-500">Keep track of what everyone loves to cook</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-gray-400 text-white rounded-full flex items-center justify-center text-sm font-bold mt-0.5">2</div>
+                    <div>
+                      <p className="font-medium text-gray-500">Sharing your Recipe Collector link</p>
+                      <p className="text-sm text-gray-500">Let friends and family submit their own recipes</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -350,6 +445,13 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
         isOpen={isAddModalOpen}
         onClose={handleCloseAddModal}
         onGuestAdded={refreshData}
+      />
+
+      <AddRecipeModal
+        isOpen={isAddRecipeModalOpen}
+        onClose={handleCloseAddRecipeModal}
+        onRecipeAdded={handleRecipeAdded}
+        preselectedGuestId={selectedGuestForRecipe?.id || null}
       />
     </div>
   );

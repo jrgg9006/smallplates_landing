@@ -136,14 +136,17 @@ export async function getGroupRecipes(groupId: string): Promise<{ data: RecipeWi
     };
   });
 
-  // Sort by display_order, then by created_at
+  // Sort by display_order, then by added_at (newest first)
   recipes.sort((a: any, b: any) => {
     const orderA = a.display_order ?? 999;
     const orderB = b.display_order ?? 999;
     if (orderA !== orderB) {
       return orderA - orderB;
     }
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    // If display_order is the same, show newest recipes first (by added_at, then created_at)
+    const addedAtA = new Date(a.added_at || a.created_at).getTime();
+    const addedAtB = new Date(b.added_at || b.created_at).getTime();
+    return addedAtB - addedAtA;
   });
 
   return { data: recipes as RecipeWithGuest[], error: null };
@@ -174,20 +177,21 @@ export async function addRecipeToGroup(groupId: string, recipeId: string, note?:
   }
 
   // Add recipe to group using the join table
-  const { data: groupRecipe, error: insertError } = await supabase
+  const { error: insertError } = await supabase
     .from('group_recipes')
     .insert({
       group_id: groupId,
       recipe_id: recipeId,
       added_by: user.id,
       note
-    })
-    .select()
-    .single();
+    });
 
   if (insertError) {
     return { data: null, error: insertError.message };
   }
+
+  // Also add to group cookbook if it exists (this will put it at the top)
+  await addRecipeToGroupCookbook(recipeId, groupId, note);
 
   // Return the recipe with its details
   const { data: recipe, error: recipeError } = await supabase
@@ -401,6 +405,9 @@ export async function createRecipeInGroup(recipeData: Omit<GuestRecipeInsert, 'u
   if (groupError) {
     return { data: null, error: groupError.message };
   }
+
+  // Also add to group cookbook (this will put it at the top)
+  await addRecipeToGroupCookbook(recipe.id, groupId);
 
   return { data: recipe, error: null };
 }
@@ -630,17 +637,18 @@ export async function addRecipeToGroupCookbook(recipeId: string, groupId: string
     return { data: null, error: 'Recipe is already in the group cookbook' };
   }
 
-  // Get next display order
-  const { count, error: countError } = await supabase
+  // Get all existing recipes to update their display order
+  const { data: existingRecipes, error: fetchError } = await supabase
     .from('cookbook_recipes')
-    .select('*', { count: 'exact', head: true })
-    .eq('cookbook_id', cookbook.id);
+    .select('id, display_order')
+    .eq('cookbook_id', cookbook.id)
+    .order('display_order', { ascending: true });
 
-  if (countError) {
-    return { data: null, error: countError.message };
+  if (fetchError) {
+    console.warn('Warning: Could not fetch existing recipes for reordering:', fetchError);
   }
 
-  // Add recipe to cookbook
+  // Add recipe to cookbook at position 1 (top of the list)
   const { data, error } = await supabase
     .from('cookbook_recipes')
     .insert({
@@ -648,10 +656,27 @@ export async function addRecipeToGroupCookbook(recipeId: string, groupId: string
       recipe_id: recipeId,
       user_id: user.id,
       note,
-      display_order: (count || 0) + 1,
+      display_order: 1,
     })
     .select()
     .single();
+
+  // If insertion was successful, update existing recipes' display order
+  if (!error && existingRecipes && existingRecipes.length > 0) {
+    // Move all existing recipes down by 1
+    const updates = existingRecipes.map(recipe => ({
+      id: recipe.id,
+      display_order: (recipe.display_order || 0) + 1
+    }));
+
+    // Batch update existing recipes
+    for (const update of updates) {
+      await supabase
+        .from('cookbook_recipes')
+        .update({ display_order: update.display_order })
+        .eq('id', update.id);
+    }
+  }
 
   if (error) {
     console.error('Error adding recipe to group cookbook:', error);

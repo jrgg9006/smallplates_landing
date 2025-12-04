@@ -200,7 +200,7 @@ export default function ProfilePage() {
       loadGuestCounts();
       
       // Check if user needs waitlist conversion (backup safety net)
-      fetch('/api/v1/auth/check-conversion', {
+      fetch('/api/auth/check-conversion', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       }).catch(error => {

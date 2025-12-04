@@ -68,3 +68,186 @@ export async function getProfileById(userId: string) {
 
   return { data, error: error?.message || null };
 }
+
+/**
+ * Update personal information (name, phone)
+ */
+export async function updatePersonalInfo(updates: { full_name?: string; phone_number?: string | null }) {
+  const supabase = createSupabaseClient();
+  
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .update(updates)
+    .eq('id', user.id)
+    .select()
+    .single();
+
+  return { data, error: error?.message || null };
+}
+
+/**
+ * Update user email (requires email verification)
+ */
+export async function updateEmail(newEmail: string, currentPassword: string) {
+  const supabase = createSupabaseClient();
+  
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  // Verify current password first
+  const { error: verifyError } = await supabase.auth.signInWithPassword({
+    email: user.email!,
+    password: currentPassword
+  });
+
+  if (verifyError) {
+    return { data: null, error: 'Current password is incorrect' };
+  }
+
+  // Update email via Supabase Auth (triggers verification email)
+  const { data, error } = await supabase.auth.updateUser({
+    email: newEmail
+  });
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data, error: null };
+}
+
+/**
+ * Update user password
+ */
+export async function updatePassword(currentPassword: string, newPassword: string) {
+  const supabase = createSupabaseClient();
+  
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  // Verify current password first
+  const { error: verifyError } = await supabase.auth.signInWithPassword({
+    email: user.email!,
+    password: currentPassword
+  });
+
+  if (verifyError) {
+    return { data: null, error: 'Current password is incorrect' };
+  }
+
+  // Update password
+  const { data, error } = await supabase.auth.updateUser({
+    password: newPassword
+  });
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data, error: null };
+}
+
+/**
+ * Delete user account (irreversible)
+ */
+export async function deleteAccount(currentPassword: string) {
+  const supabase = createSupabaseClient();
+  
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  // Verify current password first
+  const { error: verifyError } = await supabase.auth.signInWithPassword({
+    email: user.email!,
+    password: currentPassword
+  });
+
+  if (verifyError) {
+    return { data: null, error: 'Current password is incorrect' };
+  }
+
+  // Note: This function requires admin privileges on Supabase
+  // For now, we'll mark the profile as deleted and let admin handle the actual deletion
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ 
+      email: `deleted_${Date.now()}@deleted.local`,
+      full_name: 'Deleted User',
+      phone_number: null,
+      collection_enabled: false
+    })
+    .eq('id', user.id)
+    .select()
+    .single();
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  // Sign out the user
+  await supabase.auth.signOut();
+
+  return { data, error: null };
+}
+
+/**
+ * Update custom share message
+ */
+export async function updateShareMessage(customMessage: string) {
+  const supabase = createSupabaseClient();
+  
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  // Validate message length
+  if (customMessage.length > 280) {
+    return { data: null, error: 'Message must be 280 characters or less' };
+  }
+
+  if (customMessage.trim().length === 0) {
+    return { data: null, error: 'Message cannot be empty' };
+  }
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ custom_share_message: customMessage.trim() })
+    .eq('id', user.id)
+    .select()
+    .single();
+
+  return { data, error: error?.message || null };
+}
+
+/**
+ * Reset custom share message to null (use default)
+ */
+export async function resetShareMessage() {
+  const supabase = createSupabaseClient();
+  
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ custom_share_message: null })
+    .eq('id', user.id)
+    .select()
+    .single();
+
+  return { data, error: error?.message || null };
+}

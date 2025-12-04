@@ -1,40 +1,50 @@
 "use client";
 
-import React, { useState } from "react";
-import { Guest } from "@/lib/types/database";
-import { Mail, ArrowUp, Trash2, Phone, User } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { GuestSource, GuestWithMeta } from "@/lib/types/database";
+import { Mail, ArrowUp, Trash2, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeleteGuestModal } from "./DeleteGuestModal";
 import { SendMessageModal } from "./SendMessageModal";
 import { archiveGuest } from "@/lib/supabase/guests";
+import Image from "next/image";
+import { getGuestProfileIcon } from "@/lib/utils/profileIcons";
 
 interface MobileGuestCardProps {
-  guest: Guest;
+  guest: GuestWithMeta;
   onModalClose?: () => void;
   onGuestDeleted?: () => void;
-  onAddRecipe?: (guest: Guest) => void;
-  onRowClick?: (guest: Guest) => void;
+  onAddRecipe?: (guest: GuestWithMeta) => void;
+  onRowClick?: (guest: GuestWithMeta) => void;
 }
 
 // Status badge component for mobile
-function MobileStatusBadge({ status }: { status: Guest["status"] }) {
+function MobileStatusBadge({ status, source }: { status: GuestWithMeta["status"]; source?: GuestSource | null }) {
   const styles = {
     pending: "bg-gray-100 text-gray-700",
     submitted: "bg-green-100 text-green-700", 
     reached_out: "bg-green-100 text-green-700",
   };
 
-  const labels = {
+  const labels: Record<GuestWithMeta["status"], string> = {
     pending: "Pending",
     submitted: "Received",
     reached_out: "Reached Out",
   };
 
+  const sourceLabels: Record<GuestSource, string> = {
+    manual: "Added Manually",
+    collection: "Collection Link",
+  };
+
+  const displayLabel =
+    status === 'submitted' && source ? sourceLabels[source] : labels[status];
+
   return (
     <span
       className={`inline-flex items-center rounded-full font-medium px-3 py-1 text-sm ${styles[status]}`}
     >
-      {labels[status]}
+      {displayLabel}
     </span>
   );
 }
@@ -49,20 +59,38 @@ export function MobileGuestCard({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Guest name display logic
   const fullName = `${guest.first_name} ${guest.last_name || ''}`.trim();
   const hasPrintedName = guest.printed_name && guest.printed_name.trim();
-  const displayName = hasPrintedName ? guest.printed_name : fullName;
+  const displayName = hasPrintedName ? guest.printed_name! : fullName;
   const showSubtitle = hasPrintedName;
 
   // Contact info validation
   const hasEmail = guest.email && guest.email.trim() && !guest.email.startsWith('NO_EMAIL_');
-  const hasPhone = guest.phone && guest.phone.trim();
-  const hasContactInfo = hasEmail || hasPhone;
+  const hasContactInfo = hasEmail;
 
   // Recipe count display
   const showRecipeCount = guest.status !== 'pending';
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -122,8 +150,16 @@ export function MobileGuestCard({
         {/* Name Section */}
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <User className="h-4 w-4 text-gray-400 flex-shrink-0" />
+            <div className="flex items-center gap-3 mb-1">
+              <div className="flex-shrink-0">
+                <Image
+                  src={getGuestProfileIcon(guest.id, guest.is_self)}
+                  alt="Chef profile icon"
+                  width={48}
+                  height={48}
+                  className="rounded-full"
+                />
+              </div>
               <div>
                 <div className="font-medium text-gray-900 text-base">
                   {displayName}
@@ -139,28 +175,10 @@ export function MobileGuestCard({
           
           {/* Status Badge */}
           <div className="flex-shrink-0">
-            <MobileStatusBadge status={guest.status} />
+            <MobileStatusBadge status={guest.status} source={guest.latest_recipe_source} />
           </div>
         </div>
 
-        {/* Contact Info Section */}
-        <div className="space-y-2">
-          {/* Email */}
-          <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
-            <span className="text-sm text-gray-600">
-              {hasEmail ? guest.email : <span className="text-red-500">No email</span>}
-            </span>
-          </div>
-          
-          {/* Phone */}
-          <div className="flex items-center gap-2">
-            <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
-            <span className="text-sm text-gray-600">
-              {hasPhone ? guest.phone : <span className="text-red-500">No mobile</span>}
-            </span>
-          </div>
-        </div>
 
         {/* Recipe Count (if applicable) */}
         {showRecipeCount && (
@@ -204,19 +222,38 @@ export function MobileGuestCard({
             Add Recipe
           </Button>
           
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex items-center gap-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 ml-auto"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowDeleteModal(true);
-            }}
-            title="Delete guest"
-          >
-            <Trash2 className="h-4 w-4" />
-            Delete
-          </Button>
+          {/* 3 Dots Menu */}
+          <div className="relative ml-auto" ref={dropdownRef}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex items-center justify-center p-1 h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDropdown(!showDropdown);
+              }}
+              title="More options"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+            
+            {/* Dropdown Menu */}
+            {showDropdown && (
+              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-[120px]">
+                <button
+                  className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDropdown(false);
+                    setShowDeleteModal(true);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

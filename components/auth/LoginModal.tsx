@@ -40,7 +40,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           setError(error);
         } else {
           onClose();
-          router.push("/profile");
+          router.push("/profile/groups");
         }
       } else if (mode === "forgot-password") {
         const { error } = await resetPassword(email);

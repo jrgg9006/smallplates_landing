@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Guest } from "@/lib/types/database";
 import { updateGuest } from "@/lib/supabase/guests";
-import { addRecipe, getRecipesByGuest } from "@/lib/supabase/recipes";
+import { getRecipesByGuest } from "@/lib/supabase/recipes";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import {
   Tabs,
   TabsContent,
@@ -19,7 +19,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { EditRecipeModal } from "./EditRecipeModal";
+import Image from "next/image";
+import { getGuestProfileIcon } from "@/lib/utils/profileIcons";
 
 interface GuestDetailsModalProps {
   guest: Guest | null;
@@ -30,29 +31,35 @@ interface GuestDetailsModalProps {
 }
 
 export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defaultTab = "guest-info" }: GuestDetailsModalProps) {
+  // Responsive hook to detect mobile
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640); // sm breakpoint
+    // Check immediately
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Also check on component mount with a more reliable method
+  useEffect(() => {
+    if (typeof window !== 'undefined' && isOpen) {
+      const mobile = window.innerWidth < 640;
+      setIsMobile(mobile);
+      console.log('GuestDetailsModal: Mobile detection:', mobile, 'Window width:', window.innerWidth);
+    }
+  }, [isOpen]);
+
   const [firstName, setFirstName] = useState(guest?.first_name || '');
   const [lastName, setLastName] = useState(guest?.last_name || '');
   const [printedName, setPrintedName] = useState(guest?.printed_name || '');
   const [email, setEmail] = useState(guest?.email || '');
-  // const [phone, setPhone] = useState(guest?.phone || '');
+  const [phone, setPhone] = useState(guest?.phone || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // Recipe state
-  const [recipeTitle, setRecipeTitle] = useState('');
-  const [recipeSteps, setRecipeSteps] = useState('');
-  const [recipeInstructions, setRecipeInstructions] = useState('');
-  const [recipeNotes, setRecipeNotes] = useState('');
-  const [savingRecipe, setSavingRecipe] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [recipes, setRecipes] = useState<any[]>([]);
-  const [editingRecipe, setEditingRecipe] = useState<any | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-  // Helper function to check if a recipe is complete
-  const isRecipeComplete = (recipe: any) => {
-    return recipe.recipe_name && (recipe.ingredients || recipe.instructions);
-  };
 
   // Function to fetch recipes for this guest
   const fetchRecipes = React.useCallback(async () => {
@@ -70,37 +77,17 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
     }
   }, [guest]);
 
-  // Handle edit recipe
-  const handleEditRecipe = (recipe: any) => {
-    setEditingRecipe(recipe);
-    setIsEditModalOpen(true);
-  };
-
-  // Handle recipe updated from edit modal
-  const handleRecipeUpdated = () => {
-    fetchRecipes();
-    if (onGuestUpdated) {
-      onGuestUpdated();
-    }
-  };
-
   // Update state when guest changes or modal opens
   React.useEffect(() => {
     if (guest && isOpen) {
       setFirstName(guest.first_name);
       setLastName(guest.last_name);
       setPrintedName(guest.printed_name || '');
-      setEmail(guest.email?.startsWith('NO_EMAIL_') ? '' : guest.email);
-      // setPhone(guest.phone || '');
+      setEmail(guest.email);
+      setPhone(guest.phone || '');
       setError(null); // Clear any previous errors
       setSuccessMessage(null); // Clear any previous success messages
       setLoading(false);
-      setSavingRecipe(false);
-      // Reset recipe form
-      setRecipeTitle('');
-      setRecipeSteps('');
-      setRecipeInstructions('');
-      setRecipeNotes('');
       // Fetch recipes for this guest
       fetchRecipes();
     }
@@ -124,8 +111,8 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
         first_name: firstName.trim(),
         last_name: lastName.trim() || '',
         printed_name: printedName.trim() || null,
-        email: email.trim() || 'NO_EMAIL_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11),
-        // phone: phone.trim() || null,
+        email: email.trim() || '',
+        phone: phone.trim() || null,
       };
 
       // Update the guest in the database
@@ -135,25 +122,6 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
         setError(error);
         setLoading(false);
         return;
-      }
-
-      // If recipe data is provided, add the recipe for the guest
-      if (recipeTitle || recipeInstructions || recipeSteps) {
-        const recipeData = {
-          recipe_name: recipeTitle || 'Untitled Recipe',
-          ingredients: recipeSteps || '',
-          instructions: recipeInstructions || '',
-          comments: recipeNotes || ''
-        };
-
-        const { error: recipeError } = await addRecipe(guest.id, recipeData);
-        
-        if (recipeError) {
-          console.error('Error adding recipe:', recipeError);
-          setError(recipeError);
-          setLoading(false);
-          return;
-        }
       }
 
       // Success! Close modal and refresh the guest list
@@ -172,62 +140,6 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
     }
   };
 
-  const handleAddRecipe = async () => {
-    if (!guest) return;
-    
-    if (!recipeTitle && !recipeInstructions && !recipeSteps) {
-      setError('Please add at least some recipe information');
-      return;
-    }
-
-    setSavingRecipe(true);
-    setError(null); // Clear any previous errors
-
-    try {
-      const recipeData = {
-        recipe_name: recipeTitle || 'Untitled Recipe',
-        ingredients: recipeSteps || '',
-        instructions: recipeInstructions || '',
-        comments: recipeNotes || ''
-      };
-
-      const { data, error: recipeError } = await addRecipe(guest.id, recipeData);
-      
-      if (recipeError) {
-        console.error('Recipe error:', recipeError);
-        setError(recipeError);
-        setSavingRecipe(false);
-        return;
-      }
-
-      // Success! Reset recipe form
-      setRecipeTitle('');
-      setRecipeSteps('');
-      setRecipeInstructions('');
-      setRecipeNotes('');
-      
-      // Clear any lingering errors and show success
-      setError(null);
-      setSuccessMessage('Recipe added successfully!');
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(null), 3000);
-      
-      // Refresh the guest data and recipes after a short delay to ensure database is updated
-      setTimeout(() => {
-        if (onGuestUpdated) {
-          onGuestUpdated();
-        }
-        fetchRecipes(); // Refresh the recipes list
-      }, 500);
-      
-    } catch (err) {
-      console.error('Unexpected error adding recipe:', err);
-      setError('An unexpected error occurred');
-    } finally {
-      setSavingRecipe(false);
-    }
-  };
 
   if (!guest) return null;
 
@@ -237,7 +149,7 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
       case 'pending':
         return 'Pending';
       case 'submitted':
-        return 'Received';
+        return 'Submitted';
       case 'reached_out':
         return 'Reached Out';
       default:
@@ -258,13 +170,39 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
     }
   };
 
-  return (
+  // Content component to be reused in both mobile and desktop versions
+  const modalContent = (
     <>
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
-        <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="font-serif text-2xl font-semibold mb-4">Edit Guest</DialogTitle>
-        </DialogHeader>
+        
+        {/* Guest Profile Section */}
+        <div className="flex-shrink-0 flex items-center gap-4 pt-0 pb-4 border-b border-gray-200">
+          <div className="flex-shrink-0">
+            <Image
+              src={getGuestProfileIcon(guest.id, guest.is_self)}
+              alt="Guest profile icon"
+              width={96}
+              height={96}
+              className="rounded-full"
+            />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-xl font-medium text-gray-900">
+              {guest.printed_name || `${guest.first_name} ${guest.last_name || ''}`.trim()}
+            </h3>
+            {guest.printed_name && (
+              <p className="text-sm text-gray-500 mt-1">
+                {`${guest.first_name} ${guest.last_name || ''}`.trim()}
+              </p>
+            )}
+            <div className="mt-2">
+              <span
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeStyle(guest.status)}`}
+              >
+                {getStatusLabel(guest.status)}
+              </span>
+            </div>
+          </div>
+        </div>
         
         <Tabs 
           defaultValue={defaultTab} 
@@ -286,8 +224,8 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="guest-info" className="flex-1 overflow-y-auto mt-6 px-1">
-            <div className="space-y-4 pb-24 pr-2">
+          <TabsContent value="guest-info" className="flex-1 overflow-y-auto mt-6 px-2">
+            <div className="space-y-4 pb-24 pr-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="firstName" className="text-sm font-medium text-gray-600">First Name</Label>
@@ -323,25 +261,20 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
               </p>
             </div>
             
-            {/* Hidden temporarily - Plus One section */}
-            {/* <div>
-              <button className="text-sm text-blue-600 hover:underline">+ Add Plus One</button>
-            </div> */}
-            
             <div>
-              <div className="flex items-center gap-3">
-                <Label className="text-sm font-medium text-gray-600">Status</Label>
+              <Label className="text-sm font-medium text-gray-600">Status</Label>
+              <div className="mt-1 text-sm">
                 <span
                   className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeStyle(guest.status)}`}
                 >
                   {getStatusLabel(guest.status)}
                 </span>
+                {guest.date_message_sent && (
+                  <div className="mt-2 text-xs text-gray-500">
+                    Message sent on {new Date(guest.date_message_sent).toLocaleDateString()}
+                  </div>
+                )}
               </div>
-              {guest.date_message_sent && (
-                <div className="mt-2 text-xs text-gray-500">
-                  Message sent on {new Date(guest.date_message_sent).toLocaleDateString()}
-                </div>
-              )}
             </div>
             
             <div>
@@ -353,36 +286,22 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
               {/* Recipe Titles List */}
               {recipes.length > 0 && (
                 <div className="mt-4">
-                  <div className="text-sm font-medium text-gray-600 mb-2">Recipe Titles</div>
+                  <div className="text-xs font-medium text-gray-500 mb-2">Recipe Titles:</div>
                   <div className="space-y-2">
-                    {recipes.map((recipe) => {
-                      const isComplete = isRecipeComplete(recipe);
-                      return (
-                        <div 
-                          key={recipe.id} 
-                          className="flex items-center gap-2 text-sm"
-                        >
-                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0"></div>
-                          <span className="text-gray-700 flex-1">
-                            {recipe.recipe_name || 'Untitled Recipe'}
-                          </span>
-                          {!isComplete && (
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700">
-                              Incomplete
-                            </span>
-                          )}
-                          <button
-                            onClick={() => handleEditRecipe(recipe)}
-                            className="text-xs text-gray-600 hover:text-gray-800 underline"
-                          >
-                            Edit
-                          </button>
-                          <span className="text-xs text-gray-400">
-                            ({new Date(recipe.created_at).toLocaleDateString()})
-                          </span>
-                        </div>
-                      );
-                    })}
+                    {recipes.map((recipe) => (
+                      <div 
+                        key={recipe.id} 
+                        className="flex items-center gap-2 text-sm"
+                      >
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0"></div>
+                        <span className="text-gray-700 truncate">
+                          {recipe.recipe_name || (recipe.raw_recipe_text ? 'Full Recipe Received' : 'Untitled Recipe')}
+                        </span>
+                        <span className="text-xs text-gray-400 flex-shrink-0">
+                          ({new Date(recipe.created_at).toLocaleDateString()})
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -396,8 +315,8 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
             </div>
           </TabsContent>
           
-          <TabsContent value="contact-info" className="flex-1 overflow-y-auto mt-6 px-1">
-            <div className="space-y-4 pb-24 pr-2">
+          <TabsContent value="contact-info" className="flex-1 overflow-y-auto mt-6 px-2">
+            <div className="space-y-4 pb-24 pr-4">
             <div>
               <Label htmlFor="email" className="text-sm font-medium text-gray-600">Email</Label>
               <Input
@@ -408,14 +327,26 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
                 className="mt-1"
               />
             </div>
+            
+            <div>
+              <Label htmlFor="phone" className="text-sm font-medium text-gray-600">Phone</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder=""
+                className="mt-1"
+              />
+            </div>
             </div>
           </TabsContent>
           
-          <TabsContent value="recipe-status" className="flex-1 overflow-y-auto mt-6 px-1">
-            <div className="space-y-6 pb-24 pr-2">
+          <TabsContent value="recipe-status" className="flex-1 overflow-y-auto mt-6 px-2">
+            <div className="space-y-6 pb-24 pr-4">
               <div>
-                <div className="flex items-center gap-3">
-                  <label className="text-sm font-medium text-gray-600">Guest Status</label>
+                <label className="text-sm font-medium text-gray-600">Guest Status</label>
+                <div className="mt-2">
                   <span
                     className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeStyle(guest.status)}`}
                   >
@@ -435,71 +366,6 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
                   )}
                 </div>
               </div>
-
-              {/* Add Recipe Form */}
-              <div className="border-t pt-6">
-                <h3 className="text-sm font-medium text-gray-900 mb-4">Add Recipe</h3>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="recipeTitle" className="text-sm font-medium text-gray-600">Recipe Title</Label>
-                    <Input
-                      id="recipeTitle"
-                      value={recipeTitle}
-                      onChange={(e) => setRecipeTitle(e.target.value)}
-                      className="mt-1"
-                      placeholder="Recipe name"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="recipeSteps" className="text-sm font-medium text-gray-600">Ingredients</Label>
-                    <textarea
-                      id="recipeSteps"
-                      value={recipeSteps}
-                      onChange={(e) => setRecipeSteps(e.target.value)}
-                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[100px]"
-                      placeholder="List the ingredients needed for this recipe"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="recipeInstructions" className="text-sm font-medium text-gray-600">Instructions</Label>
-                    <textarea
-                      id="recipeInstructions"
-                      value={recipeInstructions}
-                      onChange={(e) => setRecipeInstructions(e.target.value)}
-                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[150px]"
-                      placeholder="If you have the recipe all in one single piece, just paste in here"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="recipeNotes" className="text-sm font-medium text-gray-600">Notes</Label>
-                    <textarea
-                      id="recipeNotes"
-                      value={recipeNotes}
-                      onChange={(e) => setRecipeNotes(e.target.value)}
-                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[80px]"
-                      placeholder="Any additional notes about this recipe"
-                    />
-                  </div>
-                  
-                  <div className="pt-2">
-                    <Label className="text-sm font-medium text-gray-600 mb-2 block">Recipe Image</Label>
-                    <Button 
-                      type="button"
-                      onClick={() => console.log('Add image placeholder')}
-                      className="bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md px-4 py-2"
-                    >
-                      Add Image
-                    </Button>
-                    <p className="text-xs text-gray-500 mt-2">
-                      This image will serve as inspiration to our image generator algorithms.
-                    </p>
-                  </div>
-                  
-                </div>
-              </div>
             </div>
           </TabsContent>
         </Tabs>
@@ -517,31 +383,64 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
             <p className="text-sm text-green-600">{successMessage}</p>
           </div>
         )}
-        
-        {/* Save Button - Fixed position in bottom right */}
-        <div className="absolute bottom-6 right-6">
-          <Button 
-            onClick={handleSave}
-            disabled={loading}
-            className="bg-black text-white hover:bg-gray-800 px-6 py-2 rounded-full disabled:opacity-50"
-          >
-            {loading ? 'Saving...' : 
-             (recipeTitle || recipeInstructions || recipeSteps) ? 'Save Recipe & Guest' : 'Save Guest'}
-          </Button>
-        </div>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Edit Recipe Modal */}
-      <EditRecipeModal
-        recipe={editingRecipe}
-        isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setEditingRecipe(null);
-        }}
-        onRecipeUpdated={handleRecipeUpdated}
-      />
     </>
+  );
+
+  // Mobile version - Sheet that slides up from bottom
+  if (isMobile) {
+    return (
+      <Sheet open={isOpen} onOpenChange={onClose}>
+        <SheetContent side="bottom" className="!h-[85vh] !max-h-[85vh] rounded-t-[20px] flex flex-col overflow-hidden p-0">
+          <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300" />
+          
+          <div className="p-6 flex flex-col h-full overflow-hidden">
+            <SheetHeader className="px-0">
+              <SheetTitle className="font-serif text-2xl font-semibold mb-4">Edit Guest</SheetTitle>
+            </SheetHeader>
+            
+            <div className="flex-1 overflow-hidden flex flex-col">
+              {modalContent}
+            </div>
+            
+            {/* Save Button */}
+            <div className="mt-4 pb-safe">
+              <Button 
+                onClick={handleSave}
+                disabled={loading}
+                className="w-full bg-black text-white hover:bg-gray-800 py-3 rounded-full disabled:opacity-50"
+              >
+                {loading ? 'Saving...' : 'Save'}
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  // Desktop version - Sheet that slides from right
+  return (
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent side="right" className="!w-[45%] !max-w-none h-full flex flex-col overflow-hidden">
+        <SheetHeader>
+          <SheetTitle className="font-serif text-2xl font-semibold mb-4">Edit Guest</SheetTitle>
+        </SheetHeader>
+        
+        <div className="flex-1 overflow-hidden flex flex-col relative">
+          {modalContent}
+          
+          {/* Save Button - Fixed position in bottom right */}
+          <div className="absolute bottom-6 right-6">
+            <Button 
+              onClick={handleSave}
+              disabled={loading}
+              className="bg-black text-white hover:bg-gray-800 px-6 py-2 rounded-full disabled:opacity-50"
+            >
+              {loading ? 'Saving...' : 'Save'}
+            </Button>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }

@@ -159,7 +159,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
         // Step 4: Redirect to profile immediately (user is already logged in!)
         console.log('🎉 Redirecting to profile...');
-        router.push("/profile");
+        router.push("/profile/groups");
 
       } catch (err) {
         console.error("Onboarding completion error:", err);
