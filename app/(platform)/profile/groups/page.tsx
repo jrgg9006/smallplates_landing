@@ -3,7 +3,7 @@
 import React from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { GroupsSection, type GroupsSectionRef } from "@/components/profile/groups/GroupsSection";
 import type { GroupWithMembers } from "@/lib/types/database";
@@ -26,6 +26,7 @@ export default function GroupsPage() {
   const groupsSectionRef = useRef<GroupsSectionRef>(null);
   const [selectedGroup, setSelectedGroup] = useState<GroupWithMembers | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [groupsLoading, setGroupsLoading] = useState(true);
   
   // Onboarding context
   const { 
@@ -87,25 +88,50 @@ export default function GroupsPage() {
     }
   }, [user, loading, router]);
 
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  // Handle GroupsSection loading state changes
+  const handleGroupsLoadingChange = useCallback((isLoading: boolean) => {
+    console.log('GroupsSection loading changed:', isLoading);
+    setGroupsLoading(isLoading);
+  }, []);
+
+  // Safety timeout: if loading takes too long, show content anyway
+  useEffect(() => {
+    if (groupsLoading) {
+      const timeout = setTimeout(() => {
+        console.warn('Groups loading timeout - showing content anyway');
+        setGroupsLoading(false);
+      }, 10000); // 10 seconds timeout
+      return () => clearTimeout(timeout);
+    }
+  }, [groupsLoading]);
 
   // Show login redirect
   if (!user) {
+    if (loading) {
+      return (
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      );
+    }
     return null; // Will redirect via useEffect
   }
 
   return (
     <div className="min-h-screen bg-white text-gray-700">
+      {/* Show loading overlay while groups are loading */}
+      {(loading || groupsLoading) && (
+        <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      )}
+
       {/* Welcome Overlay */}
       {showWelcomeOverlay && (
         <WelcomeOverlay
@@ -295,8 +321,8 @@ export default function GroupsPage() {
           </div>
         </div>
 
-        {/* Groups Content */}
-        <GroupsSection ref={groupsSectionRef} onGroupChange={handleGroupChange} />
+        {/* Groups Content - Always render so it can start loading */}
+        <GroupsSection ref={groupsSectionRef} onGroupChange={handleGroupChange} onLoadingChange={handleGroupsLoadingChange} />
       </div>
     </div>
   );

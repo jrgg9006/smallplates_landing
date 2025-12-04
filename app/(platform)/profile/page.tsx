@@ -56,6 +56,8 @@ export default function ProfilePage() {
     pending: 0,
     submitted: 0
   });
+  const [guestCountsLoading, setGuestCountsLoading] = useState(true);
+  const [initialDataLoading, setInitialDataLoading] = useState(true);
   const [isFirstRecipeModalOpen, setIsFirstRecipeModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [collectionUrl, setCollectionUrl] = useState<string>('');
@@ -162,10 +164,13 @@ export default function ProfilePage() {
   };
 
   // Load guest counts for tab badges
-  const loadGuestCounts = async () => {
+  const loadGuestCounts = async (isInitialLoad = false) => {
     if (!user?.id) return;
 
     try {
+      if (isInitialLoad) {
+        setGuestCountsLoading(true);
+      }
       const { data: guests, error } = await getGuests(false);
       
       if (error) {
@@ -184,8 +189,24 @@ export default function ProfilePage() {
       }
     } catch (err) {
       console.error('Error in loadGuestCounts:', err);
+    } finally {
+      if (isInitialLoad) {
+        setGuestCountsLoading(false);
+      }
     }
   };
+
+  // Track when initial data loading is complete
+  useEffect(() => {
+    if (user?.id && !progressLoading && !guestCountsLoading) {
+      // Both progress and guest counts have been loaded (or attempted)
+      // Set a small delay to ensure all state updates are complete
+      const timer = setTimeout(() => {
+        setInitialDataLoading(false);
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [user?.id, progressLoading, guestCountsLoading]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -197,7 +218,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user?.id) {
       loadProgressData();
-      loadGuestCounts();
+      loadGuestCounts(true); // Pass true to indicate initial load
       
       // Check if user needs waitlist conversion (backup safety net)
       fetch('/api/auth/check-conversion', {
@@ -218,10 +239,13 @@ export default function ProfilePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshTrigger, user?.id]);
 
-  if (loading) {
+  if (loading || initialDataLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
       </div>
     );
   }

@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { addRecipe, addUserRecipe, addRecipeWithFiles } from "@/lib/supabase/recipes";
 import { addRecipeToCookbook } from "@/lib/supabase/cookbooks";
-import { addRecipeToGroupCookbook, addRecipeToGroup } from "@/lib/supabase/groupRecipes";
+import { addRecipeToGroup } from "@/lib/supabase/groupRecipes";
 import { getGuests } from "@/lib/supabase/guests";
 import { getCurrentProfile } from "@/lib/supabase/profiles";
 import { Guest } from "@/lib/types/database";
@@ -305,19 +305,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
           }
         }
 
-        // Always add group recipes to the group's shared cookbook
-        if (createdRecipeId) {
-          console.log('DEBUG: Adding recipe to group cookbook', { recipeId: createdRecipeId, groupId });
-          const { error: addToCookbookError } = await addRecipeToGroupCookbook(createdRecipeId, groupId);
-          if (addToCookbookError) {
-            console.error('Failed to add recipe to group cookbook:', addToCookbookError);
-            console.warn('Plate was created successfully, but there was an issue adding it to the shared cookbook. The plate may still have been added.');
-            // Continue with success flow - don't block the user if recipe was likely added
-          }
-          console.log('DEBUG: Group cookbook addition completed');
-        } else {
-          console.log('DEBUG: No createdRecipeId, skipping cookbook addition');
-        }
+        // Note: addRecipeToGroup already adds the recipe to the group cookbook automatically
       } else {
         // Regular recipe creation (not for a group)
         if (uploadMethod === 'image') {

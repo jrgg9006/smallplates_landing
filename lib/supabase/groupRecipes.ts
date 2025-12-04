@@ -393,21 +393,12 @@ export async function createRecipeInGroup(recipeData: Omit<GuestRecipeInsert, 'u
     return { data: null, error: recipeError.message };
   }
 
-  // Add the recipe to the group
-  const { error: groupError } = await supabase
-    .from('group_recipes')
-    .insert({
-      group_id: groupId,
-      recipe_id: recipe.id,
-      added_by: user.id,
-    });
+  // Add the recipe to the group (this will automatically add to cookbook too)
+  const { error: groupError } = await addRecipeToGroup(groupId, recipe.id);
 
   if (groupError) {
-    return { data: null, error: groupError.message };
+    return { data: null, error: groupError };
   }
-
-  // Also add to group cookbook (this will put it at the top)
-  await addRecipeToGroupCookbook(recipe.id, groupId);
 
   return { data: recipe, error: null };
 }

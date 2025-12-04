@@ -17,6 +17,7 @@ import type { GroupWithMembers } from "@/lib/types/database";
 
 interface GroupsSectionProps {
   onGroupChange?: (group: GroupWithMembers | null) => void;
+  onLoadingChange?: (loading: boolean) => void;
 }
 
 export interface GroupsSectionRef {
@@ -28,9 +29,10 @@ export interface GroupsSectionRef {
   openAddExistingRecipeModal: () => void;
   openAddNewRecipeModal: () => void;
   handleGroupChange: (group: GroupWithMembers) => void;
+  loading: boolean;
 }
 
-export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({ onGroupChange }, ref) => {
+export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({ onGroupChange, onLoadingChange }, ref) => {
   const [groups, setGroups] = useState<GroupWithMembers[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<GroupWithMembers | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -53,13 +55,20 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
     onEditGroup: handleEditGroup,
     openAddExistingRecipeModal: () => setAddRecipesModalOpen(true),
     openAddNewRecipeModal: () => setAddNewRecipeModalOpen(true),
-    handleGroupChange: handleGroupChange
-  }));
+    handleGroupChange: handleGroupChange,
+    loading: loading
+  }), [selectedGroup, groups, loading]);
   
   useEffect(() => {
     loadGroups();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Notify parent when loading state changes
+  useEffect(() => {
+    console.log('GroupsSection loading state:', loading);
+    onLoadingChange?.(loading);
+  }, [loading, onLoadingChange]);
 
   // Load user role when selected group changes
   useEffect(() => {
@@ -86,6 +95,7 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
       
       if (groupsError) {
         setError(groupsError);
+        setLoading(false);
         return;
       }
       

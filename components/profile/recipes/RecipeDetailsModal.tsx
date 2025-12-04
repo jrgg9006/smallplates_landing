@@ -26,6 +26,9 @@ interface RecipeDetailsModalProps {
 export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }: RecipeDetailsModalProps) {
   const { user } = useAuth();
   
+  // Local state for recipe to allow immediate updates after editing
+  const [localRecipe, setLocalRecipe] = useState<RecipeWithGuest | null>(recipe);
+  
   // Responsive hook to detect mobile
   const [isMobile, setIsMobile] = useState(false);
   
@@ -41,6 +44,13 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
   // Cookbooks state
   const [cookbookNames, setCookbookNames] = useState<string[]>([]);
   const [loadingCookbooks, setLoadingCookbooks] = useState(false);
+
+  // Update local recipe when prop changes
+  useEffect(() => {
+    if (recipe) {
+      setLocalRecipe(recipe);
+    }
+  }, [recipe]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 640); // sm breakpoint
@@ -67,26 +77,26 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
 
   // Initialize form state when entering edit mode
   useEffect(() => {
-    if (recipe && isEditMode) {
-      setRecipeTitle(recipe.recipe_name || '');
-      setRecipeIngredients(recipe.ingredients || '');
-      setRecipeInstructions(recipe.instructions || '');
-      setRecipeNotes(recipe.comments || '');
+    if (localRecipe && isEditMode) {
+      setRecipeTitle(localRecipe.recipe_name || '');
+      setRecipeIngredients(localRecipe.ingredients || '');
+      setRecipeInstructions(localRecipe.instructions || '');
+      setRecipeNotes(localRecipe.comments || '');
       setError(null);
     }
-  }, [recipe, isEditMode]);
+  }, [localRecipe, isEditMode]);
 
   // Load cookbooks for the recipe when modal opens
   useEffect(() => {
     const loadCookbooks = async () => {
-      if (!recipe || !isOpen) {
+      if (!localRecipe || !isOpen) {
         setCookbookNames([]);
         return;
       }
 
       setLoadingCookbooks(true);
       try {
-        const { data, error } = await getCookbooksForRecipe(recipe.id);
+        const { data, error } = await getCookbooksForRecipe(localRecipe.id);
         if (error) {
           console.error('Error loading cookbooks:', error);
           setCookbookNames([]);
@@ -102,7 +112,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
     };
 
     loadCookbooks();
-  }, [recipe, isOpen]);
+  }, [localRecipe, isOpen]);
 
   const handleCancel = () => {
     setIsEditMode(false);
@@ -110,7 +120,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
   };
 
   const handleSave = async () => {
-    if (!recipe) return;
+    if (!localRecipe) return;
 
     // Validation
     if (!recipeTitle.trim()) {
@@ -134,7 +144,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
         comments: recipeNotes.trim() || null,
       };
 
-      const { error: updateError } = await updateRecipe(recipe.id, updates);
+      const { error: updateError } = await updateRecipe(localRecipe.id, updates);
 
       if (updateError) {
         setError(updateError);
@@ -142,7 +152,15 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
         return;
       }
 
-      // Success!
+      // Success! Update local recipe state immediately
+      setLocalRecipe({
+        ...localRecipe,
+        recipe_name: recipeTitle.trim(),
+        ingredients: recipeIngredients.trim(),
+        instructions: recipeInstructions.trim(),
+        comments: recipeNotes.trim() || null,
+      });
+      
       setIsEditMode(false);
       
       // Refresh parent component if callback provided
@@ -158,11 +176,11 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
   };
 
   // Check if current user created this recipe (can edit recipes they created, regardless of guest attribution)
-  const isOwnRecipe = user && recipe && recipe.user_id === user.id;
+  const isOwnRecipe = user && localRecipe && localRecipe.user_id === user.id;
 
-  if (!recipe) return null;
+  if (!localRecipe) return null;
 
-  const guest = recipe.guests;
+  const guest = localRecipe.guests;
   const guestName = guest 
     ? (guest.printed_name || `${guest.first_name} ${guest.last_name || ''}`.trim())
     : 'Unknown Guest';
@@ -171,7 +189,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
     : null;
   const guestEmail = guest?.email || null;
 
-  const sourceLabel = recipe.guests?.source === 'collection'
+  const sourceLabel = localRecipe.guests?.source === 'collection'
     ? 'Collected from link'
     : 'Added manually';
 
@@ -196,7 +214,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
       <div className="flex-shrink-0 flex items-center gap-4 pb-8 mb-8 border-b border-gray-200">
         <div className="flex-shrink-0">
           <Image
-            src={getGuestProfileIcon(recipe.guest_id, recipe.guests?.is_self === true)}
+            src={getGuestProfileIcon(localRecipe.guest_id, localRecipe.guests?.is_self === true)}
             alt="Guest profile icon"
             width={64}
             height={64}
@@ -213,7 +231,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
             </p>
           )}
           <p className="text-xs text-gray-400 mt-1 font-sans">
-            ({sourceLabel}). Added on {new Date(recipe.created_at).toLocaleDateString('en-US', {
+            ({sourceLabel}). Added on {new Date(localRecipe.created_at).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
               day: 'numeric'
@@ -227,7 +245,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <h2 className="font-serif text-4xl font-semibold text-gray-900 leading-tight mb-2">
-              {recipe.recipe_name || 'Untitled Recipe'}
+              {localRecipe.recipe_name || 'Untitled Recipe'}
             </h2>
             <p className="font-serif italic text-lg text-gray-700">
               Shared by {guestName}
@@ -246,20 +264,20 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
       </div>
 
       {/* Comments/Notes - Full width above ingredients and instructions */}
-      {recipe.comments && recipe.comments.trim() && (
+      {localRecipe.comments && localRecipe.comments.trim() && (
         <div className="flex-shrink-0 mb-8">
           <pre className="whitespace-pre-wrap font-sans font-light text-base text-gray-700 leading-relaxed m-0">
-            {recipe.comments}
+            {localRecipe.comments}
           </pre>
         </div>
       )}
 
       {/* Uploaded Files Section - if document_urls exist */}
-      {recipe.document_urls && recipe.document_urls.length > 0 && (
+      {localRecipe.document_urls && localRecipe.document_urls.length > 0 && (
         <div className="flex-shrink-0 mb-8">
           <h3 className="text-sm font-medium text-gray-600 mb-3">Uploaded Files</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {recipe.document_urls.map((url, index) => {
+            {localRecipe.document_urls.map((url, index) => {
               const isPDF = url.toLowerCase().endsWith('.pdf') || url.includes('application/pdf');
               return (
                 <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200">
@@ -303,9 +321,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
       <div className="flex-1 grid grid-cols-[3fr_7fr] gap-8 pb-6">
         {/* Left Column - Ingredients */}
         <div className="flex flex-col min-w-0 overflow-hidden">
-          {recipe.ingredients && recipe.ingredients.trim() ? (
+          {localRecipe.ingredients && localRecipe.ingredients.trim() ? (
             <pre className="whitespace-pre-wrap break-words font-sans font-light text-base text-gray-700 leading-relaxed m-0 overflow-wrap-anywhere">
-              {recipe.ingredients}
+              {localRecipe.ingredients}
             </pre>
           ) : (
             <p className="text-sm text-gray-400 italic font-sans font-light m-0">No ingredients provided</p>
@@ -314,9 +332,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
 
         {/* Right Column - Instructions */}
         <div className="flex flex-col min-w-0 overflow-hidden">
-          {recipe.instructions && recipe.instructions.trim() ? (
+          {localRecipe.instructions && localRecipe.instructions.trim() ? (
             <pre className="whitespace-pre-wrap break-words font-serif text-lg text-gray-700 leading-relaxed m-0 overflow-wrap-anywhere">
-              {recipe.instructions}
+              {localRecipe.instructions}
             </pre>
           ) : (
             <p className="text-sm text-gray-400 italic font-serif m-0">No instructions provided</p>
@@ -333,7 +351,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
       <div className="flex-shrink-0 flex items-center gap-3 pb-6 mb-6 border-b border-gray-200">
         <div className="flex-shrink-0">
           <Image
-            src={getGuestProfileIcon(recipe.guest_id, recipe.guests?.is_self === true)}
+            src={getGuestProfileIcon(localRecipe.guest_id, localRecipe.guests?.is_self === true)}
             alt="Guest profile icon"
             width={56}
             height={56}
@@ -350,7 +368,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
             </p>
           )}
           <p className="text-xs text-gray-400 mt-1 font-sans">
-            ({sourceLabel}). Added on {new Date(recipe.created_at).toLocaleDateString('en-US', {
+            ({sourceLabel}). Added on {new Date(localRecipe.created_at).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
               day: 'numeric'
@@ -364,7 +382,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <h2 className="font-serif text-3xl font-semibold text-gray-900 leading-tight mb-2">
-              {recipe.recipe_name || 'Untitled Recipe'}
+              {localRecipe.recipe_name || 'Untitled Recipe'}
             </h2>
             <p className="font-serif italic text-base text-gray-700">
               Shared by {guestName}
@@ -383,20 +401,20 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
       </div>
 
       {/* Comments/Notes - Above ingredients and instructions */}
-      {recipe.comments && recipe.comments.trim() && (
+      {localRecipe.comments && localRecipe.comments.trim() && (
         <div className="flex-shrink-0 mb-6">
           <pre className="whitespace-pre-wrap font-sans font-light text-base text-gray-700 leading-relaxed m-0">
-            {recipe.comments}
+            {localRecipe.comments}
           </pre>
         </div>
       )}
 
       {/* Uploaded Files Section - if document_urls exist */}
-      {recipe.document_urls && recipe.document_urls.length > 0 && (
+      {localRecipe.document_urls && localRecipe.document_urls.length > 0 && (
         <div className="flex-shrink-0 mb-6">
           <h3 className="text-sm font-medium text-gray-600 mb-3">Uploaded Files</h3>
           <div className="grid grid-cols-2 gap-3">
-            {recipe.document_urls.map((url, index) => {
+            {localRecipe.document_urls.map((url, index) => {
               const isPDF = url.toLowerCase().endsWith('.pdf') || url.includes('application/pdf');
               return (
                 <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200">
@@ -440,9 +458,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
       <div className="flex-1 space-y-6 pb-6">
         {/* Ingredients */}
         <div>
-          {recipe.ingredients && recipe.ingredients.trim() ? (
+          {localRecipe.ingredients && localRecipe.ingredients.trim() ? (
             <pre className="whitespace-pre-wrap font-sans font-light text-base text-gray-700 leading-relaxed m-0">
-              {recipe.ingredients}
+              {localRecipe.ingredients}
             </pre>
           ) : (
             <p className="text-sm text-gray-400 italic font-sans font-light m-0">No ingredients provided</p>
@@ -451,9 +469,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
 
         {/* Instructions */}
         <div>
-          {recipe.instructions && recipe.instructions.trim() ? (
+          {localRecipe.instructions && localRecipe.instructions.trim() ? (
             <pre className="whitespace-pre-wrap font-serif text-base text-gray-700 leading-relaxed m-0">
-              {recipe.instructions}
+              {localRecipe.instructions}
             </pre>
           ) : (
             <p className="text-sm text-gray-400 italic font-serif m-0">No instructions provided</p>
@@ -470,7 +488,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
       <div className="flex-shrink-0 flex items-center gap-4 pb-8 mb-8 border-b border-gray-200">
         <div className="flex-shrink-0">
           <Image
-            src={getGuestProfileIcon(recipe.guest_id, recipe.guests?.is_self === true)}
+            src={getGuestProfileIcon(localRecipe.guest_id, localRecipe.guests?.is_self === true)}
             alt="Guest profile icon"
             width={64}
             height={64}
@@ -487,7 +505,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
             </p>
           )}
           <p className="text-xs text-gray-400 mt-1 font-sans">
-            Added on {new Date(recipe.created_at).toLocaleDateString('en-US', {
+            Added on {new Date(localRecipe.created_at).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
               day: 'numeric'
@@ -560,7 +578,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
       <div className="flex-shrink-0 flex items-center gap-3 pb-6 mb-6 border-b border-gray-200">
         <div className="flex-shrink-0">
           <Image
-            src={getGuestProfileIcon(recipe.guest_id, recipe.guests?.is_self === true)}
+            src={getGuestProfileIcon(localRecipe.guest_id, localRecipe.guests?.is_self === true)}
             alt="Guest profile icon"
             width={56}
             height={56}
@@ -577,7 +595,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
             </p>
           )}
           <p className="text-xs text-gray-400 mt-1 font-sans">
-            Added on {new Date(recipe.created_at).toLocaleDateString('en-US', {
+            Added on {new Date(localRecipe.created_at).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
               day: 'numeric'

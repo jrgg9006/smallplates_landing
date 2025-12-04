@@ -43,7 +43,7 @@ function Step1() {
         {/* Question */}
         <div className="text-center mb-8">
           <h2 className="text-xl font-medium text-gray-900 mb-2">
-            How many recipes are you planning to add (approx)?
+            How many plates are you planning to add (approx)?
           </h2>
           <p className="text-gray-600">
             This can change in the future. Dont´t worry about it too much.

@@ -10,9 +10,9 @@ export default function WellWhatIf() {
   const customerFears = [
     "I don't get enough plates",
     "people don't want to share",
-    "my friends forget to bring them",
+    "my friends forget to send them",
     "it's too much work to organize",
-    "what if it gets awkward"
+    "it gets awkward"
   ];
   
   const [currentFearIndex, setCurrentFearIndex] = useState(0);
@@ -102,6 +102,20 @@ export default function WellWhatIf() {
               >
                 "{customerFears[currentFearIndex]}"...
               </p>
+            </div>
+          </div>
+
+          {/* Hand Passing Plate Illustration - Small */}
+          <div className="flex justify-center mt-4 md:mt-6 lg:mt-8 mb-16 md:mb-20 lg:mb-24">
+            <div className="relative w-28 md:w-36 lg:w-44">
+              <Image
+                src="/images/landing/hand_passing.png"
+                alt="Hands passing a plate"
+                width={180}
+                height={180}
+                className="w-full h-auto object-contain"
+                priority
+              />
             </div>
           </div>
 
