@@ -48,12 +48,12 @@ export function CreateCookbookModal({
 
   const handleCreate = async () => {
     if (!name.trim()) {
-      setError('Please enter a cookbook name');
+      setError('Please enter a book name');
       return;
     }
 
     if (name.length > MAX_NAME_LENGTH) {
-      setError(`Cookbook name cannot exceed ${MAX_NAME_LENGTH} characters`);
+      setError(`Book name cannot exceed ${MAX_NAME_LENGTH} characters`);
       return;
     }
 
@@ -89,7 +89,7 @@ export function CreateCookbookModal({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl font-semibold">
-            Create New Cookbook
+            Create New Book
           </DialogTitle>
           <DialogDescription>
             Give your cookbook a name and optional description
@@ -101,7 +101,7 @@ export function CreateCookbookModal({
           <div>
             <div className="flex items-center justify-between mb-1">
               <Label htmlFor="name" className="text-sm font-medium text-gray-600">
-                Cookbook Name *
+                Book Name *
               </Label>
               <span className={`text-xs ${
                 name.length > MAX_NAME_LENGTH 

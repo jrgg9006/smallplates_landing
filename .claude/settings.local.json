@@ -24,7 +24,9 @@
       "Bash(npm run dev:*)",
       "Bash(curl:*)",
       "Bash(kill:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(chmod:*)",
+      "Bash(npm test)"
     ],
     "deny": []
   }

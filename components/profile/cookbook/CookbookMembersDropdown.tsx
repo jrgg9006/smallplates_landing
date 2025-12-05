@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Users, Crown, Shield, User as UserIcon, UserPlus } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Users, Crown, Shield, User as UserIcon, UserPlus, Mail, MoreHorizontal, RotateCcw, X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { getGroupMembers } from "@/lib/supabase/groupMembers";
+import { getGroupPendingInvitations, type GroupInvitation } from "@/lib/supabase/groupInvitations";
 import type { GroupMemberWithProfile, Cookbook } from "@/lib/types/database";
 
 interface CookbookMembersDropdownProps {
@@ -20,13 +21,22 @@ interface CookbookMembersDropdownProps {
 }
 
 export function CookbookMembersDropdown({ cookbook, onInviteFriend }: CookbookMembersDropdownProps) {
+  console.log('🔵 CookbookMembersDropdown component rendered!', cookbook.id);
   const [members, setMembers] = useState<GroupMemberWithProfile[]>([]);
+  const [pendingInvitations, setPendingInvitations] = useState<GroupInvitation[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingInvitations, setLoadingInvitations] = useState(false);
   const [memberCount, setMemberCount] = useState(0);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const menuRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const [dropdownPositions, setDropdownPositions] = useState<{ [key: string]: { top: number; right: number } }>({});
+  const buttonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
   useEffect(() => {
     if (cookbook.is_group_cookbook && cookbook.group_id) {
       loadMembers();
+      loadPendingInvitations();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cookbook.group_id, cookbook.is_group_cookbook]);
@@ -53,6 +63,143 @@ export function CookbookMembersDropdown({ cookbook, onInviteFriend }: CookbookMe
       setLoading(false);
     }
   };
+
+  const loadPendingInvitations = async () => {
+    if (!cookbook.group_id) return;
+    
+    try {
+      setLoadingInvitations(true);
+      const { data, error } = await getGroupPendingInvitations(cookbook.group_id);
+      
+      if (error) {
+        console.error('Error loading pending invitations:', error);
+        return;
+      }
+      
+      if (data) {
+        setPendingInvitations(data);
+      }
+    } catch (err) {
+      console.error('Error loading pending invitations:', err);
+    } finally {
+      setLoadingInvitations(false);
+    }
+  };
+
+  const handleResendInvitation = async (invitationId: string) => {
+    console.log('🖱️ Resend button clicked!', invitationId);
+    setActionLoading(invitationId);
+    setOpenMenuId(null);
+    
+    try {
+      const response = await fetch(`/api/v1/groups/${cookbook.group_id}/invitations/${invitationId}/resend`, {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(`Error: ${data.error || 'Failed to resend invitation'}`);
+        return;
+      }
+
+      console.log('✅ Invitation resent successfully');
+    } catch (err) {
+      console.error('Error resending invitation:', err);
+      alert('Failed to resend invitation. Please try again.');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleCancelInvitation = async (invitationId: string) => {
+    console.log('🚀 handleCancelInvitation called with:', invitationId);
+    if (!confirm('Are you sure you want to cancel this invitation? The person will no longer be able to join using the invitation link.')) {
+      console.log('❌ User canceled the confirmation dialog');
+      return;
+    }
+    console.log('✅ User confirmed cancellation, proceeding...');
+
+    setActionLoading(invitationId);
+    setOpenMenuId(null);
+    
+    try {
+      const response = await fetch(`/api/v1/groups/${cookbook.group_id}/invitations/${invitationId}`, {
+        method: 'PATCH',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(`Error: ${data.error || 'Failed to cancel invitation'}`);
+        return;
+      }
+
+      await loadPendingInvitations();
+      console.log('✅ Invitation canceled successfully');
+    } catch (err) {
+      console.error('Error canceling invitation:', err);
+      alert('Failed to cancel invitation. Please try again.');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleToggleMenu = (e: React.MouseEvent<HTMLButtonElement>, invitationId: string) => {
+    e.stopPropagation();
+    
+    if (openMenuId === invitationId) {
+      setOpenMenuId(null);
+      setDropdownPositions(prev => {
+        const newPositions = { ...prev };
+        delete newPositions[invitationId];
+        return newPositions;
+      });
+    } else {
+      if (openMenuId) {
+        setOpenMenuId(null);
+      }
+      
+      const button = e.currentTarget;
+      const buttonRect = button.getBoundingClientRect();
+      const estimatedDropdownHeight = 80;
+      const spaceBelow = window.innerHeight - buttonRect.bottom;
+      const spaceAbove = buttonRect.top;
+      const rightPosition = window.innerWidth - buttonRect.right;
+      
+      let topPosition: number;
+      if (spaceBelow < estimatedDropdownHeight + 10 && spaceAbove > estimatedDropdownHeight + 10) {
+        topPosition = buttonRect.top - estimatedDropdownHeight - 4;
+      } else {
+        topPosition = buttonRect.bottom + 4;
+      }
+      
+      setDropdownPositions(prev => ({
+        ...prev,
+        [invitationId]: { top: topPosition, right: rightPosition }
+      }));
+      
+      setOpenMenuId(invitationId);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (openMenuId && menuRefs.current[openMenuId]) {
+        if (!menuRefs.current[openMenuId]?.contains(event.target as Node)) {
+          setOpenMenuId(null);
+        }
+      }
+    };
+
+    if (openMenuId) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [openMenuId]);
 
   const getRoleIcon = (role: string) => {
     switch (role) {
@@ -109,7 +256,8 @@ export function CookbookMembersDropdown({ cookbook, onInviteFriend }: CookbookMe
   }
 
   return (
-    <DropdownMenu>
+    <>
+      <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="flex items-center gap-2" disabled={loading}>
           <Users className="h-4 w-4" />
@@ -199,7 +347,123 @@ export function CookbookMembersDropdown({ cookbook, onInviteFriend }: CookbookMe
             </DropdownMenuItem>
           </>
         )}
+
+        {/* Pending Invitations Section */}
+        {pendingInvitations.length > 0 && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="flex items-center gap-2 text-xs text-gray-500 font-normal">
+              <Mail className="h-3 w-3" />
+              Invited ({pendingInvitations.length})
+            </DropdownMenuLabel>
+            {loadingInvitations ? (
+              <DropdownMenuItem disabled>
+                <div className="text-sm text-gray-500">Loading invitations...</div>
+              </DropdownMenuItem>
+            ) : (
+              pendingInvitations.map((invitation) => {
+                const nameParts = invitation.name?.trim().split(' ') || [];
+                const firstName = nameParts[0] || '';
+                const lastName = nameParts.slice(1).join(' ') || '';
+                const isMenuOpen = openMenuId === invitation.id;
+                const isLoading = actionLoading === invitation.id;
+                
+                return (
+                  <DropdownMenuItem 
+                    key={invitation.id} 
+                    className="flex items-center gap-2 py-2 cursor-default relative"
+                    onMouseDown={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm text-gray-700 truncate">
+                        {firstName} {lastName}
+                      </div>
+                      <div className="text-xs text-gray-500 truncate">
+                        {invitation.email}
+                      </div>
+                    </div>
+                    <div className="relative flex-shrink-0" ref={(el) => { menuRefs.current[invitation.id] = el; }}>
+                      <button
+                        ref={(el) => { buttonRefs.current[invitation.id] = el; }}
+                        type="button"
+                        onClick={(e) => handleToggleMenu(e, invitation.id)}
+                        className="p-1 rounded hover:bg-gray-100 transition-colors"
+                        disabled={isLoading}
+                        aria-label="Invitation options"
+                      >
+                        <MoreHorizontal className="h-4 w-4 text-gray-500" />
+                      </button>
+                    </div>
+                  </DropdownMenuItem>
+                );
+              })
+            )}
+          </>
+        )}
       </DropdownMenuContent>
-    </DropdownMenu>
+      </DropdownMenu>
+
+    {/* Render overlay and menus OUTSIDE DropdownMenu */}
+    {openMenuId && (
+      <div 
+        className="fixed inset-0 z-[90]" 
+        onClick={() => {
+          setOpenMenuId(null);
+          setDropdownPositions(prev => {
+            const newPositions = { ...prev };
+            if (openMenuId) {
+              delete newPositions[openMenuId];
+            }
+            return newPositions;
+          });
+        }}
+      />
+    )}
+
+    {/* Render menus for all open invitations */}
+    {pendingInvitations.map((invitation) => {
+      const isMenuOpen = openMenuId === invitation.id;
+      const position = dropdownPositions[invitation.id];
+      
+      if (!isMenuOpen || !position) return null;
+      
+      return (
+        <div
+          key={`menu-${invitation.id}`}
+          className="fixed bg-white border border-gray-200 rounded-md shadow-lg z-[100] min-w-[160px] py-1"
+          style={{
+            top: `${position.top}px`,
+            right: `${position.right}px`
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={(e) => {
+              console.log('🖱️ Resend button clicked!', invitation.id);
+              e.stopPropagation();
+              handleResendInvitation(invitation.id);
+            }}
+            disabled={actionLoading === invitation.id}
+          >
+            <RotateCcw className="h-4 w-4" />
+            Resend invite
+          </button>
+          <button
+            className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+            onClick={(e) => {
+              console.log('🖱️ Cancel button clicked!', invitation.id);
+              e.stopPropagation();
+              handleCancelInvitation(invitation.id);
+            }}
+            disabled={actionLoading === invitation.id}
+          >
+            <X className="h-4 w-4" />
+            Cancel invite
+          </button>
+        </div>
+      );
+    })}
+    </>
   );
 }

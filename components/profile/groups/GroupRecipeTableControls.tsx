@@ -129,7 +129,7 @@ export function GroupRecipeTableControls({
                         className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                       >
                         <Plus className="h-4 w-4" />
-                        Create New Cookbook
+                        Create New Book
                       </button>
                     </div>
                   </div>

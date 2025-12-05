@@ -30,6 +30,7 @@ export async function getGroupRecipes(groupId: string): Promise<{ data: RecipeWi
     .from('group_recipes')
     .select('recipe_id, added_by, added_at')
     .eq('group_id', groupId);
+  
 
   if (groupRecipesError) {
     return { data: null, error: groupRecipesError.message };
@@ -136,14 +137,8 @@ export async function getGroupRecipes(groupId: string): Promise<{ data: RecipeWi
     };
   });
 
-  // Sort by display_order, then by added_at (newest first)
+  // Sort by newest first (by added_at, then created_at) - new recipes always appear at top
   recipes.sort((a: any, b: any) => {
-    const orderA = a.display_order ?? 999;
-    const orderB = b.display_order ?? 999;
-    if (orderA !== orderB) {
-      return orderA - orderB;
-    }
-    // If display_order is the same, show newest recipes first (by added_at, then created_at)
     const addedAtA = new Date(a.added_at || a.created_at).getTime();
     const addedAtB = new Date(b.added_at || b.created_at).getTime();
     return addedAtB - addedAtA;

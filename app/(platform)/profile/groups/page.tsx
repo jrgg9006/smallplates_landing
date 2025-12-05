@@ -39,6 +39,11 @@ export default function GroupsPage() {
     completeStep
   } = useProfileOnboarding();
 
+  // Handle welcome overlay start - just close overlay (already on groups page)
+  const handleWelcomeStart = () => {
+    skipAllOnboarding();
+  };
+
   const handleAddGroup = () => {
     groupsSectionRef.current?.openCreateModal();
   };
@@ -49,6 +54,16 @@ export default function GroupsPage() {
 
   const handleEditGroup = () => {
     groupsSectionRef.current?.onEditGroup();
+  };
+
+  const handleDeleteGroup = () => {
+    // Delegate to GroupsSection which has the proper implementation
+    groupsSectionRef.current?.handleDeleteGroup();
+  };
+
+  const handleExitGroup = () => {
+    // Delegate to GroupsSection which has the proper implementation  
+    groupsSectionRef.current?.handleExitGroup();
   };
 
   const handleGroupChange = (group: GroupWithMembers | null) => {
@@ -136,7 +151,7 @@ export default function GroupsPage() {
       {showWelcomeOverlay && (
         <WelcomeOverlay
           userName={user.email?.split('@')[0] || 'there'}
-          onStart={startFirstRecipeExperience}
+          onStart={handleWelcomeStart}
           onDismiss={skipAllOnboarding}
           isVisible={showWelcomeOverlay}
         />
@@ -170,7 +185,7 @@ export default function GroupsPage() {
                 {selectedGroup && (
                   <div className="mb-2">
                     <span className="text-sm font-light text-gray-500 tracking-widest uppercase">
-                      COOKBOOK
+                      NOT A COOKBOOK
                       {/* {selectedGroup.visibility === 'public' ? 'SHARED GROUP' : 'PRIVATE GROUP'} */}
                     </span>
                   </div>
@@ -187,7 +202,7 @@ export default function GroupsPage() {
                       size="sm"
                       onClick={handleEditGroup}
                       className="hidden lg:flex h-8 w-8 p-0 text-gray-500 hover:text-gray-900 hover:bg-gray-100"
-                      title="Edit cookbook name"
+                      title="Edit book name"
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
@@ -242,7 +257,7 @@ export default function GroupsPage() {
                                 className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                               >
                                 <Plus className="h-4 w-4" />
-                                Create New Cookbook
+                                Create New Book
                               </button>
                             </div>
                           </div>
@@ -275,7 +290,7 @@ export default function GroupsPage() {
                       size="sm"
                       onClick={handleEditGroup}
                       className="lg:hidden h-6 w-6 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 self-center mb-4"
-                      title="Edit cookbook name"
+                      title="Edit book name"
                     >
                       <Pencil className="h-3 w-3" />
                     </Button>
@@ -303,9 +318,9 @@ export default function GroupsPage() {
               {selectedGroup && (
                 <GroupActionsDropdown
                   group={selectedGroup}
-                  userRole={groupsSectionRef.current?.selectedGroup ? 'admin' : null}
-                  onDeleteGroup={() => {}}
-                  onExitGroup={() => {}}
+                  userRole={groupsSectionRef.current?.userRole || null}
+                  onDeleteGroup={handleDeleteGroup}
+                  onExitGroup={handleExitGroup}
                 />
               )}
 

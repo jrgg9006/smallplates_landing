@@ -192,7 +192,7 @@ export function MobileGroupCard({
           </div>
         </div>
 
-        {/* Cookbook Name */}
+        {/* Book Name */}
         <div>
           <div className="text-sm font-medium text-gray-600 mb-1">Cookbook</div>
           <div className="text-base text-gray-900">{group.name}</div>

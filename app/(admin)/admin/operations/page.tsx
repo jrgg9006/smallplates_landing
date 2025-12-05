@@ -308,7 +308,7 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
         : prev
     );
     try {
-      const response = await fetch(`/api/admin/operations/recipes/${recipeId}`, {
+      const response = await fetch(`/api/v1/admin/operations/recipes/${recipeId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ [field]: value }),

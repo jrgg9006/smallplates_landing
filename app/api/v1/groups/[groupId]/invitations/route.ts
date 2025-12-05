@@ -205,7 +205,7 @@ export async function POST(
       inviterName,
       groupName: (membership.groups as any).name,
       groupDescription: (membership.groups as any).description || undefined,
-      invitationUrl
+      joinUrl: invitationUrl
     });
 
     if (!emailResult.success) {

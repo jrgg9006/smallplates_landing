@@ -146,7 +146,7 @@ export async function POST(
       inviterName,
       groupName: (invitation.groups as any).name,
       groupDescription: (invitation.groups as any).description || undefined,
-      invitationUrl
+      joinUrl: invitationUrl
     });
 
     if (!emailResult.success) {
@@ -179,4 +179,3 @@ export async function POST(
     );
   }
 }
-

@@ -196,7 +196,7 @@ export default function AdminHomePage() {
             <div className="text-5xl mb-4 grayscale">📦</div>
             <h2 className="text-2xl font-bold text-gray-500 mb-2">Orders</h2>
             <p className="text-gray-400 mb-4">
-              Track and manage cookbook orders
+              Track and manage book orders
             </p>
             <div className="text-sm text-gray-400">
               Coming soon

@@ -46,7 +46,7 @@ export async function POST(
       .from('groups')
       .select('id, name')
       .eq('created_by', userId)
-      .eq('name', 'My First Cookbook')
+      .eq('name', 'My First Book')
       .limit(1);
 
     let defaultGroupId: string | null = null;
@@ -61,8 +61,8 @@ export async function POST(
       const { data: newGroup, error: createGroupError } = await supabaseAdmin
         .from('groups')
         .insert({
-          name: 'My First Cookbook',
-          description: 'Add recipes and invite friends to build your Cookbook',
+          name: 'My First Book',
+          description: 'Add recipes and invite friends to build your book',
           created_by: userId,
           visibility: 'private'
         })

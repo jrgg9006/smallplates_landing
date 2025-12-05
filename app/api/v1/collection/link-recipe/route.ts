@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
           });
 
         if (groupRecipeError) {
-          console.error('❌ Error adding to group_recipes:', groupRecipeError);
+          console.error('Error adding to group_recipes:', groupRecipeError);
           // Don't fail - recipe is already in cookbook, just log the error
         }
       }
@@ -203,4 +203,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

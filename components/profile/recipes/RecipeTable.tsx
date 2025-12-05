@@ -207,13 +207,6 @@ export function RecipeTable({ searchValue: externalSearchValue = '', filterType 
 
   return (
     <div className="w-full">
-      {/* Loading State */}
-      {loading && (
-        <div className="w-full p-4 text-center text-muted-foreground">
-          Loading recipes...
-        </div>
-      )}
-
       {/* Desktop Table Layout */}
       <div className="hidden md:block">
         <div className="overflow-hidden rounded-lg border border-gray-200">

@@ -29,6 +29,9 @@ export interface GroupsSectionRef {
   openAddExistingRecipeModal: () => void;
   openAddNewRecipeModal: () => void;
   handleGroupChange: (group: GroupWithMembers) => void;
+  handleDeleteGroup: () => void;
+  handleExitGroup: () => void;
+  userRole: string | null;
   loading: boolean;
 }
 
@@ -56,8 +59,11 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
     openAddExistingRecipeModal: () => setAddRecipesModalOpen(true),
     openAddNewRecipeModal: () => setAddNewRecipeModalOpen(true),
     handleGroupChange: handleGroupChange,
+    handleDeleteGroup: handleDeleteGroup,
+    handleExitGroup: handleExitGroup,
+    userRole: userRole,
     loading: loading
-  }), [selectedGroup, groups, loading]);
+  }), [selectedGroup, groups, userRole, loading]);
   
   useEffect(() => {
     loadGroups();

@@ -94,7 +94,7 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
       });
 
       // Send invitation via API
-      const response = await fetch(`/api/groups/${group.id}/invitations`, {
+      const response = await fetch(`/api/v1/groups/${group.id}/invitations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -154,7 +154,7 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl font-semibold">
-            Add a friend to this Cookbook
+            Add a friend to this book
           </DialogTitle>
           {group && (
             <p className="text-sm text-gray-600 mt-2">

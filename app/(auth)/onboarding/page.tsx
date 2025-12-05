@@ -126,7 +126,7 @@ function Step2() {
         {/* Question */}
         <div className="text-center mb-8">
           <h2 className="text-xl font-medium text-gray-900 mb-2">
-            I want the cookbook for:
+            I want the book for:
           </h2>
         </div>
 
@@ -412,9 +412,9 @@ function Step4() {
       stepNumber={4}
       totalSteps={4}
       title="Join the Waitlist"
-      description={!success ? "✨ Only members of the Small Plates circle have access for now. Members are those who&apos;ve already shared a recipe." : undefined}
+      description={!success ? "✨ Only selected members of the Small Plates circle have access for now." : undefined}
       imageUrl="/images/onboarding/onboarding_step_3.jpg"
-      imageAlt="Beautiful cookbook"
+      imageAlt="Beautiful book"
       imagePosition="right"
     >
       <div className="max-w-lg mx-auto">

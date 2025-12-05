@@ -22,4 +22,3 @@ export default function IntroInfoStep({ onContinue, onBack }: IntroInfoStepProps
   );
 }
 
-

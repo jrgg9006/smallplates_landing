@@ -82,12 +82,12 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
     
     // Validate required fields
     if (!formData.name.trim()) {
-      setError('Cookbook name is required');
+      setError('Book name is required');
       return;
     }
 
     if (formData.name.length > MAX_NAME_LENGTH) {
-      setError(`Cookbook name cannot exceed ${MAX_NAME_LENGTH} characters`);
+      setError(`Book name cannot exceed ${MAX_NAME_LENGTH} characters`);
       return;
     }
 
@@ -119,7 +119,7 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
     <div className="h-full flex flex-col">
       {/* Header */}
       <SheetHeader className="pb-6">
-        <SheetTitle className="text-2xl font-serif">Create New Cookbook</SheetTitle>
+        <SheetTitle className="text-2xl font-serif">Create New Book</SheetTitle>
       </SheetHeader>
 
       {/* Form */}
@@ -129,7 +129,7 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="groupName" className="text-base font-medium">
-                Cookbook Name *
+                Book Name *
               </Label>
               <span className={`text-xs ${
                 formData.name.length > MAX_NAME_LENGTH 
@@ -158,7 +158,7 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
             />
             {formData.name.length > MAX_NAME_LENGTH && (
               <p className="text-xs text-red-600">
-                Cookbook name cannot exceed {MAX_NAME_LENGTH} characters.
+                Book name cannot exceed {MAX_NAME_LENGTH} characters.
               </p>
             )}
           </div>
@@ -245,7 +245,7 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
             className="w-full bg-black text-white hover:bg-gray-800 py-3 rounded-full disabled:opacity-50"
             disabled={loading || !formData.name.trim() || formData.name.length > MAX_NAME_LENGTH}
           >
-            {loading ? 'Creating...' : 'Create New Cookbook'}
+            {loading ? 'Creating...' : 'Create New Book'}
           </Button>
         </div>
       </form>

@@ -36,7 +36,7 @@ export async function getOrCreateDefaultCookbook() {
     // If no default cookbook exists, create one
     const newCookbook: CookbookInsert = {
       user_id: user.id,
-      name: 'My Cookbook',
+      name: 'My First Book',
       is_default: true,
     };
 
@@ -702,7 +702,7 @@ export async function updateCookbookRecipeOrder(
 
 /**
  * Get all cookbooks that contain a specific recipe
- * Returns an array of cookbook names
+ * Returns an array of book names
  */
 export async function getCookbooksForRecipe(recipeId: string): Promise<{ data: string[] | null; error: string | null }> {
   const supabase = createSupabaseClient();
@@ -752,7 +752,7 @@ export async function getCookbooksForRecipe(recipeId: string): Promise<{ data: s
           // This is a group cookbook, we need to get the group name
           groupIdsToFetch.push(cookbook.group_id);
         } else {
-          // This is a personal cookbook, use the cookbook name
+          // This is a personal cookbook, use the book name
           if (cookbook.name) {
             cookbookNames.push(cookbook.name);
           }

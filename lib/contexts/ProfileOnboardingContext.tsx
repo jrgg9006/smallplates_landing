@@ -64,6 +64,9 @@ interface ProfileOnboardingProviderProps {
 }
 
 export function ProfileOnboardingProvider({ children }: ProfileOnboardingProviderProps) {
+  // 🚧 TEMPORARY: Pause onboarding experience (set to true to re-enable)
+  const ONBOARDING_PAUSED = true;
+  
   const { user } = useAuth();
   const [onboardingState, setOnboardingState] = useState<OnboardingState>({
     has_seen_welcome: false,
@@ -429,9 +432,10 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
 
   const value: ProfileOnboardingContextType = {
     isFirstTimeUser,
-    showWelcomeOverlay,
-    showOnboardingResume,
-    showFirstRecipeExperience,
+    // When onboarding is paused, hide all onboarding UI elements
+    showWelcomeOverlay: ONBOARDING_PAUSED ? false : showWelcomeOverlay,
+    showOnboardingResume: ONBOARDING_PAUSED ? false : showOnboardingResume,
+    showFirstRecipeExperience: ONBOARDING_PAUSED ? false : showFirstRecipeExperience,
     completedSteps,
     currentStep,
     dismissWelcome,
@@ -442,7 +446,7 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
     skipOnboarding,
     resumeOnboarding,
     permanentlyDismissOnboarding,
-    shouldShowOnboarding,
+    shouldShowOnboarding: ONBOARDING_PAUSED ? false : shouldShowOnboarding,
     getNextStep
   };
 

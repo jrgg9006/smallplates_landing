@@ -227,13 +227,6 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
 
   return (
     <div className="w-full">
-      {/* Loading State */}
-      {loading && (
-        <div className="w-full p-4 text-center text-muted-foreground">
-          Loading guests...
-        </div>
-      )}
-
       {/* Desktop Table Layout */}
       <div className="hidden md:block">
         <div className="rounded-lg border border-gray-200 bg-white overflow-x-auto">
@@ -310,7 +303,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
                           Welcome to Small Plates!
                         </h3>
                         <p className="text-lg text-gray-500 mb-6">
-                          You&apos;re all set! Now let&apos;s start building your recipe collection.
+                          You&apos;re all set! Now let&apos;s start building your small plates collection.
                         </p>
                       </div>
                       
@@ -320,14 +313,14 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
                           <div className="flex items-start gap-3">
                             <div className="w-6 h-6 bg-gray-400 text-white rounded-full flex items-center justify-center text-sm font-bold mt-0.5">1</div>
                             <div>
-                              <p className="font-medium text-gray-500">Adding guests and their favorite recipes</p>
+                              <p className="font-medium text-gray-500">Adding guests and their favorite plates</p>
                               <p className="text-sm text-gray-500">Keep track of what everyone loves to cook</p>
                             </div>
                           </div>
                           <div className="flex items-start gap-3">
                             <div className="w-6 h-6 bg-gray-400 text-white rounded-full flex items-center justify-center text-sm font-bold mt-0.5">2</div>
                             <div>
-                              <p className="font-medium text-gray-500">Sharing your Recipe Collector link</p>
+                              <p className="font-medium text-gray-500">Sharing your Small Plates Collector link</p>
                               <p className="text-sm text-gray-500">Let friends and family submit their own recipes</p>
                             </div>
                           </div>

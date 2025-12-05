@@ -70,4 +70,3 @@ export default function Frame({ title, children, bottomNav, showHeaderLogo = tru
   );
 }
 
-

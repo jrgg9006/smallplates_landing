@@ -15,7 +15,7 @@ export default function WelcomeStep({ creatorName }: WelcomeStepProps) {
           <span className="font-serif text-3xl font-semibold md:text-4xl text-black mx-1">
             {creatorName}&apos;s
           </span>{' '}
-          amazing Cookbook!
+          amazing Book!
         </h1>
         <p className="mt-4 text-base md:text-xl text-gray-600 max-w-[38rem] mx-auto">
           This book isn&apos;t about perfect recipes — it&apos;s about the people who make them special.
@@ -24,5 +24,4 @@ export default function WelcomeStep({ creatorName }: WelcomeStepProps) {
     </div>
   );
 }
-
 

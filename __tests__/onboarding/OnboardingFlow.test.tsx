@@ -135,7 +135,7 @@ describe('Onboarding Flow', () => {
         />
       );
 
-      const startButton = screen.getByText('Start my cookbook');
+      const startButton = screen.getByText('Start my Book');
       fireEvent.click(startButton);
 
       expect(mockOnStart).toHaveBeenCalledTimes(1);

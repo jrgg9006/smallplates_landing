@@ -22,7 +22,7 @@ interface GroupInvitationData {
 }
 
 interface GroupInvitationPageProps {
-  params: Promise<{ token: string }>;
+  params: { token: string };
 }
 
 export default function GroupInvitationPage({ params }: GroupInvitationPageProps) {
@@ -33,7 +33,7 @@ export default function GroupInvitationPage({ params }: GroupInvitationPageProps
 
   // Extract token from params
   useEffect(() => {
-    params.then(({ token }) => setToken(token));
+    setToken(params.token);
   }, [params]);
 
   // Verify invitation token when token is available

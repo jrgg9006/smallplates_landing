@@ -89,15 +89,15 @@ export async function sendGroupInvitationEmail({
     const result = await postmarkClient.sendEmailWithTemplate({
       From: process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com',
       To: to,
-      TemplateAlias: 'group-invitation',
+      TemplateAlias: 'invite-to-group',
       TemplateModel: {
         RecipientName: recipientName,
         GroupName: groupName,
         GroupDescription: groupDescription || '',
         InviterName: inviterName,
-        JoinURL: joinUrl,
+        InvitationURL: joinUrl,
       },
-      MessageStream: 'transactional',
+      MessageStream: 'invite-user',
     });
 
     console.log('Group invitation email sent successfully:', result.MessageID);

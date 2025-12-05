@@ -6,7 +6,7 @@ import { createSupabaseClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Users, CheckCircle } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import Image from "next/image";
 
 interface GroupInfo {
@@ -68,6 +68,9 @@ export function GroupJoinForm({
 }: GroupJoinFormProps) {
   const router = useRouter();
   
+  // Toggle state - false = create account, true = sign in
+  const [hasAccount, setHasAccount] = useState(false);
+  
   // Form state
   const [formData, setFormData] = useState({
     firstName: preFilledData?.firstName || '',
@@ -109,8 +112,8 @@ export function GroupJoinForm({
   const handleJoinGroup = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate form
-    if (!formData.firstName.trim()) {
+    // Validate form - firstName only required for new accounts
+    if (!hasAccount && !formData.firstName.trim()) {
       setError('First name is required');
       return;
     }
@@ -136,7 +139,8 @@ export function GroupJoinForm({
       return;
     }
 
-    if (formData.password !== formData.confirmPassword) {
+    // Password confirmation only required for new accounts
+    if (!hasAccount && formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
@@ -285,8 +289,7 @@ export function GroupJoinForm({
       {/* Main Content */}
       <div className="max-w-md mx-auto px-6 py-8">
         <div className="text-center mb-8">
-          <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-serif font-semibold text-gray-900 mb-2">
+          <h2 className="text-4xl font-serif font-semibold text-gray-900 mb-2">
             {title}
           </h2>
           {subtitle && (
@@ -303,49 +306,78 @@ export function GroupJoinForm({
                   You&apos;ve been invited to join:
                 </p>
               )}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-medium text-gray-900">{groupData.name}</h3>
-                {groupData.description && (
-                  <p className="text-sm text-gray-600 mt-1">{groupData.description}</p>
-                )}
-              </div>
+              <h3 className="text-2xl font-serif font-bold text-black text-center mt-2 mb-6">{groupData.name}</h3>
             </div>
           )}
         </div>
 
+        {/* Account Type Toggle */}
+        <div className="mb-6">
+          <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="relative">
+              <input
+                id="hasAccount"
+                type="checkbox"
+                checked={hasAccount}
+                onChange={(e) => {
+                  setHasAccount(e.target.checked);
+                  setError(null);
+                  // Clear confirm password when switching to sign in mode
+                  if (e.target.checked) {
+                    setFormData(prev => ({ ...prev, confirmPassword: '' }));
+                  }
+                }}
+                className="sr-only"
+              />
+              <div className="block bg-gray-300 w-14 h-8 rounded-full cursor-pointer" onClick={() => setHasAccount(!hasAccount)}></div>
+              <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition transform ${
+                hasAccount ? 'translate-x-6' : 'translate-x-0'
+              } cursor-pointer`} onClick={() => setHasAccount(!hasAccount)}></div>
+            </div>
+            <label htmlFor="hasAccount" className="text-sm font-medium text-gray-700 cursor-pointer" onClick={() => setHasAccount(!hasAccount)}>
+              I already have a Small Plates account
+            </label>
+          </div>
+          <p className="text-sm text-gray-600 mt-2 text-center">
+            {hasAccount ? 'Sign in with your existing password' : 'Create a new account to join the group'}
+          </p>
+        </div>
+
         {/* Form */}
         <form onSubmit={handleJoinGroup} className="space-y-4">
-          {/* Name Fields */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="firstName" className="text-sm font-medium">
-                First Name *
-              </Label>
-              <Input
-                id="firstName"
-                type="text"
-                value={formData.firstName}
-                onChange={(e) => handleInputChange('firstName', e.target.value)}
-                placeholder="First name"
-                required
-                disabled={loading}
-                autoFocus={autoFocus}
-              />
+          {/* Name Fields - Only show for new accounts */}
+          {!hasAccount && (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="firstName" className="text-sm font-medium">
+                  First Name *
+                </Label>
+                <Input
+                  id="firstName"
+                  type="text"
+                  value={formData.firstName}
+                  onChange={(e) => handleInputChange('firstName', e.target.value)}
+                  placeholder="First name"
+                  required
+                  disabled={loading}
+                  autoFocus={autoFocus}
+                />
+              </div>
+              <div>
+                <Label htmlFor="lastName" className="text-sm font-medium">
+                  Last Name
+                </Label>
+                <Input
+                  id="lastName"
+                  type="text"
+                  value={formData.lastName}
+                  onChange={(e) => handleInputChange('lastName', e.target.value)}
+                  placeholder="Last name"
+                  disabled={loading}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="lastName" className="text-sm font-medium">
-                Last Name
-              </Label>
-              <Input
-                id="lastName"
-                type="text"
-                value={formData.lastName}
-                onChange={(e) => handleInputChange('lastName', e.target.value)}
-                placeholder="Last name"
-                disabled={loading}
-              />
-            </div>
-          </div>
+          )}
 
           {/* Email Field */}
           <div>
@@ -373,28 +405,34 @@ export function GroupJoinForm({
               type="password"
               value={formData.password}
               onChange={(e) => handleInputChange('password', e.target.value)}
-              placeholder="Create a password"
+              placeholder={hasAccount ? "Your current password" : "Create a password"}
               required
               disabled={loading}
-              minLength={8}
+              minLength={hasAccount ? 1 : 8}
+              autoFocus={hasAccount ? autoFocus : false}
             />
-            <p className="text-xs text-gray-500 mt-1">Must be at least 8 characters</p>
+            {!hasAccount && (
+              <p className="text-xs text-gray-500 mt-1">Must be at least 8 characters</p>
+            )}
           </div>
 
-          <div>
-            <Label htmlFor="confirmPassword" className="text-sm font-medium">
-              Confirm Password *
-            </Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-              placeholder="Confirm your password"
-              required
-              disabled={loading}
-            />
-          </div>
+          {/* Confirm Password - Only show for new accounts */}
+          {!hasAccount && (
+            <div>
+              <Label htmlFor="confirmPassword" className="text-sm font-medium">
+                Confirm Password *
+              </Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                placeholder="Confirm your password"
+                required
+                disabled={loading}
+              />
+            </div>
+          )}
 
           {/* Error Message */}
           {error && (
@@ -409,7 +447,10 @@ export function GroupJoinForm({
             className="w-full bg-black text-white hover:bg-gray-800 py-3"
             disabled={loading}
           >
-            {loading ? 'Joining Group...' : 'Join Group'}
+            {loading 
+              ? (hasAccount ? 'Signing In...' : 'Creating Account...') 
+              : (hasAccount ? 'Sign In & Join Group' : 'Create Account & Join Group')
+            }
           </Button>
         </form>
 

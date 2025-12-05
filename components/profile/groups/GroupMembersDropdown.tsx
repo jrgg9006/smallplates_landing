@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { Users, Crown, Shield, User as UserIcon, UserPlus, Mail, MoreHorizontal, RotateCcw, X } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Users, Crown, Shield, User as UserIcon, UserPlus, Mail } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,16 +21,12 @@ interface GroupMembersDropdownProps {
 }
 
 export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDropdownProps) {
+  console.log('🚨 GroupMembersDropdown component rendered!', group.id);
   const [members, setMembers] = useState<GroupMemberWithProfile[]>([]);
   const [pendingInvitations, setPendingInvitations] = useState<GroupInvitation[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingInvitations, setLoadingInvitations] = useState(false);
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const menuRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-  // Add state for dropdown position
-  const [dropdownPositions, setDropdownPositions] = useState<{ [key: string]: { top: number; right: number } }>({});
-  const buttonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
   useEffect(() => {
     if (group.id) {
@@ -82,7 +78,6 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
 
   const handleResendInvitation = async (invitationId: string) => {
     setActionLoading(invitationId);
-    setOpenMenuId(null);
     
     try {
       const response = await fetch(`/api/v1/groups/${group.id}/invitations/${invitationId}/resend`, {
@@ -107,12 +102,14 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
   };
 
   const handleCancelInvitation = async (invitationId: string) => {
+    console.log('🚀 handleCancelInvitation called with:', invitationId);
     if (!confirm('Are you sure you want to cancel this invitation? The person will no longer be able to join using the invitation link.')) {
+      console.log('❌ User canceled the confirmation dialog');
       return;
     }
+    console.log('✅ User confirmed cancellation, proceeding...');
 
     setActionLoading(invitationId);
-    setOpenMenuId(null);
     
     try {
       const response = await fetch(`/api/v1/groups/${group.id}/invitations/${invitationId}`, {
@@ -137,24 +134,6 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
     }
   };
 
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (openMenuId && menuRefs.current[openMenuId]) {
-        if (!menuRefs.current[openMenuId]?.contains(event.target as Node)) {
-          setOpenMenuId(null);
-        }
-      }
-    };
-
-    if (openMenuId) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [openMenuId]);
 
   const getRoleIcon = (role: string) => {
     switch (role) {
@@ -205,46 +184,6 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
     return aName.localeCompare(bName);
   });
 
-  // Update the handleToggleMenu function - use event target directly
-  const handleToggleMenu = (e: React.MouseEvent<HTMLButtonElement>, invitationId: string) => {
-    e.stopPropagation();
-    
-    if (openMenuId === invitationId) {
-      setOpenMenuId(null);
-      setDropdownPositions(prev => {
-        const newPositions = { ...prev };
-        delete newPositions[invitationId];
-        return newPositions;
-      });
-    } else {
-      // Close any other open menu
-      if (openMenuId) {
-        setOpenMenuId(null);
-      }
-      
-      // Use the event target (button) directly to get position - this is always available
-      const button = e.currentTarget;
-      const buttonRect = button.getBoundingClientRect();
-      const estimatedDropdownHeight = 80;
-      const spaceBelow = window.innerHeight - buttonRect.bottom;
-      const spaceAbove = buttonRect.top;
-      const rightPosition = window.innerWidth - buttonRect.right;
-      
-      let topPosition: number;
-      if (spaceBelow < estimatedDropdownHeight + 10 && spaceAbove > estimatedDropdownHeight + 10) {
-        topPosition = buttonRect.top - estimatedDropdownHeight - 4;
-      } else {
-        topPosition = buttonRect.bottom + 4;
-      }
-      
-      setDropdownPositions(prev => ({
-        ...prev,
-        [invitationId]: { top: topPosition, right: rightPosition }
-      }));
-      
-      setOpenMenuId(invitationId);
-    }
-  };
 
   return (
     <>
@@ -258,7 +197,7 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
         <DropdownMenuContent align="start" className="w-80 max-h-[600px] overflow-y-auto">
           <DropdownMenuLabel className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            Cookbook Members
+            Cookbook Memberss
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           
@@ -275,7 +214,7 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
                 className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50"
               >
                 <UserPlus className="h-4 w-4" />
-                Invite a friend to this Cookbook
+                Invite a friend to this Book
               </DropdownMenuItem>
             </>
           ) : sortedMembers.length === 0 ? (
@@ -291,7 +230,7 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
                 className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50"
               >
                 <UserPlus className="h-4 w-4" />
-                Invite a friend to this Cookbook
+                Invite a friend to this Book
               </DropdownMenuItem>
             </>
           ) : (
@@ -334,7 +273,7 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
                 className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50"
               >
                 <UserPlus className="h-4 w-4" />
-                Invite a friend to this Cookbook
+                Invite a friend to this Book
               </DropdownMenuItem>
             </>
           )}
@@ -357,7 +296,6 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
                   const nameParts = invitation.name?.trim().split(' ') || [];
                   const firstName = nameParts[0] || '';
                   const lastName = nameParts.slice(1).join(' ') || '';
-                  const isMenuOpen = openMenuId === invitation.id;
                   const isLoading = actionLoading === invitation.id;
                   
                   return (
@@ -374,16 +312,30 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
                           {invitation.email}
                         </div>
                       </div>
-                      <div className="relative flex-shrink-0" ref={(el) => { menuRefs.current[invitation.id] = el; }}>
+                      <div className="flex items-center gap-1 flex-shrink-0">
                         <button
-                          ref={(el) => { buttonRefs.current[invitation.id] = el; }}
-                          type="button"
-                          onClick={(e) => handleToggleMenu(e, invitation.id)}
-                          className="p-1 rounded hover:bg-gray-100 transition-colors"
+                          onClick={(e) => {
+                            console.log('🔄 RESEND BUTTON CLICKED!', invitation.id);
+                            e.stopPropagation();
+                            handleResendInvitation(invitation.id);
+                          }}
+                          className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded transition-colors"
                           disabled={isLoading}
-                          aria-label="Invitation options"
+                          title="Resend invitation"
                         >
-                          <MoreHorizontal className="h-4 w-4 text-gray-500" />
+                          Resend
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            console.log('❌ CANCEL BUTTON CLICKED!', invitation.id);
+                            e.stopPropagation();
+                            handleCancelInvitation(invitation.id);
+                          }}
+                          className="px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded transition-colors"
+                          disabled={isLoading}
+                          title="Cancel invitation"
+                        >
+                          Cancel
                         </button>
                       </div>
                     </DropdownMenuItem>
@@ -395,66 +347,6 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Render menus and overlay OUTSIDE DropdownMenu to escape overflow constraints */}
-      {/* Overlay to close menu when clicking outside */}
-      {openMenuId && (
-        <div 
-          className="fixed inset-0 z-[90]" 
-          onClick={() => {
-            setOpenMenuId(null);
-            setDropdownPositions(prev => {
-              const newPositions = { ...prev };
-              if (openMenuId) {
-                delete newPositions[openMenuId];
-              }
-              return newPositions;
-            });
-          }}
-        />
-      )}
-
-      {/* Render menus for all open invitations */}
-      {pendingInvitations.map((invitation) => {
-        const isMenuOpen = openMenuId === invitation.id;
-        const position = dropdownPositions[invitation.id];
-        
-        if (!isMenuOpen || !position) return null;
-        
-        return (
-          <div
-            key={`menu-${invitation.id}`}
-            className="fixed bg-white border border-gray-200 rounded-md shadow-lg z-[100] min-w-[160px] py-1"
-            style={{
-              top: `${position.top}px`,
-              right: `${position.right}px`
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleResendInvitation(invitation.id);
-              }}
-              disabled={actionLoading === invitation.id}
-            >
-              <RotateCcw className="h-4 w-4" />
-              Resend invite
-            </button>
-            <button
-              className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleCancelInvitation(invitation.id);
-              }}
-              disabled={actionLoading === invitation.id}
-            >
-              <X className="h-4 w-4" />
-              Cancel invite
-            </button>
-          </div>
-        );
-      })}
     </>
   );
 }

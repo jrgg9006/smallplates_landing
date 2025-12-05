@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
         email: userData.email,
         recipe_goal_category: userData.recipeCount,
         recipe_goal_number: recipeGoalNumber,
+        use_case: userData.useCase || null,
         collection_link_token: newToken,
         collection_enabled: true,
         updated_at: new Date().toISOString()
@@ -79,6 +80,32 @@ export async function POST(request: NextRequest) {
         { error: error.message },
         { status: 500 }
       );
+    }
+
+    // Ensure user has a default group (safety check in case trigger didn't run)
+    const { data: existingGroups, error: groupsCheckError } = await supabaseAdmin
+      .from('groups')
+      .select('id')
+      .eq('created_by', userId)
+      .limit(1);
+
+    if (!groupsCheckError && (!existingGroups || existingGroups.length === 0)) {
+      // User doesn't have any groups, create default group
+      const { error: groupError } = await supabaseAdmin
+        .from('groups')
+        .insert({
+          name: 'My First Book',
+          description: 'Add recipes and invite friends to build your book',
+          created_by: userId,
+          visibility: 'private'
+        });
+
+      if (groupError) {
+        console.error('Error creating default group:', groupError);
+        // Don't fail the request, just log the error
+      } else {
+        console.log('Default group created for user:', userId);
+      }
     }
 
     return NextResponse.json({ 

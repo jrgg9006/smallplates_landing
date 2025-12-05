@@ -50,8 +50,8 @@ export function WelcomeOverlay({ userName, onStart, onDismiss, isVisible }: Welc
               </p>
               
               <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-8 max-w-xl mx-auto">
-                You didn&apos;t come here just to collect recipes—you came here to connect through food.
-                This isn&apos;t just a cookbook—it&apos;s a collection of your stories, 
+                You didn&apos;t come here just to collect small plates—you came here to connect through food.
+                This isn&apos;t just a book—it&apos;s a collection of your stories, 
                 memories, and the people you love.
               </p>
               
@@ -65,15 +65,7 @@ export function WelcomeOverlay({ userName, onStart, onDismiss, isVisible }: Welc
                   onClick={onStart}
                   className="bg-black text-white px-8 py-4 text-lg hover:bg-gray-800 transition-colors"
                 >
-                  Start my cookbook
-                </Button>
-                
-                <Button
-                  onClick={onDismiss}
-                  variant="ghost"
-                  className="text-gray-600 px-8 py-4 text-lg"
-                >
-                  I&apos;ll explore on my own
+                  Let&apos;s get started
                 </Button>
               </div>
             </div>

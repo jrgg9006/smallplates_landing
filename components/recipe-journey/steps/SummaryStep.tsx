@@ -70,4 +70,3 @@ export default function SummaryStep({ recipeName, ingredients, instructions, per
   );
 }
 
-

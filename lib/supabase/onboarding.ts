@@ -47,9 +47,9 @@ export async function saveOnboardingData(userId: string, answers: OnboardingData
       };
     }
 
-    // Extract personal information from step 2
-    const step2Data = answers.step2;
-    if (!step2Data?.firstName || !step2Data?.lastName || !step2Data?.email) {
+    // Extract personal information from step 3
+    const step3Data = answers.step3;
+    if (!step3Data?.firstName || !step3Data?.lastName || !step3Data?.email) {
       return {
         data: null,
         error: 'Personal information not found in onboarding answers'
@@ -60,9 +60,9 @@ export async function saveOnboardingData(userId: string, answers: OnboardingData
     const recipeGoalNumber = mapRecipeCategoryToNumber(recipeCount);
 
     // Build full name - concatenate with partner if exists
-    let fullName = `${step2Data.firstName} ${step2Data.lastName}`;
-    if (step2Data.hasPartner && step2Data.partnerFirstName && step2Data.partnerLastName) {
-      fullName = `${step2Data.firstName} ${step2Data.lastName} and ${step2Data.partnerFirstName} ${step2Data.partnerLastName}`;
+    let fullName = `${step3Data.firstName} ${step3Data.lastName}`;
+    if (step3Data.hasPartner && step3Data.partnerFirstName && step3Data.partnerLastName) {
+      fullName = `${step3Data.firstName} ${step3Data.lastName} and ${step3Data.partnerFirstName} ${step3Data.partnerLastName}`;
     }
 
     // Generate collection token for the user
@@ -83,7 +83,7 @@ export async function saveOnboardingData(userId: string, answers: OnboardingData
       .upsert({
         id: userId,
         full_name: fullName,
-        email: step2Data.email,
+        email: step3Data.email,
         recipe_goal_category: recipeCount,
         recipe_goal_number: recipeGoalNumber,
         collection_link_token: newToken,

@@ -313,9 +313,16 @@ export async function batchUpdateGuestStatus(guestIds: string[], status: Guest['
 export async function getGuestsByStatus(status: Guest['status'], includeArchived = false) {
   const supabase = createSupabaseClient();
   
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+  
   let query = supabase
     .from('guests')
     .select('*')
+    .eq('user_id', user.id)  // Filter by user_id
     .eq('status', status)
     .order('last_name', { ascending: true });
 

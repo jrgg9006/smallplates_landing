@@ -67,7 +67,7 @@ export function RecipeOperationsTable({
     setUpdatingRecipeId(recipeId);
     
     try {
-      const response = await fetch(`/api/admin/operations/recipes/${recipeId}`, {
+      const response = await fetch(`/api/v1/admin/operations/recipes/${recipeId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ [field]: checked }),
@@ -100,7 +100,7 @@ export function RecipeOperationsTable({
     setUpdatingRecipeId(recipeId);
     
     try {
-      const response = await fetch(`/api/admin/operations/recipes/${recipeId}`, {
+      const response = await fetch(`/api/v1/admin/operations/recipes/${recipeId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -177,7 +177,7 @@ export function RecipeOperationsTable({
               User
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider max-w-[250px]">
-              Cookbook
+              Book
             </th>
             <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
               Text Finalized

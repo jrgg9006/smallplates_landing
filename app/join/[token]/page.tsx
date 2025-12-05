@@ -31,7 +31,7 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
     const verifyToken = async () => {
       try {
         const { token } = await params;
-        const response = await fetch(`/api/invitations/verify/${token}`);
+        const response = await fetch(`/api/v1/invitations/verify/${token}`);
         const data = await response.json();
 
         if (response.ok && data.status === 'valid') {
@@ -39,7 +39,7 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
           setStatus('valid');
           
           // 👁️ Track that user visited the join page
-          fetch('/api/invitations/mark-visited', {
+          fetch('/api/v1/invitations/mark-visited', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token })
@@ -76,7 +76,7 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
     try {
       const { token } = await params;
       // Call consume API to create account
-      const response = await fetch('/api/invitations/consume', {
+      const response = await fetch('/api/v1/invitations/consume', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

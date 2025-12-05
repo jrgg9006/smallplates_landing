@@ -15,7 +15,7 @@ import {
   OnboardingContextType,
 } from "@/lib/types/onboarding";
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 
 const initialState: OnboardingState = {
   currentStep: 1,
@@ -84,10 +84,10 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const completeOnboarding = useCallback(
     async () => {
       try {
-        const step2Data = state.answers.step2;
+        const step3Data = state.answers.step3;
         const step1Data = state.answers.step1;
 
-        if (!step2Data?.email) {
+        if (!step3Data?.email) {
           throw new Error("Email is required to complete onboarding");
         }
 
@@ -107,13 +107,13 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
         // Step 1: Create user with signUp (user will be auto-logged in)
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email: step2Data.email,
+          email: step3Data.email,
           password: `temp_${Math.random().toString(36).substring(2, 15)}`, // Random temp password
           options: {
             emailRedirectTo: redirectUrl,
             data: {
-              firstName: step2Data.firstName,
-              lastName: step2Data.lastName,
+              firstName: step3Data.firstName,
+              lastName: step3Data.lastName,
             }
           }
         });
@@ -125,12 +125,12 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         console.log('✅ User created and logged in:', signUpData.user.id);
 
         // Step 2: Create profile using API
-        const response = await fetch('/api/create-profile', {
+        const response = await fetch('/api/v1/create-profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userId: signUpData.user.id,
-            userData: { ...step2Data, recipeCount: step1Data?.recipeCount || '40-or-less' }
+            userData: { ...step3Data, recipeCount: step1Data?.recipeCount || '40-or-less' }
           })
         });
 
@@ -144,7 +144,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         // This runs in the background, doesn't block the user experience
         console.log('📧 Sending password setup email...');
         const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-          step2Data.email,
+          step3Data.email,
           { redirectTo: redirectUrl }
         );
 

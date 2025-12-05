@@ -55,12 +55,12 @@ export function EditCookbookNameModal({
     if (!cookbook) return;
     
     if (!name.trim()) {
-      setError('Please enter a cookbook name');
+      setError('Please enter a book name');
       return;
     }
 
     if (name.length > MAX_NAME_LENGTH) {
-      setError(`Cookbook name cannot exceed ${MAX_NAME_LENGTH} characters`);
+      setError(`Book name cannot exceed ${MAX_NAME_LENGTH} characters`);
       return;
     }
 
@@ -120,7 +120,7 @@ export function EditCookbookNameModal({
           <div>
             <div className="flex items-center justify-between mb-1">
               <Label htmlFor="edit-name" className="text-sm font-medium text-gray-600">
-                Cookbook Name *
+                Book Name *
               </Label>
               <span className={`text-xs ${
                 name.length > MAX_NAME_LENGTH 

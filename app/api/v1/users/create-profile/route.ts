@@ -94,8 +94,8 @@ export async function POST(request: NextRequest) {
       const { error: groupError } = await supabaseAdmin
         .from('groups')
         .insert({
-          name: 'My First Cookbook',
-          description: 'Add recipes and invite friends to build your Cookbook',
+          name: 'My First Book',
+          description: 'Add recipes and invite friends to build your book',
           created_by: userId,
           visibility: 'private'
         });

@@ -264,7 +264,7 @@ export default function CookbookPage() {
                 {selectedCookbook && (
                   <div className="mb-2">
                     <span className="text-sm font-light text-gray-500 tracking-widest uppercase">
-                      {selectedCookbook.is_group_cookbook || selectedCookbook.group_id ? 'SHARED COOKBOOK' : 'PRIVATE COOKBOOK'}
+                      {selectedCookbook.is_group_cookbook || selectedCookbook.group_id ? 'SHARED BOOK' : 'PRIVATE BOOK'}
                     </span>
                   </div>
                 )}
@@ -279,7 +279,7 @@ export default function CookbookPage() {
                       size="sm"
                       onClick={handleEditName}
                       className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900 hover:bg-gray-100"
-                      title="Edit cookbook name"
+                      title="Edit book name"
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
@@ -353,7 +353,7 @@ export default function CookbookPage() {
           onNoteUpdated={handleNoteUpdated}
         />
 
-        {/* Edit Cookbook Name Modal */}
+        {/* Edit Book Name Modal */}
         <EditCookbookNameModal
           isOpen={isEditNameModalOpen}
           onClose={handleCloseEditNameModal}

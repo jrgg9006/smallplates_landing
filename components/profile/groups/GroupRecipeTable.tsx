@@ -131,6 +131,7 @@ export function GroupRecipeTable({
 
         const { data: recipesData, error: recipesError } = result;
 
+
         if (recipesError) {
           setError(recipesError);
           return;
@@ -237,7 +238,7 @@ export function GroupRecipeTable({
     },
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: 100,
       },
     },
     meta: {
@@ -279,32 +280,6 @@ export function GroupRecipeTable({
     }
   };
 
-  // Show loading state
-  if (loading && data.length === 0) {
-    return (
-      <div className="w-full">
-        <GroupRecipeTableControls
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          groups={groups}
-          selectedGroup={group}
-          onGroupChange={onGroupChange}
-          onCreateGroup={onCreateGroup}
-          onInviteFriend={handleInviteFriend}
-          onAddExistingRecipe={onAddExistingRecipe || (() => {})}
-          onAddNewRecipe={onAddNewRecipe || (() => {})}
-          onDeleteGroup={onDeleteGroup || (() => {})}
-          onExitGroup={onExitGroup || (() => {})}
-          userRole={userRole}
-        />
-        <div className="bg-white border border-gray-200 rounded-lg p-8">
-          <div className="text-center">
-            <p className="text-gray-500">Loading recipes...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // Show error state
   if (error) {
@@ -388,17 +363,6 @@ export function GroupRecipeTable({
             </Button>
           </div>
         </div>
-      ) : data.length === 0 && !loading && searchValue.trim() ? (
-        <div className="bg-white border border-gray-200 rounded-lg p-8">
-          <div className="text-center max-w-md mx-auto">
-            <h3 className="text-lg font-medium text-gray-500 mb-2">
-              No recipes found
-            </h3>
-            <p className="text-sm text-gray-500">
-              Try adjusting your search or add some recipes to this cookbook.
-            </p>
-          </div>
-        </div>
       ) : (
         <>
           {/* Desktop Card Grid */}
@@ -434,18 +398,7 @@ export function GroupRecipeTable({
                   </div>
                 </SortableContext>
               </DndContext>
-            ) : (
-              <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
-                <div className="max-w-sm mx-auto">
-                  <h3 className="text-lg font-medium text-gray-500 mb-2">
-                    No results found
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    Try adjusting your search or add some recipes to this cookbook.
-                  </p>
-                </div>
-              </div>
-            )}
+            ) : null}
           </div>
 
           {/* Mobile Cards */}
@@ -467,18 +420,7 @@ export function GroupRecipeTable({
                   }}
                 />
               ))
-            ) : (
-              <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
-                <div className="text-center max-w-sm mx-auto">
-                  <h3 className="text-lg font-medium text-gray-500 mb-2">
-                    No recipes yet
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    Start adding recipes to this cookbook to see them here.
-                  </p>
-                </div>
-              </div>
-            )}
+            ) : null}
           </div>
 
           {/* Pagination - Responsive */}

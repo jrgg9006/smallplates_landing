@@ -291,7 +291,7 @@ export default function AdminUsersPage() {
             <p className="text-sm text-gray-700 font-medium pt-2">This will keep:</p>
             <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside ml-2">
               <li>User account and profile</li>
-              <li>Default group &quot;My First Cookbook&quot;</li>
+              <li>Default group &quot;My First Book&quot;</li>
             </ul>
             <p className="text-sm text-red-600 font-medium pt-2">
               This action cannot be undone.

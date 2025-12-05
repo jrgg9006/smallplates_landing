@@ -111,7 +111,7 @@ export function AddToCookbookModal({
 
   const handleCreateCookbook = async () => {
     if (!newCookbookName.trim()) {
-      setError('Please enter a cookbook name');
+      setError('Please enter a book name');
       return;
     }
 

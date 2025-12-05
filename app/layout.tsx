@@ -4,10 +4,10 @@ import { AuthProvider } from '@/lib/contexts/AuthContext'
 
 export const metadata: Metadata = {
   title: 'Small Plates & Company — The People Behind Every Recipe',
-  description: 'A cookbook experience made with your loved ones\' recipes — high-quality hardcover books that bring memories to life.',
+  description: 'A book experience made with your loved ones\' recipes — high-quality hardcover books that bring memories to life.',
   openGraph: {
     title: 'Small Plates & Company',
-    description: 'A cookbook experience made with your loved ones\' recipes.',
+    description: 'A book experience made with your loved ones\' recipes.',
     type: 'website',
     url: 'https://smallplates.co/',
   },

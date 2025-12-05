@@ -1,5 +1,5 @@
 -- Migration: Add default group creation for new users
--- This ensures every new user automatically gets a default group called "My First Cookbook"
+-- This ensures every new user automatically gets a default group called "My First Book"
 -- when they create their account for the first time
 
 -- Update the handle_new_user function to create a default group
@@ -70,8 +70,8 @@ BEGIN
         BEGIN
           INSERT INTO public.groups (name, description, created_by, visibility)
           VALUES (
-            'My First Cookbook',
-            'Add recipes and invite friends to build your Cookbook',
+            'My First Book',
+            'Add recipes and invite friends to build your book',
             NEW.id,
             'private'
           )
@@ -104,8 +104,8 @@ BEGIN
   BEGIN
     INSERT INTO public.groups (name, description, created_by, visibility)
     VALUES (
-      'My First Cookbook',
-      'Add recipes and invite friends to build your Cookbook',
+      'My First Book',
+      'Add recipes and invite friends to build your book',
       NEW.id,
       'private'
     )
@@ -122,5 +122,5 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 COMMENT ON FUNCTION public.handle_new_user() IS 
-  'Creates a profile record and default group when a new user signs up. For waitlist users, includes collection token and recipe goals. Every user gets a default group called "My First Cookbook".';
+  'Creates a profile record and default group when a new user signs up. For waitlist users, includes collection token and recipe goals. Every user gets a default group called "My First Book".';
 

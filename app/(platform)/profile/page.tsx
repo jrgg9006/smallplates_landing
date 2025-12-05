@@ -44,6 +44,12 @@ export default function ProfilePage() {
     skipOnboarding,
     resumeOnboarding
   } = useProfileOnboarding();
+
+  // Handle welcome overlay start - navigate to groups and close overlay
+  const handleWelcomeStart = () => {
+    skipAllOnboarding();
+    router.push('/profile/groups');
+  };
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -221,7 +227,7 @@ export default function ProfilePage() {
       loadGuestCounts(true); // Pass true to indicate initial load
       
       // Check if user needs waitlist conversion (backup safety net)
-      fetch('/api/auth/check-conversion', {
+      fetch('/api/v1/auth/check-conversion', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       }).catch(error => {
@@ -263,7 +269,7 @@ export default function ProfilePage() {
       {showWelcomeOverlay && (
         <WelcomeOverlay
           userName={user.email?.split('@')[0] || 'there'}
-          onStart={startFirstRecipeExperience}
+          onStart={handleWelcomeStart}
           onDismiss={skipAllOnboarding}
           isVisible={showWelcomeOverlay}
         />
@@ -323,18 +329,8 @@ export default function ProfilePage() {
               /> */}
             </div>
             
-            {/* Right side - Action buttons + Complete Onboarding button - centered on mobile */}
+            {/* Right side - Action buttons - centered on mobile */}
             <div className="flex-shrink-0 flex items-center gap-4 justify-center lg:justify-end">
-              {/* Complete Onboarding Button - Only show if onboarding is not complete */}
-              {completedSteps.length < 3 && (
-                <Button
-                  onClick={resumeOnboarding}
-                  className="bg-[#464665] text-white hover:bg-[#3a3a52] rounded-lg px-8 py-3 text-base font-medium flex items-center gap-2"
-                >
-                  Finish Onboarding
-                </Button>
-              )}
-              
               {/* Add Guests Button - Teal Circle with Dropdown */}
               <AddGuestDropdown
                 onAddGuest={handleAddGuest}

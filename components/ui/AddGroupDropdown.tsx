@@ -104,7 +104,7 @@ export function AddGroupDropdown({
         {onInviteFriend && (
           <DropdownMenuItem onClick={onInviteFriend}>
             <UserPlus className="h-4 w-4 mr-2" />
-            Invite a friend to this Cookbook
+            Invite a friend to this Book
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>

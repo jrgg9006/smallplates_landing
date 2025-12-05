@@ -66,14 +66,14 @@ export function AddGroupPageDropdown({
               className="w-full px-4 py-3 text-left text-base text-gray-700 hover:text-gray-900 hover:bg-gray-50 flex items-center gap-3 border-b border-gray-100"
             >
               <Plus className="h-5 w-5" />
-              Create new cookbook
+              Create new book
             </button>
             <button
               onClick={handleInviteFriend}
               className="w-full px-4 py-3 text-left text-base text-gray-700 hover:text-gray-900 hover:bg-gray-50 flex items-center gap-3"
             >
               <UserPlus className="h-5 w-5" />
-              Invite a friend to this Cookbook
+              Invite a friend to this Book
             </button>
           </div>
           {/* Overlay to close dropdown */}

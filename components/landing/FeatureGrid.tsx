@@ -72,7 +72,7 @@ export default function FeatureGrid() {
           
           {/* Column 1 - Title/Subtitle (spans 2 rows on desktop, no horizontal divide, vertically centered) */}
           <div className="col-span-1 md:col-span-1 md:row-span-2 border-b md:border-b-0 md:border-r border-gray-200 p-6 md:p-8 flex flex-col justify-center items-center text-center relative z-20">
-            <h2 className="font-serif font-black text-[32px] md:text-[38px] lg:text-[42px] leading-[110%] tracking-tighter text-gray-900">
+            <h2 className="font-serif font-black text-[32px] md:text-[36px] lg:text-[36px] leading-[110%] tracking-tighter text-gray-900">
               How your book comes together
             </h2>
           </div>
