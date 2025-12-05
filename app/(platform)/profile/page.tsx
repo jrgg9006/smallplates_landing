@@ -299,7 +299,7 @@ export default function ProfilePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
               >
-                <h1 className="font-serif text-6xl md:text-6xl font-medium tracking-tight text-gray-900 mb-1">
+                <h1 className="font-serif text-5xl md:text-6xl font-medium tracking-tight text-gray-900 mb-1">
                   Guest List
                 </h1>
                 <h3 className="text-lg font-light text-gray-600">

@@ -542,7 +542,7 @@ export async function getAvailableRecipesForGroup(groupId: string): Promise<{ da
 }
 
 /**
- * Add a recipe to group's shared cookbook with retry logic and auto-creation
+ * Add a plate to group's shared cookbook with retry logic and auto-creation
  */
 export async function addRecipeToGroupCookbook(recipeId: string, groupId: string, note?: string) {
   const supabase = createSupabaseClient();

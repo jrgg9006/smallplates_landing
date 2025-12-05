@@ -240,7 +240,7 @@ export function createCookbookColumns(
     },
     {
       accessorKey: "recipe_name",
-      header: () => <div className="table-header-style">Recipe Name</div>,
+      header: () => <div className="table-header-style">Plate Name</div>,
       size: 300,
       minSize: 250,
       cell: ({ row }) => {

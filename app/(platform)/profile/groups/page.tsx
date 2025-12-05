@@ -302,6 +302,9 @@ export default function GroupsPage() {
                   <AddGroupPageDropdown
                     onCreateNewGroup={handleAddGroup}
                     onInviteFriend={handleInviteFriend}
+                    onAddExistingRecipe={() => groupsSectionRef.current?.openAddExistingRecipeModal()}
+                    onAddNewRecipe={() => groupsSectionRef.current?.openAddNewRecipeModal()}
+                    groupId={selectedGroup?.id || null}
                     title="Group actions"
                   />
                 </div>

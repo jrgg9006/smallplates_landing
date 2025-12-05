@@ -26,7 +26,7 @@ interface AddRecipeDropdownProps {
 }
 
 export function AddRecipeDropdown({
-  buttonText = "Add a Recipe",
+  buttonText = "Add a Plate",
   onAddExistingRecipe,
   onAddNewRecipe,
   className,

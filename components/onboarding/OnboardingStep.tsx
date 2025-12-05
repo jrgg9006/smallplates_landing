@@ -78,7 +78,7 @@ export default function OnboardingStep({
             return (
               <div key={stepNum} className="flex items-center">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
+                  className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center text-xs lg:text-sm font-semibold transition-colors ${
                     isActive
                       ? "bg-black text-white"
                       : isCompleted
@@ -91,7 +91,7 @@ export default function OnboardingStep({
                 </div>
                 {stepNum < totalSteps && (
                   <div
-                    className={`w-12 h-0.5 mx-1 ${
+                    className={`w-8 lg:w-12 h-0.5 mx-1 ${
                       isCompleted ? "bg-gray-800" : "bg-gray-200"
                     }`}
                   />

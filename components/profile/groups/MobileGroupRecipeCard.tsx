@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { RecipeWithGuest } from "@/lib/types/database";
-import { Clock, MoreHorizontal, Trash2, Copy, Eye } from "lucide-react";
+import { Edit, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { getGuestProfileIcon } from "@/lib/utils/profileIcons";
@@ -12,6 +12,7 @@ import { RemoveRecipeFromGroupModal } from "./RemoveRecipeFromGroupModal";
 interface MobileGroupRecipeCardProps {
   recipe: RecipeWithGuest;
   groupId: string;
+  index?: number;
   onRecipeClick?: (recipe: RecipeWithGuest) => void;
   onRecipeRemoved?: () => void;
   onRecipeCopied?: () => void;
@@ -20,53 +21,16 @@ interface MobileGroupRecipeCardProps {
 export function MobileGroupRecipeCard({ 
   recipe,
   groupId,
+  index,
   onRecipeClick,
-  onRecipeRemoved,
-  onRecipeCopied
+  onRecipeRemoved
 }: MobileGroupRecipeCardProps) {
-  const [showDropdown, setShowDropdown] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [removing, setRemoving] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
-      }
-    };
-
-    if (showDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showDropdown]);
 
   const handleCardClick = () => {
     if (onRecipeClick) {
       onRecipeClick(recipe);
-    }
-  };
-
-  // Format date nicely
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 3600);
-    
-    if (diffInHours < 24) {
-      return 'Today';
-    } else if (diffInHours < 48) {
-      return 'Yesterday';
-    } else {
-      return date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
-      });
     }
   };
 
@@ -75,7 +39,6 @@ export function MobileGroupRecipeCard({
   const fullName = guest ? `${guest.first_name || ''} ${guest.last_name || ''}`.trim() : 'Unknown Guest';
   const hasPrintedName = guest?.printed_name && guest.printed_name.trim();
   const displayName = guest && hasPrintedName ? guest.printed_name! : fullName;
-  const showSubtitle = guest && hasPrintedName;
 
   // Get "Added by" name - show in footer
   const addedByName = recipe.added_by_user?.full_name || recipe.added_by_user?.email || null;
@@ -84,9 +47,16 @@ export function MobileGroupRecipeCard({
   const isOwnRecipe = recipe.added_by_user?.full_name === 'You' ||
                       recipe.guests?.is_self === true;
 
-  const handleRemoveClick = () => {
-    setShowDropdown(false);
+  const handleRemoveClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setShowDeleteModal(true);
+  };
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleCardClick();
   };
 
   const handleCloseDeleteModal = () => {
@@ -119,110 +89,85 @@ export function MobileGroupRecipeCard({
   };
 
   return (
-    <div 
-      className="bg-white border border-gray-200 rounded-lg p-4 space-y-3 cursor-pointer hover:bg-gray-50 transition-colors"
-      onClick={handleCardClick}
-    >
-      {/* Recipe Title - Large and Prominent */}
-      <div>
-        <div className="text-md font-medium text-gray-900 leading-tight">
-          {recipe.recipe_name}
+    <div className="bg-white border border-gray-200 rounded-lg p-4">
+      {/* Header with Plate Badge and Actions */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-3">
+          {/* Badge and Number */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500 font-medium">Plate</span>
+            {index !== undefined && (
+              <div className="w-6 h-6 bg-black text-white rounded-full flex items-center justify-center text-xs font-semibold">
+                {index + 1}
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Actions - Desktop style with individual buttons */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"
+            onClick={handleEditClick}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-red-400 hover:text-red-600 hover:bg-red-50 rounded"
+            onClick={handleRemoveClick}
+          >
+            <Trash className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
-      {/* Chef Section */}
-      <div className="flex items-center gap-3">
+      {/* Recipe Title - Clickable */}
+      <div 
+        className="mb-3 cursor-pointer hover:bg-gray-50 -mx-4 px-4 py-2 rounded transition-colors"
+        onClick={handleCardClick}
+      >
+        <h3 className="text-2xl font-normal text-gray-900 leading-tight font-serif">
+          {recipe.recipe_name}
+        </h3>
+      </div>
+
+      {/* Chef Section - Clickable */}
+      <div 
+        className="flex items-center gap-3 mb-3 cursor-pointer hover:bg-gray-50 -mx-4 px-4 py-2 rounded transition-colors"
+        onClick={handleCardClick}
+      >
         <div className="flex-shrink-0">
           <Image
             src={getGuestProfileIcon(recipe.guest_id, recipe.guests?.is_self === true)}
             alt="Chef profile icon"
-            width={40}
-            height={40}
+            width={32}
+            height={32}
             className="rounded-full"
           />
         </div>
         <div className="flex-1">
-          <div className="text-sm text-gray-600 mb-0.5">Chef&apos;s Name:</div>
-          <div className="font-medium text-gray-900 text-base">
+          <div className="text-xs text-gray-500 uppercase tracking-wide font-medium">CHEF</div>
+          <div className="font-medium text-gray-900 text-sm">
             {displayName}
           </div>
         </div>
-      </div>
-
-      {/* Footer with "Added by" and actions */}
-      <div className="flex items-center justify-between pt-2 border-t border-gray-100" onClick={(e) => e.stopPropagation()}>
-        {addedByName ? (
-          <div className="text-sm text-gray-500">
-            Added by <span className="font-medium text-gray-900">{addedByName}</span>
+        <div className="flex items-center gap-1">
+          <div className="flex-shrink-0">
+            <Image
+              src={getGuestProfileIcon('added_by', isOwnRecipe)}
+              alt="Added by profile icon"
+              width={20}
+              height={20}
+              className="rounded-full"
+            />
           </div>
-        ) : (
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Clock className="h-4 w-4" />
-            <span>{formatDate(recipe.created_at)}</span>
+          <div className="text-xs text-gray-500">
+            Added by {isOwnRecipe ? 'You' : addedByName?.split(' ')[0] || 'Guest'}
           </div>
-        )}
-
-        {/* Actions */}
-        <div className="relative" ref={dropdownRef}>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowDropdown(!showDropdown);
-            }}
-          >
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-
-          {/* Dropdown Menu */}
-          {showDropdown && (
-            <>
-              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 min-w-[180px] py-1">
-                <button
-                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 first:rounded-t-lg"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowDropdown(false);
-                    handleCardClick();
-                  }}
-                >
-                  <Eye className="h-4 w-4" />
-                  View recipe
-                </button>
-                
-                <button
-                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowDropdown(false);
-                    onRecipeCopied?.();
-                  }}
-                >
-                  <Copy className="h-4 w-4" />
-                  Copy to my recipes
-                </button>
-
-                <button
-                  className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 last:rounded-b-lg"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemoveClick();
-                  }}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Remove from group
-                </button>
-              </div>
-              
-              {/* Overlay to close dropdown */}
-              <div 
-                className="fixed inset-0 z-10" 
-                onClick={() => setShowDropdown(false)}
-              />
-            </>
-          )}
         </div>
       </div>
 

@@ -116,7 +116,7 @@ Elements
 
 Mini gallery of recipe cards added by the owner
 
-Button: “Add a recipe” (primary CTA)
+Button: “Add a plate” (primary CTA)
 
 4.2 Path 2 — Collect Recipes From Your People
 Goal

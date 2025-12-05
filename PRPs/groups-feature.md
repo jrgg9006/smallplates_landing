@@ -637,7 +637,7 @@ npm run build
 ### Manual Testing Checklist
 - [ ] Create a new group
 - [ ] View group members
-- [ ] Add a recipe to group
+- [ ] Add a plate to group
 - [ ] Switch between groups
 - [ ] Invite a member (placeholder)
 - [ ] Remove recipe from group

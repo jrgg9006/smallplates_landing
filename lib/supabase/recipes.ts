@@ -475,7 +475,7 @@ export async function addUserRecipe(recipeData: UserRecipeData) {
 }
 
 /**
- * Add a recipe with file uploads (for image mode)
+ * Add a plate with file uploads (for image mode)
  * Handles file staging, recipe creation, and file move to final location
  */
 export async function addRecipeWithFiles(

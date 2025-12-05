@@ -404,11 +404,12 @@ export function GroupRecipeTable({
           {/* Mobile Cards */}
           <div className="md:hidden space-y-4 px-1">
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map((row, index) => (
                 <MobileGroupRecipeCard
                   key={row.id}
                   recipe={row.original}
                   groupId={group.id}
+                  index={index}
                   onRecipeClick={handleRowClick}
                   onRecipeRemoved={() => {
                     // Call the meta function to handle recipe removal

@@ -7,6 +7,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Drawer } from "vaul";
 import { Button } from "@/components/ui/button";
 import { Copy, Mail, MessageCircle, Facebook, Edit3, Save, RotateCcw } from "lucide-react";
@@ -84,8 +90,16 @@ export function ShareCollectionModal({
 
   // Default message
   const defaultMessage = userName 
-    ? `Hi! I'm ${userName} and I'm collecting recipes for a special cookbook project. Would you share one of your favorites?`
-    : 'Hi! I\'m collecting recipes for a special cookbook project. Would you share one of your favorites?';
+    ? `I'm putting together a book with my favorite people and their plates.
+If there's one dish you love to make, I'd love to add it — anything goes.
+
+-- ${userName}`
+    : `I'm putting together a book with my favorite people and their plates.
+If there's one dish you love to make, I'd love to add it — anything goes.
+
+
+
+-- (Your name)`;
   
   const shareMessage = customMessage || defaultMessage;
 
@@ -231,6 +245,16 @@ export function ShareCollectionModal({
     }
   ];
 
+  // Desktop only shows copy link with custom label
+  const desktopShareOptions: ShareOption[] = [
+    {
+      id: 'copy',
+      label: copied ? 'Copied!' : 'Pass a Plate',
+      icon: Copy,
+      action: handleCopyLink
+    }
+  ];
+
   // Mobile version - Drawer that slides up from bottom
   if (isMobile) {
     return (
@@ -241,7 +265,7 @@ export function ShareCollectionModal({
             <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300" />
             <div className="p-6 overflow-y-auto">
               <Drawer.Title className="text-center text-lg font-semibold mb-6">
-                Share Your Collection Link
+                Psst...Pass a Plate! - Link
               </Drawer.Title>
               <div className="space-y-6">
                 {/* WhatsApp Preview section */}
@@ -363,19 +387,6 @@ export function ShareCollectionModal({
 
                 {/* Share options */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-medium text-gray-900">Share via</h3>
-                    <button
-                      onClick={() => {
-                        if (collectionUrl && typeof window !== 'undefined') {
-                          window.open(collectionUrl, '_blank', 'noopener,noreferrer');
-                        }
-                      }}
-                      className="text-sm text-gray-600 hover:text-gray-900 underline transition-colors"
-                    >
-                      Preview Form
-                    </button>
-                  </div>
                   <div className="space-y-2">
                     {shareOptions.map((option) => {
                       const Icon = option.icon;
@@ -401,6 +412,20 @@ export function ShareCollectionModal({
                       );
                     })}
                   </div>
+                  
+                  {/* Preview button centered below all share options */}
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => {
+                        if (collectionUrl && typeof window !== 'undefined') {
+                          window.open(collectionUrl, '_blank', 'noopener,noreferrer');
+                        }
+                      }}
+                      className="text-sm text-gray-600 hover:text-gray-900 underline transition-colors"
+                    >
+                      Preview Form
+                    </button>
+                  </div>
                 </div>
 
                 {/* Error message */}
@@ -417,29 +442,22 @@ export function ShareCollectionModal({
     );
   }
 
-  // Desktop version - Sheet that slides from right
+  // Desktop version - Dialog popup (centered)
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="!w-[45%] !max-w-none h-full flex flex-col overflow-hidden">
-        <SheetHeader>
-          <SheetTitle className="font-serif text-2xl font-semibold mb-4">
-            Share Your Collection Link
-          </SheetTitle>
-        </SheetHeader>
-        <div className="flex-1 overflow-y-auto">
-          <div className="space-y-6 pr-4">
-            {/* WhatsApp Preview section */}
-            <div className="space-y-4">
-              <div>
-                <span className="text-sm font-medium text-gray-900">Message Title: </span>
-                <span className="text-gray-700 text-sm">{whatsappPreviewTitle}</span>
-              </div>
-            </div>
-
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden p-0 gap-0">
+        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4 border-b border-gray-200">
+          <DialogTitle className="font-serif text-2xl font-semibold">
+            Psst...Pass a Plate!
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="flex-1 overflow-y-auto px-6 py-6">
+          <div className="space-y-6">
             {/* Message section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between relative">
-                <h3 className="text-sm font-medium text-gray-900">Personal Message</h3>
+                <h3 className="text-sm font-medium text-gray-900">Write them a note</h3>
                 {!isEditingMessage && (
                   <button
                     onClick={handleEditMessage}
@@ -467,7 +485,7 @@ export function ShareCollectionModal({
                     value={editingMessage}
                     onChange={(e) => setEditingMessage(e.target.value)}
                     className="w-full p-4 bg-white border-2 border-gray-900 rounded-xl resize-none focus:outline-none focus:ring-0 focus:border-gray-900 transition-colors text-gray-900 leading-relaxed"
-                    rows={5}
+                    rows={4}
                     maxLength={280}
                     placeholder={defaultMessage}
                   />
@@ -508,7 +526,7 @@ export function ShareCollectionModal({
                   )}
                 </div>
               ) : (
-                <div className="bg-white border-2 border-gray-200 rounded-xl p-5">
+                <div className="bg-white border-2 border-gray-200 rounded-xl p-4">
                   <p className="text-gray-700 leading-relaxed">{shareMessage}</p>
                 </div>
               )}
@@ -547,21 +565,8 @@ export function ShareCollectionModal({
 
             {/* Share options */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium text-gray-900">Share via</h3>
-                <button
-                  onClick={() => {
-                    if (collectionUrl && typeof window !== 'undefined') {
-                      window.open(collectionUrl, '_blank', 'noopener,noreferrer');
-                    }
-                  }}
-                  className="text-sm text-gray-600 hover:text-gray-900 underline transition-colors"
-                >
-                  Preview Form
-                </button>
-              </div>
-              <div className="space-y-2">
-                {shareOptions.map((option) => {
+              <div className="space-y-3">
+                {desktopShareOptions.map((option) => {
                   const Icon = option.icon;
                   const isActive = option.id === 'copy' && copied;
                   
@@ -590,6 +595,20 @@ export function ShareCollectionModal({
                   );
                 })}
               </div>
+              
+              {/* Preview button centered below Copy Link */}
+              <div className="flex justify-center">
+                <button
+                  onClick={() => {
+                    if (collectionUrl && typeof window !== 'undefined') {
+                      window.open(collectionUrl, '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                  className="text-sm text-gray-600 hover:text-gray-900 underline transition-colors"
+                >
+                  This is what they&apos;ll see when they click your link
+                </button>
+              </div>
             </div>
 
             {/* Error message */}
@@ -600,7 +619,7 @@ export function ShareCollectionModal({
             )}
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -266,7 +266,7 @@ export default function HowItWorksPage() {
                   className="mt-8 bg-gray-900 text-white hover:bg-gray-800 rounded-lg px-8 py-6 text-lg font-medium"
                 >
                   <Plus className="mr-2 h-5 w-5" />
-                  {user ? "Add a recipe" : "Get started"}
+                  {user ? "Add a plate" : "Get started"}
                 </Button>
               </motion.div>
 
@@ -288,7 +288,7 @@ export default function HowItWorksPage() {
                     Send a link — no signup needeed.
                   </h2>
                   <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light">
-                    They can upload a recipe by text, photo, or even a quick audio message.
+                    They can upload a plate by text, photo, or even a quick audio message.
                   </p>
                   <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-medium">
                     Share the link with one click via SMS, WhatsApp, or email.

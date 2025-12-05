@@ -193,9 +193,9 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
         return;
       }
     } else {
-    if (!recipeIngredients.trim() || !recipeInstructions.trim()) {
-      setError('Please fill in Ingredients and Instructions');
-      return;
+      if (!recipeInstructions.trim()) {
+        setError('Please fill in Instructions/Steps');
+        return;
       }
     }
 
@@ -545,7 +545,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                     : 'bg-gray-50 border-2 border-gray-200 text-gray-600 hover:bg-gray-100'
                 }`}
               >
-                Type Plate
+                Text
               </button>
               <button
                 type="button"
@@ -560,7 +560,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                     : 'bg-gray-50 border-2 border-gray-200 text-gray-600 hover:bg-gray-100'
                 }`}
               >
-                Upload Images
+                Images
               </button>
             </div>
           </div>
@@ -575,7 +575,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                 type="text"
                 value={recipeTitle}
                 onChange={(e) => setRecipeTitle(e.target.value)}
-                placeholder="Plate Name"
+                placeholder="Small Plate Name"
                 maxLength={50}
                 className="w-full font-serif text-3xl font-semibold text-gray-900 leading-tight border-0 border-b border-gray-300 px-0 py-2 focus:outline-none focus:border-gray-500 bg-transparent placeholder:text-gray-400"
                 required
@@ -599,7 +599,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
 
           {/* Additional Notes - full width textarea */}
           <div>
-            <p className="text-xs text-gray-400 mb-1">Comments</p>
+            <p className="text-xs text-gray-400 mb-1">Add a Note!</p>
             <textarea
               value={recipeNotes}
               onChange={(e) => setRecipeNotes(e.target.value)}
@@ -633,7 +633,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
 
               {/* Right Column - Steps (Instructions) */}
               <div className="flex flex-col">
-                <p className="text-xs text-gray-400 mb-1">What you need to make this plate</p>
+                <p className="text-xs text-gray-400 mb-1">How to make this plate *</p>
                 <textarea
                   value={recipeInstructions}
                   onChange={(e) => setRecipeInstructions(e.target.value)}
@@ -856,7 +856,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
         </div>
         
         <div>
-          <Label htmlFor="recipeInstructions" className="text-sm font-medium text-gray-600">How to make this plate</Label>
+          <Label htmlFor="recipeInstructions" className="text-sm font-medium text-gray-600">How to make this plate *</Label>
           <textarea
             id="recipeInstructions"
             value={recipeInstructions}
@@ -936,7 +936,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-7xl w-[95vw] h-[90vh] max-h-[90vh] flex flex-col overflow-hidden overflow-x-hidden p-0 gap-0">
           <DialogHeader className="flex-shrink-0 px-8 pt-6 pb-4 border-b border-gray-200">
-            <DialogTitle className="font-serif text-2xl font-semibold">Add a Plate</DialogTitle>
+            <DialogTitle className="font-serif text-2xl font-semibold">Add a Small Plate</DialogTitle>
           </DialogHeader>
           
           <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col px-8 py-6 min-w-0">

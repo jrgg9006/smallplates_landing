@@ -286,7 +286,7 @@ export function AddRecipesToCollectionModal({
       }
     }}>
       <DialogContent 
-        className="sm:max-w-[600px] max-h-[80vh] flex flex-col"
+        className="sm:max-w-[600px] max-h-[85vh] sm:max-h-[80vh] flex flex-col"
         onPointerDownOutside={(e) => {
           e.preventDefault();
         }}
@@ -303,13 +303,13 @@ export function AddRecipesToCollectionModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-hidden flex flex-col space-y-4 py-4">
+        <div className="flex-1 overflow-hidden flex flex-col space-y-2 lg:space-y-4 py-2 lg:py-4">
           {/* Filter Tabs and Select/Deselect Buttons */}
           {allRecipes.length > 0 && (
             <div className="flex items-center justify-between border-b">
               <div className="flex">
                 <button
-                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                  className={`px-2 lg:px-4 py-1 lg:py-2 text-xs lg:text-sm font-medium border-b-2 transition-colors ${
                     filterType === 'all'
                       ? 'border-black text-gray-900'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -322,7 +322,7 @@ export function AddRecipesToCollectionModal({
                   All Plates
                 </button>
                 <button
-                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                  className={`px-2 lg:px-4 py-1 lg:py-2 text-xs lg:text-sm font-medium border-b-2 transition-colors ${
                     filterType === 'myOwn'
                       ? 'border-black text-gray-900'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -335,7 +335,7 @@ export function AddRecipesToCollectionModal({
                   My Own Plates
                 </button>
                 <button
-                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                  className={`px-2 lg:px-4 py-1 lg:py-2 text-xs lg:text-sm font-medium border-b-2 transition-colors ${
                     filterType === 'collected'
                       ? 'border-black text-gray-900'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -348,8 +348,8 @@ export function AddRecipesToCollectionModal({
                   Collected Plates
                 </button>
               </div>
-              {/* Select All / Deselect All buttons on the same line */}
-              <div className="flex gap-2">
+              {/* Select All / Deselect All buttons - Hidden on mobile */}
+              <div className="hidden lg:flex gap-2">
                 <Button
                   type="button"
                   variant="outline"

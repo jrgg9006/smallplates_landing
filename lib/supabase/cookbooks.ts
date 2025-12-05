@@ -346,7 +346,7 @@ export async function exitSharedCookbook(cookbookId: string) {
 }
 
 /**
- * Add a recipe to a cookbook
+ * Add a plate to a book
  */
 export async function addRecipeToCookbook(cookbookId: string, recipeId: string, note?: string) {
   const supabase = createSupabaseClient();

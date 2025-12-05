@@ -245,7 +245,7 @@ export default function HowItWorksPage() {
                   className="mt-8 bg-gray-900 text-white hover:bg-gray-800 rounded-lg px-8 py-6 text-lg font-medium"
                 >
                   <Plus className="mr-2 h-5 w-5" />
-                  Add a recipe
+                  Add a plate
                 </Button>
               </motion.div>
 
@@ -264,10 +264,10 @@ export default function HowItWorksPage() {
               >
                 <div className="space-y-6">
                   <h2 className="font-serif text-4xl md:text-5xl font-medium text-gray-900">
-                    Send your people a simple link and let them share their recipes — no signup needeed.
+                    Send your people a simple link and let them share their plates — no signup needeed.
                   </h2>
                   <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light">
-                    They can upload a recipe by text, photo, or even a quick audio message.
+                    They can upload a plate by text, photo, or even a quick audio message.
                   </p>
                   <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light">
                     And the best part? They add a personal note — which becomes one of the most meaningful pieces of your book.

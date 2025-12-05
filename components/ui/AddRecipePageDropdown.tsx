@@ -73,14 +73,14 @@ export function AddRecipePageDropdown({
               className="w-full px-4 py-3 text-left text-base text-gray-700 hover:text-gray-900 hover:bg-gray-50 flex items-center gap-3 border-b border-gray-100"
             >
               <BookOpen className="h-5 w-5" />
-              Add a Recipe
+              Add a Plate
             </button>
             <button
               onClick={handleGetRecipes}
               className="w-full px-4 py-3 text-left text-base text-gray-700 hover:text-gray-900 hover:bg-gray-50 flex items-center gap-3"
             >
               <Users className="h-5 w-5" />
-              Get Recipes from Friends
+              Get Plates from Friends
             </button>
           </div>
           {/* Overlay to close dropdown */}
@@ -109,11 +109,11 @@ export function AddRecipePageDropdown({
         <DropdownMenuContent align="end" className="w-64">
           <DropdownMenuItem onClick={onAddRecipe} className="px-2 py-1.5 text-sm">
             <BookOpen className="h-4 w-4 mr-2" />
-            Add a Recipe
+            Add a Plate
           </DropdownMenuItem>
           <DropdownMenuItem onClick={onGetRecipesFromFriends} className="px-2 py-1.5 text-sm">
             <Users className="h-4 w-4 mr-2" />
-            Get Recipes from Friends
+            Get Plates from Friends
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

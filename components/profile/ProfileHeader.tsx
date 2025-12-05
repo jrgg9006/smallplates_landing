@@ -49,6 +49,11 @@ export function ProfileHeader() {
     router.push('/profile/groups');
   };
 
+  const handleHowItWorks = () => {
+    setIsMobileMenuOpen(false);
+    router.push('/profile/how-it-works');
+  };
+
   // Determine active states for mobile menu
   const isCookbooksActive = pathname === '/profile/groups' || pathname.startsWith('/profile/groups/');
   const isRecipesActive = pathname === '/profile/recipes' || pathname.startsWith('/profile/recipes/');
@@ -59,6 +64,8 @@ export function ProfileHeader() {
                           !pathname.startsWith('/profile/groups') && 
                           !pathname.startsWith('/profile/recipes'));
   const isOrdersActive = pathname === '/profile/orders' || pathname.startsWith('/profile/orders/');
+  const isAccountActive = pathname === '/profile/account' || pathname.startsWith('/profile/account/');
+  const isHowItWorksActive = pathname === '/profile/how-it-works' || pathname.startsWith('/profile/how-it-works/');
 
   return (
     <>
@@ -127,7 +134,7 @@ export function ProfileHeader() {
                     : "border-gray-300 text-gray-700 hover:bg-gray-50"
                 }`}
               >
-                My Recipes
+                My Small Plates
               </button>
               <button
                 onClick={handleGuests}
@@ -144,6 +151,16 @@ export function ProfileHeader() {
             {/* Account Actions */}
             <div className="space-y-3">
               <button
+                onClick={handleAccount}
+                className={`block w-full text-center py-3 px-5 rounded-full border font-semibold transition-colors ${
+                  isAccountActive
+                    ? "bg-gray-100 border-gray-400 text-gray-900"
+                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                Account
+              </button>
+              <button
                 onClick={handleOrders}
                 className={`block w-full text-center py-3 px-5 rounded-full border font-semibold transition-colors ${
                   isOrdersActive
@@ -152,6 +169,16 @@ export function ProfileHeader() {
                 }`}
               >
                 Orders
+              </button>
+              <button
+                onClick={handleHowItWorks}
+                className={`block w-full text-center py-3 px-5 rounded-full border font-semibold transition-colors ${
+                  isHowItWorksActive
+                    ? "bg-gray-100 border-gray-400 text-gray-900"
+                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                How it works
               </button>
               <button
                 onClick={handleLogout}
