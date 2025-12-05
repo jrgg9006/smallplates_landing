@@ -3,13 +3,28 @@ import './globals.css'
 import { AuthProvider } from '@/lib/contexts/AuthContext'
 
 export const metadata: Metadata = {
-  title: 'Small Plates & Company — The People Behind Every Recipe',
+  title: 'Small Plates & Company — Psst...pass a plate',
   description: 'A book experience made with your loved ones\' recipes — high-quality hardcover books that bring memories to life.',
+  metadataBase: new URL('https://smallplates.co'),
   openGraph: {
     title: 'Small Plates & Company',
     description: 'A book experience made with your loved ones\' recipes.',
     type: 'website',
     url: 'https://smallplates.co/',
+    images: [
+      {
+        url: '/images/landing_hero_image2.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Small Plates & Company - Psst...pass a plate',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Small Plates & Company',
+    description: 'A book experience made with your loved ones\' recipes.',
+    images: ['/images/landing_hero_image2.jpg'],
   },
 }
 

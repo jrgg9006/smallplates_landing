@@ -12,7 +12,7 @@ import FoodPerfect from '@/components/landing/FoodPerfect'
 import WhatsIncluded from '@/components/landing/WhatsIncluded'
 import HowItWorks from '@/components/landing/HowItWorks'
 import ShareBanner from '@/components/landing/ShareBanner'
-import PlayModeSelection from '@/components/landing/PlayModeSelection'
+// import PlayModeSelection from '@/components/landing/PlayModeSelection'
 import MemorableExperience from '@/components/landing/MemorableExperience'
 import FAQ from '@/components/landing/FAQ'
 // import Guarantee from '@/components/landing/Guarantee'
@@ -39,7 +39,7 @@ export default function Home() {
         <WhatsIncluded />
         <HowItWorks />
         <ShareBanner />
-        <PlayModeSelection />
+        {/* <PlayModeSelection /> */}
         <MemorableExperience />
         <FAQ />
         {/* <Guarantee /> */}

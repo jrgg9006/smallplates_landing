@@ -2,6 +2,18 @@
 - **Check `TASK.md`** before starting a new task. If the task isn’t listed, add it with a brief description and today's date.
 - **Use venv_linux** (the virtual environment) whenever executing Python commands, including for unit tests.
 
+### 🔧 Modify Before Create Principle
+- **ALWAYS explore existing components FIRST** before creating new ones
+- **Search for similar functionality** that can be modified or extended
+- **Check reusable components** that might already solve the problem
+- **Modify existing code** with simple but powerful changes when possible
+- **Creating new components should be the LAST option**, not the first
+- **When asked for new features**: 
+  1. Search what already exists
+  2. Identify what needs fixing/improving
+  3. Modify in the simplest but most effective way
+  4. Only create new if absolutely necessary
+
 ### 🧱 Code Structure & Modularity
 - **Never create a file longer than 500 lines of code.** If a file approaches this limit, refactor by splitting it into modules or helper files.
 - **Organize code into clearly separated modules**, grouped by feature or responsibility.
