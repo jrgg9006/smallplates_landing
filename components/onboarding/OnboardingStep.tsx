@@ -67,8 +67,8 @@ export default function OnboardingStep({
         </svg>
       </button>
 
-      {/* Progress Indicator */}
-      <div className="mb-8">
+      {/* Progress Indicator - Extra top margin on mobile to avoid X overlap */}
+      <div className="mb-8 mt-16 lg:mt-8">
         <div className="flex items-center justify-center gap-2 mb-4">
           {Array.from({ length: totalSteps }, (_, index) => {
             const stepNum = index + 1;
