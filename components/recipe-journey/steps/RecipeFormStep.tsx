@@ -44,11 +44,11 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
     <div className="space-y-8" role="form" aria-labelledby="recipe-form-heading">
       <div className="space-y-2">
         <h2 id="recipe-form-heading" className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">
-          Your recipe
+          Your Small Plate
         </h2>
         <p className="mt-3 text-sm text-gray-600">
           <button type="button" onClick={() => setShowPasteModal(true)} className="underline underline-offset-2 hover:text-gray-700">
-            💡 Have everything written already? Just paste your full recipe here — we’ll format it for you.
+            💡 Have everything written already? Just paste it here — we&apos;ll format it for you.
           </button>
         </p>
       </div>
@@ -57,7 +57,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
       {/* Title */}
       <section id="title" aria-labelledby="title-label" className="space-y-2">
         <label id="title-label" htmlFor="recipeName" className="text-sm font-medium text-gray-700">
-          Recipe title
+          Small Plate title
         </label>
         <Input
           id="recipeName"
@@ -72,7 +72,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
       {/* Ingredients */}
       <section id="ingredients" aria-labelledby="ingredients-label" className="space-y-2">
         <label id="ingredients-label" htmlFor="ingredients-input" className="text-sm font-medium text-gray-700">
-          Ingredients
+          What you need to make this plate
         </label>
         <textarea
           id="ingredients-input"
@@ -88,7 +88,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
       {/* Instructions */}
       <section id="instructions" aria-labelledby="instructions-label" className="space-y-2">
         <label id="instructions-label" htmlFor="instructions-input" className="text-sm font-medium text-gray-700">
-          Instructions
+          How to make this plate
         </label>
         <textarea
           id="instructions-input"

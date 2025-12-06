@@ -6,7 +6,7 @@ type CTAButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 export default function CTAButton({
-  label = "Let's do it",
+  label = "Add your Small Plate",
   className = "",
   ...props
 }: CTAButtonProps) {

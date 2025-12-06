@@ -35,15 +35,15 @@ function generatePersonalizedMessage(fullName: string, rawFullName: string | nul
       beforeName: '',
       name: `${firstPersonFirstName} and ${secondPersonFirstName}`,
       afterName: ' request your recipe',
-      description: 'Share a treasured family recipe to be included in their cookbook'
+      description: 'Share a treasured plate to be included in their book'
     };
   } else {
     // Single person - extract first name
     const firstName = fullName.split(' ')[0] || '';
     return {
-      beforeName: '',
-      name: firstName,
-      afterName: ' is creating a cookbook, and would love to include your recipe!',
+      beforeName: 'A Personal Note:',
+      name: '',
+      afterName: '',
     };
   }
 }
@@ -323,8 +323,47 @@ export default function CollectionForm() {
                     <p className="text-gray-600 mb-6">
                       {personalizedMessage.description}
                     </p>
+                    
+                    {/* Personal Message from Share Collection Modal */}
+                    <div className="mb-6">
+                      <div>
+                        {(() => {
+                          const message = tokenInfo?.custom_share_message || 
+                            (userName 
+                              ? `I'm putting together a book with my favorite people and their plates.
+If there's one dish you love to make, I'd love to add it — anything goes.
+
+
+
+— ${userName}`
+                              : `I'm putting together a book with my favorite people and their plates.
+If there's one dish you love to make, I'd love to add it — anything goes.
+
+
+
+— (Your friend)`
+                            );
+                          
+                          // Parse message to separate note and signature
+                          const signatureMatch = message.match(/—\s*(.+)$/);
+                          if (signatureMatch) {
+                            const signature = signatureMatch[1].trim();
+                            const note = message.replace(/\n*—\s*.+$/, '').trim();
+                            return (
+                              <div>
+                                <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light first-letter:text-6xl first-letter:font-serif first-letter:float-left first-letter:mr-3 first-letter:mt-1 mb-3">{note}</p>
+                                <div className="font-serif italic text-xl md:text-2xl text-gray-700 mt-6 mb-12">— {signature}</div>
+                              </div>
+                            );
+                          } else {
+                            return <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light first-letter:text-6xl first-letter:font-serif first-letter:float-left first-letter:mr-3 first-letter:mt-1">{message}</p>;
+                          }
+                        })()}
+                      </div>
+                    </div>
+                    
                     <div className="text-sm text-gray-500 mb-6">
-                      Please enter your first initial and last name to find yourself
+                      Let&apos;s find your name so you can add your plate
                     </div>
                   </div>
                 );
@@ -495,7 +534,7 @@ export default function CollectionForm() {
                       Welcome! You&apos;re not in the list yet
                     </h3>
                     <p className="text-gray-600 mb-4 text-sm">
-                      No worries! We&apos;ll add you when you submit your recipe.
+                      No worries! We&apos;ll add you when you submit your plate.
                     </p>
                     {/* Ask for full name with inline Continue button (visual match to search row) */}
                     <div className="space-y-2">

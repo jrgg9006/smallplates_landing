@@ -31,7 +31,7 @@ export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn =
     <div className="min-h-[calc(100vh-180px)] flex items-center justify-center" role="region" aria-labelledby="thanks-heading">
       <div className="text-center space-y-3 max-w-lg mx-auto px-2">
         <div className="text-5xl">🎉</div>
-        <h2 id="thanks-heading" className="font-serif text-2xl md:text-3xl font-semibold text-gray-900">Thank you for your recipe!</h2>
+        <h2 id="thanks-heading" className="font-serif text-2xl md:text-3xl font-semibold text-gray-900">Thank you for your contribution!</h2>
         <p className="text-gray-600">It will be a wonderful addition to the cookbook.</p>
         <div className="space-y-4 mt-6">
           <div className="text-left">

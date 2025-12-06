@@ -7,14 +7,14 @@ export interface JourneyStepConfig {
 }
 
 export const journeySteps: JourneyStepConfig[] = [
-  { key: 'welcome', title: 'Welcome', ctaLabel: "Let's do it!" },
+  { key: 'welcome', title: 'Welcome', ctaLabel: "Add your Small Plate" },
   { key: 'introInfo', title: 'How it works', ctaLabel: 'Got it!' },
   { key: 'realBook', title: 'Printed book', ctaLabel: 'Start writing' },
   { key: 'uploadMethod', title: 'Choose format', ctaLabel: 'Continue' },
-  { key: 'recipeForm', title: 'Your recipe', ctaLabel: 'Add my recipe' },
+  { key: 'recipeForm', title: 'Your recipe', ctaLabel: 'Add my creation' },
   { key: 'recipeTitle', title: 'Recipe name', ctaLabel: 'Next' },
   { key: 'imageUpload', title: 'Upload images', ctaLabel: 'Continue' },
-  { key: 'personalNote', title: 'Personal note', ctaLabel: 'Submit Recipe' },
+  { key: 'personalNote', title: 'Personal note', ctaLabel: 'Submit Plate' },
   { key: 'summary', title: 'Review' },
   { key: 'success', title: 'Thanks' },
 ];

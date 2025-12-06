@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Drawer } from "vaul";
 import { Button } from "@/components/ui/button";
-import { Copy, Mail, MessageCircle, Facebook, Edit3, Save, RotateCcw } from "lucide-react";
+import { Copy, Mail, MessageCircle, Edit3, RotateCcw } from "lucide-react";
 import { validateWhatsAppURL, isMobileDevice } from "@/lib/utils/sharing";
 import { updateShareMessage, resetShareMessage, getCurrentProfile } from "@/lib/supabase/profiles";
 import { OnboardingBadge } from "@/components/onboarding/OnboardingBadge";
@@ -53,6 +53,7 @@ export function ShareCollectionModal({
   const [isEditingMessage, setIsEditingMessage] = useState(false);
   const [customMessage, setCustomMessage] = useState<string | null>(null);
   const [editingMessage, setEditingMessage] = useState('');
+  const [editingSignature, setEditingSignature] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [messageError, setMessageError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -88,18 +89,17 @@ export function ShareCollectionModal({
     }
   };
 
-  // Default message
-  const defaultMessage = userName 
-    ? `I'm putting together a book with my favorite people and their plates.
-If there's one dish you love to make, I'd love to add it — anything goes.
-
--- ${userName}`
-    : `I'm putting together a book with my favorite people and their plates.
-If there's one dish you love to make, I'd love to add it — anything goes.
-
+  // Default message parts
+  const defaultNote = `I'm putting together a book with my favorite people and their plates.
+If there's one dish you love to make, I'd love to add it — anything goes.`;
+  const defaultSignature = userName || '(Your name)';
+  
+  // Combined message for backward compatibility
+  const defaultMessage = `${defaultNote}
 
 
--- (Your name)`;
+
+— ${defaultSignature}`;
   
   const shareMessage = customMessage || defaultMessage;
 
@@ -145,14 +145,23 @@ If there's one dish you love to make, I'd love to add it — anything goes.
     window.open(`https://wa.me/?text=${url}`, '_blank');
   };
 
-  const handleFacebookShare = () => {
-    const url = encodeURIComponent(collectionUrl);
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
-  };
 
   // Message editing handlers
   const handleEditMessage = () => {
-    setEditingMessage(shareMessage);
+    // Parse existing message to separate note and signature
+    const messageToEdit = shareMessage;
+    const signatureMatch = messageToEdit.match(/—\s*(.+)$/);
+    
+    if (signatureMatch) {
+      const signature = signatureMatch[1].trim();
+      const note = messageToEdit.replace(/\n*—\s*.+$/, '').trim();
+      setEditingMessage(note);
+      setEditingSignature(signature);
+    } else {
+      setEditingMessage(messageToEdit);
+      setEditingSignature(defaultSignature);
+    }
+    
     setIsEditingMessage(true);
     setMessageError(null);
     
@@ -165,31 +174,41 @@ If there's one dish you love to make, I'd love to add it — anything goes.
   const handleCancelEdit = () => {
     setIsEditingMessage(false);
     setEditingMessage('');
+    setEditingSignature('');
     setMessageError(null);
   };
 
   const handleSaveMessage = async () => {
     if (editingMessage.trim().length === 0) {
-      setMessageError('Message cannot be empty');
+      setMessageError('Note cannot be empty');
       return;
     }
 
-    if (editingMessage.length > 280) {
-      setMessageError('Message must be 280 characters or less');
+    if (editingSignature.trim().length === 0) {
+      setMessageError('Signature cannot be empty');
       return;
     }
+
+    // Combine note and signature
+    const combinedMessage = `${editingMessage.trim()}
+
+
+
+— ${editingSignature.trim()}`;
+
 
     setIsSaving(true);
     setMessageError(null);
 
     try {
-      const { error } = await updateShareMessage(editingMessage.trim());
+      const { error } = await updateShareMessage(combinedMessage);
       if (error) {
         setMessageError(error);
       } else {
-        setCustomMessage(editingMessage.trim());
+        setCustomMessage(combinedMessage);
         setIsEditingMessage(false);
         setEditingMessage('');
+        setEditingSignature('');
       }
     } catch (err) {
       setMessageError('Failed to save message');
@@ -210,6 +229,7 @@ If there's one dish you love to make, I'd love to add it — anything goes.
         setCustomMessage(null);
         setIsEditingMessage(false);
         setEditingMessage('');
+        setEditingSignature('');
       }
     } catch (err) {
       setMessageError('Failed to reset message');
@@ -236,12 +256,6 @@ If there's one dish you love to make, I'd love to add it — anything goes.
       label: 'WhatsApp',
       icon: MessageCircle,
       action: handleWhatsAppShare
-    },
-    {
-      id: 'facebook',
-      label: 'Facebook',
-      icon: Facebook,
-      action: handleFacebookShare
     }
   ];
 
@@ -303,16 +317,36 @@ If there's one dish you love to make, I'd love to add it — anything goes.
                   
                   {isEditingMessage ? (
                     <div className="space-y-3">
-                      <textarea
-                        value={editingMessage}
-                        onChange={(e) => setEditingMessage(e.target.value)}
-                        className="w-full p-4 bg-white border-2 border-gray-900 rounded-xl resize-none focus:outline-none focus:ring-0 focus:border-gray-900 transition-colors text-gray-900 leading-relaxed"
-                        rows={4}
-                        maxLength={280}
-                        placeholder={defaultMessage}
-                      />
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs text-gray-500">{editingMessage.length}/280 characters</p>
+                      <div>
+                        <textarea
+                          id="mobile-note"
+                          value={editingMessage}
+                          onChange={(e) => {
+                        setEditingMessage(e.target.value);
+                        setMessageError(null);
+                      }}
+                          className="w-full p-4 bg-white border-2 border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors text-gray-900 leading-relaxed"
+                          rows={5}
+                          placeholder={defaultNote}
+                          maxLength={220}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="mobile-signature" className="block text-xs font-medium text-gray-600 mb-2">Your signature</label>
+                        <input
+                          id="mobile-signature"
+                          type="text"
+                          value={editingSignature}
+                          onChange={(e) => {
+                        setEditingSignature(e.target.value);
+                        setMessageError(null);
+                      }}
+                          className="w-full px-1 pb-2 bg-transparent border-b border-gray-300 focus:outline-none focus:border-gray-600 transition-colors text-gray-900 font-serif italic text-lg"
+                          placeholder={defaultSignature}
+                          maxLength={50}
+                        />
+                      </div>
+                      <div className="flex justify-end">
                         <div className="flex gap-2">
                           <Button
                             size="sm"
@@ -335,7 +369,7 @@ If there's one dish you love to make, I'd love to add it — anything goes.
                           <Button
                             size="sm"
                             onClick={handleSaveMessage}
-                            disabled={isSaving || editingMessage.trim().length === 0}
+                            disabled={isSaving || editingMessage.trim().length === 0 || editingSignature.trim().length === 0}
                             className="h-8 px-4 bg-gray-900 text-white hover:bg-gray-800"
                           >
                             Save
@@ -348,8 +382,36 @@ If there's one dish you love to make, I'd love to add it — anything goes.
                       )}
                     </div>
                   ) : (
-                    <div className="bg-white border-2 border-gray-200 rounded-xl p-4">
-                      <p className="text-gray-700 leading-relaxed">{shareMessage}</p>
+                    <div className="space-y-3">
+                      {(() => {
+                        // Parse message to separate note and signature
+                        const signatureMatch = shareMessage.match(/—\s*(.+)$/);
+                        if (signatureMatch) {
+                          const signature = signatureMatch[1].trim();
+                          const note = shareMessage.replace(/\n*—\s*.+$/, '').trim();
+                          return (
+                            <>
+                              <div>
+                                <div className="bg-white border-2 border-gray-200 rounded-xl p-4">
+                                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{note}</p>
+                                </div>
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-2">Signature</label>
+                                <div className="bg-white border-2 border-gray-200 rounded-xl px-4 py-3">
+                                  <p className="font-serif italic text-lg text-gray-700">— {signature}</p>
+                                </div>
+                              </div>
+                            </>
+                          );
+                        } else {
+                          return (
+                            <div className="bg-white border-2 border-gray-200 rounded-xl p-4">
+                              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{shareMessage}</p>
+                            </div>
+                          );
+                        }
+                      })()}
                     </div>
                   )}
                 </div>
@@ -445,7 +507,7 @@ If there's one dish you love to make, I'd love to add it — anything goes.
   // Desktop version - Dialog popup (centered)
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden p-0 gap-0">
+      <DialogContent className="max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden p-0 gap-0">
         <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4 border-b border-gray-200">
           <DialogTitle className="font-serif text-2xl font-semibold">
             Psst...Pass a Plate!
@@ -481,16 +543,36 @@ If there's one dish you love to make, I'd love to add it — anything goes.
               
               {isEditingMessage ? (
                 <div className="space-y-3">
-                  <textarea
-                    value={editingMessage}
-                    onChange={(e) => setEditingMessage(e.target.value)}
-                    className="w-full p-4 bg-white border-2 border-gray-900 rounded-xl resize-none focus:outline-none focus:ring-0 focus:border-gray-900 transition-colors text-gray-900 leading-relaxed"
-                    rows={4}
-                    maxLength={280}
-                    placeholder={defaultMessage}
-                  />
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-gray-500">{editingMessage.length}/280 characters</p>
+                  <div>
+                    <textarea
+                      id="note"
+                      value={editingMessage}
+                      onChange={(e) => {
+                        setEditingMessage(e.target.value);
+                        setMessageError(null);
+                      }}
+                      className="w-full p-4 bg-white border-2 border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors text-gray-900 leading-relaxed"
+                      rows={5}
+                      placeholder={defaultNote}
+                      maxLength={220}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="signature" className="block text-xs font-medium text-gray-600 mb-2">Your signature</label>
+                    <input
+                      id="signature"
+                      type="text"
+                      value={editingSignature}
+                      onChange={(e) => {
+                        setEditingSignature(e.target.value);
+                        setMessageError(null);
+                      }}
+                      className="w-full px-1 pb-2 bg-transparent border-b border-gray-300 focus:outline-none focus:border-gray-600 transition-colors text-gray-900 font-serif italic text-lg"
+                      placeholder={defaultSignature}
+                      maxLength={50}
+                    />
+                  </div>
+                  <div className="flex justify-end">
                     <div className="flex gap-2">
                       <Button
                         size="sm"
@@ -513,7 +595,7 @@ If there's one dish you love to make, I'd love to add it — anything goes.
                       <Button
                         size="sm"
                         onClick={handleSaveMessage}
-                        disabled={isSaving || editingMessage.trim().length === 0}
+                        disabled={isSaving || editingMessage.trim().length === 0 || editingSignature.trim().length === 0}
                         className="h-8 px-4 bg-gray-900 text-white hover:bg-gray-800"
                       >
                         Save
@@ -526,8 +608,36 @@ If there's one dish you love to make, I'd love to add it — anything goes.
                   )}
                 </div>
               ) : (
-                <div className="bg-white border-2 border-gray-200 rounded-xl p-4">
-                  <p className="text-gray-700 leading-relaxed">{shareMessage}</p>
+                <div className="space-y-3">
+                  {(() => {
+                    // Parse message to separate note and signature
+                    const signatureMatch = shareMessage.match(/—\s*(.+)$/);
+                    if (signatureMatch) {
+                      const signature = signatureMatch[1].trim();
+                      const note = shareMessage.replace(/\n*—\s*.+$/, '').trim();
+                      return (
+                        <>
+                          <div>
+                            <div className="bg-white border-2 border-gray-200 rounded-xl p-4">
+                              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{note}</p>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-2">Signature</label>
+                            <div className="border-b border-gray-300 pb-2">
+                              <p className="font-serif italic text-lg text-gray-700">— {signature}</p>
+                            </div>
+                          </div>
+                        </>
+                      );
+                    } else {
+                      return (
+                        <div className="bg-white border-2 border-gray-200 rounded-xl p-4">
+                          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{shareMessage}</p>
+                        </div>
+                      );
+                    }
+                  })()}
                 </div>
               )}
             </div>

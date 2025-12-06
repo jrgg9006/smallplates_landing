@@ -13,7 +13,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
       id: 'text' as const,
       icon: PenLineIcon,
       title: 'Write',
-      description: 'Type or paste your recipe',
+      description: 'Type or paste your plate',
       available: true
     },
     {
@@ -27,7 +27,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
       id: 'audio' as const,
       icon: MicIcon,
       title: 'Audio',
-      description: 'Record your recipe',
+      description: 'Record your plate',
       available: false
     }
   ];
@@ -37,7 +37,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
       <div className="w-full space-y-8 px-4 md:px-6">
         <div className="space-y-2 text-center">
           <h2 className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">
-            How would you like to share your recipe?
+            How would you like to share your Small Plate?
           </h2>
           <p className="mt-3 text-base text-gray-600">
             Choose the format that works best for you

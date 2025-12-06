@@ -162,7 +162,7 @@ export default function PreviewPage() {
               <div className="text-center lg:text-left">
                 <h1 className="text-3xl font-semibold text-gray-900 mb-4">
                   <span className="font-semibold text-gray-900 mx-1">[Your Name]</span>
-                  is creating a cookbook, and would love to include your recipe!
+                  is creating a cookbook, and would love to include your plate!
                 </h1>
                 <div className="text-sm text-gray-500 mb-6">
                   Please enter your first initial and last name to find yourself
@@ -236,7 +236,7 @@ export default function PreviewPage() {
                       Welcome! You&apos;re not in the list yet
                     </h3>
                     <p className="text-gray-600 mb-4 text-sm">
-                      No worries! We&apos;ll add you when you submit your recipe.
+                      No worries! We&apos;ll add you when you submit your plate.
                     </p>
                     <div className="space-y-2">
                       <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">Name</label>

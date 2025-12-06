@@ -164,9 +164,9 @@ export default function ReviewPage() {
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
                 <Check className="h-6 w-6 text-green-600" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Recipe Submitted!</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Small Plate Submitted!</h2>
               <p className="text-gray-600 mb-6">
-                Thank you for sharing your <strong>{submissionData?.recipe.recipeName}</strong> recipe 
+                Thank you for sharing your <strong>{submissionData?.recipe.recipeName}</strong> Small Plate 
                 with {tokenInfo?.user_name}. It has been added to their collection.
               </p>
               <div className="space-y-3">
@@ -174,10 +174,10 @@ export default function ReviewPage() {
                   onClick={handleSubmitAnother}
                   className="w-full bg-black text-white hover:bg-gray-800"
                 >
-                  Send Another Recipe
+                  Send Another Small Plate
                 </Button>
                 <p className="text-sm text-gray-500">
-                  Want to share more recipes? Click above to submit another one.
+                  Want to share more plates? Click above to submit another one.
                 </p>
               </div>
             </div>
@@ -204,7 +204,7 @@ export default function ReviewPage() {
             </Button>
             <div>
               <h1 className="text-xl md:text-3xl font-serif font-semibold text-gray-900">
-                Review Your Recipe
+                Review Your Small Plate
               </h1>
               <p className="text-gray-600">
                 Double-check everything before submitting
@@ -241,12 +241,12 @@ export default function ReviewPage() {
           {/* Recipe Preview */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Recipe: {submissionData?.recipe.recipeName}</CardTitle>
+              <CardTitle className="text-lg">Small Plate: {submissionData?.recipe.recipeName}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Ingredients */}
               <div>
-                <h3 className="font-medium text-gray-900 mb-2">Ingredients</h3>
+                <h3 className="font-medium text-gray-900 mb-2">What you need to make this plate</h3>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans">
                     {submissionData?.recipe.ingredients}
@@ -256,7 +256,7 @@ export default function ReviewPage() {
 
               {/* Instructions */}
               <div>
-                <h3 className="font-medium text-gray-900 mb-2">Instructions</h3>
+                <h3 className="font-medium text-gray-900 mb-2">How to make this plate</h3>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans">
                     {submissionData?.recipe.instructions}
@@ -294,7 +294,7 @@ export default function ReviewPage() {
               className="flex-1"
               disabled={submitting}
             >
-              Edit Recipe
+              Edit my Small Plate
             </Button>
             <Button
               onClick={handleSubmit}
@@ -307,7 +307,7 @@ export default function ReviewPage() {
                   Submitting...
                 </>
               ) : (
-                'Submit Recipe'
+                'Submit my Small Plate'
               )}
             </Button>
           </div>
