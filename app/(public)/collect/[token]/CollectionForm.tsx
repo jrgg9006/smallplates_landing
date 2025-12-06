@@ -351,12 +351,12 @@ If there's one dish you love to make, I'd love to add it — anything goes.
                             const note = message.replace(/\n*—\s*.+$/, '').trim();
                             return (
                               <div>
-                                <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light first-letter:text-6xl first-letter:font-serif first-letter:float-left first-letter:mr-3 first-letter:mt-1 mb-3">{note}</p>
+                                <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1 mb-3">{note}</p>
                                 <div className="font-serif italic text-xl md:text-2xl text-gray-700 mt-6 mb-12">— {signature}</div>
                               </div>
                             );
                           } else {
-                            return <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light first-letter:text-6xl first-letter:font-serif first-letter:float-left first-letter:mr-3 first-letter:mt-1">{message}</p>;
+                            return <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1">{message}</p>;
                           }
                         })()}
                       </div>

@@ -629,16 +629,18 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
           <button
             type="button"
             onClick={handleAddAnother}
-            className="px-6 py-3 rounded-full bg-black text-white hover:bg-gray-800"
+            className="px-4 py-2.5 sm:px-6 sm:py-3 rounded-full bg-black text-white hover:bg-gray-800 text-sm sm:text-base"
           >
-            Add another Small Plate
+            <span className="sm:hidden">Add Another</span>
+            <span className="hidden sm:inline">Add another Small Plate</span>
           </button>
           <button
             type="button"
             onClick={handleDone}
-            className="px-6 py-3 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50"
+            className="px-4 py-2.5 sm:px-6 sm:py-3 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm sm:text-base"
           >
-            Done for now
+            <span className="sm:hidden">Done</span>
+            <span className="hidden sm:inline">Done for now</span>
           </button>
         </>
       ) : currentStepIndex < totalSteps - 2 && current !== 'summary' ? (
