@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import { GroupJoinForm } from "@/components/groups/GroupJoinForm";
 
 interface GroupInvitationData {
@@ -21,11 +22,10 @@ interface GroupInvitationData {
   };
 }
 
-interface GroupInvitationPageProps {
-  params: { token: string };
-}
-
-export default function GroupInvitationPage({ params }: GroupInvitationPageProps) {
+export default function GroupInvitationPage() {
+  const params = useParams();
+  const tokenParam = params?.token as string;
+  
   const [token, setToken] = useState<string>('');
   const [verifying, setVerifying] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,8 +33,10 @@ export default function GroupInvitationPage({ params }: GroupInvitationPageProps
 
   // Extract token from params
   useEffect(() => {
-    setToken(params.token);
-  }, [params]);
+    if (tokenParam) {
+      setToken(tokenParam);
+    }
+  }, [tokenParam]);
 
   // Verify invitation token when token is available
   useEffect(() => {

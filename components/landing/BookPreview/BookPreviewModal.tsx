@@ -112,7 +112,7 @@ export default function BookPreviewModal({
                 onClick={handleCreateCookbook}
               className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
             >
-              Let's do This
+              Let&apos;s do This
             </button>
           </div>
         </div>

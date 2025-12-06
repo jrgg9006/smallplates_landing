@@ -100,7 +100,7 @@ export default function WellWhatIf() {
                 key={currentFearIndex}
                 className="font-serif text-3xl md:text-4xl lg:text-5xl text-gray-700 italic absolute w-full transition-all duration-700 ease-in-out animate-slide-up"
               >
-                "{customerFears[currentFearIndex]}"...
+                &quot;{customerFears[currentFearIndex]}&quot;...
               </p>
             </div>
           </div>
