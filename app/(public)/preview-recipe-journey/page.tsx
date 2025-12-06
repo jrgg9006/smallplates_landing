@@ -29,6 +29,7 @@ export default function PreviewPage() {
     user_name: 'Your Name',
     raw_full_name: 'Your Name',
     custom_share_message: null,
+    custom_share_signature: null,
     token: 'preview-token',
     is_valid: true
   };
