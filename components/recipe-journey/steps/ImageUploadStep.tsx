@@ -126,10 +126,10 @@ export default function ImageUploadStep({ onImagesReady, onFilesSelected }: Imag
       <div className="w-full space-y-8 px-4 md:px-6">
         <div className="space-y-2 text-center">
           <h2 className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">
-            Upload your recipe
+            Upload your Small Plate
           </h2>
           <p className="mt-3 text-base text-gray-600">
-            Take a photo or upload images of your handwritten or printed recipe
+            Take a photo or upload images of your handwritten or printed plate
           </p>
         </div>
 

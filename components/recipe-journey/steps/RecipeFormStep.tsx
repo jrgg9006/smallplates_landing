@@ -43,30 +43,28 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
   return (
     <div className="space-y-8" role="form" aria-labelledby="recipe-form-heading">
       <div className="space-y-2">
-        <h2 id="recipe-form-heading" className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">
-          Your Small Plate
-        </h2>
-        <p className="mt-3 text-sm text-gray-600">
+        <p className="mt-3 text-xs text-gray-600">
           <button type="button" onClick={() => setShowPasteModal(true)} className="underline underline-offset-2 hover:text-gray-700">
-            💡 Have everything written already? Just paste it here — we&apos;ll format it for you.
+            💡 Have everything written already? Just paste it here.
           </button>
         </p>
       </div>
 
 
       {/* Title */}
-      <section id="title" aria-labelledby="title-label" className="space-y-2">
-        <label id="title-label" htmlFor="recipeName" className="text-sm font-medium text-gray-700">
-          Small Plate title
-        </label>
-        <Input
-          id="recipeName"
-          value={data.recipeName}
-          onChange={(e) => onChange('recipeName', e.target.value)}
-          placeholder="Grandma's Secret Chocolate Chip Cookies"
-          aria-describedby="title-help"
-          className="h-12"
-        />
+      <section id="title" aria-labelledby="title-label" className="space-y-6">
+        <div className="text-center">
+        </div>
+        <div className="max-w-2xl mx-auto">
+          <input
+            id="recipeName"
+            value={data.recipeName}
+            onChange={(e) => onChange('recipeName', e.target.value)}
+            placeholder="Lazy Sunday Passover Plate"
+            aria-describedby="title-help"
+            className="w-full text-center font-serif text-3xl font-semibold text-gray-900 leading-tight border-0 border-b border-gray-300 px-0 py-2 focus:outline-none focus:border-gray-500 bg-transparent placeholder:text-gray-400"
+          />
+        </div>
       </section>
 
       {/* Ingredients */}
@@ -78,7 +76,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
           id="ingredients-input"
           value={data.ingredients}
           onChange={(e) => onChange('ingredients', e.target.value)}
-          placeholder={"• 2 cups all-purpose flour\n• 1 cup brown sugar\n• 1/2 cup butter, softened"}
+          placeholder={"• The last box of pasta\n• A suspicious amount of garlic\n• Good olive oil\n• Chili flakes\n• Cheese of questionable origin\n• Hunger"}
           rows={8}
           className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical"
           aria-describedby="ingredients-help"
@@ -94,7 +92,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
           id="instructions-input"
           value={data.instructions}
           onChange={(e) => onChange('instructions', e.target.value)}
-          placeholder={"1. Preheat the oven\n2. Mix dry ingredients\n3. Bake 12–15 minutes"}
+          placeholder={"Cook the pasta until it smells right\nAdd more garlic than the recipe would admit\nStir, sip wine (or whatever you're drinking)\nServe immediately or five minutes too late\nDoesn't matter, you'll eat it anyway"}
           rows={10}
           className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical"
           aria-describedby="instructions-help"

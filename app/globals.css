@@ -71,4 +71,25 @@
   .table-header-style {
     @apply font-normal text-gray-900 font-sans text-base;
   }
+
+  /* Typography Utilities */
+  .text-body-light {
+    @apply text-gray-700 text-lg md:text-xl leading-relaxed font-light;
+  }
+
+  .text-body {
+    @apply text-gray-700 text-base md:text-lg leading-relaxed;
+  }
+
+  .text-body-small {
+    @apply text-gray-700 text-sm md:text-base leading-relaxed font-light;
+  }
+
+  .text-heading {
+    @apply text-gray-900 font-serif font-medium tracking-tight;
+  }
+
+  .text-heading-light {
+    @apply text-gray-900 font-serif font-light tracking-tight;
+  }
 }

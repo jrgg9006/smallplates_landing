@@ -32,7 +32,7 @@ export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn =
       <div className="text-center space-y-3 max-w-lg mx-auto px-2">
         <div className="text-5xl">🎉</div>
         <h2 id="thanks-heading" className="font-serif text-2xl md:text-3xl font-semibold text-gray-900">Thank you for your contribution!</h2>
-        <p className="text-gray-600">It will be a wonderful addition to the cookbook.</p>
+        <p className="text-gray-600">It will be an amazing addition to the book we're creating.</p>
         <div className="space-y-4 mt-6">
           <div className="text-left">
             {hasGuestOptIn && guestOptInEmail ? (
@@ -40,7 +40,7 @@ export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn =
             ) : (
             <label className="flex items-center gap-2 text-sm text-gray-700">
               <input type="checkbox" className="h-4 w-4 accent-green-600" checked={optIn} onChange={(e) => { setOptIn(e.target.checked); setSaved(false); }} />
-              Share with me the finalized recipe with the image.
+              Share with me how the plate turned out in the book.
             </label>
             )}
 

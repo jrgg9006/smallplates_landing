@@ -94,7 +94,7 @@ export function FirstRecipeModal({ isOpen, onClose, onSubmit, isFirstRecipe = tr
               id="ingredients"
               value={formData.ingredients}
               onChange={(e) => handleFieldChange('ingredients', e.target.value)}
-              placeholder={"• 2 cups all-purpose flour\n• 1 cup brown sugar\n• 1/2 cup butter, softened"}
+              placeholder={"• The last box of pasta\n• A suspicious amount of garlic\n• Good olive oil\n• Chili flakes\n• Cheese of questionable origin\n• Hunger"}
               rows={6}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical"
               required

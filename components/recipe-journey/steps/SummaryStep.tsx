@@ -23,7 +23,7 @@ export default function SummaryStep({ recipeName, ingredients, instructions, per
 
   return (
     <div className="space-y-8" role="region" aria-labelledby="summary-heading">
-      <h2 id="summary-heading" className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">Review your recipe</h2>
+      <h2 id="summary-heading" className="text-center font-serif text-3xl md:text-4xl font-semibold text-gray-900">Review your Small Plate</h2>
 
       <div className="space-y-6 text-left">
         <div className="border-l-4 border-gray-200 pl-6">
@@ -36,7 +36,7 @@ export default function SummaryStep({ recipeName, ingredients, instructions, per
 
         <div className="border-l-4 border-gray-200 pl-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">Ingredients</h3>
+            <h3 className="text-lg font-semibold text-gray-900">What you need to make this plate</h3>
             <EditLink section="ingredients">Editar</EditLink>
           </div>
           <p className="text-gray-700 whitespace-pre-line mt-1">
@@ -46,7 +46,7 @@ export default function SummaryStep({ recipeName, ingredients, instructions, per
 
         <div className="border-l-4 border-gray-200 pl-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">Instructions</h3>
+            <h3 className="text-lg font-semibold text-gray-900">How to make this plate</h3>
             <EditLink section="instructions">Editar</EditLink>
           </div>
           <p className="text-gray-700 whitespace-pre-line mt-1">

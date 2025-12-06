@@ -631,7 +631,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
             onClick={handleAddAnother}
             className="px-6 py-3 rounded-full bg-black text-white hover:bg-gray-800"
           >
-            Add another recipe
+            Add another Small Plate
           </button>
           <button
             type="button"
@@ -669,9 +669,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
             ? 'Continue'  // Just navigate, no upload
             : current === 'personalNote'
               ? (recipeData.uploadMethod === 'image' 
-                  ? (uploadingImages ? `Submitting... ${uploadProgress}%` : 'Submit Recipe')
+                  ? (uploadingImages ? `Submitting... ${uploadProgress}%` : 'Submit Small Plate')
                   : recipeData.rawRecipeText 
-                    ? (submitting ? 'Submitting...' : 'Submit Recipe')  // Raw text flow submits directly
+                    ? (submitting ? 'Submitting...' : 'Submit Small Plate')  // Raw text flow submits directly
                     : 'Continue to Review')  // Regular text flow continues to summary
             : (journeySteps[currentStepIndex]?.ctaLabel ?? 'Continue')
           }
@@ -684,7 +684,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
           className="px-8 py-3 rounded-full bg-black text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
           aria-busy={submitting}
         >
-          {submitting ? 'Submitting…' : submitSuccess ? 'Submitted! 🎉' : 'Submit Recipe 🎉'}
+          {submitting ? 'Submitting…' : submitSuccess ? 'Submitted! 🎉' : 'Submit Small Plate 🎉'}
         </button>
       )}
     </div>

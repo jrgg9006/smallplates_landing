@@ -39,7 +39,7 @@ export default function PersonalNoteStep({ personalNote, onChange, userName }: P
             <textarea
               value={personalNote}
               onChange={(e) => onChange(e.target.value)}
-              placeholder="(Optional) This is my favorite recipe to make after a long day at work..."
+              placeholder="(Optional) This is what I make when I miss home. Or when I need something simple and warm...."
               rows={6}
               className={`w-full px-4 py-3 border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-none ${
                 isOverLimit ? 'border-red-300' : 'border-gray-300'
