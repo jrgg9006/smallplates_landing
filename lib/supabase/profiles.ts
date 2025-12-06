@@ -204,7 +204,7 @@ export async function deleteAccount(currentPassword: string) {
 /**
  * Update custom share message
  */
-export async function updateShareMessage(customMessage: string) {
+export async function updateShareMessage(customMessage: string, customSignature: string) {
   const supabase = createSupabaseClient();
   
   const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -221,9 +221,16 @@ export async function updateShareMessage(customMessage: string) {
     return { data: null, error: 'Message cannot be empty' };
   }
 
+  if (customSignature.length > 50) {
+    return { data: null, error: 'Signature must be 50 characters or less' };
+  }
+
   const { data, error } = await supabase
     .from('profiles')
-    .update({ custom_share_message: customMessage.trim() })
+    .update({ 
+      custom_share_message: customMessage.trim(),
+      custom_share_signature: customSignature.trim() || null
+    })
     .eq('id', user.id)
     .select()
     .single();
@@ -244,7 +251,10 @@ export async function resetShareMessage() {
 
   const { data, error } = await supabase
     .from('profiles')
-    .update({ custom_share_message: null })
+    .update({ 
+      custom_share_message: null,
+      custom_share_signature: null 
+    })
     .eq('id', user.id)
     .select()
     .single();

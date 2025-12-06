@@ -328,27 +328,14 @@ export default function CollectionForm() {
                     <div className="mb-6">
                       <div>
                         {(() => {
-                          const message = tokenInfo?.custom_share_message || 
-                            (userName 
-                              ? `I'm putting together a book with my favorite people and their plates.
-If there's one dish you love to make, I'd love to add it — anything goes.
-
-
-
-— ${userName}`
-                              : `I'm putting together a book with my favorite people and their plates.
-If there's one dish you love to make, I'd love to add it — anything goes.
-
-
-
-— (Your friend)`
-                            );
-                          
-                          // Parse message to separate note and signature
-                          const signatureMatch = message.match(/—\s*(.+)$/);
-                          if (signatureMatch) {
-                            const signature = signatureMatch[1].trim();
-                            const note = message.replace(/\n*—\s*.+$/, '').trim();
+                          // Check if we have the new separated fields
+                          if (tokenInfo?.custom_share_signature !== undefined) {
+                            // New format with separated fields
+                            const note = tokenInfo.custom_share_message || 
+                              `I'm putting together a book with my favorite people and their plates.
+If there's one dish you love to make, I'd love to add it — anything goes.`;
+                            const signature = tokenInfo.custom_share_signature || userName || '(Your friend)';
+                            
                             return (
                               <div>
                                 <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1 mb-3">{note}</p>
@@ -356,7 +343,37 @@ If there's one dish you love to make, I'd love to add it — anything goes.
                               </div>
                             );
                           } else {
-                            return <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1">{message}</p>;
+                            // Legacy format - parse combined message
+                            const message = tokenInfo?.custom_share_message || 
+                              (userName 
+                                ? `I'm putting together a book with my favorite people and their plates.
+If there's one dish you love to make, I'd love to add it — anything goes.
+
+
+
+— ${userName}`
+                                : `I'm putting together a book with my favorite people and their plates.
+If there's one dish you love to make, I'd love to add it — anything goes.
+
+
+
+— (Your friend)`
+                              );
+                            
+                            // Parse message to separate note and signature
+                            const signatureMatch = message.match(/—\s*(.+)$/);
+                            if (signatureMatch) {
+                              const signature = signatureMatch[1].trim();
+                              const note = message.replace(/\n*—\s*.+$/, '').trim();
+                              return (
+                                <div>
+                                  <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1 mb-3">{note}</p>
+                                  <div className="font-serif italic text-xl md:text-2xl text-gray-700 mt-6 mb-12">— {signature}</div>
+                                </div>
+                              );
+                            } else {
+                              return <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1">{message}</p>;
+                            }
                           }
                         })()}
                       </div>

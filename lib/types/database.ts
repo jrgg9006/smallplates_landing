@@ -31,6 +31,7 @@ export interface Database {
           recipe_goal_category: string | null;
           recipe_goal_number: number | null;
           custom_share_message: string | null;
+          custom_share_signature: string | null;
           use_case: string | null;
           created_at: string;
           updated_at: string;
@@ -45,6 +46,7 @@ export interface Database {
           recipe_goal_category?: string | null;
           recipe_goal_number?: number | null;
           custom_share_message?: string | null;
+          custom_share_signature?: string | null;
           use_case?: string | null;
         };
         Update: {
@@ -56,6 +58,7 @@ export interface Database {
           recipe_goal_category?: string | null;
           recipe_goal_number?: number | null;
           custom_share_message?: string | null;
+          custom_share_signature?: string | null;
           use_case?: string | null;
         };
       };
@@ -668,6 +671,7 @@ export interface CollectionTokenInfo {
   user_name: string;
   raw_full_name: string | null;
   custom_share_message: string | null;
+  custom_share_signature: string | null;
   token: string;
   is_valid: boolean;
 }

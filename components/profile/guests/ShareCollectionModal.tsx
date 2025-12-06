@@ -76,8 +76,26 @@ export function ShareCollectionModal({
     setIsLoading(true);
     try {
       const { data: profile, error: profileError } = await getCurrentProfile();
-      if (!profileError && profile?.custom_share_message) {
-        setCustomMessage(profile.custom_share_message);
+      if (!profileError && profile) {
+        // Check for new separated fields first
+        if (profile.custom_share_signature !== undefined) {
+          // New format: separated fields
+          if (profile.custom_share_message) {
+            const combinedMessage = `${profile.custom_share_message}
+
+
+
+— ${profile.custom_share_signature || userName || '(Your name)'}`;
+            setCustomMessage(combinedMessage);
+          } else {
+            setCustomMessage(null);
+          }
+        } else if (profile.custom_share_message) {
+          // Legacy format: combined message
+          setCustomMessage(profile.custom_share_message);
+        } else {
+          setCustomMessage(null);
+        }
       } else {
         setCustomMessage(null);
       }
@@ -189,22 +207,20 @@ If there's one dish you love to make, I'd love to add it — anything goes.`;
       return;
     }
 
-    // Combine note and signature
-    const combinedMessage = `${editingMessage.trim()}
-
-
-
-— ${editingSignature.trim()}`;
-
-
     setIsSaving(true);
     setMessageError(null);
 
     try {
-      const { error } = await updateShareMessage(combinedMessage);
+      const { error } = await updateShareMessage(editingMessage.trim(), editingSignature.trim());
       if (error) {
         setMessageError(error);
       } else {
+        // Store the combined message for display purposes
+        const combinedMessage = `${editingMessage.trim()}
+
+
+
+— ${editingSignature.trim()}`;
         setCustomMessage(combinedMessage);
         setIsEditingMessage(false);
         setEditingMessage('');

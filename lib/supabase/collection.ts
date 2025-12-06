@@ -44,7 +44,7 @@ export async function validateCollectionToken(token: string): Promise<{ data: Co
 
     const { data: profile, error } = await supabase
       .from('profiles')
-      .select('id, full_name, collection_enabled, custom_share_message')
+      .select('id, full_name, collection_enabled, custom_share_message, custom_share_signature')
       .eq('collection_link_token', token)
       .eq('collection_enabled', true)
       .single();
@@ -60,6 +60,7 @@ export async function validateCollectionToken(token: string): Promise<{ data: Co
         user_name: profile.full_name || 'Recipe Collector',
         raw_full_name: profile.full_name,
         custom_share_message: profile.custom_share_message || null,
+        custom_share_signature: profile.custom_share_signature || null,
         token,
         is_valid: true,
       },

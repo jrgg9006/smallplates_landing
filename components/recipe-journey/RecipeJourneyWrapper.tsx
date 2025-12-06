@@ -91,7 +91,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
 
   // Get the cookbook creator's name for personalization
   const isPreviewMode = typeof window !== 'undefined' && sessionStorage?.getItem('isPreviewMode') === 'true';
-  const creatorName = isPreviewMode ? '[Your Name]' : (tokenInfo.user_name.split(' ')[0] || 'the cookbook creator');
+  const creatorName = isPreviewMode 
+    ? '[Your Name]' 
+    : (tokenInfo.custom_share_signature || tokenInfo.user_name.split(' ')[0] || 'the cookbook creator');
 
   const getImageUrl = () => {
     // Use collect_1.jpg for collection journey
@@ -575,17 +577,19 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
   }, [submitSuccess]);
 
   const onEditSection = (section: 'title' | 'ingredients' | 'instructions' | 'note') => {
-    setCurrentStepIndex(1);
+    // Go to the recipe form step where all fields are editable
+    const recipeFormIndex = journeySteps.findIndex(s => s.key === 'recipeForm');
+    setCurrentStepIndex(recipeFormIndex);
     setTimeout(() => {
       const map: Record<typeof section, string> = {
-        title: 'title',
-        ingredients: 'ingredients',
-        instructions: 'instructions',
+        title: 'recipeName',
+        ingredients: 'ingredients-input',
+        instructions: 'instructions-input',
         note: 'note',
       };
       const el = document.getElementById(map[section]);
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 0);
+    }, 100);
   };
 
   const handleAddAnother = () => {
@@ -840,6 +844,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
               ingredients={recipeData.uploadMethod === 'image' ? 'Images uploaded' : recipeData.ingredients}
               instructions={recipeData.uploadMethod === 'image' ? `${recipeData.documentUrls?.length || 0} images uploaded` : recipeData.instructions}
               personalNote={recipeData.personalNote}
+              guestName={`${guestData.firstName} ${guestData.lastName}`.trim()}
               onEditSection={onEditSection}
             />
           </motion.div>

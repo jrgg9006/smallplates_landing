@@ -203,7 +203,7 @@ export default function ReviewPage() {
               <ChevronLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-xl md:text-3xl font-serif font-semibold text-gray-900">
+              <h1 className="text-light">
                 Review Your Small Plate
               </h1>
               <p className="text-gray-600">

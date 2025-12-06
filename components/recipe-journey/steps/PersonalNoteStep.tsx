@@ -29,9 +29,6 @@ export default function PersonalNoteStep({ personalNote, onChange, userName }: P
           <h2 className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">
             Share a Note to {userName}
           </h2>
-          <p className="mt-3 text-base text-gray-600">
-            Add a memory, story, or message to be printed with this recipe
-          </p>
         </div>
 
         <div className="max-w-2xl mx-auto">
@@ -50,7 +47,7 @@ export default function PersonalNoteStep({ personalNote, onChange, userName }: P
             </div>
           </div>
           <p className="mt-2 text-xs text-gray-500 text-center">
-            This personal note will be printed alongside your recipe in the cookbook
+            This personal note will be printed alongside your small plate in the book.
           </p>
           {isOverLimit && (
             <p className="mt-2 text-xs text-red-600 text-center">
