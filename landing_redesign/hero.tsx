@@ -6,11 +6,31 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import BookPreviewModal from "./BookPreview/BookPreviewModal";
 
+/**
+ * HERO SECTION — Small Plates Wedding Landing Page
+ * 
+ * Voice: Margot Cole
+ * Purpose: Hook + context de bodas + CTA primario
+ * 
+ * Copy rationale:
+ * - Headline: Acquisition line "Recipes from the people who love you."
+ *   Explains the product in 7 words. Warm without being cheesy.
+ *   Margot would say this with a knowing smile.
+ * 
+ * - Subhead: Anchors wedding context + differentiates (not a keepsake)
+ *   "A wedding cookbook made by your guests" = clarity
+ *   "Not a keepsake—a kitchen book" = Margot's edge
+ * 
+ * - CTA: "Start Your Book" — active, personal, no pressure
+ * 
+ * - Secondary: "See how it works" — for those who need more before committing
+ */
+
 export default function Hero() {
   const router = useRouter();
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
-  const handleGetStarted = () => {
+  const handleStartBook = () => {
     router.push("/onboarding");
   };
 
@@ -43,8 +63,10 @@ export default function Hero() {
       {/* Content */}
       <div className="relative z-10 w-full px-6 md:px-12 lg:px-16 pt-28 md:pt-32 pb-16 md:pb-24">
         <div className="max-w-3xl">
-          <motion.h1 
-            id="hero-title" 
+          
+          {/* Headline — The Acquisition Line */}
+          <motion.h1
+            id="hero-title"
             className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight text-white leading-[1.1]"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -52,6 +74,8 @@ export default function Hero() {
           >
             Recipes from the people who love you.
           </motion.h1>
+
+          {/* Subhead — Context + Differentiation */}
           <motion.p
             className="font-sans mt-6 text-lg sm:text-xl md:text-2xl font-light text-white/90 max-w-xl leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
@@ -63,6 +87,8 @@ export default function Hero() {
               Not a keepsake—a kitchen book.
             </span>
           </motion.p>
+
+          {/* CTAs */}
           <motion.div
             className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4"
             initial={{ opacity: 0, y: 20 }}
@@ -72,7 +98,7 @@ export default function Hero() {
             {/* Primary CTA */}
             <button
               type="button"
-              onClick={handleGetStarted}
+              onClick={handleStartBook}
               className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-8 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#D4A854]"
               data-cta="hero-primary"
             >

@@ -80,20 +80,24 @@ export default function OnboardingStep({
                 <div
                   className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center text-xs lg:text-sm font-semibold transition-colors ${
                     isActive
-                      ? "bg-black text-white"
+                      ? "bg-white text-[#9A9590] border-2 border-[#D4A854]"
                       : isCompleted
-                      ? "bg-gray-800 text-white"
-                      : "bg-gray-200 text-gray-600"
+                      ? "bg-[#D4A854] text-white"
+                      : "bg-white text-gray-400 border border-gray-200"
                   }`}
                   aria-current={isActive ? "step" : undefined}
                 >
-                  {stepNum}
+                  {isCompleted ? (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    stepNum
+                  )}
                 </div>
                 {stepNum < totalSteps && (
                   <div
-                    className={`w-8 lg:w-12 h-0.5 mx-1 ${
-                      isCompleted ? "bg-gray-800" : "bg-gray-200"
-                    }`}
+                    className="w-8 lg:w-12 h-0.5 mx-1 bg-gray-200"
                   />
                 )}
               </div>

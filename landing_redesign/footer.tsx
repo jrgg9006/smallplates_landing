@@ -2,9 +2,26 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+/**
+ * FOOTER — Small Plates Wedding Landing Page
+ * 
+ * Voice: Margot Cole
+ * Purpose: Close the page with brand presence. Not a dumping ground for links.
+ * 
+ * Key elements:
+ * - Brand line: "Still at the table." — signature moment
+ * - Clean, minimal links — only what matters
+ * - Warm but not cluttered
+ * 
+ * Design rationale:
+ * - Dark background (Soft Charcoal) — anchors the page
+ * - Logo prominent but not overwhelming
+ * - Social links subtle — Margot doesn't beg for follows
+ */
+
 export default function Footer() {
   const currentYear = new Date().getFullYear();
-  
+
   return (
     <footer className="bg-[#2D2D2D]">
       {/* Main Footer Content */}
@@ -29,12 +46,12 @@ export default function Footer() {
             </p>
             
             {/* Descriptor */}
-            <p className="mt-4 font-sans font-light text-base text-white/60 max-w-sm">
+            <p className="mt-4 font-sans text-base text-white/60 max-w-sm">
               Wedding cookbooks made by the people who love you.
               Not keepsakes—kitchen books.
             </p>
           </div>
-          
+
           {/* Links */}
           <div className="lg:col-span-4">
             <div className="grid grid-cols-2 gap-8">
@@ -47,17 +64,25 @@ export default function Footer() {
                   <li>
                     <Link 
                       href="/how-it-works" 
-                      className="font-sans font-light text-base text-white/70 hover:text-white transition-colors"
+                      className="font-sans text-base text-white/70 hover:text-white transition-colors"
                     >
                       How It Works
                     </Link>
                   </li>
                   <li>
                     <Link 
-                      href="/onboarding" 
-                      className="font-sans font-light text-base text-white/70 hover:text-white transition-colors"
+                      href="/pricing" 
+                      className="font-sans text-base text-white/70 hover:text-white transition-colors"
                     >
-                      Get Started
+                      Pricing
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
+                      href="/examples" 
+                      className="font-sans text-base text-white/70 hover:text-white transition-colors"
+                    >
+                      Example Books
                     </Link>
                   </li>
                 </ul>
@@ -72,7 +97,7 @@ export default function Footer() {
                   <li>
                     <Link 
                       href="/about" 
-                      className="font-sans font-light text-base text-white/70 hover:text-white transition-colors"
+                      className="font-sans text-base text-white/70 hover:text-white transition-colors"
                     >
                       About
                     </Link>
@@ -80,7 +105,7 @@ export default function Footer() {
                   <li>
                     <a 
                       href="mailto:hello@smallplates.co" 
-                      className="font-sans font-light text-base text-white/70 hover:text-white transition-colors"
+                      className="font-sans text-base text-white/70 hover:text-white transition-colors"
                     >
                       Contact
                     </a>
@@ -102,16 +127,17 @@ export default function Footer() {
               Start Your Book
             </Link>
           </div>
+
         </div>
       </div>
-      
+
       {/* Bottom Bar */}
       <div className="border-t border-white/10">
         <div className="mx-auto max-w-7xl px-6 py-6 md:px-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             
             {/* Copyright */}
-            <p className="font-sans font-light text-sm text-white/40">
+            <p className="font-sans text-sm text-white/40">
               © {currentYear} Small Plates & Co. All rights reserved.
             </p>
 
@@ -119,13 +145,13 @@ export default function Footer() {
             <div className="flex items-center gap-6">
               <Link 
                 href="/privacy" 
-                className="font-sans font-light text-sm text-white/40 hover:text-white/70 transition-colors"
+                className="font-sans text-sm text-white/40 hover:text-white/70 transition-colors"
               >
                 Privacy
               </Link>
               <Link 
                 href="/terms" 
-                className="font-sans font-light text-sm text-white/40 hover:text-white/70 transition-colors"
+                className="font-sans text-sm text-white/40 hover:text-white/70 transition-colors"
               >
                 Terms
               </Link>

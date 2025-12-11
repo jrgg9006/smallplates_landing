@@ -193,7 +193,7 @@ export default function BooksPrinted() {
   );
 
   return (
-    <section className="bg-stone-50 py-16 md:py-24">
+    <section className="bg-[#FAF7F2] py-16 md:py-24">
       <div className="mx-auto max-w-7xl px-6 md:px-8">
         {/* Header Section */}
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-12 md:mb-16">
@@ -204,11 +204,11 @@ export default function BooksPrinted() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-medium text-gray-900 mb-4">
-              <span className="font"></span> <span className="italic">Real plates.</span> Real people. Real books.
+            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-medium text-[#2D2D2D] mb-4">
+              Real recipes. Real people. Real books.
             </h2>
-            <p className="font-light text-lg md:text-xl lg:text-2xl text-gray-900 max-w-2xl">
-            Thoughtfully designed. Beautifully printed. Made to last.
+            <p className="font-sans font-light text-lg md:text-xl lg:text-2xl text-[#2D2D2D]/70 max-w-2xl">
+              Every page has a name. Every name has a story.
             </p>
           </motion.div>
           
@@ -223,9 +223,10 @@ export default function BooksPrinted() {
             <button
               type="button"
               onClick={handleGetStarted}
-              className="inline-flex items-center justify-center rounded-2xl bg-smallplates_red text-white px-8 py-4 text-lg font-semibold shadow-sm hover:bg-orange-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-600 transition-all duration-300 hover:scale-105"
+              className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-8 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#D4A854]"
+              data-cta="proof-primary"
             >
-              Start Gathering
+              Start Your Book
             </button>
           </motion.div>
         </div>

@@ -21,10 +21,10 @@ export function SelectionCard({ value, label, isSelected, onClick }: SelectionCa
     <button
       type="button"
       onClick={() => onClick(value)}
-      className={`w-full p-4 text-left rounded-xl border-2 transition-all duration-200 hover:border-blue-300 hover:shadow-md ${
+      className={`w-full p-4 text-left rounded-xl border-2 transition-all duration-200 hover:border-[#E8E0D5] hover:shadow-md ${
         isSelected
-          ? "border-blue-500 bg-blue-50"
-          : "border-gray-200 bg-white hover:bg-gray-50"
+          ? "border-[#E8E0D5] bg-[#E8E0D5]/40"
+          : "border-gray-200 bg-white hover:bg-[#FAF7F2]"
       }`}
     >
       <div className="flex items-center justify-between">
@@ -32,7 +32,7 @@ export function SelectionCard({ value, label, isSelected, onClick }: SelectionCa
         <div
           className={`w-5 h-5 rounded-full border-2 transition-all duration-200 ${
             isSelected
-              ? "border-blue-500 bg-blue-500"
+              ? "border-[#9A9590] bg-[#9A9590]"
               : "border-gray-300"
           }`}
         >
