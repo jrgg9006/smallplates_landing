@@ -15,23 +15,31 @@ export interface OnboardingAnswer {
 }
 
 export interface OnboardingData {
+  // Couple onboarding
   step1?: {
-    recipeCount: string;
+    planningStage?: string;
+    timeline?: string;
   };
   step2?: {
-    useCase: string;
-  };
-  step3?: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    hasPartner?: boolean;
+    brideFirstName?: string;
+    brideLastName?: string;
     partnerFirstName?: string;
     partnerLastName?: string;
+    weddingDate?: string;
+    dateUndecided?: boolean;
+    // Gift giver fields
+    giftGiverName?: string;
+    firstName?: string;
+    relationship?: string;
+  };
+  step3?: {
+    guestCount?: string;
+    email?: string;
+    password?: string;
   };
   step4?: {
-    paymentComplete?: boolean;
-    stripeSessionId?: string;
+    email?: string;
+    password?: string;
   };
 }
 

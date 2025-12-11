@@ -63,13 +63,13 @@ export default function EmotionalClose() {
             className="font-serif text-2xl sm:text-3xl md:text-4xl text-white/90 leading-relaxed font-light"
           >
             Ten years from now,
-            <span className="block">you'll open this book on a random Tuesday.</span>
+            <span className="block">you&apos;ll open this book on a random Tuesday.</span>
           </p>
 
           <p className="font-serif text-2xl sm:text-3xl md:text-4xl text-white/80 leading-relaxed font-light">
-            You'll see a name.
-            <span className="block">You'll remember a face.</span>
-            <span className="block">You'll cook something that tastes like being loved.</span>
+            You&apos;ll see a name.
+            <span className="block">You&apos;ll remember a face.</span>
+            <span className="block">You&apos;ll cook something that tastes like being loved.</span>
           </p>
         </motion.div>
 
@@ -92,7 +92,7 @@ export default function EmotionalClose() {
           viewport={{ once: true }}
           transition={{ duration: 0.7, delay: 0.4, ease: "easeOut" }}
         >
-          That's what you're giving them.
+          That&apos;s what you&apos;re giving them.
           <span className="block mt-2">Not a gift.</span>
           <span className="block">A kitchen full of people.</span>
         </motion.p>

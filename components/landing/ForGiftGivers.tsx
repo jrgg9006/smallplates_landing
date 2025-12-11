@@ -37,7 +37,7 @@ export default function ForGiftGivers() {
   const router = useRouter();
 
   const handleStartGift = () => {
-    router.push("/onboarding?intent=gift");
+    router.push("/onboarding-gift");
   };
 
   return (
@@ -125,13 +125,13 @@ export default function ForGiftGivers() {
 
           {/* Subhead */}
           <p className="mt-6 font-sans font-light text-lg md:text-xl text-[#2D2D2D]/80 text-center max-w-2xl mx-auto">
-            You're about to give the best wedding gift anyone's ever received.
+            You&apos;re about to give the best wedding gift anyone&apos;s ever received.
           </p>
 
           {/* The Process */}
           <div className="mt-10 md:mt-12">
             <p className="font-sans text-base font-medium text-[#2D2D2D]/60 uppercase tracking-wider mb-6">
-              Here's the deal:
+              Here&apos;s the deal:
             </p>
             
             <ol className="space-y-4">
@@ -182,7 +182,7 @@ export default function ForGiftGivers() {
             <p className="font-sans font-light text-center text-[#2D2D2D]/70">
               <span className="block text-lg">One gift from the group.</span>
               <span className="block mt-2 text-base text-[#2D2D2D]/60">
-                Split among bridesmaids or family, it's less than most registry items—
+                Split among bridesmaids or family, it&apos;s less than most registry items—
                 <span className="block">and infinitely more meaningful.</span>
               </span>
             </p>

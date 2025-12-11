@@ -67,13 +67,8 @@ function Step1() {
         {/* Gift Flow Link */}
         <div className="text-center">
           <a 
-            href="#"
+            href="/onboarding-gift"
             className="text-sm text-[#2D2D2D]/50 hover:text-[#D4A854] transition-colors font-light"
-            onClick={(e) => {
-              e.preventDefault();
-              // For now, just alert - will implement proper flow later
-              alert("Gift flow coming soon! For now, please use the main onboarding.");
-            }}
           >
             Giving this as a gift?
           </a>
@@ -146,10 +141,10 @@ function Step2() {
         {/* Question */}
         <div className="text-center mb-8">
           <h2 className="text-xl font-medium text-[#2D2D2D] mb-2">
-            Who's getting married?
+            Who&apos;s getting married?
           </h2>
           <p className="text-[#2D2D2D]/60 font-light">
-            Let's make this personal.
+            Let&apos;s make this personal.
           </p>
         </div>
 
@@ -191,7 +186,7 @@ function Step2() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="partnerFirstName" className="block text-sm font-medium text-[#2D2D2D] mb-1">
-                Partner's First Name
+                Partner&apos;s First Name
               </label>
               <input
                 id="partnerFirstName"
@@ -205,7 +200,7 @@ function Step2() {
             </div>
             <div>
               <label htmlFor="partnerLastName" className="block text-sm font-medium text-[#2D2D2D] mb-1">
-                Partner's Last Name
+                Partner&apos;s Last Name
               </label>
               <input
                 id="partnerLastName"
@@ -249,7 +244,7 @@ function Step2() {
                   }}
                   className="rounded border-gray-300 text-[#D4A854] focus:ring-[#D4A854] mr-2"
                 />
-                <span className="text-sm text-[#2D2D2D]/70">We're still deciding</span>
+                <span className="text-sm text-[#2D2D2D]/70">We&apos;re still deciding</span>
               </label>
             </div>
           </div>
@@ -438,11 +433,11 @@ function Step4() {
             {/* Personalized Message */}
             <div className="text-center mb-8 space-y-4">
               <h2 className="text-2xl font-medium text-[#2D2D2D]">
-                We're so excited for you!
+                We&apos;re so excited for you!
               </h2>
               <p className="text-lg text-[#2D2D2D]/70 font-light leading-relaxed">
                 Your wedding cookbook is about to become reality. 
-                <br />Let's create your account and get started.
+                <br />Let&apos;s create your account and get started.
               </p>
             </div>
 
@@ -568,7 +563,7 @@ function OnboardingContent() {
  */
 export default function OnboardingPage() {
   return (
-    <OnboardingProvider>
+    <OnboardingProvider userType="couple">
       <OnboardingContent />
     </OnboardingProvider>
   );

@@ -28,13 +28,19 @@ const OnboardingContext = createContext<OnboardingContextType | undefined>(
   undefined
 );
 
+interface OnboardingProviderProps {
+  children: ReactNode;
+  userType?: 'couple' | 'gift_giver';
+}
+
 /**
  * Onboarding Provider component to manage questionnaire state
  *
  * Args:
  *   children (ReactNode): Child components
+ *   userType (string): Type of user - 'couple' or 'gift_giver'
  */
-export function OnboardingProvider({ children }: { children: ReactNode }) {
+export function OnboardingProvider({ children, userType = 'couple' }: OnboardingProviderProps) {
   const [state, setState] = useState<OnboardingState>(initialState);
   const router = useRouter();
 
@@ -84,36 +90,26 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const completeOnboarding = useCallback(
     async () => {
       try {
-        const step3Data = state.answers.step3;
-        const step1Data = state.answers.step1;
+        // Determine which step has email based on userType
+        const emailStep = userType === 'couple' ? state.answers.step4 : state.answers.step3;
+        const email = emailStep?.email;
+        const password = emailStep?.password;
 
-        if (!step3Data?.email) {
-          throw new Error("Email is required to complete onboarding");
+        if (!email || !password) {
+          throw new Error("Email and password are required to complete onboarding");
         }
 
         const supabase = createSupabaseClient();
-        const redirectUrl = typeof window !== 'undefined'
-          ? `${window.location.origin}/reset-password`
-          : `http://localhost:3000/reset-password`;
 
-        // Zero-friction flow (like Notion, Linear, Vercel):
-        // 1. Create user with temp password
-        // 2. User stays LOGGED IN (no signOut)
-        // 3. Create profile
-        // 4. Send password setup email (user can change it later)
-        // 5. Redirect to profile immediately
-
-        console.log('🚀 Starting zero-friction onboarding...');
+        console.log(`🚀 Starting ${userType} onboarding...`);
 
         // Step 1: Create user with signUp (user will be auto-logged in)
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email: step3Data.email,
-          password: `temp_${Math.random().toString(36).substring(2, 15)}`, // Random temp password
+          email: email,
+          password: password,
           options: {
-            emailRedirectTo: redirectUrl,
             data: {
-              firstName: step3Data.firstName,
-              lastName: step3Data.lastName,
+              user_type: userType
             }
           }
         });
@@ -125,48 +121,37 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         console.log('✅ User created and logged in:', signUpData.user.id);
 
         // Step 2: Create profile using API
-        const response = await fetch('/api/v1/create-profile', {
+        const response = await fetch('/api/v1/create-wedding-profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userId: signUpData.user.id,
-            userData: { ...step3Data, recipeCount: step1Data?.recipeCount || '40-or-less' }
+            userData: state.answers,
+            userType: userType
           })
         });
 
         if (!response.ok) {
           console.error('⚠️ Failed to create profile, but user was created');
+          // Try to get error message from response
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Failed to create profile');
         } else {
           console.log('✅ Profile created successfully');
         }
 
-        // Step 3: Send password setup email (user can change password later)
-        // This runs in the background, doesn't block the user experience
-        console.log('📧 Sending password setup email...');
-        const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-          step3Data.email,
-          { redirectTo: redirectUrl }
-        );
-
-        if (resetError) {
-          console.error('⚠️ Failed to send password setup email:', resetError);
-          // Don't throw error - user is already logged in and can use the app
-        } else {
-          console.log('✅ Password setup email sent');
-        }
-
         setState(prev => ({ ...prev, isComplete: true }));
 
-        // Step 4: Redirect to profile immediately (user is already logged in!)
+        // Step 3: Redirect to profile immediately (user is already logged in!)
         console.log('🎉 Redirecting to profile...');
-        router.push("/profile/groups");
+        router.push("/profile/guests");
 
       } catch (err) {
         console.error("Onboarding completion error:", err);
         alert(err instanceof Error ? err.message : "Failed to complete onboarding");
       }
     },
-    [router, state.answers]
+    [router, state.answers, userType]
   );
 
   /**

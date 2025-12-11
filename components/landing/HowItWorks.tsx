@@ -46,7 +46,7 @@ export default function HowItWorks() {
             id="how-it-works-heading"
             className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#2D2D2D]"
           >
-            Here's how it happens.
+            Here&apos;s how it happens.
           </h2>
           <p className="mt-4 font-sans text-lg md:text-xl text-[#2D2D2D]/60 font-light">
             Simpler than you think.

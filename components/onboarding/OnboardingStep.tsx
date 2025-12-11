@@ -42,33 +42,16 @@ export default function OnboardingStep({
 }: OnboardingStepProps) {
   const router = useRouter();
 
+  // Handle close/escape
+  const handleClose = () => {
+    router.push('/');
+  };
+
   // Form content component - memoized to prevent unnecessary re-renders
   const FormContent = useMemo(() => (
-    <div className="w-full px-6 lg:px-12 py-8 lg:py-12">
-      {/* Close button - visible on mobile and desktop */}
-      <button
-        onClick={() => router.push("/")}
-        className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors z-10"
-        aria-label="Close onboarding"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
-      </button>
-
-      {/* Progress Indicator - Extra top margin on mobile to avoid X overlap */}
-      <div className="mb-8 mt-16 lg:mt-8">
+    <div className="w-full px-6 lg:px-12">
+      {/* Progress Indicator */}
+      <div className="mb-8">
         <div className="flex items-center justify-center gap-2 mb-4">
           {Array.from({ length: totalSteps }, (_, index) => {
             const stepNum = index + 1;
@@ -121,11 +104,11 @@ export default function OnboardingStep({
       {/* Step Form/Content Area */}
       <div className="mb-8">{children}</div>
     </div>
-  ), [stepNumber, totalSteps, title, description, children, router]);
+  ), [stepNumber, totalSteps, title, description, children]);
 
-  // Image component
+  // Image component - fixed to viewport
   const ImageSection = () => (
-    <div className="hidden lg:block relative bg-gray-100 h-screen p-2">
+    <div className="hidden lg:block fixed left-0 top-0 w-2/5 bg-gray-100 h-screen p-2 z-0">
       {imageUrl ? (
         <div className="relative w-full h-full rounded-2xl overflow-hidden bg-white shadow-sm">
           <Image
@@ -156,44 +139,78 @@ export default function OnboardingStep({
     </div>
   );
 
-  // If no image URL is provided, render the original single column layout
+  // Fixed close button component
+  const CloseButton = () => (
+    <button
+      onClick={handleClose}
+      className="fixed top-4 right-4 z-50 text-gray-600 hover:text-gray-900 transition-colors"
+      aria-label="Close onboarding"
+    >
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  );
+
+  // If no image URL is provided, render the original single column layout with centering
   if (!imageUrl) {
     return (
-      <div className="w-full max-w-2xl mx-auto relative">
-        {FormContent}
+      <div className="min-h-screen flex items-center py-8 overflow-y-auto">
+        <CloseButton />
+        <div className="w-full max-w-2xl mx-auto my-auto">
+          {FormContent}
+        </div>
       </div>
     );
   }
 
-  // Render two-column layout with image
+  // Render layout with fixed image
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
-      {imagePosition === 'left' ? (
-        <>
-          {/* Image on left for desktop, hidden on mobile - 40% width */}
-          <div className="lg:w-2/5 lg:flex-shrink-0 border-r border-gray-200">
-            <ImageSection />
-          </div>
-          {/* Form content on right - 60% width */}
-          <div className="lg:w-3/5 flex items-center justify-center relative">
-            <div className="w-full max-w-lg">
-              {FormContent}
+    <div className="min-h-screen">
+      <CloseButton />
+      
+      {/* Fixed image - only when imagePosition is left */}
+      {imagePosition === 'left' && (
+        <ImageSection />
+      )}
+      
+      {/* Content with margin to avoid overlap - centered vertically */}
+      <div className={`min-h-screen flex items-center py-8 lg:py-12 overflow-y-auto ${imagePosition === 'left' ? 'lg:ml-[40%]' : imagePosition === 'right' ? 'lg:mr-[40%]' : ''}`}>
+        <div className="w-full max-w-lg mx-auto my-auto">
+          {FormContent}
+        </div>
+      </div>
+      
+      {/* Fixed image - only when imagePosition is right */}
+      {imagePosition === 'right' && (
+        <div className="hidden lg:block fixed right-0 top-0 w-2/5 bg-gray-100 h-screen p-2 z-0">
+          {imageUrl ? (
+            <div className="relative w-full h-full rounded-2xl overflow-hidden bg-white shadow-sm">
+              <Image
+                src={imageUrl}
+                alt={imageAlt}
+                fill
+                sizes="40vw"
+                className="object-contain"
+                priority
+              />
+              {imageCaption && (
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
+                  <p className="text-white text-2xl lg:text-3xl font-serif p-8 lg:p-12">
+                    {imageCaption}
+                  </p>
+                </div>
+              )}
             </div>
-          </div>
-        </>
-      ) : (
-        <>
-          {/* Form content on left - 60% width */}
-          <div className="lg:w-3/5 flex items-center justify-center relative">
-            <div className="w-full max-w-lg">
-              {FormContent}
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-32 h-32 bg-gray-300 rounded-lg mx-auto mb-4"></div>
+                <p className="text-gray-500">Image Placeholder</p>
+              </div>
             </div>
-          </div>
-          {/* Image on right for desktop, hidden on mobile - 40% width */}
-          <div className="lg:w-2/5 lg:flex-shrink-0 border-l border-gray-200">
-            <ImageSection />
-          </div>
-        </>
+          )}
+        </div>
       )}
     </div>
   );
