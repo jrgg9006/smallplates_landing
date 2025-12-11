@@ -64,14 +64,15 @@ export default function HowItWorks() {
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.6, delay: index * 0.15, ease: "easeOut" }}
             >
+              {/* Step Number - positioned above image */}
+              <div className="flex justify-center mb-6">
+                <span className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-[#D4A854]/20 to-[#D4A854]/30 text-[#D4A854] font-serif font-medium flex items-center justify-center text-lg border border-[#D4A854]/30 shadow-sm">
+                  {step.number}
+                </span>
+              </div>
+
               {/* Image */}
               <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-6">
-                {/* Step Number - subtle top-left positioning */}
-                <div className="absolute top-4 left-4 z-10">
-                  <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm text-[#2D2D2D] font-sans text-base font-medium shadow-sm">
-                    {step.number}
-                  </span>
-                </div>
                 <Image
                   src={step.image}
                   alt={step.imageAlt}

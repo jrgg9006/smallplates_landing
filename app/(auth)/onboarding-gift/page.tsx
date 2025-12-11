@@ -65,7 +65,7 @@ function Step1() {
       <div className="max-w-lg mx-auto">
         {/* Question */}
         <div className="text-center mb-8">
-          <h2 className="text-xl font-medium text-[#2D2D2D] mb-2">
+          <h2 className="text-lg font-medium text-[#2D2D2D] mb-0">
             What&apos;s the timeline?
           </h2>
           <p className="text-[#2D2D2D]/60 font-light">
@@ -164,7 +164,7 @@ function Step2() {
       <div className="max-w-lg mx-auto">
         {/* Personalized Message */}
         <div className="text-center mb-8">
-          <h2 className="text-xl font-medium text-[#2D2D2D] mb-2">
+          <h2 className="text-lg font-medium text-[#2D2D2D] mb-0">
             Just a few details and you&apos;re all set.
           </h2>
           <p className="text-[#2D2D2D]/60 font-light">

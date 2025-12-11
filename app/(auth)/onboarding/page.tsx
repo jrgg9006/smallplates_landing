@@ -42,11 +42,11 @@ function Step1() {
     >
       <div className="max-w-lg mx-auto">
         {/* Question */}
-        <div className="text-center mb-8">
-          <h2 className="text-xl font-medium text-[#2D2D2D] mb-2">
+        <div className="text-center mb-8 mt-6">
+          <h2 className="text-lg font-medium text-[#2D2D2D] mb-0">
             Where are you in the wedding planning?
           </h2>
-          <p className="text-[#2D2D2D]/60 font-light">
+          <p className="text-base text-[#2D2D2D]/60 font-light">
             This helps us create the perfect timeline for your book.
           </p>
         </div>
@@ -140,10 +140,10 @@ function Step2() {
       <div className="max-w-lg mx-auto">
         {/* Question */}
         <div className="text-center mb-8">
-          <h2 className="text-xl font-medium text-[#2D2D2D] mb-2">
+          <h2 className="text-lg font-medium text-[#2D2D2D] mb-0">
             Who&apos;s getting married?
           </h2>
-          <p className="text-[#2D2D2D]/60 font-light">
+          <p className="text-sm text-[#2D2D2D]/60 font-light">
             Let&apos;s make this personal.
           </p>
         </div>
@@ -313,7 +313,7 @@ function Step3() {
       <div className="max-w-lg mx-auto">
         {/* Question */}
         <div className="text-center mb-8">
-          <h2 className="text-xl font-medium text-[#2D2D2D] mb-2">
+          <h2 className="text-lg font-medium text-[#2D2D2D] mb-0">
             How many guests are you expecting?
           </h2>
           <p className="text-[#2D2D2D]/60 font-light">

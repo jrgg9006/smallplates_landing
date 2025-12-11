@@ -61,7 +61,7 @@ export default function OnboardingStep({
             return (
               <div key={stepNum} className="flex items-center">
                 <div
-                  className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center text-xs lg:text-sm font-semibold transition-colors ${
+                  className={`w-6 h-6 lg:w-8 lg:h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
                     isActive
                       ? "bg-white text-[#9A9590] border-2 border-[#D4A854]"
                       : isCompleted
@@ -90,8 +90,8 @@ export default function OnboardingStep({
       </div>
 
       {/* Step Content */}
-      <div className="text-center mb-8">
-        <h1 className="font-serif text-3xl md:text-4xl font-semibold text-gray-900 mb-3">
+      <div className="text-center mb-4">
+        <h1 className="font-serif text-2xl md:text-3xl font-semibold text-gray-900 mb-0">
           {title}
         </h1>
         {description && (
