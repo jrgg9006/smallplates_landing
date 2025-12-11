@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import BookDetailsModal from './BookDetailsModal';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [isBookDetailsOpen, setIsBookDetailsOpen] = useState(false);
   
   return (
     <footer className="bg-[#2D2D2D]">
@@ -59,6 +61,14 @@ export default function Footer() {
                     >
                       Get Started
                     </Link>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => setIsBookDetailsOpen(true)}
+                      className="font-sans font-light text-base text-white/70 hover:text-white transition-colors text-left"
+                    >
+                      Book Specifications
+                    </button>
                   </li>
                 </ul>
               </div>
@@ -134,6 +144,12 @@ export default function Footer() {
           </div>
         </div>
       </div>
+      
+      {/* Book Details Modal */}
+      <BookDetailsModal 
+        isOpen={isBookDetailsOpen} 
+        onClose={() => setIsBookDetailsOpen(false)} 
+      />
     </footer>
   );
 }

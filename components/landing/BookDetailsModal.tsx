@@ -82,14 +82,12 @@ export default function BookDetailsModal({ isOpen, onClose }: BookDetailsModalPr
           <div className="p-8 md:p-12">
             {/* Header with more top spacing */}
             <div className="pt-8 md:pt-8 mb-10">
-              <h1 id="modal-title" className="font-serif text-3xl md:text-4xl font-medium text-gray-900 mb-6 text-center">
-                About Your Small Plates Book
+              <h1 id="modal-title" className="font-serif text-3xl md:text-4xl font-medium text-[#2D2D2D] mb-6 text-center">
+                Your Kitchen. Their Love.
               </h1>
               
-              <p className="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto text-center">
-                Each Small Plates & Co. book is crafted with the same care that goes into the recipes it holds. 
-                Every detail—from the materials to the printing—has been thoughtfully chosen to create something 
-                you&apos;ll treasure for years.
+              <p className="text-lg text-[#2D2D2D]/70 leading-relaxed max-w-2xl mx-auto text-center font-light">
+                This isn&apos;t just a cookbook. It&apos;s everyone who loves you, gathered in one place. Each page designed to be opened, stained, and treasured—because the best gifts are the ones you actually use.
               </p>
               
               {/* Decorative divider */}
@@ -100,7 +98,7 @@ export default function BookDetailsModal({ isOpen, onClose }: BookDetailsModalPr
 
             {/* Book Specifications with editorial design */}
             <div className="mb-10">
-              <h2 className="font-serif text-2xl text-gray-900 mb-8 text-center">
+              <h2 className="font-serif text-2xl text-[#2D2D2D] mb-8 text-center">
                 Book Specifications
               </h2>
               <dl className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
@@ -119,9 +117,8 @@ export default function BookDetailsModal({ isOpen, onClose }: BookDetailsModalPr
 
             {/* Footer text with elegant styling */}
             <div className="border-t border-gray-200 pt-8">
-              <p className="text-base text-gray-600 leading-relaxed text-center italic max-w-2xl mx-auto">
-                Each book is printed in full color with archival-quality inks and bound for durability, 
-                ensuring your memories look as beautiful as the day they were shared.
+              <p className="text-base text-[#2D2D2D]/70 leading-relaxed text-center italic max-w-2xl mx-auto font-light">
+                Built to live in your kitchen for decades, not gather dust on a shelf. <span className="font-serif not-italic text-[#2D2D2D]/50">Still at the table.</span>
               </p>
             </div>
           </div>

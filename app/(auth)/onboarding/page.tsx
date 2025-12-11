@@ -76,7 +76,7 @@ function Step1() {
       </div>
 
       {/* Navigation */}
-      <div className="flex justify-between mt-8">
+      <div className="flex justify-between mt-6">
         <button
           type="button"
           onClick={() => window.history.back()}
