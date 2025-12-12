@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { RedesignedGroupsSection as GroupsSection, type GroupsSectionRef } from "@/components/profile/groups/RedesignedGroupsSection";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { CaptainsDropdown } from "@/components/profile/groups/CaptainsDropdown";
+import { MoreMenuDropdown } from "@/components/profile/groups/MoreMenuDropdown";
 import { ChevronDown, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 import type { GroupWithMembers } from "@/lib/types/database";
@@ -23,6 +24,7 @@ export default function GroupsPage() {
   const [groupsLoading, setGroupsLoading] = useState(true);
   const [recipeCount, setRecipeCount] = useState(0);
   const [showCaptains, setShowCaptains] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   
   // Onboarding context
   const { 
@@ -58,6 +60,10 @@ export default function GroupsPage() {
 
   const handleExitGroup = () => {
     groupsSectionRef.current?.handleExitGroup();
+  };
+
+  const handleEditProfile = () => {
+    groupsSectionRef.current?.onEditGroup();
   };
 
   const handleGroupChange = (group: GroupWithMembers | null) => {
@@ -221,9 +227,19 @@ export default function GroupsPage() {
           </div>
           
           {/* More Menu */}
-          <button className="btn-tertiary px-3.5">
-            ⋯
-          </button>
+          <div className="relative">
+            <button 
+              onClick={() => setShowMoreMenu(!showMoreMenu)}
+              className="btn-tertiary px-3.5"
+            >
+              ⋯
+            </button>
+            <MoreMenuDropdown 
+              isOpen={showMoreMenu} 
+              onClose={() => setShowMoreMenu(false)}
+              onEditProfile={handleEditProfile}
+            />
+          </div>
         </div>
         
         {/* Recipe Grid */}

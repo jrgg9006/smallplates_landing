@@ -20,7 +20,6 @@ interface EditGroupModalProps {
   onGroupUpdated?: (group: GroupWithMembers) => void;
 }
 
-const MAX_DESCRIPTION_LENGTH = 280;
 const MAX_NAME_LENGTH = 30;
 
 export function EditGroupModal({ 
@@ -30,14 +29,12 @@ export function EditGroupModal({
   onGroupUpdated
 }: EditGroupModalProps) {
   const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (group) {
       setName(group.name || '');
-      setDescription(group.description || '');
     }
   }, [group, isOpen]);
 
@@ -65,10 +62,9 @@ export function EditGroupModal({
     }
 
     const trimmedName = name.trim();
-    const trimmedDescription = description.trim() || null;
     
     // Check if anything changed
-    if (trimmedName === group.name && trimmedDescription === (group.description || null)) {
+    if (trimmedName === group.name) {
       // No change, just close
       onClose();
       return;
@@ -80,7 +76,6 @@ export function EditGroupModal({
     try {
       const { data, error: updateError } = await updateGroup(group.id, { 
         name: trimmedName,
-        description: trimmedDescription || undefined,
         visibility: group.visibility
       });
       
@@ -170,45 +165,6 @@ export function EditGroupModal({
             )}
           </div>
 
-          {/* Description Field */}
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <Label htmlFor="edit-description" className="text-sm font-medium text-gray-600">
-                Description (Optional)
-              </Label>
-              <span className={`text-xs ${
-                description.length > MAX_DESCRIPTION_LENGTH 
-                  ? 'text-red-600 font-medium' 
-                  : description.length > MAX_DESCRIPTION_LENGTH * 0.9 
-                    ? 'text-orange-600' 
-                    : 'text-gray-500'
-              }`}>
-                {description.length}/{MAX_DESCRIPTION_LENGTH}
-              </span>
-            </div>
-            <textarea
-              id="edit-description"
-              value={description}
-              onChange={(e) => {
-                const newValue = e.target.value;
-                if (newValue.length <= MAX_DESCRIPTION_LENGTH) {
-                  setDescription(newValue);
-                }
-              }}
-              className={`mt-1 w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[100px] ${
-                description.length > MAX_DESCRIPTION_LENGTH 
-                  ? 'border-red-300 focus:ring-red-500' 
-                  : 'border-gray-300'
-              }`}
-              placeholder="What's this cookbook about?"
-              maxLength={MAX_DESCRIPTION_LENGTH}
-            />
-            {description.length > MAX_DESCRIPTION_LENGTH && (
-              <p className="mt-1 text-xs text-red-600">
-                Description cannot exceed {MAX_DESCRIPTION_LENGTH} characters.
-              </p>
-            )}
-          </div>
 
           {/* Error Message */}
           {error && (

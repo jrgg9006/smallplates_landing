@@ -12,10 +12,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createGroup } from "@/lib/supabase/groups";
-import type { GroupFormData, GroupVisibility } from "@/lib/types/database";
+import { getCurrentProfile } from "@/lib/supabase/profiles";
+import type { GroupFormData, GroupVisibility, Profile } from "@/lib/types/database";
 
 const MAX_NAME_LENGTH = 30;
-const MAX_DESCRIPTION_LENGTH = 280;
 
 interface CreateGroupModalProps {
   isOpen: boolean;
@@ -42,18 +42,39 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userProfile, setUserProfile] = useState<Profile | null>(null);
 
-  // Reset form when modal opens
+  // Load user profile when modal opens
   useEffect(() => {
     if (isOpen) {
-      setFormData({
-        name: '',
-        description: '',
-        visibility: 'private',
-      });
-      setError(null);
+      loadUserProfile();
     }
   }, [isOpen]);
+
+  const loadUserProfile = async () => {
+    const { data: profile } = await getCurrentProfile();
+    if (profile) {
+      setUserProfile(profile);
+      
+      // Generate default name from couple names
+      let defaultName = '';
+      if (profile.couple_first_name && profile.partner_first_name) {
+        defaultName = `${profile.couple_first_name} & ${profile.partner_first_name}`;
+      }
+      
+      setFormData({
+        name: defaultName,
+        visibility: 'private',
+      });
+    } else {
+      // No profile data, use empty name
+      setFormData({
+        name: '',
+        visibility: 'private',
+      });
+    }
+    setError(null);
+  };
 
   const handleInputChange = (field: keyof GroupFormData, value: string) => {
     // Apply character limits
@@ -156,45 +177,15 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
               required
               disabled={loading}
             />
+            {userProfile?.couple_first_name && userProfile?.partner_first_name && 
+             formData.name === `${userProfile.couple_first_name} & ${userProfile.partner_first_name}` && (
+              <p className="text-xs text-[hsl(var(--brand-warm-gray))] italic">
+                Using names from your profile. You can edit this if you'd like.
+              </p>
+            )}
             {formData.name.length > MAX_NAME_LENGTH && (
               <p className="text-xs text-red-600">
                 Book name cannot exceed {MAX_NAME_LENGTH} characters.
-              </p>
-            )}
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="groupDescription" className="text-base font-medium">
-                Description
-              </Label>
-              <span className={`text-xs ${
-                (formData.description || '').length > MAX_DESCRIPTION_LENGTH 
-                  ? 'text-red-600 font-medium' 
-                  : (formData.description || '').length > MAX_DESCRIPTION_LENGTH * 0.9 
-                    ? 'text-orange-600' 
-                    : 'text-gray-500'
-              }`}>
-                {(formData.description || '').length}/{MAX_DESCRIPTION_LENGTH}
-              </span>
-            </div>
-            <textarea
-              id="groupDescription"
-              value={formData.description || ''}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="What's this cookbook about? (optional)"
-              className={`w-full p-3 border rounded-md text-base min-h-[100px] resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                (formData.description || '').length > MAX_DESCRIPTION_LENGTH 
-                  ? 'border-red-300 focus:ring-red-500' 
-                  : 'border-gray-300'
-              }`}
-              maxLength={MAX_DESCRIPTION_LENGTH}
-              disabled={loading}
-            />
-            {(formData.description || '').length > MAX_DESCRIPTION_LENGTH && (
-              <p className="text-xs text-red-600">
-                Description cannot exceed {MAX_DESCRIPTION_LENGTH} characters.
               </p>
             )}
           </div>
