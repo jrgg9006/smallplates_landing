@@ -154,7 +154,7 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl font-semibold">
-            Add a friend to this book
+            Invite a Captain
           </DialogTitle>
           {group && (
             <p className="text-sm text-gray-600 mt-2">
@@ -163,10 +163,10 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
           )}
         </DialogHeader>
         
-        <form onSubmit={handleSendInvite} className="space-y-4 py-4">
+        <div className="space-y-4 py-4">
           {/* Name Field */}
-          <div className="space-y-2">
-            <Label htmlFor="friendName" className="text-sm font-medium">
+          <div>
+            <Label htmlFor="friendName" className="text-sm font-medium text-gray-600">
               Name *
             </Label>
             <Input
@@ -178,12 +178,13 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
               required
               disabled={loading}
               autoFocus
+              className="mt-1"
             />
           </div>
 
           {/* Email Field */}
-          <div className="space-y-2">
-            <Label htmlFor="friendEmail" className="text-sm font-medium">
+          <div>
+            <Label htmlFor="friendEmail" className="text-sm font-medium text-gray-600">
               Email *
             </Label>
             <Input
@@ -194,22 +195,23 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
               placeholder="friend@email.com"
               required
               disabled={loading}
+              className="mt-1"
             />
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 mt-1">
               An invitation to join will be sent to this email
             </p>
           </div>
 
           {/* Copy Invite Link Button */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">
+          <div>
+            <Label className="text-sm font-medium text-gray-600 mb-3 block">
               Or share invite link
             </Label>
             <Button
               type="button"
               variant="outline"
               onClick={handleCopyInviteLink}
-              className={`w-full flex items-center gap-2 transition-colors ${
+              className={`w-full flex items-center gap-2 transition-colors mb-2 ${
                 linkCopied ? 'text-green-700 border-green-700 hover:bg-green-50' : ''
               }`}
               disabled={loading || linkCopied}
@@ -244,27 +246,26 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
               <p className="text-red-600 text-sm">{error}</p>
             </div>
           )}
+        </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-3 pt-4">
-            <Button 
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="submit"
-              className="bg-black text-white hover:bg-gray-800 flex items-center gap-2"
-              disabled={loading || !formData.name.trim() || !formData.email.trim()}
-            >
-              <UserPlus className="h-4 w-4" />
-              {loading ? 'Sending...' : 'Send Invite'}
-            </Button>
-          </div>
-        </form>
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-3">
+          <Button 
+            variant="outline"
+            onClick={onClose}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSendInvite}
+            className="bg-black text-white hover:bg-gray-800"
+            disabled={loading || !formData.name.trim() || !formData.email.trim()}
+          >
+            <UserPlus className="h-4 w-4 mr-2" />
+            {loading ? 'Sending...' : 'Send Invite'}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -7,6 +7,7 @@ import { RedesignedGroupsSection as GroupsSection, type GroupsSectionRef } from 
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { CaptainsDropdown } from "@/components/profile/groups/CaptainsDropdown";
 import { MoreMenuDropdown } from "@/components/profile/groups/MoreMenuDropdown";
+import { AddFriendToGroupModal } from "@/components/profile/groups/AddFriendToGroupModal";
 import { ChevronDown, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 import type { GroupWithMembers } from "@/lib/types/database";
@@ -26,6 +27,7 @@ export default function GroupsPage() {
   const [recipeCount, setRecipeCount] = useState(0);
   const [showCaptains, setShowCaptains] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showAddCaptainModal, setShowAddCaptainModal] = useState(false);
   
   // Onboarding context
   const { 
@@ -47,8 +49,9 @@ export default function GroupsPage() {
     groupsSectionRef.current?.openCreateModal();
   };
 
-  const handleInviteFriend = () => {
-    groupsSectionRef.current?.openInviteModal();
+  const handleCollectRecipes = () => {
+    // TODO: Open recipe collection flow, not captain invitation
+    console.log('Collect Recipes clicked - implement recipe collection flow');
   };
 
   const handleEditGroup = () => {
@@ -65,6 +68,10 @@ export default function GroupsPage() {
 
   const handleEditProfile = () => {
     groupsSectionRef.current?.onEditGroup();
+  };
+
+  const handleInviteCaptain = () => {
+    setShowAddCaptainModal(true);
   };
 
   const handleGroupChange = (group: GroupWithMembers | null) => {
@@ -204,7 +211,7 @@ export default function GroupsPage() {
           {/* PRIMARY - Collect Recipes (HONEY, ROUNDED) */}
           <button 
             className="btn-primary"
-            onClick={handleInviteFriend}
+            onClick={handleCollectRecipes}
             disabled={!selectedGroup}
           >
             Collect Recipes
@@ -228,7 +235,7 @@ export default function GroupsPage() {
               Captains 
               <ChevronDown size={10} />
             </button>
-            {showCaptains && <CaptainsDropdown isOpen={showCaptains} selectedGroup={selectedGroup} onClose={() => setShowCaptains(false)} />}
+            {showCaptains && <CaptainsDropdown isOpen={showCaptains} selectedGroup={selectedGroup} onClose={() => setShowCaptains(false)} onInviteCaptain={handleInviteCaptain} />}
           </div>
           
           {/* More Menu */}
@@ -257,6 +264,17 @@ export default function GroupsPage() {
           />
         </div>
       </main>
+
+      {/* Add Captain Modal */}
+      <AddFriendToGroupModal
+        isOpen={showAddCaptainModal}
+        onClose={() => setShowAddCaptainModal(false)}
+        group={selectedGroup}
+        onInviteSent={() => {
+          // Optionally refresh captains list or handle success
+          console.log('Captain invitation sent');
+        }}
+      />
     </div>
   );
 }

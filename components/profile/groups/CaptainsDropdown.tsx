@@ -7,9 +7,10 @@ interface CaptainsDropdownProps {
   isOpen: boolean;
   selectedGroup: GroupWithMembers | null;
   onClose: () => void;
+  onInviteCaptain?: () => void;
 }
 
-export function CaptainsDropdown({ isOpen, selectedGroup, onClose }: CaptainsDropdownProps) {
+export function CaptainsDropdown({ isOpen, selectedGroup, onClose, onInviteCaptain }: CaptainsDropdownProps) {
   if (!isOpen) return null;
   
   // Get captains data from selectedGroup
@@ -49,7 +50,13 @@ export function CaptainsDropdown({ isOpen, selectedGroup, onClose }: CaptainsDro
             </div>
           </div>
         ))}
-        <button className="w-full mt-2 py-2.5 bg-transparent border border-dashed border-[hsl(var(--brand-border-button))] rounded-[20px] text-[13px] text-[hsl(var(--brand-light-gray))] hover:bg-[hsl(var(--brand-border))] transition-colors">
+        <button 
+          onClick={() => {
+            onInviteCaptain?.();
+            onClose();
+          }}
+          className="w-full mt-2 py-2.5 bg-transparent border border-dashed border-[hsl(var(--brand-border-button))] rounded-[20px] text-[13px] text-[hsl(var(--brand-light-gray))] hover:bg-[hsl(var(--brand-border))] transition-colors"
+        >
           + Invite Captain
         </button>
       </div>
