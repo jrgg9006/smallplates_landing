@@ -5,7 +5,6 @@ import { useState, useRef, useEffect } from "react";
 import { User, LogOut, Package, BookOpen, Users, ChefHat, HelpCircle } from "lucide-react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 export default function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,16 +29,10 @@ export default function ProfileDropdown() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         onMouseEnter={() => setIsOpen(true)}
-        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors overflow-hidden"
+        className="flex items-center justify-center w-10 h-10 rounded-full bg-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-charcoal))]/90 transition-colors text-[hsl(var(--brand-white))] text-sm font-medium"
         aria-label="Profile menu"
       >
-        <Image
-          src="/images/icons_profile/chef_you.png"
-          alt="Your profile"
-          width={40}
-          height={40}
-          className="w-10 h-10 rounded-full object-cover"
-        />
+        {user?.email?.charAt(0)?.toUpperCase() || 'U'}
       </button>
 
       {/* Dropdown Menu */}

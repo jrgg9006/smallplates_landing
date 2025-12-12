@@ -1,19 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useCallback } from "react";
-import { motion } from "framer-motion";
-import { GroupsSection, type GroupsSectionRef } from "@/components/profile/groups/GroupsSection";
-import type { GroupWithMembers } from "@/lib/types/database";
+import { RedesignedGroupsSection as GroupsSection, type GroupsSectionRef } from "@/components/profile/groups/RedesignedGroupsSection";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
-import { Button } from "@/components/ui/button";
-import { Pencil, ChevronDown, Users, Plus, BookOpen } from "lucide-react";
-import { AddGroupDropdown } from "@/components/ui/AddGroupDropdown";
-import { AddGroupPageDropdown } from "@/components/ui/AddGroupPageDropdown";
-import { GroupMembersDropdown } from "@/components/profile/groups/GroupMembersDropdown";
-import { GroupActionsDropdown } from "@/components/profile/groups/GroupActionsDropdown";
+import { CaptainsDropdown } from "@/components/profile/groups/CaptainsDropdown";
+import { ChevronDown, Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
+import type { GroupWithMembers } from "@/lib/types/database";
 import { useProfileOnboarding, OnboardingSteps } from "@/lib/contexts/ProfileOnboardingContext";
 import { WelcomeOverlay } from "@/components/onboarding/WelcomeOverlay";
 import { FirstRecipeExperience } from "@/components/onboarding/FirstRecipeExperience";
@@ -25,8 +20,9 @@ export default function GroupsPage() {
   const router = useRouter();
   const groupsSectionRef = useRef<GroupsSectionRef>(null);
   const [selectedGroup, setSelectedGroup] = useState<GroupWithMembers | null>(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [groupsLoading, setGroupsLoading] = useState(true);
+  const [recipeCount, setRecipeCount] = useState(0);
+  const [showCaptains, setShowCaptains] = useState(false);
   
   // Onboarding context
   const { 
@@ -39,7 +35,7 @@ export default function GroupsPage() {
     completeStep
   } = useProfileOnboarding();
 
-  // Handle welcome overlay start - just close overlay (already on groups page)
+  // Handler functions
   const handleWelcomeStart = () => {
     skipAllOnboarding();
   };
@@ -57,12 +53,10 @@ export default function GroupsPage() {
   };
 
   const handleDeleteGroup = () => {
-    // Delegate to GroupsSection which has the proper implementation
     groupsSectionRef.current?.handleDeleteGroup();
   };
 
   const handleExitGroup = () => {
-    // Delegate to GroupsSection which has the proper implementation  
     groupsSectionRef.current?.handleExitGroup();
   };
 
@@ -86,14 +80,15 @@ export default function GroupsPage() {
         throw new Error('Failed to save recipe. Please try again.');
       }
 
-      // Complete the onboarding step
       completeStep(OnboardingSteps.FIRST_RECIPE);
-      
-      // The FirstRecipeExperience component will handle showing the confirmation message
     } catch (err) {
       console.error('Error saving recipe:', err);
-      throw err; // Let the component handle the error display
+      throw err;
     }
+  };
+
+  const handlePreviewBook = () => {
+    console.log('Preview Book clicked');
   };
 
   // Redirect to login if not authenticated
@@ -105,49 +100,45 @@ export default function GroupsPage() {
 
   // Handle GroupsSection loading state changes
   const handleGroupsLoadingChange = useCallback((isLoading: boolean) => {
-    console.log('GroupsSection loading changed:', isLoading);
     setGroupsLoading(isLoading);
   }, []);
 
-  // Safety timeout: if loading takes too long, show content anyway
-  useEffect(() => {
-    if (groupsLoading) {
-      const timeout = setTimeout(() => {
-        console.warn('Groups loading timeout - showing content anyway');
-        setGroupsLoading(false);
-      }, 10000); // 10 seconds timeout
-      return () => clearTimeout(timeout);
-    }
-  }, [groupsLoading]);
+  // Handle recipe count changes
+  const handleRecipeCountChange = useCallback((count: number) => {
+    setRecipeCount(count);
+  }, []);
 
   // Show login redirect
   if (!user) {
     if (loading) {
       return (
-        <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="min-h-screen bg-[hsl(var(--brand-warm-white))] flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[hsl(var(--brand-honey))] mx-auto mb-4"></div>
+            <p className="text-[hsl(var(--brand-warm-gray))]">Loading...</p>
           </div>
         </div>
       );
     }
-    return null; // Will redirect via useEffect
+    return null;
   }
 
+  // Calculate unique contributors - simplified for now
+  const uniqueContributors = recipeCount > 0 ? Math.min(recipeCount, 5) : 0;
+
   return (
-    <div className="min-h-screen bg-white text-gray-700">
-      {/* Show loading overlay while groups are loading */}
+    <div className="min-h-screen bg-[hsl(var(--brand-background))]">
+      {/* Loading overlay */}
       {(loading || groupsLoading) && (
-        <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-[hsl(var(--brand-background))] z-50 flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[hsl(var(--brand-honey))] mx-auto mb-4"></div>
+            <p className="text-[hsl(var(--brand-warm-gray))]">Loading...</p>
           </div>
         </div>
       )}
 
-      {/* Welcome Overlay */}
+      {/* Onboarding overlays */}
       {showWelcomeOverlay && (
         <WelcomeOverlay
           userName={user.email?.split('@')[0] || 'there'}
@@ -157,7 +148,6 @@ export default function GroupsPage() {
         />
       )}
 
-      {/* First Recipe Experience */}
       {showFirstRecipeExperience && (
         <FirstRecipeExperience
           onSubmit={handleFirstRecipeSubmit}
@@ -165,183 +155,87 @@ export default function GroupsPage() {
         />
       )}
 
+      {/* Header */}
       <ProfileHeader />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Hero Section */}
-        <div className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-            {/* Title section with editorial text - centered on mobile */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:gap-8 mb-4 lg:mb-0 justify-center lg:justify-start w-full lg:w-auto">
-              {/* Editorial Text Version */}
-              <motion.div 
-                className="text-center lg:text-left w-full lg:w-auto"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-              >
-                {/* Privacy indicator */}
-                {selectedGroup && (
-                  <div className="mb-2">
-                    <span className="text-sm font-light text-gray-500 tracking-widest uppercase">
-                      NOT A COOKBOOK
-                      {/* {selectedGroup.visibility === 'public' ? 'SHARED GROUP' : 'PRIVATE GROUP'} */}
-                    </span>
-                  </div>
-                )}
-                
-                <div className="flex items-center gap-3 justify-center lg:justify-start">
-                  <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-medium tracking-tight text-gray-900 mb-1">
-                    {selectedGroup?.name || 'My Cookbooks'}
-                  </h1>
-                  {/* Desktop edit icon - hidden on mobile */}
-                  {selectedGroup && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleEditGroup}
-                      className="hidden lg:flex h-8 w-8 p-0 text-gray-500 hover:text-gray-900 hover:bg-gray-100"
-                      title="Edit book name"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-                <div className="flex flex-col items-center lg:items-start">
-                  <h3 className="text-lg font-light text-gray-600 mb-4 text-center lg:text-left">
-                    {selectedGroup?.description?.trim() || 'Created by TEAM'}
-                  </h3>
-                  
-                  {/* Group Selector Dropdown and Print Book Button - Side by side - Desktop only */}
-                  <div className="hidden lg:flex items-center gap-3 mb-4">
-                    {/* Group Selector Dropdown */}
-                    <div className="relative">
-                      <button
-                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                        className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 min-w-[200px] justify-between"
-                      >
-                        <span className="truncate">
-                          {selectedGroup ? selectedGroup.name : 'Select Cookbook'}
-                        </span>
-                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                      </button>
-                      
-                      {isDropdownOpen && (
-                        <>
-                          <div className="absolute top-12 left-0 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                            {groupsSectionRef.current?.groups.map((group) => (
-                              <button
-                                key={group.id}
-                                onClick={() => {
-                                  groupsSectionRef.current?.handleGroupChange(group);
-                                  setSelectedGroup(group);
-                                  setIsDropdownOpen(false);
-                                }}
-                                className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2 ${
-                                  selectedGroup?.id === group.id
-                                    ? 'bg-gray-100 text-gray-900 font-medium'
-                                    : 'text-gray-700'
-                                }`}
-                              >
-                                <Users className="h-4 w-4 flex-shrink-0" />
-                                <span className="truncate">{group.name}</span>
-                              </button>
-                            ))}
-                            <div className="border-t border-gray-200 mt-1 pt-1">
-                              <button
-                                onClick={() => {
-                                  setIsDropdownOpen(false);
-                                  handleAddGroup();
-                                }}
-                                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                              >
-                                <Plus className="h-4 w-4" />
-                                Create New Book
-                              </button>
-                            </div>
-                          </div>
-                          {/* Overlay to close dropdown */}
-                          <div 
-                            className="fixed inset-0 z-40" 
-                            onClick={() => setIsDropdownOpen(false)}
-                          />
-                        </>
-                      )}
-                    </div>
-                    
-                    {/* Print Book Button */}
-                    <Button
-                      onClick={() => {
-                        // Placeholder - to be implemented
-                        console.log('Print Book clicked');
-                      }}
-                      className="bg-black text-white hover:bg-gray-900 rounded-lg px-6 py-2 text-sm font-medium flex items-center gap-2 flex-shrink-0"
-                    >
-                      <BookOpen className="h-4 w-4" />
-                      Print Book
-                    </Button>
-                  </div>
-                  
-                  {/* Mobile edit icon - shown only on mobile, below description */}
-                  {selectedGroup && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleEditGroup}
-                      className="lg:hidden h-6 w-6 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 self-center mb-4"
-                      title="Edit book name"
-                    >
-                      <Pencil className="h-3 w-3" />
-                    </Button>
-                  )}
-                </div>
-
-                {/* Mobile: Add Group dropdown - positioned after subtitle */}
-                <div className="lg:hidden mb-0 flex justify-center">
-                  <AddGroupPageDropdown
-                    onCreateNewGroup={handleAddGroup}
-                    onInviteFriend={handleInviteFriend}
-                    onAddExistingRecipe={() => groupsSectionRef.current?.openAddExistingRecipeModal()}
-                    onAddNewRecipe={() => groupsSectionRef.current?.openAddNewRecipeModal()}
-                    groupId={selectedGroup?.id || null}
-                    title="Group actions"
-                  />
-                </div>
-
-              </motion.div>
-            </div>
-            
-            {/* Right side - Action buttons - Desktop only */}
-            <div className="hidden lg:flex flex-shrink-0 flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center w-full lg:w-auto">
-              {/* Members Dropdown */}
-              {selectedGroup && <GroupMembersDropdown group={selectedGroup} onInviteFriend={handleInviteFriend} />}
-
-              {/* Group Actions Dropdown - Three dots menu */}
-              {selectedGroup && (
-                <GroupActionsDropdown
-                  group={selectedGroup}
-                  userRole={groupsSectionRef.current?.userRole || null}
-                  onDeleteGroup={handleDeleteGroup}
-                  onExitGroup={handleExitGroup}
-                />
-              )}
-
-              <AddGroupDropdown
-                onAddExistingRecipe={() => groupsSectionRef.current?.openAddExistingRecipeModal()}
-                onAddNewRecipe={() => groupsSectionRef.current?.openAddNewRecipeModal()}
-                onInviteFriend={handleInviteFriend}
-                groupId={selectedGroup?.id || null}
-                title="Add plates to this cookbook"
-                className="hidden lg:flex"
-              />
+      <main className="max-w-[1000px] mx-auto px-10">
+        {/* Hero Image */}
+        <div className="relative w-full h-[200px] mt-6 rounded-2xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity group">
+          <Image
+            src="/images/profile/Hero_Profile_2400.jpg"
+            alt="Couple cooking together"
+            fill
+            className="object-cover"
+            sizes="1000px"
+          />
+          {/* Overlay with text - sutil para no competir con la imagen */}
+          <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
+            <div className="flex flex-col items-center text-white/70 group-hover:text-white/90 transition-all duration-300">
+              <ImageIcon size={40} strokeWidth={1} className="opacity-60 group-hover:opacity-80 transition-opacity" />
+              <span className="text-[12px] mt-1.5 font-normal opacity-80">Click to add your photo</span>
             </div>
           </div>
         </div>
-
-        {/* Groups Content - Always render so it can start loading */}
-        <GroupsSection ref={groupsSectionRef} onGroupChange={handleGroupChange} onLoadingChange={handleGroupsLoadingChange} />
-      </div>
+        
+        {/* Title Section */}
+        <div className="mt-6">
+          <h1 className="cookbook-title mb-1.5">
+            {selectedGroup?.name || 'My Cookbook'}
+          </h1>
+          <p className="cookbook-metadata">
+            {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} · {recipeCount} recipes{uniqueContributors > 0 ? ` from ${uniqueContributors} people` : ''}
+          </p>
+        </div>
+        
+        {/* Action Bar */}
+        <div className="flex items-center gap-3 mt-5 pb-6 border-b border-[hsl(var(--brand-border))]">
+          {/* PRIMARY - Collect Recipes (HONEY, ROUNDED) */}
+          <button 
+            className="btn-primary"
+            onClick={handleInviteFriend}
+            disabled={!selectedGroup}
+          >
+            Collect Recipes
+          </button>
+          
+          {/* SECONDARY - Add Your Own (OUTLINE, ROUNDED) */}
+          <button 
+            className="btn-secondary"
+            onClick={() => groupsSectionRef.current?.openAddNewRecipeModal()}
+            disabled={!selectedGroup}
+          >
+            Add Your Own
+          </button>
+          
+          {/* Captains Dropdown */}
+          <div className="relative">
+            <button 
+              onClick={() => setShowCaptains(!showCaptains)}
+              className="btn-tertiary flex items-center gap-1.5"
+            >
+              Captains 
+              <ChevronDown size={10} />
+            </button>
+            {showCaptains && <CaptainsDropdown isOpen={showCaptains} selectedGroup={selectedGroup} onClose={() => setShowCaptains(false)} />}
+          </div>
+          
+          {/* More Menu */}
+          <button className="btn-tertiary px-3.5">
+            ⋯
+          </button>
+        </div>
+        
+        {/* Recipe Grid */}
+        <div className="mt-8 pb-15">
+          <GroupsSection 
+            ref={groupsSectionRef} 
+            onGroupChange={handleGroupChange} 
+            onLoadingChange={handleGroupsLoadingChange}
+            onRecipeCountChange={handleRecipeCountChange}
+          />
+        </div>
+      </main>
     </div>
   );
 }

@@ -13,6 +13,7 @@ const config: Config = {
   			serif: [
   				'minion-pro',
   				'Georgia',
+  				'Times New Roman',
   				'serif'
   			],
   			'serif-display': [
@@ -34,10 +35,9 @@ const config: Config = {
   				'serif'
   			],
   			sans: [
-  				'system-ui',
+  				'Inter',
   				'-apple-system',
   				'BlinkMacSystemFont',
-  				'Segoe UI',
   				'sans-serif'
   			]
   		},
@@ -89,7 +89,20 @@ const config: Config = {
   			},
   			smallplates_green: '#00676F',
   			smallplates_red: '#E33D26',
-  			smallplates_darkblue: '#444459'
+  			smallplates_darkblue: '#444459',
+  			// Small Plates Brand Colors
+  			brand: {
+  				'warm-white': 'hsl(var(--brand-warm-white))',
+  				'honey': 'hsl(var(--brand-honey))',
+  				'honey-dark': 'hsl(var(--brand-honey-dark))',
+  				'charcoal': 'hsl(var(--brand-charcoal))',
+  				'warm-gray': 'hsl(var(--brand-warm-gray))',
+  				'cream': 'hsl(var(--brand-cream))',
+  				'sand': 'hsl(var(--brand-sand))',
+  				'white': 'hsl(var(--brand-white))',
+  				'olive': 'hsl(var(--brand-olive))',
+  				'terracotta': 'hsl(var(--brand-terracotta))'
+  			}
   		}
   	}
   },

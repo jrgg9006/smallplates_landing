@@ -74,11 +74,7 @@ export default function ProfileNavigation({
           <Link
             key={item.href}
             href={item.href}
-            className={`relative flex items-center gap-2 px-4 py-2 text-base transition-colors ${
-              item.isActive
-                ? "text-gray-900 font-medium border-b-2 border-gray-900"
-                : "text-gray-700 font-normal hover:text-gray-900"
-            }`}
+            className={`text-sm text-[hsl(var(--brand-light-gray))] hover:text-[hsl(var(--brand-charcoal))] cursor-pointer transition-colors`}
             aria-current={item.isActive ? "page" : undefined}
           >
             {item.label}
