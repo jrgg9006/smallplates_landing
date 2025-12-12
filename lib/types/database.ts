@@ -384,6 +384,9 @@ export interface Database {
           description: string | null;
           created_by: string;
           visibility: GroupVisibility;
+          wedding_date: string | null;
+          wedding_date_undecided: boolean;
+          timeline: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
           created_at: string;
           updated_at: string;
         };
@@ -393,12 +396,18 @@ export interface Database {
           description?: string | null;
           created_by?: string;
           visibility?: GroupVisibility;
+          wedding_date?: string | null;
+          wedding_date_undecided?: boolean;
+          timeline?: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
         };
         Update: {
           name?: string;
           description?: string | null;
           created_by?: string;
           visibility?: GroupVisibility;
+          wedding_date?: string | null;
+          wedding_date_undecided?: boolean;
+          timeline?: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
         };
       };
       group_members: {
@@ -648,6 +657,9 @@ export interface GroupFormData {
   name: string;
   description?: string;
   visibility?: GroupVisibility;
+  wedding_date?: string | null;
+  wedding_date_undecided?: boolean;
+  timeline?: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
 }
 
 export interface GroupInvitationFormData {

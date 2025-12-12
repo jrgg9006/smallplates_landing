@@ -15,6 +15,7 @@ import { WelcomeOverlay } from "@/components/onboarding/WelcomeOverlay";
 import { FirstRecipeExperience } from "@/components/onboarding/FirstRecipeExperience";
 import { FirstRecipeModal, RecipeData } from "@/components/profile/FirstRecipeModal";
 import { addUserRecipe, UserRecipeData } from "@/lib/supabase/recipes";
+import { getWeddingDisplayText, type WeddingTimeline } from "@/lib/utils/dateFormatting";
 
 export default function GroupsPage() {
   const { user, loading } = useAuth();
@@ -190,7 +191,11 @@ export default function GroupsPage() {
             {selectedGroup?.name || 'My Cookbook'}
           </h1>
           <p className="cookbook-metadata">
-            {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} · {recipeCount} recipes{uniqueContributors > 0 ? ` from ${uniqueContributors} people` : ''}
+            {getWeddingDisplayText(
+              selectedGroup?.wedding_date || null,
+              selectedGroup?.wedding_date_undecided || false,
+              selectedGroup?.timeline as WeddingTimeline
+            )} · {recipeCount} recipes{uniqueContributors > 0 ? ` from ${uniqueContributors} people` : ''}
           </p>
         </div>
         

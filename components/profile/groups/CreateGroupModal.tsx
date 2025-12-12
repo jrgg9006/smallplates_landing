@@ -37,7 +37,6 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
   // Form state
   const [formData, setFormData] = useState<GroupFormData>({
     name: '',
-    description: '',
     visibility: 'private',
   });
   const [loading, setLoading] = useState(false);
@@ -80,9 +79,6 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
     // Apply character limits
     if (field === 'name' && value.length > MAX_NAME_LENGTH) {
       return; // Don't update if name exceeds limit
-    }
-    if (field === 'description' && value.length > MAX_DESCRIPTION_LENGTH) {
-      return; // Don't update if description exceeds limit
     }
     
     setFormData(prev => ({
@@ -180,7 +176,7 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
             {userProfile?.couple_first_name && userProfile?.partner_first_name && 
              formData.name === `${userProfile.couple_first_name} & ${userProfile.partner_first_name}` && (
               <p className="text-xs text-[hsl(var(--brand-warm-gray))] italic">
-                Using names from your profile. You can edit this if you'd like.
+                Using names from your profile. You can edit this if you&apos;d like.
               </p>
             )}
             {formData.name.length > MAX_NAME_LENGTH && (

@@ -29,12 +29,16 @@ export function EditGroupModal({
   onGroupUpdated
 }: EditGroupModalProps) {
   const [name, setName] = useState('');
+  const [weddingDate, setWeddingDate] = useState('');
+  const [weddingDateUndecided, setWeddingDateUndecided] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (group) {
       setName(group.name || '');
+      setWeddingDate(group.wedding_date || '');
+      setWeddingDateUndecided(group.wedding_date_undecided || false);
     }
   }, [group, isOpen]);
 
@@ -64,7 +68,12 @@ export function EditGroupModal({
     const trimmedName = name.trim();
     
     // Check if anything changed
-    if (trimmedName === group.name) {
+    const hasChanges = 
+      trimmedName !== group.name ||
+      weddingDate !== (group.wedding_date || '') ||
+      weddingDateUndecided !== (group.wedding_date_undecided || false);
+
+    if (!hasChanges) {
       // No change, just close
       onClose();
       return;
@@ -74,10 +83,19 @@ export function EditGroupModal({
     setError(null);
 
     try {
-      const { data, error: updateError } = await updateGroup(group.id, { 
+      const updateData: any = { 
         name: trimmedName,
-        visibility: group.visibility
-      });
+        visibility: group.visibility,
+        wedding_date: weddingDate || null,
+        wedding_date_undecided: weddingDateUndecided
+      };
+
+      // If they set a specific date, mark as not undecided
+      if (weddingDate) {
+        updateData.wedding_date_undecided = false;
+      }
+
+      const { data, error: updateError } = await updateGroup(group.id, updateData);
       
       if (updateError) {
         setError(updateError);
@@ -165,6 +183,49 @@ export function EditGroupModal({
             )}
           </div>
 
+          {/* Wedding Date Section */}
+          <div>
+            <Label className="text-sm font-medium text-gray-600 mb-3 block">
+              Wedding Date
+            </Label>
+
+            {/* Date picker - show first */}
+            <div className="mb-3">
+              <Input
+                type="date"
+                value={weddingDate}
+                onChange={(e) => setWeddingDate(e.target.value)}
+                disabled={weddingDateUndecided}
+                className={weddingDateUndecided ? 'opacity-50' : ''}
+                placeholder="Select wedding date"
+              />
+            </div>
+            
+            {/* Date is undecided checkbox */}
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="wedding-undecided"
+                checked={weddingDateUndecided}
+                onChange={(e) => {
+                  setWeddingDateUndecided(e.target.checked);
+                  if (e.target.checked) {
+                    setWeddingDate(''); // Clear date if marking as undecided
+                  }
+                }}
+                className="mr-3 h-4 w-4 text-[hsl(var(--brand-honey))] border-gray-300 rounded focus:ring-[hsl(var(--brand-honey))]"
+              />
+              <label htmlFor="wedding-undecided" className="text-sm text-gray-700">
+                Wedding date is still undecided
+              </label>
+            </div>
+
+            {weddingDateUndecided && (
+              <p className="text-xs text-gray-500 italic mt-2">
+                Your cookbook will show &ldquo;Celebrations planned&rdquo; until you set a date
+              </p>
+            )}
+          </div>
 
           {/* Error Message */}
           {error && (

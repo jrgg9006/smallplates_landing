@@ -67,3 +67,13 @@
 - **Never hallucinate libraries or functions** – only use known, verified Python packages.
 - **Always confirm file paths and module names** exist before referencing them in code or tests.
 - **Never delete or overwrite existing code** unless explicitly instructed to or if part of a task from `TASK.md`.
+
+### ⚡ Build & Testing Guidelines
+- **DO NOT run `npm run build` for every small change** - it's unnecessary and slows down development
+- **ONLY run `npm run build` when:**
+  - Major feature implementations are complete
+  - Need to verify TypeScript compilation for complex type changes
+  - Before finalizing a significant architectural change
+  - When explicitly requested by the user
+- **For small edits** (text changes, minor fixes, styling adjustments): skip build verification
+- **Use simple TypeScript inspection** to catch obvious errors instead of full builds

@@ -24,6 +24,9 @@ export async function createGroup(formData: GroupFormData) {
     description: formData.description,
     created_by: user.id,
     visibility: formData.visibility || 'private',
+    wedding_date: formData.wedding_date || null,
+    wedding_date_undecided: formData.wedding_date_undecided || false,
+    timeline: formData.timeline || null,
   };
 
   // Create the group - triggers will handle member addition and cookbook creation
@@ -166,6 +169,9 @@ export async function updateGroup(groupId: string, updates: GroupFormData) {
     name: updates.name,
     description: updates.description,
     visibility: updates.visibility,
+    wedding_date: updates.wedding_date,
+    wedding_date_undecided: updates.wedding_date_undecided,
+    timeline: updates.timeline,
   };
 
   const { data, error } = await supabase
