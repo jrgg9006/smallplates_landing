@@ -89,7 +89,7 @@ export default function Footer() {
                   </li>
                   <li>
                     <a 
-                      href="mailto:hello@smallplates.co" 
+                      href="mailto:team@smallplatesandcompany.com" 
                       className="font-sans font-light text-base text-white/70 hover:text-white transition-colors"
                     >
                       Contact
