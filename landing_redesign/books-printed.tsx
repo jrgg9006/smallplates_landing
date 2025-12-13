@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import RecipeModal from "./RecipeModal";
+// import RecipeModal from "./RecipeModal"; // TODO: Fix import path
 import Autoplay from "embla-carousel-autoplay";
 import {
   Carousel,
@@ -266,11 +266,13 @@ export default function BooksPrinted() {
 
       {/* Recipe Detail Modal */}
       {selectedRecipe && (
-        <RecipeModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          recipe={selectedRecipe}
-        />
+        <div>
+          {/* <RecipeModal
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            recipe={selectedRecipe}
+          /> */}
+        </div>
       )}
     </section>
   );

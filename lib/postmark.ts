@@ -29,7 +29,7 @@ export interface SendGroupInvitationEmailParams {
 export async function sendInvitationEmail({ to, confirmationUrl }: SendInvitationEmailParams) {
   try {
     const result = await postmarkClient.sendEmailWithTemplate({
-      From: process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com',
+      From: `Small Plates & Co. <${process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com'}>`,
       To: to,
       TemplateAlias: 'invite-user-from-waitlist', // Your template name in Postmark
       TemplateModel: {
@@ -56,7 +56,7 @@ export async function sendNewRecipeNotification({
 }: SendNewRecipeNotificationParams) {
   try {
     const result = await postmarkClient.sendEmailWithTemplate({
-      From: process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com',
+      From: `Small Plates & Co. <${process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com'}>`,
       To: to,
       TemplateAlias: 'new-recipe-notification',
       TemplateModel: {
@@ -87,7 +87,7 @@ export async function sendGroupInvitationEmail({
 }: SendGroupInvitationEmailParams) {
   try {
     const result = await postmarkClient.sendEmailWithTemplate({
-      From: process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com',
+      From: `Small Plates & Co. <${process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com'}>`,
       To: to,
       TemplateAlias: 'invite-to-group',
       TemplateModel: {

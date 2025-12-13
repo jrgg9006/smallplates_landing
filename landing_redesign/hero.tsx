@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import BookPreviewModal from "./BookPreview/BookPreviewModal";
+// import BookPreviewModal from "./BookPreview/BookPreviewModal"; // TODO: Fix import path
 
 /**
  * HERO SECTION — Small Plates Wedding Landing Page
@@ -130,10 +130,10 @@ export default function Hero() {
       </div>
 
       {/* Book Preview Modal */}
-      <BookPreviewModal
+      {/* <BookPreviewModal
         isOpen={isPreviewModalOpen}
         onClose={() => setIsPreviewModalOpen(false)}
-      />
+      /> */}
     </section>
   );
 }

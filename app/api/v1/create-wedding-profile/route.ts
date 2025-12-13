@@ -3,7 +3,7 @@ import { createUserProfileAdmin } from '@/lib/supabase/wedding-onboarding';
 
 export async function POST(req: Request) {
   try {
-    const { userId, userData, userType } = await req.json();
+    const { userId, userData, userType, userEmail } = await req.json();
 
     if (!userId || !userData || !userType) {
       return NextResponse.json(
@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     }
 
     // Create profile using admin client (bypasses RLS)
-    const { data, error } = await createUserProfileAdmin(userId, userData, userType);
+    const { data, error } = await createUserProfileAdmin(userId, userData, userType, userEmail);
 
     if (error) {
       return NextResponse.json(

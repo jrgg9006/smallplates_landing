@@ -12,6 +12,7 @@ interface OnboardingStepProps {
   imageAlt?: string;
   imagePosition?: 'left' | 'right';
   imageCaption?: string;
+  hideProgress?: boolean;
 }
 
 /**
@@ -39,6 +40,7 @@ export default function OnboardingStep({
   imageAlt = "Onboarding step image",
   imagePosition = 'left',
   imageCaption,
+  hideProgress = false,
 }: OnboardingStepProps) {
   const router = useRouter();
 
@@ -51,9 +53,10 @@ export default function OnboardingStep({
   const FormContent = useMemo(() => (
     <div className="w-full px-6 lg:px-12">
       {/* Progress Indicator */}
-      <div className="mb-8">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          {Array.from({ length: totalSteps }, (_, index) => {
+      {!hideProgress && (
+        <div className="mb-8">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            {Array.from({ length: totalSteps }, (_, index) => {
             const stepNum = index + 1;
             const isActive = stepNum === stepNumber;
             const isCompleted = stepNum < stepNumber;
@@ -88,6 +91,7 @@ export default function OnboardingStep({
           })}
         </div>
       </div>
+      )}
 
       {/* Step Content */}
       <div className="text-center mb-4">

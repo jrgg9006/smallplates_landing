@@ -5,12 +5,29 @@ import { useState, useRef, useEffect } from "react";
 import { User, LogOut, Package, BookOpen, Users, ChefHat, HelpCircle } from "lucide-react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import { getCurrentProfile } from "@/lib/supabase/profiles";
+import type { Profile } from "@/lib/types/database";
 
 export default function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, signOut } = useAuth();
   const router = useRouter();
+
+  // Fetch profile data when user changes
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (user?.id) {
+        const { data } = await getCurrentProfile();
+        setProfile(data);
+      } else {
+        setProfile(null);
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -23,6 +40,14 @@ export default function ProfileDropdown() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Get the display letter (first letter of name, fallback to email)
+  const getDisplayLetter = () => {
+    if (profile?.full_name && profile.full_name.trim()) {
+      return profile.full_name.charAt(0).toUpperCase();
+    }
+    return user?.email?.charAt(0)?.toUpperCase() || 'U';
+  };
+
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Profile Icon Button */}
@@ -32,7 +57,7 @@ export default function ProfileDropdown() {
         className="flex items-center justify-center w-10 h-10 rounded-full bg-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-charcoal))]/90 transition-colors text-[hsl(var(--brand-white))] text-sm font-medium"
         aria-label="Profile menu"
       >
-        {user?.email?.charAt(0)?.toUpperCase() || 'U'}
+        {getDisplayLetter()}
       </button>
 
       {/* Dropdown Menu */}

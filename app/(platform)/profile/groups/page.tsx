@@ -17,6 +17,8 @@ import { FirstRecipeExperience } from "@/components/onboarding/FirstRecipeExperi
 import { FirstRecipeModal, RecipeData } from "@/components/profile/FirstRecipeModal";
 import { addUserRecipe, UserRecipeData } from "@/lib/supabase/recipes";
 import { getWeddingDisplayText, type WeddingTimeline } from "@/lib/utils/dateFormatting";
+import { EmailVerificationBanner } from "@/components/profile/EmailVerificationBanner";
+import { getCurrentProfile } from "@/lib/supabase/profiles";
 
 export default function GroupsPage() {
   const { user, loading } = useAuth();
@@ -28,6 +30,10 @@ export default function GroupsPage() {
   const [showCaptains, setShowCaptains] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showAddCaptainModal, setShowAddCaptainModal] = useState(false);
+  
+  // Email verification state
+  const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
+  const [showEmailBanner, setShowEmailBanner] = useState(false);
   
   // Onboarding context
   const { 
@@ -105,6 +111,42 @@ export default function GroupsPage() {
     console.log('Preview Book clicked');
   };
 
+  // Check email verification status and URL params
+  useEffect(() => {
+    const checkEmailVerification = async () => {
+      if (!user?.id) return;
+
+      try {
+        const { data: profile } = await getCurrentProfile();
+        if (profile) {
+          setEmailVerified(profile.email_verified);
+          setShowEmailBanner(!profile.email_verified);
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    // Check URL params for verification messages
+    const params = new URLSearchParams(window.location.search);
+    const message = params.get('message');
+    const error = params.get('error');
+
+    if (message === 'email-verified') {
+      setEmailVerified(true);
+      setShowEmailBanner(false);
+      // Clear URL params
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (error) {
+      // Handle verification errors if needed
+      console.error('Email verification error:', error);
+      // Clear URL params
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
+    checkEmailVerification();
+  }, [user]);
+
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!loading && !user) {
@@ -174,6 +216,15 @@ export default function GroupsPage() {
 
       {/* Main Content */}
       <main className="max-w-[1000px] mx-auto px-10">
+        
+        {/* Email Verification Banner */}
+        {showEmailBanner && (
+          <EmailVerificationBanner
+            isVisible={showEmailBanner}
+            onDismiss={() => setShowEmailBanner(false)}
+            userEmail={user?.email}
+          />
+        )}
         {/* Hero Image */}
         <div className="relative w-full h-[200px] mt-6 rounded-2xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity group">
           <Image

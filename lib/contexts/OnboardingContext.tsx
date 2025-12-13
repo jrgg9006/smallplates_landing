@@ -73,13 +73,17 @@ export function OnboardingProvider({ children, userType = 'couple' }: Onboarding
    */
   const updateStepData = useCallback(
     (stepId: number, data: Record<string, any>) => {
-      setState((prev) => ({
-        ...prev,
-        answers: {
-          ...prev.answers,
-          [`step${stepId}`]: data,
-        },
-      }));
+      return new Promise<void>((resolve) => {
+        setState((prev) => ({
+          ...prev,
+          answers: {
+            ...prev.answers,
+            [`step${stepId}`]: data,
+          },
+        }));
+        // Use setTimeout to ensure state update has completed
+        setTimeout(resolve, 0);
+      });
     },
     []
   );
@@ -88,14 +92,28 @@ export function OnboardingProvider({ children, userType = 'couple' }: Onboarding
    * Complete the onboarding process and create user account
    */
   const completeOnboarding = useCallback(
-    async () => {
+    async (email?: string, password?: string) => {
       try {
-        // Determine which step has email based on userType
-        const emailStep = userType === 'couple' ? state.answers.step4 : state.answers.step3;
-        const email = emailStep?.email;
-        const password = emailStep?.password;
+        // Use passed parameters first, fallback to state
+        let finalEmail = email;
+        let finalPassword = password;
+        
+        if (!finalEmail || !finalPassword) {
+          // Fallback to state if parameters not provided
+          const emailStep = userType === 'couple' ? state.answers.step4 : state.answers.step3;
+          finalEmail = finalEmail || emailStep?.email;
+          finalPassword = finalPassword || emailStep?.password;
+        }
 
-        if (!email || !password) {
+        console.log("🔍 Debug onboarding completion:");
+        console.log("UserType:", userType);
+        console.log("Passed email:", email);
+        console.log("Passed password:", password ? "[PRESENT]" : "[MISSING]");
+        console.log("State.answers:", state.answers);
+        console.log("Final email:", finalEmail);
+        console.log("Final password:", finalPassword ? "[PRESENT]" : "[MISSING]");
+
+        if (!finalEmail || !finalPassword) {
           throw new Error("Email and password are required to complete onboarding");
         }
 
@@ -105,8 +123,8 @@ export function OnboardingProvider({ children, userType = 'couple' }: Onboarding
 
         // Step 1: Create user with signUp (user will be auto-logged in)
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email: email,
-          password: password,
+          email: finalEmail,
+          password: finalPassword,
           options: {
             data: {
               user_type: userType
@@ -127,24 +145,51 @@ export function OnboardingProvider({ children, userType = 'couple' }: Onboarding
           body: JSON.stringify({
             userId: signUpData.user.id,
             userData: state.answers,
-            userType: userType
+            userType: userType,
+            userEmail: finalEmail
           })
         });
 
+        const responseData = await response.json();
+
         if (!response.ok) {
           console.error('⚠️ Failed to create profile, but user was created');
-          // Try to get error message from response
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || 'Failed to create profile');
+          throw new Error(responseData.error || 'Failed to create profile');
         } else {
           console.log('✅ Profile created successfully');
         }
 
+        // Step 3: Send verification email via Postmark
+        if (responseData.data?.emailVerificationToken) {
+          try {
+            const emailResponse = await fetch('/api/v1/send-verification-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: finalEmail,
+                token: responseData.data.emailVerificationToken,
+                userType: userType,
+                userName: responseData.data.profile?.full_name
+              })
+            });
+
+            if (!emailResponse.ok) {
+              console.error('⚠️ Failed to send verification email, but profile was created');
+              // Don't throw error here - profile creation was successful
+            } else {
+              console.log('✅ Verification email sent');
+            }
+          } catch (emailError) {
+            console.error('Error sending verification email:', emailError);
+            // Don't throw error here - profile creation was successful
+          }
+        }
+
         setState(prev => ({ ...prev, isComplete: true }));
 
-        // Step 3: Redirect to profile immediately (user is already logged in!)
+        // Step 4: Redirect to profile immediately (user is already logged in!)
         console.log('🎉 Redirecting to profile...');
-        router.push("/profile/guests");
+        router.push("/profile/groups");
 
       } catch (err) {
         console.error("Onboarding completion error:", err);

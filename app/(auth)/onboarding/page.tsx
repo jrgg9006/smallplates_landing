@@ -401,18 +401,19 @@ function Step4() {
     setLoading(true);
 
     try {
-      // Store account info in context
-      updateStepData(4, {
+      // Store account info in context and wait for state update
+      await updateStepData(4, {
         email: email.trim(),
         password // In real app, this would be hashed
       });
       
-      // Complete onboarding with all collected data
-      await completeOnboarding();
+      // Complete onboarding with all collected data - pass email/password directly
+      await completeOnboarding(email.trim(), password);
       
       setSuccess(true);
       setLoading(false);
     } catch (err) {
+      console.error("Error in handleCreateAccount:", err);
       setLoading(false);
     }
   };
@@ -426,6 +427,7 @@ function Step4() {
       title="You're about to start something beautiful."
       imageUrl="/images/onboarding/onboarding_step_4.jpg"
       imageAlt="Beautiful wedding cookbook"
+      hideProgress={success}
     >
       <div className="max-w-lg mx-auto">
         {!success ? (
@@ -519,19 +521,16 @@ function Step4() {
           </>
         ) : (
           /* Success Message */
-          <div className="text-center py-12">
-            <div className="w-20 h-20 bg-[#D4A854]/10 rounded-full mx-auto flex items-center justify-center mb-6">
-              <svg className="w-10 h-10 text-[#D4A854]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-center py-16">
+            <div className="w-24 h-24 bg-[#D4A854]/10 rounded-full mx-auto flex items-center justify-center mb-8">
+              <svg className="w-12 h-12 text-[#D4A854]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="text-2xl font-semibold text-[#2D2D2D] mb-3">
-              Welcome to Small Plates!
-            </h3>
-            <p className="text-lg text-[#2D2D2D]/70 font-light mb-6">
-              Your wedding cookbook journey starts now.
-            </p>
-            <p className="text-base text-[#D4A854] italic font-serif">
+            <h2 className="text-3xl font-medium text-[#2D2D2D] mb-6 leading-tight">
+              You&apos;re about to start something beautiful.
+            </h2>
+            <p className="text-xl text-[#D4A854] italic font-serif">
               Still at the table.
             </p>
           </div>
