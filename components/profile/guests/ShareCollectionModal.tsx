@@ -201,11 +201,11 @@ Send your favorite dish — anything goes. Takes 5 minutes. You'll be in our kit
           {/* Hero Message */}
           <div className="text-center space-y-2">
             <p className="text-gray-900 text-lg">
-              You're about to create something incredible.
+              You&apos;re about to create something incredible.
             </p>
             <p className="text-gray-600 text-sm">
-              Send this link to everyone who loves them. They'll add their favorite recipes. 
-              We'll turn it into a book they'll cook from forever.
+              Send this link to everyone who loves them. They&apos;ll add their favorite recipes. 
+              We&apos;ll turn it into a book they&apos;ll cook from forever.
             </p>
           </div>
 

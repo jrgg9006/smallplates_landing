@@ -57,8 +57,8 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
       
       // Generate default name from couple names
       let defaultName = '';
-      if (profile.couple_first_name && profile.partner_first_name) {
-        defaultName = `${profile.couple_first_name} & ${profile.partner_first_name}`;
+      if (profile.couple_first_name && profile.couple_partner_first_name) {
+        defaultName = `${profile.couple_first_name} & ${profile.couple_partner_first_name}`;
       }
       
       setFormData({
@@ -173,8 +173,8 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
               required
               disabled={loading}
             />
-            {userProfile?.couple_first_name && userProfile?.partner_first_name && 
-             formData.name === `${userProfile.couple_first_name} & ${userProfile.partner_first_name}` && (
+            {userProfile?.couple_first_name && userProfile?.couple_partner_first_name && 
+             formData.name === `${userProfile.couple_first_name} & ${userProfile.couple_partner_first_name}` && (
               <p className="text-xs text-[hsl(var(--brand-warm-gray))] italic">
                 Using names from your profile. You can edit this if you&apos;d like.
               </p>

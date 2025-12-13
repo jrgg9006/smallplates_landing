@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Search, ChevronDown, Users, Plus, BookOpen } from "lucide-react";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AddRecipeDropdown } from "@/components/ui/AddRecipeDropdown";
@@ -62,10 +63,12 @@ export function GroupRecipeTableControls({
           <div className="flex items-center justify-between mb-2">
             {/* Left side - My Small Plates image */}
             <div className="flex-shrink-0">
-              <img 
+              <Image 
                 src="/images/profile/my_small_plates.png" 
                 alt="My Small Plates" 
                 className="h-5"
+                width={100}
+                height={20}
               />
             </div>
             
