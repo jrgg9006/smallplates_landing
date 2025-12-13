@@ -94,7 +94,7 @@ export default function GroupJoinPage({ params }: GroupJoinPageProps) {
   return (
     <GroupJoinForm
       title="Join the Cookbook"
-      subtitle="Help create a meaningful gift for the couple"
+      subtitle=""
       groupData={groupData ? {
         id: groupData.id,
         name: groupData.name,
@@ -102,7 +102,7 @@ export default function GroupJoinPage({ params }: GroupJoinPageProps) {
       } : null}
       onJoin={handleJoin}
       verifying={verifying}
-      verifyMessage="Loading group information..."
+      verifyMessage="Loading cookbook information..."
       verifyError={error}
       errorTitle="Group Not Found"
       footerText="By joining this cookbook, you agree to share recipes and collaborate with group members."

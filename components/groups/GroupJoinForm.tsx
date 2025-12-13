@@ -453,7 +453,7 @@ export function GroupJoinForm({
           >
             {loading 
               ? (hasAccount ? 'Signing In...' : 'Creating Account...') 
-              : (hasAccount ? 'Sign In & Join Group' : 'Create Account & Join Group')
+              : (hasAccount ? 'Sign In & Join Group' : 'Create Account & Join Cookbook')
             }
           </Button>
         </form>

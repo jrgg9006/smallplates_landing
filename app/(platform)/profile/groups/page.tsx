@@ -30,6 +30,7 @@ export default function GroupsPage() {
   const [showCaptains, setShowCaptains] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showAddCaptainModal, setShowAddCaptainModal] = useState(false);
+  const [invitationsRefreshTrigger, setInvitationsRefreshTrigger] = useState(0);
   
   // Email verification state
   const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
@@ -286,7 +287,7 @@ export default function GroupsPage() {
               Captains 
               <ChevronDown size={10} />
             </button>
-            {showCaptains && <CaptainsDropdown isOpen={showCaptains} selectedGroup={selectedGroup} onClose={() => setShowCaptains(false)} onInviteCaptain={handleInviteCaptain} />}
+            {showCaptains && <CaptainsDropdown isOpen={showCaptains} selectedGroup={selectedGroup} onClose={() => setShowCaptains(false)} onInviteCaptain={handleInviteCaptain} refreshTrigger={invitationsRefreshTrigger} />}
           </div>
           
           {/* More Menu */}
@@ -322,8 +323,8 @@ export default function GroupsPage() {
         onClose={() => setShowAddCaptainModal(false)}
         group={selectedGroup}
         onInviteSent={() => {
-          // Optionally refresh captains list or handle success
-          console.log('Captain invitation sent');
+          // Refresh pending invitations when a new invitation is sent
+          setInvitationsRefreshTrigger(prev => prev + 1);
         }}
       />
     </div>
