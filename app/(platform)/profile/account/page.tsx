@@ -58,7 +58,7 @@ export default function AccountPage() {
           {/* Mobile: Back button */}
           <div className="lg:hidden">
             <Link
-              href="/profile"
+              href="/profile/groups"
               className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
               aria-label="Back to profile"
             >
@@ -73,7 +73,7 @@ export default function AccountPage() {
         {/* Back Navigation - Hidden on mobile */}
         <div className="mb-6 hidden md:block">
           <button
-            onClick={() => router.push('/profile')}
+            onClick={() => router.push('/profile/groups')}
             className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />

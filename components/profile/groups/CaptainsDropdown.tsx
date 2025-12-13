@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import type { GroupWithMembers } from "@/lib/types/database";
-import { getGroupPendingInvitations, type GroupInvitation } from "@/lib/supabase/groupInvitations";
-import { Clock } from "lucide-react";
+import { getGroupPendingInvitations, cancelGroupInvitation, type GroupInvitation } from "@/lib/supabase/groupInvitations";
+import { Clock, Trash2 } from "lucide-react";
 
 interface CaptainsDropdownProps {
   isOpen: boolean;
@@ -16,6 +16,7 @@ interface CaptainsDropdownProps {
 export function CaptainsDropdown({ isOpen, selectedGroup, onClose, onInviteCaptain, refreshTrigger }: CaptainsDropdownProps) {
   const [pendingInvitations, setPendingInvitations] = useState<GroupInvitation[]>([]);
   const [loadingInvitations, setLoadingInvitations] = useState(false);
+  const [cancelingId, setCancelingId] = useState<string | null>(null);
 
   // Load pending invitations when dropdown opens or when refresh is triggered
   useEffect(() => {
@@ -41,6 +42,35 @@ export function CaptainsDropdown({ isOpen, selectedGroup, onClose, onInviteCapta
       console.error('Error loading pending invitations:', error);
     } finally {
       setLoadingInvitations(false);
+    }
+  };
+
+  const handleCancelInvitation = async (invitationId: string, inviteeName: string) => {
+    if (!selectedGroup?.id) return;
+    
+    // Simple confirmation dialog
+    const confirmed = window.confirm(`Cancel invitation for ${inviteeName}?`);
+    if (!confirmed) return;
+    
+    try {
+      setCancelingId(invitationId);
+      const { success, error } = await cancelGroupInvitation(selectedGroup.id, invitationId);
+      
+      if (error) {
+        console.error('Error canceling invitation:', error);
+        alert('Failed to cancel invitation. Please try again.');
+        return;
+      }
+      
+      if (success) {
+        // Refresh the pending invitations list
+        await loadPendingInvitations();
+      }
+    } catch (error) {
+      console.error('Error canceling invitation:', error);
+      alert('Failed to cancel invitation. Please try again.');
+    } finally {
+      setCancelingId(null);
     }
   };
 
@@ -99,15 +129,34 @@ export function CaptainsDropdown({ isOpen, selectedGroup, onClose, onInviteCapta
             
             {/* Pending Invitation Items */}
             {pendingInvitations.map((invitation) => (
-              <div key={invitation.id} className="py-1.5 px-1">
-                <p className="text-xs text-[hsl(var(--brand-warm-gray))] mb-0">
-                  {invitation.name || invitation.email}
-                </p>
-                {invitation.name && invitation.email && (
-                  <p className="text-[10px] text-[hsl(var(--brand-warm-gray))]/60 mb-0">
-                    {invitation.email}
+              <div 
+                key={invitation.id} 
+                className="py-1.5 px-1 group flex items-center justify-between hover:bg-gray-50/50 rounded-lg transition-colors"
+              >
+                <div className="flex-1">
+                  <p className="text-xs text-[hsl(var(--brand-warm-gray))] mb-0">
+                    {invitation.name || invitation.email}
                   </p>
-                )}
+                  {invitation.name && invitation.email && (
+                    <p className="text-[10px] text-[hsl(var(--brand-warm-gray))]/60 mb-0">
+                      {invitation.email}
+                    </p>
+                  )}
+                </div>
+                
+                {/* Cancel Button - appears on hover */}
+                <button
+                  onClick={() => handleCancelInvitation(invitation.id, invitation.name || invitation.email)}
+                  disabled={cancelingId === invitation.id}
+                  className="opacity-0 group-hover:opacity-100 ml-2 p-1 rounded-md hover:bg-gray-50 transition-all duration-200 disabled:opacity-50"
+                  title="Cancel invitation"
+                >
+                  <Trash2 
+                    className={`h-3 w-3 text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] transition-colors ${
+                      cancelingId === invitation.id ? 'animate-pulse' : ''
+                    }`} 
+                  />
+                </button>
               </div>
             ))}
           </>

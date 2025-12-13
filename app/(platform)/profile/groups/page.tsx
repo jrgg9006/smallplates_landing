@@ -19,6 +19,8 @@ import { addUserRecipe, UserRecipeData } from "@/lib/supabase/recipes";
 import { getWeddingDisplayText, type WeddingTimeline } from "@/lib/utils/dateFormatting";
 import { EmailVerificationBanner } from "@/components/profile/EmailVerificationBanner";
 import { getCurrentProfile } from "@/lib/supabase/profiles";
+import { ShareCollectionModal } from "@/components/profile/guests/ShareCollectionModal";
+import { getUserCollectionToken } from "@/lib/supabase/collection";
 
 export default function GroupsPage() {
   const { user, loading } = useAuth();
@@ -31,6 +33,8 @@ export default function GroupsPage() {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showAddCaptainModal, setShowAddCaptainModal] = useState(false);
   const [invitationsRefreshTrigger, setInvitationsRefreshTrigger] = useState(0);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [collectionToken, setCollectionToken] = useState<string | null>(null);
   
   // Email verification state
   const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
@@ -56,9 +60,15 @@ export default function GroupsPage() {
     groupsSectionRef.current?.openCreateModal();
   };
 
-  const handleCollectRecipes = () => {
-    // TODO: Open recipe collection flow, not captain invitation
-    console.log('Collect Recipes clicked - implement recipe collection flow');
+  const handleCollectRecipes = async () => {
+    // Get the collection token first
+    const { data: token, error } = await getUserCollectionToken();
+    if (error || !token) {
+      console.error('Error getting collection token:', error);
+      return;
+    }
+    setCollectionToken(token);
+    setShowShareModal(true);
   };
 
   const handleEditGroup = () => {
@@ -327,6 +337,16 @@ export default function GroupsPage() {
           setInvitationsRefreshTrigger(prev => prev + 1);
         }}
       />
+
+      {/* Share Collection Modal */}
+      {selectedGroup && collectionToken && (
+        <ShareCollectionModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          collectionUrl={`${window.location.origin}/collect/${collectionToken}`}
+          userName={user?.email?.split('@')[0] || null}
+        />
+      )}
     </div>
   );
 }

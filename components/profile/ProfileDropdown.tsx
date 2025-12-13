@@ -76,7 +76,7 @@ export default function ProfileDropdown() {
             <User className="h-4 w-4" />
             Account
           </button>
-          <button
+          {/* <button
             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
             onClick={() => {
               router.push('/profile/orders');
@@ -85,7 +85,7 @@ export default function ProfileDropdown() {
           >
             <Package className="h-4 w-4" />
             Orders
-          </button>
+          </button> */}
           {/* <button
             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
             onClick={() => {
@@ -96,7 +96,7 @@ export default function ProfileDropdown() {
             <BookOpen className="h-4 w-4" />
             My Cookbook
           </button> */}
-          <button
+          {/* <button
             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
             onClick={() => {
               router.push('/profile');
@@ -105,8 +105,8 @@ export default function ProfileDropdown() {
           >
             <Users className="h-4 w-4" />
             Guests
-          </button>
-          <button
+          </button> */}
+          {/* <button
             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
             onClick={() => {
               router.push('/profile/recipes');
@@ -115,8 +115,8 @@ export default function ProfileDropdown() {
           >
             <ChefHat className="h-4 w-4" />
             My Small Plates
-          </button>
-          <button
+          </button> */}
+          {/* <button
             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
             onClick={() => {
               router.push('/how-it-works');
@@ -125,7 +125,7 @@ export default function ProfileDropdown() {
           >
             <HelpCircle className="h-4 w-4" />
             How It Works
-          </button>
+          </button> */}
           <hr className="my-1 border-gray-200" />
           <button
             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"

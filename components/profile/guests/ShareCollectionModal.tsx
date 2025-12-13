@@ -2,31 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Drawer } from "vaul";
 import { Button } from "@/components/ui/button";
-import { Copy, Mail, MessageCircle, Edit3, RotateCcw } from "lucide-react";
-import { validateWhatsAppURL, isMobileDevice } from "@/lib/utils/sharing";
+import { Copy, Check, Edit3 } from "lucide-react";
 import { updateShareMessage, resetShareMessage, getCurrentProfile } from "@/lib/supabase/profiles";
-import { OnboardingBadge } from "@/components/onboarding/OnboardingBadge";
-import type { LucideIcon } from "lucide-react";
-
-interface ShareOption {
-  id: 'copy' | 'email' | 'whatsapp' | 'facebook';
-  label: string;
-  icon: LucideIcon;
-  action: () => void;
-}
 
 interface ShareCollectionModalProps {
   isOpen: boolean;
@@ -47,21 +30,11 @@ export function ShareCollectionModal({
 }: ShareCollectionModalProps) {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
-  
-  // Message editing states
   const [isEditingMessage, setIsEditingMessage] = useState(false);
   const [customMessage, setCustomMessage] = useState<string | null>(null);
   const [editingMessage, setEditingMessage] = useState('');
-  const [editingSignature, setEditingSignature] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const [messageError, setMessageError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Detect mobile device
-  useEffect(() => {
-    setIsMobile(isMobileDevice());
-  }, []);
+  const [showMessageCustomization, setShowMessageCustomization] = useState(false);
 
   // Load custom message when modal opens
   useEffect(() => {
@@ -73,17 +46,13 @@ export function ShareCollectionModal({
 
   // Load custom message from profile
   const loadCustomMessage = async () => {
-    setIsLoading(true);
     try {
       const { data: profile, error: profileError } = await getCurrentProfile();
       if (!profileError && profile) {
-        // Check for new separated fields first
         if (profile.custom_share_signature !== undefined) {
           // New format: separated fields
           if (profile.custom_share_message) {
             const combinedMessage = `${profile.custom_share_message}
-
-
 
 — ${profile.custom_share_signature || userName || '(Your name)'}`;
             setCustomMessage(combinedMessage);
@@ -102,32 +71,17 @@ export function ShareCollectionModal({
     } catch (err) {
       console.error('Error loading custom message:', err);
       setCustomMessage(null);
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  // Default message parts
-  const defaultNote = `I'm putting together a book with my favorite people and their plates.
-If there's one dish you love to make, I'd love to add it — anything goes.`;
-  const defaultSignature = userName || '(Your name)';
-  
-  // Combined message for backward compatibility
-  const defaultMessage = `${defaultNote}
+  // Default message using brand voice
+  const defaultMessage = `I'm putting together a cookbook with recipes from everyone who loves us.
 
+Send your favorite dish — anything goes. Takes 5 minutes. You'll be in our kitchen forever.
 
-
-— ${defaultSignature}`;
+— ${userName || '(Your name)'}`;
   
   const shareMessage = customMessage || defaultMessage;
-
-  // Default title for email subject
-  const emailSubject = userName 
-    ? `Share Your Recipe for ${userName}'s Cookbook! 🍳`
-    : "Share Your Recipe for My Cookbook! 🍳";
-
-  // WhatsApp preview title (fixed, shown in preview)
-  const whatsappPreviewTitle = 'Share a Recipe to my Cookbook - SP&Co';
 
   const handleCopyLink = async () => {
     try {
@@ -140,48 +94,36 @@ If there's one dish you love to make, I'd love to add it — anything goes.`;
     }
   };
 
-  const handleEmailShare = () => {
-    const subject = encodeURIComponent(emailSubject);
-    const body = encodeURIComponent(`${shareMessage}\n\n${collectionUrl}`);
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
-  };
-
-  const handleWhatsAppShare = () => {
-    // Validate URL for WhatsApp
-    const validation = validateWhatsAppURL(collectionUrl);
-    if (!validation.isValid) {
-      const errorMessage = validation.issues.length > 0 
-        ? validation.issues[0] 
-        : "Invalid URL for WhatsApp";
-      setError(errorMessage);
-      setTimeout(() => setError(null), 5000);
-      return;
+  const handleCopyLinkAndMessage = async () => {
+    try {
+      const fullMessage = `${shareMessage}\n\n${collectionUrl}`;
+      await navigator.clipboard.writeText(fullMessage);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      setError("Failed to copy link and message");
+      setTimeout(() => setError(null), 3000);
     }
-
-    // WhatsApp: Only send the link (message appears in preview)
-    const url = encodeURIComponent(collectionUrl);
-    window.open(`https://wa.me/?text=${url}`, '_blank');
   };
 
+  const handleShowMessageCustomization = () => {
+    setShowMessageCustomization(true);
+  };
 
-  // Message editing handlers
   const handleEditMessage = () => {
     // Parse existing message to separate note and signature
     const messageToEdit = shareMessage;
     const signatureMatch = messageToEdit.match(/—\s*(.+)$/);
     
     if (signatureMatch) {
-      const signature = signatureMatch[1].trim();
       const note = messageToEdit.replace(/\n*—\s*.+$/, '').trim();
       setEditingMessage(note);
-      setEditingSignature(signature);
     } else {
       setEditingMessage(messageToEdit);
-      setEditingSignature(defaultSignature);
     }
     
     setIsEditingMessage(true);
-    setMessageError(null);
+    setError(null);
     
     // If this is an onboarding step, complete it when user clicks Edit
     if (isOnboardingStep && onStepComplete) {
@@ -189,561 +131,219 @@ If there's one dish you love to make, I'd love to add it — anything goes.`;
     }
   };
 
-  const handleCancelEdit = () => {
-    setIsEditingMessage(false);
-    setEditingMessage('');
-    setEditingSignature('');
-    setMessageError(null);
-  };
-
   const handleSaveMessage = async () => {
     if (editingMessage.trim().length === 0) {
-      setMessageError('Note cannot be empty');
-      return;
-    }
-
-    if (editingSignature.trim().length === 0) {
-      setMessageError('Signature cannot be empty');
+      setError('Message cannot be empty');
       return;
     }
 
     setIsSaving(true);
-    setMessageError(null);
+    setError(null);
 
     try {
-      const { error } = await updateShareMessage(editingMessage.trim(), editingSignature.trim());
+      const signature = userName || '(Your name)';
+      const { error } = await updateShareMessage(editingMessage.trim(), signature);
       if (error) {
-        setMessageError(error);
+        setError(error);
       } else {
-        // Store the combined message for display purposes
         const combinedMessage = `${editingMessage.trim()}
 
-
-
-— ${editingSignature.trim()}`;
+— ${signature}`;
         setCustomMessage(combinedMessage);
         setIsEditingMessage(false);
         setEditingMessage('');
-        setEditingSignature('');
       }
     } catch (err) {
-      setMessageError('Failed to save message');
+      setError('Failed to save message');
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingMessage(false);
+    setEditingMessage('');
+    setShowMessageCustomization(false);
+    setError(null);
   };
 
   const handleResetMessage = async () => {
     setIsSaving(true);
-    setMessageError(null);
+    setError(null);
 
     try {
       const { error } = await resetShareMessage();
       if (error) {
-        setMessageError(error);
+        setError(error);
       } else {
         setCustomMessage(null);
         setIsEditingMessage(false);
         setEditingMessage('');
-        setEditingSignature('');
+        setShowMessageCustomization(false);
       }
     } catch (err) {
-      setMessageError('Failed to reset message');
+      setError('Failed to reset message');
     } finally {
       setIsSaving(false);
     }
   };
 
-  const shareOptions: ShareOption[] = [
-    {
-      id: 'copy',
-      label: copied ? 'Copied!' : 'Copy Link',
-      icon: Copy,
-      action: handleCopyLink
-    },
-    {
-      id: 'email',
-      label: 'Email',
-      icon: Mail,
-      action: handleEmailShare
-    },
-    {
-      id: 'whatsapp',
-      label: 'WhatsApp',
-      icon: MessageCircle,
-      action: handleWhatsAppShare
-    }
-  ];
-
-  // Desktop only shows copy link with custom label
-  const desktopShareOptions: ShareOption[] = [
-    {
-      id: 'copy',
-      label: copied ? 'Copied!' : 'Pass a Plate',
-      icon: Copy,
-      action: handleCopyLink
-    }
-  ];
-
-  // Mobile version - Drawer that slides up from bottom
-  if (isMobile) {
-    return (
-      <Drawer.Root open={isOpen} onOpenChange={onClose}>
-        <Drawer.Portal>
-          <Drawer.Overlay className="fixed inset-0 bg-black/40" />
-          <Drawer.Content className="fixed bottom-0 left-0 right-0 z-50 mt-24 flex h-full max-h-[75vh] flex-col rounded-t-[10px] bg-white">
-            <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300" />
-            <div className="p-6 overflow-y-auto">
-              <Drawer.Title className="text-center text-lg font-semibold mb-6">
-                Psst...Pass a Plate! - Link
-              </Drawer.Title>
-              <div className="space-y-6">
-                {/* WhatsApp Preview section */}
-                <div className="space-y-4">
-                  <div>
-                    <span className="text-sm font-medium text-gray-900">Message Title: </span>
-                    <span className="text-gray-700 text-sm">{whatsappPreviewTitle}</span>
-                  </div>
-                </div>
-
-                {/* Message section */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between relative">
-                    <h3 className="text-sm font-medium text-gray-900">Personal Message</h3>
-                    {!isEditingMessage && (
-                      <button
-                        onClick={handleEditMessage}
-                        className={`text-sm text-gray-500 hover:text-gray-700 transition-all flex items-center gap-1 relative ${
-                          isOnboardingStep 
-                            ? 'ring-2 ring-[#464665] ring-offset-2 rounded-md px-2 py-1 animate-pulse' 
-                            : ''
-                        }`}
-                      >
-                        <Edit3 className="h-3.5 w-3.5" />
-                        Edit
-                        {isOnboardingStep && (
-                          <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#464665] opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-[#464665]"></span>
-                          </span>
-                        )}
-                      </button>
-                    )}
-                  </div>
-                  
-                  {isEditingMessage ? (
-                    <div className="space-y-3">
-                      <div>
-                        <textarea
-                          id="mobile-note"
-                          value={editingMessage}
-                          onChange={(e) => {
-                        setEditingMessage(e.target.value);
-                        setMessageError(null);
-                      }}
-                          className="w-full p-4 bg-white border-2 border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors text-gray-900 leading-relaxed"
-                          rows={5}
-                          placeholder={defaultNote}
-                          maxLength={220}
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="mobile-signature" className="block text-xs font-medium text-gray-600 mb-2">Your signature</label>
-                        <input
-                          id="mobile-signature"
-                          type="text"
-                          value={editingSignature}
-                          onChange={(e) => {
-                        setEditingSignature(e.target.value);
-                        setMessageError(null);
-                      }}
-                          className="w-full px-1 pb-2 bg-transparent border-b border-gray-300 focus:outline-none focus:border-gray-600 transition-colors text-gray-900 font-serif italic text-lg"
-                          placeholder={defaultSignature}
-                          maxLength={50}
-                        />
-                      </div>
-                      <div className="flex justify-end">
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={handleCancelEdit}
-                            disabled={isSaving}
-                            className="h-8 px-3 text-gray-600 hover:text-gray-900"
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={handleResetMessage}
-                            disabled={isSaving}
-                            className="h-8 px-3 text-gray-600 hover:text-gray-900"
-                          >
-                            <RotateCcw className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={handleSaveMessage}
-                            disabled={isSaving || editingMessage.trim().length === 0 || editingSignature.trim().length === 0}
-                            className="h-8 px-4 bg-gray-900 text-white hover:bg-gray-800"
-                          >
-                            Save
-                          </Button>
-                        </div>
-                      </div>
-                      
-                      {messageError && (
-                        <div className="text-sm text-red-600 mt-1">{messageError}</div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {(() => {
-                        // Parse message to separate note and signature
-                        const signatureMatch = shareMessage.match(/—\s*(.+)$/);
-                        if (signatureMatch) {
-                          const signature = signatureMatch[1].trim();
-                          const note = shareMessage.replace(/\n*—\s*.+$/, '').trim();
-                          return (
-                            <>
-                              <div>
-                                <div className="bg-white border-2 border-gray-200 rounded-xl p-4">
-                                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{note}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-2">Signature</label>
-                                <div className="bg-white border-2 border-gray-200 rounded-xl px-4 py-3">
-                                  <p className="font-serif italic text-lg text-gray-700">— {signature}</p>
-                                </div>
-                              </div>
-                            </>
-                          );
-                        } else {
-                          return (
-                            <div className="bg-white border-2 border-gray-200 rounded-xl p-4">
-                              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{shareMessage}</p>
-                            </div>
-                          );
-                        }
-                      })()}
-                    </div>
-                  )}
-                </div>
-
-                {/* Onboarding Badge - Show only during onboarding, after Personal Message */}
-                {isOnboardingStep && !isEditingMessage && (
-                  <div className="relative">
-                    {/* Arrow pointing to Edit button */}
-                    <div className="absolute -top-8 right-0 flex items-center justify-end">
-                      <svg 
-                        className="w-16 h-12 text-[#464665]" 
-                        viewBox="0 0 64 48" 
-                        fill="none" 
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path 
-                          d="M8 40 L56 8 M56 8 L40 8 M56 8 L56 24" 
-                          stroke="currentColor" 
-                          strokeWidth="2" 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round"
-                          className="animate-pulse"
-                        />
-                      </svg>
-                    </div>
-                    <OnboardingBadge
-                      stepNumber={3}
-                      title="Step 3 of Onboarding"
-                      message="Edit your personal message to customize how your link appears when shared. Click 'Edit' above to get started."
-                    />
-                  </div>
-                )}
-
-                <div className="h-px bg-gray-200" />
-
-                {/* Share options */}
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    {shareOptions.map((option) => {
-                      const Icon = option.icon;
-                      const isActive = option.id === 'copy' && copied;
-                      
-                      return (
-                        <button
-                          key={option.id}
-                          onClick={option.action}
-                          className={`
-                            w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all
-                            ${isActive 
-                              ? 'bg-green-50 border-green-500 text-green-700' 
-                              : 'bg-white border-gray-200 hover:border-gray-900 hover:bg-gray-50 text-gray-900'
-                            }
-                          `}
-                        >
-                          <Icon className={`w-5 h-5 ${isActive ? 'text-green-600' : 'text-gray-600'}`} />
-                          <span className="font-medium text-left flex-1">
-                            {option.label}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  
-                  {/* Preview button centered below all share options */}
-                  <div className="flex justify-center">
-                    <button
-                      onClick={() => {
-                        if (collectionUrl && typeof window !== 'undefined') {
-                          window.open(collectionUrl, '_blank', 'noopener,noreferrer');
-                        }
-                      }}
-                      className="text-sm text-gray-600 hover:text-gray-900 underline transition-colors"
-                    >
-                      Preview Form
-                    </button>
-                  </div>
-                </div>
-
-                {/* Error message */}
-                {error && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
-                    <p className="text-sm text-red-600">{error}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </Drawer.Content>
-        </Drawer.Portal>
-      </Drawer.Root>
-    );
-  }
-
-  // Desktop version - Dialog popup (centered)
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden p-0 gap-0">
-        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4 border-b border-gray-200">
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
           <DialogTitle className="font-serif text-2xl font-semibold">
-            Psst...Pass a Plate!
+            Collect Recipes
           </DialogTitle>
         </DialogHeader>
         
-        <div className="flex-1 overflow-y-auto px-6 py-6">
-          <div className="space-y-6">
-            {/* Message section */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between relative">
-                <h3 className="text-sm font-medium text-gray-900">Write them a note</h3>
+        <div className="space-y-6 py-4">
+          {/* Hero Message */}
+          <div className="text-center space-y-2">
+            <p className="text-gray-900 text-lg">
+              You're about to create something incredible.
+            </p>
+            <p className="text-gray-600 text-sm">
+              Send this link to everyone who loves them. They'll add their favorite recipes. 
+              We'll turn it into a book they'll cook from forever.
+            </p>
+          </div>
+
+          {/* Main Actions */}
+          <div className="space-y-3">
+            {/* Primary Action - Copy Link */}
+            <Button
+              onClick={handleCopyLink}
+              className={`w-full flex items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all ${
+                copied 
+                  ? 'bg-[hsl(var(--brand-honey))] border-[hsl(var(--brand-honey))] text-black hover:bg-[hsl(var(--brand-honey))] hover:border-[hsl(var(--brand-honey))] hover:text-black' 
+                  : 'bg-black text-white hover:bg-gray-800 border-black'
+              }`}
+            >
+              {copied ? (
+                <>
+                  <Check className="w-5 h-5" />
+                  Copied
+                </>
+              ) : (
+                <>
+                  <Copy className="w-5 h-5" />
+                  Copy Link
+                </>
+              )}
+            </Button>
+            
+            {/* Secondary Action - Customize Message */}
+            {!showMessageCustomization && (
+              <div className="text-center">
+                <button
+                  onClick={handleShowMessageCustomization}
+                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Customize message
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Message Customization Section (Collapsible) */}
+          {showMessageCustomization && (
+            <div className="space-y-4 border-t pt-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-gray-900">
+                  Your message to guests:
+                </h3>
                 {!isEditingMessage && (
                   <button
                     onClick={handleEditMessage}
-                    className={`text-sm text-gray-500 hover:text-gray-700 transition-all flex items-center gap-1 relative ${
-                      isOnboardingStep 
-                        ? 'ring-2 ring-[#464665] ring-offset-2 rounded-md px-2 py-1 animate-pulse' 
-                        : ''
-                    }`}
+                    className="text-sm text-gray-500 hover:text-gray-700 transition-all flex items-center gap-1"
                   >
                     <Edit3 className="h-3.5 w-3.5" />
                     Edit
-                    {isOnboardingStep && (
-                      <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#464665] opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-[#464665]"></span>
-                      </span>
-                    )}
                   </button>
                 )}
               </div>
               
               {isEditingMessage ? (
                 <div className="space-y-3">
-                  <div>
-                    <textarea
-                      id="note"
-                      value={editingMessage}
-                      onChange={(e) => {
-                        setEditingMessage(e.target.value);
-                        setMessageError(null);
-                      }}
-                      className="w-full p-4 bg-white border-2 border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors text-gray-900 leading-relaxed"
-                      rows={5}
-                      placeholder={defaultNote}
-                      maxLength={220}
-                    />
+                  <textarea
+                    value={editingMessage}
+                    onChange={(e) => {
+                      setEditingMessage(e.target.value);
+                      setError(null);
+                    }}
+                    className="w-full p-4 bg-white border-2 border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors text-gray-900 leading-relaxed"
+                    rows={4}
+                    placeholder="Your message to guests..."
+                    maxLength={300}
+                  />
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCancelEdit}
+                      disabled={isSaving}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleResetMessage}
+                      disabled={isSaving}
+                    >
+                      Reset
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleSaveMessage}
+                      disabled={isSaving || editingMessage.trim().length === 0}
+                      className="bg-black text-white hover:bg-gray-800"
+                    >
+                      Save
+                    </Button>
                   </div>
-                  <div>
-                    <label htmlFor="signature" className="block text-xs font-medium text-gray-600 mb-2">Your signature</label>
-                    <input
-                      id="signature"
-                      type="text"
-                      value={editingSignature}
-                      onChange={(e) => {
-                        setEditingSignature(e.target.value);
-                        setMessageError(null);
-                      }}
-                      className="w-full px-1 pb-2 bg-transparent border-b border-gray-300 focus:outline-none focus:border-gray-600 transition-colors text-gray-900 font-serif italic text-lg"
-                      placeholder={defaultSignature}
-                      maxLength={50}
-                    />
-                  </div>
-                  <div className="flex justify-end">
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={handleCancelEdit}
-                        disabled={isSaving}
-                        className="h-8 px-3 text-gray-600 hover:text-gray-900"
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={handleResetMessage}
-                        disabled={isSaving}
-                        className="h-8 px-3 text-gray-600 hover:text-gray-900"
-                      >
-                        <RotateCcw className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={handleSaveMessage}
-                        disabled={isSaving || editingMessage.trim().length === 0 || editingSignature.trim().length === 0}
-                        className="h-8 px-4 bg-gray-900 text-white hover:bg-gray-800"
-                      >
-                        Save
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  {messageError && (
-                    <div className="text-sm text-red-600 mt-1">{messageError}</div>
-                  )}
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {(() => {
-                    // Parse message to separate note and signature
-                    const signatureMatch = shareMessage.match(/—\s*(.+)$/);
-                    if (signatureMatch) {
-                      const signature = signatureMatch[1].trim();
-                      const note = shareMessage.replace(/\n*—\s*.+$/, '').trim();
-                      return (
-                        <>
-                          <div>
-                            <div className="bg-white border-2 border-gray-200 rounded-xl p-4">
-                              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{note}</p>
-                            </div>
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-2">Signature</label>
-                            <div className="border-b border-gray-300 pb-2">
-                              <p className="font-serif italic text-lg text-gray-700">— {signature}</p>
-                            </div>
-                          </div>
-                        </>
-                      );
-                    } else {
-                      return (
-                        <div className="bg-white border-2 border-gray-200 rounded-xl p-4">
-                          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{shareMessage}</p>
-                        </div>
-                      );
-                    }
-                  })()}
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">
+                    {shareMessage}
+                  </p>
                 </div>
               )}
+
+              {/* Copy Link & Message when customizing */}
+              <Button
+                onClick={handleCopyLinkAndMessage}
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2"
+              >
+                <Copy className="w-4 h-4" />
+                Copy Link & Message
+              </Button>
             </div>
+          )}
 
-            {/* Onboarding Badge - Show only during onboarding, after Personal Message */}
-            {isOnboardingStep && !isEditingMessage && (
-              <div className="relative">
-                {/* Arrow pointing to Edit button */}
-                <div className="absolute -top-8 right-0 flex items-center justify-end">
-                  <svg 
-                    className="w-16 h-12 text-[#464665]" 
-                    viewBox="0 0 64 48" 
-                    fill="none" 
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path 
-                      d="M8 40 L56 8 M56 8 L40 8 M56 8 L56 24" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                      className="animate-pulse"
-                    />
-                  </svg>
-                </div>
-                <OnboardingBadge
-                  stepNumber={3}
-                  title="Step 3 of Onboarding"
-                  message="Edit your personal message to customize how your link appears when shared. Click 'Edit' above to get started."
-                />
-              </div>
-            )}
-
-            <div className="h-px bg-gray-200" />
-
-            {/* Share options */}
-            <div className="space-y-4">
-              <div className="space-y-3">
-                {desktopShareOptions.map((option) => {
-                  const Icon = option.icon;
-                  const isActive = option.id === 'copy' && copied;
-                  
-                  return (
-                    <button
-                      key={option.id}
-                      onClick={option.action}
-                      className={`
-                        w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all
-                        ${isActive 
-                          ? 'bg-green-50 border-green-500 text-green-700' 
-                          : 'bg-white border-gray-200 hover:border-gray-900 hover:bg-gray-50 text-gray-900'
-                        }
-                      `}
-                    >
-                      <Icon className={`w-5 h-5 ${isActive ? 'text-green-600' : 'text-gray-600'}`} />
-                      <span className="font-medium text-left flex-1">
-                        {option.label}
-                      </span>
-                      {option.id === 'copy' && (
-                        <span className={`text-sm ${isActive ? 'text-green-600' : 'text-gray-500'}`}>
-                          {isActive ? 'Link copied!' : 'One click to copy'}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              
-              {/* Preview button centered below Copy Link */}
-              <div className="flex justify-center">
-                <button
-                  onClick={() => {
-                    if (collectionUrl && typeof window !== 'undefined') {
-                      window.open(collectionUrl, '_blank', 'noopener,noreferrer');
-                    }
-                  }}
-                  className="text-sm text-gray-600 hover:text-gray-900 underline transition-colors"
-                >
-                  This is what they&apos;ll see when they click your link
-                </button>
-              </div>
-            </div>
-
-            {/* Error message */}
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
-                <p className="text-sm text-red-600">{error}</p>
-              </div>
-            )}
+          {/* Preview Link */}
+          <div className="text-center">
+            <button
+              onClick={() => {
+                if (collectionUrl && typeof window !== 'undefined') {
+                  window.open(collectionUrl, '_blank', 'noopener,noreferrer');
+                }
+              }}
+              className="text-sm text-gray-600 hover:text-gray-900 underline transition-colors"
+            >
+              Preview what guests will see
+            </button>
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-3">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
