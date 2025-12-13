@@ -63,7 +63,7 @@ export function GroupJoinForm({
   verifyMessage = "Loading...",
   verifyError = null,
   errorTitle = "Error",
-  footerText = "By joining this cookbook, you agree to share recipes and collaborate with group members.",
+  footerText = "By joining, you're helping create a beautiful keepsake for the couple.",
   autoFocus = false
 }: GroupJoinFormProps) {
   const router = useRouter();
@@ -258,11 +258,11 @@ export function GroupJoinForm({
         <div className="text-center max-w-md mx-auto px-6">
           <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
           <h1 className="text-2xl font-serif font-semibold text-gray-900 mb-4">
-            Welcome to the Group!
+            Welcome to the Cookbook!
           </h1>
           <p className="text-gray-600 mb-6">
-            You&apos;ve successfully joined <span className="font-medium">{groupName}</span>.
-            Redirecting to your groups page...
+            You&apos;ve successfully joined <span className="font-medium">{groupName}</span> and can now help create this special gift.
+            Redirecting to your cookbooks...
           </p>
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 mx-auto"></div>
         </div>
@@ -306,7 +306,9 @@ export function GroupJoinForm({
                   You&apos;ve been invited to join:
                 </p>
               )}
-              <h3 className="text-2xl font-serif font-bold text-black text-center mt-2 mb-6">{groupData.name}</h3>
+              <h3 className="text-2xl font-serif font-bold text-black text-center mt-2 mb-6">
+                {groupData.name}
+              </h3>
             </div>
           )}
         </div>
@@ -329,8 +331,10 @@ export function GroupJoinForm({
                 }}
                 className="sr-only"
               />
-              <div className="block bg-gray-300 w-14 h-8 rounded-full cursor-pointer" onClick={() => setHasAccount(!hasAccount)}></div>
-              <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition transform ${
+              <div className={`block w-14 h-8 rounded-full cursor-pointer transition-colors duration-300 ${
+                hasAccount ? 'bg-amber-400' : 'bg-gray-300'
+              }`} onClick={() => setHasAccount(!hasAccount)}></div>
+              <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-all duration-300 transform shadow-sm ${
                 hasAccount ? 'translate-x-6' : 'translate-x-0'
               } cursor-pointer`} onClick={() => setHasAccount(!hasAccount)}></div>
             </div>
@@ -339,7 +343,7 @@ export function GroupJoinForm({
             </label>
           </div>
           <p className="text-sm text-gray-600 mt-2 text-center">
-            {hasAccount ? 'Sign in with your existing password' : 'Create a new account to join the group'}
+            {hasAccount ? 'Sign in with your existing password' : 'Create your account to start sharing recipes'}
           </p>
         </div>
 

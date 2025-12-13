@@ -48,7 +48,7 @@ export async function POST(
 ) {
   try {
     const { groupId } = await params;
-    const { name, email } = await request.json();
+    const { name, email, relationship } = await request.json();
 
     // Validate input
     if (!name?.trim()) {
@@ -165,7 +165,8 @@ export async function POST(
         invited_by: user.id,
         status: 'pending',
         token,
-        expires_at: expiresAt.toISOString()
+        expires_at: expiresAt.toISOString(),
+        relationship_to_couple: relationship || null
       })
       .select('*')
       .single();

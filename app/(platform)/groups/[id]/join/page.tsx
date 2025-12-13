@@ -93,7 +93,8 @@ export default function GroupJoinPage({ params }: GroupJoinPageProps) {
 
   return (
     <GroupJoinForm
-      title="Join a Book"
+      title="Join the Cookbook"
+      subtitle="Help create a meaningful gift for the couple"
       groupData={groupData ? {
         id: groupData.id,
         name: groupData.name,

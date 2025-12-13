@@ -14,6 +14,13 @@ import { UserPlus, Copy, Check } from "lucide-react";
 import type { GroupWithMembers } from "@/lib/types/database";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { getCurrentProfile } from "@/lib/supabase/profiles";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface AddFriendToGroupModalProps {
   isOpen: boolean;
@@ -29,10 +36,10 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    relationship: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
 
@@ -42,9 +49,9 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
       setFormData({
         name: '',
         email: '',
+        relationship: '',
       });
       setError(null);
-      setSuccess(null);
       setLinkCopied(false);
       
       // Check email verification status
@@ -127,6 +134,7 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
         body: JSON.stringify({
           name: formData.name.trim(),
           email: formData.email.trim(),
+          relationship: formData.relationship,
         }),
       });
 
@@ -137,16 +145,11 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
         return;
       }
 
-      // Success! Show success message
-      setSuccess(`Invitation sent to ${formData.name} (${formData.email})`);
-      
-      // Clear form after success
-      setTimeout(() => {
-        onClose();
-        if (onInviteSent) {
-          onInviteSent();
-        }
-      }, 2000);
+      // Success! Just close the modal
+      onClose();
+      if (onInviteSent) {
+        onInviteSent();
+      }
     } catch (err) {
       console.error('Error sending invite:', err);
       setError('Failed to send invitation. Please try again.');
@@ -181,11 +184,6 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
           <DialogTitle className="font-serif text-2xl font-semibold">
             Invite a Captain
           </DialogTitle>
-          {group && (
-            <p className="text-sm text-gray-600 mt-2">
-              Inviting to: <span className="font-medium">{group.name}</span>
-            </p>
-          )}
         </DialogHeader>
         
         <div className="space-y-4 py-4">
@@ -227,6 +225,29 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
             </p>
           </div>
 
+          {/* Relationship Field */}
+          <div>
+            <Label htmlFor="relationship" className="text-sm font-medium text-gray-600">
+              How does this Captain know the couple?
+            </Label>
+            <Select
+              value={formData.relationship}
+              onValueChange={(value) => handleInputChange('relationship', value)}
+              disabled={loading}
+            >
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="Select relationship" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="friend">Friend</SelectItem>
+                <SelectItem value="family">Family</SelectItem>
+                <SelectItem value="bridesmaid">Bridesmaid</SelectItem>
+                <SelectItem value="wedding-planner">Wedding Planner</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Copy Invite Link Button */}
           <div>
             <Label className="text-sm font-medium text-gray-600 mb-3 block">
@@ -253,17 +274,7 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
                 </>
               )}
             </Button>
-            <p className="text-xs text-gray-500">
-              Share this link with anyone you want to invite to the Cookbook
-            </p>
           </div>
-
-          {/* Success Message - Only for Send Invite */}
-          {success && !linkCopied && (
-            <div className="bg-green-50 border border-green-200 rounded-md p-3">
-              <p className="text-green-600 text-sm">{success}</p>
-            </div>
-          )}
 
           {/* Error Message */}
           {error && (
