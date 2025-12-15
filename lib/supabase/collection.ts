@@ -235,6 +235,7 @@ export async function submitGuestRecipeWithFiles(
       submission_status: 'submitted',
       submitted_at: new Date().toISOString(),
       source: 'collection',
+      group_id: context?.groupId || null,
     };
 
     const { data: recipe, error: recipeError } = await supabase
@@ -454,6 +455,7 @@ export async function submitGuestRecipe(
       submission_status: 'submitted',
       submitted_at: new Date().toISOString(),
       source: 'collection',
+      group_id: context?.groupId || null,
     };
 
     const { data: recipe, error: recipeError } = await supabase
