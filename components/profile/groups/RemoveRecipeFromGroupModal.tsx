@@ -4,8 +4,6 @@ import React from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -30,38 +28,42 @@ export function RemoveRecipeFromGroupModal({
 }: RemoveRecipeFromGroupModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl font-semibold mb-4">
-            Remove Plate
+          <DialogTitle className="font-serif text-2xl font-semibold">
+            Remove Recipe
           </DialogTitle>
-          <DialogDescription>
-            Are you sure you want to remove <span className="font-medium text-foreground">&quot;{recipeName}&quot;</span> from this cookbook?
-            <br />
-            <br />
-            <span className="text-sm text-muted-foreground">
-              You will remove this plate from this book - but the recipe will not be deleted.
-              {isOwnRecipe && " If this was your own recipe, it will still be available in &quot;My Recipes&quot;."}
-            </span>
-          </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="flex-col gap-2 sm:flex-row sm:gap-4">
-          <Button
-            onClick={onConfirm}
-            disabled={loading}
-            className="order-1 sm:order-2 bg-black text-white hover:bg-gray-800 disabled:opacity-50"
-          >
-            {loading ? 'Removing...' : 'Remove'}
-          </Button>
-          <Button
+        
+        <div className="space-y-4 py-4">
+          <p className="text-sm text-gray-600">
+            Are you sure you want to remove <span className="font-medium text-gray-800">&ldquo;{recipeName}&rdquo;</span> from this cookbook?
+          </p>
+          
+          <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
+            <p className="text-xs text-gray-500">
+              <strong>Note:</strong> The recipe won&apos;t be deleted—just removed from this book.
+              {isOwnRecipe && " Since this is your recipe, it will remain in your personal collection."}
+            </p>
+          </div>
+        </div>
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-3">
+          <Button 
             variant="outline"
             onClick={onClose}
             disabled={loading}
-            className="order-2 sm:order-1"
           >
             Cancel
           </Button>
-        </DialogFooter>
+          <Button 
+            onClick={onConfirm}
+            className="bg-black text-white hover:bg-gray-800"
+            disabled={loading}
+          >
+            {loading ? 'Removing...' : 'Remove Recipe'}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -23,7 +23,6 @@ export async function createGroup(formData: GroupFormData) {
     name: formData.name,
     description: formData.description,
     created_by: user.id,
-    visibility: formData.visibility || 'private',
     wedding_date: formData.wedding_date || null,
     wedding_date_undecided: formData.wedding_date_undecided || false,
     timeline: formData.timeline || null,
@@ -168,7 +167,6 @@ export async function updateGroup(groupId: string, updates: GroupFormData) {
   const updateData: GroupUpdate = {
     name: updates.name,
     description: updates.description,
-    visibility: updates.visibility,
     wedding_date: updates.wedding_date,
     wedding_date_undecided: updates.wedding_date_undecided,
     timeline: updates.timeline,

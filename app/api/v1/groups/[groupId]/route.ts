@@ -42,7 +42,6 @@ export async function GET(
         id,
         name,
         description,
-        visibility,
         created_at
       `)
       .eq('id', groupId)
@@ -68,7 +67,6 @@ export async function GET(
         id: group.id,
         name: group.name,
         description: group.description,
-        visibility: group.visibility,
         createdAt: group.created_at
       }
     });

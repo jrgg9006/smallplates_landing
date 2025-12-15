@@ -42,8 +42,6 @@ export function GroupSelector({ groups, selectedGroup, onGroupChange }: GroupSel
             <div className="font-medium">{group.name}</div>
             <div className="text-sm text-gray-500 flex items-center gap-2">
               <span>{group.member_count || 0} members</span>
-              <span>•</span>
-              <span>{group.visibility}</span>
             </div>
             {group.description && (
               <div className="text-xs text-gray-400 mt-1 line-clamp-2">

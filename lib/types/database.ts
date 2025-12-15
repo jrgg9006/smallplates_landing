@@ -12,7 +12,6 @@ export type CommunicationChannel = 'email' | 'sms' | 'whatsapp';
 export type CommunicationStatus = 'pending' | 'sent' | 'delivered' | 'failed' | 'opened';
 
 // Groups feature types
-export type GroupVisibility = 'private' | 'public';
 export type MemberRole = 'owner' | 'admin' | 'member';
 export type InvitationStatus = 'pending' | 'accepted' | 'declined' | 'expired';
 
@@ -380,7 +379,6 @@ export interface Database {
           name: string;
           description: string | null;
           created_by: string;
-          visibility: GroupVisibility;
           wedding_date: string | null;
           wedding_date_undecided: boolean;
           timeline: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
@@ -396,7 +394,6 @@ export interface Database {
           name: string;
           description?: string | null;
           created_by?: string;
-          visibility?: GroupVisibility;
           wedding_date?: string | null;
           wedding_date_undecided?: boolean;
           timeline?: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
@@ -409,7 +406,6 @@ export interface Database {
           name?: string;
           description?: string | null;
           created_by?: string;
-          visibility?: GroupVisibility;
           wedding_date?: string | null;
           wedding_date_undecided?: boolean;
           timeline?: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
@@ -665,7 +661,6 @@ export interface RecipeFormData {
 export interface GroupFormData {
   name: string;
   description?: string;
-  visibility?: GroupVisibility;
   wedding_date?: string | null;
   wedding_date_undecided?: boolean;
   timeline?: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;

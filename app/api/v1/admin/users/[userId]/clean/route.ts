@@ -64,7 +64,6 @@ export async function POST(
           name: 'My First Book',
           description: 'Add recipes and invite friends to build your book',
           created_by: userId,
-          visibility: 'private'
         })
         .select('id')
         .single();

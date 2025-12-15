@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createGroup } from "@/lib/supabase/groups";
 import { getCurrentProfile } from "@/lib/supabase/profiles";
-import type { GroupFormData, GroupVisibility, Profile } from "@/lib/types/database";
+import type { GroupFormData, Profile } from "@/lib/types/database";
 
 const MAX_NAME_LENGTH = 30;
 
@@ -37,7 +37,6 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
   // Form state
   const [formData, setFormData] = useState<GroupFormData>({
     name: '',
-    visibility: 'private',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,13 +62,11 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
       
       setFormData({
         name: defaultName,
-        visibility: 'private',
       });
     } else {
       // No profile data, use empty name
       setFormData({
         name: '',
-        visibility: 'private',
       });
     }
     setError(null);
@@ -87,12 +84,6 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
     }));
   };
 
-  const handleVisibilityChange = (value: GroupVisibility) => {
-    setFormData(prev => ({
-      ...prev,
-      visibility: value
-    }));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,36 +177,6 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
             )}
           </div>
 
-          {/* Visibility */}
-          <div className="space-y-2">
-            <Label htmlFor="groupVisibility" className="text-base font-medium">
-              Privacy
-            </Label>
-            <Select 
-              value={formData.visibility} 
-              onValueChange={handleVisibilityChange}
-              disabled={loading}
-            >
-              <SelectTrigger className="text-base">
-                <SelectValue placeholder="Choose privacy setting" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="private">
-                  <div>
-                    <div className="font-medium">Private</div>
-                    <div className="text-sm text-gray-500">Only invited members can see this cookbook</div>
-                  </div>
-                </SelectItem>
-                <SelectItem value="public" disabled className="opacity-50 cursor-not-allowed">
-                  <div>
-                    <div className="font-medium text-gray-400">Public</div>
-                    <div className="text-sm text-gray-400">Anyone can find and join this cookbook</div>
-                    <div className="text-xs text-gray-400 mt-1 font-medium">Coming soon</div>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
 
           {/* Error Message */}
           {error && (

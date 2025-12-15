@@ -56,7 +56,6 @@ export async function GET(request: Request) {
           id,
           name,
           description,
-          visibility,
           created_at
         ),
         inviter:profiles!group_invitations_invited_by_fkey (

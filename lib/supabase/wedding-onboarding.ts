@@ -289,8 +289,7 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
         planning_stage: step1Data?.planningStage || null,
         partner_first_name: step2Data?.partnerFirstName || null,
         partner_last_name: step2Data?.partnerLastName || null,
-        created_by: userId,
-        visibility: 'private'
+        created_by: userId
       };
 
     } else {
@@ -322,8 +321,7 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
         timeline: step1Data?.timeline || null,
         partner_first_name: step2Data?.partnerFirstName || null,
         relationship_to_couple: step2Data?.relationship || null,
-        created_by: userId,
-        visibility: 'private'
+        created_by: userId
       };
     }
 

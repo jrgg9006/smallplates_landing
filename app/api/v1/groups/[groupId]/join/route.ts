@@ -61,7 +61,7 @@ export async function POST(
     // Step 1: Verify group exists
     const { data: group, error: groupError } = await supabaseAdmin
       .from('groups')
-      .select('id, name, description, visibility')
+      .select('id, name, description')
       .eq('id', groupId)
       .single();
 

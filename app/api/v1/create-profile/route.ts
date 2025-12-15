@@ -97,7 +97,6 @@ export async function POST(request: NextRequest) {
           name: 'My First Book',
           description: 'Add recipes and invite friends to build your book',
           created_by: userId,
-          visibility: 'private'
         });
 
       if (groupError) {

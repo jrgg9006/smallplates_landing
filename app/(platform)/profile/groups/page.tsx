@@ -317,7 +317,7 @@ export default function GroupsPage() {
         </div>
         
         {/* Recipe Grid */}
-        <div className="mt-8 pb-15">
+        <div className="mt-8 pb-16">
           <GroupsSection 
             ref={groupsSectionRef} 
             onGroupChange={handleGroupChange} 

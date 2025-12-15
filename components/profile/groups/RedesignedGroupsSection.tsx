@@ -11,8 +11,9 @@ import { RecipeCardGrid } from "./RecipeCardGrid";
 import { AddRecipeModal } from "../recipes/AddRecipeModal";
 import { AddRecipesToGroupModal } from "./AddRecipesToGroupModal";
 import { AddFriendToGroupModal } from "./AddFriendToGroupModal";
+import { RemoveRecipeFromGroupModal } from "./RemoveRecipeFromGroupModal";
 import { getMyGroups, getUserRoleInGroup, deleteGroup, exitGroup } from "@/lib/supabase/groups";
-import { getGroupRecipes, searchGroupRecipes } from "@/lib/supabase/groupRecipes";
+import { getGroupRecipes, searchGroupRecipes, removeRecipeFromGroup } from "@/lib/supabase/groupRecipes";
 import type { GroupWithMembers, RecipeWithGuest } from "@/lib/types/database";
 
 interface GroupsSectionProps {
@@ -53,12 +54,15 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
   const [addRecipesModalOpen, setAddRecipesModalOpen] = useState(false);
   const [addNewRecipeModalOpen, setAddNewRecipeModalOpen] = useState(false);
   const [inviteFriendModalOpen, setInviteFriendModalOpen] = useState(false);
+  const [removeRecipeModalOpen, setRemoveRecipeModalOpen] = useState(false);
+  const [recipeToRemove, setRecipeToRemove] = useState<RecipeWithGuest | null>(null);
   
   // Loading & error state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
   
   // Expose functions to parent component
   useImperativeHandle(ref, () => ({
@@ -232,12 +236,38 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
   };
 
   const handleRemoveRecipe = (recipe: RecipeWithGuest) => {
-    // TODO: Open remove recipe modal
-    console.log('Remove recipe:', recipe);
+    setRecipeToRemove(recipe);
+    setRemoveRecipeModalOpen(true);
   };
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
+  };
+
+  const handleConfirmRemoveRecipe = async () => {
+    if (!recipeToRemove || !selectedGroup) return;
+    
+    try {
+      setIsRemoving(true);
+      const { error } = await removeRecipeFromGroup(recipeToRemove.id, selectedGroup.id);
+      
+      if (error) {
+        console.error('Error removing recipe:', error);
+        // TODO: Show error toast
+        return;
+      }
+      
+      // Refresh recipes
+      await loadRecipes();
+      
+      // Close modal
+      setRemoveRecipeModalOpen(false);
+      setRecipeToRemove(null);
+    } catch (err) {
+      console.error('Error removing recipe:', err);
+    } finally {
+      setIsRemoving(false);
+    }
   };
 
   // Show loading state
@@ -372,6 +402,18 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
         onInviteSent={() => {
           setInviteFriendModalOpen(false);
         }}
+      />
+      
+      <RemoveRecipeFromGroupModal
+        isOpen={removeRecipeModalOpen}
+        recipeName={recipeToRemove?.recipe_name || ''}
+        isOwnRecipe={recipeToRemove?.guests?.is_self || false}
+        onClose={() => {
+          setRemoveRecipeModalOpen(false);
+          setRecipeToRemove(null);
+        }}
+        onConfirm={handleConfirmRemoveRecipe}
+        loading={isRemoving}
       />
     </div>
   );

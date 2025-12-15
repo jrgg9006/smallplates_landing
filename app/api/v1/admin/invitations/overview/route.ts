@@ -49,7 +49,7 @@ export async function GET() {
       // 2. Groups overview
       supabaseAdmin
         .from('groups')
-        .select('id, created_at, visibility')
+        .select('id, created_at')
         .order('created_at', { ascending: false }),
 
       // 3. Group members count
@@ -112,8 +112,6 @@ export async function GET() {
     // Process groups data
     const groups = groupsResult.data || [];
     const totalGroups = groups.length;
-    const publicGroups = groups.filter(g => g.visibility === 'public').length;
-    const privateGroups = groups.filter(g => g.visibility === 'private').length;
     
     const recentGroups = groups.filter(g => 
       new Date(g.created_at) >= sevenDaysAgo
@@ -219,8 +217,6 @@ export async function GET() {
         // Groups overview
         groups: {
           total: totalGroups,
-          public: publicGroups,
-          private: privateGroups,
           recent: recentGroups
         },
 

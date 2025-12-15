@@ -85,7 +85,6 @@ export function EditGroupModal({
     try {
       const updateData: any = { 
         name: trimmedName,
-        visibility: group.visibility,
         wedding_date: weddingDate || null,
         wedding_date_undecided: weddingDateUndecided
       };

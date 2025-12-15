@@ -218,11 +218,6 @@ export function MobileGroupCard({
             <span>{recipeCount} recipe{recipeCount !== 1 ? 's' : ''}</span>
           </div>
           <div className="flex items-center gap-2">
-            {group.visibility === 'public' && (
-              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                Public
-              </span>
-            )}
             {isSelected && (
               <div className="w-2 h-2 bg-gray-900 rounded-full"></div>
             )}

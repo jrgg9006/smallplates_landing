@@ -13,7 +13,6 @@ interface GroupInvitationData {
     id: string;
     name: string;
     description?: string;
-    visibility: string;
     createdAt: string;
   };
   inviter: {

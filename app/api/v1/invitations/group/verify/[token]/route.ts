@@ -43,7 +43,6 @@ export async function GET(
           id,
           name,
           description,
-          visibility,
           created_at
         ),
         inviter:profiles!group_invitations_invited_by_fkey (
@@ -149,7 +148,6 @@ export async function GET(
           id: invitation.groups.id,
           name: invitation.groups.name,
           description: invitation.groups.description,
-          visibility: invitation.groups.visibility,
           createdAt: invitation.groups.created_at
         },
         

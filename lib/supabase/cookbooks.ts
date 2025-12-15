@@ -84,7 +84,6 @@ export async function getAllCookbooks() {
           description,
           created_at,
           updated_at,
-          visibility,
           created_by
         )
       `)

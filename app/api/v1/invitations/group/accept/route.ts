@@ -41,8 +41,7 @@ export async function POST(request: Request) {
         groups (
           id,
           name,
-          description,
-          visibility
+          description
         )
       `)
       .eq('token', token)
