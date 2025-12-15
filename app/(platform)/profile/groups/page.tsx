@@ -21,6 +21,7 @@ import { EmailVerificationBanner } from "@/components/profile/EmailVerificationB
 import { getCurrentProfile } from "@/lib/supabase/profiles";
 import { ShareCollectionModal } from "@/components/profile/guests/ShareCollectionModal";
 import { getUserCollectionToken } from "@/lib/supabase/collection";
+import { createShareURL } from "@/lib/utils/sharing";
 
 export default function GroupsPage() {
   const { user, loading } = useAuth();
@@ -237,7 +238,7 @@ export default function GroupsPage() {
           />
         )}
         {/* Hero Image */}
-        <div className="relative w-full h-[200px] mt-6 rounded-2xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity group">
+        <div className="relative w-full h-[200px] mt-6 rounded-2xl overflow-hidden">
           <Image
             src="/images/profile/Hero_Profile_2400.jpg"
             alt="Couple cooking together"
@@ -246,9 +247,9 @@ export default function GroupsPage() {
             sizes="1000px"
           />
           {/* Overlay with text - sutil para no competir con la imagen */}
-          <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
-            <div className="flex flex-col items-center text-white/70 group-hover:text-white/90 transition-all duration-300">
-              <ImageIcon size={40} strokeWidth={1} className="opacity-60 group-hover:opacity-80 transition-opacity" />
+          <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+            <div className="flex flex-col items-center text-white/70">
+              <ImageIcon size={40} strokeWidth={1} className="opacity-60" />
               <span className="text-[12px] mt-1.5 font-normal opacity-80">Click to add your photo</span>
             </div>
           </div>
@@ -343,7 +344,7 @@ export default function GroupsPage() {
         <ShareCollectionModal
           isOpen={showShareModal}
           onClose={() => setShowShareModal(false)}
-          collectionUrl={`${window.location.origin}/collect/${collectionToken}`}
+          collectionUrl={createShareURL(window.location.origin, collectionToken, { groupId: selectedGroup.id })}
           userName={user?.email?.split('@')[0] || null}
         />
       )}

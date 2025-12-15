@@ -64,19 +64,31 @@ export default function RecipeFormPage() {
       let finalCookbookId = cookbookIdFromParams;
       let finalGroupId = groupIdFromParams;
       
+      console.log('🔧 DEBUG RecipePage: Initial context from params:', {
+        cookbookIdFromParams,
+        groupIdFromParams
+      });
+      
       // If query params are missing, try sessionStorage
       if (!finalCookbookId && !finalGroupId) {
         const storedContext = sessionStorage.getItem('collectionContext');
+        console.log('🔧 DEBUG RecipePage: Trying sessionStorage context:', storedContext);
         if (storedContext) {
           try {
             const context = JSON.parse(storedContext);
             finalCookbookId = context.cookbookId || null;
             finalGroupId = context.groupId || null;
+            console.log('🔧 DEBUG RecipePage: Parsed context from sessionStorage:', context);
           } catch (e) {
             console.warn('Failed to parse stored context:', e);
           }
         }
       }
+      
+      console.log('🔧 DEBUG RecipePage: Final context to use:', {
+        finalCookbookId,
+        finalGroupId
+      });
       
       setCookbookId(finalCookbookId);
       setGroupId(finalGroupId);

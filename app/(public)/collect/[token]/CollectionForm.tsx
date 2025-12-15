@@ -58,6 +58,13 @@ export default function CollectionForm() {
   const cookbookId = searchParams.get('cookbook');
   const groupId = searchParams.get('group');
   
+  console.log('🔧 DEBUG CollectionForm: URL params detected:', {
+    cookbookId,
+    groupId,
+    fullUrl: typeof window !== 'undefined' ? window.location.href : 'server-side',
+    searchParams: typeof window !== 'undefined' ? window.location.search : 'server-side'
+  });
+  
   // Mobile debugging - log component mount
   useEffect(() => {
     console.log('🔥 CollectionLandingPage mounted on mobile', {
@@ -178,7 +185,9 @@ export default function CollectionForm() {
         sessionStorage.setItem('collectionGuestData', JSON.stringify(guestData));
         // Store cookbook/group context as backup
         if (cookbookId || groupId) {
-          sessionStorage.setItem('collectionContext', JSON.stringify({ cookbookId, groupId }));
+          const contextToStore = { cookbookId, groupId };
+          console.log('🔧 DEBUG CollectionForm: Storing context in sessionStorage (existing guest):', contextToStore);
+          sessionStorage.setItem('collectionContext', JSON.stringify(contextToStore));
         }
       }
     } catch (error) {
@@ -209,7 +218,9 @@ export default function CollectionForm() {
         sessionStorage.setItem('collectionGuestData', JSON.stringify(guestData));
         // Store cookbook/group context as backup
         if (cookbookId || groupId) {
-          sessionStorage.setItem('collectionContext', JSON.stringify({ cookbookId, groupId }));
+          const contextToStore = { cookbookId, groupId };
+          console.log('🔧 DEBUG CollectionForm: Storing context in sessionStorage (new guest):', contextToStore);
+          sessionStorage.setItem('collectionContext', JSON.stringify(contextToStore));
         }
       }
     } catch {

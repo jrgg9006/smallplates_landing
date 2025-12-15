@@ -221,6 +221,13 @@ export async function submitGuestRecipeWithFiles(
     }
 
     // Step 4: Create recipe record
+    console.log('🔧 DEBUG: Creating recipe record with context:', {
+      contextProvided: !!context,
+      cookbookId: context?.cookbookId,
+      groupId: context?.groupId,
+      groupIdToSave: context?.groupId || null
+    });
+    
     const recipeData: GuestRecipeInsert = {
       guest_id: guestId,
       user_id: tokenInfo.user_id,
@@ -237,6 +244,12 @@ export async function submitGuestRecipeWithFiles(
       source: 'collection',
       group_id: context?.groupId || null,
     };
+    
+    console.log('🔧 DEBUG: Recipe data to insert:', {
+      recipeDataKeys: Object.keys(recipeData),
+      groupIdInData: recipeData.group_id,
+      fullRecipeData: recipeData
+    });
 
     const { data: recipe, error: recipeError } = await supabase
       .from('guest_recipes')
@@ -250,7 +263,13 @@ export async function submitGuestRecipeWithFiles(
       return { data: null, error: recipeError?.message || 'Failed to create recipe' };
     }
 
-    console.log('✅ Recipe created successfully:', { recipeId: recipe.id, guestId, userId: tokenInfo.user_id });
+    console.log('✅ Recipe created successfully:', { 
+      recipeId: recipe.id, 
+      guestId, 
+      userId: tokenInfo.user_id,
+      groupIdSaved: recipe.group_id,
+      contextGroupId: context?.groupId 
+    });
 
     // Step 5: If files were staged, move them to final hierarchical location
     let finalFileUrls: string[] = [];
