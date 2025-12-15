@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
@@ -109,21 +108,14 @@ export default function TheSolution() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
           >
-            <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl">
-              {/* TODO: Replace with /images/landing/book-in-kitchen.jpg when available */}
-              <Image
-                src="/images/landing/food_perfect.jpg"
-                alt="Small Plates cookbook open on a kitchen counter, with coffee and fresh ingredients nearby"
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
+            <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl bg-gray-200">
+              {/* Placeholder until we have the final image */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <p className="text-gray-400 font-sans text-sm"></p>
+              </div>
             </div>
             
             {/* Caption — adds authenticity */}
-            <p className="mt-4 text-center text-sm text-[#9A9590] font-sans">
-              The Martinez-Chen book. 47 recipes. 47 people.
-            </p>
           </motion.div>
 
         </div>

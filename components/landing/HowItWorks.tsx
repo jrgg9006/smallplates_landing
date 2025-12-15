@@ -66,7 +66,7 @@ export default function HowItWorks() {
             >
               {/* Step Number - positioned above image */}
               <div className="flex justify-center mb-6">
-                <span className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-[#D4A854]/20 to-[#D4A854]/30 text-[#D4A854] font-serif font-medium flex items-center justify-center text-lg border border-[#D4A854]/30 shadow-sm">
+                <span className="flex-shrink-0 w-12 h-12 rounded-full bg-[#F5F5F0] text-[#9A9590] font-serif font-medium flex items-center justify-center text-lg">
                   {step.number}
                 </span>
               </div>
