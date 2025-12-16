@@ -95,7 +95,7 @@ export function CaptainsDropdown({ isOpen, selectedGroup, onClose, onInviteCapta
       />
       
       {/* Dropdown */}
-      <div className="absolute top-full left-0 mt-2 bg-[hsl(var(--brand-white))] rounded-2xl shadow-[0_4px_24px_rgba(45,45,45,0.12)] p-3 min-w-[220px] z-50 border border-[hsl(var(--brand-border))]">
+      <div className="absolute top-full right-0 mt-2 bg-[hsl(var(--brand-white))] rounded-2xl shadow-[0_4px_24px_rgba(45,45,45,0.12)] p-3 min-w-[220px] z-50 border border-[hsl(var(--brand-border))]">
         {captains.map((captain, idx) => (
           <div key={idx} className="flex items-center gap-2 py-2">
             <div 
