@@ -36,6 +36,7 @@ export default function GroupsPage() {
   const [invitationsRefreshTrigger, setInvitationsRefreshTrigger] = useState(0);
   const [showShareModal, setShowShareModal] = useState(false);
   const [collectionToken, setCollectionToken] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   
   // Email verification state
   const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
@@ -122,6 +123,18 @@ export default function GroupsPage() {
   const handlePreviewBook = () => {
     console.log('Preview Book clicked');
   };
+
+  // Check if mobile on mount and window resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640); // sm breakpoint in Tailwind
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Check email verification status and URL params
   useEffect(() => {
@@ -289,8 +302,8 @@ export default function GroupsPage() {
             Add Your Own
           </button>
           
-          {/* Captains Dropdown */}
-          <div className="relative">
+          {/* Captains Dropdown - Hidden on mobile */}
+          <div className="relative hidden sm:block">
             <button 
               onClick={() => setShowCaptains(!showCaptains)}
               className="btn-tertiary flex items-center gap-1.5"
@@ -313,7 +326,13 @@ export default function GroupsPage() {
               isOpen={showMoreMenu} 
               onClose={() => setShowMoreMenu(false)}
               onEditProfile={handleEditProfile}
+              showCaptainsOption={isMobile}
+              onCaptainsClick={() => setShowCaptains(true)}
             />
+            {/* Captains dropdown for mobile */}
+            <div className="sm:hidden">
+              {showCaptains && <CaptainsDropdown isOpen={showCaptains} selectedGroup={selectedGroup} onClose={() => setShowCaptains(false)} onInviteCaptain={handleInviteCaptain} refreshTrigger={invitationsRefreshTrigger} />}
+            </div>
           </div>
         </div>
         
