@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
+import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { motion } from "framer-motion";
@@ -64,6 +64,78 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
   
+  const loadGroups = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data, error: groupsError } = await getMyGroups();
+      
+      if (groupsError) {
+        setError(groupsError);
+        setLoading(false);
+        return;
+      }
+      
+      if (data) {
+        setGroups(data);
+        // Auto-select first group if no group is selected
+        // Use functional update to avoid dependency on selectedGroup
+        setSelectedGroup(prev => {
+          if (data.length > 0 && !prev) {
+            return data[0];
+          }
+          return prev;
+        });
+      }
+    } catch (err) {
+      setError('Failed to load cookbooks');
+      console.error('Error loading cookbooks:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadRecipes = useCallback(async () => {
+    if (!selectedGroup) {
+      setRecipes([]);
+      return;
+    }
+
+    try {
+      const { data: recipeData, error: recipeError } = await getGroupRecipes(selectedGroup.id);
+      
+      if (recipeError) {
+        console.error('Error loading recipes:', recipeError);
+        setRecipes([]);
+        return;
+      }
+      
+      if (recipeData) {
+        setRecipes(recipeData);
+      }
+    } catch (err) {
+      console.error('Error loading recipes:', err);
+      setRecipes([]);
+    }
+  }, [selectedGroup]);
+
+  const handleGroupChange = useCallback((group: GroupWithMembers) => {
+    setSelectedGroup(group);
+    onGroupChange?.(group);
+  }, [onGroupChange]);
+
+  const handleEditGroup = useCallback(() => {
+    setEditModalOpen(true);
+  }, []);
+
+  const handleDeleteGroup = useCallback(() => {
+    setDeleteModalOpen(true);
+  }, []);
+
+  const handleExitGroup = useCallback(() => {
+    setDeleteModalOpen(true);
+  }, []);
+
   // Expose functions to parent component
   useImperativeHandle(ref, () => ({
     openCreateModal: () => setCreateModalOpen(true),
@@ -78,8 +150,8 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
     handleExitGroup: handleExitGroup,
     userRole: userRole,
     loading: loading
-  }), [selectedGroup, groups, userRole, loading]);
-  
+  }), [selectedGroup, groups, userRole, loading, handleEditGroup, handleGroupChange, handleDeleteGroup, handleExitGroup]);
+
   useEffect(() => {
     loadGroups();
   }, [loadGroups]);
@@ -111,71 +183,15 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
   useEffect(() => {
     onRecipeCountChange?.(recipes.length);
   }, [recipes.length, onRecipeCountChange]);
-  
-  async function loadGroups() {
-    try {
-      setLoading(true);
-      setError(null);
-      const { data, error: groupsError } = await getMyGroups();
-      
-      if (groupsError) {
-        setError(groupsError);
-        setLoading(false);
-        return;
-      }
-      
-      if (data) {
-        setGroups(data);
-        // Auto-select first group if no group is selected
-        if (data.length > 0 && !selectedGroup) {
-          setSelectedGroup(data[0]);
-          onGroupChange?.(data[0]);
-        }
-      }
-    } catch (err) {
-      setError('Failed to load cookbooks');
-      console.error('Error loading cookbooks:', err);
-    } finally {
-      setLoading(false);
-    }
-  }
 
-  async function loadRecipes() {
-    if (!selectedGroup) {
-      setRecipes([]);
-      return;
-    }
-
-    try {
-      const { data: recipeData, error: recipeError } = await getGroupRecipes(selectedGroup.id);
-      
-      if (recipeError) {
-        console.error('Error loading recipes:', recipeError);
-        setRecipes([]);
-        return;
-      }
-      
-      if (recipeData) {
-        setRecipes(recipeData);
-      }
-    } catch (err) {
-      console.error('Error loading recipes:', err);
-      setRecipes([]);
-    }
-  }
+  // Sync selectedGroup changes to parent (after render completes)
+  useEffect(() => {
+    onGroupChange?.(selectedGroup);
+  }, [selectedGroup, onGroupChange]);
 
   const handleGroupCreated = () => {
     loadGroups();
     setCreateModalOpen(false);
-  };
-
-  const handleGroupChange = (group: GroupWithMembers) => {
-    setSelectedGroup(group);
-    onGroupChange?.(group);
-  };
-
-  const handleEditGroup = () => {
-    setEditModalOpen(true);
   };
 
   const handleGroupUpdated = (updatedGroup: GroupWithMembers) => {
@@ -184,14 +200,6 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
     );
     setSelectedGroup(updatedGroup);
     onGroupChange?.(updatedGroup);
-  };
-
-  const handleDeleteGroup = () => {
-    setDeleteModalOpen(true);
-  };
-
-  const handleExitGroup = () => {
-    setDeleteModalOpen(true);
   };
 
   const handleConfirmDeleteExit = async () => {

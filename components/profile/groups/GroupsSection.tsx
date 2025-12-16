@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
+import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import { motion } from "framer-motion";
@@ -50,6 +50,23 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   
+  const handleGroupChange = useCallback((group: GroupWithMembers) => {
+    setSelectedGroup(group);
+    onGroupChange?.(group);
+  }, [onGroupChange]);
+
+  const handleEditGroup = useCallback(() => {
+    setEditModalOpen(true);
+  }, []);
+
+  const handleDeleteGroup = useCallback(() => {
+    setDeleteModalOpen(true);
+  }, []);
+
+  const handleExitGroup = useCallback(() => {
+    setDeleteModalOpen(true);
+  }, []);
+
   // Expose functions to parent component
   useImperativeHandle(ref, () => ({
     openCreateModal: () => setCreateModalOpen(true),
@@ -64,7 +81,7 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
     handleExitGroup: handleExitGroup,
     userRole: userRole,
     loading: loading
-  }), [selectedGroup, groups, userRole, loading]);
+  }), [selectedGroup, groups, userRole, loading, handleEditGroup, handleGroupChange, handleDeleteGroup, handleExitGroup]);
   
   useEffect(() => {
     loadGroups();
@@ -76,6 +93,25 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
     console.log('GroupsSection loading state:', loading);
     onLoadingChange?.(loading);
   }, [loading, onLoadingChange]);
+
+  const loadRecipes = useCallback(async () => {
+    if (!selectedGroup) {
+      setRecipes([]);
+      return;
+    }
+    try {
+      const { data: recipeData, error: recipeError } = await getGroupRecipes(selectedGroup.id);
+      
+      if (recipeError) {
+        console.error('Error loading recipes:', recipeError);
+        return;
+      }
+      
+      setRecipes(recipeData || []);
+    } catch (err) {
+      console.error('Error loading recipes:', err);
+    }
+  }, [selectedGroup]);
 
   // Load user role when selected group changes
   useEffect(() => {
@@ -93,7 +129,7 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
 
     loadUserRole();
     loadRecipes();
-  }, [selectedGroup]);
+  }, [selectedGroup, loadRecipes]);
   
   async function loadGroups() {
     try {
@@ -125,25 +161,6 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
     }
   }
 
-  async function loadRecipes() {
-    if (!selectedGroup) {
-      setRecipes([]);
-      return;
-    }
-    try {
-      const { data: recipeData, error: recipeError } = await getGroupRecipes(selectedGroup.id);
-      
-      if (recipeError) {
-        console.error('Error loading recipes:', recipeError);
-        return;
-      }
-      
-      setRecipes(recipeData || []);
-    } catch (err) {
-      console.error('Error loading recipes:', err);
-    }
-  }
-
   const handleGroupCreated = () => {
     // Refresh groups list and close modal
     loadGroups();
@@ -165,15 +182,6 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
     console.log('Remove recipe:', recipe);
   };
 
-  const handleGroupChange = (group: GroupWithMembers) => {
-    setSelectedGroup(group);
-    onGroupChange?.(group);
-  };
-
-  const handleEditGroup = () => {
-    setEditModalOpen(true);
-  };
-
   const handleCloseEditModal = () => {
     setEditModalOpen(false);
   };
@@ -187,14 +195,6 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
     setSelectedGroup(updatedGroup);
     // Notify parent component about the change
     onGroupChange?.(updatedGroup);
-  };
-
-  const handleDeleteGroup = () => {
-    setDeleteModalOpen(true);
-  };
-
-  const handleExitGroup = () => {
-    setDeleteModalOpen(true);
   };
 
   const handleConfirmDeleteExit = async () => {
