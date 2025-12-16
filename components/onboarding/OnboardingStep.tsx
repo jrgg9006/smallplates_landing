@@ -108,7 +108,7 @@ export default function OnboardingStep({
       {/* Step Form/Content Area */}
       <div className="mb-8">{children}</div>
     </div>
-  ), [stepNumber, totalSteps, title, description, children]);
+  ), [stepNumber, totalSteps, title, description, children, hideProgress]);
 
   // Image component - fixed to viewport
   const ImageSection = () => (

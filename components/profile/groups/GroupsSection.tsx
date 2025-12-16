@@ -7,13 +7,13 @@ import { motion } from "framer-motion";
 import { CreateGroupModal } from "./CreateGroupModal";
 import { EditGroupModal } from "./EditGroupModal";
 import { DeleteGroupModal } from "./DeleteGroupModal";
-import { GroupRecipeTable } from "./GroupRecipeTable";
+import { RecipeCardGrid } from "./RecipeCardGrid";
 import { AddRecipeModal } from "../recipes/AddRecipeModal";
 import { AddRecipesToGroupModal } from "./AddRecipesToGroupModal";
 import { AddFriendToGroupModal } from "./AddFriendToGroupModal";
-import { MobileGroupCard } from "./MobileGroupCard";
 import { getMyGroups, getUserRoleInGroup, deleteGroup, exitGroup } from "@/lib/supabase/groups";
-import type { GroupWithMembers } from "@/lib/types/database";
+import { getGroupRecipes } from "@/lib/supabase/groupRecipes";
+import type { GroupWithMembers, RecipeWithGuest } from "@/lib/types/database";
 
 interface GroupsSectionProps {
   onGroupChange?: (group: GroupWithMembers | null) => void;
@@ -38,6 +38,7 @@ export interface GroupsSectionRef {
 export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({ onGroupChange, onLoadingChange }, ref) => {
   const [groups, setGroups] = useState<GroupWithMembers[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<GroupWithMembers | null>(null);
+  const [recipes, setRecipes] = useState<RecipeWithGuest[]>([]);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -91,6 +92,7 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
     };
 
     loadUserRole();
+    loadRecipes();
   }, [selectedGroup]);
   
   async function loadGroups() {
@@ -123,10 +125,44 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
     }
   }
 
+  async function loadRecipes() {
+    if (!selectedGroup) {
+      setRecipes([]);
+      return;
+    }
+    try {
+      const { data: recipeData, error: recipeError } = await getGroupRecipes(selectedGroup.id);
+      
+      if (recipeError) {
+        console.error('Error loading recipes:', recipeError);
+        return;
+      }
+      
+      setRecipes(recipeData || []);
+    } catch (err) {
+      console.error('Error loading recipes:', err);
+    }
+  }
+
   const handleGroupCreated = () => {
     // Refresh groups list and close modal
     loadGroups();
     setCreateModalOpen(false);
+  };
+
+  const handleRecipeClick = (recipe: RecipeWithGuest) => {
+    // TODO: Implement recipe view/edit functionality
+    console.log('Recipe clicked:', recipe);
+  };
+
+  const handleEditRecipe = (recipe: RecipeWithGuest) => {
+    // TODO: Implement recipe editing functionality
+    console.log('Edit recipe:', recipe);
+  };
+
+  const handleRemoveRecipe = (recipe: RecipeWithGuest) => {
+    // TODO: Implement recipe removal functionality
+    console.log('Remove recipe:', recipe);
   };
 
   const handleGroupChange = (group: GroupWithMembers) => {
@@ -261,23 +297,11 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
                   </div>
                 )}
                 
-                <GroupRecipeTable 
-                  group={selectedGroup} 
-                  groups={groups}
-                  onGroupChange={handleGroupChange}
-                  onCreateGroup={() => setCreateModalOpen(true)}
-                  onRecipeAdded={loadGroups}
-                  onAddExistingRecipe={() => setAddRecipesModalOpen(true)}
-                  onAddNewRecipe={() => {
-                    console.log('🔥🔥🔥 DEBUG: Cookbooks section - Opening Add Recipe Modal', { 
-                      selectedGroup: selectedGroup,
-                      selectedGroupId: selectedGroup?.id
-                    });
-                    setAddNewRecipeModalOpen(true);
-                  }}
-                  onDeleteGroup={handleDeleteGroup}
-                  onExitGroup={handleExitGroup}
-                  userRole={userRole}
+                <RecipeCardGrid
+                  recipes={recipes}
+                  onRecipeClick={handleRecipeClick}
+                  onEditRecipe={handleEditRecipe}
+                  onRemoveRecipe={handleRemoveRecipe}
                 />
               </div>
             ) : (
@@ -294,47 +318,29 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
           <div className="md:hidden">
             {selectedGroup ? (
               <div>
-                <GroupRecipeTable 
-                  group={selectedGroup} 
-                  groups={groups}
-                  onGroupChange={handleGroupChange}
-                  onCreateGroup={() => setCreateModalOpen(true)}
-                  onRecipeAdded={loadGroups}
-                  onAddExistingRecipe={() => setAddRecipesModalOpen(true)}
-                  onAddNewRecipe={() => {
-                    setAddNewRecipeModalOpen(true);
-                  }}
-                  onDeleteGroup={handleDeleteGroup}
-                  onExitGroup={handleExitGroup}
-                  userRole={userRole}
+                <RecipeCardGrid
+                  recipes={recipes}
+                  onRecipeClick={handleRecipeClick}
+                  onEditRecipe={handleEditRecipe}
+                  onRemoveRecipe={handleRemoveRecipe}
                 />
               </div>
             ) : (
               <div className="space-y-3">
                 {groups.map((group: GroupWithMembers) => (
-                  <MobileGroupCard
+                  <Button
                     key={group.id}
-                    group={group}
-                    isSelected={false}
-                    onGroupClick={handleGroupChange}
-                    onEditGroup={() => {
-                      setSelectedGroup(group);
-                      setEditModalOpen(true);
-                    }}
-                    onDeleteGroup={() => {
-                      setSelectedGroup(group);
-                      handleDeleteGroup();
-                    }}
-                    onExitGroup={() => {
-                      setSelectedGroup(group);
-                      handleExitGroup();
-                    }}
-                    onInviteFriend={() => {
-                      setSelectedGroup(group);
-                      setInviteFriendModalOpen(true);
-                    }}
-                    userRole={userRole}
-                  />
+                    variant="outline"
+                    className="w-full justify-start p-4 h-auto"
+                    onClick={() => handleGroupChange(group)}
+                  >
+                    <div className="text-left">
+                      <div className="font-medium">{group.name}</div>
+                      {group.description && (
+                        <div className="text-sm text-gray-500 mt-1">{group.description}</div>
+                      )}
+                    </div>
+                  </Button>
                 ))}
               </div>
             )}
@@ -355,7 +361,7 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
         onClose={() => setAddNewRecipeModalOpen(false)}
         groupId={selectedGroup?.id}
         onRecipeAdded={() => {
-          loadGroups();
+          loadRecipes();
           setAddNewRecipeModalOpen(false);
         }}
       />
@@ -366,7 +372,7 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
         onClose={() => setAddRecipesModalOpen(false)}
         groupId={selectedGroup?.id || null}
         onRecipesAdded={() => {
-          loadGroups();
+          loadRecipes();
           setAddRecipesModalOpen(false);
         }}
       />

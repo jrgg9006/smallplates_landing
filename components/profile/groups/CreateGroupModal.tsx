@@ -12,8 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createGroup } from "@/lib/supabase/groups";
-import { getCurrentProfile } from "@/lib/supabase/profiles";
-import type { GroupFormData, Profile } from "@/lib/types/database";
+import type { GroupFormData } from "@/lib/types/database";
 
 const MAX_NAME_LENGTH = 30;
 
@@ -40,7 +39,6 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [userProfile, setUserProfile] = useState<Profile | null>(null);
 
   // Load user profile when modal opens
   useEffect(() => {
@@ -50,25 +48,10 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
   }, [isOpen]);
 
   const loadUserProfile = async () => {
-    const { data: profile } = await getCurrentProfile();
-    if (profile) {
-      setUserProfile(profile);
-      
-      // Generate default name from couple names
-      let defaultName = '';
-      if (profile.couple_first_name && profile.couple_partner_first_name) {
-        defaultName = `${profile.couple_first_name} & ${profile.couple_partner_first_name}`;
-      }
-      
-      setFormData({
-        name: defaultName,
-      });
-    } else {
-      // No profile data, use empty name
-      setFormData({
-        name: '',
-      });
-    }
+    // Reset form data when modal opens
+    setFormData({
+      name: '',
+    });
     setError(null);
   };
 
@@ -103,7 +86,7 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
       setLoading(true);
       setError(null);
 
-      const { data, error: createError } = await createGroup(formData);
+      const { error: createError } = await createGroup(formData);
 
       if (createError) {
         setError(createError);
@@ -164,12 +147,6 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
               required
               disabled={loading}
             />
-            {userProfile?.couple_first_name && userProfile?.couple_partner_first_name && 
-             formData.name === `${userProfile.couple_first_name} & ${userProfile.couple_partner_first_name}` && (
-              <p className="text-xs text-[hsl(var(--brand-warm-gray))] italic">
-                Using names from your profile. You can edit this if you&apos;d like.
-              </p>
-            )}
             {formData.name.length > MAX_NAME_LENGTH && (
               <p className="text-xs text-red-600">
                 Book name cannot exceed {MAX_NAME_LENGTH} characters.

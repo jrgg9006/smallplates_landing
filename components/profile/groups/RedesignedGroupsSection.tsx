@@ -82,7 +82,7 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
   
   useEffect(() => {
     loadGroups();
-  }, []);
+  }, [loadGroups]);
 
   // Notify parent when loading state changes
   useEffect(() => {
@@ -105,7 +105,7 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
 
     loadUserRole();
     loadRecipes();
-  }, [selectedGroup]);
+  }, [selectedGroup, loadRecipes]);
 
   // Update recipe count for parent
   useEffect(() => {

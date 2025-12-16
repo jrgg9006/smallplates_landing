@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import type { GroupWithMembers } from "@/lib/types/database";
 import { getGroupPendingInvitations, cancelGroupInvitation, type GroupInvitation } from "@/lib/supabase/groupInvitations";
 import { Clock, Trash2 } from "lucide-react";
@@ -18,14 +18,7 @@ export function CaptainsDropdown({ isOpen, selectedGroup, onClose, onInviteCapta
   const [loadingInvitations, setLoadingInvitations] = useState(false);
   const [cancelingId, setCancelingId] = useState<string | null>(null);
 
-  // Load pending invitations when dropdown opens or when refresh is triggered
-  useEffect(() => {
-    if (isOpen && selectedGroup?.id) {
-      loadPendingInvitations();
-    }
-  }, [isOpen, selectedGroup?.id, refreshTrigger]);
-
-  const loadPendingInvitations = async () => {
+  const loadPendingInvitations = useCallback(async () => {
     if (!selectedGroup?.id) return;
     
     try {
@@ -43,7 +36,14 @@ export function CaptainsDropdown({ isOpen, selectedGroup, onClose, onInviteCapta
     } finally {
       setLoadingInvitations(false);
     }
-  };
+  }, [selectedGroup?.id]);
+
+  // Load pending invitations when dropdown opens or when refresh is triggered
+  useEffect(() => {
+    if (isOpen && selectedGroup?.id) {
+      loadPendingInvitations();
+    }
+  }, [isOpen, selectedGroup?.id, refreshTrigger, loadPendingInvitations]);
 
   const handleCancelInvitation = async (invitationId: string, inviteeName: string) => {
     if (!selectedGroup?.id) return;
