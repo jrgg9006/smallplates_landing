@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import { getMyGroups } from "@/lib/supabase/groups";
 import type { GroupWithMembers } from "@/lib/types/database";
@@ -15,12 +14,11 @@ import {
 interface GroupNavigationSheetProps {
   isOpen: boolean;
   onClose: () => void;
+  onGroupSelect?: (group: GroupWithMembers) => void;
+  currentGroupId?: string;
 }
 
-export function GroupNavigationSheet({ isOpen, onClose }: GroupNavigationSheetProps) {
-  const router = useRouter();
-  const params = useParams();
-  const currentGroupId = params.id as string | undefined;
+export function GroupNavigationSheet({ isOpen, onClose, onGroupSelect, currentGroupId }: GroupNavigationSheetProps) {
   const [groups, setGroups] = useState<GroupWithMembers[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,8 +48,8 @@ export function GroupNavigationSheet({ isOpen, onClose }: GroupNavigationSheetPr
     return "Celebrations ahead";
   };
 
-  const handleGroupSelect = (groupId: string) => {
-    router.push(`/profile/groups/${groupId}`);
+  const handleGroupSelect = (group: GroupWithMembers) => {
+    onGroupSelect?.(group);
     onClose();
   };
 
@@ -91,7 +89,7 @@ export function GroupNavigationSheet({ isOpen, onClose }: GroupNavigationSheetPr
                 {groups.map((group) => (
                   <button
                     key={group.id}
-                    onClick={() => handleGroupSelect(group.id)}
+                    onClick={() => handleGroupSelect(group)}
                     className={`
                       w-full rounded-lg overflow-hidden transition-all duration-300
                       hover:shadow-lg hover:-translate-y-0.5 relative group

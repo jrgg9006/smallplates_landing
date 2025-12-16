@@ -5,15 +5,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BookOpen, Users2, ChefHat, Users } from "lucide-react";
 import { GroupNavigationSheet } from "@/components/profile/groups/GroupNavigationSheet";
+import type { GroupWithMembers } from "@/lib/types/database";
 
 interface ProfileNavigationProps {
   variant?: "desktop" | "mobile";
   onNavigate?: () => void;
+  onGroupSelect?: (group: GroupWithMembers) => void;
+  currentGroupId?: string;
 }
 
 export default function ProfileNavigation({ 
   variant = "desktop",
-  onNavigate 
+  onNavigate,
+  onGroupSelect,
+  currentGroupId
 }: ProfileNavigationProps) {
   const pathname = usePathname();
   const [isGroupSheetOpen, setIsGroupSheetOpen] = useState(false);
@@ -100,7 +105,9 @@ export default function ProfileNavigation({
       
       <GroupNavigationSheet 
         isOpen={isGroupSheetOpen} 
-        onClose={() => setIsGroupSheetOpen(false)} 
+        onClose={() => setIsGroupSheetOpen(false)}
+        onGroupSelect={onGroupSelect}
+        currentGroupId={currentGroupId}
       />
     </>
   );

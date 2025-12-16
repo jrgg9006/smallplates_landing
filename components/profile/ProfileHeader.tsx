@@ -8,8 +8,14 @@ import Image from "next/image";
 import Link from "next/link";
 import ProfileDropdown from "@/components/profile/ProfileDropdown";
 import ProfileNavigation from "@/components/profile/ProfileNavigation";
+import type { GroupWithMembers } from "@/lib/types/database";
 
-export function ProfileHeader() {
+interface ProfileHeaderProps {
+  onGroupSelect?: (group: GroupWithMembers) => void;
+  currentGroupId?: string;
+}
+
+export function ProfileHeader({ onGroupSelect, currentGroupId }: ProfileHeaderProps) {
   const { signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -86,7 +92,11 @@ export function ProfileHeader() {
           
           {/* Desktop: Navigation + Profile */}
           <div className="hidden lg:flex items-center gap-6">
-            <ProfileNavigation variant="desktop" />
+            <ProfileNavigation 
+              variant="desktop" 
+              onGroupSelect={onGroupSelect}
+              currentGroupId={currentGroupId}
+            />
             <ProfileDropdown />
           </div>
 

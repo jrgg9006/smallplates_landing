@@ -97,6 +97,12 @@ export default function GroupsPage() {
     setSelectedGroup(group);
   };
 
+  const handleGroupSelectFromNav = (group: GroupWithMembers) => {
+    setSelectedGroup(group);
+    // Also update via ref to sync RedesignedGroupsSection
+    groupsSectionRef.current?.handleGroupChange(group);
+  };
+
   const handleFirstRecipeSubmit = async (recipeData: RecipeData) => {
     try {
       const userRecipeData: UserRecipeData = {
@@ -237,7 +243,10 @@ export default function GroupsPage() {
       )}
 
       {/* Header */}
-      <ProfileHeader />
+      <ProfileHeader 
+        onGroupSelect={handleGroupSelectFromNav}
+        currentGroupId={selectedGroup?.id}
+      />
 
       {/* Main Content */}
       <main className="max-w-[1000px] mx-auto px-10">
