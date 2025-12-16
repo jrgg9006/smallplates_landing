@@ -321,7 +321,7 @@ function Step3() {
       });
       
       // Complete onboarding with all collected data
-      await completeOnboarding();
+      await completeOnboarding(email.trim(), password);
       
       setSuccess(true);
       setLoading(false);
@@ -336,7 +336,7 @@ function Step3() {
     <OnboardingStep
       stepNumber={3}
       totalSteps={3}
-      title="You're about to start something beautiful."
+      title=""
       imageUrl="/images/onboarding/onboarding_gift_4.jpg"
       imageAlt="Beautiful wedding cookbook"
     >

@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BookOpen, Users2, ChefHat, Users } from "lucide-react";
+import { GroupNavigationSheet } from "@/components/profile/groups/GroupNavigationSheet";
 
 interface ProfileNavigationProps {
   variant?: "desktop" | "mobile";
@@ -15,6 +16,7 @@ export default function ProfileNavigation({
   onNavigate 
 }: ProfileNavigationProps) {
   const pathname = usePathname();
+  const [isGroupSheetOpen, setIsGroupSheetOpen] = useState(false);
 
   // Determine active states
   const isCookbookActive = pathname === "/profile/cookbook" || pathname.startsWith("/profile/cookbook/");
@@ -68,19 +70,38 @@ export default function ProfileNavigation({
 
   // Desktop variant
   return (
-    <nav className="flex items-center gap-8" aria-label="Main navigation">
-      {navItems.map((item) => {
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`text-sm text-[hsl(var(--brand-light-gray))] hover:text-[hsl(var(--brand-charcoal))] cursor-pointer transition-colors`}
-            aria-current={item.isActive ? "page" : undefined}
-          >
-            {item.label}
-          </Link>
-        );
-      })}
-    </nav>
+    <>
+      <nav className="flex items-center gap-8" aria-label="Main navigation">
+        {navItems.map((item) => {
+          if (item.label === "My Books") {
+            return (
+              <button
+                key={item.href}
+                onClick={() => setIsGroupSheetOpen(true)}
+                className={`text-sm text-[hsl(var(--brand-light-gray))] hover:text-[hsl(var(--brand-charcoal))] cursor-pointer transition-colors`}
+                aria-current={item.isActive ? "page" : undefined}
+              >
+                {item.label}
+              </button>
+            );
+          }
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`text-sm text-[hsl(var(--brand-light-gray))] hover:text-[hsl(var(--brand-charcoal))] cursor-pointer transition-colors`}
+              aria-current={item.isActive ? "page" : undefined}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
+      
+      <GroupNavigationSheet 
+        isOpen={isGroupSheetOpen} 
+        onClose={() => setIsGroupSheetOpen(false)} 
+      />
+    </>
   );
 }

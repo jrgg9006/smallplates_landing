@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Copy, Check, Edit3 } from "lucide-react";
+import { Copy, Check } from "lucide-react";
 import { updateShareMessage, resetShareMessage, getCurrentProfile } from "@/lib/supabase/profiles";
 
 interface ShareCollectionModalProps {
@@ -94,42 +94,31 @@ Send your favorite dish — anything goes. Takes 5 minutes. You'll be in our kit
     }
   };
 
-  const handleCopyLinkAndMessage = async () => {
-    try {
-      const fullMessage = `${shareMessage}\n\n${collectionUrl}`;
-      await navigator.clipboard.writeText(fullMessage);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      setError("Failed to copy link and message");
-      setTimeout(() => setError(null), 3000);
-    }
-  };
 
   const handleShowMessageCustomization = () => {
     setShowMessageCustomization(true);
-  };
-
-  const handleEditMessage = () => {
-    // Parse existing message to separate note and signature
+    // Automatically start editing when customization is shown
     const messageToEdit = shareMessage;
     const signatureMatch = messageToEdit.match(/—\s*(.+)$/);
     
     if (signatureMatch) {
+      // Remove signature from the message for editing
       const note = messageToEdit.replace(/\n*—\s*.+$/, '').trim();
       setEditingMessage(note);
     } else {
+      // If no signature found, use the full message
       setEditingMessage(messageToEdit);
     }
     
     setIsEditingMessage(true);
     setError(null);
     
-    // If this is an onboarding step, complete it when user clicks Edit
+    // If this is an onboarding step, complete it when user clicks customize
     if (isOnboardingStep && onStepComplete) {
       onStepComplete();
     }
   };
+
 
   const handleSaveMessage = async () => {
     if (editingMessage.trim().length === 0) {
@@ -253,74 +242,48 @@ Send your favorite dish — anything goes. Takes 5 minutes. You'll be in our kit
                 <h3 className="text-sm font-medium text-gray-900">
                   Your message to guests:
                 </h3>
-                {!isEditingMessage && (
-                  <button
-                    onClick={handleEditMessage}
-                    className="text-sm text-gray-500 hover:text-gray-700 transition-all flex items-center gap-1"
-                  >
-                    <Edit3 className="h-3.5 w-3.5" />
-                    Edit
-                  </button>
-                )}
               </div>
               
-              {isEditingMessage ? (
-                <div className="space-y-3">
-                  <textarea
-                    value={editingMessage}
-                    onChange={(e) => {
-                      setEditingMessage(e.target.value);
-                      setError(null);
-                    }}
-                    className="w-full p-4 bg-white border-2 border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors text-gray-900 leading-relaxed"
-                    rows={4}
-                    placeholder="Your message to guests..."
-                    maxLength={300}
-                  />
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleCancelEdit}
-                      disabled={isSaving}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleResetMessage}
-                      disabled={isSaving}
-                    >
-                      Reset
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={handleSaveMessage}
-                      disabled={isSaving || editingMessage.trim().length === 0}
-                      className="bg-black text-white hover:bg-gray-800"
-                    >
-                      Save
-                    </Button>
-                  </div>
+              <div className="space-y-3">
+                <textarea
+                  value={editingMessage}
+                  onChange={(e) => {
+                    setEditingMessage(e.target.value);
+                    setError(null);
+                  }}
+                  className="w-full p-4 bg-white border-2 border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors text-gray-900 leading-relaxed"
+                  rows={4}
+                  placeholder="Your message to guests..."
+                  maxLength={300}
+                />
+                <div className="flex justify-end gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCancelEdit}
+                    disabled={isSaving}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleResetMessage}
+                    disabled={isSaving}
+                  >
+                    Reset
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSaveMessage}
+                    disabled={isSaving || editingMessage.trim().length === 0}
+                    className="bg-black text-white hover:bg-gray-800"
+                  >
+                    Save
+                  </Button>
                 </div>
-              ) : (
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">
-                    {shareMessage}
-                  </p>
-                </div>
-              )}
+              </div>
 
-              {/* Copy Link & Message when customizing */}
-              <Button
-                onClick={handleCopyLinkAndMessage}
-                variant="outline"
-                className="w-full flex items-center justify-center gap-2"
-              >
-                <Copy className="w-4 h-4" />
-                Copy Link & Message
-              </Button>
             </div>
           )}
 

@@ -35,10 +35,6 @@ export interface Database {
           email_verification_token: string | null;
           email_verification_expires_at: string | null;
           email_verified: boolean;
-          couple_first_name: string | null;
-          couple_last_name: string | null;
-          couple_partner_first_name: string | null;
-          couple_partner_last_name: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -57,10 +53,6 @@ export interface Database {
           email_verification_token?: string | null;
           email_verification_expires_at?: string | null;
           email_verified?: boolean;
-          couple_first_name?: string | null;
-          couple_last_name?: string | null;
-          couple_partner_first_name?: string | null;
-          couple_partner_last_name?: string | null;
         };
         Update: {
           email?: string;
@@ -76,10 +68,6 @@ export interface Database {
           email_verification_token?: string | null;
           email_verification_expires_at?: string | null;
           email_verified?: boolean;
-          couple_first_name?: string | null;
-          couple_last_name?: string | null;
-          couple_partner_first_name?: string | null;
-          couple_partner_last_name?: string | null;
         };
       };
       guests: {
@@ -381,8 +369,9 @@ export interface Database {
           created_by: string;
           wedding_date: string | null;
           wedding_date_undecided: boolean;
-          timeline: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
-          planning_stage: 'just-engaged' | 'deep-planning' | 'almost-done' | 'just-exploring' | null;
+          wedding_timeline: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
+          couple_first_name: string | null;
+          couple_last_name: string | null;
           partner_first_name: string | null;
           partner_last_name: string | null;
           relationship_to_couple: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
@@ -396,8 +385,9 @@ export interface Database {
           created_by?: string;
           wedding_date?: string | null;
           wedding_date_undecided?: boolean;
-          timeline?: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
-          planning_stage?: 'just-engaged' | 'deep-planning' | 'almost-done' | 'just-exploring' | null;
+          wedding_timeline?: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
+          couple_first_name?: string | null;
+          couple_last_name?: string | null;
           partner_first_name?: string | null;
           partner_last_name?: string | null;
           relationship_to_couple?: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
@@ -408,8 +398,9 @@ export interface Database {
           created_by?: string;
           wedding_date?: string | null;
           wedding_date_undecided?: boolean;
-          timeline?: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
-          planning_stage?: 'just-engaged' | 'deep-planning' | 'almost-done' | 'just-exploring' | null;
+          wedding_timeline?: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
+          couple_first_name?: string | null;
+          couple_last_name?: string | null;
           partner_first_name?: string | null;
           partner_last_name?: string | null;
           relationship_to_couple?: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
@@ -422,16 +413,19 @@ export interface Database {
           role: MemberRole;
           joined_at: string;
           invited_by: string | null;
+          relationship_to_couple: string | null;
         };
         Insert: {
           group_id: string;
           profile_id: string;
           role?: MemberRole;
           invited_by?: string | null;
+          relationship_to_couple?: string | null;
         };
         Update: {
           role?: MemberRole;
           invited_by?: string | null;
+          relationship_to_couple?: string | null;
         };
       };
       group_invitations: {
@@ -445,6 +439,7 @@ export interface Database {
           token: string;
           expires_at: string;
           created_at: string;
+          relationship_to_couple: string | null;
         };
         Insert: {
           id?: string;
@@ -455,10 +450,12 @@ export interface Database {
           status?: InvitationStatus;
           token: string;
           expires_at: string;
+          relationship_to_couple?: string | null;
         };
         Update: {
           status?: InvitationStatus;
           expires_at?: string;
+          relationship_to_couple?: string | null;
         };
       };
     };
@@ -663,11 +660,13 @@ export interface GroupFormData {
   description?: string;
   wedding_date?: string | null;
   wedding_date_undecided?: boolean;
-  timeline?: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
-  planning_stage?: 'just-engaged' | 'deep-planning' | 'almost-done' | 'just-exploring' | null;
+  wedding_timeline?: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
+  couple_first_name?: string | null;
+  couple_last_name?: string | null;
   partner_first_name?: string | null;
   partner_last_name?: string | null;
   relationship_to_couple?: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
+  created_by?: string;
 }
 
 export interface GroupInvitationFormData {

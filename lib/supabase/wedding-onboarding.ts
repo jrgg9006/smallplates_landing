@@ -7,170 +7,8 @@
 import { createSupabaseClient } from './client';
 import { createClient } from '@supabase/supabase-js';
 import { OnboardingData } from '@/lib/types/onboarding';
-import { createGroup } from './groups';
+import { createGroupAdmin } from './groups';
 
-/**
- * Save couple onboarding data
- * 
- * Args:
- *   userId (string): The user's UUID
- *   answers (OnboardingData): Complete onboarding answers
- * 
- * Returns:
- *   Promise<{data: any, error: string | null}>
- */
-export async function saveCoupleOnboardingData(userId: string, answers: OnboardingData) {
-  try {
-    const supabase = createSupabaseClient();
-
-    // Extract data from steps
-    const step1Data = answers.step1;
-    const step2Data = answers.step2;
-    const step3Data = answers.step3;
-    const step4Data = answers.step4;
-
-    // Build full name
-    let fullName = '';
-    if (step2Data?.brideFirstName && step2Data?.brideLastName) {
-      fullName = `${step2Data.brideFirstName} ${step2Data.brideLastName}`;
-      if (step2Data.partnerFirstName && step2Data.partnerLastName) {
-        fullName += ` and ${step2Data.partnerFirstName} ${step2Data.partnerLastName}`;
-      }
-    }
-
-    // Generate collection token for the user
-    const { data: newToken, error: tokenError } = await supabase
-      .rpc('generate_collection_token');
-
-    if (tokenError || !newToken) {
-      console.error('Failed to generate collection token:', tokenError);
-      return {
-        data: null,
-        error: 'Failed to generate collection token'
-      };
-    }
-
-    // Parse wedding date
-    let weddingDate = null;
-    let weddingDateUndecided = false;
-    if (step2Data?.dateUndecided) {
-      weddingDateUndecided = true;
-    } else if (step2Data?.weddingDate) {
-      weddingDate = step2Data.weddingDate;
-    }
-
-    // Create or update the user's profile with onboarding data using upsert
-    const { data, error } = await supabase
-      .from('profiles')
-      .upsert({
-        id: userId,
-        full_name: fullName,
-        email: step4Data?.email || '',
-        user_type: 'couple',
-        wedding_date: weddingDate,
-        wedding_date_undecided: weddingDateUndecided,
-        planning_stage: step1Data?.planningStage || null,
-        partner_first_name: step2Data?.partnerFirstName || null,
-        partner_last_name: step2Data?.partnerLastName || null,
-        guest_count: step3Data?.guestCount || null,
-        collection_link_token: newToken,
-        collection_enabled: true,
-        updated_at: new Date().toISOString()
-      })
-      .select();
-
-    if (error) {
-      console.error('Error saving couple onboarding data:', error);
-      return {
-        data: null,
-        error: error.message
-      };
-    }
-
-    return {
-      data: data?.[0] || null,
-      error: null
-    };
-
-  } catch (err) {
-    console.error('Error in saveCoupleOnboardingData:', err);
-    return {
-      data: null,
-      error: err instanceof Error ? err.message : 'Unknown error occurred'
-    };
-  }
-}
-
-/**
- * Save gift giver onboarding data
- * 
- * Args:
- *   userId (string): The user's UUID
- *   answers (OnboardingData): Complete onboarding answers
- * 
- * Returns:
- *   Promise<{data: any, error: string | null}>
- */
-export async function saveGiftGiverOnboardingData(userId: string, answers: OnboardingData) {
-  try {
-    const supabase = createSupabaseClient();
-
-    // Extract data from steps
-    const step1Data = answers.step1;
-    const step2Data = answers.step2;
-    const step3Data = answers.step3;
-
-    // Generate collection token for the user
-    const { data: newToken, error: tokenError } = await supabase
-      .rpc('generate_collection_token');
-
-    if (tokenError || !newToken) {
-      console.error('Failed to generate collection token:', tokenError);
-      return {
-        data: null,
-        error: 'Failed to generate collection token'
-      };
-    }
-
-    // Create or update the user's profile with onboarding data using upsert
-    const { data, error } = await supabase
-      .from('profiles')
-      .upsert({
-        id: userId,
-        full_name: step2Data?.giftGiverName || '',
-        email: step3Data?.email || '',
-        user_type: 'gift_giver',
-        timeline: step1Data?.timeline || null,
-        couple_first_name: step2Data?.firstName || null,
-        couple_partner_name: step2Data?.partnerFirstName || null,
-        relationship_to_couple: step2Data?.relationship || null,
-        collection_link_token: newToken,
-        collection_enabled: true,
-        updated_at: new Date().toISOString()
-      })
-      .select();
-
-    if (error) {
-      console.error('Error saving gift giver onboarding data:', error);
-      return {
-        data: null,
-        error: error.message
-      };
-    }
-
-    return {
-      data: data?.[0] || null,
-      error: null
-    };
-
-  } catch (err) {
-    console.error('Error in saveGiftGiverOnboardingData:', err);
-    return {
-      data: null,
-      error: err instanceof Error ? err.message : 'Unknown error occurred'
-    };
-  }
-}
 
 /**
  * Create user profile with admin privileges (bypasses RLS)
@@ -238,10 +76,10 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
       const step3Data = answers.step3;
       const step4Data = answers.step4;
 
-      // Build full name
+      // Build full name for the user (person creating the account)
       let fullName = '';
-      if (step2Data?.brideFirstName && step2Data?.partnerFirstName) {
-        fullName = `${step2Data.brideFirstName} & ${step2Data.partnerFirstName}`;
+      if (step2Data?.brideFirstName && step2Data?.brideLastName) {
+        fullName = `${step2Data.brideFirstName} ${step2Data.brideLastName}`;
       } else if (step2Data?.brideFirstName) {
         fullName = step2Data.brideFirstName;
       }
@@ -269,26 +107,42 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
         }
       });
 
-      // Profile only gets personal data
+      // Profile only gets personal data (no couple info)
       profileData = {
         ...profileData,
         full_name: fullName,
-        email: userEmail || step4Data?.email || '',
-        couple_first_name: step2Data?.brideFirstName || null,
-        couple_last_name: step2Data?.brideLastName || null,
-        couple_partner_first_name: step2Data?.partnerFirstName || null,
-        couple_partner_last_name: step2Data?.partnerLastName || null
+        email: userEmail || step4Data?.email || ''
       };
 
-      // Group gets event-specific data
+      // Map planning stage to timeline
+      let weddingTimeline = null;
+      if (step1Data?.planningStage) {
+        const planningStageMap = {
+          'just-engaged': '6-plus-months',
+          'deep-planning': '3-6-months',
+          'almost-done': '1-3-months',
+          'just-exploring': '6-plus-months'
+        };
+        weddingTimeline = planningStageMap[step1Data.planningStage as keyof typeof planningStageMap] || null;
+      }
+
+      // Build group name using couple's first names
+      const groupName = step2Data?.brideFirstName && step2Data?.partnerFirstName 
+        ? `${step2Data.brideFirstName} & ${step2Data.partnerFirstName}`
+        : fullName;
+
+      // Group gets event-specific data including both couple members
       groupData = {
-        name: fullName,
+        name: groupName,
         description: 'A collection of recipes from our loved ones',
         wedding_date: weddingDate,
         wedding_date_undecided: weddingDateUndecided,
-        planning_stage: step1Data?.planningStage || null,
+        wedding_timeline: weddingTimeline,
+        couple_first_name: step2Data?.brideFirstName || null,
+        couple_last_name: step2Data?.brideLastName || null,
         partner_first_name: step2Data?.partnerFirstName || null,
         partner_last_name: step2Data?.partnerLastName || null,
+        relationship_to_couple: null, // null for couples since they are the couple
         created_by: userId
       };
 
@@ -316,10 +170,13 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
       // Group gets event-specific data for gift givers
       const coupleName = `${step2Data?.firstName || ''} & ${step2Data?.partnerFirstName || ''}`.trim();
       groupData = {
-        name: `${coupleName}'s Wedding Cookbook`,
+        name: coupleName,
         description: 'A thoughtful gift collection of recipes',
-        timeline: step1Data?.timeline || null,
+        wedding_timeline: step1Data?.timeline || null,
+        couple_first_name: step2Data?.firstName || null,
+        couple_last_name: null, // Gift giver doesn't provide last names
         partner_first_name: step2Data?.partnerFirstName || null,
+        partner_last_name: null, // Gift giver doesn't provide last names
         relationship_to_couple: step2Data?.relationship || null,
         created_by: userId
       };
@@ -337,31 +194,12 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
       return { data: null, error: profileError.message };
     }
 
-    // Create group using admin client (this will also trigger cookbook creation)
-    const { data: group, error: groupError } = await supabaseAdmin
-      .from('groups')
-      .insert(groupData)
-      .select()
-      .single();
+    // Create group using the admin function
+    const { data: group, error: groupError } = await createGroupAdmin(groupData);
 
     if (groupError) {
       console.error('Error creating group:', groupError);
       // Profile was created but group failed - still return success but log the issue
-    }
-
-    // Add user as owner of the group
-    if (group) {
-      const { error: memberError } = await supabaseAdmin
-        .from('group_members')
-        .insert({
-          group_id: group.id,
-          profile_id: userId,
-          role: 'owner'
-        });
-
-      if (memberError) {
-        console.error('Error adding user to group:', memberError);
-      }
     }
 
     return { 

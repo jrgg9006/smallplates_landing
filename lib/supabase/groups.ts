@@ -1,4 +1,5 @@
 import { createSupabaseClient } from '@/lib/supabase/client';
+import { createClient } from '@supabase/supabase-js';
 import type {
   Group,
   GroupInsert,
@@ -6,6 +7,71 @@ import type {
   GroupWithMembers,
   GroupFormData,
 } from '@/lib/types/database';
+
+/**
+ * Create a new group during onboarding (using admin client, no auth required)
+ */
+export async function createGroupAdmin(formData: GroupFormData) {
+  // Use admin client to bypass RLS during onboarding
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!, // Service role key
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    }
+  );
+
+  if (!formData.created_by) {
+    return { data: null, error: 'created_by is required for admin group creation' };
+  }
+
+  const groupData: GroupInsert = {
+    name: formData.name,
+    description: formData.description,
+    created_by: formData.created_by,
+    wedding_date: formData.wedding_date || null,
+    wedding_date_undecided: formData.wedding_date_undecided || false,
+    wedding_timeline: formData.wedding_timeline || null,
+    couple_first_name: formData.couple_first_name || null,
+    couple_last_name: formData.couple_last_name || null,
+    partner_first_name: formData.partner_first_name || null,
+    partner_last_name: formData.partner_last_name || null,
+    relationship_to_couple: formData.relationship_to_couple || null,
+  };
+
+  // Create the group
+  const { data: group, error } = await supabaseAdmin
+    .from('groups')
+    .insert(groupData)
+    .select()
+    .single();
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  // Add the creator as owner of the group
+  const memberRelationship = formData.relationship_to_couple;
+  const { error: memberError } = await supabaseAdmin
+    .from('group_members')
+    .insert({
+      group_id: group.id,
+      profile_id: formData.created_by,
+      role: 'owner',
+      relationship_to_couple: memberRelationship
+    });
+
+  if (memberError) {
+    console.error('Error adding user to group:', memberError);
+    // Group was created but member addition failed
+    return { data: group, error: `Group created but failed to add member: ${memberError.message}` };
+  }
+
+  return { data: group, error: null };
+}
 
 /**
  * Create a new group and automatically add the creator as owner
@@ -22,10 +88,15 @@ export async function createGroup(formData: GroupFormData) {
   const groupData: GroupInsert = {
     name: formData.name,
     description: formData.description,
-    created_by: user.id,
+    created_by: formData.created_by || user.id,
     wedding_date: formData.wedding_date || null,
     wedding_date_undecided: formData.wedding_date_undecided || false,
-    timeline: formData.timeline || null,
+    wedding_timeline: formData.wedding_timeline || null,
+    couple_first_name: formData.couple_first_name || null,
+    couple_last_name: formData.couple_last_name || null,
+    partner_first_name: formData.partner_first_name || null,
+    partner_last_name: formData.partner_last_name || null,
+    relationship_to_couple: formData.relationship_to_couple || null,
   };
 
   // Create the group - triggers will handle member addition and cookbook creation
@@ -169,7 +240,12 @@ export async function updateGroup(groupId: string, updates: GroupFormData) {
     description: updates.description,
     wedding_date: updates.wedding_date,
     wedding_date_undecided: updates.wedding_date_undecided,
-    timeline: updates.timeline,
+    wedding_timeline: updates.wedding_timeline,
+    couple_first_name: updates.couple_first_name,
+    couple_last_name: updates.couple_last_name,
+    partner_first_name: updates.partner_first_name,
+    partner_last_name: updates.partner_last_name,
+    relationship_to_couple: updates.relationship_to_couple,
   };
 
   const { data, error } = await supabase

@@ -264,7 +264,7 @@ export default function GroupsPage() {
             {getWeddingDisplayText(
               selectedGroup?.wedding_date || null,
               selectedGroup?.wedding_date_undecided || false,
-              selectedGroup?.timeline as WeddingTimeline
+              selectedGroup?.wedding_timeline as WeddingTimeline
             )} · {recipeCount} recipes{uniqueContributors > 0 ? ` from ${uniqueContributors} people` : ''}
           </p>
         </div>

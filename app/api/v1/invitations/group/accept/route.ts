@@ -250,7 +250,8 @@ export async function POST(request: Request) {
         group_id: invitation.group_id,
         profile_id: userId,
         role: 'member',
-        invited_by: invitation.invited_by
+        invited_by: invitation.invited_by,
+        relationship_to_couple: invitation.relationship_to_couple
       });
 
     if (memberError) {
