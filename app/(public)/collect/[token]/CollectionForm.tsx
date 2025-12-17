@@ -12,15 +12,18 @@ import { Card, CardContent } from '@/components/ui/card';
 
 /**
  * Generate personalized request message based on user's full name
- * Handles both single person and couple scenarios
+ * Always returns "A Personal Note:" as title, only the couple names change
  */
 function generatePersonalizedMessage(fullName: string, rawFullName: string | null) {
+  // Always show "A Personal Note:" as title
+  // Only difference is if we show couple names or "our friends"
+  
   if (!rawFullName) {
+    // No name available - use generic fallback
     return {
-      beforeName: 'Share Your Recipe',
+      beforeName: 'A Personal Note:',
       name: '',
       afterName: '',
-      description: 'Please enter your first initial and last name to get started'
     };
   }
 
@@ -32,14 +35,12 @@ function generatePersonalizedMessage(fullName: string, rawFullName: string | nul
     const secondPersonFirstName = parts[1]?.split(' ')[0] || '';
     
     return {
-      beforeName: '',
-      name: `${firstPersonFirstName} and ${secondPersonFirstName}`,
-      afterName: ' request your recipe',
-      description: 'Share a treasured plate to be included in their book'
+      beforeName: 'A Personal Note:',
+      name: '',
+      afterName: '',
     };
   } else {
-    // Single person - extract first name
-    const firstName = fullName.split(' ')[0] || '';
+    // Single person
     return {
       beforeName: 'A Personal Note:',
       name: '',
