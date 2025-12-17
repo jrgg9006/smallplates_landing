@@ -262,7 +262,11 @@ export function ShareCollectionModal({
                   placeholder="Your message to guests..."
                   maxLength={300}
                 />
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-between items-center">
+                  <span className={`text-xs ${editingMessage.length > 280 ? 'text-red-500' : 'text-gray-400'}`}>
+                    {editingMessage.length}/300
+                  </span>
+                <div className="flex gap-2">
                   <Button
                     size="sm"
                     variant="outline"
@@ -287,6 +291,7 @@ export function ShareCollectionModal({
                   >
                     Save
                   </Button>
+                </div>
                 </div>
               </div>
 
