@@ -128,7 +128,7 @@ export default function ReviewPage() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center">
+      <div className="min-h-screen bg-white lg:bg-[#FAF7F2] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4A854] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
@@ -140,7 +140,7 @@ export default function ReviewPage() {
   // Error state
   if (error && !submissionData) {
     return (
-      <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center">
+      <div className="min-h-screen bg-white lg:bg-[#FAF7F2] flex items-center justify-center">
         <Card className="max-w-md mx-auto">
           <CardContent className="pt-6">
             <div className="text-center">
@@ -159,7 +159,7 @@ export default function ReviewPage() {
   // Success state
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center">
+      <div className="min-h-screen bg-white lg:bg-[#FAF7F2] flex items-center justify-center">
         <Card className="max-w-md mx-auto">
           <CardContent className="pt-6">
             <div className="text-center">
@@ -190,9 +190,9 @@ export default function ReviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2]">
+    <div className="min-h-screen bg-white lg:bg-[#FAF7F2]">
       {/* Header */}
-      <div className="bg-[#FAF7F2] border-b border-gray-200">
+      <div className="bg-white lg:bg-[#FAF7F2] border-b border-gray-200">
         <div className="max-w-2xl mx-auto px-6 py-6">
           <div className="flex items-center gap-4">
             <Button 
