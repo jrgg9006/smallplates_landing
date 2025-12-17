@@ -27,8 +27,6 @@ export interface Database {
           phone_number: string | null;
           collection_link_token: string | null;
           collection_enabled: boolean;
-          custom_share_message: string | null;
-          custom_share_signature: string | null;
           user_type: 'couple' | 'gift_giver';
           onboarding_state: any;
           pending_email: string | null;
@@ -45,8 +43,6 @@ export interface Database {
           phone_number?: string | null;
           collection_link_token?: string | null;
           collection_enabled?: boolean;
-          custom_share_message?: string | null;
-          custom_share_signature?: string | null;
           user_type?: 'couple' | 'gift_giver';
           onboarding_state?: any;
           pending_email?: string | null;
@@ -60,8 +56,6 @@ export interface Database {
           phone_number?: string | null;
           collection_link_token?: string | null;
           collection_enabled?: boolean;
-          custom_share_message?: string | null;
-          custom_share_signature?: string | null;
           user_type?: 'couple' | 'gift_giver';
           onboarding_state?: any;
           pending_email?: string | null;

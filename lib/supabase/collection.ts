@@ -43,17 +43,8 @@ export async function validateCollectionToken(token: string, groupId?: string | 
       return { data: null, error: 'Collection is disabled for this user' };
     }
 
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('id, full_name, collection_enabled, custom_share_message, custom_share_signature')
-      .eq('collection_link_token', token)
-      .eq('collection_enabled', true)
-      .single();
-
-    if (error || !profile) {
-      console.log('❌ Final validation failed:', error);
-      return { data: null, error: 'Invalid or expired collection link' };
-    }
+    // Use profileCheck data directly (already validated above)
+    const profile = profileCheck;
 
     // No profile fallback - only use group_members message
     let customShareMessage: string | null = null;

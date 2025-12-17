@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from "lucide-react";
-import { updateShareMessage, resetShareMessage, getCurrentProfile } from "@/lib/supabase/profiles";
 import { getGroupShareMessage, updateGroupShareMessage, resetGroupShareMessage } from "@/lib/supabase/groups";
 
 interface ShareCollectionModalProps {
@@ -113,18 +112,17 @@ export function ShareCollectionModal({
     try {
       const signature = userName || '';
       
-      // Save to group_members if groupId exists, otherwise to profile
-      let saveError: string | null = null;
-      if (groupId) {
-        const result = await updateGroupShareMessage(groupId, editingMessage.trim(), signature);
-        saveError = result.error;
-      } else {
-        const result = await updateShareMessage(editingMessage.trim(), signature);
-        saveError = result.error;
+      // Only save to group_members (requires groupId)
+      if (!groupId) {
+        setError('Unable to save: no group selected');
+        setIsSaving(false);
+        return;
       }
       
-      if (saveError) {
-        setError(saveError);
+      const result = await updateGroupShareMessage(groupId, editingMessage.trim(), signature);
+      
+      if (result.error) {
+        setError(result.error);
       } else {
         setCustomMessage(editingMessage.trim());
         setIsEditingMessage(false);
@@ -149,18 +147,17 @@ export function ShareCollectionModal({
     setError(null);
 
     try {
-      // Reset from group_members if groupId exists, otherwise from profile
-      let resetError: string | null = null;
-      if (groupId) {
-        const result = await resetGroupShareMessage(groupId);
-        resetError = result.error;
-      } else {
-        const result = await resetShareMessage();
-        resetError = result.error;
+      // Only reset from group_members (requires groupId)
+      if (!groupId) {
+        setError('Unable to reset: no group selected');
+        setIsSaving(false);
+        return;
       }
       
-      if (resetError) {
-        setError(resetError);
+      const result = await resetGroupShareMessage(groupId);
+      
+      if (result.error) {
+        setError(result.error);
       } else {
         setCustomMessage(null);
         setIsEditingMessage(false);
