@@ -6,11 +6,20 @@ interface PageProps {
   params: Promise<{ token: string }>
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
+export async function generateMetadata({ 
+  params,
+  searchParams 
+}: { 
+  params: Promise<{ token: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}): Promise<Metadata> {
   const { token } = await params
+  const resolvedSearchParams = await searchParams
+  const groupId = typeof resolvedSearchParams.group === 'string' ? resolvedSearchParams.group : null
   
   // Get user info from token for personalized meta tags
-  const { data: tokenInfo, error } = await validateCollectionToken(token)
+  // Pass groupId to load custom_share_message from group_members
+  const { data: tokenInfo, error } = await validateCollectionToken(token, groupId)
   
   // Default metadata if token is invalid
   if (error || !tokenInfo) {
@@ -25,10 +34,13 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
   const userName = tokenInfo.user_name || tokenInfo.raw_full_name || 'Someone'
   const firstName = userName.split(' ')[0] || 'Someone'
   
+  // Use couple names if available (from group), otherwise use firstName
+  const displayName = tokenInfo.couple_names || firstName
+  
   // Generate personalized meta tags
-  // Use custom_share_message if available, otherwise use default
+  // Use custom_share_message if available (from group_members), otherwise use default
   const title = 'Share a Recipe to my Cookbook - SP&Co'
-  const defaultDescription = `${firstName} invites you to share your favorite recipe with them! They will print a cookbook with recipes from family and friends.`
+  const defaultDescription = `${displayName} invites you to share your favorite recipe with them! They will print a cookbook with recipes from family and friends.`
   const description = tokenInfo.custom_share_message || defaultDescription
   
   return {

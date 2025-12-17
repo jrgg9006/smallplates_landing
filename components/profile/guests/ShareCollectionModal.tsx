@@ -51,17 +51,21 @@ export function ShareCollectionModal({
   // Load custom message from group_members only (no profile fallback)
   const loadCustomMessage = async () => {
     try {
-      // Only load from group_members if we have a groupId
-      if (groupId) {
-        const { data: groupData, error: groupError } = await getGroupShareMessage(groupId);
-        if (!groupError && groupData && groupData.custom_share_message) {
-          setCustomMessage(groupData.custom_share_message);
-          return;
-        }
+      // If no groupId, we can't load custom message - use default
+      if (!groupId) {
+        setCustomMessage(null);
+        return;
       }
 
-      // No fallback to profile - just use default message
-      setCustomMessage(null);
+      // Always try to load custom message from group_members when groupId exists
+      const { data: groupData, error: groupError } = await getGroupShareMessage(groupId);
+      
+      if (!groupError && groupData?.custom_share_message) {
+        setCustomMessage(groupData.custom_share_message);
+      } else {
+        // No custom message found or error occurred - use default
+        setCustomMessage(null);
+      }
     } catch (err) {
       console.error('Error loading custom message:', err);
       setCustomMessage(null);
