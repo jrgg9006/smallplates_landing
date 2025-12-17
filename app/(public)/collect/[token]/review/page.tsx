@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ChevronLeft, Check } from 'lucide-react';
 import { validateCollectionToken, submitGuestRecipe } from '@/lib/supabase/collection';
 import type { CollectionTokenInfo, CollectionGuestSubmission } from '@/lib/types/database';
@@ -32,7 +32,9 @@ interface SubmissionData {
 export default function ReviewPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const token = params.token as string;
+  const groupId = searchParams.get('group');
   
   // State management
   const [tokenInfo, setTokenInfo] = useState<CollectionTokenInfo | null>(null);
@@ -45,8 +47,8 @@ export default function ReviewPage() {
   // Initialize component
   useEffect(() => {
     async function initialize() {
-      // Validate token
-      const { data, error } = await validateCollectionToken(token);
+      // Validate token (pass groupId for group-specific message)
+      const { data, error } = await validateCollectionToken(token, groupId);
       if (error || !data) {
         setError(error || 'Invalid collection link');
         setLoading(false);

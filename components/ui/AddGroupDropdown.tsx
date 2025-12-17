@@ -23,6 +23,7 @@ interface AddGroupDropdownProps {
   onAddNewRecipe?: () => void;
   onCollectionLink?: () => void;
   groupId?: string | null;
+  coupleNames?: string | null;
   disabled?: boolean;
   className?: string;
   title?: string;
@@ -35,6 +36,7 @@ export function AddGroupDropdown({
   onAddNewRecipe,
   onCollectionLink,
   groupId = null,
+  coupleNames = null,
   disabled = false,
   className,
   title = "Add plates"
@@ -115,6 +117,8 @@ export function AddGroupDropdown({
         onClose={() => setIsShareModalOpen(false)}
         collectionUrl={collectionUrl}
         userName={userFullName}
+        groupId={groupId}
+        coupleNames={coupleNames}
       />
     )}
     </>

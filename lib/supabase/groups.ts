@@ -391,3 +391,98 @@ export async function getGroupRecipeCount(groupId: string): Promise<{ data: numb
 
   return { data: count || 0, error: null };
 }
+
+/**
+ * Get the current user's share message for a specific group
+ */
+export async function getGroupShareMessage(groupId: string): Promise<{ 
+  data: { custom_share_message: string | null; custom_share_signature: string | null } | null; 
+  error: string | null 
+}> {
+  const supabase = createSupabaseClient();
+  
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  const { data, error } = await supabase
+    .from('group_members')
+    .select('custom_share_message, custom_share_signature')
+    .eq('group_id', groupId)
+    .eq('profile_id', user.id)
+    .single();
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data, error: null };
+}
+
+/**
+ * Update the current user's share message for a specific group
+ */
+export async function updateGroupShareMessage(
+  groupId: string, 
+  customMessage: string, 
+  customSignature: string
+): Promise<{ data: unknown; error: string | null }> {
+  const supabase = createSupabaseClient();
+  
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  // Validate message length
+  if (customMessage.length > 280) {
+    return { data: null, error: 'Message must be 280 characters or less' };
+  }
+
+  if (customMessage.trim().length === 0) {
+    return { data: null, error: 'Message cannot be empty' };
+  }
+
+  if (customSignature.length > 50) {
+    return { data: null, error: 'Signature must be 50 characters or less' };
+  }
+
+  const { data, error } = await supabase
+    .from('group_members')
+    .update({ 
+      custom_share_message: customMessage.trim(),
+      custom_share_signature: customSignature.trim() || null
+    })
+    .eq('group_id', groupId)
+    .eq('profile_id', user.id)
+    .select()
+    .single();
+
+  return { data, error: error?.message || null };
+}
+
+/**
+ * Reset the current user's share message for a specific group
+ */
+export async function resetGroupShareMessage(groupId: string): Promise<{ data: unknown; error: string | null }> {
+  const supabase = createSupabaseClient();
+  
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  const { data, error } = await supabase
+    .from('group_members')
+    .update({ 
+      custom_share_message: null,
+      custom_share_signature: null 
+    })
+    .eq('group_id', groupId)
+    .eq('profile_id', user.id)
+    .select()
+    .single();
+
+  return { data, error: error?.message || null };
+}

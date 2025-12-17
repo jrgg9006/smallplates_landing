@@ -16,12 +16,13 @@ import type {
 
 /**
  * Validate a collection token and get user info
+ * If groupId is provided, it will look for custom message in group_members first
  */
-export async function validateCollectionToken(token: string): Promise<{ data: CollectionTokenInfo | null; error: string | null }> {
+export async function validateCollectionToken(token: string, groupId?: string | null): Promise<{ data: CollectionTokenInfo | null; error: string | null }> {
   const supabase = createSupabaseClient();
   
   try {
-    console.log('🔍 Validating token:', token);
+    console.log('🔍 Validating token:', token, 'groupId:', groupId);
     
     // First, let's check if the token exists at all (without collection_enabled filter)
     const { data: profileCheck, error: checkError } = await supabase
@@ -54,13 +55,33 @@ export async function validateCollectionToken(token: string): Promise<{ data: Co
       return { data: null, error: 'Invalid or expired collection link' };
     }
 
+    // Default to profile-level message
+    let customShareMessage = profile.custom_share_message || null;
+    let customShareSignature = profile.custom_share_signature || null;
+
+    // If groupId is provided, try to get group-specific message from group_members
+    if (groupId) {
+      const { data: groupMember } = await supabase
+        .from('group_members')
+        .select('custom_share_message, custom_share_signature')
+        .eq('group_id', groupId)
+        .eq('profile_id', profile.id)
+        .single();
+
+      if (groupMember?.custom_share_message) {
+        console.log('📝 Using group-specific share message');
+        customShareMessage = groupMember.custom_share_message;
+        customShareSignature = groupMember.custom_share_signature || null;
+      }
+    }
+
     return {
       data: {
         user_id: profile.id,
         user_name: profile.full_name || 'Recipe Collector',
         raw_full_name: profile.full_name,
-        custom_share_message: profile.custom_share_message || null,
-        custom_share_signature: profile.custom_share_signature || null,
+        custom_share_message: customShareMessage,
+        custom_share_signature: customShareSignature,
         token,
         is_valid: true,
       },

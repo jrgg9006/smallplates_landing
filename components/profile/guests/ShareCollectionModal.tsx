@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from "lucide-react";
 import { updateShareMessage, resetShareMessage, getCurrentProfile } from "@/lib/supabase/profiles";
+import { getGroupShareMessage, updateGroupShareMessage, resetGroupShareMessage } from "@/lib/supabase/groups";
 
 interface ShareCollectionModalProps {
   isOpen: boolean;
@@ -18,6 +19,8 @@ interface ShareCollectionModalProps {
   userName: string | null;
   isOnboardingStep?: boolean;
   onStepComplete?: () => void;
+  groupId?: string | null;
+  coupleNames?: string | null;
 }
 
 export function ShareCollectionModal({ 
@@ -26,7 +29,9 @@ export function ShareCollectionModal({
   collectionUrl,
   userName,
   isOnboardingStep = false,
-  onStepComplete
+  onStepComplete,
+  groupId = null,
+  coupleNames = null
 }: ShareCollectionModalProps) {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,25 +47,24 @@ export function ShareCollectionModal({
       loadCustomMessage();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, groupId]);
 
-  // Load custom message from profile
+  // Load custom message from group_members (if groupId) or profile (fallback)
   const loadCustomMessage = async () => {
     try {
+      // If we have a groupId, load from group_members first
+      if (groupId) {
+        const { data: groupData, error: groupError } = await getGroupShareMessage(groupId);
+        if (!groupError && groupData && groupData.custom_share_message) {
+          setCustomMessage(groupData.custom_share_message);
+          return;
+        }
+      }
+
+      // Fallback to profile-level message
       const { data: profile, error: profileError } = await getCurrentProfile();
       if (!profileError && profile) {
-        if (profile.custom_share_signature !== undefined) {
-          // New format: separated fields
-          if (profile.custom_share_message) {
-            const combinedMessage = `${profile.custom_share_message}
-
-— ${profile.custom_share_signature || userName || '(Your name)'}`;
-            setCustomMessage(combinedMessage);
-          } else {
-            setCustomMessage(null);
-          }
-        } else if (profile.custom_share_message) {
-          // Legacy format: combined message
+        if (profile.custom_share_message) {
           setCustomMessage(profile.custom_share_message);
         } else {
           setCustomMessage(null);
@@ -75,11 +79,8 @@ export function ShareCollectionModal({
   };
 
   // Default message using brand voice
-  const defaultMessage = `I'm putting together a cookbook with recipes from everyone who loves us.
-
-Send your favorite dish — anything goes. Takes 5 minutes. You'll be in our kitchen forever.
-
-— ${userName || '(Your name)'}`;
+  const coupleDisplayName = coupleNames || 'your friends';
+  const defaultMessage = `You're adding a recipe to ${coupleDisplayName}'s wedding cookbook. Doesn't have to be fancy—just something you actually make. A quick note about why you love it, and you're done.`;
   
   const shareMessage = customMessage || defaultMessage;
 
@@ -98,18 +99,7 @@ Send your favorite dish — anything goes. Takes 5 minutes. You'll be in our kit
   const handleShowMessageCustomization = () => {
     setShowMessageCustomization(true);
     // Automatically start editing when customization is shown
-    const messageToEdit = shareMessage;
-    const signatureMatch = messageToEdit.match(/—\s*(.+)$/);
-    
-    if (signatureMatch) {
-      // Remove signature from the message for editing
-      const note = messageToEdit.replace(/\n*—\s*.+$/, '').trim();
-      setEditingMessage(note);
-    } else {
-      // If no signature found, use the full message
-      setEditingMessage(messageToEdit);
-    }
-    
+    setEditingMessage(shareMessage);
     setIsEditingMessage(true);
     setError(null);
     
@@ -130,17 +120,24 @@ Send your favorite dish — anything goes. Takes 5 minutes. You'll be in our kit
     setError(null);
 
     try {
-      const signature = userName || '(Your name)';
-      const { error } = await updateShareMessage(editingMessage.trim(), signature);
-      if (error) {
-        setError(error);
+      const signature = userName || '';
+      
+      // Save to group_members if groupId exists, otherwise to profile
+      let saveError: string | null = null;
+      if (groupId) {
+        const result = await updateGroupShareMessage(groupId, editingMessage.trim(), signature);
+        saveError = result.error;
       } else {
-        const combinedMessage = `${editingMessage.trim()}
-
-— ${signature}`;
-        setCustomMessage(combinedMessage);
+        const result = await updateShareMessage(editingMessage.trim(), signature);
+        saveError = result.error;
+      }
+      
+      if (saveError) {
+        setError(saveError);
+      } else {
+        setCustomMessage(editingMessage.trim());
         setIsEditingMessage(false);
-        setEditingMessage('');
+        setShowMessageCustomization(false);
       }
     } catch (err) {
       setError('Failed to save message');
@@ -161,9 +158,18 @@ Send your favorite dish — anything goes. Takes 5 minutes. You'll be in our kit
     setError(null);
 
     try {
-      const { error } = await resetShareMessage();
-      if (error) {
-        setError(error);
+      // Reset from group_members if groupId exists, otherwise from profile
+      let resetError: string | null = null;
+      if (groupId) {
+        const result = await resetGroupShareMessage(groupId);
+        resetError = result.error;
+      } else {
+        const result = await resetShareMessage();
+        resetError = result.error;
+      }
+      
+      if (resetError) {
+        setError(resetError);
       } else {
         setCustomMessage(null);
         setIsEditingMessage(false);

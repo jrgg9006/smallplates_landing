@@ -414,6 +414,8 @@ export interface Database {
           joined_at: string;
           invited_by: string | null;
           relationship_to_couple: string | null;
+          custom_share_message: string | null;
+          custom_share_signature: string | null;
         };
         Insert: {
           group_id: string;
@@ -421,11 +423,15 @@ export interface Database {
           role?: MemberRole;
           invited_by?: string | null;
           relationship_to_couple?: string | null;
+          custom_share_message?: string | null;
+          custom_share_signature?: string | null;
         };
         Update: {
           role?: MemberRole;
           invited_by?: string | null;
           relationship_to_couple?: string | null;
+          custom_share_message?: string | null;
+          custom_share_signature?: string | null;
         };
       };
       group_invitations: {

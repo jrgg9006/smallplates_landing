@@ -111,7 +111,7 @@ export default function CollectionForm() {
 
       try {
         addDebugLog('📡 Calling validateCollectionToken');
-        const { data, error } = await validateCollectionToken(token);
+        const { data, error } = await validateCollectionToken(token, groupId);
         
         addDebugLog(`📡 Response: ${error ? 'ERROR: ' + error : 'SUCCESS'}`);
         
@@ -132,7 +132,7 @@ export default function CollectionForm() {
     }
 
     validateToken();
-  }, [token]);
+  }, [token, groupId]);
 
   // Handle guest search
   const handleSearch = async () => {
@@ -321,7 +321,7 @@ export default function CollectionForm() {
                 const personalizedMessage = generatePersonalizedMessage(userName, rawFullName);
                 console.log('Debug - personalizedMessage:', personalizedMessage);
                 return (
-                  <div className="text-center lg:text-left">
+                  <div className="text-left">
                     <h1 className="text-3xl font-semibold text-gray-900 mb-4">
                       {personalizedMessage.beforeName}
                       {personalizedMessage.name && (
@@ -340,51 +340,24 @@ export default function CollectionForm() {
                       <div>
                         {(() => {
                           // Check if we have the new separated fields
-                          if (tokenInfo?.custom_share_signature !== undefined) {
-                            // New format with separated fields
-                            const note = tokenInfo.custom_share_message || 
-                              `I'm putting together a book with my favorite people and their plates.
-If there's one dish you love to make, I'd love to add it — anything goes.`;
-                            const signature = tokenInfo.custom_share_signature || userName || '(Your friend)';
+                          if (tokenInfo?.custom_share_message) {
+                            // New format - just show the message without signature
+                            const note = tokenInfo.custom_share_message;
                             
                             return (
                               <div>
-                                <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1 mb-3">{note}</p>
-                                <div className="font-serif italic text-xl md:text-2xl text-gray-700 mt-6 mb-12">— {signature}</div>
+                                <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1 mb-12">{note}</p>
                               </div>
                             );
                           } else {
-                            // Legacy format - parse combined message
-                            const message = tokenInfo?.custom_share_message || 
-                              (userName 
-                                ? `I'm putting together a book with my favorite people and their plates.
-If there's one dish you love to make, I'd love to add it — anything goes.
-
-
-
-— ${userName}`
-                                : `I'm putting together a book with my favorite people and their plates.
-If there's one dish you love to make, I'd love to add it — anything goes.
-
-
-
-— (Your friend)`
-                              );
+                            // Default message without signature
+                            const defaultNote = `I'm putting together a book with my favorite people and their plates. If there's one dish you love to make, I'd love to add it — anything goes.`;
                             
-                            // Parse message to separate note and signature
-                            const signatureMatch = message.match(/—\s*(.+)$/);
-                            if (signatureMatch) {
-                              const signature = signatureMatch[1].trim();
-                              const note = message.replace(/\n*—\s*.+$/, '').trim();
-                              return (
-                                <div>
-                                  <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1 mb-3">{note}</p>
-                                  <div className="font-serif italic text-xl md:text-2xl text-gray-700 mt-6 mb-12">— {signature}</div>
-                                </div>
-                              );
-                            } else {
-                              return <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1">{message}</p>;
-                            }
+                            return (
+                              <div>
+                                <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1 mb-12">{defaultNote}</p>
+                              </div>
+                            );
                           }
                         })()}
                       </div>

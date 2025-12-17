@@ -40,8 +40,8 @@ export default function RecipeFormPage() {
   // Initialize component
   useEffect(() => {
     async function initialize() {
-      // Validate token
-      const { data, error } = await validateCollectionToken(token);
+      // Validate token (pass groupId for group-specific message)
+      const { data, error } = await validateCollectionToken(token, groupIdFromParams);
       if (error || !data) {
         setError(error || 'Invalid collection link');
         setLoading(false);

@@ -14,6 +14,7 @@ interface AddGroupPageDropdownProps {
   onAddExistingRecipe?: () => void;
   onAddNewRecipe?: () => void;
   groupId?: string | null;
+  coupleNames?: string | null;
   title?: string;
   className?: string;
 }
@@ -24,6 +25,7 @@ export function AddGroupPageDropdown({
   onAddExistingRecipe,
   onAddNewRecipe,
   groupId = null,
+  coupleNames = null,
   title = "Group actions",
   className = ""
 }: AddGroupPageDropdownProps) {
@@ -162,6 +164,8 @@ export function AddGroupPageDropdown({
           onClose={() => setIsShareModalOpen(false)}
           collectionUrl={collectionUrl}
           userName={userFullName}
+          groupId={groupId}
+          coupleNames={coupleNames}
         />
       )}
     </div>

@@ -374,6 +374,12 @@ export default function GroupsPage() {
           onClose={() => setShowShareModal(false)}
           collectionUrl={createShareURL(window.location.origin, collectionToken, { groupId: selectedGroup.id })}
           userName={user?.email?.split('@')[0] || null}
+          groupId={selectedGroup.id}
+          coupleNames={
+            selectedGroup.couple_first_name && selectedGroup.partner_first_name
+              ? `${selectedGroup.couple_first_name} & ${selectedGroup.partner_first_name}`
+              : selectedGroup.couple_first_name || selectedGroup.partner_first_name || null
+          }
         />
       )}
     </div>
