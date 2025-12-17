@@ -125,8 +125,8 @@ export default function ImageUploadStep({ onImagesReady, onFilesSelected }: Imag
     <div className="min-h-[calc(100vh-180px)] flex items-center justify-center">
       <div className="w-full space-y-8 px-4 md:px-6">
         <div className="space-y-2 text-center">
-          <h2 className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">
-            Upload your Small Plate
+          <h2 className="font-serif text-3xl md:text-4xl font-semibold text-[#2D2D2D]">
+            Upload your recipe
           </h2>
           <p className="mt-3 text-base text-gray-600">
             Take a photo or upload images of your handwritten or printed plate
@@ -149,14 +149,14 @@ export default function ImageUploadStep({ onImagesReady, onFilesSelected }: Imag
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full group p-8 rounded-2xl border-2 border-gray-200 hover:border-gray-900 hover:shadow-lg cursor-pointer transition-all duration-200"
+                  className="w-full group p-8 rounded-2xl border-2 border-gray-200 hover:border-[#D4A854] hover:shadow-lg cursor-pointer transition-all duration-200"
                 >
                   <div className="flex flex-col items-center space-y-4">
-                    <div className="p-4 rounded-full bg-gray-50 group-hover:bg-gray-900 transition-colors duration-200">
-                      <UploadIcon className="w-8 h-8 text-gray-700 group-hover:text-white transition-colors duration-200" />
+                    <div className="p-4 rounded-full bg-gray-50 group-hover:bg-[#D4A854] transition-colors duration-200">
+                      <UploadIcon className="w-8 h-8 text-[#2D2D2D] group-hover:text-white transition-colors duration-200" />
                     </div>
                     <div className="text-center">
-                      <h3 className="font-medium text-lg text-gray-900">Upload a file or take a picture</h3>
+                      <h3 className="font-medium text-lg text-[#2D2D2D]">Upload a file or take a picture</h3>
                       <p className="mt-1 text-sm text-gray-500">Choose from your device or camera</p>
                       <p className="mt-1 text-xs text-gray-400">Max 5MB per file, up to 10 files</p>
                     </div>
@@ -170,14 +170,14 @@ export default function ImageUploadStep({ onImagesReady, onFilesSelected }: Imag
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="group p-8 rounded-2xl border-2 border-gray-200 hover:border-gray-900 hover:shadow-lg cursor-pointer transition-all duration-200"
+                  className="group p-8 rounded-2xl border-2 border-gray-200 hover:border-[#D4A854] hover:shadow-lg cursor-pointer transition-all duration-200"
                 >
                   <div className="flex flex-col items-center space-y-4">
-                    <div className="p-4 rounded-full bg-gray-50 group-hover:bg-gray-900 transition-colors duration-200">
-                      <UploadIcon className="w-8 h-8 text-gray-700 group-hover:text-white transition-colors duration-200" />
+                    <div className="p-4 rounded-full bg-gray-50 group-hover:bg-[#D4A854] transition-colors duration-200">
+                      <UploadIcon className="w-8 h-8 text-[#2D2D2D] group-hover:text-white transition-colors duration-200" />
                     </div>
                     <div className="text-center">
-                      <h3 className="font-medium text-lg text-gray-900">Upload files</h3>
+                      <h3 className="font-medium text-lg text-[#2D2D2D]">Upload files</h3>
                       <p className="mt-1 text-sm text-gray-500">Select images or PDFs from your device</p>
                       <p className="mt-1 text-xs text-gray-400">Max 5MB per file, up to 10 files</p>
                     </div>
@@ -195,7 +195,7 @@ export default function ImageUploadStep({ onImagesReady, onFilesSelected }: Imag
                       <CameraIcon className="w-8 h-8 text-gray-400" />
                     </div>
                     <div className="text-center">
-                      <h3 className="font-medium text-lg text-gray-900">Take a photo</h3>
+                      <h3 className="font-medium text-lg text-[#2D2D2D]">Take a photo</h3>
                       <p className="mt-1 text-sm text-gray-500">Use your camera to capture the recipe</p>
                     </div>
                     <span className="absolute top-4 right-4 text-xs font-medium text-gray-400 bg-gray-100 px-2 py-1 rounded-full">

@@ -70,7 +70,7 @@ export function ShareCollectionModal({
 
   // Default message using brand voice
   const coupleDisplayName = coupleNames || 'your friends';
-  const defaultMessage = `You're adding a recipe to ${coupleDisplayName}'s wedding cookbook. Doesn't have to be fancy—just something you actually make. A quick note about why you love it, and you're done.`;
+  const defaultMessage = `You're adding a recipe to ${coupleDisplayName}'s wedding cookbook. Doesn't have to be fancy—just something you actually make. It'll live in their kitchen forever.`;
   
   const shareMessage = customMessage || defaultMessage;
 

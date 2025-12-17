@@ -14,10 +14,10 @@ interface FrameProps {
 
 export default function Frame({ title, children, bottomNav, showHeaderLogo = true, leftImageSrc }: FrameProps) {
   return (
-    <div className="h-screen bg-white overflow-hidden">
+    <div className="h-screen bg-[#FAF7F2] overflow-hidden">
       <div className="grid grid-cols-1 lg:grid-cols-5 h-full">
         {/* Left image pane - desktop only */}
-        <div className="hidden lg:block lg:col-span-2 border-r border-gray-200 relative lg:sticky lg:top-0 h-screen bg-gray-100">
+        <div className="hidden lg:block lg:col-span-2 border-r border-gray-200 relative lg:sticky lg:top-0 h-screen bg-[#E8E0D5]">
           <div className="relative h-screen p-2">
             <div className="relative w-full h-full rounded-2xl overflow-hidden">
               {leftImageSrc && (
@@ -30,7 +30,7 @@ export default function Frame({ title, children, bottomNav, showHeaderLogo = tru
         {/* Right content pane */}
         <div className="flex flex-col lg:col-span-3 h-screen overflow-y-auto">
           {/* Sticky Header centered within text pane */}
-          <header className="sticky top-0 z-40 w-full border-b border-gray-100 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+          <header className="sticky top-0 z-40 w-full border-b border-gray-100 bg-[#FAF7F2]/95 backdrop-blur supports-[backdrop-filter]:bg-[#FAF7F2]/80">
             <div className="mx-auto w-full max-w-3xl px-6 h-14 flex items-center justify-center">
               {showHeaderLogo && (
                 <Link href="/" aria-label="Go to home">
@@ -51,7 +51,7 @@ export default function Frame({ title, children, bottomNav, showHeaderLogo = tru
 
           {/* Sticky Bottom Nav */}
           {bottomNav && (
-            <footer className="lg:sticky lg:bottom-0 fixed bottom-0 inset-x-0 lg:inset-x-auto z-40 lg:z-30 w-full border-t border-gray-100 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+            <footer className="lg:sticky lg:bottom-0 fixed bottom-0 inset-x-0 lg:inset-x-auto z-40 lg:z-30 w-full border-t border-[#D4A854]/20 bg-[#FAF7F2]/95 backdrop-blur supports-[backdrop-filter]:bg-[#FAF7F2]/80">
               <div
                 className="mx-auto w-full max-w-3xl px-4 py-4 lg:py-4"
                 style={{

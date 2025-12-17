@@ -235,10 +235,10 @@ export default function CollectionForm() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading collection...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4A854] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
     );
@@ -247,7 +247,7 @@ export default function CollectionForm() {
   // Error state
   if (error && !tokenInfo) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center">
         <Card className="max-w-md mx-auto">
           <CardContent className="pt-6">
             <div className="text-center">
@@ -277,9 +277,9 @@ export default function CollectionForm() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#FAF7F2]">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-[#FAF7F2] border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-center">
           <Link href="/" className="hover:opacity-80 transition-opacity">
             <Image
@@ -296,7 +296,7 @@ export default function CollectionForm() {
       {/* Main Content - Two Column Layout */}
       <div className="min-h-screen lg:min-h-[calc(100vh-4rem)] flex flex-col lg:flex-row">
         {/* Left Column - Image */}
-        <div className="hidden lg:block lg:w-2/5 relative bg-gray-100 h-[calc(100vh-4rem)] p-2">
+        <div className="hidden lg:block lg:w-2/5 relative bg-[#E8E0D5] h-[calc(100vh-4rem)] p-2">
           <div className="relative w-full h-full rounded-2xl overflow-hidden">
             <Image
               src="/images/collect/collect_1.jpg"
@@ -323,7 +323,7 @@ export default function CollectionForm() {
                 console.log('Debug - personalizedMessage:', personalizedMessage);
                 return (
                   <div className="text-left">
-                    <h1 className="text-3xl font-semibold text-gray-900 mb-4">
+                    <h1 className="text-3xl font-semibold text-[#2D2D2D] mb-4 font-serif">
                       {personalizedMessage.beforeName}
                       {personalizedMessage.name && (
                         <span className="font-semibold text-gray-900 mx-1">
@@ -349,7 +349,7 @@ export default function CollectionForm() {
                           } else {
                             // Default message with couple names
                             const coupleDisplayName = tokenInfo?.couple_names || 'your friends';
-                            const defaultNote = `You're adding a recipe to ${coupleDisplayName}'s wedding cookbook. Doesn't have to be fancy—just something you actually make. A quick note about why you love it, and you're done.`;
+                            const defaultNote = `You're adding a recipe to ${coupleDisplayName}'s wedding cookbook. Doesn't have to be fancy—just something you actually make. It'll live in their kitchen forever.`;
                             
                             return (
                               <div>
@@ -362,7 +362,7 @@ export default function CollectionForm() {
                     </div>
                     
                     <div className="text-sm text-gray-500 mb-6">
-                      Let&apos;s find your name so you can add your plate
+                      Find your name. Add your recipe. Done.
                     </div>
                   </div>
                 );
@@ -421,7 +421,7 @@ export default function CollectionForm() {
                   className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[80px] transition-colors ${
                     !firstName.trim() || searching 
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                      : 'bg-black text-white hover:bg-gray-800'
+                      : 'bg-[#D4A854] text-white hover:bg-[#c49b4a]'
                   }`}
                 >
                   {searching ? (
@@ -466,7 +466,7 @@ export default function CollectionForm() {
                   <Button
                     onClick={handleContinueAsNew}
                     disabled={!fullName.trim()}
-                    className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!fullName.trim() ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-black text-white hover:bg-gray-800'}`}
+                    className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!fullName.trim() ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[#D4A854] text-white hover:bg-[#c49b4a]'}`}
                   >
                     Continue
                   </Button>
@@ -477,24 +477,24 @@ export default function CollectionForm() {
 
             {/* Search Results */}
             {searchCompleted && !showNameEntry && (
-              <div className="border-t pt-6">
+              <div className="border-t border-[#D4A854]/20 pt-6">
                 {searchResults.length > 0 ? (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-medium text-gray-900">
-                      Select your name to unlock your private form
+                    <h3 className="text-lg font-medium text-[#2D2D2D] font-serif">
+                      That&apos;s you, right?
                     </h3>
                     <div className="space-y-3">
                       {searchResults.map((guest) => (
                         <button
                           key={guest.id}
                           onClick={() => handleGuestSelect(guest)}
-                          className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors text-left"
+                          className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-[#D4A854]/50 hover:bg-[#FAF7F2] transition-colors text-left"
                         >
-                          <span className="text-gray-900 font-medium">
+                          <span className="text-[#2D2D2D] font-medium">
                             {guest.first_name} {guest.last_name}
                           </span>
                           <svg 
-                            className="w-5 h-5 text-gray-400" 
+                            className="w-5 h-5 text-[#D4A854]" 
                             fill="none" 
                             stroke="currentColor" 
                             viewBox="0 0 24 24"
@@ -511,13 +511,13 @@ export default function CollectionForm() {
                           // Optionally: scroll/focus
                           setTimeout(() => document.getElementById('fullName')?.focus(), 100);
                         }}
-                        className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors text-left"
+                        className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-[#D4A854]/50 hover:bg-[#FAF7F2] transition-colors text-left"
                       >
-                        <span className="text-gray-900 font-medium">
+                        <span className="text-[#2D2D2D] font-medium">
                           I don&apos;t see my name
                         </span>
                         <svg 
-                          className="w-5 h-5 text-gray-400" 
+                          className="w-5 h-5 text-[#D4A854]" 
                           fill="none" 
                           stroke="currentColor" 
                           viewBox="0 0 24 24"
@@ -529,11 +529,11 @@ export default function CollectionForm() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <h3 className="text-sm font-medium text-gray-900">
-                      Welcome! You&apos;re not in the list yet
+                    <h3 className="text-lg font-medium text-[#2D2D2D] font-serif">
+                      Not on the list yet? No problem.
                     </h3>
                     <p className="text-gray-600 mb-4 text-sm">
-                      No worries! We&apos;ll add you when you submit your plate.
+                      We&apos;ll add you when you submit your recipe.
                     </p>
                     {/* Ask for full name with inline Continue button (visual match to search row) */}
                     <div className="space-y-2">
@@ -556,7 +556,7 @@ export default function CollectionForm() {
                         <Button
                           onClick={handleContinueAsNew}
                           disabled={!((fullName || firstName).trim())}
-                          className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!((fullName || firstName).trim()) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-black text-white hover:bg-gray-800'}`}
+                          className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!((fullName || firstName).trim()) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[#D4A854] text-white hover:bg-[#c49b4a]'}`}
                         >
                           Continue
                         </Button>

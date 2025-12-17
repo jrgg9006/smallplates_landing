@@ -36,7 +36,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
     <div className="min-h-[calc(100vh-180px)] flex items-center justify-center">
       <div className="w-full space-y-8 px-4 md:px-6">
         <div className="space-y-2 text-center">
-          <h2 className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">
+          <h2 className="font-serif text-3xl md:text-4xl font-semibold text-[#2D2D2D]">
             How would you like to share your Small Plate?
           </h2>
           <p className="mt-3 text-base text-gray-600">
@@ -54,7 +54,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
             className={`
               relative group p-4 md:p-8 rounded-xl md:rounded-2xl border-2 transition-all duration-200
               ${method.available 
-                ? 'border-gray-200 hover:border-gray-900 hover:shadow-lg cursor-pointer' 
+                ? 'border-gray-200 hover:border-[#D4A854] hover:shadow-lg cursor-pointer' 
                 : 'border-gray-100 opacity-50 cursor-not-allowed'
               }
             `}
@@ -63,7 +63,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
               <div className={`
                 p-3 md:p-4 rounded-full transition-colors duration-200 flex-shrink-0
                 ${method.available 
-                  ? 'bg-gray-50 group-hover:bg-gray-900' 
+                  ? 'bg-gray-50 group-hover:bg-[#D4A854]' 
                   : 'bg-gray-50'
                 }
               `}>
@@ -71,7 +71,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
                   className={`
                     w-6 h-6 md:w-8 md:h-8 transition-colors duration-200
                     ${method.available 
-                      ? 'text-gray-700 group-hover:text-white' 
+                      ? 'text-[#2D2D2D] group-hover:text-white' 
                       : 'text-gray-400'
                     }
                   `} 

@@ -30,16 +30,18 @@ export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn =
   return (
     <div className="min-h-[calc(100vh-180px)] flex items-center justify-center" role="region" aria-labelledby="thanks-heading">
       <div className="text-center space-y-3 max-w-lg mx-auto px-2">
-        <div className="text-5xl">🎉</div>
-        <h2 id="thanks-heading" className="font-serif text-2xl md:text-3xl font-semibold text-gray-900">Thank you for your contribution!</h2>
-        <p className="text-gray-600">It will be an amazing addition to the book we&apos;re creating.</p>
+        <div className="w-16 h-16 bg-[#D4A854]/20 rounded-full mx-auto flex items-center justify-center">
+          <span className="text-3xl">✓</span>
+        </div>
+        <h2 id="thanks-heading" className="font-serif text-2xl md:text-3xl font-semibold text-[#2D2D2D]">You&apos;re in the book.</h2>
+        <p className="text-gray-600">Your recipe will be a beautiful addition to their kitchen.</p>
         <div className="space-y-4 mt-6">
           <div className="text-left">
             {hasGuestOptIn && guestOptInEmail ? (
               <p className="text-sm text-gray-600">We’ll email your recipe to <span className="font-medium text-gray-800">{guestOptInEmail}</span>.</p>
             ) : (
             <label className="flex items-center gap-2 text-sm text-gray-700">
-              <input type="checkbox" className="h-4 w-4 accent-green-600" checked={optIn} onChange={(e) => { setOptIn(e.target.checked); setSaved(false); }} />
+              <input type="checkbox" className="h-4 w-4 accent-[#D4A854]" checked={optIn} onChange={(e) => { setOptIn(e.target.checked); setSaved(false); }} />
               Share with me how the plate turned out in the book.
             </label>
             )}

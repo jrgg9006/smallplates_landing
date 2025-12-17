@@ -26,8 +26,8 @@ export default function PersonalNoteStep({ personalNote, onChange, userName }: P
     <div className="min-h-[calc(100vh-180px)] flex items-center justify-center">
       <div className="w-full space-y-8 px-4 md:px-6">
         <div className="space-y-2 text-center">
-          <h2 className="font-serif text-3xl md:text-4xl font-semibold text-gray-900">
-            Share a Note to {userName}
+          <h2 className="font-serif text-3xl md:text-4xl font-semibold text-[#2D2D2D]">
+            Add a personal note
           </h2>
         </div>
 
@@ -38,7 +38,7 @@ export default function PersonalNoteStep({ personalNote, onChange, userName }: P
               onChange={(e) => onChange(e.target.value)}
               placeholder="(Optional) This is what I make when I miss home. Or when I need something simple and warm...."
               rows={6}
-              className={`w-full px-4 py-3 border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-none ${
+              className={`w-full px-4 py-3 border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:border-transparent resize-none ${
                 isOverLimit ? 'border-red-300' : 'border-gray-300'
               }`}
             />

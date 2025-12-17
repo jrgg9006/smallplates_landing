@@ -128,9 +128,9 @@ export default function ReviewPage() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4A854] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -140,11 +140,11 @@ export default function ReviewPage() {
   // Error state
   if (error && !submissionData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center">
         <Card className="max-w-md mx-auto">
           <CardContent className="pt-6">
             <div className="text-center">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Error</h2>
+              <h2 className="text-xl font-semibold text-[#2D2D2D] mb-2 font-serif">Error</h2>
               <p className="text-gray-600 mb-4">{error}</p>
               <Button onClick={() => router.push(`/collect/${token}`)} variant="outline">
                 Start Over
@@ -159,24 +159,24 @@ export default function ReviewPage() {
   // Success state
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center">
         <Card className="max-w-md mx-auto">
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-                <Check className="h-6 w-6 text-green-600" />
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-[#D4A854]/20 mb-4">
+                <Check className="h-6 w-6 text-[#D4A854]" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Small Plate Submitted!</h2>
+              <h2 className="text-xl font-semibold text-[#2D2D2D] mb-2 font-serif">You&apos;re in the book.</h2>
               <p className="text-gray-600 mb-6">
-                Thank you for sharing your <strong>{submissionData?.recipe.recipeName}</strong> Small Plate 
-                with {tokenInfo?.user_name}. It has been added to their collection.
+                Your recipe <strong>{submissionData?.recipe.recipeName}</strong> will be a beautiful addition 
+                to {tokenInfo?.user_name}&apos;s kitchen.
               </p>
               <div className="space-y-3">
                 <Button 
                   onClick={handleSubmitAnother}
-                  className="w-full bg-black text-white hover:bg-gray-800"
+                  className="w-full bg-[#D4A854] text-white hover:bg-[#c49b4a]"
                 >
-                  Send Another Small Plate
+                  Add another recipe
                 </Button>
                 <p className="text-sm text-gray-500">
                   Want to share more plates? Click above to submit another one.
@@ -190,9 +190,9 @@ export default function ReviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#FAF7F2]">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-[#FAF7F2] border-b border-gray-200">
         <div className="max-w-2xl mx-auto px-6 py-6">
           <div className="flex items-center gap-4">
             <Button 
@@ -205,8 +205,8 @@ export default function ReviewPage() {
               <ChevronLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-light">
-                Review Your Small Plate
+              <h1 className="text-[#2D2D2D] font-serif text-xl font-semibold">
+                Review your recipe
               </h1>
               <p className="text-gray-600">
                 Double-check everything before submitting
@@ -270,8 +270,8 @@ export default function ReviewPage() {
               {submissionData?.recipe.personalNote && (
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2">Personal Note</h3>
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <pre className="text-sm text-blue-800 whitespace-pre-wrap font-sans">
+                  <div className="bg-[#D4A854]/10 border border-[#D4A854]/20 rounded-lg p-4">
+                    <pre className="text-sm text-[#2D2D2D] whitespace-pre-wrap font-sans">
                       {submissionData.recipe.personalNote}
                     </pre>
                   </div>
@@ -300,7 +300,7 @@ export default function ReviewPage() {
             </Button>
             <Button
               onClick={handleSubmit}
-              className="flex-1 bg-black text-white hover:bg-gray-800"
+              className="flex-1 bg-[#D4A854] text-white hover:bg-[#c49b4a]"
               disabled={submitting}
             >
               {submitting ? (
@@ -309,7 +309,7 @@ export default function ReviewPage() {
                   Submitting...
                 </>
               ) : (
-                'Submit my Small Plate'
+                'Add my creation'
               )}
             </Button>
           </div>

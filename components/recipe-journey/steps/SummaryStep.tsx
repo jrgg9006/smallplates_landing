@@ -17,7 +17,7 @@ export default function SummaryStep({ recipeName, ingredients, instructions, per
     <div className="space-y-8 max-w-4xl mx-auto" role="region" aria-labelledby="summary-heading">
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h2 id="summary-heading" className="text-gray-700 text-lg md:text-xl leading-relaxed font-light">Review your Small Plate</h2>
+          <h2 id="summary-heading" className="text-[#2D2D2D] text-lg md:text-xl leading-relaxed font-light font-serif">Review your recipe</h2>
           {onEditSection && (
             <button
               type="button"
@@ -32,7 +32,7 @@ export default function SummaryStep({ recipeName, ingredients, instructions, per
         
         {/* Recipe Title - Large serif like in AddAPlate */}
         <div className="relative group">
-          <h1 className="font-serif text-4xl md:text-5xl font-semibold text-gray-900 leading-tight">
+          <h1 className="font-serif text-4xl md:text-5xl font-semibold text-[#2D2D2D] leading-tight">
             {recipeName || 'Untitled Recipe'}
           </h1>
           {/* Guest signature - exactly like in AddASmallPlate modal */}
@@ -91,7 +91,7 @@ export default function SummaryStep({ recipeName, ingredients, instructions, per
       </div>
 
       {/* Visual separator */}
-      <div className="border-t border-gray-200 mt-12"></div>
+      <div className="border-t border-[#D4A854]/20 mt-12"></div>
     </div>
   );
 }

@@ -107,10 +107,10 @@ export default function RecipeFormPage() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your recipe journey...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4A854] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
     );
@@ -119,9 +119,9 @@ export default function RecipeFormPage() {
   // Error state
   if (error || !tokenInfo || !guestData) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-[#FAF7F2]">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-[#FAF7F2] border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-center">
             <Link href="/" className="hover:opacity-80 transition-opacity">
               <Image
@@ -140,13 +140,13 @@ export default function RecipeFormPage() {
           <Card className="max-w-md mx-auto">
             <CardContent className="pt-6">
               <div className="text-center">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">Oops!</h2>
+                <h2 className="text-xl font-semibold text-[#2D2D2D] mb-2 font-serif">Oops!</h2>
                 <p className="text-gray-600 mb-4">
                   {error || 'Something went wrong loading your recipe form.'}
                 </p>
                 <button
                   onClick={handleBack}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D4A854]"
                 >
                   <ChevronLeft className="w-4 h-4 mr-2" />
                   Go Back
@@ -161,7 +161,7 @@ export default function RecipeFormPage() {
 
   // Main journey experience - fullscreen like onboarding
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#FAF7F2]">
       {/* Recipe Journey - No header, fullscreen */}
       <RecipeJourneyWrapper
         tokenInfo={tokenInfo}
