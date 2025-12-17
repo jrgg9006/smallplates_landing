@@ -8,6 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ProfileDropdown from "@/components/profile/ProfileDropdown";
 import ProfileNavigation from "@/components/profile/ProfileNavigation";
+import { GroupNavigationSheet } from "@/components/profile/groups/GroupNavigationSheet";
 import type { GroupWithMembers } from "@/lib/types/database";
 
 interface ProfileHeaderProps {
@@ -20,6 +21,7 @@ export function ProfileHeader({ onGroupSelect, currentGroupId }: ProfileHeaderPr
   const router = useRouter();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isGroupSheetOpen, setIsGroupSheetOpen] = useState(false);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -35,43 +37,14 @@ export function ProfileHeader({ onGroupSelect, currentGroupId }: ProfileHeaderPr
     router.push('/profile/account');
   };
 
-  const handleOrders = () => {
-    setIsMobileMenuOpen(false);
-    router.push('/profile/orders');
-  };
-
-  const handleRecipes = () => {
-    setIsMobileMenuOpen(false);
-    router.push('/profile/recipes');
-  };
-
-  const handleGuests = () => {
-    setIsMobileMenuOpen(false);
-    router.push('/profile');
-  };
-
   const handleCookbooks = () => {
     setIsMobileMenuOpen(false);
-    router.push('/profile/groups');
-  };
-
-  const handleHowItWorks = () => {
-    setIsMobileMenuOpen(false);
-    router.push('/profile/how-it-works');
+    setIsGroupSheetOpen(true);
   };
 
   // Determine active states for mobile menu
   const isCookbooksActive = pathname === '/profile/groups' || pathname.startsWith('/profile/groups/');
-  const isRecipesActive = pathname === '/profile/recipes' || pathname.startsWith('/profile/recipes/');
-  const isGuestsActive = pathname === '/profile' || 
-                         (pathname.startsWith('/profile/') && 
-                          !pathname.startsWith('/profile/account') && 
-                          !pathname.startsWith('/profile/orders') && 
-                          !pathname.startsWith('/profile/groups') && 
-                          !pathname.startsWith('/profile/recipes'));
-  const isOrdersActive = pathname === '/profile/orders' || pathname.startsWith('/profile/orders/');
   const isAccountActive = pathname === '/profile/account' || pathname.startsWith('/profile/account/');
-  const isHowItWorksActive = pathname === '/profile/how-it-works' || pathname.startsWith('/profile/how-it-works/');
 
   return (
     <>
@@ -124,8 +97,7 @@ export function ProfileHeader({ onGroupSelect, currentGroupId }: ProfileHeaderPr
       {isMobileMenuOpen && (
         <div className="lg:hidden border-t border-gray-100 bg-gray-50">
           <div className="px-6 py-4">
-            {/* Navigation Links - All in button style */}
-            <div className="space-y-3 pb-3 mb-3 border-b border-gray-200">
+            <div className="space-y-3">
               <button
                 onClick={handleCookbooks}
                 className={`block w-full text-center py-3 px-5 rounded-full border font-semibold transition-colors ${
@@ -134,32 +106,8 @@ export function ProfileHeader({ onGroupSelect, currentGroupId }: ProfileHeaderPr
                     : "border-gray-300 text-gray-700 hover:bg-gray-50"
                 }`}
               >
-                My Cookbooks
+                My Books
               </button>
-              <button
-                onClick={handleRecipes}
-                className={`block w-full text-center py-3 px-5 rounded-full border font-semibold transition-colors ${
-                  isRecipesActive
-                    ? "bg-gray-100 border-gray-400 text-gray-900"
-                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                My Small Plates
-              </button>
-              <button
-                onClick={handleGuests}
-                className={`block w-full text-center py-3 px-5 rounded-full border font-semibold transition-colors ${
-                  isGuestsActive
-                    ? "bg-gray-100 border-gray-400 text-gray-900"
-                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                My Guests
-              </button>
-            </div>
-            
-            {/* Account Actions */}
-            <div className="space-y-3">
               <button
                 onClick={handleAccount}
                 className={`block w-full text-center py-3 px-5 rounded-full border font-semibold transition-colors ${
@@ -171,26 +119,6 @@ export function ProfileHeader({ onGroupSelect, currentGroupId }: ProfileHeaderPr
                 Account
               </button>
               <button
-                onClick={handleOrders}
-                className={`block w-full text-center py-3 px-5 rounded-full border font-semibold transition-colors ${
-                  isOrdersActive
-                    ? "bg-gray-100 border-gray-400 text-gray-900"
-                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                Orders
-              </button>
-              <button
-                onClick={handleHowItWorks}
-                className={`block w-full text-center py-3 px-5 rounded-full border font-semibold transition-colors ${
-                  isHowItWorksActive
-                    ? "bg-gray-100 border-gray-400 text-gray-900"
-                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                How it works
-              </button>
-              <button
                 onClick={handleLogout}
                 className="block w-full text-center py-3 px-5 rounded-full bg-black text-white font-semibold hover:bg-gray-800 transition-colors"
               >
@@ -200,6 +128,14 @@ export function ProfileHeader({ onGroupSelect, currentGroupId }: ProfileHeaderPr
           </div>
         </div>
       )}
+
+      {/* Group Navigation Sheet */}
+      <GroupNavigationSheet 
+        isOpen={isGroupSheetOpen}
+        onClose={() => setIsGroupSheetOpen(false)}
+        onGroupSelect={onGroupSelect}
+        currentGroupId={currentGroupId}
+      />
     </>
   );
 }

@@ -24,6 +24,15 @@ export function GroupNavigationSheet({ isOpen, onClose, onGroupSelect, currentGr
   const router = useRouter();
   const [groups, setGroups] = useState<GroupWithMembers[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Responsive detection
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -59,20 +68,25 @@ export function GroupNavigationSheet({ isOpen, onClose, onGroupSelect, currentGr
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent 
-        side="left" 
-        className="w-[35%] sm:w-[400px] p-0 overflow-hidden bg-white [&_button[data-radix-dialog-close]]:focus:outline-none [&_button[data-radix-dialog-close]]:focus:ring-0 [&_button[data-radix-dialog-close]]:focus:ring-offset-0"
+        side={isMobile ? "bottom" : "left"} 
+        className={isMobile 
+          ? "!h-[85vh] !max-h-[85vh] rounded-t-[20px] p-0 overflow-hidden bg-white" 
+          : "w-[85%] sm:w-[400px] p-0 overflow-hidden bg-white [&_button[data-radix-dialog-close]]:focus:outline-none [&_button[data-radix-dialog-close]]:focus:ring-0 [&_button[data-radix-dialog-close]]:focus:ring-offset-0"
+        }
       >
+        {/* Mobile visual handle */}
+        {isMobile && <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300" />}
 
-        <div className="h-full flex flex-col">
+        <div className={`h-full flex flex-col ${isMobile ? 'pt-2' : ''}`}>
           {/* Header */}
-          <SheetHeader className="px-8 py-6 border-b border-gray-100">
+          <SheetHeader className={`${isMobile ? 'px-6 py-4' : 'px-8 py-6'} border-b border-gray-100`}>
             <SheetTitle className="font-serif text-2xl font-semibold text-[hsl(var(--brand-charcoal))]">
               Your Books
             </SheetTitle>
           </SheetHeader>
           
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className={`flex-1 overflow-y-auto ${isMobile ? 'px-4 py-4' : 'p-6'}`}>
             {loading ? (
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
