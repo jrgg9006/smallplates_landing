@@ -28,6 +28,7 @@ export default function PreviewPage() {
     user_id: 'preview-user',
     user_name: 'Your Name',
     raw_full_name: 'Your Name',
+    couple_names: 'Your Name',
     custom_share_message: null,
     custom_share_signature: null,
     token: 'preview-token',
