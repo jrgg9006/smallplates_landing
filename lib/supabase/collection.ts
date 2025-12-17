@@ -55,12 +55,31 @@ export async function validateCollectionToken(token: string, groupId?: string | 
       return { data: null, error: 'Invalid or expired collection link' };
     }
 
-    // Default to profile-level message
-    let customShareMessage = profile.custom_share_message || null;
-    let customShareSignature = profile.custom_share_signature || null;
+    // No profile fallback - only use group_members message
+    let customShareMessage: string | null = null;
+    let customShareSignature: string | null = null;
+    let coupleNames: string | null = null;
 
-    // If groupId is provided, try to get group-specific message from group_members
+    // If groupId is provided, get group-specific message and couple names
     if (groupId) {
+      // Get group info for couple names
+      const { data: group } = await supabase
+        .from('groups')
+        .select('couple_first_name, partner_first_name')
+        .eq('id', groupId)
+        .single();
+
+      if (group) {
+        if (group.couple_first_name && group.partner_first_name) {
+          coupleNames = `${group.couple_first_name} & ${group.partner_first_name}`;
+        } else if (group.couple_first_name) {
+          coupleNames = group.couple_first_name;
+        } else if (group.partner_first_name) {
+          coupleNames = group.partner_first_name;
+        }
+      }
+
+      // Get group-specific message from group_members
       const { data: groupMember } = await supabase
         .from('group_members')
         .select('custom_share_message, custom_share_signature')
@@ -82,6 +101,7 @@ export async function validateCollectionToken(token: string, groupId?: string | 
         raw_full_name: profile.full_name,
         custom_share_message: customShareMessage,
         custom_share_signature: customShareSignature,
+        couple_names: coupleNames,
         token,
         is_valid: true,
       },

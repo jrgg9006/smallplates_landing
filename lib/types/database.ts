@@ -721,6 +721,7 @@ export interface CollectionTokenInfo {
   raw_full_name: string | null;
   custom_share_message: string | null;
   custom_share_signature: string | null;
+  couple_names: string | null;
   token: string;
   is_valid: boolean;
 }

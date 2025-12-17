@@ -49,10 +49,10 @@ export function ShareCollectionModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, groupId]);
 
-  // Load custom message from group_members (if groupId) or profile (fallback)
+  // Load custom message from group_members only (no profile fallback)
   const loadCustomMessage = async () => {
     try {
-      // If we have a groupId, load from group_members first
+      // Only load from group_members if we have a groupId
       if (groupId) {
         const { data: groupData, error: groupError } = await getGroupShareMessage(groupId);
         if (!groupError && groupData && groupData.custom_share_message) {
@@ -61,17 +61,8 @@ export function ShareCollectionModal({
         }
       }
 
-      // Fallback to profile-level message
-      const { data: profile, error: profileError } = await getCurrentProfile();
-      if (!profileError && profile) {
-        if (profile.custom_share_message) {
-          setCustomMessage(profile.custom_share_message);
-        } else {
-          setCustomMessage(null);
-        }
-      } else {
-        setCustomMessage(null);
-      }
+      // No fallback to profile - just use default message
+      setCustomMessage(null);
     } catch (err) {
       console.error('Error loading custom message:', err);
       setCustomMessage(null);

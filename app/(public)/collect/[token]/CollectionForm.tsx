@@ -332,17 +332,13 @@ export default function CollectionForm() {
                       )}
                       {personalizedMessage.afterName}
                     </h1>
-                    <p className="text-gray-600 mb-6">
-                      {personalizedMessage.description}
-                    </p>
                     
                     {/* Personal Message from Share Collection Modal */}
                     <div className="mb-6">
                       <div>
                         {(() => {
-                          // Check if we have the new separated fields
+                          // If there's a saved custom message, show it
                           if (tokenInfo?.custom_share_message) {
-                            // New format - just show the message without signature
                             const note = tokenInfo.custom_share_message;
                             
                             return (
@@ -351,8 +347,9 @@ export default function CollectionForm() {
                               </div>
                             );
                           } else {
-                            // Default message without signature
-                            const defaultNote = `I'm putting together a book with my favorite people and their plates. If there's one dish you love to make, I'd love to add it — anything goes.`;
+                            // Default message with couple names
+                            const coupleDisplayName = tokenInfo?.couple_names || 'your friends';
+                            const defaultNote = `You're adding a recipe to ${coupleDisplayName}'s wedding cookbook. Doesn't have to be fancy—just something you actually make. A quick note about why you love it, and you're done.`;
                             
                             return (
                               <div>
