@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Plus } from "lucide-react";
 import { getMyGroups } from "@/lib/supabase/groups";
 import type { GroupWithMembers } from "@/lib/types/database";
 import {
@@ -19,6 +21,7 @@ interface GroupNavigationSheetProps {
 }
 
 export function GroupNavigationSheet({ isOpen, onClose, onGroupSelect, currentGroupId }: GroupNavigationSheetProps) {
+  const router = useRouter();
   const [groups, setGroups] = useState<GroupWithMembers[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -135,6 +138,20 @@ export function GroupNavigationSheet({ isOpen, onClose, onGroupSelect, currentGr
                     </div>
                   </button>
                 ))}
+
+                {/* Create New Book Button */}
+                <button
+                  onClick={() => {
+                    onClose();
+                    router.push('/onboarding-gift?mode=add-book');
+                  }}
+                  className="w-full py-4 border-2 border-dashed border-[hsl(var(--brand-warm-gray))]/30 rounded-lg 
+                             flex items-center justify-center gap-2 text-[hsl(var(--brand-warm-gray))] 
+                             hover:border-[hsl(var(--brand-honey))] hover:text-[hsl(var(--brand-honey))] transition-colors"
+                >
+                  <Plus size={20} />
+                  <span className="font-medium">Create a new book</span>
+                </button>
               </div>
             )}
           </div>

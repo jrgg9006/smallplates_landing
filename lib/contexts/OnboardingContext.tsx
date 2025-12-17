@@ -31,6 +31,8 @@ const OnboardingContext = createContext<OnboardingContextType | undefined>(
 interface OnboardingProviderProps {
   children: ReactNode;
   userType?: 'couple' | 'gift_giver';
+  skipAuth?: boolean;
+  existingUserId?: string;
 }
 
 /**
@@ -40,7 +42,7 @@ interface OnboardingProviderProps {
  *   children (ReactNode): Child components
  *   userType (string): Type of user - 'couple' or 'gift_giver'
  */
-export function OnboardingProvider({ children, userType = 'couple' }: OnboardingProviderProps) {
+export function OnboardingProvider({ children, userType = 'couple', skipAuth = false, existingUserId }: OnboardingProviderProps) {
   const [state, setState] = useState<OnboardingState>(initialState);
   const router = useRouter();
 
@@ -90,77 +92,103 @@ export function OnboardingProvider({ children, userType = 'couple' }: Onboarding
 
   /**
    * Complete the onboarding process and create user account
+   * When skipAuth=true, uses existingUserId instead of creating a new account
+   * @param email - Optional email for account creation
+   * @param password - Optional password for account creation
+   * @param directData - Optional data to merge with state.answers (useful when state hasn't updated yet)
    */
   const completeOnboarding = useCallback(
-    async (email?: string, password?: string) => {
+    async (email?: string, password?: string, directData?: Record<string, any>) => {
       try {
-        // Use passed parameters first, fallback to state
+        let userId: string;
         let finalEmail = email;
-        let finalPassword = password;
-        
-        if (!finalEmail || !finalPassword) {
-          // Fallback to state if parameters not provided
-          const emailStep = userType === 'couple' ? state.answers.step4 : state.answers.step3;
-          finalEmail = finalEmail || emailStep?.email;
-          finalPassword = finalPassword || emailStep?.password;
-        }
 
-        console.log("🔍 Debug onboarding completion:");
-        console.log("UserType:", userType);
-        console.log("Passed email:", email);
-        console.log("Passed password:", password ? "[PRESENT]" : "[MISSING]");
-        console.log("State.answers:", state.answers);
-        console.log("Final email:", finalEmail);
-        console.log("Final password:", finalPassword ? "[PRESENT]" : "[MISSING]");
-
-        if (!finalEmail || !finalPassword) {
-          throw new Error("Email and password are required to complete onboarding");
-        }
-
-        const supabase = createSupabaseClient();
-
-        console.log(`🚀 Starting ${userType} onboarding...`);
-
-        // Step 1: Create user with signUp (user will be auto-logged in)
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email: finalEmail,
-          password: finalPassword,
-          options: {
-            data: {
-              user_type: userType
-            }
+        if (skipAuth && existingUserId) {
+          // User already authenticated - skip signup
+          console.log(`🚀 Adding new book for existing user: ${existingUserId}`);
+          userId = existingUserId;
+          
+          // Get email from current session if not provided
+          if (!finalEmail) {
+            const supabase = createSupabaseClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            finalEmail = user?.email;
           }
-        });
+        } else {
+          // Normal flow - create new account
+          let finalPassword = password;
+          
+          if (!finalEmail || !finalPassword) {
+            // Fallback to state if parameters not provided
+            const emailStep = userType === 'couple' ? state.answers.step4 : state.answers.step3;
+            finalEmail = finalEmail || emailStep?.email;
+            finalPassword = finalPassword || emailStep?.password;
+          }
 
-        if (signUpError || !signUpData.user) {
-          throw new Error(signUpError?.message || "Failed to create user account");
+          console.log("🔍 Debug onboarding completion:");
+          console.log("UserType:", userType);
+          console.log("Passed email:", email);
+          console.log("Passed password:", password ? "[PRESENT]" : "[MISSING]");
+          console.log("State.answers:", state.answers);
+          console.log("Final email:", finalEmail);
+          console.log("Final password:", finalPassword ? "[PRESENT]" : "[MISSING]");
+
+          if (!finalEmail || !finalPassword) {
+            throw new Error("Email and password are required to complete onboarding");
+          }
+
+          const supabase = createSupabaseClient();
+
+          console.log(`🚀 Starting ${userType} onboarding...`);
+
+          // Create user with signUp (user will be auto-logged in)
+          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            email: finalEmail,
+            password: finalPassword,
+            options: {
+              data: {
+                user_type: userType
+              }
+            }
+          });
+
+          if (signUpError || !signUpData.user) {
+            throw new Error(signUpError?.message || "Failed to create user account");
+          }
+
+          console.log('✅ User created and logged in:', signUpData.user.id);
+          userId = signUpData.user.id;
         }
 
-        console.log('✅ User created and logged in:', signUpData.user.id);
+        // Reason: Merge directData with state.answers to handle async state updates
+        const mergedAnswers = directData 
+          ? { ...state.answers, ...directData }
+          : state.answers;
 
-        // Step 2: Create profile using API
+        // Create profile/group using API
         const response = await fetch('/api/v1/create-wedding-profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            userId: signUpData.user.id,
-            userData: state.answers,
+            userId: userId,
+            userData: mergedAnswers,
             userType: userType,
-            userEmail: finalEmail
+            userEmail: finalEmail,
+            isAdditionalBook: skipAuth // Reason: tells API this is an additional book, not first-time setup
           })
         });
 
         const responseData = await response.json();
 
         if (!response.ok) {
-          console.error('⚠️ Failed to create profile, but user was created');
+          console.error('⚠️ Failed to create profile/book');
           throw new Error(responseData.error || 'Failed to create profile');
         } else {
-          console.log('✅ Profile created successfully');
+          console.log('✅ Profile/book created successfully');
         }
 
-        // Step 3: Send verification email via Postmark
-        if (responseData.data?.emailVerificationToken) {
+        // Send verification email only for new users (not skipAuth)
+        if (!skipAuth && responseData.data?.emailVerificationToken) {
           try {
             const emailResponse = await fetch('/api/v1/send-verification-email', {
               method: 'POST',
@@ -175,19 +203,17 @@ export function OnboardingProvider({ children, userType = 'couple' }: Onboarding
 
             if (!emailResponse.ok) {
               console.error('⚠️ Failed to send verification email, but profile was created');
-              // Don't throw error here - profile creation was successful
             } else {
               console.log('✅ Verification email sent');
             }
           } catch (emailError) {
             console.error('Error sending verification email:', emailError);
-            // Don't throw error here - profile creation was successful
           }
         }
 
         setState(prev => ({ ...prev, isComplete: true }));
 
-        // Step 4: Redirect to profile immediately (user is already logged in!)
+        // Redirect to profile
         console.log('🎉 Redirecting to profile...');
         router.push("/profile/groups");
 
@@ -196,7 +222,7 @@ export function OnboardingProvider({ children, userType = 'couple' }: Onboarding
         alert(err instanceof Error ? err.message : "Failed to complete onboarding");
       }
     },
-    [router, state.answers, userType]
+    [router, state.answers, userType, skipAuth, existingUserId]
   );
 
   /**

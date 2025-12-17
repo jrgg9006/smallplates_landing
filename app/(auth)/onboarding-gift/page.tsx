@@ -1,8 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { OnboardingProvider, useOnboarding } from "@/lib/contexts/OnboardingContext";
+import { useAuth } from "@/lib/contexts/AuthContext";
 import OnboardingStep from "@/components/onboarding/OnboardingStep";
 import { SelectionCard } from "@/components/onboarding/SelectionCard";
 import { CustomDropdown } from "@/components/onboarding/CustomDropdown";
@@ -11,7 +13,7 @@ import { CustomDropdown } from "@/components/onboarding/CustomDropdown";
 /**
  * Step 1 Component - Wedding Timeline
  */
-function Step1() {
+function Step1({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
   const { nextStep, previousStep, updateStepData } = useOnboarding();
   const [selectedTimeline, setSelectedTimeline] = useState<string>("");
 
@@ -57,7 +59,7 @@ function Step1() {
   return (
     <OnboardingStep
       stepNumber={1}
-      totalSteps={3}
+      totalSteps={isAddBookMode ? 2 : 3}
       title="When's the big day?"
       imageUrl="/images/onboarding/onboarding_gift_2.jpg"
       imageAlt="Wedding timeline planning"
@@ -127,36 +129,56 @@ function Step1() {
 /**
  * Step 2 Component - Contact & Gift Setup
  */
-function Step2() {
-  const { nextStep, previousStep, updateStepData } = useOnboarding();
+function Step2({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
+  const { state, nextStep, previousStep, updateStepData, completeOnboarding } = useOnboarding();
   const [giftGiverName, setGiftGiverName] = useState("");
   const [firstName, setFirstName] = useState("");
   const [partnerFirstName, setPartnerFirstName] = useState("");
   const [relationship, setRelationship] = useState("");
+  const [loading, setLoading] = useState(false);
 
 
-  const handleContinue = () => {
-    if (!giftGiverName.trim() || !firstName.trim() || !partnerFirstName.trim() || !relationship) {
+  const handleContinue = async () => {
+    // Reason: Skip giftGiverName validation when user is already authenticated
+    if ((!isAddBookMode && !giftGiverName.trim()) || !firstName.trim() || !partnerFirstName.trim() || !relationship) {
       return;
     }
 
-    // Store gift info in context
-    updateStepData(2, {
-      giftGiverName: giftGiverName.trim(),
+    // Build step2 data
+    const step2Data = {
+      ...(isAddBookMode ? {} : { giftGiverName: giftGiverName.trim() }),
       firstName: firstName.trim(),
       partnerFirstName: partnerFirstName.trim(),
       relationship: relationship
-    });
+    };
+
+    // Store gift info in context
+    await updateStepData(2, step2Data);
     
-    nextStep();
+    // Reason: If add-book mode, complete onboarding directly (skip Step3 account creation)
+    if (isAddBookMode) {
+      setLoading(true);
+      try {
+        // Pass step1 and step2 data directly to avoid async state timing issues
+        await completeOnboarding(undefined, undefined, { 
+          step1: state.answers.step1,
+          step2: step2Data 
+        });
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      nextStep();
+    }
   };
 
-  const isFormValid = giftGiverName.trim() && firstName.trim() && partnerFirstName.trim() && relationship;
+  // Reason: Skip giftGiverName validation when user is already authenticated
+  const isFormValid = (isAddBookMode || giftGiverName.trim()) && firstName.trim() && partnerFirstName.trim() && relationship;
 
   return (
     <OnboardingStep
       stepNumber={2}
-      totalSteps={3}
+      totalSteps={isAddBookMode ? 2 : 3}
       title="Almost there."
       imageUrl="/images/onboarding/onboarding_gift_3.jpg"
       imageAlt="Final gift details"
@@ -174,21 +196,23 @@ function Step2() {
 
         {/* Gift Setup Form */}
         <div className="space-y-6 mb-8">
-              <div>
-                <label htmlFor="giftGiverName" className="block text-sm font-medium text-[#2D2D2D] mb-1">
-                  Your name
-                </label>
-                <input
-                  id="giftGiverName"
-                  type="text"
-                  required
-                  value={giftGiverName}
-                  onChange={(e) => setGiftGiverName(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none transition-all"
-                  placeholder="Your name"
-                />
-              </div>
-
+              {/* Hide "Your name" for authenticated users creating additional books */}
+              {!isAddBookMode && (
+                <div>
+                  <label htmlFor="giftGiverName" className="block text-sm font-medium text-[#2D2D2D] mb-1">
+                    Your name
+                  </label>
+                  <input
+                    id="giftGiverName"
+                    type="text"
+                    required
+                    value={giftGiverName}
+                    onChange={(e) => setGiftGiverName(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none transition-all"
+                    placeholder="Your name"
+                  />
+                </div>
+              )}
 
               {/* Couple Names */}
               <div>
@@ -252,21 +276,31 @@ function Step2() {
               <button
                 type="button"
                 onClick={previousStep}
-                className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors"
+                disabled={loading}
+                className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors disabled:opacity-50"
               >
                 Back
               </button>
               <button
                 type="button"
                 onClick={handleContinue}
-                disabled={!isFormValid}
+                disabled={!isFormValid || loading}
                 className={`px-8 py-3 rounded-xl font-semibold transition-colors ${
-                  isFormValid
+                  isFormValid && !loading
                     ? "bg-[#D4A854] text-white hover:bg-[#c49b4a]"
                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
                 }`}
               >
-                Continue
+                {loading ? (
+                  <>
+                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></span>
+                    Creating...
+                  </>
+                ) : isAddBookMode ? (
+                  "Create Book"
+                ) : (
+                  "Continue"
+                )}
               </button>
             </div>
       </div>
@@ -463,25 +497,46 @@ function Step3() {
  * Main Gift Onboarding Page Component
  * Manages the 3-step gift giver flow
  */
-function GiftOnboardingContent() {
+function GiftOnboardingContent({ isAddBookMode }: { isAddBookMode: boolean }) {
   const { state } = useOnboarding();
 
   return (
     <div className="min-h-screen bg-white">
-      {state.currentStep === 1 && <Step1 />}
-      {state.currentStep === 2 && <Step2 />}
-      {state.currentStep === 3 && <Step3 />}
+      {state.currentStep === 1 && <Step1 isAddBookMode={isAddBookMode} />}
+      {state.currentStep === 2 && <Step2 isAddBookMode={isAddBookMode} />}
+      {state.currentStep === 3 && !isAddBookMode && <Step3 />}
     </div>
   );
 }
 
 /**
- * Page wrapper with OnboardingProvider
+ * Inner component that uses useSearchParams (requires Suspense boundary)
+ */
+function GiftOnboardingPageInner() {
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
+  
+  // Reason: add-book mode only applies when user is already authenticated
+  const isAddBookMode = searchParams.get('mode') === 'add-book' && !!user;
+
+  return (
+    <OnboardingProvider 
+      userType="gift_giver"
+      skipAuth={isAddBookMode}
+      existingUserId={user?.id}
+    >
+      <GiftOnboardingContent isAddBookMode={isAddBookMode} />
+    </OnboardingProvider>
+  );
+}
+
+/**
+ * Page wrapper with Suspense boundary for useSearchParams
  */
 export default function GiftOnboardingPage() {
   return (
-    <OnboardingProvider userType="gift_giver">
-      <GiftOnboardingContent />
-    </OnboardingProvider>
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center">Loading...</div>}>
+      <GiftOnboardingPageInner />
+    </Suspense>
   );
 }

@@ -14,14 +14,16 @@ import { createGroupAdmin } from './groups';
  * Create user profile with admin privileges (bypasses RLS)
  * Used during onboarding when user is not yet authenticated
  * Supports both couple and gift giver types
+ * @param isAdditionalBook - When true, only creates group (user already has profile)
  */
-export async function createUserProfileAdmin(userId: string, answers: OnboardingData, userType: 'couple' | 'gift_giver', userEmail?: string) {
+export async function createUserProfileAdmin(userId: string, answers: OnboardingData, userType: 'couple' | 'gift_giver', userEmail?: string, isAdditionalBook: boolean = false) {
   try {
     // Debug logging for all incoming data
     console.log('🔍 CREATE PROFILE ADMIN DEBUG:', {
       userId,
       userType,
       userEmail,
+      isAdditionalBook,
       answers,
       answersKeys: Object.keys(answers),
       step1: answers.step1,
@@ -41,30 +43,36 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
       }
     );
 
-    // Generate collection token
-    const { data: newToken, error: tokenError } = await supabaseAdmin
-      .rpc('generate_collection_token');
+    // Reason: Skip profile updates for additional books to preserve existing verification token
+    let emailVerificationToken: string | null = null;
+    let profile: any = null;
 
-    if (tokenError || !newToken) {
-      console.error('Failed to generate collection token:', tokenError);
-      return { data: null, error: 'Failed to generate collection token' };
+    if (!isAdditionalBook) {
+      // Generate collection token
+      const { data: newToken, error: tokenError } = await supabaseAdmin
+        .rpc('generate_collection_token');
+
+      if (tokenError || !newToken) {
+        console.error('Failed to generate collection token:', tokenError);
+        return { data: null, error: 'Failed to generate collection token' };
+      }
+
+      // Generate email verification token
+      emailVerificationToken = crypto.randomUUID();
+      const emailVerificationExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days
+
+      // Base profile data (only personal info)
+      var profileData: any = {
+        id: userId,
+        user_type: userType,
+        collection_link_token: newToken,
+        collection_enabled: true,
+        email_verification_token: emailVerificationToken,
+        email_verification_expires_at: emailVerificationExpiresAt,
+        email_verified: false,
+        updated_at: new Date().toISOString()
+      };
     }
-
-    // Generate email verification token
-    const emailVerificationToken = crypto.randomUUID();
-    const emailVerificationExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days
-
-    // Base profile data (only personal info)
-    let profileData: any = {
-      id: userId,
-      user_type: userType,
-      collection_link_token: newToken,
-      collection_enabled: true,
-      email_verification_token: emailVerificationToken,
-      email_verification_expires_at: emailVerificationExpiresAt,
-      email_verified: false,
-      updated_at: new Date().toISOString()
-    };
 
     // Group data (event-specific info)
     let groupData: any = null;
@@ -107,12 +115,14 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
         }
       });
 
-      // Profile only gets personal data (no couple info)
-      profileData = {
-        ...profileData,
-        full_name: fullName,
-        email: userEmail || step4Data?.email || ''
-      };
+      // Profile only gets personal data (no couple info) - skip for additional books
+      if (!isAdditionalBook) {
+        profileData = {
+          ...profileData,
+          full_name: fullName,
+          email: userEmail || step4Data?.email || ''
+        };
+      }
 
       // Map planning stage to timeline
       let weddingTimeline = null;
@@ -157,15 +167,18 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
         step3Data,
         email: step3Data?.email,
         emailExists: !!step3Data?.email,
-        giftGiverName: step2Data?.giftGiverName
+        giftGiverName: step2Data?.giftGiverName,
+        isAdditionalBook
       });
 
-      // Profile only gets personal data
-      profileData = {
-        ...profileData,
-        full_name: step2Data?.giftGiverName || '',
-        email: userEmail || step3Data?.email || ''
-      };
+      // Profile only gets personal data - skip for additional books
+      if (!isAdditionalBook) {
+        profileData = {
+          ...profileData,
+          full_name: step2Data?.giftGiverName || '',
+          email: userEmail || step3Data?.email || ''
+        };
+      }
 
       // Group gets event-specific data for gift givers
       const coupleName = `${step2Data?.firstName || ''} & ${step2Data?.partnerFirstName || ''}`.trim();
@@ -182,16 +195,19 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
       };
     }
 
-    // Create profile with admin privileges
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .upsert(profileData)
-      .select()
-      .single();
+    // Create profile with admin privileges - skip for additional books
+    if (!isAdditionalBook) {
+      const { data: createdProfile, error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .upsert(profileData)
+        .select()
+        .single();
 
-    if (profileError) {
-      console.error('Error creating profile with admin:', profileError);
-      return { data: null, error: profileError.message };
+      if (profileError) {
+        console.error('Error creating profile with admin:', profileError);
+        return { data: null, error: profileError.message };
+      }
+      profile = createdProfile;
     }
 
     // Create group using the admin function

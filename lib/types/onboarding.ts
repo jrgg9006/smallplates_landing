@@ -55,6 +55,6 @@ export interface OnboardingContextType {
   nextStep: () => void;
   previousStep: () => void;
   updateStepData: (stepId: number, data: Record<string, any>) => Promise<void>;
-  completeOnboarding: (email?: string, password?: string) => Promise<void>;
+  completeOnboarding: (email?: string, password?: string, directData?: Record<string, any>) => Promise<void>;
   resetOnboarding: () => void;
 }

@@ -3,7 +3,7 @@ import { createUserProfileAdmin } from '@/lib/supabase/wedding-onboarding';
 
 export async function POST(req: Request) {
   try {
-    const { userId, userData, userType, userEmail } = await req.json();
+    const { userId, userData, userType, userEmail, isAdditionalBook } = await req.json();
 
     if (!userId || !userData || !userType) {
       return NextResponse.json(
@@ -13,7 +13,8 @@ export async function POST(req: Request) {
     }
 
     // Create profile using admin client (bypasses RLS)
-    const { data, error } = await createUserProfileAdmin(userId, userData, userType, userEmail);
+    // isAdditionalBook=true means user already exists, only create new group
+    const { data, error } = await createUserProfileAdmin(userId, userData, userType, userEmail, isAdditionalBook);
 
     if (error) {
       return NextResponse.json(
