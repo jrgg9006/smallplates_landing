@@ -37,7 +37,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
       <div className="w-full space-y-8 px-4 md:px-6">
         <div className="space-y-2 text-center">
           <h2 className="font-serif text-3xl md:text-4xl font-semibold text-[#2D2D2D]">
-            How would you like to share your Small Plate?
+            How would you like to share your Recipe?
           </h2>
           <p className="mt-3 text-base text-gray-600">
             Choose the format that works best for you
@@ -52,7 +52,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
             onClick={() => method.available && onSelectMethod(method.id)}
             disabled={!method.available}
             className={`
-              relative group p-4 md:p-8 rounded-xl md:rounded-2xl border-2 transition-all duration-200
+              relative group p-4 md:p-8 rounded-xl md:rounded-2xl border-2 transition-all duration-200 bg-white
               ${method.available 
                 ? 'border-gray-200 hover:border-[#D4A854] hover:shadow-lg cursor-pointer' 
                 : 'border-gray-100 opacity-50 cursor-not-allowed'

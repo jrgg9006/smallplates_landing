@@ -339,7 +339,7 @@ export default function CollectionForm() {
                       </div>
                     )}
                     
-                    <h1 className="text-3xl font-semibold text-[#2D2D2D] mb-4 font-serif">
+                    <h1 className="text-2xl lg:text-3xl font-semibold text-[#2D2D2D] mb-4 font-serif">
                       {personalizedMessage.beforeName}
                       {personalizedMessage.name && (
                         <span className="font-semibold text-gray-900 mx-1">
@@ -359,7 +359,7 @@ export default function CollectionForm() {
                             
                             return (
                               <div>
-                                <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1 mb-12">{note}</p>
+                                <p className="text-gray-700 text-base lg:text-lg xl:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1 mb-12">{note}</p>
                               </div>
                             );
                           } else {
@@ -369,7 +369,7 @@ export default function CollectionForm() {
                             
                             return (
                               <div>
-                                <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1 mb-12">{defaultNote}</p>
+                                <p className="text-gray-700 text-base lg:text-lg xl:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1 mb-12">{defaultNote}</p>
                               </div>
                             );
                           }
@@ -488,7 +488,7 @@ export default function CollectionForm() {
                     Continue
                   </Button>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">This is how we’ll print your name in the cookbook.</p>
+                <p className="text-sm text-gray-500 mt-1">This is how we'll print your name in the cookbook.</p>
               </div>
             )}
 
@@ -497,7 +497,7 @@ export default function CollectionForm() {
               <div className="border-t border-[#D4A854]/20 pt-6">
                 {searchResults.length > 0 ? (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-medium text-[#2D2D2D] font-serif">
+                    <h3 className="text-xl font-medium text-[#2D2D2D] font-serif">
                       That&apos;s you, right?
                     </h3>
                     <div className="space-y-3">
@@ -546,7 +546,7 @@ export default function CollectionForm() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-medium text-[#2D2D2D] font-serif">
+                    <h3 className="text-xl font-medium text-[#2D2D2D] font-serif">
                       Not on the list yet? No problem.
                     </h3>
                     <p className="text-gray-600 mb-4 text-sm">
@@ -578,7 +578,7 @@ export default function CollectionForm() {
                           Continue
                         </Button>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">This is how we’ll print your name in the cookbook.</p>
+                      <p className="text-sm text-gray-500 mt-1">This is how we'll print your name in the cookbook.</p>
                     </div>
                   </div>
                 )}

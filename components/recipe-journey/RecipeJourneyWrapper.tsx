@@ -137,11 +137,15 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
         setCurrentStepIndex(personalNoteIndex);
       } else if (currentStep?.key === 'recipeTitle') {
-        // After recipe title, check if we have raw text or are in image mode
+        // After recipe title, check the upload method
         if (recipeData.rawRecipeText) {
           // Raw text flow: go directly to personal note
           const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
           setCurrentStepIndex(personalNoteIndex);
+        } else if (recipeData.uploadMethod === 'text') {
+          // Text flow: go to recipe form
+          const recipeFormIndex = journeySteps.findIndex(s => s.key === 'recipeForm');
+          setCurrentStepIndex(recipeFormIndex);
         } else {
           // Image flow: go to image upload
           const imageUploadIndex = journeySteps.findIndex(s => s.key === 'imageUpload');
@@ -223,9 +227,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
           setCurrentStepIndex(recipeFormIndex);
         }
       } else if (currentStep?.key === 'recipeForm') {
-        // From recipe form, go back to upload method selection
-        const uploadMethodIndex = journeySteps.findIndex(s => s.key === 'uploadMethod');
-        setCurrentStepIndex(uploadMethodIndex);
+        // From recipe form, go back to recipe title (since now text recipes go through title step)
+        const recipeTitleIndex = journeySteps.findIndex(s => s.key === 'recipeTitle');
+        setCurrentStepIndex(recipeTitleIndex);
       } else if (currentStep?.key === 'summary') {
         // From summary, go back to personal note (only text flow uses summary)
         const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
@@ -266,9 +270,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     setRecipeData(prev => ({ ...prev, uploadMethod: method }));
     
     if (method === 'text') {
-      // Go directly to recipeForm
-      const recipeFormIndex = journeySteps.findIndex(s => s.key === 'recipeForm');
-      setCurrentStepIndex(recipeFormIndex);
+      // Go to recipe title step first (same as image flow)
+      const recipeTitleIndex = journeySteps.findIndex(s => s.key === 'recipeTitle');
+      setCurrentStepIndex(recipeTitleIndex);
     } else if (method === 'image') {
       // Go to recipe title step first
       const recipeTitleIndex = journeySteps.findIndex(s => s.key === 'recipeTitle');

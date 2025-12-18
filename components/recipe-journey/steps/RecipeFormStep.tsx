@@ -50,21 +50,6 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
       </div>
 
 
-      {/* Title */}
-      <section id="title" aria-labelledby="title-label" className="space-y-6">
-        <div className="text-center">
-        </div>
-        <div className="max-w-2xl mx-auto">
-          <input
-            id="recipeName"
-            value={data.recipeName}
-            onChange={(e) => onChange('recipeName', e.target.value)}
-            placeholder="Lazy Sunday Passover Plate"
-            aria-describedby="title-help"
-            className="w-full text-center font-serif text-3xl font-semibold text-[#2D2D2D] leading-tight border-0 border-b border-gray-300 px-0 py-2 focus:outline-none focus:border-[#D4A854] bg-transparent placeholder:text-gray-400"
-          />
-        </div>
-      </section>
 
       {/* Ingredients */}
       <section id="ingredients" aria-labelledby="ingredients-label" className="space-y-2">

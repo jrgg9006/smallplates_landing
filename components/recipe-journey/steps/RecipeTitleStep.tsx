@@ -13,7 +13,7 @@ export default function RecipeTitleStep({ recipeName, onChange }: RecipeTitleSte
       <div className="w-full space-y-8 px-4 md:px-6">
         <div className="space-y-2 text-center">
           <h2 className="text-gray-700 text-lg md:text-xl leading-relaxed font-light text-center">
-            Small Plate Title
+            Recipe Title
           </h2>
         </div>
 

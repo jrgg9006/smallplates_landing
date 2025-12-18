@@ -73,7 +73,7 @@ export function FirstRecipeModal({ isOpen, onClose, onSubmit, isFirstRecipe = tr
           {/* Recipe Title */}
           <div className="space-y-2">
             <label htmlFor="recipeName" className="text-sm font-medium text-gray-700">
-              Small Plate title
+              Recipe title
             </label>
             <Input
               id="recipeName"
