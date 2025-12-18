@@ -5,7 +5,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -462,7 +461,7 @@ export function AddRecipesToCollectionModal({
           )}
         </div>
 
-        <DialogFooter className={collectionType === "group" ? "mt-4" : ""}>
+        <div className="flex justify-end gap-3">
           <Button
             variant="outline"
             onClick={(e) => {
@@ -495,7 +494,7 @@ export function AddRecipesToCollectionModal({
                 )
             }
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

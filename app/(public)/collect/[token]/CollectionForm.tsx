@@ -280,7 +280,7 @@ export default function CollectionForm() {
   return (
     <div className="min-h-screen bg-white lg:bg-[#FAF7F2]">
       {/* Header */}
-      <div className="bg-white lg:bg-[#FAF7F2] border-b border-gray-200">
+      <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-center">
           <Link href="/" className="hover:opacity-80 transition-opacity">
             <Image

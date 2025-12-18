@@ -22,7 +22,7 @@ import { addRecipeToGroup } from "@/lib/supabase/groupRecipes";
 import { getGuests } from "@/lib/supabase/guests";
 import { getCurrentProfile } from "@/lib/supabase/profiles";
 import { Guest } from "@/lib/types/database";
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, Plus, PenTool, Camera } from "lucide-react";
 import { RecipeImageUpload } from "./RecipeImageUpload";
 import { AddGuestModal } from "@/components/profile/guests/AddGuestModal";
 
@@ -177,24 +177,24 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
   const handleSave = async () => {
     // Validation
     if (!isMyOwnRecipe && !selectedGuestId) {
-      setError('Please select a guest or check "This is my own plate"');
+      setError("Whose recipe is this?");
       return;
     }
 
     if (!recipeTitle.trim()) {
-      setError('Please fill in Plate Title');
+      setError("Every recipe needs a name");
       return;
     }
 
     // Validation based on upload method
     if (uploadMethod === 'image') {
       if (selectedFiles.length === 0) {
-        setError('Please upload at least one image');
+        setError("Show us what you're making");
         return;
       }
     } else {
       if (!recipeInstructions.trim()) {
-        setError('Please fill in Instructions/Steps');
+        setError("Tell us how to make it");
         return;
       }
     }
@@ -418,17 +418,17 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
     return `${guest.first_name} ${guest.last_name || ''}`.trim();
   };
 
-  // Desktop content component - restructured to look like a recipe page
+  // Desktop content component - spacious and organized
   const desktopContent = (
-    <div className="flex-1 overflow-y-auto flex flex-col min-w-0">
-      {/* Top Section: Split Left/Right */}
-      <div className="flex-shrink-0 grid grid-cols-[1fr_4fr] gap-4 mb-8 pb-8 border-b border-gray-200">
-        {/* Left Side: Guest, Checkbox, Recipe Type */}
-        <div className="flex flex-col space-y-4">
+    <div className="flex-1 overflow-hidden flex flex-col min-w-0 pr-10 pt-6">
+      {/* Main Content Grid - Controls on left, Recipe content on right */}
+      <div className="flex-1 grid grid-cols-[240px_1fr] gap-10">
+        {/* Left Column: Controls */}
+        <div className="flex flex-col space-y-8">
           {/* Guest Selector */}
           <div>
-            <Label htmlFor="guest" className="text-sm font-medium text-gray-600">
-              Guest {!isMyOwnRecipe && '*'}
+            <Label htmlFor="guest" className="text-sm font-medium text-gray-700 mb-3 block">
+              Who's sharing this? {!isMyOwnRecipe && <span className="text-[hsl(var(--brand-honey))] text-xs">*</span>}
             </Label>
             {!isMyOwnRecipe && (
               <>
@@ -453,7 +453,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                     <button
                       type="button"
                       onClick={() => setShowGuestDropdown(!showGuestDropdown)}
-                      className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50 focus:outline-none focus:border-gray-500"
+                      className="w-full flex items-center justify-between px-4 py-3 border-0 border-b-2 border-gray-200 text-sm bg-transparent hover:border-gray-300 focus:outline-none focus:border-[hsl(var(--brand-honey))] transition-all duration-200"
                     >
                       <span className={selectedGuestId ? 'text-gray-900' : 'text-gray-500'}>
                         {selectedGuestId && selectedGuest
@@ -465,7 +465,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                     
                     {showGuestDropdown && (
                       <>
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                        <div className="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-auto">
                           {guests.map((guest) => (
                             <button
                               key={guest.id}
@@ -474,23 +474,23 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                                 setSelectedGuestId(guest.id);
                                 setShowGuestDropdown(false);
                               }}
-                              className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 ${
+                              className={`w-full px-4 py-3 text-left text-sm hover:bg-[#FFF8F0] transition-colors ${
                                 selectedGuestId === guest.id
-                                  ? 'bg-gray-100 text-gray-900 font-medium'
+                                  ? 'bg-[#FFF8F0] text-gray-900 font-medium'
                                   : 'text-gray-700'
                               }`}
                             >
                               {getGuestDisplayName(guest)}
                             </button>
                           ))}
-                          <div className="border-t border-gray-200 mt-1 pt-1">
+                          <div className="border-t border-gray-100">
                             <button
                               type="button"
                               onClick={() => {
                                 setShowGuestDropdown(false);
                                 setShowAddGuestModal(true);
                               }}
-                              className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                              className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-[#FFF8F0] flex items-center gap-2 transition-colors"
                             >
                               <Plus className="h-4 w-4" />
                               Add New Guest
@@ -510,9 +510,9 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
             )}
           </div>
 
-          {/* "This is my own recipe" checkbox */}
+          {/* "It is mine" checkbox */}
           <div>
-            <label className="flex items-center space-x-2 cursor-pointer">
+            <label className="flex items-center space-x-3 cursor-pointer group">
               <input
                 type="checkbox"
                 checked={isMyOwnRecipe}
@@ -523,132 +523,146 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                     setShowGuestDropdown(false);
                   }
                 }}
-                className="w-4 h-4 text-black border-gray-300 rounded focus:ring-gray-400 focus:ring-1"
+                className="w-4 h-4 text-[hsl(var(--brand-honey))] accent-[hsl(var(--brand-honey))] border-gray-300 rounded focus:ring-[hsl(var(--brand-honey))] focus:ring-2 transition-all"
               />
-              <span className="text-sm text-gray-700">This is my own plate</span>
+              <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">It is mine</span>
             </label>
           </div>
 
-          {/* Recipe Type Toggle */}
+          {/* Recipe Type Toggle - Tab Style */}
           <div>
-            <Label className="text-sm font-medium text-gray-600 mb-2 block">Plate type</Label>
-            <div className="flex flex-col gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setUploadMethod('text');
-                  setSelectedFiles([]);
-                }}
-                className={`w-full px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  uploadMethod === 'text'
-                    ? 'bg-white border-2 border-black text-black'
-                    : 'bg-gray-50 border-2 border-gray-200 text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                Text
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setUploadMethod('image');
-                  setRecipeIngredients('');
-                  setRecipeInstructions('');
-                }}
-                className={`w-full px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  uploadMethod === 'image'
-                    ? 'bg-white border-2 border-black text-black'
-                    : 'bg-gray-50 border-2 border-gray-200 text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                Images
-              </button>
+            <Label className="text-sm font-medium text-gray-700 mb-3 block">How will you share it?</Label>
+            <div className="bg-white rounded-xl p-1 shadow-sm border border-gray-100">
+              <div className="grid grid-cols-2 gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUploadMethod('text');
+                    setSelectedFiles([]);
+                  }}
+                  className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    uploadMethod === 'text'
+                      ? 'bg-gray-900 text-white shadow-sm'
+                      : 'bg-transparent text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <PenTool className="w-4 h-4" />
+                  Text
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUploadMethod('image');
+                    setRecipeIngredients('');
+                    setRecipeInstructions('');
+                  }}
+                  className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    uploadMethod === 'image'
+                      ? 'bg-gray-900 text-white shadow-sm'
+                      : 'bg-transparent text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <Camera className="w-4 h-4" />
+                  Images
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Right Side: Complete recipe form structure (from image) */}
-        <div className="flex flex-col space-y-6 min-w-0">
-          {/* Plate Name - at top, large serif */}
-          <div>
-            <div className="flex items-center justify-between">
+        {/* Right Column: Recipe Content */}
+        <div className="flex flex-col min-w-0 h-full">
+          {/* Recipe Title - Fixed Height */}
+          <div className="flex-shrink-0 mb-6">
+            <div className="relative">
               <input
                 type="text"
                 value={recipeTitle}
                 onChange={(e) => setRecipeTitle(e.target.value)}
-                placeholder="Small Plate Name"
+                placeholder="Late Night Carbonara"
                 maxLength={50}
-                className="w-full font-serif text-3xl font-semibold text-gray-900 leading-tight border-0 border-b border-gray-300 px-0 py-2 focus:outline-none focus:border-gray-500 bg-transparent placeholder:text-gray-400"
+                className="w-full font-serif text-3xl font-semibold text-gray-900 leading-tight border-0 border-b-2 border-gray-200 px-0 py-4 focus:outline-none focus:border-[hsl(var(--brand-honey))] bg-transparent placeholder:text-gray-400 placeholder:font-normal transition-all duration-200"
                 required
               />
-              <span className="text-xs text-gray-400 ml-2 whitespace-nowrap">
-                {recipeTitle.length}/50
-              </span>
+              {recipeTitle.length > 40 && (
+                <span className="absolute right-0 top-4 text-xs text-gray-400">
+                  {recipeTitle.length}/50
+                </span>
+              )}
             </div>
-            {/* Subtitle - Shared by guest name or user name */}
+            {/* Subtitle - Shared by */}
             {!isMyOwnRecipe && selectedGuest && (
-              <p className="font-serif italic text-lg text-gray-700 mt-2">
-                Shared by {selectedGuest.printed_name || `${selectedGuest.first_name} ${selectedGuest.last_name || ''}`.trim()}
+              <p className="font-serif italic text-base text-gray-600 mt-2">
+                from {selectedGuest.printed_name || `${selectedGuest.first_name} ${selectedGuest.last_name || ''}`.trim()}
               </p>
             )}
             {isMyOwnRecipe && userName && (
-              <p className="font-serif italic text-lg text-gray-700 mt-2">
-                Shared by {userName}
+              <p className="font-serif italic text-base text-gray-600 mt-2">
+                from {userName}
               </p>
             )}
           </div>
 
-          {/* Additional Notes - full width textarea */}
-          <div>
-            <p className="text-xs text-gray-400 mb-1">Add a Note!</p>
+          {/* Personal Note - Fixed Height */}
+          <div className="flex-shrink-0 mb-6">
+            <Label className="text-sm font-medium text-gray-700 mb-3 block">Add a special note</Label>
             <textarea
               value={recipeNotes}
               onChange={(e) => setRecipeNotes(e.target.value)}
-              placeholder="Any additional notes about this plate (optional...but encouraged!)"
-              className="w-full font-sans font-light text-base text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 placeholder:text-gray-400 resize-vertical min-h-[60px]"
+              placeholder="Made this at 2am more times than I will admit."
+              className="w-full text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-white border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 resize-none h-16 transition-all duration-200"
             />
           </div>
 
-          {/* Two Columns: Ingredients (left) and Steps (right) */}
-          {uploadMethod === 'image' ? (
-            <div className="flex-1">
-              <Label className="text-sm font-medium text-gray-600 mb-3 block">Plate Images *</Label>
-              <RecipeImageUpload
-                onFilesSelected={setSelectedFiles}
-                selectedFiles={selectedFiles}
-                error={error}
-              />
-            </div>
-          ) : (
-            <div className="grid grid-cols-[3fr_7fr] gap-4">
-              {/* Left Column - Ingredients */}
-              <div className="flex flex-col">
-                <p className="text-xs text-gray-400 mb-1">What you need to make this plate</p>
-                <textarea
-                  value={recipeIngredients}
-                  onChange={(e) => setRecipeIngredients(e.target.value)}
-                  placeholder="(Optional) List the ingredients needed for this plate"
-                  className="w-full font-sans font-light text-base text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 placeholder:text-gray-400 resize-vertical min-h-[400px]"
-                />
+          {/* Recipe Content - Takes Remaining Space */}
+          <div className="flex-1 min-h-0">
+            {uploadMethod === 'image' ? (
+              <div className="h-full flex flex-col">
+                <Label className="text-sm font-medium text-gray-700 mb-4 block flex-shrink-0">
+                  Show us what you're making <span className="text-[hsl(var(--brand-honey))] text-xs">*</span>
+                </Label>
+                <div className="flex-1">
+                  <RecipeImageUpload
+                    onFilesSelected={setSelectedFiles}
+                    selectedFiles={selectedFiles}
+                    error={error}
+                  />
+                </div>
               </div>
+            ) : (
+              <div className="grid grid-cols-[1fr_2fr] gap-8 h-full">
+                {/* Ingredients Column */}
+                <div className="flex flex-col h-full">
+                  <Label className="text-sm font-medium text-gray-700 mb-3 block flex-shrink-0">What ingredients you will need</Label>
+                  <textarea
+                    value={recipeIngredients}
+                    onChange={(e) => setRecipeIngredients(e.target.value)}
+                    placeholder="Pecorino, not parmesan. Good eggs. The real guanciale."
+                    className="flex-1 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-white border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 resize-none transition-all duration-200"
+                  />
+                </div>
 
-              {/* Right Column - Steps (Instructions) */}
-              <div className="flex flex-col">
-                <p className="text-xs text-gray-400 mb-1">How to make this plate *</p>
-                <textarea
-                  value={recipeInstructions}
-                  onChange={(e) => setRecipeInstructions(e.target.value)}
-                  placeholder="List the steps needed to make this plate - make it simple, easy and fun to follow!"
-                  className="w-full font-serif text-lg text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 placeholder:text-gray-400 resize-vertical min-h-[400px]"
-                />
+                {/* Instructions Column */}
+                <div className="flex flex-col h-full">
+                  <Label className="text-sm font-medium text-gray-700 mb-3 block flex-shrink-0">
+                    The magic happens here <span className="text-[hsl(var(--brand-honey))] text-xs">*</span>
+                  </Label>
+                  <textarea
+                    value={recipeInstructions}
+                    onChange={(e) => setRecipeInstructions(e.target.value)}
+                    placeholder="Start with cold pan. Trust the process. Save the pasta water—you will need it."
+                    className="flex-1 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-white border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 resize-none transition-all duration-200"
+                  />
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-6">
+        <div className="bg-red-50/50 border border-red-200 rounded-xl p-3 mt-4">
           <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
@@ -661,8 +675,8 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
       <div className="space-y-6 pb-24 pr-4">
         {/* Guest Selector */}
         <div>
-          <Label htmlFor="guest" className="text-sm font-medium text-gray-600">
-            Guest {!isMyOwnRecipe && '*'}
+          <Label htmlFor="guest" className="text-sm font-medium text-gray-700">
+            Who's sharing this? {!isMyOwnRecipe && <span className="text-[hsl(var(--brand-honey))] text-xs">*</span>}
           </Label>
           {!isMyOwnRecipe && (
             <>
@@ -687,7 +701,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                   <button
                     type="button"
                     onClick={() => setShowGuestDropdown(!showGuestDropdown)}
-                    className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    className="w-full flex items-center justify-between px-4 py-3 border-0 border-b-2 border-gray-200 text-sm bg-transparent hover:border-gray-300 focus:outline-none focus:border-[hsl(var(--brand-honey))] transition-all duration-200"
                   >
                     <span className={selectedGuestId ? 'text-gray-900' : 'text-gray-500'}>
                       {selectedGuestId && selectedGuest
@@ -756,52 +770,57 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                     setShowGuestDropdown(false);
                   }
                 }}
-                className="w-4 h-4 text-black border-gray-300 rounded focus:ring-gray-400 focus:ring-1"
+                className="w-4 h-4 text-[hsl(var(--brand-honey))] accent-[hsl(var(--brand-honey))] border-gray-300 rounded focus:ring-[hsl(var(--brand-honey))] focus:ring-2 transition-all"
               />
-              <span className="text-sm text-gray-700">This is my own plate</span>
+              <span className="text-sm text-gray-700">It is mine</span>
             </label>
           </div>
         </div>
 
-        {/* Upload Method Toggle */}
+        {/* Upload Method Toggle - Tab Style */}
         <div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setUploadMethod('text');
-                setSelectedFiles([]);
-              }}
-              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                uploadMethod === 'text'
-                  ? 'bg-white border-2 border-black text-black'
-                  : 'bg-gray-50 border-2 border-gray-200 text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              Type Recipe
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setUploadMethod('image');
-                setRecipeIngredients('');
-                setRecipeInstructions('');
-              }}
-              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                uploadMethod === 'image'
-                  ? 'bg-white border-2 border-black text-black'
-                  : 'bg-gray-50 border-2 border-gray-200 text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              Upload Images
-            </button>
+          <Label className="text-sm font-medium text-gray-700 mb-3 block">How will you share it?</Label>
+          <div className="bg-white rounded-xl p-1 shadow-sm border border-gray-100">
+            <div className="grid grid-cols-2 gap-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setUploadMethod('text');
+                  setSelectedFiles([]);
+                }}
+                className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  uploadMethod === 'text'
+                    ? 'bg-gray-900 text-white shadow-sm'
+                    : 'bg-transparent text-gray-600'
+                }`}
+              >
+                <PenTool className="w-4 h-4" />
+                Text
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setUploadMethod('image');
+                  setRecipeIngredients('');
+                  setRecipeInstructions('');
+                }}
+                className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  uploadMethod === 'image'
+                    ? 'bg-gray-900 text-white shadow-sm'
+                    : 'bg-transparent text-gray-600'
+                }`}
+              >
+                <Camera className="w-4 h-4" />
+                Images
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Recipe Title */}
         <div>
           <div className="flex items-center justify-between mb-1">
-            <Label htmlFor="recipeTitle" className="text-sm font-medium text-gray-600">Plate Title *</Label>
+            <Label htmlFor="recipeTitle" className="text-sm font-medium text-gray-700">What are we making? <span className="text-[hsl(var(--brand-honey))] text-xs">*</span></Label>
             <span className="text-xs text-gray-400">
               {recipeTitle.length}/50
             </span>
@@ -812,28 +831,29 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
             onChange={(e) => setRecipeTitle(e.target.value)}
             maxLength={50}
             className="mt-1"
-            placeholder="Plate name"
+            placeholder="Late Night Carbonara"
             required
+          />
+        </div>
+
+        {/* Tell them why this matters - moved here for mobile */}
+        <div>
+          <Label htmlFor="recipeNotes" className="text-sm font-medium text-gray-700">Tell them why this matters</Label>
+          <textarea
+            id="recipeNotes"
+            value={recipeNotes}
+            onChange={(e) => setRecipeNotes(e.target.value)}
+            className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[80px] bg-white transition-all duration-200"
+            placeholder="Made this at 2am more times than I will admit."
           />
         </div>
         
         {/* Conditional Form Fields Based on Upload Method */}
         {uploadMethod === 'image' ? (
           <>
-            {/* Image Mode: Notes and Image Upload */}
+            {/* Image Mode: Image Upload only (notes moved above) */}            
             <div>
-              <Label htmlFor="recipeNotes" className="text-sm font-medium text-gray-600">Notes</Label>
-              <textarea
-                id="recipeNotes"
-                value={recipeNotes}
-                onChange={(e) => setRecipeNotes(e.target.value)}
-                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 resize-vertical min-h-[80px]"
-                placeholder="Any additional notes about this plate (optional)"
-              />
-            </div>
-            
-            <div>
-              <Label className="text-sm font-medium text-gray-600 mb-3 block">Plate Images *</Label>
+              <Label className="text-sm font-medium text-gray-700 mb-3 block">Show us what you're making <span className="text-[hsl(var(--brand-honey))] text-xs">*</span></Label>
               <RecipeImageUpload
                 onFilesSelected={setSelectedFiles}
                 selectedFiles={selectedFiles}
@@ -843,37 +863,26 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
           </>
         ) : (
           <>
-            {/* Text Mode: Ingredients, Instructions, and Notes */}
+            {/* Text Mode: Ingredients and Instructions only (notes moved above) */}
         <div>
-          <Label htmlFor="recipeIngredients" className="text-sm font-medium text-gray-600">Ingredients</Label>
+          <Label htmlFor="recipeIngredients" className="text-sm font-medium text-gray-700">What you will need</Label>
           <textarea
             id="recipeIngredients"
             value={recipeIngredients}
             onChange={(e) => setRecipeIngredients(e.target.value)}
-                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 resize-vertical min-h-[120px]"
-            placeholder="(Optional) List the ingredients needed for this plate"
+                className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[100px] bg-white transition-all duration-200"
+            placeholder="Pecorino, not parmesan. Good eggs. The real guanciale."
           />
         </div>
         
         <div>
-          <Label htmlFor="recipeInstructions" className="text-sm font-medium text-gray-600">How to make this plate *</Label>
+          <Label htmlFor="recipeInstructions" className="text-sm font-medium text-gray-700">The magic happens here <span className="text-[hsl(var(--brand-honey))] text-xs">*</span></Label>
           <textarea
             id="recipeInstructions"
             value={recipeInstructions}
             onChange={(e) => setRecipeInstructions(e.target.value)}
-                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 resize-vertical min-h-[180px]"
-            placeholder="If you have the plate all in one single piece, just paste in here"
-          />
-        </div>
-        
-        <div>
-          <Label htmlFor="recipeNotes" className="text-sm font-medium text-gray-600">Notes</Label>
-          <textarea
-            id="recipeNotes"
-            value={recipeNotes}
-            onChange={(e) => setRecipeNotes(e.target.value)}
-            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[80px]"
-            placeholder="Any additional notes about this plate"
+                className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[140px] bg-white transition-all duration-200"
+            placeholder="Start with cold pan. Trust the process. Save the pasta water—you will need it."
           />
         </div>
           </>
@@ -894,24 +903,31 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
     return (
       <>
         <Sheet open={isOpen} onOpenChange={onClose}>
-          <SheetContent side="bottom" className="!h-[85vh] !max-h-[85vh] rounded-t-[20px] flex flex-col overflow-hidden p-0">
+          <SheetContent side="bottom" className="!h-[85vh] !max-h-[85vh] rounded-t-[20px] flex flex-col overflow-hidden p-0 bg-white">
             <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300" />
             
-            <div className="p-6 flex flex-col h-full overflow-hidden">
+            <div className="p-6 flex flex-col h-full overflow-hidden bg-white">
               <SheetHeader className="px-0">
-                <SheetTitle className="font-serif text-2xl font-semibold mb-4">Add Plate</SheetTitle>
+                <SheetTitle className="font-serif text-2xl font-semibold mb-4">Add a new Recipe</SheetTitle>
               </SheetHeader>
               
               <div className="flex-1 overflow-hidden flex flex-col overflow-y-auto">
                 {modalContent}
               </div>
               
-              {/* Save Button */}
-              <div className="mt-2 pb-safe">
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-3 mt-4 pb-safe">
+                <Button 
+                  variant="outline"
+                  onClick={onClose}
+                  disabled={loading}
+                >
+                  Cancel
+                </Button>
                 <Button 
                   onClick={handleSave}
                   disabled={loading || (!isMyOwnRecipe && guests.length === 0)}
-                  className="w-full bg-black text-white hover:bg-gray-800 py-3 rounded-full disabled:opacity-50"
+                  className="bg-black text-white hover:bg-gray-800"
                 >
                   {loading ? 'Saving...' : 'Save'}
                 </Button>
@@ -934,21 +950,28 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-7xl w-[95vw] h-[90vh] max-h-[90vh] flex flex-col overflow-hidden overflow-x-hidden p-0 gap-0">
-          <DialogHeader className="flex-shrink-0 px-8 pt-6 pb-4 border-b border-gray-200">
-            <DialogTitle className="font-serif text-2xl font-semibold">Add a Small Plate</DialogTitle>
+        <DialogContent className="max-w-6xl w-[95vw] h-[90vh] max-h-[90vh] flex flex-col overflow-hidden p-0 gap-0 bg-white">
+          <DialogHeader className="flex-shrink-0 px-8 pt-6 pb-2">
+            <DialogTitle className="font-serif text-2xl font-semibold text-gray-900">Add a new Recipe</DialogTitle>
           </DialogHeader>
           
-          <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col px-8 py-6 min-w-0">
+          <div className="flex-1 overflow-hidden flex flex-col pl-8 pr-8 pb-6 min-w-0">
             {desktopContent}
           </div>
           
-          {/* Save Button - Fixed position at bottom */}
-          <div className="flex-shrink-0 bg-white border-t border-gray-200 px-8 py-4">
+          {/* Action Buttons - Fixed position at bottom */}
+          <div className="flex justify-end gap-3 flex-shrink-0 bg-white px-8 py-4">
+            <Button 
+              variant="outline"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
             <Button 
               onClick={handleSave}
               disabled={loading || (!isMyOwnRecipe && guests.length === 0)}
-              className="w-full bg-black text-white hover:bg-gray-800 py-3 rounded-full disabled:opacity-50"
+              className="bg-black text-white hover:bg-gray-800"
             >
               {loading ? 'Saving...' : 'Save'}
             </Button>
