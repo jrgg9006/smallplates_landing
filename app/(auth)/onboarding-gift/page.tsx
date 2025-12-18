@@ -94,9 +94,14 @@ function Step1({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
           ))}
         </div>
         
-        {/* Confidence building message */}
-        <div className="text-center text-sm text-[#2D2D2D]/50 font-light">
-          The thoughtful gift everyone will remember.
+        {/* Gift Flow Link */}
+        <div className="text-center">
+          <a 
+            href="/onboarding"
+            className="text-sm text-[#2D2D2D]/50 hover:text-[#D4A854] transition-colors font-light"
+          >
+            Are you the couple getting married?
+          </a>
         </div>
       </div>
 

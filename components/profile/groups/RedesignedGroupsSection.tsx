@@ -203,7 +203,11 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
 
   // Sync selectedGroup changes to parent (after render completes)
   useEffect(() => {
-    onGroupChange?.(selectedGroup);
+    const timeoutId = setTimeout(() => {
+      onGroupChange?.(selectedGroup);
+    }, 0);
+    
+    return () => clearTimeout(timeoutId);
   }, [selectedGroup, onGroupChange]);
 
   const handleGroupCreated = () => {
