@@ -96,11 +96,11 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     : (tokenInfo.custom_share_signature || tokenInfo.user_name.split(' ')[0] || 'the cookbook creator');
 
   const getImageUrl = () => {
-    // Use couple image if available, otherwise use default placeholder
+    // Use couple image if available, otherwise return undefined for no image
     if (tokenInfo.couple_image_url) {
       return tokenInfo.couple_image_url;
     }
-    return "/images/collect/collect_1.jpg";
+    return undefined;
   };
 
   const focusFirstHeading = useCallback(() => {

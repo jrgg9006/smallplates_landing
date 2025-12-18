@@ -299,14 +299,18 @@ export default function CollectionForm() {
         {/* Left Column - Image */}
         <div className="hidden lg:block lg:w-2/5 relative bg-[#E8E0D5] h-[calc(100vh-4rem)] p-2">
           <div className="relative w-full h-full rounded-2xl overflow-hidden">
-            <Image
-              src={tokenInfo?.couple_image_url || "/images/collect/collect_1.jpg"}
-              alt={tokenInfo?.couple_image_url ? "Couple Photo" : "Small Plates Cookbook Recipe Collection"}
-              fill
-              sizes="40vw"
-              className={tokenInfo?.couple_image_url ? "object-cover" : "object-contain"}
-              priority
-            />
+            {tokenInfo?.couple_image_url ? (
+              <Image
+                src={tokenInfo.couple_image_url}
+                alt="Couple Photo"
+                fill
+                sizes="40vw"
+                className="object-cover"
+                priority
+              />
+            ) : (
+              <div className="w-full h-full bg-[#E8E0D5]" />
+            )}
           </div>
         </div>
 

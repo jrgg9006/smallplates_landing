@@ -284,14 +284,14 @@ export function ShareCollectionModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className={`${
         showMessageCustomization ? 'lg:max-w-[900px]' : 'sm:max-w-[500px]'
-      } transition-all duration-300`}>
+      } transition-all duration-300 max-h-[90vh] flex flex-col`}>
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl font-semibold">
             Collect Recipes
           </DialogTitle>
         </DialogHeader>
         
-        <div className="py-4">
+        <div className="py-4 overflow-y-auto flex-1 -mx-6 px-6">
           {!showMessageCustomization ? (
             /* Normal single-column layout */
             <div className="space-y-6">
@@ -356,10 +356,10 @@ export function ShareCollectionModal({
               </div>
             </div>
           ) : (
-            /* Expanded two-column layout */
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            /* Expanded layout - responsive for mobile */
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
               {/* Left Column - Main Content */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="lg:col-span-2 space-y-4 lg:space-y-6">
                 {/* Hero Message */}
                 <div className="text-left space-y-2">
                   <p className="text-gray-900 text-lg">
@@ -405,14 +405,14 @@ export function ShareCollectionModal({
               </div>
 
               {/* Right Column - Image Upload + Message Customization */}
-              <div className="lg:col-span-3 space-y-6">
+              <div className="lg:col-span-3 space-y-4 lg:space-y-6">
                 {/* Couple Image Section */}
                 {groupId && (
                   <div className="space-y-4">
                     {/* Current Image Display */}
                     {coupleImage ? (
                       <div className="space-y-3">
-                        <div className="relative w-full h-40 bg-gray-100 rounded-xl overflow-hidden">
+                        <div className="relative w-full h-32 lg:h-40 bg-gray-100 rounded-xl overflow-hidden">
                           <Image
                             src={coupleImage}
                             alt="Couple"
@@ -449,7 +449,7 @@ export function ShareCollectionModal({
                       /* Upload UI when no image */
                       <div className="space-y-3">
                         <div 
-                          className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-gray-400 transition-colors cursor-pointer bg-gray-50"
+                          className="border-2 border-dashed border-gray-300 rounded-xl p-6 lg:p-8 text-center hover:border-gray-400 transition-colors cursor-pointer bg-gray-50"
                           onClick={() => {
                             const input = document.getElementById('coupleImageInput') as HTMLInputElement;
                             input?.click();
@@ -536,8 +536,8 @@ export function ShareCollectionModal({
                         setEditingMessage(e.target.value);
                         setError(null);
                       }}
-                      className="w-full p-4 bg-white border-2 border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors text-gray-900 leading-relaxed"
-                      rows={6}
+                      className="w-full p-3 lg:p-4 bg-white border-2 border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors text-gray-900 leading-relaxed"
+                      rows={5}
                       placeholder="Your message to guests..."
                       maxLength={300}
                     />
