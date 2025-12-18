@@ -255,8 +255,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         // In preview mode, go back to the preview search page
         window.history.back();
       } else {
-        // Normal mode - go back to the name search landing for this token
-        router.push(`/collect/${token}`);
+        // Normal mode - go back to the name search landing for this token, preserving query parameters
+        const queryString = cookbookId ? `?cookbook=${cookbookId}` : groupId ? `?group=${groupId}` : '';
+        router.push(`/collect/${token}${queryString}`);
       }
     }
   };

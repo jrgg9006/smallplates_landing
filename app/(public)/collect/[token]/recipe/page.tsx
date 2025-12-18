@@ -101,7 +101,8 @@ export default function RecipeFormPage() {
 
   // Handle back navigation
   const handleBack = () => {
-    router.push(`/collect/${token}`);
+    const queryString = cookbookId ? `?cookbook=${cookbookId}` : groupId ? `?group=${groupId}` : '';
+    router.push(`/collect/${token}${queryString}`);
   };
 
   // Loading state
