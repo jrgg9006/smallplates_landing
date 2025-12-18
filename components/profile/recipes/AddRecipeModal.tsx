@@ -428,7 +428,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
           {/* Guest Selector */}
           <div>
             <Label htmlFor="guest" className="text-sm font-medium text-gray-700 mb-3 block">
-              Who's sharing this? {!isMyOwnRecipe && <span className="text-[hsl(var(--brand-honey))] text-xs">*</span>}
+              Who&apos;s sharing this? {!isMyOwnRecipe && <span className="text-[hsl(var(--brand-honey))] text-xs">*</span>}
             </Label>
             {!isMyOwnRecipe && (
               <>
@@ -619,7 +619,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
             {uploadMethod === 'image' ? (
               <div className="h-full flex flex-col">
                 <Label className="text-sm font-medium text-gray-700 mb-4 block flex-shrink-0">
-                  Show us what you're making <span className="text-[hsl(var(--brand-honey))] text-xs">*</span>
+                  Show us what you&apos;re making <span className="text-[hsl(var(--brand-honey))] text-xs">*</span>
                 </Label>
                 <div className="flex-1">
                   <RecipeImageUpload
@@ -676,7 +676,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
         {/* Guest Selector */}
         <div>
           <Label htmlFor="guest" className="text-sm font-medium text-gray-700">
-            Who's sharing this? {!isMyOwnRecipe && <span className="text-[hsl(var(--brand-honey))] text-xs">*</span>}
+            Who&apos;s sharing this? {!isMyOwnRecipe && <span className="text-[hsl(var(--brand-honey))] text-xs">*</span>}
           </Label>
           {!isMyOwnRecipe && (
             <>
@@ -853,7 +853,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
           <>
             {/* Image Mode: Image Upload only (notes moved above) */}            
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-3 block">Show us what you're making <span className="text-[hsl(var(--brand-honey))] text-xs">*</span></Label>
+              <Label className="text-sm font-medium text-gray-700 mb-3 block">Show us what you&apos;re making <span className="text-[hsl(var(--brand-honey))] text-xs">*</span></Label>
               <RecipeImageUpload
                 onFilesSelected={setSelectedFiles}
                 selectedFiles={selectedFiles}
