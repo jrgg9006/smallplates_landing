@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 
 interface SuccessStepProps {
   defaultName?: string;
@@ -8,9 +9,10 @@ interface SuccessStepProps {
   hasGuestOptIn?: boolean;
   guestOptInEmail?: string;
   onSavePrefs: (name: string | undefined, email: string | undefined, optedIn: boolean) => Promise<void> | void;
+  coupleImageUrl?: string | null;
 }
 
-export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn = false, guestOptInEmail, onSavePrefs }: SuccessStepProps) {
+export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn = false, guestOptInEmail, onSavePrefs, coupleImageUrl }: SuccessStepProps) {
   const [email, setEmail] = useState<string>(defaultEmail || '');
   const [optIn, setOptIn] = useState<boolean>(!!defaultEmail);
   const [showEditor, setShowEditor] = useState<boolean>(!defaultEmail);
@@ -30,6 +32,20 @@ export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn =
   return (
     <div className="min-h-[calc(100vh-180px)] flex items-center justify-center" role="region" aria-labelledby="thanks-heading">
       <div className="text-center space-y-3 max-w-lg mx-auto px-2">
+        {/* Couple Image for mobile only - desktop shows in left panel */}
+        {coupleImageUrl && (
+          <div className="lg:hidden mb-6 flex justify-center">
+            <div className="relative w-40 h-28 rounded-xl overflow-hidden shadow-md">
+              <Image
+                src={coupleImageUrl}
+                alt="Couple"
+                fill
+                className="object-cover"
+              />
+            </div>
+          </div>
+        )}
+        
         <div className="w-16 h-16 bg-[#D4A854]/20 rounded-full mx-auto flex items-center justify-center">
           <span className="text-3xl">✓</span>
         </div>

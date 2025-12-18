@@ -8,8 +8,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Upload, X, Image as ImageIcon } from "lucide-react";
 import { getGroupShareMessage, updateGroupShareMessage, resetGroupShareMessage } from "@/lib/supabase/groups";
+import Image from "next/image";
 
 interface ShareCollectionModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ interface ShareCollectionModalProps {
   onStepComplete?: () => void;
   groupId?: string | null;
   coupleNames?: string | null;
+  currentCoupleImage?: string | null;
 }
 
 export function ShareCollectionModal({ 
@@ -30,7 +32,8 @@ export function ShareCollectionModal({
   isOnboardingStep = false,
   onStepComplete,
   groupId = null,
-  coupleNames = null
+  coupleNames = null,
+  currentCoupleImage = null
 }: ShareCollectionModalProps) {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +42,11 @@ export function ShareCollectionModal({
   const [editingMessage, setEditingMessage] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [showMessageCustomization, setShowMessageCustomization] = useState(false);
+  
+  // Image upload state
+  const [coupleImage, setCoupleImage] = useState<string | null>(currentCoupleImage);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   // Load custom message when modal opens
   useEffect(() => {
@@ -47,6 +55,11 @@ export function ShareCollectionModal({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, groupId]);
+
+  // Sync couple image state when modal opens or currentCoupleImage changes
+  useEffect(() => {
+    setCoupleImage(currentCoupleImage);
+  }, [currentCoupleImage, isOpen]);
 
   // Load custom message from group_members only (no profile fallback)
   const loadCustomMessage = async () => {
@@ -175,138 +188,413 @@ export function ShareCollectionModal({
     }
   };
 
+  // Image upload functions
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setError('Invalid file type. Only JPEG, PNG, and WebP are allowed.');
+      return;
+    }
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File too large. Maximum size is 5MB.');
+      return;
+    }
+
+    setSelectedFile(file);
+    setError(null);
+  };
+
+  const handleUploadImage = async () => {
+    if (!selectedFile || !groupId) {
+      setError('No file selected or group not found');
+      return;
+    }
+
+    setIsUploadingImage(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', selectedFile);
+
+      const response = await fetch(`/api/v1/groups/${groupId}/couple-image`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setError(result.error || 'Failed to upload image');
+        return;
+      }
+
+      setCoupleImage(result.url);
+      setSelectedFile(null);
+      
+      // Reset file input
+      const fileInput = document.getElementById('coupleImageInput') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+
+    } catch (err) {
+      setError('Failed to upload image');
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handleDeleteImage = async () => {
+    if (!groupId) {
+      setError('Group not found');
+      return;
+    }
+
+    setIsUploadingImage(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/v1/groups/${groupId}/couple-image`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setError(result.error || 'Failed to delete image');
+        return;
+      }
+
+      setCoupleImage(null);
+      setSelectedFile(null);
+
+    } catch (err) {
+      setError('Failed to delete image');
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className={`${
+        showMessageCustomization ? 'lg:max-w-[900px]' : 'sm:max-w-[500px]'
+      } transition-all duration-300`}>
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl font-semibold">
             Collect Recipes
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6 py-4">
-          {/* Hero Message */}
-          <div className="text-center space-y-2">
-            <p className="text-gray-900 text-lg">
-              You&apos;re about to create something incredible.
-            </p>
-            <p className="text-gray-600 text-sm">
-              Send this link to everyone who loves them. They&apos;ll add their favorite recipes. 
-              We&apos;ll turn it into a book they&apos;ll cook from forever.
-            </p>
-          </div>
+        <div className="py-4">
+          {!showMessageCustomization ? (
+            /* Normal single-column layout */
+            <div className="space-y-6">
+              {/* Hero Message */}
+              <div className="text-center space-y-2">
+                <p className="text-gray-900 text-lg">
+                  You&apos;re about to create something incredible.
+                </p>
+                <p className="text-gray-600 text-sm">
+                  Send this link to everyone who loves them. They&apos;ll add their favorite recipes. 
+                  We&apos;ll turn it into a book they&apos;ll cook from forever.
+                </p>
+              </div>
 
-          {/* Main Actions */}
-          <div className="space-y-3">
-            {/* Primary Action - Copy Link */}
-            <Button
-              onClick={handleCopyLink}
-              className={`w-full flex items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all ${
-                copied 
-                  ? 'bg-[hsl(var(--brand-honey))] border-[hsl(var(--brand-honey))] text-black hover:bg-[hsl(var(--brand-honey))] hover:border-[hsl(var(--brand-honey))] hover:text-black' 
-                  : 'bg-black text-white hover:bg-gray-800 border-black'
-              }`}
-            >
-              {copied ? (
-                <>
-                  <Check className="w-5 h-5" />
-                  Copied
-                </>
-              ) : (
-                <>
-                  <Copy className="w-5 h-5" />
-                  Copy Link
-                </>
-              )}
-            </Button>
-            
-            {/* Secondary Action - Customize Message */}
-            {!showMessageCustomization && (
+              {/* Main Actions */}
+              <div className="space-y-3">
+                {/* Primary Action - Copy Link */}
+                <Button
+                  onClick={handleCopyLink}
+                  className={`w-full flex items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all ${
+                    copied 
+                      ? 'bg-[hsl(var(--brand-honey))] border-[hsl(var(--brand-honey))] text-black hover:bg-[hsl(var(--brand-honey))] hover:border-[hsl(var(--brand-honey))] hover:text-black' 
+                      : 'bg-black text-white hover:bg-gray-800 border-black'
+                  }`}
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-5 h-5" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-5 h-5" />
+                      Copy Link
+                    </>
+                  )}
+                </Button>
+                
+                {/* Secondary Actions */}
+                <div className="text-center space-y-2">
+                  <button
+                    onClick={handleShowMessageCustomization}
+                    className="text-sm text-gray-600 hover:text-gray-900 transition-colors block mx-auto"
+                  >
+                    Customize message
+                  </button>
+                </div>
+              </div>
+
+              {/* Preview Link */}
               <div className="text-center">
                 <button
-                  onClick={handleShowMessageCustomization}
-                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                  onClick={() => {
+                    if (collectionUrl && typeof window !== 'undefined') {
+                      window.open(collectionUrl, '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                  className="text-sm text-gray-600 hover:text-gray-900 underline transition-colors"
                 >
-                  Customize message
+                  Preview what guests will see
                 </button>
               </div>
-            )}
-          </div>
-
-          {/* Message Customization Section (Collapsible) */}
-          {showMessageCustomization && (
-            <div className="space-y-4 border-t pt-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium text-gray-900">
-                  Your message to guests:
-                </h3>
-              </div>
-              
-              <div className="space-y-3">
-                <textarea
-                  value={editingMessage}
-                  onChange={(e) => {
-                    setEditingMessage(e.target.value);
-                    setError(null);
-                  }}
-                  className="w-full p-4 bg-white border-2 border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors text-gray-900 leading-relaxed"
-                  rows={4}
-                  placeholder="Your message to guests..."
-                  maxLength={300}
-                />
-                <div className="flex justify-between items-center">
-                  <span className={`text-xs ${editingMessage.length > 280 ? 'text-red-500' : 'text-gray-400'}`}>
-                    {editingMessage.length}/300
-                  </span>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleCancelEdit}
-                    disabled={isSaving}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleResetMessage}
-                    disabled={isSaving}
-                  >
-                    Reset
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleSaveMessage}
-                    disabled={isSaving || editingMessage.trim().length === 0}
-                    className="bg-black text-white hover:bg-gray-800"
-                  >
-                    Save
-                  </Button>
+            </div>
+          ) : (
+            /* Expanded two-column layout */
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+              {/* Left Column - Main Content */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Hero Message */}
+                <div className="text-left space-y-2">
+                  <p className="text-gray-900 text-lg">
+                    You&apos;re about to create something incredible.
+                  </p>
+                  <p className="text-gray-600 text-sm">
+                    Send this link to everyone who loves them. They&apos;ll add their favorite recipes. 
+                    We&apos;ll turn it into a book they&apos;ll cook from forever.
+                  </p>
                 </div>
+
+                {/* Copy Link Button */}
+                <Button
+                  onClick={handleCopyLink}
+                  className={`w-full flex items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all ${
+                    copied 
+                      ? 'bg-[hsl(var(--brand-honey))] border-[hsl(var(--brand-honey))] text-black hover:bg-[hsl(var(--brand-honey))] hover:border-[hsl(var(--brand-honey))] hover:text-black' 
+                      : 'bg-black text-white hover:bg-gray-800 border-black'
+                  }`}
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-5 h-5" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-5 h-5" />
+                      Copy Link
+                    </>
+                  )}
+                </Button>
+
+                {/* Customize Message Link */}
+                <div className="text-left">
+                  <button
+                    onClick={handleShowMessageCustomization}
+                    className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    Customize message
+                  </button>
                 </div>
               </div>
 
+              {/* Right Column - Image Upload + Message Customization */}
+              <div className="lg:col-span-3 space-y-6">
+                {/* Couple Image Section */}
+                {groupId && (
+                  <div className="space-y-4">
+                    {/* Current Image Display */}
+                    {coupleImage ? (
+                      <div className="space-y-3">
+                        <div className="relative w-full h-40 bg-gray-100 rounded-xl overflow-hidden">
+                          <Image
+                            src={coupleImage}
+                            alt="Couple"
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={handleDeleteImage}
+                            disabled={isUploadingImage}
+                            className="text-red-600 border-red-200 hover:bg-red-50"
+                          >
+                            <X className="w-4 h-4 mr-1" />
+                            Remove
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              const input = document.getElementById('coupleImageInput') as HTMLInputElement;
+                              input?.click();
+                            }}
+                            disabled={isUploadingImage}
+                          >
+                            <Upload className="w-4 h-4 mr-1" />
+                            Change
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Upload UI when no image */
+                      <div className="space-y-3">
+                        <div 
+                          className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-gray-400 transition-colors cursor-pointer bg-gray-50"
+                          onClick={() => {
+                            const input = document.getElementById('coupleImageInput') as HTMLInputElement;
+                            input?.click();
+                          }}
+                        >
+                          <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                          <p className="text-sm text-gray-600 mb-1 font-medium">
+                            Add couple image
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Click to upload (JPEG, PNG, WebP • max 5MB)
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* File Input (Hidden) */}
+                    <input
+                      id="coupleImageInput"
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+
+                    {/* Selected File Preview */}
+                    {selectedFile && (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <span className="text-sm text-gray-700 truncate">
+                            {selectedFile.name}
+                          </span>
+                          <span className="text-xs text-gray-500 ml-2">
+                            {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                          </span>
+                        </div>
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedFile(null);
+                            }}
+                            disabled={isUploadingImage}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={handleUploadImage}
+                            disabled={isUploadingImage}
+                            className="bg-black text-white hover:bg-gray-800"
+                          >
+                            {isUploadingImage ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                Uploading...
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="w-4 h-4 mr-1" />
+                                Upload
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Message Customization Section */}
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900 mb-3">
+                      Your message to guests:
+                    </h3>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <textarea
+                      value={editingMessage}
+                      onChange={(e) => {
+                        setEditingMessage(e.target.value);
+                        setError(null);
+                      }}
+                      className="w-full p-4 bg-white border-2 border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors text-gray-900 leading-relaxed"
+                      rows={6}
+                      placeholder="Your message to guests..."
+                      maxLength={300}
+                    />
+                    <div className="flex justify-between items-center">
+                      <span className={`text-xs ${editingMessage.length > 280 ? 'text-red-500' : 'text-gray-400'}`}>
+                        {editingMessage.length}/300
+                      </span>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleCancelEdit}
+                          disabled={isSaving}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleResetMessage}
+                          disabled={isSaving}
+                        >
+                          Reset
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={handleSaveMessage}
+                          disabled={isSaving || editingMessage.trim().length === 0}
+                          className="bg-black text-white hover:bg-gray-800"
+                        >
+                          Save
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Preview Link in Right Column */}
+                  <div className="pt-2">
+                    <button
+                      onClick={() => {
+                        if (collectionUrl && typeof window !== 'undefined') {
+                          window.open(collectionUrl, '_blank', 'noopener,noreferrer');
+                        }
+                      }}
+                      className="text-sm text-gray-600 hover:text-gray-900 underline transition-colors"
+                    >
+                      Preview what guests will see
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* Preview Link */}
-          <div className="text-center">
-            <button
-              onClick={() => {
-                if (collectionUrl && typeof window !== 'undefined') {
-                  window.open(collectionUrl, '_blank', 'noopener,noreferrer');
-                }
-              }}
-              className="text-sm text-gray-600 hover:text-gray-900 underline transition-colors"
-            >
-              Preview what guests will see
-            </button>
-          </div>
-
           {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-3">
+            <div className="bg-red-50 border border-red-200 rounded-md p-3 mt-4">
               <p className="text-red-600 text-sm">{error}</p>
             </div>
           )}

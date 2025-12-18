@@ -1,16 +1,18 @@
 "use client";
 
 import React from 'react';
+import Image from 'next/image';
 
 interface PersonalNoteStepProps {
   personalNote: string;
   onChange: (value: string) => void;
   userName: string;
+  coupleImageUrl?: string | null;
 }
 
 const MAX_CHARACTERS = 500;
 
-export default function PersonalNoteStep({ personalNote, onChange, userName }: PersonalNoteStepProps) {
+export default function PersonalNoteStep({ personalNote, onChange, userName, coupleImageUrl }: PersonalNoteStepProps) {
   const characterCount = personalNote.length;
   const isNearLimit = characterCount > MAX_CHARACTERS * 0.8; // 80% of limit
   const isOverLimit = characterCount > MAX_CHARACTERS;
@@ -25,6 +27,20 @@ export default function PersonalNoteStep({ personalNote, onChange, userName }: P
   return (
     <div className="min-h-[calc(100vh-180px)] flex items-center justify-center">
       <div className="w-full space-y-8 px-4 md:px-6">
+        {/* Couple Image for mobile only - desktop shows in left panel */}
+        {coupleImageUrl && (
+          <div className="lg:hidden flex justify-center">
+            <div className="relative w-48 h-32 rounded-xl overflow-hidden shadow-md">
+              <Image
+                src={coupleImageUrl}
+                alt="Couple"
+                fill
+                className="object-cover"
+              />
+            </div>
+          </div>
+        )}
+        
         <div className="space-y-2 text-center">
           <h2 className="font-serif text-3xl md:text-4xl font-semibold text-[#2D2D2D]">
             Add a personal note

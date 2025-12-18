@@ -50,13 +50,14 @@ export async function validateCollectionToken(token: string, groupId?: string | 
     let customShareMessage: string | null = null;
     let customShareSignature: string | null = null;
     let coupleNames: string | null = null;
+    let coupleImageUrl: string | null = null;
 
-    // If groupId is provided, get group-specific message and couple names
+    // If groupId is provided, get group-specific message, couple names, and image
     if (groupId) {
-      // Get group info for couple names
+      // Get group info for couple names and image
       const { data: group } = await supabase
         .from('groups')
-        .select('couple_first_name, partner_first_name')
+        .select('couple_first_name, partner_first_name, couple_image_url')
         .eq('id', groupId)
         .single();
 
@@ -68,6 +69,9 @@ export async function validateCollectionToken(token: string, groupId?: string | 
         } else if (group.partner_first_name) {
           coupleNames = group.partner_first_name;
         }
+        
+        // Set couple image URL if available
+        coupleImageUrl = group.couple_image_url;
       }
 
       // Get group-specific message from group_members
@@ -93,6 +97,7 @@ export async function validateCollectionToken(token: string, groupId?: string | 
         custom_share_message: customShareMessage,
         custom_share_signature: customShareSignature,
         couple_names: coupleNames,
+        couple_image_url: coupleImageUrl,
         token,
         is_valid: true,
       },

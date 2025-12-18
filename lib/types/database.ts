@@ -716,6 +716,7 @@ export interface CollectionTokenInfo {
   custom_share_message: string | null;
   custom_share_signature: string | null;
   couple_names: string | null;
+  couple_image_url: string | null;
   token: string;
   is_valid: boolean;
 }

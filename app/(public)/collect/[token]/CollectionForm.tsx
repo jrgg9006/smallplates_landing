@@ -299,11 +299,11 @@ export default function CollectionForm() {
         <div className="hidden lg:block lg:w-2/5 relative bg-[#E8E0D5] h-[calc(100vh-4rem)] p-2">
           <div className="relative w-full h-full rounded-2xl overflow-hidden">
             <Image
-              src="/images/collect/collect_1.jpg"
-              alt="Small Plates Cookbook Recipe Collection"
+              src={tokenInfo?.couple_image_url || "/images/collect/collect_1.jpg"}
+              alt={tokenInfo?.couple_image_url ? "Couple Photo" : "Small Plates Cookbook Recipe Collection"}
               fill
               sizes="40vw"
-              className="object-contain"
+              className={tokenInfo?.couple_image_url ? "object-cover" : "object-contain"}
               priority
             />
           </div>
@@ -323,6 +323,22 @@ export default function CollectionForm() {
                 console.log('Debug - personalizedMessage:', personalizedMessage);
                 return (
                   <div className="text-left">
+                    {/* Mobile Couple Image - shown above Personal Note title */}
+                    {tokenInfo?.couple_image_url && (
+                      <div className="lg:hidden mb-6">
+                        <div className="relative w-full h-64 bg-gray-100 rounded-2xl overflow-hidden">
+                          <Image
+                            src={tokenInfo.couple_image_url}
+                            alt="Couple Photo"
+                            fill
+                            sizes="100vw"
+                            className="object-cover"
+                            priority
+                          />
+                        </div>
+                      </div>
+                    )}
+                    
                     <h1 className="text-3xl font-semibold text-[#2D2D2D] mb-4 font-serif">
                       {personalizedMessage.beforeName}
                       {personalizedMessage.name && (
@@ -386,7 +402,7 @@ export default function CollectionForm() {
                     placeholder=""
                     disabled={searching}
                     maxLength={1}
-                    className="text-center"
+                    className="text-center bg-white"
                     autoComplete="given-name"
                     inputMode="text"
                   />
@@ -408,6 +424,7 @@ export default function CollectionForm() {
                     }}
                     placeholder=""
                     disabled={searching}
+                    className="bg-white"
                     autoComplete="family-name"
                     inputMode="text"
                   />
@@ -488,7 +505,7 @@ export default function CollectionForm() {
                         <button
                           key={guest.id}
                           onClick={() => handleGuestSelect(guest)}
-                          className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-[#D4A854]/50 hover:bg-[#FAF7F2] transition-colors text-left"
+                          className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-[#D4A854]/50 hover:bg-[#FAF7F2] transition-colors text-left bg-white"
                         >
                           <span className="text-[#2D2D2D] font-medium">
                             {guest.first_name} {guest.last_name}
@@ -511,7 +528,7 @@ export default function CollectionForm() {
                           // Optionally: scroll/focus
                           setTimeout(() => document.getElementById('fullName')?.focus(), 100);
                         }}
-                        className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-[#D4A854]/50 hover:bg-[#FAF7F2] transition-colors text-left"
+                        className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-[#D4A854]/50 hover:bg-[#FAF7F2] transition-colors text-left bg-white"
                       >
                         <span className="text-[#2D2D2D] font-medium">
                           I don&apos;t see my name

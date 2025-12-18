@@ -380,6 +380,7 @@ export default function GroupsPage() {
               ? `${selectedGroup.couple_first_name} & ${selectedGroup.partner_first_name}`
               : selectedGroup.couple_first_name || selectedGroup.partner_first_name || null
           }
+          currentCoupleImage={selectedGroup.couple_image_url}
         />
       )}
     </div>

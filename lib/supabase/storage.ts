@@ -343,3 +343,112 @@ export async function deleteRecipeDocuments(urls: string[]): Promise<void> {
     console.error('Error in deleteRecipeDocuments:', error);
   }
 }
+
+/**
+ * Upload couple image for a group (with shared client)
+ */
+export async function uploadGroupCoupleImageWithClient(
+  supabase: any,
+  groupId: string,
+  file: File
+): Promise<{ url: string | null; error: string | null }> {
+  try {
+    console.log('uploadGroupCoupleImageWithClient called with:', {
+      groupId,
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type
+    });
+
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const filePath = `groups/${groupId}/couple_image.${fileExt}`;
+
+    console.log(`Uploading couple image for group ${groupId} to: ${filePath}`);
+
+    // Remove existing couple image if it exists
+    console.log('Removing existing image if present...');
+    const { error: removeError } = await supabase.storage
+      .from('recipes')
+      .remove([filePath]);
+    
+    if (removeError) {
+      console.log('Note: Could not remove existing file (may not exist):', removeError);
+    }
+
+    // Upload the new image
+    console.log('Starting upload to storage...');
+    const { data, error: uploadError } = await supabase.storage
+      .from('recipes')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true
+      });
+
+    if (uploadError) {
+      console.error(`Error uploading couple image:`, {
+        error: uploadError,
+        filePath: filePath,
+        fileSize: file.size,
+        fileType: file.type,
+        message: uploadError.message
+      });
+      return { url: null, error: `Failed to upload image: ${uploadError.message}` };
+    }
+
+    console.log(`Successfully uploaded couple image:`, { data });
+
+    // Get public URL for the uploaded image
+    console.log('Getting public URL...');
+    const { data: { publicUrl } } = supabase.storage
+      .from('recipes')
+      .getPublicUrl(filePath);
+
+    console.log('Generated public URL:', publicUrl);
+    return { url: publicUrl, error: null };
+  } catch (error) {
+    console.error('Error in uploadGroupCoupleImageWithClient:', error);
+    return { url: null, error: 'An unexpected error occurred while uploading image' };
+  }
+}
+
+/**
+ * Upload couple image for a group
+ */
+export async function uploadGroupCoupleImage(
+  groupId: string,
+  file: File
+): Promise<{ url: string | null; error: string | null }> {
+  const supabase = createSupabaseClient();
+  return uploadGroupCoupleImageWithClient(supabase, groupId, file);
+}
+
+/**
+ * Delete couple image for a group
+ */
+export async function deleteGroupCoupleImage(groupId: string): Promise<{ error: string | null }> {
+  const supabase = createSupabaseClient();
+  
+  try {
+    console.log(`Deleting couple image for group: ${groupId}`);
+    
+    // List all possible image extensions to find existing files
+    const extensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    const possiblePaths = extensions.map(ext => `groups/${groupId}/couple_image.${ext}`);
+    
+    // Try to remove all possible paths (Supabase will ignore non-existent files)
+    const { error: deleteError } = await supabase.storage
+      .from('recipes')
+      .remove(possiblePaths);
+
+    if (deleteError) {
+      console.error('Error deleting couple image:', deleteError);
+      return { error: deleteError.message };
+    }
+
+    console.log(`Successfully deleted couple image for group: ${groupId}`);
+    return { error: null };
+  } catch (error) {
+    console.error('Error in deleteGroupCoupleImage:', error);
+    return { error: 'An unexpected error occurred while deleting image' };
+  }
+}

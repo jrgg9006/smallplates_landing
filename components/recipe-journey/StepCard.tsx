@@ -2,7 +2,6 @@
 
 import React, { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -64,17 +63,6 @@ export default function StepCard({
 }: StepCardProps) {
   const router = useRouter();
 
-  // Get image URL based on step number (cycling through onboarding images)
-  const getImageUrl = () => {
-    const imageMap = {
-      1: "/images/onboarding/onboarding_step_1.jpg",
-      2: "/images/onboarding/onboarding_step_2.jpg", 
-      3: "/images/onboarding/onboarding_step_3.jpg"
-    };
-    // Cycle through images if more than 3 steps
-    const imageIndex = ((step - 1) % 3) + 1;
-    return imageMap[imageIndex as keyof typeof imageMap];
-  };
 
   const renderContent = () => {
     switch (content.type) {
@@ -349,16 +337,8 @@ export default function StepCard({
   // Image component (EXACT COPY from OnboardingStep)
   const ImageSection = () => (
     <div className="hidden lg:block relative bg-gray-100 h-screen p-2">
-      <div className="relative w-full h-full rounded-2xl overflow-hidden bg-white shadow-sm">
-        <Image
-          src={getImageUrl()}
-          alt="Recipe journey step image"
-          fill
-          sizes="40vw"
-          className="object-contain"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
+      <div className="relative w-full h-full rounded-2xl overflow-hidden bg-gray-200 shadow-sm flex items-end">
+        <div className="w-full bg-gradient-to-t from-black/60 to-transparent flex items-end">
           <p className="text-white text-2xl lg:text-3xl font-serif p-8 lg:p-12">
             No matter how many, we&apos;ll make it happen
           </p>

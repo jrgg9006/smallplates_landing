@@ -21,7 +21,14 @@ export default function Frame({ title, children, bottomNav, showHeaderLogo = tru
           <div className="relative h-screen p-2">
             <div className="relative w-full h-full rounded-2xl overflow-hidden">
               {leftImageSrc && (
-                <Image src={leftImageSrc} alt="Recipe journey" fill sizes="40vw" className="object-contain" priority />
+                <Image 
+                  src={leftImageSrc} 
+                  alt="Recipe journey" 
+                  fill 
+                  sizes="40vw" 
+                  className={leftImageSrc.includes('supabase.co') ? "object-cover" : "object-contain"} 
+                  priority 
+                />
               )}
             </div>
           </div>

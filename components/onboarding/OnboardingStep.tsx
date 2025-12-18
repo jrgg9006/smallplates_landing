@@ -113,33 +113,15 @@ export default function OnboardingStep({
   // Image component - fixed to viewport
   const ImageSection = () => (
     <div className="hidden lg:block fixed left-0 top-0 w-2/5 bg-gray-100 h-screen p-2 z-0">
-      {imageUrl ? (
-        <div className="relative w-full h-full rounded-2xl overflow-hidden bg-white shadow-sm">
-          <Image
-            src={imageUrl}
-            alt={imageAlt}
-            fill
-            sizes="40vw"
-            className="object-contain"
-            priority
-          />
-          {imageCaption && (
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
-              <p className="text-white text-2xl lg:text-3xl font-serif p-8 lg:p-12">
-                {imageCaption}
-              </p>
-            </div>
-          )}
-        </div>
-      ) : (
-        // Placeholder for image
-        <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-32 h-32 bg-gray-300 rounded-lg mx-auto mb-4"></div>
-            <p className="text-gray-500">Image Placeholder</p>
+      <div className="relative w-full h-full rounded-2xl overflow-hidden bg-gray-200 shadow-sm flex items-end">
+        {imageCaption && (
+          <div className="w-full bg-gradient-to-t from-black/60 to-transparent">
+            <p className="text-white text-2xl lg:text-3xl font-serif p-8 lg:p-12">
+              {imageCaption}
+            </p>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 

@@ -96,7 +96,10 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     : (tokenInfo.custom_share_signature || tokenInfo.user_name.split(' ')[0] || 'the cookbook creator');
 
   const getImageUrl = () => {
-    // Use collect_1.jpg for collection journey
+    // Use couple image if available, otherwise use default placeholder
+    if (tokenInfo.couple_image_url) {
+      return tokenInfo.couple_image_url;
+    }
     return "/images/collect/collect_1.jpg";
   };
 
@@ -741,7 +744,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
             exit={{ opacity: 0, x: -16 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
           >
-            <WelcomeStep creatorName={creatorName} />
+            <WelcomeStep creatorName={creatorName} coupleImageUrl={tokenInfo.couple_image_url} />
           </motion.div>
         )}
         {current === 'introInfo' && (
@@ -835,6 +838,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
               personalNote={recipeData.personalNote}
               onChange={(value) => setRecipeData(prev => ({ ...prev, personalNote: value }))}
               userName={creatorName}
+              coupleImageUrl={tokenInfo.couple_image_url}
             />
           </motion.div>
         )}
@@ -870,6 +874,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
               hasGuestOptIn={guestOptInRef.current}
               guestOptInEmail={guestOptInEmailRef.current || undefined}
               onSavePrefs={handleSavePrefs}
+              coupleImageUrl={tokenInfo.couple_image_url}
             />
           </motion.div>
         )}
