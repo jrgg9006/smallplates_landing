@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
+import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { motion } from "framer-motion";
@@ -35,6 +35,7 @@ export interface GroupsSectionRef {
   handleExitGroup: () => void;
   userRole: string | null;
   loading: boolean;
+  loadGroups: (forceRefreshSelected?: boolean) => Promise<void>;
 }
 
 export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({ 
@@ -64,7 +65,11 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
   
-  const loadGroups = useCallback(async () => {
+  // Use ref to avoid dependency issues
+  const onGroupChangeRef = useRef(onGroupChange);
+  onGroupChangeRef.current = onGroupChange;
+  
+  const loadGroups = useCallback(async (forceRefreshSelected = false) => {
     try {
       setLoading(true);
       setError(null);
@@ -79,10 +84,21 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
       if (data) {
         setGroups(data);
         // Auto-select first group if no group is selected
-        // Use functional update to avoid dependency on selectedGroup
+        // OR refresh the selected group with fresh data if forceRefreshSelected is true
         setSelectedGroup(prev => {
           if (data.length > 0 && !prev) {
-            return data[0];
+            // First time load - select first group
+            const firstGroup = data[0];
+            onGroupChangeRef.current?.(firstGroup);
+            return firstGroup;
+          } else if (forceRefreshSelected && prev) {
+            // Refresh selected group with fresh data from database
+            const refreshedGroup = data.find(g => g.id === prev.id);
+            if (refreshedGroup) {
+              console.log('🔄 Refreshing selectedGroup with fresh data:', refreshedGroup.image_group_dashboard);
+              onGroupChangeRef.current?.(refreshedGroup);
+              return refreshedGroup;
+            }
           }
           return prev;
         });
@@ -93,7 +109,7 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, []); // Remove onGroupChange from dependencies to prevent infinite loop
 
   const loadRecipes = useCallback(async () => {
     if (!selectedGroup) {
@@ -121,8 +137,8 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
 
   const handleGroupChange = useCallback((group: GroupWithMembers) => {
     setSelectedGroup(group);
-    onGroupChange?.(group);
-  }, [onGroupChange]);
+    onGroupChangeRef.current?.(group);
+  }, []);
 
   const handleEditGroup = useCallback(() => {
     setEditModalOpen(true);
@@ -149,8 +165,9 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
     handleDeleteGroup: handleDeleteGroup,
     handleExitGroup: handleExitGroup,
     userRole: userRole,
-    loading: loading
-  }), [selectedGroup, groups, userRole, loading, handleEditGroup, handleGroupChange, handleDeleteGroup, handleExitGroup]);
+    loading: loading,
+    loadGroups: loadGroups
+  }), [selectedGroup, groups, userRole, loading, handleEditGroup, handleGroupChange, handleDeleteGroup, handleExitGroup, loadGroups]);
 
   useEffect(() => {
     loadGroups();
@@ -223,7 +240,7 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
         }
       }
 
-      await loadGroups();
+      await loadGroups(true); // Force refresh to update state
       setDeleteModalOpen(false);
       
     } catch (err) {
@@ -297,7 +314,7 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
             <p className="text-red-600">Error: {error}</p>
             <Button 
-              onClick={loadGroups} 
+              onClick={() => loadGroups()} 
               className="mt-2"
               variant="outline"
             >

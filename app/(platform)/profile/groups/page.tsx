@@ -8,7 +8,7 @@ import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { CaptainsDropdown } from "@/components/profile/groups/CaptainsDropdown";
 import { MoreMenuDropdown } from "@/components/profile/groups/MoreMenuDropdown";
 import { AddFriendToGroupModal } from "@/components/profile/groups/AddFriendToGroupModal";
-import { ChevronDown, Image as ImageIcon } from "lucide-react";
+import { ChevronDown, Image as ImageIcon, Upload, X } from "lucide-react";
 import Image from "next/image";
 import type { GroupWithMembers } from "@/lib/types/database";
 import { useProfileOnboarding, OnboardingSteps } from "@/lib/contexts/ProfileOnboardingContext";
@@ -41,6 +41,11 @@ export default function GroupsPage() {
   // Email verification state
   const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
   const [showEmailBanner, setShowEmailBanner] = useState(false);
+  
+  // Dashboard image state
+  const [selectedDashboardFile, setSelectedDashboardFile] = useState<File | null>(null);
+  const [isUploadingDashboardImage, setIsUploadingDashboardImage] = useState(false);
+  const [dashboardImageError, setDashboardImageError] = useState<string | null>(null);
   
   // Onboarding context
   const { 
@@ -129,6 +134,126 @@ export default function GroupsPage() {
   const handlePreviewBook = () => {
     console.log('Preview Book clicked');
   };
+
+  // Dashboard image functions
+  const handleDashboardImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setDashboardImageError('Invalid file type. Only JPEG, PNG, and WebP are allowed.');
+      return;
+    }
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      setDashboardImageError('File too large. Maximum size is 5MB.');
+      return;
+    }
+
+    setSelectedDashboardFile(file);
+    setDashboardImageError(null);
+    
+    // Auto-upload the file
+    handleUploadDashboardImage(file);
+  };
+
+  const handleUploadDashboardImage = async (file?: File) => {
+    const fileToUpload = file || selectedDashboardFile;
+    if (!fileToUpload || !selectedGroup) {
+      setDashboardImageError('No file selected or group not found');
+      return;
+    }
+
+    setIsUploadingDashboardImage(true);
+    setDashboardImageError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', fileToUpload);
+
+      const response = await fetch(`/api/v1/groups/${selectedGroup.id}/dashboard-image`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setDashboardImageError(result.error || 'Failed to upload image');
+        return;
+      }
+
+      setSelectedDashboardFile(null);
+      
+      // Reset file input
+      const fileInput = document.getElementById('dashboardImageInput') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+
+      console.log('🔍 Upload successful, about to refresh groups. Current selectedGroup:', selectedGroup?.id);
+      console.log('🔍 Upload URL returned:', result.url);
+
+      // Refresh groups data to get the latest state
+      if (groupsSectionRef.current) {
+        console.log('🔍 Calling loadGroups with forceRefresh...');
+        await groupsSectionRef.current.loadGroups(true); // Force refresh selected group
+        console.log('🔍 loadGroups completed. Updated selectedGroup:', groupsSectionRef.current.selectedGroup?.image_group_dashboard);
+      } else {
+        console.error('🔍 groupsSectionRef.current is null!');
+      }
+
+    } catch (err) {
+      setDashboardImageError('Failed to upload image');
+    } finally {
+      setIsUploadingDashboardImage(false);
+    }
+  };
+
+  const handleDeleteDashboardImage = async () => {
+    if (!selectedGroup) {
+      setDashboardImageError('Group not found');
+      return;
+    }
+
+    setIsUploadingDashboardImage(true);
+    setDashboardImageError(null);
+
+    try {
+      const response = await fetch(`/api/v1/groups/${selectedGroup.id}/dashboard-image`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setDashboardImageError(result.error || 'Failed to delete image');
+        return;
+      }
+
+      setSelectedDashboardFile(null);
+
+      // Refresh groups data to get the latest state
+      if (groupsSectionRef.current) {
+        console.log('🔍 Delete successful, calling loadGroups with forceRefresh...');
+        await groupsSectionRef.current.loadGroups(true); // Force refresh selected group
+      }
+
+    } catch (err) {
+      setDashboardImageError('Failed to delete image');
+    } finally {
+      setIsUploadingDashboardImage(false);
+    }
+  };
+
+  const handleDashboardImageClick = () => {
+    const input = document.getElementById('dashboardImageInput') as HTMLInputElement;
+    input?.click();
+  };
+
+  // Derive dashboard image directly from selectedGroup to avoid sync issues
+  const currentDashboardImage = selectedGroup?.image_group_dashboard || null;
 
   // Check if mobile on mount and window resize
   useEffect(() => {
@@ -260,22 +385,87 @@ export default function GroupsPage() {
           />
         )}
         {/* Hero Image */}
-        <div className="relative w-full h-[200px] mt-6 rounded-2xl overflow-hidden">
-          <Image
-            src="/images/profile/Hero_Profile_2400.jpg"
-            alt="Couple cooking together"
-            fill
-            className="object-cover"
-            sizes="1000px"
+        <div className="relative w-full h-[200px] mt-6 rounded-2xl overflow-hidden group">
+          {currentDashboardImage ? (
+            /* Show uploaded dashboard image */
+            <>
+              <Image
+                src={currentDashboardImage}
+                alt="Group dashboard image"
+                fill
+                className="object-cover"
+                sizes="1000px"
+              />
+              {/* Hover overlay with edit buttons - only show on hover */}
+              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleDashboardImageClick}
+                    disabled={isUploadingDashboardImage}
+                    className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-warm-white))] text-[hsl(var(--brand-charcoal))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-honey))] hover:text-black transition-all duration-200 shadow-sm"
+                  >
+                    <Upload size={16} />
+                    Change
+                  </button>
+                  <button
+                    onClick={handleDeleteDashboardImage}
+                    disabled={isUploadingDashboardImage}
+                    className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-charcoal))] text-[hsl(var(--brand-warm-white))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-warm-gray))] transition-all duration-200 shadow-sm"
+                  >
+                    <X size={16} />
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            /* Show placeholder with upload prompt */
+            <>
+              <Image
+                src="/images/profile/Hero_Profile_2400.jpg"
+                alt="Couple cooking together"
+                fill
+                className="object-cover"
+                sizes="1000px"
+              />
+              {/* Clickable overlay */}
+              <div 
+                className="absolute inset-0 bg-black/10 flex items-center justify-center cursor-pointer hover:bg-black/15 transition-colors"
+                onClick={handleDashboardImageClick}
+              >
+                <div className="flex flex-col items-center text-white/70">
+                  {isUploadingDashboardImage ? (
+                    <>
+                      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white/50 mb-2"></div>
+                      <span className="text-[12px] mt-1.5 font-normal opacity-80">Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <ImageIcon size={40} strokeWidth={1} className="opacity-60" />
+                      <span className="text-[12px] mt-1.5 font-normal opacity-80">Click to add your photo</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+          
+          {/* Hidden file input */}
+          <input
+            id="dashboardImageInput"
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
+            onChange={handleDashboardImageSelect}
+            className="hidden"
           />
-          {/* Overlay with text - sutil para no competir con la imagen */}
-          <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
-            <div className="flex flex-col items-center text-white/70">
-              <ImageIcon size={40} strokeWidth={1} className="opacity-60" />
-              <span className="text-[12px] mt-1.5 font-normal opacity-80">Click to add your photo</span>
-            </div>
-          </div>
         </div>
+
+        {/* Error Message */}
+        {dashboardImageError && (
+          <div className="mt-3 bg-red-50 border border-red-200 rounded-md p-3">
+            <p className="text-red-600 text-sm">{dashboardImageError}</p>
+          </div>
+        )}
         
         {/* Title Section */}
         <div className="mt-6">

@@ -452,3 +452,112 @@ export async function deleteGroupCoupleImage(groupId: string): Promise<{ error: 
     return { error: 'An unexpected error occurred while deleting image' };
   }
 }
+
+/**
+ * Upload dashboard image for a group (with shared client)
+ */
+export async function uploadGroupDashboardImageWithClient(
+  supabase: any,
+  groupId: string,
+  file: File
+): Promise<{ url: string | null; error: string | null }> {
+  try {
+    console.log('uploadGroupDashboardImageWithClient called with:', {
+      groupId,
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type
+    });
+
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const filePath = `groups/${groupId}/dashboard_image.${fileExt}`;
+
+    console.log(`Uploading dashboard image for group ${groupId} to: ${filePath}`);
+
+    // Remove existing dashboard image if it exists
+    console.log('Removing existing dashboard image if present...');
+    const { error: removeError } = await supabase.storage
+      .from('recipes')
+      .remove([filePath]);
+    
+    if (removeError) {
+      console.log('Note: Could not remove existing file (may not exist):', removeError);
+    }
+
+    // Upload the new image
+    console.log('Starting upload to storage...');
+    const { data, error: uploadError } = await supabase.storage
+      .from('recipes')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true
+      });
+
+    if (uploadError) {
+      console.error(`Error uploading dashboard image:`, {
+        error: uploadError,
+        filePath: filePath,
+        fileSize: file.size,
+        fileType: file.type,
+        message: uploadError.message
+      });
+      return { url: null, error: `Failed to upload image: ${uploadError.message}` };
+    }
+
+    console.log(`Successfully uploaded dashboard image:`, { data });
+
+    // Get public URL for the uploaded image
+    console.log('Getting public URL...');
+    const { data: { publicUrl } } = supabase.storage
+      .from('recipes')
+      .getPublicUrl(filePath);
+
+    console.log('Generated public URL:', publicUrl);
+    return { url: publicUrl, error: null };
+  } catch (error) {
+    console.error('Error in uploadGroupDashboardImageWithClient:', error);
+    return { url: null, error: 'An unexpected error occurred while uploading image' };
+  }
+}
+
+/**
+ * Upload dashboard image for a group
+ */
+export async function uploadGroupDashboardImage(
+  groupId: string,
+  file: File
+): Promise<{ url: string | null; error: string | null }> {
+  const supabase = createSupabaseClient();
+  return uploadGroupDashboardImageWithClient(supabase, groupId, file);
+}
+
+/**
+ * Delete dashboard image for a group
+ */
+export async function deleteGroupDashboardImage(groupId: string): Promise<{ error: string | null }> {
+  const supabase = createSupabaseClient();
+  
+  try {
+    console.log(`Deleting dashboard image for group: ${groupId}`);
+    
+    // List all possible image extensions to find existing files
+    const extensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    const possiblePaths = extensions.map(ext => `groups/${groupId}/dashboard_image.${ext}`);
+    
+    // Try to remove all possible paths (Supabase will ignore non-existent files)
+    const { error: deleteError } = await supabase.storage
+      .from('recipes')
+      .remove(possiblePaths);
+
+    if (deleteError) {
+      console.error('Error deleting dashboard image:', deleteError);
+      return { error: deleteError.message };
+    }
+
+    console.log(`Successfully deleted dashboard image for group: ${groupId}`);
+    return { error: null };
+  } catch (error) {
+    console.error('Error in deleteGroupDashboardImage:', error);
+    return { error: 'An unexpected error occurred while deleting image' };
+  }
+}
