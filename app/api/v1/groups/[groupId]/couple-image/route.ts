@@ -8,11 +8,11 @@ import { uploadGroupCoupleImageWithClient, deleteGroupCoupleImage } from '@/lib/
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
-    console.log('Starting couple image upload for groupId:', params?.groupId);
-    const { groupId } = params;
+    const { groupId } = await params;
+    console.log('Starting couple image upload for groupId:', groupId);
     
     if (!groupId) {
       console.error('No groupId provided');
@@ -143,10 +143,10 @@ export async function POST(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
-    const { groupId } = params;
+    const { groupId } = await params;
     
     if (!groupId) {
       return NextResponse.json(

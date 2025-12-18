@@ -32,7 +32,8 @@ export default function PreviewPage() {
     custom_share_message: null,
     custom_share_signature: null,
     token: 'preview-token',
-    is_valid: true
+    is_valid: true,
+    couple_image_url: null
   };
 
   // Guest search state

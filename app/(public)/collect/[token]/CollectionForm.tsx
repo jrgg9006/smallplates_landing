@@ -488,7 +488,7 @@ export default function CollectionForm() {
                     Continue
                   </Button>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">This is how we'll print your name in the cookbook.</p>
+                <p className="text-sm text-gray-500 mt-1">This is how we&apos;ll print your name in the cookbook.</p>
               </div>
             )}
 
@@ -578,7 +578,7 @@ export default function CollectionForm() {
                           Continue
                         </Button>
                       </div>
-                      <p className="text-sm text-gray-500 mt-1">This is how we'll print your name in the cookbook.</p>
+                      <p className="text-sm text-gray-500 mt-1">This is how we&apos;ll print your name in the cookbook.</p>
                     </div>
                   </div>
                 )}

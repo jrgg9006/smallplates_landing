@@ -70,7 +70,7 @@ export default function ReviewPage() {
     }
 
     initialize();
-  }, [token, router]);
+  }, [token, router, groupId]);
 
   // Handle back navigation
   const handleBack = () => {

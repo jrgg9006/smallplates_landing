@@ -369,6 +369,7 @@ export interface Database {
           partner_first_name: string | null;
           partner_last_name: string | null;
           relationship_to_couple: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
+          couple_image_url: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -385,6 +386,7 @@ export interface Database {
           partner_first_name?: string | null;
           partner_last_name?: string | null;
           relationship_to_couple?: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
+          couple_image_url?: string | null;
         };
         Update: {
           name?: string;
@@ -398,6 +400,7 @@ export interface Database {
           partner_first_name?: string | null;
           partner_last_name?: string | null;
           relationship_to_couple?: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
+          couple_image_url?: string | null;
         };
       };
       group_members: {

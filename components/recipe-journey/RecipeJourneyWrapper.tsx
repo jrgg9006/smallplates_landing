@@ -748,7 +748,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
             exit={{ opacity: 0, x: -16 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
           >
-            <WelcomeStep creatorName={creatorName} coupleImageUrl={tokenInfo.couple_image_url} />
+            <WelcomeStep creatorName={creatorName} />
           </motion.div>
         )}
         {current === 'introInfo' && (
