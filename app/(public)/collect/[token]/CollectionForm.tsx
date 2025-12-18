@@ -151,7 +151,8 @@ export default function CollectionForm() {
       const { data: guest, error } = await searchGuestInCollection(
         tokenInfo.user_id,
         firstName.trim(),
-        lastName.trim()
+        lastName.trim(),
+        groupId  // Pass groupId to filter guests by specific group
       );
 
       if (error) {

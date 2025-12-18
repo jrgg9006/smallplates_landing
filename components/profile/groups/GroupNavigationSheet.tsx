@@ -6,6 +6,11 @@ import Image from "next/image";
 import { Plus } from "lucide-react";
 import { getMyGroups } from "@/lib/supabase/groups";
 import type { GroupWithMembers } from "@/lib/types/database";
+
+// Extend the interface locally to ensure image_group_dashboard is available
+interface GroupWithDashboardImage extends GroupWithMembers {
+  image_group_dashboard: string | null;
+}
 import {
   Sheet,
   SheetContent,
@@ -22,7 +27,7 @@ interface GroupNavigationSheetProps {
 
 export function GroupNavigationSheet({ isOpen, onClose, onGroupSelect, currentGroupId }: GroupNavigationSheetProps) {
   const router = useRouter();
-  const [groups, setGroups] = useState<GroupWithMembers[]>([]);
+  const [groups, setGroups] = useState<GroupWithDashboardImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -44,7 +49,7 @@ export function GroupNavigationSheet({ isOpen, onClose, onGroupSelect, currentGr
     setLoading(true);
     const { data, error } = await getMyGroups();
     if (!error && data) {
-      setGroups(data);
+      setGroups(data as GroupWithDashboardImage[]);
     }
     setLoading(false);
   };
@@ -60,7 +65,7 @@ export function GroupNavigationSheet({ isOpen, onClose, onGroupSelect, currentGr
     return "Celebrations ahead";
   };
 
-  const handleGroupSelect = (group: GroupWithMembers) => {
+  const handleGroupSelect = (group: GroupWithDashboardImage) => {
     onGroupSelect?.(group);
     onClose();
   };
@@ -116,7 +121,7 @@ export function GroupNavigationSheet({ isOpen, onClose, onGroupSelect, currentGr
                     <div className="h-40 relative">
                       {/* Background Image */}
                       <Image
-                        src="/images/profile/Hero_Profile_2400.jpg"
+                        src={group.image_group_dashboard || "/images/profile/Hero_Profile_2400.jpg"}
                         alt=""
                         fill
                         className="object-cover"
