@@ -380,17 +380,36 @@ export async function submitGuestRecipeWithFiles(
       finalFileUrls = moveResult.urls;
       
       // Update recipe with final file URLs
-      const { error: updateError } = await supabase
+      console.log(`🔄 Attempting to update recipe ${recipe.id} with document_urls:`, finalFileUrls);
+      
+      const { data: updateData, error: updateError } = await supabase
         .from('guest_recipes')
         .update({ document_urls: finalFileUrls })
-        .eq('id', recipe.id);
+        .eq('id', recipe.id)
+        .select('id, document_urls');
 
       if (updateError) {
-        console.error('Error updating recipe with file URLs:', updateError);
+        console.error('❌ Error updating recipe with file URLs:', updateError);
+        console.error('❌ Recipe ID:', recipe.id);
+        console.error('❌ URLs to save:', finalFileUrls);
         // Files are already moved, so we don't want to fail the whole submission
         // Just log the error and continue
       } else {
-        console.log(`✅ Updated recipe with ${finalFileUrls.length} file URLs`);
+        console.log(`✅ Successfully updated recipe with ${finalFileUrls.length} file URLs`);
+        console.log(`✅ Updated data:`, updateData);
+        
+        // Verify the update worked by reading back
+        const { data: verifyData, error: verifyError } = await supabase
+          .from('guest_recipes')
+          .select('id, document_urls')
+          .eq('id', recipe.id)
+          .single();
+        
+        if (verifyError) {
+          console.error('❌ Error verifying update:', verifyError);
+        } else {
+          console.log(`🔍 Verification read - document_urls:`, verifyData.document_urls);
+        }
       }
     }
 

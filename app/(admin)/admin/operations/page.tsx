@@ -80,6 +80,7 @@ export default function OperationsPage() {
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeWithProductionStatus | null>(null);
   const [updatingField, setUpdatingField] = useState<string | null>(null);
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
+  const [downloadingImages, setDownloadingImages] = useState(false);
   
   // Filters
   const [statusFilter, setStatusFilter] = useState<'all' | 'no_action' | 'in_progress' | 'ready_to_print'>('all');
@@ -325,6 +326,240 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
     }
   };
 
+  const getRecipeImagesFromStorage = async (recipe: RecipeWithProductionStatus): Promise<string[]> => {
+    // If document_urls exists and is not empty, use those first (primary source)
+    if (recipe.document_urls && recipe.document_urls.length > 0) {
+      console.log(`📁 Using document_urls (${recipe.document_urls.length} images):`, recipe.document_urls);
+      return recipe.document_urls;
+    }
+    
+    // If no document_urls but upload_method is 'image', try to get from Storage (fallback)
+    if (recipe.upload_method === 'image' && recipe.guests && recipe.profiles) {
+      console.log(`🔄 Fallback: Searching Storage API for recipe ${recipe.id}`);
+      try {
+        const supabase = createSupabaseClient();
+        
+        // Construct the storage path based on the known structure
+        const basePath = `users/${recipe.profiles.id}/guests/${recipe.guests.id}/recipes/${recipe.id}`;
+        
+        // List all files in the recipe directory
+        const { data: files, error } = await supabase.storage
+          .from('recipes')
+          .list(basePath, {
+            limit: 100,
+            sortBy: { column: 'name', order: 'asc' }
+          });
+        
+        if (error) {
+          console.error('Error listing files from storage:', error);
+          return [];
+        }
+        
+        if (!files || files.length === 0) {
+          // Try alternative structures
+          const imagePath = `${basePath}/images`;
+          const { data: imageFiles, error: imageError } = await supabase.storage
+            .from('recipes')
+            .list(imagePath, {
+              limit: 100,
+              sortBy: { column: 'name', order: 'asc' }
+            });
+          
+          if (imageError || !imageFiles) {
+            console.error('Error listing image files:', imageError);
+            return [];
+          }
+          
+          // Convert file names to full URLs
+          const fallbackUrls = imageFiles
+            .filter(file => file.name && !file.name.endsWith('/')) // Filter out folders
+            .map(file => {
+              const { data } = supabase.storage
+                .from('recipes')
+                .getPublicUrl(`${imagePath}/${file.name}`);
+              return data.publicUrl;
+            });
+          
+          console.log(`✅ Storage fallback found ${fallbackUrls.length} images`);
+          return fallbackUrls;
+        }
+        
+        // Convert file names to full URLs for files in base path
+        const fallbackUrls = files
+          .filter(file => file.name && !file.name.endsWith('/')) // Filter out folders
+          .map(file => {
+            const { data } = supabase.storage
+              .from('recipes')
+              .getPublicUrl(`${basePath}/${file.name}`);
+            return data.publicUrl;
+          });
+        
+        console.log(`✅ Storage fallback found ${fallbackUrls.length} images in base path`);
+        return fallbackUrls;
+        
+      } catch (error) {
+        console.error('Error accessing storage:', error);
+        return [];
+      }
+    }
+    
+    return [];
+  };
+
+  const handleDownloadRecipeImages = async (recipe: RecipeWithProductionStatus) => {
+    console.log('Recipe data for download:', {
+      id: recipe.id,
+      recipe_name: recipe.recipe_name,
+      document_urls: recipe.document_urls,
+      upload_method: recipe.upload_method,
+      user_id: recipe.profiles?.id,
+      guest_id: recipe.guests?.id
+    });
+    
+    // Get image URLs from storage
+    const imageUrls = await getRecipeImagesFromStorage(recipe);
+    
+    if (imageUrls.length === 0) {
+      alert('No images found for this recipe.');
+      return;
+    }
+    
+    setDownloadingImages(true);
+    
+    try {
+      
+      // Clean filename parts
+      const cleanRecipeName = (recipe.recipe_name || 'Untitled').replace(/[^a-z0-9\s-]/gi, '').replace(/\s+/g, '_');
+      const cleanGuestName = (recipe.guests?.printed_name || 
+        `${recipe.guests?.first_name || ''} ${recipe.guests?.last_name || ''}`.trim() || 
+        'Unknown').replace(/[^a-z0-9\s-]/gi, '').replace(/\s+/g, '_');
+      
+      // Download each image
+      for (let i = 0; i < imageUrls.length; i++) {
+        const url = imageUrls[i];
+        
+        try {
+          // Fetch the image
+          const response = await fetch(url);
+          if (!response.ok) throw new Error('Failed to fetch image');
+          
+          const blob = await response.blob();
+          
+          // Create a download link
+          const link = document.createElement('a');
+          const objectUrl = URL.createObjectURL(blob);
+          
+          // Get file extension from URL or use jpg as default
+          const urlParts = url.split('.');
+          const extension = urlParts[urlParts.length - 1].split('?')[0] || 'jpg';
+          
+          link.href = objectUrl;
+          // Add index if multiple images
+          const suffix = imageUrls.length > 1 ? `_${i + 1}` : '';
+          link.download = `${cleanGuestName}_${cleanRecipeName}${suffix}.${extension}`;
+          
+          // Trigger download
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          // Clean up
+          URL.revokeObjectURL(objectUrl);
+          
+          // Small delay between downloads
+          if (i < imageUrls.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+          
+        } catch (error) {
+          console.error(`Failed to download image from ${url}:`, error);
+        }
+      }
+      
+      alert(`Downloaded ${imageUrls.length} image${imageUrls.length > 1 ? 's' : ''} successfully!`);
+      
+    } catch (error) {
+      console.error('Error downloading images:', error);
+      alert('Failed to download images. Please try again.');
+    } finally {
+      setDownloadingImages(false);
+    }
+  };
+
+  const handleDownloadAllImages = async () => {
+    if (!recipes || recipes.length === 0) return;
+    
+    setDownloadingImages(true);
+    
+    try {
+      // Collect all image URLs from visible recipes
+      const imageUrls = recipes
+        .filter(recipe => recipe.image_url)
+        .map(recipe => ({
+          url: recipe.image_url!,
+          recipeName: recipe.recipe_name || 'Untitled',
+          guestName: recipe.guests?.printed_name || 
+            `${recipe.guests?.first_name || ''} ${recipe.guests?.last_name || ''}`.trim() || 
+            'Unknown'
+        }));
+      
+      if (imageUrls.length === 0) {
+        alert('No images found in the current recipes.');
+        return;
+      }
+      
+      // Download each image
+      for (let i = 0; i < imageUrls.length; i++) {
+        const { url, recipeName, guestName } = imageUrls[i];
+        
+        try {
+          // Fetch the image
+          const response = await fetch(url);
+          if (!response.ok) throw new Error('Failed to fetch image');
+          
+          const blob = await response.blob();
+          
+          // Create a download link
+          const link = document.createElement('a');
+          const objectUrl = URL.createObjectURL(blob);
+          
+          // Clean filename - remove special characters
+          const cleanRecipeName = recipeName.replace(/[^a-z0-9\s-]/gi, '').replace(/\s+/g, '_');
+          const cleanGuestName = guestName.replace(/[^a-z0-9\s-]/gi, '').replace(/\s+/g, '_');
+          
+          // Get file extension from URL or use jpg as default
+          const urlParts = url.split('.');
+          const extension = urlParts[urlParts.length - 1].split('?')[0] || 'jpg';
+          
+          link.href = objectUrl;
+          link.download = `${cleanGuestName}_${cleanRecipeName}_${i + 1}.${extension}`;
+          
+          // Trigger download
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          // Clean up
+          URL.revokeObjectURL(objectUrl);
+          
+          // Small delay between downloads to prevent browser issues
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+        } catch (error) {
+          console.error(`Failed to download image from ${url}:`, error);
+        }
+      }
+      
+      alert(`Downloaded ${imageUrls.length} image${imageUrls.length > 1 ? 's' : ''} successfully!`);
+      
+    } catch (error) {
+      console.error('Error downloading images:', error);
+      alert('Failed to download some images. Please check the console for details.');
+    } finally {
+      setDownloadingImages(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -474,6 +709,37 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
                       </button>
                     </div>
                     <div className="flex items-center gap-3">
+                      {/* Download Images Button - Show when there are uploaded images */}
+                      {((selectedRecipe.document_urls && selectedRecipe.document_urls.length > 0) || selectedRecipe.upload_method === 'image') && (
+                        <button
+                          onClick={() => handleDownloadRecipeImages(selectedRecipe)}
+                          disabled={downloadingImages}
+                          className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                          title={`Download ${selectedRecipe.document_urls?.length || 0} recipe image${(selectedRecipe.document_urls?.length || 0) !== 1 ? 's' : ''}`}
+                        >
+                          {downloadingImages ? (
+                            <>
+                              <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                              </svg>
+                              <span>Downloading...</span>
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                              </svg>
+                              <span>
+                                {selectedRecipe.document_urls?.length 
+                                  ? `Download ${selectedRecipe.document_urls.length} Image${selectedRecipe.document_urls.length > 1 ? 's' : ''}`
+                                  : 'Download Images'
+                                }
+                              </span>
+                            </>
+                          )}
+                        </button>
+                      )}
                       <button
                         onClick={copyEntireRecipe}
                         className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
