@@ -89,14 +89,16 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
           if (data.length > 0 && !prev) {
             // First time load - select first group
             const firstGroup = data[0];
-            onGroupChangeRef.current?.(firstGroup);
+            // Defer the callback to avoid setState during render
+            setTimeout(() => onGroupChangeRef.current?.(firstGroup), 0);
             return firstGroup;
           } else if (forceRefreshSelected && prev) {
             // Refresh selected group with fresh data from database
             const refreshedGroup = data.find(g => g.id === prev.id);
             if (refreshedGroup) {
               console.log('🔄 Refreshing selectedGroup with fresh data:', refreshedGroup.image_group_dashboard);
-              onGroupChangeRef.current?.(refreshedGroup);
+              // Defer the callback to avoid setState during render
+              setTimeout(() => onGroupChangeRef.current?.(refreshedGroup), 0);
               return refreshedGroup;
             }
           }
@@ -160,7 +162,14 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
     groups: groups,
     onEditGroup: handleEditGroup,
     openAddExistingRecipeModal: () => setAddRecipesModalOpen(true),
-    openAddNewRecipeModal: () => setAddNewRecipeModalOpen(true),
+    openAddNewRecipeModal: () => {
+      if (!selectedGroup) {
+        console.error('Cannot open AddRecipeModal: No group selected');
+        return;
+      }
+      console.log('Opening AddRecipeModal for group:', selectedGroup.id, selectedGroup.name);
+      setAddNewRecipeModalOpen(true);
+    },
     handleGroupChange: handleGroupChange,
     handleDeleteGroup: handleDeleteGroup,
     handleExitGroup: handleExitGroup,
@@ -201,14 +210,6 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
     onRecipeCountChange?.(recipes.length);
   }, [recipes.length, onRecipeCountChange]);
 
-  // Sync selectedGroup changes to parent (after render completes)
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      onGroupChange?.(selectedGroup);
-    }, 0);
-    
-    return () => clearTimeout(timeoutId);
-  }, [selectedGroup, onGroupChange]);
 
   const handleGroupCreated = () => {
     loadGroups();
@@ -220,7 +221,8 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
       prev.map(g => g.id === updatedGroup.id ? updatedGroup : g)
     );
     setSelectedGroup(updatedGroup);
-    onGroupChange?.(updatedGroup);
+    // Defer the callback to avoid setState during render
+    setTimeout(() => onGroupChange?.(updatedGroup), 0);
   };
 
   const handleConfirmDeleteExit = async () => {
@@ -391,7 +393,7 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
       <AddRecipeModal
         isOpen={addNewRecipeModalOpen}
         onClose={() => setAddNewRecipeModalOpen(false)}
-        groupId={selectedGroup?.id}
+        groupId={selectedGroup?.id || ''}
         onRecipeAdded={() => {
           loadRecipes();
           setAddNewRecipeModalOpen(false);

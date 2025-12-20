@@ -31,7 +31,7 @@ interface AddPlateModalProps {
   onClose: () => void;
   onRecipeAdded?: () => void; // Callback to refresh the plate list
   cookbookId?: string | null; // Optional cookbook ID to auto-add plate after creation
-  groupId?: string | null; // Optional group ID to create plate directly in group
+  groupId: string | null; // Group ID is now REQUIRED when not null - enforce it
   preselectedGuestId?: string | null; // Optional guest ID to pre-select
 }
 
@@ -175,6 +175,12 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
   }, [isOpen]);
 
   const handleSave = async () => {
+    // Critical validation: Ensure we have a target (group or cookbook)
+    if (!groupId && !cookbookId) {
+      setError("Unable to save recipe: No collection specified. Please contact support.");
+      return;
+    }
+
     // Validation
     if (!isMyOwnRecipe && !selectedGuestId) {
       setError("Whose recipe is this?");
@@ -233,7 +239,8 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
             isMyOwnRecipe ? null : selectedGuestId,
             formData,
             selectedFiles,
-            isMyOwnRecipe
+            isMyOwnRecipe,
+            groupId
           );
 
           setUploadProgress(50);
@@ -249,11 +256,16 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
           
           // Add the recipe to the group
           if (createdRecipeId) {
+            console.log('🔍 Adding recipe to group:', { recipeId: createdRecipeId, groupId });
             const { error: groupError } = await addRecipeToGroup(groupId, createdRecipeId);
             if (groupError) {
-              console.error('Failed to add recipe to group:', groupError);
+              console.error('❌ Failed to add recipe to group:', groupError);
               // Plate was created but not added to group - still continue
+            } else {
+              console.log('✅ Recipe successfully added to group');
             }
+          } else {
+            console.error('❌ No recipe ID returned after creation!');
           }
 
           setUploadProgress(100);
@@ -267,7 +279,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
               personalNote: recipeNotes.trim() || undefined,
             };
 
-            const { data: userRecipeData_result, error: recipeError } = await addUserRecipe(userRecipeData);
+            const { data: userRecipeData_result, error: recipeError } = await addUserRecipe(userRecipeData, groupId);
             
             if (recipeError) {
               setError(recipeError);
@@ -284,7 +296,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
               comments: recipeNotes.trim() || undefined,
             };
 
-            const { data: recipeData_result, error: recipeError } = await addRecipe(selectedGuestId, recipeData);
+            const { data: recipeData_result, error: recipeError } = await addRecipe(selectedGuestId, recipeData, groupId);
             
             if (recipeError) {
               setError(recipeError);
@@ -297,11 +309,16 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
           
           // Add the recipe to the group
           if (createdRecipeId) {
+            console.log('🔍 Adding recipe to group:', { recipeId: createdRecipeId, groupId });
             const { error: groupError } = await addRecipeToGroup(groupId, createdRecipeId);
             if (groupError) {
-              console.error('Failed to add recipe to group:', groupError);
+              console.error('❌ Failed to add recipe to group:', groupError);
               // Plate was created but not added to group - still continue
+            } else {
+              console.log('✅ Recipe successfully added to group');
             }
+          } else {
+            console.error('❌ No recipe ID returned after creation!');
           }
         }
 
@@ -330,7 +347,8 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
             isMyOwnRecipe ? null : selectedGuestId,
             formData,
             selectedFiles,
-            isMyOwnRecipe
+            isMyOwnRecipe,
+            groupId
           );
 
           setUploadProgress(100);
@@ -353,7 +371,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
               personalNote: recipeNotes.trim() || undefined,
             };
 
-            const { data: userRecipeData_result, error: recipeError } = await addUserRecipe(userRecipeData);
+            const { data: userRecipeData_result, error: recipeError } = await addUserRecipe(userRecipeData, groupId);
             
             if (recipeError) {
               setError(recipeError);
@@ -370,7 +388,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
               comments: recipeNotes.trim() || undefined,
             };
 
-            const { data: recipeData_result, error: recipeError } = await addRecipe(selectedGuestId, recipeData);
+            const { data: recipeData_result, error: recipeError } = await addRecipe(selectedGuestId, recipeData, groupId);
             
             if (recipeError) {
               setError(recipeError);

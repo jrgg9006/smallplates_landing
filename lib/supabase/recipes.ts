@@ -21,12 +21,20 @@ export interface UserRecipeData {
   personalNote?: string;
   upload_method?: 'text' | 'image';
   document_urls?: string[];
+  groupId?: string | null; // Optional group ID for recipes created directly in a group
 }
 
 /**
  * Add a new recipe for a guest
  */
-export async function addRecipe(guestId: string, formData: RecipeFormData) {
+export async function addRecipe(guestId: string, formData: RecipeFormData, groupId?: string | null) {
+  console.log('🔍 addRecipe called with:', {
+    guestId,
+    hasGroupId: !!groupId,
+    groupId,
+    recipeName: formData.recipe_name
+  });
+  
   const supabase = createSupabaseClient();
   
   // Get the current user
@@ -78,6 +86,7 @@ export async function addRecipe(guestId: string, formData: RecipeFormData) {
       document_urls: formData.document_urls || null,
       submission_status: 'submitted',
       submitted_at: new Date().toISOString(),
+      group_id: groupId || null, // Set group_id when recipe is created directly in a group
     };
 
     console.log('Inserting recipe with data:', recipeData);
@@ -329,7 +338,16 @@ export async function deleteRecipe(recipeId: string) {
 /**
  * Add a user's own recipe to their collection
  */
-export async function addUserRecipe(recipeData: UserRecipeData) {
+export async function addUserRecipe(recipeData: UserRecipeData, groupId?: string | null) {
+  // Support both old and new calling patterns
+  const targetGroupId = groupId || recipeData.groupId || null;
+  
+  console.log('🔍 addUserRecipe called with:', {
+    hasGroupIdParam: !!groupId,
+    hasGroupIdInData: !!recipeData.groupId,
+    targetGroupId,
+    recipeName: recipeData.recipeName
+  });
   const supabase = createSupabaseClient();
   
   // Get the current user
@@ -457,7 +475,8 @@ export async function addUserRecipe(recipeData: UserRecipeData) {
         upload_method: recipeData.upload_method || 'text',
         document_urls: recipeData.document_urls || null,
         submission_status: 'submitted',
-        submitted_at: new Date().toISOString()
+        submitted_at: new Date().toISOString(),
+        group_id: targetGroupId // Set group_id when recipe is created directly in a group
       })
       .select()
       .single();
@@ -482,7 +501,8 @@ export async function addRecipeWithFiles(
   guestId: string | null,
   formData: RecipeFormData | UserRecipeData,
   files: File[],
-  isUserRecipe: boolean = false
+  isUserRecipe: boolean = false,
+  groupId?: string | null
 ): Promise<{ data: GuestRecipe | null; error: string | null }> {
   const supabase = createSupabaseClient();
   
@@ -604,6 +624,7 @@ export async function addRecipeWithFiles(
       document_urls: null, // Will be populated after file move
       submission_status: 'submitted',
       submitted_at: new Date().toISOString(),
+      group_id: groupId || null, // Set group_id when recipe is created directly in a group
     };
 
     const { data: recipe, error: recipeError } = await supabase

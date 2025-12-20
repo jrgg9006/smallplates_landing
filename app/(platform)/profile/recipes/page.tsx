@@ -251,6 +251,7 @@ export default function RecipesPage() {
           isOpen={isAddModalOpen}
           onClose={handleCloseAddModal}
           onRecipeAdded={handleRecipeAdded}
+          groupId={null}
         />
 
         {/* Bulk Add to Cookbook Modal */}

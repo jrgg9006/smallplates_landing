@@ -153,6 +153,19 @@ export async function getGroupRecipes(groupId: string): Promise<{ data: RecipeWi
 export async function addRecipeToGroup(groupId: string, recipeId: string, note?: string) {
   const supabase = createSupabaseClient();
   
+  // Critical validation: Ensure groupId is provided
+  if (!groupId || groupId.trim() === '') {
+    console.error('❌ CRITICAL: addRecipeToGroup called with invalid groupId:', groupId);
+    return { data: null, error: 'Group ID is required to add recipe to group' };
+  }
+  
+  if (!recipeId || recipeId.trim() === '') {
+    console.error('❌ CRITICAL: addRecipeToGroup called with invalid recipeId:', recipeId);
+    return { data: null, error: 'Recipe ID is required to add recipe to group' };
+  }
+  
+  console.log('🔍 addRecipeToGroup called with:', { groupId, recipeId, note });
+  
   // Get the current user
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) {
