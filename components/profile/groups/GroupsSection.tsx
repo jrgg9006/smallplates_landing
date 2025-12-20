@@ -359,7 +359,7 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
       <AddRecipeModal
         isOpen={addNewRecipeModalOpen}
         onClose={() => setAddNewRecipeModalOpen(false)}
-        groupId={selectedGroup?.id}
+        groupId={selectedGroup?.id || null}
         onRecipeAdded={() => {
           loadRecipes();
           setAddNewRecipeModalOpen(false);

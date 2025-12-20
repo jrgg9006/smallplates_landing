@@ -445,6 +445,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
         onClose={handleCloseAddRecipeModal}
         onRecipeAdded={handleRecipeAdded}
         preselectedGuestId={selectedGuestForRecipe?.id || null}
+        groupId={null}
       />
     </div>
   );
