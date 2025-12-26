@@ -434,10 +434,10 @@ function Step4() {
           <>
             {/* Personalized Message */}
             <div className="text-center mb-8 space-y-4">
-              <h2 className="text-2xl font-medium text-[#2D2D2D]">
+              <h2 className="text-lg font-medium text-[#2D2D2D]">
                 We&apos;re so excited for you!
               </h2>
-              <p className="text-lg text-[#2D2D2D]/70 font-light leading-relaxed">
+              <p className="text-base text-[#2D2D2D]/70 font-light leading-relaxed">
                 Your wedding cookbook is about to become reality. 
                 <br />Let&apos;s create your account and get started.
               </p>

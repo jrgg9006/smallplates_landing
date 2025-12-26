@@ -384,10 +384,10 @@ function Step3() {
           <>
             {/* Personalized Message */}
             <div className="text-center mb-8 space-y-4">
-              <h2 className="text-2xl font-medium text-[#2D2D2D]">
+              <h2 className="text-lg font-medium text-[#2D2D2D]">
                 Perfect choice.
               </h2>
-              <p className="text-lg text-[#2D2D2D]/70 font-light leading-relaxed">
+              <p className="text-base text-[#2D2D2D]/70 font-light leading-relaxed">
                 You&apos;re giving something they&apos;ll treasure forever.
                 <br />Let&apos;s create your account to get started.
               </p>
