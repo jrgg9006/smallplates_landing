@@ -172,7 +172,7 @@ export function RecipeImageUpload({
         type="file"
         multiple
         accept="image/*,application/pdf"
-        capture={isMobile ? "environment" : undefined}
+        capture={undefined}
         onChange={handleFileSelect}
         className="hidden"
       />
