@@ -52,7 +52,7 @@ export default function PersonalNoteStep({ personalNote, onChange, userName, cou
             <textarea
               value={personalNote}
               onChange={(e) => onChange(e.target.value)}
-              placeholder="A story about this recipe. When you make it. Why it matters to you."
+              placeholder="A story about this recipe. When to make it. Why it's special."
               rows={6}
               className={`w-full px-4 py-3 border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:border-transparent resize-none ${
                 isOverLimit ? 'border-red-300' : 'border-gray-300'
@@ -63,7 +63,7 @@ export default function PersonalNoteStep({ personalNote, onChange, userName, cou
             </div>
           </div>
           <p className="mt-2 text-xs text-gray-500 text-center">
-            Your note will be printed alongside your recipe in their book.
+            Your note will live on the page with your recipe. A piece of you in their kitchen.
           </p>
           {isOverLimit && (
             <p className="mt-2 text-xs text-red-600 text-center">
