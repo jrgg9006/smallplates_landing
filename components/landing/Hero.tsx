@@ -29,7 +29,7 @@ export default function Hero() {
       {/* Background image */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/images/landing/hero-wedding-kitchen.jpg"
+          src="/images/profile/Hero_Profile_2400.jpg"
           alt="Couple cooking together in warm kitchen light"
           fill
           className="object-cover"
