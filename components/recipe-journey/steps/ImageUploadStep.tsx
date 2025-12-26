@@ -129,7 +129,7 @@ export default function ImageUploadStep({ onImagesReady, onFilesSelected }: Imag
             Upload your recipe
           </h2>
           <p className="mt-3 text-base text-gray-600">
-            Take a photo or upload images of your handwritten or printed plate
+            Just the recipe (not the dish). We'll make it beautiful.
           </p>
         </div>
 

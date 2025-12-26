@@ -3,6 +3,10 @@ import { motion } from "framer-motion";
 export default function FAQ() {
   const faqs = [
     {
+      question: "Do I need to upload a photo of the finished dish?",
+      answer: "No. Just the recipe itself. We create every image for your book — that's what makes it cohesive and beautiful."
+    },
+    {
       question: "What if some guests don't cook?",
       answer: "Perfect. They can send a takeout order they'd die for. A sandwich they get every time. It's not about being a chef — it's about being in the book."
     },
