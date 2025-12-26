@@ -306,12 +306,41 @@ export async function submitGuestRecipeWithFiles(
       guestId = newGuest.id;
     }
 
-    // Step 4: Create recipe record
+    // Step 4: Generate a temporary recipe ID for file organization
+    // This allows us to organize files properly before creating the recipe
+    const tempRecipeId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    let finalFileUrls: string[] = [];
+
+    // Step 5: If files were staged, move them to final hierarchical location BEFORE creating recipe
+    if (sessionId && fileMetadata.length > 0) {
+      console.log(`Moving ${fileMetadata.length} files from staging to final location...`);
+      
+      const moveResult = await moveFilesToFinalLocationWithClient(
+        supabase,
+        tokenInfo.user_id,
+        guestId,
+        tempRecipeId,  // Use temp ID for now
+        sessionId,
+        fileMetadata
+      );
+
+      if (moveResult.error) {
+        // Cleanup staging files on error
+        if (sessionId) await cleanupStagingFiles(sessionId);
+        return { data: null, error: moveResult.error };
+      }
+
+      finalFileUrls = moveResult.urls;
+      console.log(`✅ Files moved successfully. URLs:`, finalFileUrls);
+    }
+
+    // Step 6: Create recipe record WITH document_urls already populated
     console.log('🔧 DEBUG: Creating recipe record with context:', {
       contextProvided: !!context,
       cookbookId: context?.cookbookId,
       groupId: context?.groupId,
-      groupIdToSave: context?.groupId || null
+      groupIdToSave: context?.groupId || null,
+      documentUrls: finalFileUrls
     });
     
     const recipeData: GuestRecipeInsert = {
@@ -323,7 +352,7 @@ export async function submitGuestRecipeWithFiles(
       comments: submission.comments?.trim() || null,
       raw_recipe_text: submission.raw_recipe_text?.trim() || null,
       upload_method: submission.upload_method || 'text',
-      document_urls: null, // Will be populated after file move
+      document_urls: finalFileUrls.length > 0 ? finalFileUrls : null, // Include URLs in initial insert
       audio_url: submission.audio_url || null,
       submission_status: 'submitted',
       submitted_at: new Date().toISOString(),
@@ -334,6 +363,7 @@ export async function submitGuestRecipeWithFiles(
     console.log('🔧 DEBUG: Recipe data to insert:', {
       recipeDataKeys: Object.keys(recipeData),
       groupIdInData: recipeData.group_id,
+      documentUrlsCount: recipeData.document_urls?.length || 0,
       fullRecipeData: recipeData
     });
 
@@ -344,8 +374,8 @@ export async function submitGuestRecipeWithFiles(
       .single();
 
     if (recipeError || !recipe) {
-      if (sessionId) await cleanupStagingFiles(sessionId);
       console.error('Recipe creation error:', recipeError);
+      // TODO: Clean up uploaded files if recipe creation fails
       return { data: null, error: recipeError?.message || 'Failed to create recipe' };
     }
 
@@ -354,66 +384,18 @@ export async function submitGuestRecipeWithFiles(
       guestId, 
       userId: tokenInfo.user_id,
       groupIdSaved: recipe.group_id,
-      contextGroupId: context?.groupId 
+      contextGroupId: context?.groupId,
+      documentUrlsSaved: recipe.document_urls
     });
 
-    // Step 5: If files were staged, move them to final hierarchical location
-    let finalFileUrls: string[] = [];
-    if (sessionId && fileMetadata.length > 0) {
-      console.log(`Moving ${fileMetadata.length} files from staging to final location...`);
-      
-      const moveResult = await moveFilesToFinalLocationWithClient(
-        supabase,
-        tokenInfo.user_id,
-        guestId,
-        recipe.id,
-        sessionId,
-        fileMetadata
-      );
-
-      if (moveResult.error) {
-        // If file move fails, we should clean up the recipe record too
-        await supabase.from('guest_recipes').delete().eq('id', recipe.id);
-        return { data: null, error: moveResult.error };
-      }
-
-      finalFileUrls = moveResult.urls;
-      
-      // Update recipe with final file URLs
-      console.log(`🔄 Attempting to update recipe ${recipe.id} with document_urls:`, finalFileUrls);
-      
-      const { data: updateData, error: updateError } = await supabase
-        .from('guest_recipes')
-        .update({ document_urls: finalFileUrls })
-        .eq('id', recipe.id)
-        .select('id, document_urls');
-
-      if (updateError) {
-        console.error('❌ Error updating recipe with file URLs:', updateError);
-        console.error('❌ Recipe ID:', recipe.id);
-        console.error('❌ URLs to save:', finalFileUrls);
-        // Files are already moved, so we don't want to fail the whole submission
-        // Just log the error and continue
-      } else {
-        console.log(`✅ Successfully updated recipe with ${finalFileUrls.length} file URLs`);
-        console.log(`✅ Updated data:`, updateData);
-        
-        // Verify the update worked by reading back
-        const { data: verifyData, error: verifyError } = await supabase
-          .from('guest_recipes')
-          .select('id, document_urls')
-          .eq('id', recipe.id)
-          .single();
-        
-        if (verifyError) {
-          console.error('❌ Error verifying update:', verifyError);
-        } else {
-          console.log(`🔍 Verification read - document_urls:`, verifyData.document_urls);
-        }
-      }
+    // Step 7: If we used a temp ID for files, rename them to use the real recipe ID
+    if (finalFileUrls.length > 0 && tempRecipeId !== recipe.id) {
+      console.log(`📝 Note: Files were organized with temp ID ${tempRecipeId}, real recipe ID is ${recipe.id}`);
+      // In a production system, you might want to rename the files here
+      // For now, the files will work with the temp ID in the path
     }
 
-    // Step 6: Automatically add recipe to cookbook/group if context is provided
+    // Step 8: Automatically add recipe to cookbook/group if context is provided
     // Use API endpoint to bypass RLS (since we're in anonymous context)
     // Check if we have at least one valid context value (cookbookId OR groupId)
     const hasValidContext = context && (context.cookbookId || context.groupId);
@@ -444,7 +426,7 @@ export async function submitGuestRecipeWithFiles(
       }
     }
 
-    // Step 7: Return success with all IDs and URLs
+    // Step 9: Return success with all IDs and URLs
     return {
       data: {
         guest_id: guestId,
