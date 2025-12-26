@@ -231,7 +231,7 @@ function Step2() {
               className={`w-full max-w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none transition-all ${
                 dateUndecided ? 'bg-gray-100 text-gray-500' : ''
               }`}
-              style={{ minWidth: '0' }}
+              style={{ minWidth: '0', maxWidth: '100%' }}
             />
             
             <div className="mt-3">
