@@ -19,7 +19,7 @@ import type { GroupWithMembers, RecipeWithGuest } from "@/lib/types/database";
 interface GroupsSectionProps {
   onGroupChange?: (group: GroupWithMembers | null) => void;
   onLoadingChange?: (loading: boolean) => void;
-  onRecipeCountChange?: (count: number) => void;
+  onRecipeCountChange?: (count: number, uniqueContributors: number) => void;
 }
 
 export interface GroupsSectionRef {
@@ -205,10 +205,27 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
     loadRecipes();
   }, [selectedGroup, loadRecipes]);
 
-  // Update recipe count for parent
+  // Update recipe count and unique contributors for parent
   useEffect(() => {
-    onRecipeCountChange?.(recipes.length);
-  }, [recipes.length, onRecipeCountChange]);
+    // Calculate unique contributors
+    const uniqueContributors = new Set(
+      recipes
+        .map(recipe => {
+          // For guest recipes, use guest_id
+          if (recipe.guest_id && recipe.guests) {
+            return recipe.guest_id;
+          }
+          // For user recipes, use user_id
+          if (recipe.user_id) {
+            return recipe.user_id;
+          }
+          return null;
+        })
+        .filter(id => id !== null)
+    ).size;
+    
+    onRecipeCountChange?.(recipes.length, uniqueContributors);
+  }, [recipes.length, recipes, onRecipeCountChange]);
 
 
   const handleGroupCreated = () => {

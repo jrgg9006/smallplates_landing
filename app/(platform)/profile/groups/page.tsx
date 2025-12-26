@@ -30,6 +30,7 @@ export default function GroupsPage() {
   const [selectedGroup, setSelectedGroup] = useState<GroupWithMembers | null>(null);
   const [groupsLoading, setGroupsLoading] = useState(true);
   const [recipeCount, setRecipeCount] = useState(0);
+  const [uniqueContributors, setUniqueContributors] = useState(0);
   const [showCaptains, setShowCaptains] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showAddCaptainModal, setShowAddCaptainModal] = useState(false);
@@ -316,8 +317,9 @@ export default function GroupsPage() {
   }, []);
 
   // Handle recipe count changes
-  const handleRecipeCountChange = useCallback((count: number) => {
+  const handleRecipeCountChange = useCallback((count: number, contributors: number) => {
     setRecipeCount(count);
+    setUniqueContributors(contributors);
   }, []);
 
   // Show login redirect
@@ -335,8 +337,7 @@ export default function GroupsPage() {
     return null;
   }
 
-  // Calculate unique contributors - simplified for now
-  const uniqueContributors = recipeCount > 0 ? Math.min(recipeCount, 5) : 0;
+  // uniqueContributors now comes from the RedesignedGroupsSection component
 
   return (
     <div className="min-h-screen bg-[hsl(var(--brand-background))]">
