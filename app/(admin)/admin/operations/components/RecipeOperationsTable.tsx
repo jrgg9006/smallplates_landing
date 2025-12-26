@@ -40,7 +40,7 @@ interface RecipeWithProductionStatus {
     needs_review: boolean;
   } | null;
   calculated_status: 'no_action' | 'in_progress' | 'ready_to_print';
-  cookbook: {
+  group: {
     id: string;
     name: string;
   } | null;
@@ -177,7 +177,7 @@ export function RecipeOperationsTable({
               User
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider max-w-[250px]">
-              Book
+              Group
             </th>
             <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
               Text Finalized
@@ -205,7 +205,7 @@ export function RecipeOperationsTable({
               <tr
                 key={recipe.id}
                 onClick={() => onRecipeClick?.(recipe)}
-                className={`hover:bg-gray-50 cursor-pointer ${isUpdating ? 'opacity-50' : ''}`}
+                className={`hover:bg-gray-50 cursor-pointer ${isUpdating ? 'opacity-50' : ''} ${!recipe.group ? 'bg-orange-50' : ''}`}
               >
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex items-center gap-2">
@@ -241,7 +241,11 @@ export function RecipeOperationsTable({
                 </td>
                 <td className="px-4 py-3 max-w-[250px]">
                   <div className="text-sm text-gray-500 break-words">
-                    {recipe.cookbook?.name || 'Not in Cookbook'}
+                    {recipe.group ? (
+                      <span>{recipe.group.name}</span>
+                    ) : (
+                      <span className="text-orange-600 font-medium">Archived</span>
+                    )}
                   </div>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-center">

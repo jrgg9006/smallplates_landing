@@ -31,6 +31,7 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
   cookbookId?: string | 'not_in_cookbook';
   userId?: string;
   needsReview?: boolean;
+  hideArchived?: boolean;
 }) {
   const supabase = createSupabaseAdminClient();
   
@@ -54,10 +55,11 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
         full_name
       ),
       recipe_production_status (*),
-      cookbook_recipes (
-        id,
-        cookbook_id,
-        cookbooks (
+      group_recipes (
+        group_id,
+        added_by,
+        added_at,
+        groups (
           id,
           name
         )
@@ -80,6 +82,8 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
     return { data: [], error: null };
   }
 
+  console.log(`Found ${recipes.length} total recipes before transformation`);
+  
   // Transform and filter results
   const transformedRecipes = recipes.map((recipe: any) => {
     // Handle production status - could be array or single object depending on Supabase version
@@ -101,18 +105,24 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
       status = 'in_progress';
     }
 
-    // Get cookbook info - recipes can be in multiple cookbooks, but we'll show the first one
-    const cookbookRecipes = recipe.cookbook_recipes || [];
-    const cookbookRecipe = Array.isArray(cookbookRecipes) ? cookbookRecipes[0] : null;
-    const cookbook = cookbookRecipe?.cookbooks || null;
+    // Get group info - recipes can be in multiple groups, but we'll show the first one
+    const groupRecipes = recipe.group_recipes || [];
+    const hasGroupAssociation = Array.isArray(groupRecipes) ? groupRecipes.length > 0 : !!groupRecipes;
+    const groupRecipe = Array.isArray(groupRecipes) ? groupRecipes[0] : groupRecipes;
+    const group = hasGroupAssociation && groupRecipe?.groups ? groupRecipe.groups : null;
+    
+    // Debug log for recipes without groups
+    if (!group && recipe.id) {
+      console.log(`Recipe ${recipe.id} (${recipe.recipe_name}) has no group association`);
+    }
 
     return {
       ...recipe,
       production_status: productionStatus,
       calculated_status: status,
-      cookbook: cookbook ? {
-        id: cookbook.id,
-        name: cookbook.name,
+      group: group ? {
+        id: group.id,
+        name: group.name,
       } : null,
     };
   });
@@ -126,9 +136,11 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
 
   if (filters?.cookbookId) {
     if (filters.cookbookId === 'not_in_cookbook') {
-      filtered = filtered.filter((r: any) => !r.cookbook);
+      const archivedRecipes = transformedRecipes.filter((r: any) => !r.group);
+      console.log(`Filtering for archived recipes: found ${archivedRecipes.length} recipes without groups`);
+      filtered = filtered.filter((r: any) => !r.group);
     } else {
-      filtered = filtered.filter((r: any) => r.cookbook?.id === filters.cookbookId);
+      filtered = filtered.filter((r: any) => r.group?.id === filters.cookbookId);
     }
   }
 
@@ -138,6 +150,12 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
         ? (r.production_status?.needs_review === true)
         : (r.production_status?.needs_review !== true)
     );
+  }
+
+  // Filter based on archived status
+  // hideArchived = true means we DON'T want to see archived recipes (only show active ones)
+  if (filters?.hideArchived === true) {
+    filtered = filtered.filter((r: any) => r.group !== null);
   }
 
   return { data: filtered, error: null };

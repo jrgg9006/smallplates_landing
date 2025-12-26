@@ -45,7 +45,7 @@ interface RecipeWithProductionStatus {
     needs_review: boolean;
   } | null;
   calculated_status: 'no_action' | 'in_progress' | 'ready_to_print';
-  cookbook: {
+  group: {
     id: string;
     name: string;
   } | null;
@@ -56,12 +56,12 @@ interface ProductionStats {
   recipesReadyToPrint: number;
 }
 
-interface Cookbook {
+interface Group {
   id: string;
   name: string;
-  user_id: string;
-  user_name: string | null;
-  user_email: string;
+  owner_id: string;
+  owner_name: string | null;
+  owner_email: string;
 }
 
 interface User {
@@ -75,7 +75,7 @@ export default function OperationsPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [recipes, setRecipes] = useState<RecipeWithProductionStatus[]>([]);
   const [stats, setStats] = useState<ProductionStats>({ recipesNeedingAction: 0, recipesReadyToPrint: 0 });
-  const [cookbooks, setCookbooks] = useState<Cookbook[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeWithProductionStatus | null>(null);
   const [updatingField, setUpdatingField] = useState<string | null>(null);
@@ -84,8 +84,9 @@ export default function OperationsPage() {
   
   // Filters
   const [statusFilter, setStatusFilter] = useState<'all' | 'no_action' | 'in_progress' | 'ready_to_print'>('all');
-  const [cookbookFilter, setCookbookFilter] = useState<string>('all');
+  const [groupFilter, setGroupFilter] = useState<string>('all');
   const [userFilter, setUserFilter] = useState<string>('all');
+  const [showArchived, setShowArchived] = useState(false);
   
   const router = useRouter();
 
@@ -100,13 +101,13 @@ export default function OperationsPage() {
       loadStats();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter, cookbookFilter, userFilter, isAdmin]);
+  }, [statusFilter, groupFilter, userFilter, showArchived, isAdmin]);
 
-  // Load all users and cookbooks once on initial mount (not from filtered results)
+  // Load all users and groups once on initial mount (not from filtered results)
   useEffect(() => {
     if (isAdmin) {
       loadAllUsers();
-      loadAllCookbooks();
+      loadAllGroups();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
@@ -123,23 +124,23 @@ export default function OperationsPage() {
     
     console.log('✅ Admin access granted');
     setIsAdmin(true);
-    await loadCookbooks();
+    await loadGroups();
     setLoading(false);
   };
 
-  const loadCookbooks = async () => {
+  const loadGroups = async () => {
     try {
-      // We'll get cookbooks from the recipes data, but for now just set empty
+      // We'll get groups from the recipes data, but for now just set empty
       // In a real implementation, you might want a separate API endpoint
-      setCookbooks([]);
+      setGroups([]);
     } catch (error) {
-      console.error('Error loading cookbooks:', error);
+      console.error('Error loading groups:', error);
     }
   };
 
-  const loadAllCookbooks = async () => {
+  const loadAllGroups = async () => {
     try {
-      // Load all recipes without filters to get all cookbooks
+      // Load all recipes without filters to get all groups
       const response = await fetch('/api/v1/admin/operations/recipes');
       
       if (!response.ok) {
@@ -148,26 +149,26 @@ export default function OperationsPage() {
       
       const data = await response.json();
       
-      // Extract unique cookbooks from all recipes
-      const uniqueCookbooks = new Map<string, Cookbook>();
+      // Extract unique groups from all recipes
+      const uniqueGroups = new Map<string, Group>();
       data.forEach((recipe: RecipeWithProductionStatus) => {
-        if (recipe.cookbook && recipe.profiles) {
-          uniqueCookbooks.set(recipe.cookbook.id, {
-            id: recipe.cookbook.id,
-            name: recipe.cookbook.name,
-            user_id: recipe.profiles.id,
-            user_name: recipe.profiles.full_name,
-            user_email: recipe.profiles.email,
+        if (recipe.group && recipe.profiles) {
+          uniqueGroups.set(recipe.group.id, {
+            id: recipe.group.id,
+            name: recipe.group.name,
+            owner_id: recipe.profiles.id,
+            owner_name: recipe.profiles.full_name,
+            owner_email: recipe.profiles.email,
           });
         }
       });
-      setCookbooks(Array.from(uniqueCookbooks.values()).sort((a, b) => {
+      setGroups(Array.from(uniqueGroups.values()).sort((a, b) => {
         const nameA = a.name || '';
         const nameB = b.name || '';
         return nameA.localeCompare(nameB);
       }));
     } catch (error) {
-      console.error('Error loading cookbooks:', error);
+      console.error('Error loading groups:', error);
     }
   };
 
@@ -177,11 +178,16 @@ export default function OperationsPage() {
       if (statusFilter !== 'all') {
         params.append('status', statusFilter);
       }
-      if (cookbookFilter !== 'all') {
-        params.append('cookbookId', cookbookFilter);
+      if (groupFilter !== 'all') {
+        params.append('cookbookId', groupFilter); // Keep as cookbookId for backward compatibility
       }
       if (userFilter !== 'all') {
         params.append('userId', userFilter);
+      }
+      // By default, we hide archived recipes unless showArchived is true
+      // BUT if the user specifically selected "Not in Group", we should show them
+      if (!showArchived && groupFilter !== 'not_in_cookbook') {
+        params.append('hideArchived', 'true');
       }
 
       const response = await fetch(`/api/v1/admin/operations/recipes?${params.toString()}`);
@@ -614,15 +620,15 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium text-gray-700">Group:</label>
           <select
-            value={cookbookFilter}
-            onChange={(e) => setCookbookFilter(e.target.value)}
+            value={groupFilter}
+            onChange={(e) => setGroupFilter(e.target.value)}
             className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent min-w-[250px]"
           >
             <option value="all">All Groups</option>
-            <option value="not_in_cookbook">Not in Group</option>
-            {cookbooks.map((cookbook) => (
-              <option key={cookbook.id} value={cookbook.id}>
-                ({cookbook.user_name || cookbook.user_email}) {cookbook.name}
+            <option value="not_in_cookbook">Not in Group (Archived)</option>
+            {groups.map((group) => (
+              <option key={group.id} value={group.id}>
+                ({group.owner_name || group.owner_email}) {group.name}
               </option>
             ))}
           </select>
@@ -654,6 +660,17 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
             <option value="in_progress">In Progress</option>
             <option value="ready_to_print">Ready to Print</option>
           </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={showArchived}
+              onChange={(e) => setShowArchived(e.target.checked)}
+              className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
+            />
+            <span className="font-medium text-gray-700">Show archived recipes</span>
+          </label>
         </div>
         <div className="text-sm text-gray-600 ml-auto">
           {recipes.length} recipe{recipes.length !== 1 ? 's' : ''}
@@ -782,8 +799,8 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">Cookbook:</span>
-                    <span>{selectedRecipe.cookbook?.name || 'Not in Cookbook'}</span>
+                    <span className="font-medium">Group:</span>
+                    <span>{selectedRecipe.group?.name || 'Not in Group (Archived)'}</span>
                   </div>
                   <div className="flex items-center gap-4 flex-wrap">
                     <label className="flex items-center gap-1.5">

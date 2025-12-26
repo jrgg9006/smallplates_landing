@@ -13,12 +13,14 @@ export async function GET(req: NextRequest) {
     const cookbookId = searchParams.get('cookbookId');
     const userId = searchParams.get('userId');
     const needsReview = searchParams.get('needsReview');
+    const hideArchived = searchParams.get('hideArchived');
 
     const filters: {
       status?: 'no_action' | 'in_progress' | 'ready_to_print';
       cookbookId?: string | 'not_in_cookbook';
       userId?: string;
       needsReview?: boolean;
+      hideArchived?: boolean;
     } = {};
 
     if (status) {
@@ -35,6 +37,10 @@ export async function GET(req: NextRequest) {
 
     if (needsReview !== null) {
       filters.needsReview = needsReview === 'true';
+    }
+
+    if (hideArchived !== null) {
+      filters.hideArchived = hideArchived === 'true';
     }
 
     const { data, error } = await getAllRecipesWithProductionStatusAdmin(filters);
