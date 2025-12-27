@@ -14,7 +14,7 @@ export default function WelcomeStep({ creatorName }: WelcomeStepProps) {
           You&apos;re in!
         </h1>
         <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light mt-4">
-          This book isn&apos;t about perfect recipes — <br /> it&apos;s about sharing something of yourself with the people who matter.
+          This book isn&apos;t about perfect recipes — <br /> it&apos;s about you being in their kitchen. Forever.
         </p>
       </div>
     </div>

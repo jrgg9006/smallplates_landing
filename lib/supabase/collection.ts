@@ -403,7 +403,7 @@ export async function submitGuestRecipeWithFiles(
     if (hasValidContext && recipe.id && tokenInfo) {
       
       try {
-        const response = await fetch('/api/v1/users/collection/link-recipe', {
+        const response = await fetch('/api/v1/collection/link-recipe', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -596,7 +596,7 @@ export async function submitGuestRecipe(
     if (hasValidContext && recipe.id && tokenInfo) {
       
       try {
-        const response = await fetch('/api/v1/users/collection/link-recipe', {
+        const response = await fetch('/api/v1/collection/link-recipe', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
