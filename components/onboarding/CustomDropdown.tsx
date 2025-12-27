@@ -25,7 +25,9 @@ interface CustomDropdownProps {
  */
 export function CustomDropdown({ options, value, onChange, placeholder, label }: CustomDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState<'bottom' | 'top'>('bottom');
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -40,6 +42,22 @@ export function CustomDropdown({ options, value, onChange, placeholder, label }:
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Check available space and position dropdown accordingly
+  useEffect(() => {
+    if (isOpen && triggerRef.current) {
+      const triggerRect = triggerRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - triggerRect.bottom;
+      const spaceAbove = triggerRect.top;
+      
+      // If not enough space below and more space above, position at top
+      if (spaceBelow < 300 && spaceAbove > spaceBelow) {
+        setDropdownPosition('top');
+      } else {
+        setDropdownPosition('bottom');
+      }
+    }
+  }, [isOpen]);
 
   const selectedOption = options.find(option => option.value === value);
 
@@ -56,6 +74,7 @@ export function CustomDropdown({ options, value, onChange, placeholder, label }:
       
       {/* Trigger Button */}
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`w-full p-4 text-left rounded-xl border-2 transition-all duration-200 hover:border-[#E8E0D5] hover:shadow-md ${
@@ -82,7 +101,11 @@ export function CustomDropdown({ options, value, onChange, placeholder, label }:
 
       {/* Dropdown Options */}
       {isOpen && (
-        <div className="absolute z-[9999] w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-auto">
+        <div className={`absolute z-[9999] w-full bg-white border border-gray-200 rounded-xl shadow-xl overflow-auto ${
+          dropdownPosition === 'top' 
+            ? 'bottom-full mb-2' 
+            : 'top-full mt-2'
+        }`} style={{ maxHeight: '320px' }}>
           {options.map((option) => (
             <button
               key={option.value}
