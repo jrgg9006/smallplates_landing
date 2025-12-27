@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { handleApiError } from '@/lib/errors/api-errors';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -196,10 +197,15 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error in link-recipe API:', error);
+    const apiError = handleApiError(error, 'link-recipe API', 'Failed to link recipe');
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { 
+        error: apiError.message,
+        type: apiError.type,
+        timestamp: apiError.timestamp,
+        ...(apiError.details && { details: apiError.details })
+      },
+      { status: apiError.statusCode }
     );
   }
 }

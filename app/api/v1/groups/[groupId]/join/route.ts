@@ -221,29 +221,25 @@ export async function POST(
       console.log('✅ New user created successfully:', userId);
     }
 
-    // Step 2: Add user to group as member
+    // Step 2: Add user to group as member (using upsert for race condition protection)
     // For direct links, we don't have an inviter, so set invited_by to null
     const { error: memberError } = await supabaseAdmin
       .from('group_members')
-      .insert({
+      .upsert({
         group_id: groupId,
         profile_id: userId,
         role: 'member',
         invited_by: null // No specific inviter for direct links
+      }, {
+        onConflict: 'group_id,profile_id'
       });
 
     if (memberError) {
       console.error('❌ Error adding user to group:', memberError);
-      
-      // If it's a duplicate error, that's actually fine (race condition)
-      if (memberError.code === '23505') {
-        console.log('ℹ️ User already in group (duplicate key), continuing...');
-      } else {
-        return NextResponse.json(
-          { error: 'Failed to add user to group' },
-          { status: 500 }
-        );
-      }
+      return NextResponse.json(
+        { error: 'Failed to add user to group: ' + memberError.message },
+        { status: 500 }
+      );
     } else {
       console.log('✅ User added to group successfully');
     }

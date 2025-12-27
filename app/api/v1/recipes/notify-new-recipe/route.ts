@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 // import { sendNewRecipeNotification } from '@/lib/postmark';
 import { createSupabaseServer } from '@/lib/supabase/server';
+import { handleApiError } from '@/lib/errors/api-errors';
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,9 +60,12 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Error in notify-new-recipe API:', error);
+    const apiError = handleApiError(error, 'notify-new-recipe API', 'Failed to send recipe notification');
     return NextResponse.json({ 
-      error: 'Internal server error' 
-    }, { status: 500 });
+      error: apiError.message,
+      type: apiError.type,
+      timestamp: apiError.timestamp,
+      ...(apiError.details && { details: apiError.details })
+    }, { status: apiError.statusCode });
   }
 }

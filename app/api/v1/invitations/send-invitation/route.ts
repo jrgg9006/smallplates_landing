@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 // import { sendInvitationEmail } from '@/lib/postmark';
 import { createSupabaseServer } from '@/lib/supabase/server';
+import { handleApiError } from '@/lib/errors/api-errors';
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,9 +42,12 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Error in send-invitation API:', error);
+    const apiError = handleApiError(error, 'send-invitation API', 'Failed to send invitation');
     return NextResponse.json({ 
-      error: 'Internal server error' 
-    }, { status: 500 });
+      error: apiError.message,
+      type: apiError.type,
+      timestamp: apiError.timestamp,
+      ...(apiError.details && { details: apiError.details })
+    }, { status: apiError.statusCode });
   }
 }

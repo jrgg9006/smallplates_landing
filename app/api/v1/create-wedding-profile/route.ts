@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createUserProfileAdmin } from '@/lib/supabase/wedding-onboarding';
+import { handleApiError } from '@/lib/errors/api-errors';
 
 export async function POST(req: Request) {
   try {
@@ -25,10 +26,15 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ data, success: true });
   } catch (error) {
-    console.error('Create profile error:', error);
+    const apiError = handleApiError(error, 'create-wedding-profile', 'Failed to create wedding profile');
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { 
+        error: apiError.message,
+        type: apiError.type,
+        timestamp: apiError.timestamp,
+        ...(apiError.details && { details: apiError.details })
+      },
+      { status: apiError.statusCode }
     );
   }
 }

@@ -215,18 +215,28 @@ export async function POST(request: Request) {
       if (signUpError) {
         console.error('❌ Error creating user:', signUpError);
         
-        // Handle duplicate email
-        if (signUpError.message?.includes('already registered')) {
+        // Handle duplicate email - check if user was created by another concurrent request
+        if (signUpError.message?.includes('already registered') || signUpError.message?.includes('User already registered')) {
+          console.log('⚠️ User already exists (race condition), fetching existing user...');
+          // Re-fetch the user list to get the newly created user
+          const { data: { users: refreshedUsers }, error: refreshError } = await supabaseAdmin.auth.admin.listUsers();
+          const refreshedUser = refreshedUsers?.find(u => u.email === email);
+          
+          if (refreshedUser) {
+            userId = refreshedUser.id;
+            console.log('✅ Found existing user after race condition:', userId);
+          } else {
+            return NextResponse.json(
+              { error: 'Unable to create or find user account. Please try again.' },
+              { status: 500 }
+            );
+          }
+        } else {
           return NextResponse.json(
-            { error: 'This email is already registered. If you already have an account, please login and use the invitation link again.' },
-            { status: 409 }
+            { error: signUpError.message || 'Failed to create account' },
+            { status: 500 }
           );
         }
-        
-        return NextResponse.json(
-          { error: signUpError.message || 'Failed to create account' },
-          { status: 500 }
-        );
       }
 
       if (!signUpData.user) {
@@ -243,29 +253,25 @@ export async function POST(request: Request) {
       console.log('✅ New user created successfully:', userId);
     }
 
-    // Step 2: Add user to group as member
+    // Step 2: Add user to group as member (using upsert for race condition protection)
     const { error: memberError } = await supabaseAdmin
       .from('group_members')
-      .insert({
+      .upsert({
         group_id: invitation.group_id,
         profile_id: userId,
         role: 'member',
         invited_by: invitation.invited_by,
         relationship_to_couple: invitation.relationship_to_couple
+      }, {
+        onConflict: 'group_id,profile_id'
       });
 
     if (memberError) {
       console.error('❌ Error adding user to group:', memberError);
-      
-      // If it's a duplicate error, that's actually fine
-      if (memberError.code === '23505') {
-        console.log('ℹ️ User already in group (duplicate key), continuing...');
-      } else {
-        return NextResponse.json(
-          { error: 'Failed to add user to group' },
-          { status: 500 }
-        );
-      }
+      return NextResponse.json(
+        { error: 'Failed to add user to group: ' + memberError.message },
+        { status: 500 }
+      );
     } else {
       console.log('✅ User added to group successfully');
     }

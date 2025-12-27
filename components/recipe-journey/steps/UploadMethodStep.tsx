@@ -100,7 +100,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
             No photo of the dish needed.
           </p>
           <p className="text-base text-gray-600">
-            Just the recipe itself—we'll handle the rest.
+            Just the recipe itself—we&apos;ll handle the rest.
           </p>
         </div>
       </div>

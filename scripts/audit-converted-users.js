@@ -1,10 +1,23 @@
 const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config({ path: '.env.local' });
 
 // Comprehensive audit of all "converted" waitlist users
 async function auditConvertedUsers() {
+  // Use environment variables for security
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    console.log('❌ Missing required environment variables:');
+    console.log('   - NEXT_PUBLIC_SUPABASE_URL:', !!supabaseUrl);
+    console.log('   - SUPABASE_SERVICE_ROLE_KEY:', !!serviceRoleKey);
+    console.log('\nPlease check your .env.local file');
+    return;
+  }
+
   const supabaseAdmin = createClient(
-    'https://iinnpndsxepvviafrmwz.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpbm5wbmRzeGVwdnZpYWZybXd6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTc3NjI0MCwiZXhwIjoyMDc1MzUyMjQwfQ.8uaJ_MyOYUwLQfkYGRvuzkGX_Hy53kXfcClfVK0jQ_k',
+    supabaseUrl,
+    serviceRoleKey,
     {
       auth: {
         autoRefreshToken: false,
@@ -229,4 +242,9 @@ async function auditConvertedUsers() {
   }
 }
 
-auditConvertedUsers();
+// Only run if this file is executed directly
+if (require.main === module) {
+  auditConvertedUsers();
+}
+
+module.exports = { auditConvertedUsers };

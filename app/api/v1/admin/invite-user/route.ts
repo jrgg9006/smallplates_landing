@@ -7,6 +7,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { updateWaitlistStatus } from '@/lib/supabase/waitlist';
 import { sendInvitationEmail } from '@/lib/postmark';
+import { requireAdminAuth } from '@/lib/auth/admin';
 import crypto from 'crypto';
 
 // Create Supabase Admin client (uses service role key)
@@ -24,6 +25,9 @@ const supabaseAdmin = createClient(
 
 export async function POST(request: Request) {
   try {
+    // Check admin authentication
+    await requireAdminAuth();
+    
     const { email, waitlistId } = await request.json();
 
     // Validate input
