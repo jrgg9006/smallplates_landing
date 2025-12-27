@@ -43,7 +43,7 @@ export async function addToWaitlist(data: WaitlistData): Promise<{ success: bool
   try {
     const supabase = createSupabaseClient();
 
-    console.log('📋 Adding to waitlist:', data.email);
+    // console.log removed for production
 
     const { data: result, error } = await supabase
       .from('waitlist')
@@ -72,7 +72,7 @@ export async function addToWaitlist(data: WaitlistData): Promise<{ success: bool
       return { success: false, error: error.message };
     }
 
-    console.log('✅ Added to waitlist successfully:', result.id);
+    // console.log removed for production
     return { success: true };
 
   } catch (err) {
@@ -176,7 +176,7 @@ export async function updateWaitlistStatus(
       return { success: false, error: error.message };
     }
 
-    console.log(`✅ Updated waitlist user ${id} to status: ${status}`);
+    // console.log removed for production
     return { success: true };
 
   } catch (err) {
@@ -217,11 +217,11 @@ export async function convertWaitlistUser(
     }
 
     if (!data) {
-      console.log(`⚠️ No waitlist user found with id ${waitlistId} in 'invited' status`);
+      // console.log removed for production
       return { success: false, error: 'Waitlist user not found or already converted' };
     }
 
-    console.log(`✅ Converted waitlist user ${data.email} (${data.first_name} ${data.last_name})`);
+    // console.log removed for production
     return { success: true };
 
   } catch (err) {
@@ -260,7 +260,7 @@ export async function deleteWaitlistEntry(
       return { success: false, error: error.message };
     }
 
-    console.log(`✅ Soft deleted waitlist entry ${id}`);
+    // console.log removed for production
     return { success: true };
 
   } catch (err) {

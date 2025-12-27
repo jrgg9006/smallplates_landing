@@ -36,12 +36,12 @@ export default function AdminHomePage() {
     
     // Check if user is logged in and is admin
     if (!user || !isAdminEmail(user.email)) {
-      console.log('❌ Not admin, redirecting to home');
+      // console.log removed for production
       router.push('/');
       return;
     }
     
-    console.log('✅ Admin access granted');
+    // console.log removed for production
     setIsAdmin(true);
     setUserName(user.email || '');
     setLoading(false);

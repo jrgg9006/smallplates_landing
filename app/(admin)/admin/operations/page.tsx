@@ -117,12 +117,12 @@ export default function OperationsPage() {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user || !isAdminEmail(user.email)) {
-      console.log('❌ Not admin, redirecting to home');
+      // console.log removed for production
       router.push('/');
       return;
     }
     
-    console.log('✅ Admin access granted');
+    // console.log removed for production
     setIsAdmin(true);
     await loadGroups();
     setLoading(false);
@@ -335,13 +335,13 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
   const getRecipeImagesFromStorage = async (recipe: RecipeWithProductionStatus): Promise<string[]> => {
     // If document_urls exists and is not empty, use those first (primary source)
     if (recipe.document_urls && recipe.document_urls.length > 0) {
-      console.log(`📁 Using document_urls (${recipe.document_urls.length} images):`, recipe.document_urls);
+      // console.log removed for production
       return recipe.document_urls;
     }
     
     // If no document_urls but upload_method is 'image', try to get from Storage (fallback)
     if (recipe.upload_method === 'image' && recipe.guests && recipe.profiles) {
-      console.log(`🔄 Fallback: Searching Storage API for recipe ${recipe.id}`);
+      // console.log removed for production
       try {
         const supabase = createSupabaseClient();
         
@@ -386,7 +386,7 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
               return data.publicUrl;
             });
           
-          console.log(`✅ Storage fallback found ${fallbackUrls.length} images`);
+          // console.log removed for production
           return fallbackUrls;
         }
         
@@ -400,7 +400,7 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
             return data.publicUrl;
           });
         
-        console.log(`✅ Storage fallback found ${fallbackUrls.length} images in base path`);
+        // console.log removed for production
         return fallbackUrls;
         
       } catch (error) {
@@ -413,14 +413,6 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
   };
 
   const handleDownloadRecipeImages = async (recipe: RecipeWithProductionStatus) => {
-    console.log('Recipe data for download:', {
-      id: recipe.id,
-      recipe_name: recipe.recipe_name,
-      document_urls: recipe.document_urls,
-      upload_method: recipe.upload_method,
-      user_id: recipe.profiles?.id,
-      guest_id: recipe.guests?.id
-    });
     
     // Get image URLs from storage
     const imageUrls = await getRecipeImagesFromStorage(recipe);

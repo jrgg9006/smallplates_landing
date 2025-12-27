@@ -190,7 +190,7 @@ export default function ProfilePage() {
           pending: guests.filter(guest => guest.status === 'pending').length,
           submitted: guests.filter(guest => guest.status === 'submitted').length,
         };
-        console.log('Guest counts loaded:', counts); // Debug log
+        // console.log removed for production
         setGuestCounts(counts);
       }
     } catch (err) {
@@ -231,7 +231,7 @@ export default function ProfilePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       }).catch(error => {
-        console.log('Conversion check failed (non-critical):', error);
+        // console.log removed for production
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

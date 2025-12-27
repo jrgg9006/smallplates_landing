@@ -28,24 +28,24 @@ export default function ResetPasswordPage() {
 
         const supabase = createSupabaseClient();
 
-        console.log('🔍 Reset password page loaded');
-        console.log('🔍 Full URL:', window.location.href);
+        // console.log removed for production
+        // console.log removed for production
 
         // First, check if there's already an active session
         const { data: { session: existingSession } } = await supabase.auth.getSession();
 
         if (existingSession) {
-          console.log('✅ Existing session found, ready for password change');
+          // console.log removed for production
           setSessionReady(true);
           return;
         }
 
         // Check for hash parameters (from email link)
         const hash = window.location.hash;
-        console.log('🔍 URL hash present:', !!hash && hash.length > 10);
+        // console.log removed for production
 
         if (!hash || hash.length < 10) {
-          console.log('❌ No hash parameters and no existing session');
+          // console.log removed for production
           setError('Este link de reset ha expirado o ya fue usado. Por favor, solicita un nuevo link de reset.');
           return;
         }
@@ -56,23 +56,23 @@ export default function ResetPasswordPage() {
         const refreshToken = hashParams.get('refresh_token');
         const type = hashParams.get('type');
 
-        console.log('🔍 Token type:', type);
-        console.log('🔍 Access token present:', !!accessToken);
-        console.log('🔍 Refresh token present:', !!refreshToken);
+        // console.log removed for production
+        // console.log removed for production
+        // console.log removed for production
 
         if (!accessToken || !refreshToken) {
-          console.log('❌ Missing tokens in URL');
+          // console.log removed for production
           setError('Link de reset inválido. Por favor, solicita un nuevo link.');
           return;
         }
 
         // Verify it's a recovery token
         if (type !== 'recovery') {
-          console.log('⚠️ Unexpected token type:', type);
+          // console.log removed for production
         }
 
         // Set the session using tokens from URL
-        console.log('🔄 Setting session with tokens...');
+        // console.log removed for production
         const { data, error } = await supabase.auth.setSession({
           access_token: accessToken,
           refresh_token: refreshToken
@@ -93,7 +93,7 @@ export default function ResetPasswordPage() {
               const tokenPayload = JSON.parse(atob(accessToken!.split('.')[1]));
               const email = tokenPayload.email;
 
-              console.log('📧 Extracted email from expired token:', email);
+              // console.log removed for production
               setUserEmail(email);
               setTokenExpired(true);
 
@@ -110,15 +110,15 @@ export default function ResetPasswordPage() {
         }
 
         if (data.session) {
-          console.log('✅ Session established successfully');
-          console.log('✅ User ID:', data.session.user.id);
+          // console.log removed for production
+          // console.log removed for production
           setSessionReady(true);
 
           // Clean up URL hash to prevent token reuse issues on refresh
-          console.log('🧹 Cleaning URL hash...');
+          // console.log removed for production
           window.history.replaceState(null, '', window.location.pathname);
         } else {
-          console.log('❌ No session returned from setSession');
+          // console.log removed for production
           setError('Error estableciendo sesión. Por favor, intenta con un nuevo link.');
         }
 
@@ -154,7 +154,7 @@ export default function ResetPasswordPage() {
         throw new Error(error.message);
       }
 
-      console.log('✅ New reset link sent to:', userEmail);
+      // console.log removed for production
       setResendSuccess(true);
 
     } catch (err) {
@@ -198,14 +198,14 @@ export default function ResetPasswordPage() {
         throw new Error("Password update failed - user not authenticated");
       }
 
-      console.log("✅ Password successfully updated for user:", data.user.id);
+      // console.log removed for production
       
       // Wait a moment for session to be fully established
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Call completion endpoint to handle waitlist conversion
       try {
-        console.log("🔄 Calling signup completion endpoint...");
+        // console.log removed for production
         const completeResponse = await fetch('/api/v1/auth/complete-signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
@@ -214,9 +214,9 @@ export default function ResetPasswordPage() {
         const completeResult = await completeResponse.json();
         
         if (completeResponse.ok) {
-          console.log("✅ Signup completion processed:", completeResult.message);
+          // console.log removed for production
           if (completeResult.converted) {
-            console.log("📋 Waitlist user converted successfully");
+            // console.log removed for production
           }
         } else {
           console.error("⚠️ Signup completion endpoint failed:", completeResult.error);

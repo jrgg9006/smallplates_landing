@@ -21,7 +21,7 @@ interface CookbookMembersDropdownProps {
 }
 
 export function CookbookMembersDropdown({ cookbook, onInviteFriend }: CookbookMembersDropdownProps) {
-  console.log('🔵 CookbookMembersDropdown component rendered!', cookbook.id);
+  // console.log removed for production
   const [members, setMembers] = useState<GroupMemberWithProfile[]>([]);
   const [pendingInvitations, setPendingInvitations] = useState<GroupInvitation[]>([]);
   const [loading, setLoading] = useState(false);
@@ -87,7 +87,7 @@ export function CookbookMembersDropdown({ cookbook, onInviteFriend }: CookbookMe
   };
 
   const handleResendInvitation = async (invitationId: string) => {
-    console.log('🖱️ Resend button clicked!', invitationId);
+    // console.log removed for production
     setActionLoading(invitationId);
     setOpenMenuId(null);
     
@@ -103,7 +103,7 @@ export function CookbookMembersDropdown({ cookbook, onInviteFriend }: CookbookMe
         return;
       }
 
-      console.log('✅ Invitation resent successfully');
+      // console.log removed for production
     } catch (err) {
       console.error('Error resending invitation:', err);
       alert('Failed to resend invitation. Please try again.');
@@ -113,12 +113,12 @@ export function CookbookMembersDropdown({ cookbook, onInviteFriend }: CookbookMe
   };
 
   const handleCancelInvitation = async (invitationId: string) => {
-    console.log('🚀 handleCancelInvitation called with:', invitationId);
+    // console.log removed for production
     if (!confirm('Are you sure you want to cancel this invitation? The person will no longer be able to join using the invitation link.')) {
-      console.log('❌ User canceled the confirmation dialog');
+      // console.log removed for production
       return;
     }
-    console.log('✅ User confirmed cancellation, proceeding...');
+    // console.log removed for production
 
     setActionLoading(invitationId);
     setOpenMenuId(null);
@@ -136,7 +136,7 @@ export function CookbookMembersDropdown({ cookbook, onInviteFriend }: CookbookMe
       }
 
       await loadPendingInvitations();
-      console.log('✅ Invitation canceled successfully');
+      // console.log removed for production
     } catch (err) {
       console.error('Error canceling invitation:', err);
       alert('Failed to cancel invitation. Please try again.');
@@ -440,7 +440,7 @@ export function CookbookMembersDropdown({ cookbook, onInviteFriend }: CookbookMe
           <button
             className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
             onClick={(e) => {
-              console.log('🖱️ Resend button clicked!', invitation.id);
+              // console.log removed for production
               e.stopPropagation();
               handleResendInvitation(invitation.id);
             }}
@@ -452,7 +452,7 @@ export function CookbookMembersDropdown({ cookbook, onInviteFriend }: CookbookMe
           <button
             className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
             onClick={(e) => {
-              console.log('🖱️ Cancel button clicked!', invitation.id);
+              // console.log removed for production
               e.stopPropagation();
               handleCancelInvitation(invitation.id);
             }}

@@ -96,7 +96,7 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
             // Refresh selected group with fresh data from database
             const refreshedGroup = data.find(g => g.id === prev.id);
             if (refreshedGroup) {
-              console.log('🔄 Refreshing selectedGroup with fresh data:', refreshedGroup.image_group_dashboard);
+              // console.log removed for production
               // Defer the callback to avoid setState during render
               setTimeout(() => onGroupChangeRef.current?.(refreshedGroup), 0);
               return refreshedGroup;
@@ -167,7 +167,7 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
         console.error('Cannot open AddRecipeModal: No group selected');
         return;
       }
-      console.log('Opening AddRecipeModal for group:', selectedGroup.id, selectedGroup.name);
+      // console.log removed for production
       setAddNewRecipeModalOpen(true);
     },
     handleGroupChange: handleGroupChange,
@@ -275,12 +275,12 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
 
   const handleRecipeClick = (recipe: RecipeWithGuest) => {
     // TODO: Open recipe details modal
-    console.log('Recipe clicked:', recipe);
+    // console.log removed for production
   };
 
   const handleEditRecipe = (recipe: RecipeWithGuest) => {
     // TODO: Open edit recipe modal
-    console.log('Edit recipe:', recipe);
+    // console.log removed for production
   };
 
   const handleRemoveRecipe = (recipe: RecipeWithGuest) => {

@@ -87,12 +87,12 @@ export default function ActivityPage() {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user || !isAdminEmail(user.email)) {
-      console.log('❌ Not admin, redirecting to home');
+      // console.log removed for production
       router.push('/');
       return;
     }
     
-    console.log('✅ Admin access granted');
+    // console.log removed for production
     setIsAdmin(true);
     await loadUsers();
     setLoading(false);
@@ -101,7 +101,7 @@ export default function ActivityPage() {
   const loadUsers = async () => {
     try {
       const response = await fetch('/api/v1/admin/activity/users');
-      console.log('Response status:', response.status);
+      // console.log removed for production
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -110,7 +110,7 @@ export default function ActivityPage() {
       }
       
       const data = await response.json();
-      console.log('Users data:', data);
+      // console.log removed for production
       setUsers(data);
     } catch (error) {
       console.error('Error loading users:', error);
@@ -120,9 +120,9 @@ export default function ActivityPage() {
   const loadGuests = async (userId: string) => {
     setLoadingGuests(true);
     try {
-      console.log('Loading guests for user:', userId);
+      // console.log removed for production
       const response = await fetch(`/api/v1/admin/activity/users/${userId}`);
-      console.log('Guests response status:', response.status);
+      // console.log removed for production
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -131,7 +131,7 @@ export default function ActivityPage() {
       }
       
       const data = await response.json();
-      console.log('Guests data:', data);
+      // console.log removed for production
       setGuests(data.guests || []);
     } catch (error) {
       console.error('Error loading guests:', error);
@@ -143,11 +143,11 @@ export default function ActivityPage() {
   const loadRecipes = async (userId: string, guestId: string) => {
     setLoadingRecipes(true);
     try {
-      console.log('Loading recipes for guest:', guestId);
+      // console.log removed for production
       
       // Use API route that calls admin function server-side
       const response = await fetch(`/api/v1/admin/activity/users/${userId}/guests/${guestId}/recipes`);
-      console.log('Recipes response status:', response.status);
+      // console.log removed for production
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -156,7 +156,7 @@ export default function ActivityPage() {
       }
       
       const data = await response.json();
-      console.log('Admin recipe data loaded:', data.recipes?.length || 0, 'recipes');
+      // console.log removed for production
       setRecipes(data.recipes || []); // API returns { guest, user, recipes }
     } catch (error) {
       console.error('Error loading recipes:', error);
@@ -292,7 +292,7 @@ export default function ActivityPage() {
                   <div
                     key={guest.id}
                     onClick={() => {
-                      console.log('Clicking guest:', guest.id, guest.first_name);
+                      // console.log removed for production
                       setSelectedGuest(guest.id);
                     }}
                     className={`px-4 py-3 border-b cursor-pointer hover:bg-gray-50 ${

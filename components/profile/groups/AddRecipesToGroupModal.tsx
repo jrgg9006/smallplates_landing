@@ -19,7 +19,7 @@ export function AddRecipesToGroupModal({
 }: AddRecipesToGroupModalProps) {
   // Wrapper function to match expected interface for adding recipes
   const handleAddRecipe = async (groupId: string, recipeId: string) => {
-    console.log('DEBUG: Adding existing recipe to group and cookbook', { groupId, recipeId });
+    // console.log removed for production
     
     // First, add recipe to the group
     const groupResult = await addRecipeToGroup(groupId, recipeId);
@@ -33,14 +33,14 @@ export function AddRecipesToGroupModal({
     if (cookbookResult.error) {
       // Check if it's just a duplicate error (which is fine)
       if (cookbookResult.error.includes('already in the group cookbook')) {
-        console.log('DEBUG: Recipe already in cookbook - this is fine');
+        // console.log removed for production
       } else {
         console.error('Recipe added to group but failed to add to shared cookbook:', cookbookResult.error);
         // Still don't return this as an error since the main operation (adding to group) succeeded
       }
       // Don't return error here - recipe was successfully added to group
     } else {
-      console.log('DEBUG: Successfully added recipe to both group and shared cookbook');
+      // console.log removed for production
     }
     
     // Always return success if the group addition worked, regardless of cookbook status

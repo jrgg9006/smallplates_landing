@@ -54,12 +54,12 @@ export default function GuestRecipesPage() {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user || !isAdminEmail(user.email)) {
-      console.log('❌ Not admin, redirecting to home');
+      // console.log removed for production
       router.push('/');
       return;
     }
     
-    console.log('✅ Admin access granted');
+    // console.log removed for production
     setIsAdmin(true);
     await loadGuestRecipes();
     setLoading(false);

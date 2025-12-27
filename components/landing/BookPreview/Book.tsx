@@ -124,7 +124,7 @@ export default function Book() {
           try {
             flipBookRef.current.pageFlip().flip(lastPageIndex, 'back');
           } catch (err) {
-            console.warn('Error preventing page wrap:', err);
+            // console.log removed for production
           }
         }
       });
@@ -136,7 +136,7 @@ export default function Book() {
           try {
             flipBookRef.current.pageFlip().flip(0, 'forward');
           } catch (err) {
-            console.warn('Error preventing page wrap:', err);
+            // console.log removed for production
           }
         }
       });

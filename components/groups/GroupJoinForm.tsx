@@ -192,7 +192,7 @@ export function GroupJoinForm({
         return;
       }
 
-      console.log('✅ User logged in successfully, redirecting to groups page');
+      // console.log removed for production
 
       // Redirect to groups page after a brief delay
       // For better UX, we could redirect directly to the specific group if we have the groupId

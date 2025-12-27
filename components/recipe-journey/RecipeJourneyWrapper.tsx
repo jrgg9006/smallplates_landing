@@ -307,14 +307,6 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         setUploadProgress(prev => Math.min(prev + 15, 90));
       }, 300);
       
-      console.log('Submitting recipe with files using new hierarchical structure...');
-      
-      console.log('🔧 DEBUG RecipeJourneyWrapper: Context being passed:', {
-        cookbookId,
-        groupId,
-        token,
-        submissionData: submission
-      });
       
       // Use the new improved submission function with cookbook/group context
       const { data, error } = await submitGuestRecipeWithFiles(token, submission, selectedFiles, { cookbookId, groupId });
@@ -336,11 +328,6 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         return;
       }
 
-      console.log('✅ Recipe submitted successfully with new storage structure:', {
-        guestId: data.guest_id,
-        recipeId: data.recipe_id,
-        fileUrls: data.file_urls?.length || 0
-      });
       
       // Store the successful submission data
       lastRecipeIdRef.current = data.recipe_id;

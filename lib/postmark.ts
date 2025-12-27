@@ -38,7 +38,7 @@ export async function sendInvitationEmail({ to, confirmationUrl }: SendInvitatio
       MessageStream: 'invite-user', // The stream you configured
     });
 
-    console.log('Invitation email sent successfully:', result.MessageID);
+    // console.log removed for production
     return { success: true, messageId: result.MessageID };
   } catch (error) {
     console.error('Error sending invitation email:', error);
@@ -69,7 +69,7 @@ export async function sendNewRecipeNotification({
       MessageStream: 'transactional', // Using transactional stream
     });
 
-    console.log('Recipe notification sent successfully:', result.MessageID);
+    // console.log removed for production
     return { success: true, messageId: result.MessageID };
   } catch (error) {
     console.error('Error sending recipe notification:', error);
@@ -100,7 +100,7 @@ export async function sendGroupInvitationEmail({
       MessageStream: 'invite-user',
     });
 
-    console.log('Group invitation email sent successfully:', result.MessageID);
+    // console.log removed for production
     return { success: true, messageId: result.MessageID };
   } catch (error) {
     console.error('Error sending group invitation email:', error);

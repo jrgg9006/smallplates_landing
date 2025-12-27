@@ -90,7 +90,7 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
 
   // Notify parent when loading state changes
   useEffect(() => {
-    console.log('GroupsSection loading state:', loading);
+    // console.log removed for production
     onLoadingChange?.(loading);
   }, [loading, onLoadingChange]);
 
@@ -144,11 +144,11 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
       }
       
       if (data) {
-        console.log('DEBUG: Loaded cookbooks data:', data);
+        // console.log removed for production
         setGroups(data);
         // Auto-select first group if no group is selected
         if (data.length > 0 && !selectedGroup) {
-          console.log('DEBUG: Auto-selecting first cookbook:', data[0]);
+          // console.log removed for production
           setSelectedGroup(data[0]);
           onGroupChange?.(data[0]);
         }
@@ -169,17 +169,17 @@ export const GroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
 
   const handleRecipeClick = (recipe: RecipeWithGuest) => {
     // TODO: Implement recipe view/edit functionality
-    console.log('Recipe clicked:', recipe);
+    // console.log removed for production
   };
 
   const handleEditRecipe = (recipe: RecipeWithGuest) => {
     // TODO: Implement recipe editing functionality
-    console.log('Edit recipe:', recipe);
+    // console.log removed for production
   };
 
   const handleRemoveRecipe = (recipe: RecipeWithGuest) => {
     // TODO: Implement recipe removal functionality
-    console.log('Remove recipe:', recipe);
+    // console.log removed for production
   };
 
   const handleCloseEditModal = () => {

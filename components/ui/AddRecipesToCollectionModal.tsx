@@ -201,7 +201,7 @@ export function AddRecipesToCollectionModal({
               addError.includes('already in the group cookbook') ||
               addError.includes('Recipe is already in')) {
             success++;
-            console.log(`Recipe ${recipeId} already exists - counting as success`);
+            // console.log removed for production
           } else {
             failed++;
             console.error(`Failed to add recipe ${recipeId}:`, addError);

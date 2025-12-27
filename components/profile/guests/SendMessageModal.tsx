@@ -26,10 +26,10 @@ export function SendMessageModal({ guest, isOpen, onClose }: SendMessageModalPro
     if (!guest) return;
     
     // TODO: Implement send message functionality
-    console.log('Sending message to:', `${guest.first_name} ${guest.last_name || ''}`.trim());
-    console.log('Email:', guest.email);
-    console.log('Message:', message);
-    console.log('Send copy to me:', sendCopyToMe);
+    // console.log removed for production
+    // console.log removed for production
+    // console.log removed for production
+    // console.log removed for production
     
     // Here you would typically call an API to send the email
     

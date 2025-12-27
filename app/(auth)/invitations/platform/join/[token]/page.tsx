@@ -45,7 +45,7 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
             body: JSON.stringify({ token })
           }).catch(err => {
             // Silent fail - don't block user experience for tracking
-            console.warn('Failed to mark invitation as visited:', err);
+            // console.log removed for production
           });
         } else {
           setStatus(data.status || 'invalid');

@@ -21,7 +21,7 @@ interface GroupMembersDropdownProps {
 }
 
 export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDropdownProps) {
-  console.log('🚨 GroupMembersDropdown component rendered!', group.id);
+  // console.log removed for production
   const [members, setMembers] = useState<GroupMemberWithProfile[]>([]);
   const [pendingInvitations, setPendingInvitations] = useState<GroupInvitation[]>([]);
   const [loading, setLoading] = useState(false);
@@ -92,7 +92,7 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
       }
 
       // Success - invitation was resent
-      console.log('✅ Invitation resent successfully');
+      // console.log removed for production
     } catch (err) {
       console.error('Error resending invitation:', err);
       alert('Failed to resend invitation. Please try again.');
@@ -102,12 +102,12 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
   };
 
   const handleCancelInvitation = async (invitationId: string) => {
-    console.log('🚀 handleCancelInvitation called with:', invitationId);
+    // console.log removed for production
     if (!confirm('Are you sure you want to cancel this invitation? The person will no longer be able to join using the invitation link.')) {
-      console.log('❌ User canceled the confirmation dialog');
+      // console.log removed for production
       return;
     }
-    console.log('✅ User confirmed cancellation, proceeding...');
+    // console.log removed for production
 
     setActionLoading(invitationId);
     
@@ -125,7 +125,7 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
 
       // Success - reload invitations to remove the canceled one
       await loadPendingInvitations();
-      console.log('✅ Invitation canceled successfully');
+      // console.log removed for production
     } catch (err) {
       console.error('Error canceling invitation:', err);
       alert('Failed to cancel invitation. Please try again.');
@@ -315,7 +315,7 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
                       <div className="flex items-center gap-1 flex-shrink-0">
                         <button
                           onClick={(e) => {
-                            console.log('🔄 RESEND BUTTON CLICKED!', invitation.id);
+                            // console.log removed for production
                             e.stopPropagation();
                             handleResendInvitation(invitation.id);
                           }}
@@ -327,7 +327,7 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
                         </button>
                         <button
                           onClick={(e) => {
-                            console.log('❌ CANCEL BUTTON CLICKED!', invitation.id);
+                            // console.log removed for production
                             e.stopPropagation();
                             handleCancelInvitation(invitation.id);
                           }}

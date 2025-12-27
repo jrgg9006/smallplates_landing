@@ -26,7 +26,7 @@ export default function AdminWaitlistPage() {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!isAdminEmail(user?.email)) {
-      console.log('❌ Not admin, redirecting to home');
+      // console.log removed for production
       router.push('/');
       return;
     }

@@ -59,20 +59,10 @@ export default function CollectionForm() {
   const cookbookId = searchParams.get('cookbook');
   const groupId = searchParams.get('group');
   
-  console.log('🔧 DEBUG CollectionForm: URL params detected:', {
-    cookbookId,
-    groupId,
-    fullUrl: typeof window !== 'undefined' ? window.location.href : 'server-side',
-    searchParams: typeof window !== 'undefined' ? window.location.search : 'server-side'
-  });
   
   // Mobile debugging - log component mount
   useEffect(() => {
-    console.log('🔥 CollectionLandingPage mounted on mobile', {
-      userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
-      token,
-      timestamp: new Date().toISOString()
-    });
+    // Component mount logging removed for production
   }, [token]);
   
   // State management
@@ -83,7 +73,7 @@ export default function CollectionForm() {
   
   // Mobile debugging - console and visual logs
   const addDebugLog = (message: string) => {
-    console.log(message);
+    // console.log removed for production
     setDebugLogs(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
   };
   
@@ -101,7 +91,7 @@ export default function CollectionForm() {
   // Validate token on component mount
   useEffect(() => {
     async function validateToken() {
-      console.log('🔍 Mobile Debug - validateToken starting', { token });
+      // console.log removed for production
       
       if (!token) {
         console.error('❌ Mobile Debug - No token provided');
@@ -129,7 +119,7 @@ export default function CollectionForm() {
       }
       
       setLoading(false);
-      console.log('🏁 Mobile Debug - validateToken completed');
+      // console.log removed for production
     }
 
     validateToken();
@@ -137,10 +127,10 @@ export default function CollectionForm() {
 
   // Handle guest search
   const handleSearch = async () => {
-    console.log('Mobile Debug - handleSearch called', { tokenInfo: !!tokenInfo, firstName, lastName });
+    // console.log removed for production
     
     if (!tokenInfo || !firstName.trim()) {
-      console.log('Mobile Debug - Search cancelled: missing tokenInfo or firstName');
+      // console.log removed for production
       return;
     }
 
@@ -188,12 +178,12 @@ export default function CollectionForm() {
         // Store cookbook/group context as backup
         if (cookbookId || groupId) {
           const contextToStore = { cookbookId, groupId };
-          console.log('🔧 DEBUG CollectionForm: Storing context in sessionStorage (existing guest):', contextToStore);
+          // console.log removed for production
           sessionStorage.setItem('collectionContext', JSON.stringify(contextToStore));
         }
       }
     } catch (error) {
-      console.warn('Failed to store data in sessionStorage:', error);
+      // console.log removed for production
       // Continue anyway - we can handle missing sessionStorage in the recipe page
     }
     
@@ -221,7 +211,7 @@ export default function CollectionForm() {
         // Store cookbook/group context as backup
         if (cookbookId || groupId) {
           const contextToStore = { cookbookId, groupId };
-          console.log('🔧 DEBUG CollectionForm: Storing context in sessionStorage (new guest):', contextToStore);
+          // console.log removed for production
           sessionStorage.setItem('collectionContext', JSON.stringify(contextToStore));
         }
       }
@@ -321,11 +311,11 @@ export default function CollectionForm() {
               {(() => {
                 const userName = tokenInfo?.user_name || '';
                 const rawFullName = tokenInfo?.raw_full_name || null;
-                console.log('Debug - tokenInfo:', tokenInfo);
-                console.log('Debug - user_name:', userName);
-                console.log('Debug - raw_full_name:', rawFullName);
+                // console.log removed for production
+                // console.log removed for production
+                // console.log removed for production
                 const personalizedMessage = generatePersonalizedMessage(userName, rawFullName);
-                console.log('Debug - personalizedMessage:', personalizedMessage);
+                // console.log removed for production
                 return (
                   <div className="text-left">
                     {/* Mobile Couple Image - shown above Personal Note title */}

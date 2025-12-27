@@ -164,7 +164,7 @@ export async function addRecipeToGroup(groupId: string, recipeId: string, note?:
     return { data: null, error: 'Recipe ID is required to add recipe to group' };
   }
   
-  console.log('🔍 addRecipeToGroup called with:', { groupId, recipeId, note });
+  // console.log removed for production
   
   // Get the current user
   const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -585,7 +585,7 @@ export async function addRecipeToGroupCookbook(recipeId: string, groupId: string
     }
 
     // If no cookbook found, create it
-    console.log(`No cookbook found for group ${groupId}, creating one...`);
+    // console.log removed for production
     
     // Get group info for cookbook creation
     const { data: group, error: groupError } = await supabase
@@ -644,7 +644,7 @@ export async function addRecipeToGroupCookbook(recipeId: string, groupId: string
     .order('display_order', { ascending: true });
 
   if (fetchError) {
-    console.warn('Warning: Could not fetch existing recipes for reordering:', fetchError);
+    // console.log removed for production
   }
 
   // Add recipe to cookbook at position 1 (top of the list)
@@ -689,7 +689,7 @@ export async function addRecipeToGroupCookbook(recipeId: string, groupId: string
     
     if (existingEntry) {
       // Recipe was actually inserted, so treat as success
-      console.log('Recipe was successfully inserted despite error message');
+      // console.log removed for production
       return { data: existingEntry, error: null };
     }
     

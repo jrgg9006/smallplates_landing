@@ -105,7 +105,7 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
 
         if (skipAuth && existingUserId) {
           // User already authenticated - skip signup
-          console.log(`🚀 Adding new book for existing user: ${existingUserId}`);
+          // console.log removed for production
           userId = existingUserId;
           
           // Get email from current session if not provided
@@ -125,13 +125,13 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
             finalPassword = finalPassword || emailStep?.password;
           }
 
-          console.log("🔍 Debug onboarding completion:");
-          console.log("UserType:", userType);
-          console.log("Passed email:", email);
-          console.log("Passed password:", password ? "[PRESENT]" : "[MISSING]");
-          console.log("State.answers:", state.answers);
-          console.log("Final email:", finalEmail);
-          console.log("Final password:", finalPassword ? "[PRESENT]" : "[MISSING]");
+          // console.log removed for production
+          // console.log removed for production
+          // console.log removed for production
+          // console.log removed for production
+          // console.log removed for production
+          // console.log removed for production
+          // console.log removed for production
 
           if (!finalEmail || !finalPassword) {
             throw new Error("Email and password are required to complete onboarding");
@@ -139,7 +139,7 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
 
           const supabase = createSupabaseClient();
 
-          console.log(`🚀 Starting ${userType} onboarding...`);
+          // console.log removed for production
 
           // Create user with signUp (user will be auto-logged in)
           const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -156,7 +156,7 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
             throw new Error(signUpError?.message || "Failed to create user account");
           }
 
-          console.log('✅ User created and logged in:', signUpData.user.id);
+          // console.log removed for production
           userId = signUpData.user.id;
         }
 
@@ -184,7 +184,7 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
           console.error('⚠️ Failed to create profile/book');
           throw new Error(responseData.error || 'Failed to create profile');
         } else {
-          console.log('✅ Profile/book created successfully');
+          // console.log removed for production
         }
 
         // Send verification email only for new users (not skipAuth)
@@ -204,7 +204,7 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
             if (!emailResponse.ok) {
               console.error('⚠️ Failed to send verification email, but profile was created');
             } else {
-              console.log('✅ Verification email sent');
+              // console.log removed for production
             }
           } catch (emailError) {
             console.error('Error sending verification email:', emailError);
@@ -214,7 +214,7 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
         setState(prev => ({ ...prev, isComplete: true }));
 
         // Redirect to profile
-        console.log('🎉 Redirecting to profile...');
+        // console.log removed for production
         router.push("/profile/groups");
 
       } catch (err) {

@@ -133,7 +133,7 @@ export default function GroupsPage() {
   };
 
   const handlePreviewBook = () => {
-    console.log('Preview Book clicked');
+    // console.log removed for production
   };
 
   // Dashboard image functions
@@ -193,14 +193,14 @@ export default function GroupsPage() {
       const fileInput = document.getElementById('dashboardImageInput') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
 
-      console.log('🔍 Upload successful, about to refresh groups. Current selectedGroup:', selectedGroup?.id);
-      console.log('🔍 Upload URL returned:', result.url);
+      // console.log removed for production
+      // console.log removed for production
 
       // Refresh groups data to get the latest state
       if (groupsSectionRef.current) {
-        console.log('🔍 Calling loadGroups with forceRefresh...');
+        // console.log removed for production
         await groupsSectionRef.current.loadGroups(true); // Force refresh selected group
-        console.log('🔍 loadGroups completed. Updated selectedGroup:', groupsSectionRef.current.selectedGroup?.image_group_dashboard);
+        // console.log removed for production
       } else {
         console.error('🔍 groupsSectionRef.current is null!');
       }
@@ -237,7 +237,7 @@ export default function GroupsPage() {
 
       // Refresh groups data to get the latest state
       if (groupsSectionRef.current) {
-        console.log('🔍 Delete successful, calling loadGroups with forceRefresh...');
+        // console.log removed for production
         await groupsSectionRef.current.loadGroups(true); // Force refresh selected group
       }
 

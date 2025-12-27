@@ -94,11 +94,6 @@ export default function CookbookPage() {
   };
 
   const handleAddNewRecipe = () => {
-    console.log('DEBUG: Opening Add Recipe Modal', { 
-      selectedCookbook: selectedCookbook,
-      isGroupCookbook: selectedCookbook?.is_group_cookbook,
-      groupId: selectedCookbook?.group_id 
-    });
     setIsAddNewRecipeModalOpen(true);
   };
 
@@ -112,7 +107,7 @@ export default function CookbookPage() {
 
   const handlePurchaseCookbook = () => {
     // TODO: Implement purchase flow
-    console.log('Purchase cookbook clicked - placeholder');
+    // console.log removed for production
     // This will navigate to purchase page in the future
   };
 
@@ -188,7 +183,7 @@ export default function CookbookPage() {
         const { data: defaultCookbook, error: defaultError } = await getOrCreateDefaultCookbook();
         
         if (defaultError) {
-          console.warn('Could not create default cookbook:', defaultError);
+          // console.log removed for production
           // Continue anyway - user might not have permission or there might be a constraint issue
         }
         

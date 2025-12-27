@@ -118,12 +118,6 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
       setLoading(true);
       setError(null);
 
-      console.log('Sending group invitation:', {
-        groupId: group.id,
-        groupName: group.name,
-        inviteeName: formData.name,
-        inviteeEmail: formData.email,
-      });
 
       // Send invitation via API
       const response = await fetch(`/api/v1/groups/${group.id}/invitations`, {

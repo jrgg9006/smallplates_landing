@@ -104,10 +104,10 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
       const profileWithOnboarding = profile as any;
       if (profileWithOnboarding?.onboarding_state && typeof profileWithOnboarding.onboarding_state === 'object') {
         const dbState = profileWithOnboarding.onboarding_state as OnboardingState;
-        console.log('Loading onboarding state from database:', dbState);
+        // console.log removed for production
         setOnboardingState(dbState);
       } else {
-        console.log('No onboarding state in database, using defaults');
+        // console.log removed for production
       }
       
       hasLoadedStateRef.current = true;
@@ -134,7 +134,7 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
           if (error) {
             console.error('Failed to save onboarding state:', error);
           } else {
-            console.log('Successfully saved onboarding state:', updated);
+            // console.log removed for production
           }
         });
       
@@ -283,23 +283,23 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
 
   // Debug logging with more detail
   useEffect(() => {
-    console.log('=== ONBOARDING DEBUG ===');
-    console.log('User ID:', user?.id);
-    console.log('Guest Count:', guestCount);
-    console.log('Onboarding State:', onboardingState);
-    console.log('Has Seen Welcome:', onboardingState.has_seen_welcome);
-    console.log('Welcome Dismissed At:', onboardingState.welcome_dismissed_at);
-    console.log('Show Welcome:', showWelcome);
-    console.log('Show Onboarding Cards:', showOnboardingCards);
-    console.log('Show Onboarding Resume:', showOnboardingResume);
-    console.log('Should Show Onboarding:', shouldShowOnboarding);
-    console.log('Is First Time User:', isFirstTimeUser);
-    console.log('Show Welcome Overlay:', showWelcomeOverlay);
-    console.log('========================');
+    // console.log removed for production
+    // console.log removed for production
+    // console.log removed for production
+    // console.log removed for production
+    // console.log removed for production
+    // console.log removed for production
+    // console.log removed for production
+    // console.log removed for production
+    // console.log removed for production
+    // console.log removed for production
+    // console.log removed for production
+    // console.log removed for production
+    // console.log removed for production
   }, [guestCount, onboardingState, isFirstTimeUser, showWelcomeOverlay, user?.id, showWelcome, showOnboardingCards, showOnboardingResume, shouldShowOnboarding]);
 
   const dismissWelcome = useCallback(() => {
-    console.log('Dismissing welcome overlay...');
+    // console.log removed for production
     
     // Simply switch states
     setShowWelcome(false);
@@ -314,7 +314,7 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
   }, [updateOnboardingState]);
 
   const startFirstRecipeExperience = useCallback(() => {
-    console.log('Starting first recipe experience...');
+    // console.log removed for production
     
     // Switch to first recipe experience
     setShowWelcome(false);
@@ -330,7 +330,7 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
   }, [updateOnboardingState]);
 
   const skipFirstRecipeExperience = useCallback(() => {
-    console.log('Skipping first recipe experience...');
+    // console.log removed for production
     
     // Go back to onboarding cards
     setShowFirstRecipeExperience(false);
@@ -338,7 +338,7 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
   }, []);
 
   const skipAllOnboarding = useCallback(() => {
-    console.log('Skipping all onboarding...');
+    // console.log removed for production
     
     // Hide all onboarding components
     setShowWelcome(false);
@@ -374,7 +374,7 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
   }, [updateOnboardingState]);
 
   const skipOnboarding = useCallback(() => {
-    console.log('Skipping onboarding...');
+    // console.log removed for production
     
     // Hide onboarding cards and show resume component
     setShowOnboardingCards(false);
@@ -388,7 +388,7 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
   }, [onboardingState.dismissal_count, updateOnboardingState]);
 
   const resumeOnboarding = useCallback(() => {
-    console.log('Resuming onboarding...');
+    // console.log removed for production
     
     // Show onboarding cards and hide resume component
     setShowOnboardingResume(false);
@@ -396,7 +396,7 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
   }, []);
 
   const permanentlyDismissOnboarding = useCallback(() => {
-    console.log('Permanently dismissing onboarding...');
+    // console.log removed for production
     
     // Hide resume component
     setShowOnboardingResume(false);

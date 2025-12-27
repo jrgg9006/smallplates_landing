@@ -39,7 +39,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
   // Debug: Log when modal opens with different contexts
   React.useEffect(() => {
     if (isOpen) {
-      console.log('DEBUG: AddPlateModal opened with context:', { cookbookId, groupId });
+      // console.log removed for production
     }
   }, [isOpen, cookbookId, groupId]);
   // Responsive hook to detect mobile
@@ -213,9 +213,9 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
       let createdRecipeId: string | null = null;
 
       // If groupId is provided, create plate directly in the group
-      console.log('DEBUG: Recipe creation starting', { groupId, isMyOwnRecipe, uploadMethod });
+      // console.log removed for production
       if (groupId) {
-        console.log('DEBUG: Creating recipe for group', groupId);
+        // console.log removed for production
         if (uploadMethod === 'image') {
           // For groups with image uploads, we need to use a different approach
           // First create the recipe with files, then add it to the group
@@ -256,13 +256,13 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
           
           // Add the recipe to the group
           if (createdRecipeId) {
-            console.log('🔍 Adding recipe to group:', { recipeId: createdRecipeId, groupId });
+            // console.log removed for production
             const { error: groupError } = await addRecipeToGroup(groupId, createdRecipeId);
             if (groupError) {
               console.error('❌ Failed to add recipe to group:', groupError);
               // Plate was created but not added to group - still continue
             } else {
-              console.log('✅ Recipe successfully added to group');
+              // console.log removed for production
             }
           } else {
             console.error('❌ No recipe ID returned after creation!');
@@ -309,13 +309,13 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
           
           // Add the recipe to the group
           if (createdRecipeId) {
-            console.log('🔍 Adding recipe to group:', { recipeId: createdRecipeId, groupId });
+            // console.log removed for production
             const { error: groupError } = await addRecipeToGroup(groupId, createdRecipeId);
             if (groupError) {
               console.error('❌ Failed to add recipe to group:', groupError);
               // Plate was created but not added to group - still continue
             } else {
-              console.log('✅ Recipe successfully added to group');
+              // console.log removed for production
             }
           } else {
             console.error('❌ No recipe ID returned after creation!');

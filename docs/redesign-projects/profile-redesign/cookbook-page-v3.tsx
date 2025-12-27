@@ -12,7 +12,7 @@ const sampleRecipes = [
   { id: 9, name: "Apple Pie", contributor: "Grandma" },
 ];
 
-const RecipeCard = ({ recipe }) => {
+const RecipeCard = ({ recipe }: { recipe: any }) => {
   const [isHovered, setIsHovered] = useState(false);
   
   return (
@@ -98,7 +98,7 @@ const RecipeCard = ({ recipe }) => {
   );
 };
 
-const CaptainsDropdown = ({ isOpen }) => {
+const CaptainsDropdown = ({ isOpen }: { isOpen: boolean }) => {
   if (!isOpen) return null;
   
   const captains = [

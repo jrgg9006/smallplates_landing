@@ -20,7 +20,7 @@ export async function getAllCookbooks() {
     return { data: null, error: 'User not authenticated' };
   }
 
-  console.log('🔍 Loading Groups (renamed to Cookbooks) for user:', user.email);
+  // console.log removed for production
 
   try {
     // Get all groups where the user is a member (these are displayed as "Cookbooks" in UI)
@@ -43,7 +43,7 @@ export async function getAllCookbooks() {
       return { data: null, error: 'Failed to load cookbooks' };
     }
 
-    console.log('Raw groups data:', userGroups);
+    // console.log removed for production
 
     // Flatten and transform groups to look like cookbooks
     const allCookbooks: any[] = [];
@@ -74,7 +74,7 @@ export async function getAllCookbooks() {
       }
     });
 
-    console.log('Transformed groups (as cookbooks):', allCookbooks.map(cb => ({ id: cb.id, name: cb.name })));
+    // console.log removed for production
 
     // Sort by creation date (newest first)
     allCookbooks.sort((a, b) => {

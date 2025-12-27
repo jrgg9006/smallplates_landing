@@ -43,7 +43,7 @@ export function formatWeddingDate(dateString: string): string {
       year: 'numeric' 
     });
   } catch (error) {
-    console.warn('Error formatting wedding date:', error);
+    // console.log removed for production
     return 'Celebrations planned';
   }
 }

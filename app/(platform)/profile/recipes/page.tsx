@@ -78,7 +78,7 @@ export default function RecipesPage() {
   const handleShare = () => {
     // Placeholder - will be implemented later
     setIsShareModalOpen(true);
-    console.log('Share recipes:', selectedRecipes);
+    // console.log removed for production
   };
 
   const handleCloseShareModal = () => {
@@ -87,7 +87,7 @@ export default function RecipesPage() {
 
   const handleShareRecipes = () => {
     // Placeholder - will be implemented later
-    console.log('Share recipes clicked');
+    // console.log removed for production
   };
 
   const handleGetRecipesFromFriends = async () => {

@@ -1,399 +1,250 @@
-# Context Engineering Template
+# SmallPlates & Company
 
-A comprehensive template for getting started with Context Engineering - the discipline of engineering context for AI coding assistants so they have the information necessary to get the job done end to end.
+*The wedding recipe book made by the people who love you.*
 
-> **Context Engineering is 10x better than prompt engineering and 100x better than vibe coding.**
+## 📖 Overview
 
-## 🚀 Quick Start
+SmallPlates creates collaborative recipe books where wedding guests contribute their favorite recipes, which are then professionally designed and printed as premium hardcover books for the couple. 
 
-```bash
-# 1. Clone this template
-git clone https://github.com/coleam00/Context-Engineering-Intro.git
-cd Context-Engineering-Intro
+More than a cookbook — it's a meaningful gift that carries the presence of loved ones into the kitchen, where marriage actually happens.
 
-# 2. Set up your project rules (optional - template provided)
-# Edit CLAUDE.md to add your project-specific guidelines
+**"Still at the table."** Every time they cook a recipe, every time they read a name — their loved ones are still there, still part of their life together.
 
-# 3. Add examples (highly recommended)
-# Place relevant code examples in the examples/ folder
+## ✨ How It Works
 
-# 4. Create your initial feature request
-# Edit INITIAL.md with your feature requirements
+1. **Create** - An organizer (bridesmaid, family member) starts a recipe collection
+2. **Collect** - Share a unique link with wedding guests to contribute recipes
+3. **Design** - We professionally format and design every submission
+4. **Print** - Receive beautiful hardcover books ready to gift
 
-# 5. Generate a comprehensive PRP (Product Requirements Prompt)
-# In Claude Code, run:
-/generate-prp INITIAL.md
+## 🎯 Key Features
 
-# 6. Execute the PRP to implement your feature
-# In Claude Code, run:
-/execute-prp PRPs/your-feature-name.md
-```
+### For Organizers
+- **Easy Setup**: Create a collection in minutes
+- **Guest Management**: Track who's contributed, send gentle reminders
+- **Real-time Progress**: Watch the book come together
+- **Multiple Book Options**: Premium for the couple, Classic editions for family
 
-## 📚 Table of Contents
+### For Contributors
+- **Simple Submission**: Add recipes via web, no app needed
+- **Personal Touch**: Include notes and memories with each recipe
+- **Multiple Formats**: Upload photos, type directly, or share links
 
-- [What is Context Engineering?](#what-is-context-engineering)
-- [Template Structure](#template-structure)
-- [Step-by-Step Guide](#step-by-step-guide)
-- [Writing Effective INITIAL.md Files](#writing-effective-initialmd-files)
-- [The PRP Workflow](#the-prp-workflow)
-- [Using Examples Effectively](#using-examples-effectively)
-- [Best Practices](#best-practices)
-
-## What is Context Engineering?
-
-Context Engineering represents a paradigm shift from traditional prompt engineering:
-
-### Prompt Engineering vs Context Engineering
-
-**Prompt Engineering:**
-- Focuses on clever wording and specific phrasing
-- Limited to how you phrase a task
-- Like giving someone a sticky note
-
-**Context Engineering:**
-- A complete system for providing comprehensive context
-- Includes documentation, examples, rules, patterns, and validation
-- Like writing a full screenplay with all the details
-
-### Why Context Engineering Matters
-
-1. **Reduces AI Failures**: Most agent failures aren't model failures - they're context failures
-2. **Ensures Consistency**: AI follows your project patterns and conventions
-3. **Enables Complex Features**: AI can handle multi-step implementations with proper context
-4. **Self-Correcting**: Validation loops allow AI to fix its own mistakes
-
-## Template Structure
-
-```
-context-engineering-intro/
-├── .claude/
-│   ├── commands/
-│   │   ├── generate-prp.md    # Generates comprehensive PRPs
-│   │   └── execute-prp.md     # Executes PRPs to implement features
-│   └── settings.local.json    # Claude Code permissions
-├── PRPs/
-│   ├── templates/
-│   │   └── prp_base.md       # Base template for PRPs
-│   └── EXAMPLE_multi_agent_prp.md  # Example of a complete PRP
-├── examples/                  # Your code examples (critical!)
-├── CLAUDE.md                 # Global rules for AI assistant
-├── INITIAL.md               # Template for feature requests
-├── INITIAL_EXAMPLE.md       # Example feature request
-└── README.md                # This file
-```
-
-This template doesn't focus on RAG and tools with context engineering because I have a LOT more in store for that soon. ;)
-
-## Step-by-Step Guide
-
-### 1. Set Up Global Rules (CLAUDE.md)
-
-The `CLAUDE.md` file contains project-wide rules that the AI assistant will follow in every conversation. The template includes:
-
-- **Project awareness**: Reading planning docs, checking tasks
-- **Code structure**: File size limits, module organization
-- **Testing requirements**: Unit test patterns, coverage expectations
-- **Style conventions**: Language preferences, formatting rules
-- **Documentation standards**: Docstring formats, commenting practices
-
-**You can use the provided template as-is or customize it for your project.**
-
-### 2. Create Your Initial Feature Request
-
-Edit `INITIAL.md` to describe what you want to build:
-
-```markdown
-## FEATURE:
-[Describe what you want to build - be specific about functionality and requirements]
-
-## EXAMPLES:
-[List any example files in the examples/ folder and explain how they should be used]
-
-## DOCUMENTATION:
-[Include links to relevant documentation, APIs, or MCP server resources]
-
-## OTHER CONSIDERATIONS:
-[Mention any gotchas, specific requirements, or things AI assistants commonly miss]
-```
-
-**See `INITIAL_EXAMPLE.md` for a complete example.**
-
-### 3. Generate the PRP
-
-PRPs (Product Requirements Prompts) are comprehensive implementation blueprints that include:
-
-- Complete context and documentation
-- Implementation steps with validation
-- Error handling patterns
-- Test requirements
-
-They are similar to PRDs (Product Requirements Documents) but are crafted more specifically to instruct an AI coding assistant.
-
-Run in Claude Code:
-```bash
-/generate-prp INITIAL.md
-```
-
-**Note:** The slash commands are custom commands defined in `.claude/commands/`. You can view their implementation:
-- `.claude/commands/generate-prp.md` - See how it researches and creates PRPs
-- `.claude/commands/execute-prp.md` - See how it implements features from PRPs
-
-The `$ARGUMENTS` variable in these commands receives whatever you pass after the command name (e.g., `INITIAL.md` or `PRPs/your-feature.md`).
-
-This command will:
-1. Read your feature request
-2. Research the codebase for patterns
-3. Search for relevant documentation
-4. Create a comprehensive PRP in `PRPs/your-feature-name.md`
-
-### 4. Execute the PRP
-
-Once generated, execute the PRP to implement your feature:
-
-```bash
-/execute-prp PRPs/your-feature-name.md
-```
-
-The AI coding assistant will:
-1. Read all context from the PRP
-2. Create a detailed implementation plan
-3. Execute each step with validation
-4. Run tests and fix any issues
-5. Ensure all success criteria are met
-
-## Writing Effective INITIAL.md Files
-
-### Key Sections Explained
-
-**FEATURE**: Be specific and comprehensive
-- ❌ "Build a web scraper"
-- ✅ "Build an async web scraper using BeautifulSoup that extracts product data from e-commerce sites, handles rate limiting, and stores results in PostgreSQL"
-
-**EXAMPLES**: Leverage the examples/ folder
-- Place relevant code patterns in `examples/`
-- Reference specific files and patterns to follow
-- Explain what aspects should be mimicked
-
-**DOCUMENTATION**: Include all relevant resources
-- API documentation URLs
-- Library guides
-- MCP server documentation
-- Database schemas
-
-**OTHER CONSIDERATIONS**: Capture important details
-- Authentication requirements
-- Rate limits or quotas
-- Common pitfalls
-- Performance requirements
-
-## The PRP Workflow
-
-### How /generate-prp Works
-
-The command follows this process:
-
-1. **Research Phase**
-   - Analyzes your codebase for patterns
-   - Searches for similar implementations
-   - Identifies conventions to follow
-
-2. **Documentation Gathering**
-   - Fetches relevant API docs
-   - Includes library documentation
-   - Adds gotchas and quirks
-
-3. **Blueprint Creation**
-   - Creates step-by-step implementation plan
-   - Includes validation gates
-   - Adds test requirements
-
-4. **Quality Check**
-   - Scores confidence level (1-10)
-   - Ensures all context is included
-
-### How /execute-prp Works
-
-1. **Load Context**: Reads the entire PRP
-2. **Plan**: Creates detailed task list using TodoWrite
-3. **Execute**: Implements each component
-4. **Validate**: Runs tests and linting
-5. **Iterate**: Fixes any issues found
-6. **Complete**: Ensures all requirements met
-
-See `PRPs/EXAMPLE_multi_agent_prp.md` for a complete example of what gets generated.
-
-## Using Examples Effectively
-
-The `examples/` folder is **critical** for success. AI coding assistants perform much better when they can see patterns to follow.
-
-### What to Include in Examples
-
-1. **Code Structure Patterns**
-   - How you organize modules
-   - Import conventions
-   - Class/function patterns
-
-2. **Testing Patterns**
-   - Test file structure
-   - Mocking approaches
-   - Assertion styles
-
-3. **Integration Patterns**
-   - API client implementations
-   - Database connections
-   - Authentication flows
-
-4. **CLI Patterns**
-   - Argument parsing
-   - Output formatting
-   - Error handling
-
-### Example Structure
-
-```
-examples/
-├── README.md           # Explains what each example demonstrates
-├── cli.py             # CLI implementation pattern
-├── agent/             # Agent architecture patterns
-│   ├── agent.py      # Agent creation pattern
-│   ├── tools.py      # Tool implementation pattern
-│   └── providers.py  # Multi-provider pattern
-└── tests/            # Testing patterns
-    ├── test_agent.py # Unit test patterns
-    └── conftest.py   # Pytest configuration
-```
-
-## Best Practices
-
-### 1. Be Explicit in INITIAL.md
-- Don't assume the AI knows your preferences
-- Include specific requirements and constraints
-- Reference examples liberally
-
-### 2. Provide Comprehensive Examples
-- More examples = better implementations
-- Show both what to do AND what not to do
-- Include error handling patterns
-
-### 3. Use Validation Gates
-- PRPs include test commands that must pass
-- AI will iterate until all validations succeed
-- This ensures working code on first try
-
-### 4. Leverage Documentation
-- Include official API docs
-- Add MCP server resources
-- Reference specific documentation sections
-
-### 5. Customize CLAUDE.md
-- Add your conventions
-- Include project-specific rules
-- Define coding standards
-
-## Resources
-
-- [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
-- [Context Engineering Best Practices](https://www.philschmid.de/context-engineering)
-
----
-
-# SmallPlates Landing Page
-
-A conversion-focused landing page for SmallPlates & Company, built with Next.js 14 (App Router), React, and Tailwind CSS.
-
-## 🚀 Quick Start
-
-```bash
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-
-# Open http://localhost:3000
-```
-
-## 📦 Build & Deploy
-
-```bash
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Lint code
-npm run lint
-```
+### For Couples
+- **Meaningful Gift**: A book made by everyone who loves them
+- **Daily Use**: Lives in the kitchen, not on a shelf
+- **Growing Value**: Becomes more meaningful over time
 
 ## 🛠️ Tech Stack
 
-- **Framework**: Next.js 15 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Components**: React 19
+- **Frontend**: Next.js 15.5.7, React 19, TypeScript
+- **Styling**: Tailwind CSS, shadcn/ui components
+- **Database**: Supabase (PostgreSQL with Row Level Security)
+- **Authentication**: Supabase Auth
+- **Storage**: Supabase Storage
+- **Payments**: Stripe
+- **Email**: Resend
+- **AI**: OpenAI API (recipe enhancement)
+- **Deployment**: Vercel
+
+## 📋 Prerequisites
+
+- Node.js 18.17 or later
+- npm or yarn
+- Supabase account
+- Stripe account (for payments)
+- Resend account (for emails)
+- OpenAI API key (optional, for AI features)
+
+## 🚀 Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone [repository-url]
+   cd smallplates_landing
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   
+   Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+
+   Configure the following variables:
+   ```env
+   # Supabase
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+   # Stripe
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+   STRIPE_SECRET_KEY=your_stripe_secret_key
+   STRIPE_WEBHOOK_SECRET=your_webhook_secret
+
+   # Email (Resend)
+   RESEND_API_KEY=your_resend_api_key
+   RESEND_DOMAIN=your_verified_domain
+
+   # OpenAI (optional)
+   OPENAI_API_KEY=your_openai_api_key
+   ANTHROPIC_API_KEY=your_anthropic_api_key
+
+   # App Configuration
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   ```
+
+4. **Run database migrations**
+   
+   Apply the Supabase migrations from the `supabase/migrations` folder in your Supabase dashboard.
+
+5. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000)
 
 ## 📁 Project Structure
 
 ```
-.
-├── app/
-│   ├── layout.tsx          # Root layout with Metadata API
-│   ├── page.tsx            # Main landing page
-│   └── globals.css         # Global styles
-├── components/
-│   ├── Banner.tsx          # Top logo banner
-│   ├── Hero.tsx            # Hero section
-│   ├── ProductShowcase.tsx # Product section
-│   ├── CollectorTool.tsx   # Collector explainer
-│   └── CTAButton.tsx       # Reusable CTA button
-├── public/
-│   └── images/             # Static images
-├── docs/landing/           # Landing page best practices
-│   ├── landing.md          # UX principles
-│   └── seo.md              # SEO guidelines
-└── examples/               # Reference implementations
+smallplates_landing/
+├── app/                     # Next.js App Router
+│   ├── (admin)/            # Admin dashboard
+│   ├── (landing)/          # Public pages
+│   ├── (onboarding)/       # User onboarding flow
+│   ├── (platform)/         # Main application
+│   │   └── profile/        # User dashboard
+│   ├── (recipe-journey)/   # Recipe submission flow
+│   └── api/                # API routes
+├── components/             # React components
+│   ├── auth/              # Authentication
+│   ├── landing/           # Landing page sections
+│   ├── onboarding/        # Onboarding steps
+│   ├── profile/           # Dashboard components
+│   │   ├── cookbook/      # Cookbook management
+│   │   ├── groups/        # Group/event management
+│   │   ├── guests/        # Guest management
+│   │   └── recipes/       # Recipe management
+│   ├── recipe-journey/    # Recipe submission flow
+│   └── ui/               # Reusable UI components
+├── lib/                   # Utilities
+│   ├── supabase/         # Database client & queries
+│   ├── stripe/           # Payment integration
+│   └── types/            # TypeScript definitions
+├── public/               # Static assets
+├── supabase/             # Database schema
+├── brand_wedding/        # Brand guidelines
+├── business_plan/        # Business documentation
+└── CLAUDE.md            # AI assistant instructions
 ```
 
-## 🎨 Design Principles
+## 🗄️ Database Schema
 
-- **Clean & Minimal**: White background, generous spacing
-- **Mobile-First**: Responsive across all breakpoints (375px → 1440px)
-- **Accessible**: WCAG 2.1 Level AA compliance
-- **Performant**: Core Web Vitals optimized (LCP ≤ 2.5s)
+Main tables:
+- **profiles** - User accounts and preferences
+- **groups** - Recipe collections (weddings/events)
+- **group_members** - Group participants and permissions
+- **guests** - Recipe contributors
+- **recipes** - Submitted recipes with metadata
+- **waitlist** - Early access signups
+- **email_logs** - Email delivery tracking
 
-See [docs/landing/landing.md](docs/landing/landing.md) for detailed best practices.
+## 🔐 Security & Authentication
 
-## 🔧 Environment Variables
+- **Supabase Auth** for user authentication
+- **Row Level Security (RLS)** policies for data protection
+- **Email verification** for new accounts
+- **Invitation system** for group members
+- **Secure API routes** with proper authorization
 
-Copy `.env.example` to `.env.local`:
+## 💳 Pricing Tiers
+
+| Tier | Name | Contents | Price |
+|------|------|----------|-------|
+| 1 | The Book | 1 Premium | $149 |
+| 2 | The Family Collection | 1 Premium + 2 Classic | $279 |
+| 3 | The Kitchen Table | 1 Premium + 5 Classic | $449 |
+| Custom | Contact Us | Flexible configurations | Quote |
+
+## 🔧 Development Scripts
 
 ```bash
-cp .env.example .env.local
+# Development
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+
+# Code Quality
+npm run lint         # Run ESLint
+npm run typecheck    # TypeScript type checking
+
+# Database
+npm run db:types     # Generate TypeScript types from Supabase
 ```
 
-Configure:
-- `NEXT_PUBLIC_SITE_URL`: Your production URL
-- `NEXT_PUBLIC_GA_ID`: (Optional) Google Analytics ID
+## 🚀 Deployment
 
-## 📝 SEO Configuration
+Optimized for Vercel deployment:
 
-SEO metadata is configured in `app/layout.tsx` using Next.js Metadata API:
-- Title: "Small Plates & Company — The People Behind Every Recipe"
-- Description optimized for search and social sharing
-- OpenGraph tags for rich social previews
+1. Push code to GitHub
+2. Import project in Vercel
+3. Add all environment variables
+4. Deploy
 
-See [docs/landing/seo.md](docs/landing/seo.md) for SEO guidelines.
+Production checklist:
+- [ ] Configure Supabase RLS policies
+- [ ] Set up Stripe webhooks
+- [ ] Verify email domain in Resend
+- [ ] Enable proper CORS settings
+- [ ] Set production environment variables
 
-## 🧪 Development
+## 🤝 Contributing
 
-This project was built using Context Engineering principles with:
-- Complete PRP at [PRPs/smallplates-landing-page.md](PRPs/smallplates-landing-page.md)
-- Reference examples in `examples/` directory
-- Development rules in `CLAUDE.md`
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Follow the guidelines in `CLAUDE.md`
+4. Commit your changes (`git commit -m 'Add amazing feature'`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
 
-## 📚 Additional Documentation
+## 📝 Development Guidelines
 
-- Landing page best practices: [docs/landing/landing.md](docs/landing/landing.md)
-- SEO guidelines: [docs/landing/seo.md](docs/landing/seo.md)
-- Feature specification: [INITIAL.md](INITIAL.md)
+See `CLAUDE.md` for:
+- Code structure and organization
+- Testing requirements
+- Style conventions
+- AI assistant instructions
+
+## 🎨 Brand Guidelines
+
+See `brand_wedding/` for:
+- Brand positioning and voice
+- Visual identity
+- Messaging framework
+- Photography style
+
+## 📊 Business Context
+
+See `business_plan/` for:
+- Executive summary
+- Market analysis
+- Customer segments
+- Competitive landscape
+
+## 📧 Support
+
+- Email: support@smallplates.company
+- Website: [smallplates.company](https://smallplates.company)
+
+---
+
+*Built with love in the kitchen.*
+
+Small Plates & Company © 2024. All rights reserved.

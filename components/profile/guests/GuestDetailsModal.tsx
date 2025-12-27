@@ -47,7 +47,7 @@ export function GuestDetailsModal({ guest, isOpen, onClose, onGuestUpdated, defa
     if (typeof window !== 'undefined' && isOpen) {
       const mobile = window.innerWidth < 640;
       setIsMobile(mobile);
-      console.log('GuestDetailsModal: Mobile detection:', mobile, 'Window width:', window.innerWidth);
+      // console.log removed for production
     }
   }, [isOpen]);
 

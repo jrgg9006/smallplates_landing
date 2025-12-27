@@ -124,16 +124,16 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
   }, [searchValue, statusFilter, refreshTrigger]);
 
   const handleGuestClick = (guest: GuestWithMeta) => {
-    console.log('handleGuestClick called, isModalClosing:', isModalClosing, 'isModalClosingRef:', isModalClosingRef.current);
+    // console.log removed for production
     // Prevent opening if a modal just closed
     if (isModalClosing || isModalClosingRef.current) {
-      console.log('Preventing guest click because modal just closed');
+      // console.log removed for production
       setIsModalClosing(false);
       isModalClosingRef.current = false;
       return;
     }
     
-    console.log('Opening GuestDetailsModal');
+    // console.log removed for production
     setSelectedGuest(guest);
     setIsModalOpen(true);
   };
@@ -173,12 +173,12 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
     meta: {
       onGuestClick: handleGuestClick,
       onModalClose: () => {
-        console.log('Modal close triggered, setting both flags to true');
+        // console.log removed for production
         setIsModalClosing(true);
         isModalClosingRef.current = true;
         // Reset the flags after a longer delay to ensure row click is prevented
         setTimeout(() => {
-          console.log('Resetting both flags to false');
+          // console.log removed for production
           setIsModalClosing(false);
           isModalClosingRef.current = false;
         }, 500);
@@ -344,11 +344,11 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
                 key={row.id}
                 guest={row.original}
                 onModalClose={() => {
-                  console.log('Modal close triggered from mobile card, setting both flags to true');
+                  // console.log removed for production
                   setIsModalClosing(true);
                   isModalClosingRef.current = true;
                   setTimeout(() => {
-                    console.log('Resetting both flags to false from mobile card');
+                    // console.log removed for production
                     setIsModalClosing(false);
                     isModalClosingRef.current = false;
                   }, 500);

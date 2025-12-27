@@ -121,7 +121,7 @@ export function CookbookTableControls({
                 cookbook={selectedCookbook}
                 onInviteFriend={() => {
                   // TODO: Implement invite functionality - could open a modal or navigate to group management
-                  console.log('Add member to cookbook:', selectedCookbook.name);
+                  // console.log removed for production
                 }}
               />
             )}
@@ -213,7 +213,7 @@ export function CookbookTableControls({
               cookbook={selectedCookbook}
               onInviteFriend={() => {
                 // TODO: Implement invite functionality
-                console.log('Add member to cookbook (mobile):', selectedCookbook.name);
+                // console.log removed for production
               }}
             />
           )}

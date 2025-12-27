@@ -82,7 +82,7 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
     return { data: [], error: null };
   }
 
-  console.log(`Found ${recipes.length} total recipes before transformation`);
+  // console.log removed for production
   
   // Transform and filter results
   const transformedRecipes = recipes.map((recipe: any) => {
@@ -113,7 +113,7 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
     
     // Debug log for recipes without groups
     if (!group && recipe.id) {
-      console.log(`Recipe ${recipe.id} (${recipe.recipe_name}) has no group association`);
+      // console.log removed for production
     }
 
     return {
@@ -137,7 +137,7 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
   if (filters?.cookbookId) {
     if (filters.cookbookId === 'not_in_cookbook') {
       const archivedRecipes = transformedRecipes.filter((r: any) => !r.group);
-      console.log(`Filtering for archived recipes: found ${archivedRecipes.length} recipes without groups`);
+      // console.log removed for production
       filtered = filtered.filter((r: any) => !r.group);
     } else {
       filtered = filtered.filter((r: any) => r.group?.id === filters.cookbookId);

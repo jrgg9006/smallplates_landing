@@ -171,7 +171,7 @@ function ActionsCell({ guest, onModalClose, onGuestDeleted, onAddRecipe }: {
   };
 
   const handleCloseMessageModal = () => {
-    console.log('SendMessageModal closing, calling onModalClose');
+    // console.log removed for production
     setShowMessageModal(false);
     // Signal that a modal is closing to prevent row click
     if (onModalClose) {

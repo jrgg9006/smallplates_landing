@@ -71,7 +71,7 @@ export async function getAllCookbooks() {
     return { data: null, error: 'User not authenticated' };
   }
 
-  console.log('🔍 Loading Groups (renamed to Cookbooks) for user:', user.email);
+  // console.log removed for production
 
   try {
     // Get all groups where the user is a member (these are displayed as "Cookbooks" in UI)
@@ -94,7 +94,7 @@ export async function getAllCookbooks() {
       return { data: null, error: 'Failed to load cookbooks' };
     }
 
-    console.log('Raw groups data:', userGroups);
+    // console.log removed for production
 
     // Flatten and transform groups to look like cookbooks
     const allCookbooks: any[] = [];
@@ -125,7 +125,7 @@ export async function getAllCookbooks() {
       }
     });
 
-    console.log('Transformed groups (as cookbooks):', allCookbooks.map(cb => ({ id: cb.id, name: cb.name })));
+    // console.log removed for production
 
     // Sort by creation date (newest first)
     allCookbooks.sort((a, b) => {
@@ -279,7 +279,7 @@ export async function deleteCookbook(cookbookId: string) {
 
   // Check if it's the default cookbook - allow deletion but warn user
   if (cookbook.is_default) {
-    console.log('Deleting default cookbook - a new one will be created automatically');
+    // console.log removed for production
   }
 
   // Delete the cookbook (cascade should handle related records)
@@ -297,7 +297,7 @@ export async function deleteCookbook(cookbookId: string) {
   if (cookbook.is_default) {
     const { error: defaultError } = await getOrCreateDefaultCookbook();
     if (defaultError) {
-      console.warn('Failed to create new default cookbook after deletion:', defaultError);
+      // console.log removed for production
     }
   }
 
@@ -355,7 +355,7 @@ export async function addRecipeToCookbook(cookbookId: string, recipeId: string, 
     return { data: null, error: 'User not authenticated' };
   }
 
-  console.log('🔍 Adding recipe to group (cookbook):', { cookbookId, recipeId, user: user.email });
+  // console.log removed for production
 
   try {
     // Since we changed to show Groups as "Cookbooks", cookbookId is actually a groupId
@@ -377,7 +377,7 @@ export async function addRecipeToCookbook(cookbookId: string, recipeId: string, 
       return { data: null, error: 'Cookbook not found or access denied' };
     }
 
-    console.log('Group found:', groupMember.groups);
+    // console.log removed for production
 
     // Verify the recipe exists and user has access to it
     // For group cookbooks, allow recipes user has access to (RLS will handle this)
@@ -486,7 +486,7 @@ export async function getCookbookRecipes(cookbookId: string) {
     return { data: null, error: cookbookError.message };
   }
 
-  console.log('Cookbook info:', cookbook);
+  // console.log removed for production
 
   // Get cookbook recipes first
   let cookbookQuery = supabase
@@ -563,7 +563,7 @@ export async function getCookbookRecipes(cookbookId: string) {
         acc[profile.id] = profile;
         return acc;
       }, {});
-      console.log('Fetched user profiles:', userProfiles);
+      // console.log removed for production
     }
   }
 
@@ -588,7 +588,7 @@ export async function getCookbookRecipes(cookbookId: string) {
       }
     }
     
-    console.log('Recipe user_id:', cookbookRecipe?.user_id, 'Current user:', user.id, 'Added by user:', addedByUser);
+    // console.log removed for production
     
     return {
       ...recipe,

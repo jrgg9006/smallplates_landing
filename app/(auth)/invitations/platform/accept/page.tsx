@@ -28,14 +28,14 @@ export default function AcceptInvitationPage() {
 
         const supabase = createSupabaseClient();
 
-        console.log('🔍 Invitation acceptance page loaded');
-        console.log('🔍 Full URL:', window.location.href);
+        // console.log removed for production
+        // console.log removed for production
 
         // First, check if there's already an active session
         const { data: { session: existingSession } } = await supabase.auth.getSession();
 
         if (existingSession) {
-          console.log('✅ Existing session found, ready for password setup');
+          // console.log removed for production
           setSessionReady(true);
           return;
         }
@@ -44,23 +44,23 @@ export default function AcceptInvitationPage() {
         const hash = window.location.hash;
         const search = window.location.search;
         
-        console.log('🔍 URL hash present:', !!hash && hash.length > 10);
-        console.log('🔍 URL search present:', !!search && search.length > 10);
-        console.log('🔍 Full hash:', hash);
-        console.log('🔍 Full search:', search);
+        // console.log removed for production
+        // console.log removed for production
+        // console.log removed for production
+        // console.log removed for production
 
         // Try hash first, then search params
         let params = null;
         if (hash && hash.length > 10) {
-          console.log('🔄 Using hash parameters...');
+          // console.log removed for production
           params = new URLSearchParams(hash.substring(1));
         } else if (search && search.length > 10) {
-          console.log('🔄 Using search parameters...');
+          // console.log removed for production
           params = new URLSearchParams(search.substring(1));
         }
 
         if (!params) {
-          console.log('❌ No hash or search parameters and no existing session');
+          // console.log removed for production
           setError('Esta invitación ha expirado o ya fue usada. Por favor, solicita una nueva invitación.');
           return;
         }
@@ -71,19 +71,19 @@ export default function AcceptInvitationPage() {
         const refreshToken = hashParams.get('refresh_token');
         const type = hashParams.get('type');
 
-        console.log('🔍 Token type:', type);
-        console.log('🔍 Access token present:', !!accessToken);
-        console.log('🔍 Refresh token present:', !!refreshToken);
+        // console.log removed for production
+        // console.log removed for production
+        // console.log removed for production
 
         if (!accessToken || !refreshToken) {
-          console.log('❌ Missing tokens in URL');
+          // console.log removed for production
           setError('Invitación inválida. Por favor, solicita una nueva invitación.');
           return;
         }
 
         // Verify it's an invitation token (different from password recovery)
         if (type !== 'invite') {
-          console.log('⚠️ Unexpected token type for invitation:', type);
+          // console.log removed for production
           // Don't fail - some versions might not include type parameter
         }
 
@@ -91,7 +91,7 @@ export default function AcceptInvitationPage() {
         // without establishing a session until the user actually needs it
         try {
           // Validate tokens by attempting to set session, but in a non-persistent way
-          console.log('🔄 Validating invitation tokens...');
+          // console.log removed for production
           const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken
@@ -112,7 +112,7 @@ export default function AcceptInvitationPage() {
                 const tokenPayload = JSON.parse(atob(accessToken!.split('.')[1]));
                 const email = tokenPayload.email;
 
-                console.log('📧 Extracted email from expired token:', email);
+                // console.log removed for production
                 setUserEmail(email);
                 setTokenExpired(true);
 
@@ -133,9 +133,9 @@ export default function AcceptInvitationPage() {
           }
 
           if (data.session) {
-            console.log('✅ Invitation tokens validated successfully');
-            console.log('✅ User ID:', data.session.user.id);
-            console.log('👤 User metadata:', data.session.user.user_metadata);
+            // console.log removed for production
+            // console.log removed for production
+            // console.log removed for production
             setSessionReady(true);
 
             // Store tokens in localStorage so they persist even if user closes tab completely
@@ -143,10 +143,10 @@ export default function AcceptInvitationPage() {
             localStorage.setItem('invitation_refresh_token', refreshToken);
 
             // Clean up URL hash but keep tokens available for password setup
-            console.log('🧹 Cleaning URL hash but preserving tokens for password setup...');
+            // console.log removed for production
             window.history.replaceState(null, '', window.location.pathname);
           } else {
-            console.log('❌ No session returned from setSession');
+            // console.log removed for production
             setError('Error estableciendo sesión. Por favor, intenta con una nueva invitación.');
           }
 
@@ -167,7 +167,7 @@ export default function AcceptInvitationPage() {
       const storedRefreshToken = localStorage.getItem('invitation_refresh_token');
       
       if (storedAccessToken && storedRefreshToken && !window.location.hash) {
-        console.log('🔄 Found stored invitation tokens, attempting to restore session...');
+        // console.log removed for production
         
         const supabase = createSupabaseClient();
         
@@ -178,11 +178,11 @@ export default function AcceptInvitationPage() {
           });
 
           if (data.session && !error) {
-            console.log('✅ Session restored from stored tokens');
+            // console.log removed for production
             setSessionReady(true);
             return;
           } else {
-            console.log('❌ Stored tokens no longer valid, clearing...');
+            // console.log removed for production
             localStorage.removeItem('invitation_access_token');
             localStorage.removeItem('invitation_refresh_token');
           }
@@ -212,7 +212,7 @@ export default function AcceptInvitationPage() {
     try {
       // Note: We can't directly resend invitations from client side
       // This would need to be handled by contacting the admin or through a special API
-      console.log('⚠️ Resend invitation not implemented - user needs to contact admin');
+      // console.log removed for production
       setError('Por favor, contacta al administrador para solicitar una nueva invitación.');
 
     } catch (err) {
@@ -256,14 +256,14 @@ export default function AcceptInvitationPage() {
         throw new Error("Password setup failed - user not authenticated");
       }
 
-      console.log("✅ Password successfully set for invited user:", data.user.id);
+      // console.log removed for production
       
       // Wait a moment for session to be fully established
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Call completion endpoint to handle waitlist conversion
       try {
-        console.log("🔄 Calling signup completion endpoint...");
+        // console.log removed for production
         const completeResponse = await fetch('/api/v1/auth/complete-signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
@@ -272,9 +272,9 @@ export default function AcceptInvitationPage() {
         const completeResult = await completeResponse.json();
         
         if (completeResponse.ok) {
-          console.log("✅ Signup completion processed:", completeResult.message);
+          // console.log removed for production
           if (completeResult.converted) {
-            console.log("📋 Waitlist user converted successfully");
+            // console.log removed for production
           }
         } else {
           console.error("⚠️ Signup completion endpoint failed:", completeResult.error);

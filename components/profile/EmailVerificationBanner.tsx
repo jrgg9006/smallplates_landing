@@ -19,12 +19,6 @@ export function EmailVerificationBanner({ isVisible, onDismiss, userEmail }: Ema
     if (!userEmail && !user?.email) return;
     
     const emailToSend = userEmail || user?.email;
-    console.log('🔄 BANNER: Attempting to resend email to:', {
-      userEmail,
-      userEmailFromAuth: user?.email,
-      finalEmail: emailToSend,
-      userId: user?.id
-    });
     
     setIsResending(true);
     setResendStatus('idle');
