@@ -61,8 +61,8 @@ function Step1({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
       stepNumber={1}
       totalSteps={isAddBookMode ? 2 : 3}
       title="When's the big day?"
-      imageUrl="/images/onboarding/onboarding_gift_2.jpg"
-      imageAlt="Wedding timeline planning"
+      imageUrl="/images/onboarding/onboarding_lemon.png"
+      imageAlt="Wedding planning essentials"
     >
       <div className="max-w-lg mx-auto">
         {/* Question */}
@@ -185,8 +185,8 @@ function Step2({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
       stepNumber={2}
       totalSteps={isAddBookMode ? 2 : 3}
       title="Almost there."
-      imageUrl="/images/onboarding/onboarding_gift_3.jpg"
-      imageAlt="Final gift details"
+      imageUrl="/images/onboarding/onboarding_lemon.png"
+      imageAlt="Wedding planning essentials"
     >
       <div className="max-w-lg mx-auto">
         {/* Personalized Message */}
@@ -376,8 +376,8 @@ function Step3() {
       stepNumber={3}
       totalSteps={3}
       title=""
-      imageUrl="/images/onboarding/onboarding_gift_4.jpg"
-      imageAlt="Beautiful wedding cookbook"
+      imageUrl="/images/onboarding/onboarding_lemon.png"
+      imageAlt="Wedding planning essentials"
     >
       <div className="max-w-lg mx-auto">
         {!success ? (

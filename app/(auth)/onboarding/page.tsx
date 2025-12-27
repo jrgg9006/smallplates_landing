@@ -37,7 +37,7 @@ function Step1() {
       stepNumber={1}
       totalSteps={4}
       title="Let's start with the basics."
-      imageUrl="/images/onboarding/onboarding_step_1.jpg"
+      imageUrl="/images/onboarding/onboarding_lemon.png"
       imageAlt="Wedding planning essentials"
     >
       <div className="max-w-lg mx-auto">
@@ -134,8 +134,8 @@ function Step2() {
       stepNumber={2}
       totalSteps={4}
       title="Now for the good part."
-      imageUrl="/images/onboarding/onboarding_step_2.jpg"
-      imageAlt="Happy couple"
+      imageUrl="/images/onboarding/onboarding_lemon.png"
+      imageAlt="Wedding planning essentials"
     >
       <div className="max-w-lg mx-auto">
         {/* Question */}
@@ -308,8 +308,8 @@ function Step3() {
       stepNumber={3}
       totalSteps={4}
       title="Tell us about your celebration."
-      imageUrl="/images/onboarding/onboarding_step_3.jpg"
-      imageAlt="Wedding reception celebration"
+      imageUrl="/images/onboarding/onboarding_lemon.png"
+      imageAlt="Wedding planning essentials"
     >
       <div className="max-w-lg mx-auto">
         {/* Question */}
@@ -426,8 +426,8 @@ function Step4() {
       stepNumber={4}
       totalSteps={4}
       title="You're about to start something beautiful."
-      imageUrl="/images/onboarding/onboarding_step_4.jpg"
-      imageAlt="Beautiful wedding cookbook"
+      imageUrl="/images/onboarding/onboarding_lemon.png"
+      imageAlt="Wedding planning essentials"
       hideProgress={success}
     >
       <div className="max-w-lg mx-auto">
