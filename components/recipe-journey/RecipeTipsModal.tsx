@@ -1,8 +1,20 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { X, ChevronLeft, Coffee, Heart, Sparkles } from 'lucide-react';
+import { ChevronLeft, Coffee, Heart, Sparkles } from 'lucide-react';
 import Image from 'next/image';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface RecipeTipsModalProps {
   isOpen: boolean;
@@ -59,70 +71,72 @@ export default function RecipeTipsModal({ isOpen, onClose }: RecipeTipsModalProp
 
   if (!isOpen) return null;
 
-  return (
-    <div 
-      className={`fixed inset-0 z-50 ${isMobile ? '' : 'flex items-center justify-center'}`}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="tips-modal-title"
-    >
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity duration-300"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      
-      {/* Modal */}
-      <div className={`
-        relative bg-white shadow-xl overflow-hidden animate-in fade-in duration-300
-        ${isMobile 
-          ? 'fixed bottom-0 left-0 right-0 rounded-t-2xl max-h-[90vh] animate-slide-in-bottom' 
-          : 'rounded-2xl max-w-md w-full mx-4 max-h-[85vh] zoom-in-95'
-        }
-      `}>
-        {/* Mobile visual handle */}
-        {isMobile && (
-          <div className="flex justify-center pt-4 pb-2">
-            <div className="h-1.5 w-12 rounded-full bg-gray-300" />
+  // Mobile version - Sheet that slides up from bottom
+  if (isMobile) {
+    return (
+      <Sheet open={isOpen} onOpenChange={onClose}>
+        <SheetContent side="bottom" className="!h-[90vh] !max-h-[90vh] rounded-t-[20px] flex flex-col overflow-hidden p-0 bg-white">
+          <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300" />
+          
+          <div className="p-4 flex flex-col h-full overflow-hidden bg-white">
+            <SheetHeader className="px-0 flex-shrink-0">
+              {activeCategory !== 'main' ? (
+                <button 
+                  onClick={() => setActiveCategory('main')}
+                  className="flex items-center text-[#9A9590] hover:text-[#2D2D2D] transition-colors focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:ring-offset-2 rounded-md p-1 -ml-1 w-fit"
+                  aria-label="Back to categories"
+                >
+                  <ChevronLeft className="w-5 h-5 mr-1" />
+                  <span className="sr-only sm:not-sr-only">Back</span>
+                </button>
+              ) : (
+                <SheetTitle className="font-medium text-base text-[#2D2D2D] mb-2">
+                  Tips
+                </SheetTitle>
+              )}
+            </SheetHeader>
+            
+            <div className="flex-1 overflow-y-auto">
+              {activeCategory === 'main' && <MainView onSelectCategory={setActiveCategory} />}
+              {activeCategory === 'easy' && <EasyStuffView />}
+              {activeCategory === 'borrowed' && <BorrowedRecipesView />}
+              {activeCategory === 'fun' && <FunStuffView />}
+            </div>
           </div>
-        )}
+        </SheetContent>
+      </Sheet>
+    );
+  }
 
-        {/* Header */}
-        <div className={`flex items-center justify-between ${isMobile ? 'px-4 py-3' : 'px-6 py-4'}`}>
+  // Desktop version - Dialog popup (centered)
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md w-full max-h-[85vh] flex flex-col overflow-hidden p-0 gap-0 bg-white rounded-2xl">
+        <DialogHeader className="flex-shrink-0 px-6 py-4">
           {activeCategory !== 'main' ? (
             <button 
               onClick={() => setActiveCategory('main')}
-              className="flex items-center text-[#9A9590] hover:text-[#2D2D2D] transition-colors focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:ring-offset-2 rounded-md p-1 -ml-1"
+              className="flex items-center text-[#9A9590] hover:text-[#2D2D2D] transition-colors focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:ring-offset-2 rounded-md p-1 -ml-1 w-fit"
               aria-label="Back to categories"
             >
               <ChevronLeft className="w-5 h-5 mr-1" />
               <span className="sr-only sm:not-sr-only">Back</span>
             </button>
           ) : (
-            <h2 className="font-medium text-base text-[#2D2D2D]">
+            <DialogTitle className="font-medium text-base text-[#2D2D2D] mb-4">
               Tips
-            </h2>
+            </DialogTitle>
           )}
-          <button 
-            onClick={onClose}
-            className="text-[#9A9590] hover:text-[#2D2D2D] transition-colors focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:ring-offset-2 rounded-md p-1 -mr-1"
-            aria-label="Close modal"
-          >
-            <X className="w-6 h-6" />
-            <span className="sr-only">Close</span>
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className={`overflow-y-auto ${isMobile ? 'px-4 pb-6 max-h-[calc(90vh-100px)]' : 'px-6 pb-8 max-h-[calc(85vh-60px)]'}`}>
+        </DialogHeader>
+        
+        <div className="flex-1 overflow-y-auto px-6 pb-8">
           {activeCategory === 'main' && <MainView onSelectCategory={setActiveCategory} />}
           {activeCategory === 'easy' && <EasyStuffView />}
           {activeCategory === 'borrowed' && <BorrowedRecipesView />}
           {activeCategory === 'fun' && <FunStuffView />}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
