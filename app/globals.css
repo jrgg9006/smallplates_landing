@@ -280,4 +280,18 @@
   .text-heading-light {
     @apply text-[hsl(var(--brand-charcoal))] font-serif font-light tracking-tight;
   }
+
+  /* Custom animations for modals */
+  @keyframes slide-in-bottom {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-in-bottom {
+    animation: slide-in-bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 }
