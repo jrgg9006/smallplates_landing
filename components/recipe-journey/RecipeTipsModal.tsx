@@ -166,7 +166,7 @@ function MainView({ onSelectCategory }: { onSelectCategory: (cat: TipCategory) =
         </h2>
         <p className="text-[#9A9590] text-sm">
           Short answer: anything.<br />
-          Long answer: here&apos;s what that actually means.
+          Here are some ideas to get you started.
         </p>
       </div>
 
