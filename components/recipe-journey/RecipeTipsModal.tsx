@@ -61,7 +61,7 @@ export default function RecipeTipsModal({ isOpen, onClose }: RecipeTipsModalProp
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className={`fixed inset-0 z-50 ${isMobile ? '' : 'flex items-center justify-center'}`}
       role="dialog"
       aria-modal="true"
       aria-labelledby="tips-modal-title"
