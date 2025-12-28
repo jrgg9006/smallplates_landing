@@ -96,11 +96,12 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     : (tokenInfo.custom_share_signature || tokenInfo.user_name.split(' ')[0] || 'the cookbook creator');
 
   const getImageUrl = () => {
-    // Use couple image if available, otherwise return undefined for no image
+    // Use couple image if available, otherwise use lemon image for all steps
     if (tokenInfo.couple_image_url) {
       return tokenInfo.couple_image_url;
     }
-    return undefined;
+    // For all steps, use lemon as fallback when no couple image exists
+    return '/images/onboarding/onboarding_lemon.png';
   };
 
   const focusFirstHeading = useCallback(() => {
@@ -550,7 +551,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     const handler = (e: BeforeUnloadEvent) => {
       if (isDirtyRef.current && !submitSuccess) {
         e.preventDefault();
-        e.returnValue = '';
+        // Modern browsers show a generic message
+        return '';
       }
     };
     window.addEventListener('beforeunload', handler);
@@ -680,7 +682,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     }
   }, [submitSuccess]);
 
-  const handleSavePrefs = async (name?: string, email?: string, optedIn?: boolean) => {
+  const handleSavePrefs = async (_name?: string, email?: string, optedIn?: boolean) => {
     const recipeId = lastRecipeIdRef.current;
     const guestId = lastGuestIdRef.current;
     // Keep recipe-level update for completeness

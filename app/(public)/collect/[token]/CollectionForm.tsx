@@ -226,7 +226,7 @@ export default function CollectionForm() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-white lg:bg-[#FAF7F2] flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4A854] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
@@ -238,7 +238,7 @@ export default function CollectionForm() {
   // Error state
   if (error && !tokenInfo) {
     return (
-      <div className="min-h-screen bg-white lg:bg-[#FAF7F2] flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <Card className="max-w-md mx-auto">
           <CardContent className="pt-6">
             <div className="text-center">
@@ -268,7 +268,7 @@ export default function CollectionForm() {
   }
 
   return (
-    <div className="min-h-screen bg-white lg:bg-[#FAF7F2]">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-center">
@@ -287,8 +287,8 @@ export default function CollectionForm() {
       {/* Main Content - Two Column Layout */}
       <div className="min-h-screen lg:min-h-[calc(100vh-4rem)] flex flex-col lg:flex-row">
         {/* Left Column - Image */}
-        <div className="hidden lg:block lg:w-2/5 relative bg-[#E8E0D5] h-[calc(100vh-4rem)] p-2">
-          <div className="relative w-full h-full rounded-2xl overflow-hidden">
+        <div className="hidden lg:block lg:w-2/5 relative bg-gray-100 h-[calc(100vh-4rem)] p-2">
+          <div className="relative w-full h-full rounded-2xl overflow-hidden bg-white shadow-sm">
             {tokenInfo?.couple_image_url ? (
               <Image
                 src={tokenInfo.couple_image_url}
@@ -299,7 +299,14 @@ export default function CollectionForm() {
                 priority
               />
             ) : (
-              <div className="w-full h-full bg-[#E8E0D5]" />
+              <Image
+                src="/images/onboarding/onboarding_lemon.png"
+                alt="Welcome"
+                fill
+                sizes="40vw"
+                className="object-cover"
+                priority
+              />
             )}
           </div>
         </div>

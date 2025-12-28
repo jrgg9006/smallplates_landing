@@ -95,11 +95,11 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
         ))}
         </div>
 
-        <div className="mt-12 text-center space-y-2">
+        <div className="mt-12 text-center space-y-0">
           <p className="text-base font-medium text-[#2D2D2D]">
             No photo of the dish needed.
           </p>
-          <p className="text-base text-gray-600">
+          <p className="text-base text-gray-400">
             Just the recipe itself—we&apos;ll handle the rest.
           </p>
         </div>

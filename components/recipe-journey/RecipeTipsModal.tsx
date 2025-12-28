@@ -152,7 +152,7 @@ function MainView({ onSelectCategory }: { onSelectCategory: (cat: TipCategory) =
         </h2>
         <p className="text-[#9A9590] text-sm">
           Short answer: anything.<br />
-          Long answer: here's what that actually means.
+          Long answer: here&apos;s what that actually means.
         </p>
       </div>
 
@@ -251,7 +251,7 @@ function EasyStuffView() {
           The easy stuff
         </h2>
         <p className="text-[#9A9590] mt-2">
-          You don't need a signature dish. You just need something real.
+          You don&apos;t need a signature dish. You just need something real.
         </p>
       </div>
 
@@ -298,7 +298,7 @@ function BorrowedRecipesView() {
           Borrowed recipes
         </h2>
         <p className="text-[#9A9590] mt-2">
-          Some of the best recipes aren't yours. They're your mom's. Or your roommate's. Or that restaurant you can't stop thinking about.
+          Some of the best recipes aren&apos;t yours. They&apos;re your mom&apos;s. Or your roommate&apos;s. Or that restaurant you can&apos;t stop thinking about.
         </p>
       </div>
 
