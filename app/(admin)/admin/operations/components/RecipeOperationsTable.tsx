@@ -44,6 +44,9 @@ interface RecipeWithProductionStatus {
     id: string;
     name: string;
   } | null;
+  midjourney_prompts: {
+    generated_prompt: string;
+  } | null;
 }
 
 interface RecipeOperationsTableProps {
@@ -209,17 +212,62 @@ export function RecipeOperationsTable({
               >
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex items-center gap-2">
-                    {recipe.image_url && (
-                      <div className="relative w-10 h-10 rounded overflow-hidden bg-gray-100 flex-shrink-0">
-                        <Image
-                          src={recipe.image_url}
-                          alt={recipe.recipe_name}
-                          fill
-                          className="object-cover"
-                          sizes="40px"
-                        />
-                      </div>
-                    )}
+                    {(() => {
+                      // Normalize image_url - handle both string and array formats
+                      let imageUrl: string | null = null;
+                      
+                      if (recipe.image_url) {
+                        if (Array.isArray(recipe.image_url)) {
+                          // If it's an array, take the first element and ensure it's a string
+                          const firstItem = recipe.image_url[0];
+                          if (typeof firstItem === 'string') {
+                            imageUrl = firstItem;
+                          } else if (Array.isArray(firstItem)) {
+                            // Nested array - take first element
+                            imageUrl = firstItem[0] || null;
+                          }
+                        } else if (typeof recipe.image_url === 'string') {
+                          // Check if it's a JSON string that looks like an array
+                          const trimmed = recipe.image_url.trim();
+                          if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+                            try {
+                              const parsed = JSON.parse(trimmed);
+                              if (Array.isArray(parsed) && parsed.length > 0) {
+                                imageUrl = typeof parsed[0] === 'string' ? parsed[0] : null;
+                              }
+                            } catch {
+                              // If parsing fails, use the string as-is
+                              imageUrl = recipe.image_url;
+                            }
+                          } else {
+                            imageUrl = recipe.image_url;
+                          }
+                        }
+                      }
+                      
+                      // Fallback to document_urls if image_url is not available
+                      if (!imageUrl && recipe.document_urls && recipe.document_urls.length > 0) {
+                        const docUrl = recipe.document_urls[0];
+                        imageUrl = typeof docUrl === 'string' ? docUrl : null;
+                      }
+                      
+                      // Final validation - ensure it's a valid URL string
+                      if (imageUrl && typeof imageUrl !== 'string') {
+                        imageUrl = null;
+                      }
+                      
+                      return imageUrl ? (
+                        <div className="relative w-10 h-10 rounded overflow-hidden bg-gray-100 flex-shrink-0">
+                          <Image
+                            src={imageUrl}
+                            alt={recipe.recipe_name}
+                            fill
+                            className="object-cover"
+                            sizes="40px"
+                          />
+                        </div>
+                      ) : null;
+                    })()}
                     <div>
                       <div className="text-sm font-medium text-gray-900">
                         {recipe.recipe_name || 'Untitled Recipe'}

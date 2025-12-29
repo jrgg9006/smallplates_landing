@@ -6,6 +6,7 @@ import {
   cleanupStagingFiles,
   generateSessionId,
 } from '@/lib/supabase/storage';
+import { generateAndSaveMidjourneyPrompt } from '@/lib/supabase/midjourneyPrompts';
 import type {
   GuestRecipe,
   GuestRecipeInsert,
@@ -102,6 +103,21 @@ export async function addRecipe(guestId: string, formData: RecipeFormData, group
     }
 
     console.log('Recipe inserted successfully:', insertedRecipe);
+
+    // Generate Midjourney prompt asynchronously (don't block recipe creation)
+    if (insertedRecipe && formData.upload_method !== 'image') {
+      // Only generate prompt for text-based recipes (not image uploads)
+      generateAndSaveMidjourneyPrompt(
+        insertedRecipe.id,
+        formData.recipe_name,
+        formData.ingredients,
+        formData.instructions
+      ).catch((error) => {
+        // Log but don't throw - we don't want to break recipe creation
+        console.error('Failed to generate Midjourney prompt:', error);
+      });
+    }
+
     return { data: insertedRecipe, error: null };
     
   } catch (err) {
@@ -486,6 +502,20 @@ export async function addUserRecipe(recipeData: UserRecipeData, groupId?: string
       return { data: null, error: error.message };
     }
 
+    // Generate Midjourney prompt asynchronously (don't block recipe creation)
+    if (data && recipeData.upload_method !== 'image') {
+      // Only generate prompt for text-based recipes (not image uploads)
+      generateAndSaveMidjourneyPrompt(
+        data.id,
+        recipeData.recipeName,
+        recipeData.ingredients,
+        recipeData.instructions
+      ).catch((error) => {
+        // Log but don't throw - we don't want to break recipe creation
+        console.error('Failed to generate Midjourney prompt:', error);
+      });
+    }
+
     return { data, error: null };
   } catch (err) {
     console.error('Unexpected error in addUserRecipe:', err);
@@ -691,6 +721,10 @@ export async function addRecipeWithFiles(
         }
       }
     }
+
+    // Note: For image-based recipes, we don't generate Midjourney prompts
+    // because we don't have text ingredients/instructions to work with
+    // The prompt generation is only for text-based recipes
 
     return { data: recipe, error: null };
   } catch (err) {

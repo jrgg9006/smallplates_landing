@@ -63,6 +63,9 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
           id,
           name
         )
+      ),
+      midjourney_prompts (
+        generated_prompt
       )
     `)
     .order('created_at', { ascending: false });
@@ -111,6 +114,11 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
     const groupRecipe = Array.isArray(groupRecipes) ? groupRecipes[0] : groupRecipes;
     const group = hasGroupAssociation && groupRecipe?.groups ? groupRecipe.groups : null;
     
+    // Handle midjourney_prompts - could be array or single object depending on Supabase version
+    const midjourneyPrompt = Array.isArray(recipe.midjourney_prompts)
+      ? recipe.midjourney_prompts[0] || null
+      : recipe.midjourney_prompts || null;
+    
     // Debug log for recipes without groups
     if (!group && recipe.id) {
       // console.log removed for production
@@ -124,6 +132,7 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
         id: group.id,
         name: group.name,
       } : null,
+      midjourney_prompts: midjourneyPrompt,
     };
   });
 

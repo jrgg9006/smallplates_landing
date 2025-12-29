@@ -49,6 +49,9 @@ interface RecipeWithProductionStatus {
     id: string;
     name: string;
   } | null;
+  midjourney_prompts: {
+    generated_prompt: string;
+  } | null;
 }
 
 interface ProductionStats {
@@ -492,14 +495,59 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
     try {
       // Collect all image URLs from visible recipes
       const imageUrls = recipes
-        .filter(recipe => recipe.image_url)
-        .map(recipe => ({
-          url: recipe.image_url!,
-          recipeName: recipe.recipe_name || 'Untitled',
-          guestName: recipe.guests?.printed_name || 
-            `${recipe.guests?.first_name || ''} ${recipe.guests?.last_name || ''}`.trim() || 
-            'Unknown'
-        }));
+        .map(recipe => {
+          // Normalize image_url - handle both string and array formats
+          let imageUrl: string | null = null;
+          
+          if (recipe.image_url) {
+            if (Array.isArray(recipe.image_url)) {
+              // If it's an array, take the first element and ensure it's a string
+              const firstItem = recipe.image_url[0];
+              if (typeof firstItem === 'string') {
+                imageUrl = firstItem;
+              } else if (Array.isArray(firstItem)) {
+                // Nested array - take first element
+                imageUrl = firstItem[0] || null;
+              }
+            } else if (typeof recipe.image_url === 'string') {
+              // Check if it's a JSON string that looks like an array
+              const trimmed = recipe.image_url.trim();
+              if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+                try {
+                  const parsed = JSON.parse(trimmed);
+                  if (Array.isArray(parsed) && parsed.length > 0) {
+                    imageUrl = typeof parsed[0] === 'string' ? parsed[0] : null;
+                  }
+                } catch {
+                  // If parsing fails, use the string as-is
+                  imageUrl = recipe.image_url;
+                }
+              } else {
+                imageUrl = recipe.image_url;
+              }
+            }
+          }
+          
+          // Fallback to document_urls if image_url is not available
+          if (!imageUrl && recipe.document_urls && recipe.document_urls.length > 0) {
+            const docUrl = recipe.document_urls[0];
+            imageUrl = typeof docUrl === 'string' ? docUrl : null;
+          }
+          
+          // Final validation - ensure it's a valid URL string
+          if (imageUrl && typeof imageUrl !== 'string') {
+            imageUrl = null;
+          }
+          
+          return imageUrl ? {
+            url: imageUrl,
+            recipeName: recipe.recipe_name || 'Untitled',
+            guestName: recipe.guests?.printed_name || 
+              `${recipe.guests?.first_name || ''} ${recipe.guests?.last_name || ''}`.trim() || 
+              'Unknown',
+          } : null;
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null);
       
       if (imageUrls.length === 0) {
         alert('No images found in the current recipes.');
@@ -838,19 +886,64 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
               {/* Content */}
               <div className="px-10 py-8 space-y-8">
                 {/* Recipe Image */}
-                {selectedRecipe.image_url && (
-                  <div className="rounded-xl overflow-hidden shadow-lg bg-gray-100">
-                    <div className="relative aspect-video w-full">
-                      <Image
-                        src={selectedRecipe.image_url}
-                        alt={selectedRecipe.recipe_name}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 1280px) 65vw, 50vw"
-                      />
+                {(() => {
+                  // Normalize image_url - handle both string and array formats
+                  let imageUrl: string | null = null;
+                  
+                  if (selectedRecipe.image_url) {
+                    if (Array.isArray(selectedRecipe.image_url)) {
+                      // If it's an array, take the first element and ensure it's a string
+                      const firstItem = selectedRecipe.image_url[0];
+                      if (typeof firstItem === 'string') {
+                        imageUrl = firstItem;
+                      } else if (Array.isArray(firstItem)) {
+                        // Nested array - take first element
+                        imageUrl = firstItem[0] || null;
+                      }
+                    } else if (typeof selectedRecipe.image_url === 'string') {
+                      // Check if it's a JSON string that looks like an array
+                      const trimmed = selectedRecipe.image_url.trim();
+                      if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+                        try {
+                          const parsed = JSON.parse(trimmed);
+                          if (Array.isArray(parsed) && parsed.length > 0) {
+                            imageUrl = typeof parsed[0] === 'string' ? parsed[0] : null;
+                          }
+                        } catch {
+                          // If parsing fails, use the string as-is
+                          imageUrl = selectedRecipe.image_url;
+                        }
+                      } else {
+                        imageUrl = selectedRecipe.image_url;
+                      }
+                    }
+                  }
+                  
+                  // Fallback to document_urls if image_url is not available
+                  if (!imageUrl && selectedRecipe.document_urls && selectedRecipe.document_urls.length > 0) {
+                    const docUrl = selectedRecipe.document_urls[0];
+                    imageUrl = typeof docUrl === 'string' ? docUrl : null;
+                  }
+                  
+                  // Final validation - ensure it's a valid URL string
+                  if (imageUrl && typeof imageUrl !== 'string') {
+                    imageUrl = null;
+                  }
+                  
+                  return imageUrl ? (
+                    <div className="rounded-xl overflow-hidden shadow-lg bg-gray-100">
+                      <div className="relative aspect-video w-full">
+                        <Image
+                          src={imageUrl}
+                          alt={selectedRecipe.recipe_name}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 1280px) 65vw, 50vw"
+                        />
+                      </div>
                     </div>
-                  </div>
-                )}
+                  ) : null;
+                })()}
 
                 {/* Notes Section */}
                 <div>
@@ -884,6 +977,49 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
                     <div className="text-base text-gray-800 whitespace-pre-wrap leading-relaxed select-text font-sans">
                       {selectedRecipe.comments || 'No notes provided'}
                     </div>
+                  </div>
+                </div>
+
+                {/* Midjourney Prompt Section */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-2xl font-semibold text-gray-900">
+                      Midjourney Prompt
+                    </h3>
+                    {selectedRecipe.midjourney_prompts && (
+                      <button
+                        onClick={() => copyToClipboard(selectedRecipe.midjourney_prompts!.generated_prompt, 'midjourney-prompt')}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                        title="Copy to clipboard"
+                      >
+                        {copiedSection === 'midjourney-prompt' ? (
+                          <>
+                            <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span className="text-green-600">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            <span>Copy</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  <div className="bg-gray-50 border border-gray-200 p-8 rounded-lg shadow-sm">
+                    {selectedRecipe.midjourney_prompts ? (
+                      <div className="text-base text-gray-800 whitespace-pre-wrap leading-relaxed select-text font-sans">
+                        {selectedRecipe.midjourney_prompts.generated_prompt}
+                      </div>
+                    ) : (
+                      <div className="text-base text-gray-500 italic">
+                        No Midjourney prompt generated yet for this recipe.
+                      </div>
+                    )}
                   </div>
                 </div>
 

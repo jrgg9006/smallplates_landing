@@ -5,6 +5,7 @@
 
 import { createSupabaseClient } from './client';
 import { generateSessionId, uploadFilesToStagingWithClient, moveFilesToFinalLocationWithClient, cleanupStagingFiles } from './storage';
+import { generateAndSaveMidjourneyPrompt } from './midjourneyPrompts';
 import type { 
   CollectionTokenInfo, 
   CollectionGuestSubmission, 
@@ -388,6 +389,20 @@ export async function submitGuestRecipeWithFiles(
       documentUrlsSaved: recipe.document_urls
     });
 
+    // Generate Midjourney prompt asynchronously (don't block recipe creation)
+    // Only for text-based recipes (not image uploads or raw_recipe_text)
+    if (recipe && submission.upload_method !== 'image' && !submission.raw_recipe_text) {
+      generateAndSaveMidjourneyPrompt(
+        recipe.id,
+        submission.recipe_name.trim(),
+        submission.ingredients.trim(),
+        submission.instructions.trim()
+      ).catch((error) => {
+        // Log but don't throw - we don't want to break recipe creation
+        console.error('Failed to generate Midjourney prompt:', error);
+      });
+    }
+
     // Step 7: If we used a temp ID for files, rename them to use the real recipe ID
     if (finalFileUrls.length > 0 && tempRecipeId !== recipe.id) {
       console.log(`📝 Note: Files were organized with temp ID ${tempRecipeId}, real recipe ID is ${recipe.id}`);
@@ -587,6 +602,20 @@ export async function submitGuestRecipe(
       .select('notify_opt_in, notify_email')
       .eq('id', guestId)
       .single();
+
+    // Generate Midjourney prompt asynchronously (don't block recipe creation)
+    // Only for text-based recipes (not image uploads or raw_recipe_text)
+    if (recipe && submission.upload_method !== 'image' && !submission.raw_recipe_text) {
+      generateAndSaveMidjourneyPrompt(
+        recipe.id,
+        submission.recipe_name.trim(),
+        submission.ingredients.trim(),
+        submission.instructions.trim()
+      ).catch((error) => {
+        // Log but don't throw - we don't want to break recipe creation
+        console.error('Failed to generate Midjourney prompt:', error);
+      });
+    }
 
     // Automatically add recipe to cookbook/group if context is provided
     // Use API endpoint to bypass RLS (since we're in anonymous context)
