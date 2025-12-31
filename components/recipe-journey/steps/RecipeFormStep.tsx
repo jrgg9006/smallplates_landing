@@ -70,7 +70,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
       {/* Instructions */}
       <section id="instructions" aria-labelledby="instructions-label" className="space-y-2">
         <label id="instructions-label" htmlFor="instructions-input" className="text-sm font-medium text-gray-700">
-          How to make this plate
+          How to make this plate. Tell it your way.
         </label>
         <textarea
           id="instructions-input"

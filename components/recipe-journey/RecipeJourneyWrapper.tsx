@@ -12,6 +12,7 @@ import RecipeFormStep, { type RecipeData as FormRecipeData } from './steps/Recip
 import SummaryStep from './steps/SummaryStep';
 import SuccessStep from './steps/SuccessStep';
 import WelcomeStep from './steps/WelcomeStep';
+import RecipeTypeStep, { RecipeTypeOption } from './steps/RecipeTypeStep';
 import UploadMethodStep from './steps/UploadMethodStep';
 import ImageUploadStep from './steps/ImageUploadStep';
 import RecipeTitleStep from './steps/RecipeTitleStep';
@@ -58,6 +59,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [selectedRecipeType, setSelectedRecipeType] = useState<RecipeTypeOption | null>(null);
   const isDirtyRef = useRef(false);
   const lastRecipeIdRef = useRef<string | null>(null);
   const lastGuestIdRef = useRef<string | null>(null);
@@ -84,6 +86,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     setSelectedFiles([]);
     setUploadingImages(false);
     setUploadProgress(0);
+    setSelectedRecipeType(null);
     // Clear localStorage
     localStorage.removeItem('recipeJourneyData');
     isDirtyRef.current = false;
@@ -115,12 +118,25 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     if (currentStepIndex < totalSteps - 1) {
       const currentStep = journeySteps[currentStepIndex];
       
-      // Special handling for welcome step - skip to uploadMethod directly (hiding introInfo and realBook)
+      // Special handling for welcome step - go to recipeType
       if (currentStep?.key === 'welcome') {
+        const recipeTypeIndex = journeySteps.findIndex(s => s.key === 'recipeType');
+        setCurrentStepIndex(recipeTypeIndex);
+        setTimeout(focusFirstHeading, 0);
+        // Scroll to top on mobile for better UX
+        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 100);
+        }
+        return;
+      }
+
+      // Special handling for recipeType step - go to uploadMethod
+      if (currentStep?.key === 'recipeType') {
         const uploadMethodIndex = journeySteps.findIndex(s => s.key === 'uploadMethod');
         setCurrentStepIndex(uploadMethodIndex);
         setTimeout(focusFirstHeading, 0);
-        // Scroll to top on mobile for better UX
         if (typeof window !== 'undefined' && window.innerWidth < 1024) {
           setTimeout(() => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -179,10 +195,24 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     if (currentStepIndex > 0) {
       const currentStep = journeySteps[currentStepIndex];
       
-      // Special handling for uploadMethod - go back to welcome directly (skipping introInfo and realBook)
-      if (currentStep?.key === 'uploadMethod') {
+      // Special handling for recipeType - go back to welcome
+      if (currentStep?.key === 'recipeType') {
         const welcomeIndex = journeySteps.findIndex(s => s.key === 'welcome');
         setCurrentStepIndex(welcomeIndex);
+        setTimeout(focusFirstHeading, 0);
+        // Scroll to top on mobile for better UX
+        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 100);
+        }
+        return;
+      }
+
+      // Special handling for uploadMethod - go back to recipeType
+      if (currentStep?.key === 'uploadMethod') {
+        const recipeTypeIndex = journeySteps.findIndex(s => s.key === 'recipeType');
+        setCurrentStepIndex(recipeTypeIndex);
         setTimeout(focusFirstHeading, 0);
         // Scroll to top on mobile for better UX
         if (typeof window !== 'undefined' && window.innerWidth < 1024) {
@@ -263,6 +293,19 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     setTimeout(focusFirstHeading, 0);
     
     // Scroll to top on mobile for better UX
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+    }
+  };
+
+  const handleRecipeTypeSelect = (type: RecipeTypeOption | null) => {
+    setSelectedRecipeType(type);
+    // Auto-advance to next step after selection
+    const uploadMethodIndex = journeySteps.findIndex(s => s.key === 'uploadMethod');
+    setCurrentStepIndex(uploadMethodIndex);
+    setTimeout(focusFirstHeading, 0);
     if (typeof window !== 'undefined' && window.innerWidth < 1024) {
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -715,6 +758,20 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
             <WelcomeStep creatorName={creatorName} />
           </motion.div>
         )}
+        {current === 'recipeType' && (
+          <motion.div
+            key="recipeType"
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
+            <RecipeTypeStep 
+              onSelectType={handleRecipeTypeSelect}
+              selectedType={selectedRecipeType}
+            />
+          </motion.div>
+        )}
         {current === 'introInfo' && (
           <motion.div
             key="introInfo"
@@ -777,6 +834,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
             <RecipeTitleStep 
               recipeName={recipeData.recipeName}
               onChange={(value) => setRecipeData(prev => ({ ...prev, recipeName: value }))}
+              recipeTypeHint={selectedRecipeType?.hint}
             />
           </motion.div>
         )}

@@ -43,7 +43,7 @@ export default function WelcomeStep({ creatorName }: WelcomeStepProps) {
                 </p>
                 <button 
                   onClick={() => setShowTips(true)}
-                  className="text-[#D4A854] hover:text-[#b8923a] text-sm mt-2 font-medium transition-colors"
+                  className="text-[#D4A854] hover:text-[#b8923a] text-sm mt-2 font-light transition-colors"
                 >
                   More ideas →
                 </button>
