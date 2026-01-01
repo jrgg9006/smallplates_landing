@@ -809,3 +809,45 @@ export async function toggleCollectionEnabled(enabled: boolean): Promise<{ data:
     return { data: null, error: 'Failed to update collection settings' };
   }
 }
+
+/**
+ * Get social proof data for a collection (recipe count for a specific group)
+ * Used to show "X recipes and counting" on the collection landing page
+ * 
+ * IMPORTANT: groupId is required. If not provided, returns null (fail safe).
+ */
+export async function getCollectionSocialProof(
+  groupId: string | null | undefined
+): Promise<{
+  data: { count: number } | null;
+  error: string | null;
+}> {
+  // If no groupId, don't show social proof (fail safe)
+  if (!groupId) {
+    return { data: null, error: null };
+  }
+  
+  try {
+    const supabase = createSupabaseClient();
+    
+    // Count recipes for this specific group only
+    const { count, error } = await supabase
+      .from('guest_recipes')
+      .select('*', { count: 'exact', head: true })
+      .eq('group_id', groupId)
+      .eq('submission_status', 'submitted');
+    
+    if (error) {
+      console.error('Error fetching social proof:', error);
+      return { data: null, error: error.message };
+    }
+    
+    return {
+      data: { count: count || 0 },
+      error: null
+    };
+  } catch (err) {
+    console.error('Error in getCollectionSocialProof:', err);
+    return { data: null, error: 'Failed to fetch social proof data' };
+  }
+}

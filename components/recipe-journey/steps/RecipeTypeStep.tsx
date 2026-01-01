@@ -37,7 +37,7 @@ export const RECIPE_TYPE_OPTIONS: RecipeTypeOption[] = [
   {
     id: 'invented',
     emoji: '✨',
-    label: 'Something I completely made up',
+    label: 'I have something else in mind',
     hint: 'Your original creation'
   }
 ];
@@ -63,7 +63,7 @@ export default function RecipeTypeStep({ onSelectType, selectedType }: RecipeTyp
         {/* Header */}
         <div className="space-y-3 text-center">
           <h2 className="font-serif text-3xl md:text-4xl font-semibold text-[#2D2D2D]">
-            What are you sharing today?
+            What are you bringing to the table?
           </h2>
           <p className="text-base text-gray-600">
             Doesn&apos;t have to be fancy. Just has to be yours.
@@ -97,15 +97,6 @@ export default function RecipeTypeStep({ onSelectType, selectedType }: RecipeTyp
         </div>
 
         {/* Skip option */}
-        <div className="text-center mt-3">
-          <button
-            type="button"
-            onClick={handleSkip}
-            className="text-[#9A9590] hover:text-[#2D2D2D] text-sm transition-colors underline underline-offset-4 decoration-1"
-          >
-            I have something else in mind →
-          </button>
-        </div>
       </div>
     </div>
   );

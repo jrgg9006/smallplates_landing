@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { validateCollectionToken, searchGuestInCollection } from '@/lib/supabase/collection';
+import { validateCollectionToken, searchGuestInCollection, getCollectionSocialProof } from '@/lib/supabase/collection';
+import SocialProofBanner from '@/components/recipe-journey/SocialProofBanner';
 import type { CollectionTokenInfo, Guest } from '@/lib/types/database';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -87,6 +88,8 @@ export default function CollectionForm() {
   const [fullName, setFullName] = useState('');
   // 1) Add showNameEntry state
   const [showNameEntry, setShowNameEntry] = useState(false);
+  // Social proof state
+  const [socialProofCount, setSocialProofCount] = useState<number>(0);
 
   // Validate token on component mount
   useEffect(() => {
@@ -112,6 +115,14 @@ export default function CollectionForm() {
         } else {
           addDebugLog('✅ Token validation success');
           setTokenInfo(data);
+          
+          // Fetch social proof data (only if groupId exists)
+          if (groupId) {
+            const { data: proofData } = await getCollectionSocialProof(groupId);
+            if (proofData) {
+              setSocialProofCount(proofData.count);
+            }
+          }
         }
       } catch (err) {
         addDebugLog('💥 validateCollectionToken error: ' + String(err));
@@ -378,6 +389,9 @@ export default function CollectionForm() {
                         })()}
                       </div>
                     </div>
+                    
+                    {/* Social Proof Banner */}
+                    <SocialProofBanner count={socialProofCount} />
                     
                     <div className="text-sm text-gray-500 mb-6">
                       Find your name. Add your recipe. Done.
