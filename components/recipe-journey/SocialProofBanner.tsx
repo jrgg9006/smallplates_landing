@@ -15,7 +15,7 @@ export default function SocialProofBanner({ count }: SocialProofBannerProps) {
   // Determine the message based on count
   const message = count >= 10 
     ? `${count} recipes and counting. Don't miss out!`
-    : 'The book is filling up.';
+    : 'The book is filling up. Add yours now!';
   
   return (
     <>
