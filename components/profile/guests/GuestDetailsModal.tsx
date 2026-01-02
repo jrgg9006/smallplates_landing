@@ -13,7 +13,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Check, Clock } from "lucide-react";
 
 interface GuestDetailsModalProps {
   guest: Guest | null;
@@ -109,9 +108,6 @@ export function GuestDetailsModal({
 
   if (!guest) return null;
 
-  // Status display
-  const recipeCount = guest.recipes_received || 0;
-  const hasRecipes = recipeCount > 0;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

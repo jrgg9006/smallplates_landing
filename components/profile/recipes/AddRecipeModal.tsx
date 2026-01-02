@@ -119,7 +119,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
   const loadGuests = async () => {
     setGuestsLoading(true);
     try {
-      const { data: guestsData, error: guestsError } = await getGuests(false);
+      const { data: guestsData, error: guestsError } = await getGuests(undefined, false);
       
       if (guestsError) {
         console.error('Error loading guests:', guestsError);

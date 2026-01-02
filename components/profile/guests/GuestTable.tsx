@@ -43,7 +43,6 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
   // Modal state
   const [selectedGuest, setSelectedGuest] = React.useState<GuestWithMeta | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [modalDefaultTab, setModalDefaultTab] = React.useState<string>("guest-info");
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
   const [isAddRecipeModalOpen, setIsAddRecipeModalOpen] = React.useState(false);
   const [selectedGuestForRecipe, setSelectedGuestForRecipe] = React.useState<GuestWithMeta | null>(null);
@@ -86,7 +85,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
         } else {
           // No search query - load by status or all guests
           if (statusFilter !== 'all') {
-            const { data: statusResults, error } = await getGuestsByStatus(statusFilter as Guest['status'], false);
+            const { data: statusResults, error } = await getGuestsByStatus(statusFilter as Guest['status'], undefined, false);
             
             if (error) {
               setError(error);
@@ -96,7 +95,7 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
             setData(statusResults || []);
           } else {
             // Load all guests
-            const { data: guests, error } = await getGuests(false);
+            const { data: guests, error } = await getGuests(undefined, false);
             
             if (error) {
               setError(error);
@@ -141,7 +140,6 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedGuest(null);
-    setModalDefaultTab("guest-info"); // Reset to default tab
   };
 
   const handleAddRecipe = (guest: GuestWithMeta) => {
@@ -431,7 +429,6 @@ export function GuestTable({ searchValue: externalSearchValue = '', statusFilter
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onGuestUpdated={refreshData}
-        defaultTab={modalDefaultTab}
       />
 
       <AddGuestModal

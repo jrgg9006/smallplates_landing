@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { Search, Plus, User, Check, Clock, ChevronDown } from "lucide-react";
 import { getGuestsByGroup } from "@/lib/supabase/guests";
 import type { Guest } from "@/lib/types/database";
@@ -50,21 +50,21 @@ export function GuestNavigationSheet({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Load guests when sheet opens
-  useEffect(() => {
-    if (isOpen && groupId) {
-      loadGuests();
-    }
-  }, [isOpen, groupId]);
-
-  const loadGuests = async () => {
+  const loadGuests = useCallback(async () => {
     setLoading(true);
     const { data, error } = await getGuestsByGroup(groupId);
     if (!error && data) {
       setGuests(data);
     }
     setLoading(false);
-  };
+  }, [groupId]);
+
+  // Load guests when sheet opens
+  useEffect(() => {
+    if (isOpen && groupId) {
+      loadGuests();
+    }
+  }, [isOpen, groupId, loadGuests]);
 
   // Filter guests by search query and status
   const filteredGuests = useMemo(() => {
@@ -202,7 +202,7 @@ export function GuestNavigationSheet({
               </div>
             ) : sortedGuests.length === 0 ? (
               <div className="text-center py-16">
-                <p className="text-gray-500 text-sm">No guests match "{searchQuery}"</p>
+                <p className="text-gray-500 text-sm">No guests match &quot;{searchQuery}&quot;</p>
               </div>
             ) : (
               <div className="space-y-2">

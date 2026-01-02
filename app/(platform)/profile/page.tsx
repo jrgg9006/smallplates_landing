@@ -177,7 +177,7 @@ export default function ProfilePage() {
       if (isInitialLoad) {
         setGuestCountsLoading(true);
       }
-      const { data: guests, error } = await getGuests(false);
+      const { data: guests, error } = await getGuests(undefined, false);
       
       if (error) {
         console.error('Error loading guest counts:', error);
