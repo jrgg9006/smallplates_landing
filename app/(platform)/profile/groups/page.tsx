@@ -21,8 +21,10 @@ import { EmailVerificationBanner } from "@/components/profile/EmailVerificationB
 import { getCurrentProfile } from "@/lib/supabase/profiles";
 import { ShareCollectionModal } from "@/components/profile/guests/ShareCollectionModal";
 import { GuestNavigationSheet } from "@/components/profile/guests/GuestNavigationSheet";
+import { GuestDetailsModal } from "@/components/profile/guests/GuestDetailsModal";
 import { getUserCollectionToken } from "@/lib/supabase/collection";
 import { createShareURL } from "@/lib/utils/sharing";
+import type { Guest } from "@/lib/types/database";
 
 export default function GroupsPage() {
   const { user, loading } = useAuth();
@@ -38,6 +40,8 @@ export default function GroupsPage() {
   const [invitationsRefreshTrigger, setInvitationsRefreshTrigger] = useState(0);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showGuestSheet, setShowGuestSheet] = useState(false);
+  const [showGuestDetailsModal, setShowGuestDetailsModal] = useState(false);
+  const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [collectionToken, setCollectionToken] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   
@@ -605,7 +609,8 @@ export default function GroupsPage() {
           groupId={selectedGroup.id}
           groupName={selectedGroup.name}
           onGuestSelect={(guest) => {
-            // Close the sheet and could open guest details modal here if needed
+            setSelectedGuest(guest);
+            setShowGuestDetailsModal(true);
             setShowGuestSheet(false);
           }}
           onAddGuest={() => {
@@ -614,6 +619,20 @@ export default function GroupsPage() {
           }}
         />
       )}
+
+      {/* Guest Details Modal */}
+      <GuestDetailsModal
+        guest={selectedGuest}
+        isOpen={showGuestDetailsModal}
+        onClose={() => {
+          setShowGuestDetailsModal(false);
+          setSelectedGuest(null);
+        }}
+        onGuestUpdated={() => {
+          // Refresh guests in the navigation sheet by reloading
+          setInvitationsRefreshTrigger(prev => prev + 1);
+        }}
+      />
     </div>
   );
 }

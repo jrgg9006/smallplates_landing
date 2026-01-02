@@ -1,3 +1,72 @@
+# Prompt 2A-3: Rediseñar GuestDetailsModal con estilo Wedding
+
+## Contexto
+
+Small Plates es una plataforma donde invitados de boda suben recetas para crear un libro colaborativo. Tenemos un `GuestDetailsModal` existente que está desactualizado y no sigue la nueva marca wedding.
+
+**Objetivo:** Rediseñar el modal para que sea limpio, simple, y alineado a la marca Margot Cole. Debe verse idéntico a los otros modales nuevos como `AddGuestModal`.
+
+---
+
+## Archivo a modificar
+
+```
+components/profile/guests/GuestDetailsModal.tsx
+```
+
+**Acción:** Reemplazar completamente el contenido del archivo con el nuevo diseño.
+
+---
+
+## Principios de diseño
+
+1. **Simple** — Sin tabs, todo en una vista
+2. **Limpio** — Solo lo esencial, nada más
+3. **Wedding brand** — Colores y tipografía de marca
+4. **Consistente** — Mismo estilo que `AddGuestModal`
+
+---
+
+## Estructura visual
+
+```
+┌─────────────────────────────────────────┐
+│ Guest Details                        ✕  │
+├─────────────────────────────────────────┤
+│                                         │
+│  María López                            │
+│  ✅ 1 recipe                            │
+│                                         │
+├─────────────────────────────────────────┤
+│                                         │
+│  First Name *        Last Name          │
+│  [María         ]    [López        ]    │
+│                                         │
+│  Printed Name                           │
+│  [                                 ]    │
+│  How this name appears in the book      │
+│                                         │
+│  Email                                  │
+│  [maria@gmail.com                  ]    │
+│                                         │
+│  Phone                                  │
+│  [+52 555 123 4567                 ]    │
+│                                         │
+├─────────────────────────────────────────┤
+│  Recipes                                │
+│  • Pasta de la abuela                   │
+│  • Guacamole especial                   │
+│                                         │
+├─────────────────────────────────────────┤
+│                     [Cancel]  [Save]    │
+└─────────────────────────────────────────┘
+```
+
+---
+
+## Código completo
+
+```tsx
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -124,6 +193,28 @@ export function GuestDetailsModal({
 
         <div className="space-y-6 py-4">
           
+          {/* Guest Header - Name + Status */}
+          <div className="flex items-center justify-between pb-4 border-b border-[hsl(var(--brand-sand))]">
+            <div>
+              <h3 className="text-lg font-medium text-[hsl(var(--brand-charcoal))]">
+                {guest.printed_name || `${guest.first_name} ${guest.last_name || ''}`.trim()}
+              </h3>
+            </div>
+            <div className={`flex items-center gap-1.5 text-sm ${hasRecipes ? 'text-green-600' : 'text-[hsl(var(--brand-warm-gray))]'}`}>
+              {hasRecipes ? (
+                <>
+                  <Check size={16} />
+                  <span>{recipeCount} {recipeCount === 1 ? 'recipe' : 'recipes'}</span>
+                </>
+              ) : (
+                <>
+                  <Clock size={16} />
+                  <span>Pending</span>
+                </>
+              )}
+            </div>
+          </div>
+
           {/* Form Fields */}
           <div className="space-y-4">
             
@@ -255,3 +346,81 @@ export function GuestDetailsModal({
     </Dialog>
   );
 }
+```
+
+---
+
+## Colores de marca usados
+
+| Variable | Color | Uso |
+|----------|-------|-----|
+| `--brand-charcoal` | #2D2D2D | Texto principal, botón Save |
+| `--brand-warm-gray` | #9A9590 | Labels, texto secundario |
+| `--brand-sand` | #E8E0D5 | Bordes, dividers |
+| `--brand-honey` | #D4A854 | Focus states, bullet points |
+| `--brand-warm-white` | #FAF7F2 | Hover backgrounds |
+
+---
+
+## Integración con GuestNavigationSheet
+
+Después de crear el modal, hay que conectarlo al `GuestNavigationSheet` para que funcione el click en un guest.
+
+### Modificar GuestNavigationSheet.tsx
+
+Agregar el estado y el modal:
+
+```tsx
+// Al inicio, agregar import
+import { GuestDetailsModal } from "./GuestDetailsModal";
+
+// Dentro del componente, agregar estado
+const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
+const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+
+// Modificar handleGuestClick
+const handleGuestClick = (guest: Guest) => {
+  setSelectedGuest(guest);
+  setIsDetailsModalOpen(true);
+};
+
+// Al final del componente, antes del cierre del Sheet, agregar:
+<GuestDetailsModal
+  guest={selectedGuest}
+  isOpen={isDetailsModalOpen}
+  onClose={() => {
+    setIsDetailsModalOpen(false);
+    setSelectedGuest(null);
+  }}
+  onGuestUpdated={() => {
+    loadGuests(); // Refresh the list
+  }}
+/>
+```
+
+---
+
+## Cambios vs versión anterior
+
+| Aspecto | Antes | Ahora |
+|---------|-------|-------|
+| **Tabs** | 3 tabs (Guest Info, Contact, Recipes) | Sin tabs, todo en una vista |
+| **Avatar** | Imagen 96x96 | Removido |
+| **Colores** | Grays genéricos | Brand colors |
+| **Tipo de modal** | Sheet (slide from right) | Dialog (centered) |
+| **Recetas** | Fecha, fuente, muchos detalles | Solo nombre |
+| **Complejidad** | 300+ líneas | ~180 líneas |
+
+---
+
+## Verificación post-implementación
+
+1. [ ] El modal abre al hacer click en un guest
+2. [ ] Muestra el nombre y status del guest
+3. [ ] Los campos son editables
+4. [ ] El botón Save actualiza el guest
+5. [ ] Las recetas se muestran solo por nombre (en italic serif)
+6. [ ] Los colores son de la marca (honey, charcoal, sand, etc.)
+7. [ ] El estilo es consistente con AddGuestModal
+8. [ ] Funciona en mobile y desktop
+9. [ ] El GuestNavigationSheet se actualiza después de guardar

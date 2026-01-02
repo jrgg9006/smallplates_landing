@@ -117,9 +117,9 @@ export function GuestNavigationSheet({
     const recipeCount = guest.recipes_received || 0;
     if (recipeCount > 0) {
       return {
-        icon: <Check size={14} className="text-green-600" />,
+        icon: <Check size={14} className="text-[hsl(var(--brand-honey))]" />,
         text: recipeCount === 1 ? "1 recipe" : `${recipeCount} recipes`,
-        className: "text-green-600"
+        className: "text-[hsl(var(--brand-honey))]"
       };
     }
     return {
