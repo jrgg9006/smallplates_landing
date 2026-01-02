@@ -8,9 +8,12 @@ interface MoreMenuDropdownProps {
   onEditProfile: () => void;
   showCaptainsOption?: boolean;
   onCaptainsClick?: () => void;
+  showAddGuestOption?: boolean;
+  onAddGuestClick?: () => void;
+  onViewGuestsClick?: () => void;
 }
 
-export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsOption, onCaptainsClick }: MoreMenuDropdownProps) {
+export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsOption, onCaptainsClick, showAddGuestOption, onAddGuestClick, onViewGuestsClick }: MoreMenuDropdownProps) {
   if (!isOpen) return null;
   
   return (
@@ -34,6 +37,26 @@ export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsO
             Captains
           </button>
         )}
+        {showAddGuestOption && onAddGuestClick && (
+          <button
+            onClick={() => {
+              onAddGuestClick();
+              onClose();
+            }}
+            className="w-full text-left px-4 py-2.5 text-sm text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-border))] rounded-lg transition-colors"
+          >
+            Add Guest
+          </button>
+        )}
+        <button
+          onClick={() => {
+            onViewGuestsClick?.();
+            onClose();
+          }}
+          className="w-full text-left px-4 py-2.5 text-sm text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-border))] rounded-lg transition-colors"
+        >
+          Manage Guests
+        </button>
         <button
           onClick={() => {
             onEditProfile();

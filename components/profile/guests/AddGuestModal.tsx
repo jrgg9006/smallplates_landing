@@ -19,9 +19,10 @@ interface AddGuestModalProps {
   onClose: () => void;
   onGuestAdded?: (guestId?: string) => void; // Callback to refresh the guest list, optionally with new guest ID
   isFirstGuest?: boolean; // Show onboarding badge for first guest
+  groupId?: string; // Optional group ID for adding guest to specific group
 }
 
-export function AddGuestModal({ isOpen, onClose, onGuestAdded, isFirstGuest = false }: AddGuestModalProps) {
+export function AddGuestModal({ isOpen, onClose, onGuestAdded, isFirstGuest = false, groupId }: AddGuestModalProps) {
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -72,6 +73,7 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded, isFirstGuest = fa
         last_name: lastName.trim() || '',
         printed_name: printedName.trim() || undefined,
         email: email.trim() || undefined,
+        group_id: groupId,
       };
 
       // Add the guest to the database

@@ -23,6 +23,7 @@ export async function addGuest(formData: GuestFormData) {
 
   const guestData: GuestInsert = {
     user_id: user.id,
+    group_id: formData.group_id,
     first_name: formData.first_name,
     last_name: formData.last_name || '', // Provide empty string if no last name
     printed_name: formData.printed_name,
@@ -47,7 +48,7 @@ export async function addGuest(formData: GuestFormData) {
  * Get all guests for the current user, ordered by recipe submission date
  * Guests with recipes appear first (by most recent recipe date), then guests without recipes (by creation date)
  */
-export async function getGuests(includeArchived = false): Promise<{ data: Guest[] | null; error: string | null }> {
+export async function getGuests(groupId?: string, includeArchived = false): Promise<{ data: Guest[] | null; error: string | null }> {
   const supabase = createSupabaseClient();
   
   // Get the current user
@@ -66,6 +67,11 @@ export async function getGuests(includeArchived = false): Promise<{ data: Guest[
       )
     `)
     .eq('user_id', user.id);
+
+  // Filter by group_id if provided
+  if (groupId) {
+    query = query.eq('group_id', groupId);
+  }
 
   if (!includeArchived) {
     query = query.eq('is_archived', false);
@@ -219,11 +225,17 @@ export async function searchGuests(filters: GuestSearchFilters) {
     return { data, error: error?.message || null };
   }
 
+  // Filter by group_id if provided
+  let filteredData = data;
+  if (filters.group_id) {
+    filteredData = data.filter((guest: any) => guest.group_id === filters.group_id);
+  }
+
   // Now get the recipe data for each guest to apply proper sorting
-  const guestIds = data.map((guest: any) => guest.id);
+  const guestIds = filteredData.map((guest: any) => guest.id);
   
   if (guestIds.length === 0) {
-    return { data, error: null };
+    return { data: filteredData, error: null };
   }
 
   // Get recipe data for all guests in the search results
@@ -233,8 +245,8 @@ export async function searchGuests(filters: GuestSearchFilters) {
     .in('guest_id', guestIds);
 
   if (recipesError) {
-    // If recipes query fails, return original data without custom sorting
-    return { data, error: null };
+    // If recipes query fails, return filtered data without custom sorting
+    return { data: filteredData, error: null };
   }
 
   // Create a map of guest_id to latest recipe date
@@ -250,7 +262,7 @@ export async function searchGuests(filters: GuestSearchFilters) {
   }
 
   // Sort the search results with the same logic as getGuests
-  const sortedData = data.sort((a: any, b: any) => {
+  const sortedData = filteredData.sort((a: any, b: any) => {
     const aLatestRecipe = recipeMap.get(a.id) || null;
     const bLatestRecipe = recipeMap.get(b.id) || null;
     const aHasRecipes = aLatestRecipe !== null;
@@ -275,9 +287,9 @@ export async function searchGuests(filters: GuestSearchFilters) {
 }
 
 /**
- * Get guest statistics using the database function
+ * Get guest statistics using the database function or calculated from filtered guests
  */
-export async function getGuestStatistics(): Promise<{ data: GuestStatistics | null; error: string | null }> {
+export async function getGuestStatistics(groupId?: string): Promise<{ data: GuestStatistics | null; error: string | null }> {
   const supabase = createSupabaseClient();
   
   const { data: { user } } = await supabase.auth.getUser();
@@ -285,11 +297,51 @@ export async function getGuestStatistics(): Promise<{ data: GuestStatistics | nu
     return { data: null, error: 'User not authenticated' };
   }
 
-  const { data, error } = await supabase.rpc('get_guest_statistics', {
-    user_uuid: user.id,
-  });
+  if (groupId) {
+    // Calculate statistics for a specific group by fetching guests
+    const { data: guests, error } = await getGuests(groupId, false);
+    
+    if (error || !guests) {
+      return { data: null, error };
+    }
+    
+    // Calculate statistics
+    const stats: GuestStatistics = {
+      total_guests: guests.length,
+      active_guests: guests.filter(g => !g.is_archived).length,
+      archived_guests: guests.filter(g => g.is_archived).length,
+      pending_invitations: guests.filter(g => g.status === 'pending').length,
+      invites_sent: guests.filter(g => g.status === 'reached_out').length,
+      recipes_received: guests.reduce((sum, g) => sum + (g.recipes_received || 0), 0),
+      total_expected_recipes: guests.reduce((sum, g) => sum + (g.number_of_recipes || 1), 0),
+      completion_rate: 0, // Will calculate below
+    };
+    
+    // Calculate completion rate
+    if (stats.total_expected_recipes > 0) {
+      stats.completion_rate = (stats.recipes_received / stats.total_expected_recipes) * 100;
+    }
+    
+    return { data: stats, error: null };
+  } else {
+    // Use the database function for all guests
+    const { data, error } = await supabase.rpc('get_guest_statistics', {
+      user_uuid: user.id,
+    });
 
-  return { data, error: error?.message || null };
+    return { data, error: error?.message || null };
+  }
+}
+
+/**
+ * Get all guests for a specific group
+ */
+export async function getGuestsByGroup(groupId: string, includeArchived = false): Promise<{ data: Guest[] | null; error: string | null }> {
+  if (!groupId) {
+    return { data: null, error: 'Group ID is required' };
+  }
+  
+  return getGuests(groupId, includeArchived);
 }
 
 /**
@@ -310,7 +362,7 @@ export async function batchUpdateGuestStatus(guestIds: string[], status: Guest['
 /**
  * Get guests by status
  */
-export async function getGuestsByStatus(status: Guest['status'], includeArchived = false) {
+export async function getGuestsByStatus(status: Guest['status'], groupId?: string, includeArchived = false) {
   const supabase = createSupabaseClient();
   
   // Get the current user
@@ -325,6 +377,11 @@ export async function getGuestsByStatus(status: Guest['status'], includeArchived
     .eq('user_id', user.id)  // Filter by user_id
     .eq('status', status)
     .order('last_name', { ascending: true });
+
+  // Filter by group_id if provided
+  if (groupId) {
+    query = query.eq('group_id', groupId);
+  }
 
   if (!includeArchived) {
     query = query.eq('is_archived', false);

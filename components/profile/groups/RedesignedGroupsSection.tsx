@@ -12,6 +12,7 @@ import { AddRecipeModal } from "../recipes/AddRecipeModal";
 import { AddRecipesToGroupModal } from "./AddRecipesToGroupModal";
 import { AddFriendToGroupModal } from "./AddFriendToGroupModal";
 import { RemoveRecipeFromGroupModal } from "./RemoveRecipeFromGroupModal";
+import { AddGuestModal } from "../guests/AddGuestModal";
 import { getMyGroups, getUserRoleInGroup, deleteGroup, exitGroup } from "@/lib/supabase/groups";
 import { getGroupRecipes, searchGroupRecipes, removeRecipeFromGroup } from "@/lib/supabase/groupRecipes";
 import type { GroupWithMembers, RecipeWithGuest } from "@/lib/types/database";
@@ -25,6 +26,7 @@ interface GroupsSectionProps {
 export interface GroupsSectionRef {
   openCreateModal: () => void;
   openInviteModal: () => void;
+  openAddGuestModal: () => void;
   selectedGroup: GroupWithMembers | null;
   groups: GroupWithMembers[];
   onEditGroup: () => void;
@@ -56,6 +58,7 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
   const [addNewRecipeModalOpen, setAddNewRecipeModalOpen] = useState(false);
   const [inviteFriendModalOpen, setInviteFriendModalOpen] = useState(false);
   const [removeRecipeModalOpen, setRemoveRecipeModalOpen] = useState(false);
+  const [addGuestModalOpen, setAddGuestModalOpen] = useState(false);
   const [recipeToRemove, setRecipeToRemove] = useState<RecipeWithGuest | null>(null);
   
   // Loading & error state
@@ -158,6 +161,7 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
   useImperativeHandle(ref, () => ({
     openCreateModal: () => setCreateModalOpen(true),
     openInviteModal: () => setInviteFriendModalOpen(true),
+    openAddGuestModal: () => setAddGuestModalOpen(true),
     selectedGroup: selectedGroup,
     groups: groups,
     onEditGroup: handleEditGroup,
@@ -462,6 +466,17 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
         }}
         onConfirm={handleConfirmRemoveRecipe}
         loading={isRemoving}
+      />
+
+      <AddGuestModal
+        isOpen={addGuestModalOpen}
+        onClose={() => setAddGuestModalOpen(false)}
+        groupId={selectedGroup?.id}
+        onGuestAdded={() => {
+          setAddGuestModalOpen(false);
+          // Optionally refresh recipes if needed to show new guest's contributions
+          loadRecipes();
+        }}
       />
     </div>
   );

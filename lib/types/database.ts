@@ -68,6 +68,7 @@ export interface Database {
         Row: {
           id: string;
           user_id: string;
+          group_id: string | null;
           first_name: string;
           last_name: string;
           printed_name: string | null;
@@ -90,6 +91,7 @@ export interface Database {
         Insert: {
           id?: string;
           user_id: string;
+          group_id?: string | null;
           first_name: string;
           last_name: string;
           printed_name?: string | null;
@@ -124,6 +126,7 @@ export interface Database {
           source?: GuestSource;
           is_archived?: boolean;
           is_self?: boolean;
+          group_id?: string | null;
         };
       };
       guest_recipes: {
@@ -649,6 +652,7 @@ export interface GuestFormData {
   number_of_recipes?: number;
   notes?: string;
   tags?: string[];
+  group_id?: string;
 }
 
 export interface RecipeFormData {
@@ -697,6 +701,7 @@ export interface GuestSearchFilters {
   status?: GuestStatus;
   include_archived?: boolean;
   tags?: string[];
+  group_id?: string;
 }
 
 // Collection-specific types

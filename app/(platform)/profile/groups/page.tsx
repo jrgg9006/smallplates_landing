@@ -20,6 +20,7 @@ import { getWeddingDisplayText, type WeddingTimeline } from "@/lib/utils/dateFor
 import { EmailVerificationBanner } from "@/components/profile/EmailVerificationBanner";
 import { getCurrentProfile } from "@/lib/supabase/profiles";
 import { ShareCollectionModal } from "@/components/profile/guests/ShareCollectionModal";
+import { GuestNavigationSheet } from "@/components/profile/guests/GuestNavigationSheet";
 import { getUserCollectionToken } from "@/lib/supabase/collection";
 import { createShareURL } from "@/lib/utils/sharing";
 
@@ -36,6 +37,7 @@ export default function GroupsPage() {
   const [showAddCaptainModal, setShowAddCaptainModal] = useState(false);
   const [invitationsRefreshTrigger, setInvitationsRefreshTrigger] = useState(0);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showGuestSheet, setShowGuestSheet] = useState(false);
   const [collectionToken, setCollectionToken] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   
@@ -97,6 +99,14 @@ export default function GroupsPage() {
 
   const handleInviteCaptain = () => {
     setShowAddCaptainModal(true);
+  };
+
+  const handleAddGuest = () => {
+    groupsSectionRef.current?.openAddGuestModal();
+  };
+
+  const handleViewGuests = () => {
+    setShowGuestSheet(true);
   };
 
   const handleGroupChange = (group: GroupWithMembers | null) => {
@@ -501,6 +511,15 @@ export default function GroupsPage() {
           >
             Add Your Own
           </button>
+
+          {/* Add Guest Button - Hidden on mobile */}
+          <button 
+            className="btn-secondary hidden sm:block"
+            onClick={handleAddGuest}
+            disabled={!selectedGroup}
+          >
+            Add Guest
+          </button>
           
           {/* Captains Dropdown - Hidden on mobile */}
           <div className="relative hidden sm:block">
@@ -528,6 +547,9 @@ export default function GroupsPage() {
               onEditProfile={handleEditProfile}
               showCaptainsOption={isMobile}
               onCaptainsClick={() => setShowCaptains(true)}
+              onViewGuestsClick={handleViewGuests}
+              showAddGuestOption={isMobile}
+              onAddGuestClick={handleAddGuest}
             />
             {/* Captains dropdown for mobile */}
             <div className="sm:hidden">
@@ -572,6 +594,24 @@ export default function GroupsPage() {
               : selectedGroup.couple_first_name || selectedGroup.partner_first_name || null
           }
           currentCoupleImage={selectedGroup.couple_image_url}
+        />
+      )}
+
+      {/* Guest Navigation Sheet */}
+      {selectedGroup && (
+        <GuestNavigationSheet
+          isOpen={showGuestSheet}
+          onClose={() => setShowGuestSheet(false)}
+          groupId={selectedGroup.id}
+          groupName={selectedGroup.name}
+          onGuestSelect={(guest) => {
+            // Close the sheet and could open guest details modal here if needed
+            setShowGuestSheet(false);
+          }}
+          onAddGuest={() => {
+            setShowGuestSheet(false);
+            handleAddGuest();
+          }}
         />
       )}
     </div>
