@@ -141,6 +141,11 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
         ? `${step2Data.brideFirstName} & ${step2Data.partnerFirstName}`
         : fullName;
 
+      // Build couple display name for emails (consistent format)
+      const coupleDisplayName = step2Data?.brideFirstName && step2Data?.partnerFirstName 
+        ? `${step2Data.brideFirstName} & ${step2Data.partnerFirstName}`
+        : fullName;
+
       // Group gets event-specific data including both couple members
       groupData = {
         name: groupName,
@@ -152,6 +157,7 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
         couple_last_name: step2Data?.brideLastName || null,
         partner_first_name: step2Data?.partnerFirstName || null,
         partner_last_name: step2Data?.partnerLastName || null,
+        couple_display_name: coupleDisplayName,
         relationship_to_couple: null, // null for couples since they are the couple
         created_by: userId
       };
@@ -182,6 +188,12 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
 
       // Group gets event-specific data for gift givers
       const coupleName = `${step2Data?.firstName || ''} & ${step2Data?.partnerFirstName || ''}`.trim();
+      
+      // Build couple display name for emails (same format as couple flow)
+      const coupleDisplayName = step2Data?.firstName && step2Data?.partnerFirstName 
+        ? `${step2Data.firstName} & ${step2Data.partnerFirstName}`
+        : coupleName;
+
       groupData = {
         name: coupleName,
         description: 'A thoughtful gift collection of recipes',
@@ -190,6 +202,7 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
         couple_last_name: null, // Gift giver doesn't provide last names
         partner_first_name: step2Data?.partnerFirstName || null,
         partner_last_name: null, // Gift giver doesn't provide last names
+        couple_display_name: coupleDisplayName,
         relationship_to_couple: step2Data?.relationship || null,
         created_by: userId
       };

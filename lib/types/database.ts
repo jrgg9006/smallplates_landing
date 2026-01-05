@@ -374,6 +374,7 @@ export interface Database {
           relationship_to_couple: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
           couple_image_url: string | null;
           image_group_dashboard: string | null;
+          couple_display_name: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -392,6 +393,7 @@ export interface Database {
           relationship_to_couple?: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
           couple_image_url?: string | null;
           image_group_dashboard?: string | null;
+          couple_display_name?: string | null;
         };
         Update: {
           name?: string;
@@ -407,6 +409,7 @@ export interface Database {
           relationship_to_couple?: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
           couple_image_url?: string | null;
           image_group_dashboard?: string | null;
+          couple_display_name?: string | null;
         };
       };
       group_members: {
@@ -676,6 +679,7 @@ export interface GroupFormData {
   partner_first_name?: string | null;
   partner_last_name?: string | null;
   relationship_to_couple?: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
+  couple_display_name?: string | null;
   created_by?: string;
 }
 
