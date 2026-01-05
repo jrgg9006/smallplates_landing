@@ -187,7 +187,7 @@ export default function ForGiftGivers() {
               </span>
             </p>
             <p className="mt-4 font-serif text-xl text-[#2D2D2D] text-center">
-              Books start at $120.
+              Books start at $149.
             </p>
           </motion.div>
 

@@ -7,7 +7,8 @@ const postmarkClient = new ServerClient(process.env.POSTMARK_SERVER_TOKEN || '')
 export interface SendGuestInvitationParams {
   to: string;
   guestName: string;
-  coupleDisplayName: string;
+  coupleDisplayName?: string;
+  coupleName?: string;
   collectionLink: string;
   coupleImageUrl?: string;
   captainName?: string;
@@ -18,15 +19,19 @@ export async function sendGuestInvitationEmail({
   to,
   guestName,
   coupleDisplayName,
+  coupleName,
   collectionLink,
   coupleImageUrl,
   captainName,
   emailNumber,
 }: SendGuestInvitationParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
+    // Use coupleName if provided, otherwise use coupleDisplayName for backward compatibility
+    const displayName = coupleName || coupleDisplayName || 'The Couple';
+    
     // Get the template
     const { subject, html } = getInvitationTemplate(emailNumber, {
-      coupleDisplayName,
+      coupleDisplayName: displayName,
       guestName,
       collectionLink,
       coupleImageUrl,
@@ -35,7 +40,7 @@ export async function sendGuestInvitationEmail({
 
     // Send email via Postmark
     const result = await postmarkClient.sendEmail({
-      From: `${coupleDisplayName} <team@smallplatesandcompany.com>`,
+      From: `${displayName} <team@smallplatesandcompany.com>`,
       To: to,
       Subject: subject,
       HtmlBody: html,

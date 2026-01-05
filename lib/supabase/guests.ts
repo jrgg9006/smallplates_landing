@@ -407,3 +407,216 @@ export async function checkGuestExists(email: string): Promise<boolean> {
 
   return !!data;
 }
+
+// ============================================
+// INVITATION EMAIL FUNCTIONS
+// ============================================
+
+/**
+ * Get all guests that are currently in the invitation sequence
+ * Returns guests with status 'invited' and a valid email
+ */
+export async function getGuestsForInvitationEmails(): Promise<{ 
+  data: Array<Guest & { 
+    group: {
+      id: string;
+      couple_first_name: string | null;
+      partner_first_name: string | null;
+      couple_image_url: string | null;
+      created_by: string;
+    };
+    collection_link_token: string | null;
+  }> | null; 
+  error: string | null 
+}> {
+  const supabase = createSupabaseClient();
+  
+  // Get guests with status 'invited', their group info, and the profile's collection_link_token
+  const { data, error } = await supabase
+    .from('guests')
+    .select(`
+      *,
+      group:groups!inner (
+        id,
+        couple_first_name,
+        partner_first_name,
+        couple_image_url,
+        created_by,
+        profile:profiles!created_by (
+          collection_link_token
+        )
+      )
+    `)
+    .eq('status', 'invited')
+    .not('email', 'is', null)
+    .not('email', 'like', 'NO_EMAIL_%');
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  // Flatten the data structure
+  const flattenedData = data?.map(guest => {
+    const { group, ...guestData } = guest;
+    return {
+      ...guestData,
+      group: {
+        id: group.id,
+        couple_first_name: group.couple_first_name,
+        partner_first_name: group.partner_first_name,
+        couple_image_url: group.couple_image_url,
+        created_by: group.created_by,
+      },
+      collection_link_token: group.profile?.collection_link_token || null,
+    };
+  }) || [];
+
+  return { data: flattenedData, error: null };
+}
+
+/**
+ * Update guest after sending an invitation email
+ */
+export async function updateGuestInvitationStatus(
+  guestId: string, 
+  emailsSentCount: number
+): Promise<{ error: string | null }> {
+  const supabase = createSupabaseClient();
+  
+  const { error } = await supabase
+    .from('guests')
+    .update({
+      emails_sent_count: emailsSentCount,
+      last_email_sent_at: new Date().toISOString(),
+    })
+    .eq('id', guestId);
+
+  return { error: error?.message || null };
+}
+
+/**
+ * Mark guest invitation as completed (all emails sent, no response)
+ */
+export async function markGuestInvitationCompleted(
+  guestId: string
+): Promise<{ error: string | null }> {
+  const supabase = createSupabaseClient();
+  
+  const { error } = await supabase
+    .from('guests')
+    .update({
+      status: 'completed',
+    })
+    .eq('id', guestId);
+
+  return { error: error?.message || null };
+}
+
+/**
+ * Start invitation sequence for a guest
+ */
+export async function startGuestInvitation(
+  guestId: string
+): Promise<{ data: Guest | null; error: string | null }> {
+  const supabase = createSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('guests')
+    .update({
+      status: 'invited',
+      invitation_started_at: new Date().toISOString(),
+      emails_sent_count: 0,
+      invitation_paused_at: null,
+    })
+    .eq('id', guestId)
+    .select()
+    .single();
+
+  return { data, error: error?.message || null };
+}
+
+/**
+ * Pause invitation sequence for a guest
+ */
+export async function pauseGuestInvitation(
+  guestId: string
+): Promise<{ data: Guest | null; error: string | null }> {
+  const supabase = createSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('guests')
+    .update({
+      status: 'paused',
+      invitation_paused_at: new Date().toISOString(),
+    })
+    .eq('id', guestId)
+    .select()
+    .single();
+
+  return { data, error: error?.message || null };
+}
+
+/**
+ * Resume invitation sequence for a guest
+ */
+export async function resumeGuestInvitation(
+  guestId: string
+): Promise<{ data: Guest | null; error: string | null }> {
+  const supabase = createSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('guests')
+    .update({
+      status: 'invited',
+      invitation_paused_at: null,
+    })
+    .eq('id', guestId)
+    .select()
+    .single();
+
+  return { data, error: error?.message || null };
+}
+
+/**
+ * Retry invitation sequence for a guest (start from email 1)
+ */
+export async function retryGuestInvitation(
+  guestId: string
+): Promise<{ data: Guest | null; error: string | null }> {
+  const supabase = createSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('guests')
+    .update({
+      status: 'invited',
+      invitation_started_at: new Date().toISOString(),
+      emails_sent_count: 0,
+      invitation_paused_at: null,
+      last_email_sent_at: null,
+    })
+    .eq('id', guestId)
+    .select()
+    .single();
+
+  return { data, error: error?.message || null };
+}
+
+/**
+ * Manually mark a guest as submitted (e.g., received recipe via WhatsApp)
+ */
+export async function markGuestAsSubmitted(
+  guestId: string
+): Promise<{ data: Guest | null; error: string | null }> {
+  const supabase = createSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('guests')
+    .update({
+      status: 'submitted',
+    })
+    .eq('id', guestId)
+    .select()
+    .single();
+
+  return { data, error: error?.message || null };
+}
