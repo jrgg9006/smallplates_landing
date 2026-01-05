@@ -335,11 +335,11 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         <div className="flex flex-col h-full">
           <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans flex-shrink-0">The magic happens here</Label>
           {localRecipe.instructions && localRecipe.instructions.trim() ? (
-            <pre className="whitespace-pre-wrap break-words font-serif text-sm text-gray-700 leading-relaxed m-0 overflow-wrap-anywhere">
+            <pre className="whitespace-pre-wrap break-words font-sans font-light text-sm text-gray-700 leading-relaxed m-0 overflow-wrap-anywhere">
               {localRecipe.instructions}
             </pre>
           ) : (
-            <p className="text-sm text-gray-400 italic font-serif m-0">No instructions provided</p>
+            <p className="text-sm text-gray-400 italic font-sans font-light m-0">No instructions provided</p>
           )}
         </div>
       </div>
@@ -445,11 +445,11 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         <div>
           <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans">The magic happens here</Label>
           {localRecipe.instructions && localRecipe.instructions.trim() ? (
-            <pre className="whitespace-pre-wrap font-serif text-base text-gray-700 leading-relaxed m-0">
+            <pre className="whitespace-pre-wrap font-sans font-light text-base text-gray-700 leading-relaxed m-0">
               {localRecipe.instructions}
             </pre>
           ) : (
-            <p className="text-sm text-gray-400 italic font-serif m-0">No instructions provided</p>
+            <p className="text-sm text-gray-400 italic font-sans font-light m-0">No instructions provided</p>
           )}
         </div>
       </div>
@@ -458,7 +458,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
 
   // Edit content component for desktop - reusing AddRecipeModal styling patterns
   const desktopEditContent = (
-    <div className="flex-1 overflow-hidden flex flex-col min-w-0">
+    <div className="flex-1 flex flex-col min-w-0">
       {/* Recipe Title Section - Editable */}
       <div className="flex-shrink-0 mb-6">
         <input
@@ -481,12 +481,12 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           value={recipeNotes}
           onChange={(e) => setRecipeNotes(e.target.value)}
           placeholder="Made this at 2am more times than I will admit."
-          className="w-full text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-white border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 resize-none h-16 transition-all duration-200"
+          className="w-full text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-white border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 resize-none min-h-[80px] transition-all duration-200"
         />
       </div>
 
       {/* Two Column Layout: Ingredients (left) and Instructions (right) */}
-      <div className="flex-1 min-h-0 grid grid-cols-[1fr_2fr] gap-8 pt-2">
+      <div className="flex-1 min-h-0 grid grid-cols-[1fr_2fr] gap-8">
         {/* Left Column - Ingredients */}
         <div className="flex flex-col h-full">
           <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans flex-shrink-0">What ingredients you will need</Label>
@@ -494,7 +494,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
             value={recipeIngredients}
             onChange={(e) => setRecipeIngredients(e.target.value)}
             placeholder="Pecorino, not parmesan. Good eggs. The real guanciale."
-            className="flex-1 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-white border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 resize-none transition-all duration-200"
+            className="flex-1 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-white border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 resize-none font-sans transition-all duration-200"
           />
         </div>
 
@@ -507,14 +507,14 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
             value={recipeInstructions}
             onChange={(e) => setRecipeInstructions(e.target.value)}
             placeholder="Start with cold pan. Trust the process. Save the pasta water—you will need it."
-            className="flex-1 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-white border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 resize-none transition-all duration-200"
+            className="flex-1 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-white border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 resize-none font-sans transition-all duration-200"
           />
         </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50/50 border border-red-200 rounded-xl p-3 mt-4">
+        <div className="flex-shrink-0 bg-red-50/50 border border-red-200 rounded-xl p-3 mt-4">
           <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
@@ -561,7 +561,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
             value={recipeIngredients}
             onChange={(e) => setRecipeIngredients(e.target.value)}
             placeholder="Pecorino, not parmesan. Good eggs. The real guanciale."
-            className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[100px] bg-white transition-all duration-200 placeholder:text-gray-400"
+            className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[100px] bg-white font-sans transition-all duration-200 placeholder:text-gray-400"
           />
         </div>
 
@@ -573,7 +573,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
             value={recipeInstructions}
             onChange={(e) => setRecipeInstructions(e.target.value)}
             placeholder="Start with cold pan. Trust the process. Save the pasta water—you will need it."
-            className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[140px] bg-white transition-all duration-200 placeholder:text-gray-400"
+            className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[140px] bg-white font-sans transition-all duration-200 placeholder:text-gray-400"
           />
         </div>
 
@@ -637,9 +637,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           <DialogTitle className="font-serif text-2xl font-semibold text-gray-900">Recipe Details</DialogTitle>
         </DialogHeader>
         
-        <div className={`flex-1 flex flex-col pl-8 pr-8 pt-8 pb-6 min-w-0 ${
-          isEditMode ? 'overflow-hidden' : 'overflow-y-auto'
-        }`}>
+        <div className="flex-1 flex flex-col pl-8 pr-8 pt-8 pb-6 min-w-0 overflow-y-auto">
           {isEditMode ? desktopEditContent : desktopContent}
         </div>
           

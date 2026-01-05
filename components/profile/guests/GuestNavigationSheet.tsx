@@ -218,7 +218,7 @@ export function GuestNavigationSheet({
                     >
                       <div className="flex items-center justify-between gap-3">
                         {/* Guest name */}
-                        <p className="font-medium text-[hsl(var(--brand-charcoal))] truncate flex-1">
+                        <p className="font-normal text-[hsl(var(--brand-charcoal))] truncate flex-1">
                           {guest.first_name} {guest.last_name || ''}
                         </p>
                         
