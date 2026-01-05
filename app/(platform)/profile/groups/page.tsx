@@ -513,16 +513,16 @@ export default function GroupsPage() {
             onClick={() => groupsSectionRef.current?.openAddNewRecipeModal()}
             disabled={!selectedGroup}
           >
-            Add Your Own
+            Add Recipes
           </button>
 
-          {/* Add Guest Button - Hidden on mobile */}
+          {/* Guests Button - Hidden on mobile */}
           <button 
             className="btn-secondary hidden sm:block"
-            onClick={handleAddGuest}
+            onClick={handleViewGuests}
             disabled={!selectedGroup}
           >
-            Add Guest
+            Guests
           </button>
           
           {/* Captains Dropdown - Hidden on mobile */}
@@ -553,7 +553,6 @@ export default function GroupsPage() {
               onCaptainsClick={() => setShowCaptains(true)}
               onViewGuestsClick={handleViewGuests}
               showAddGuestOption={isMobile}
-              onAddGuestClick={handleAddGuest}
             />
             {/* Captains dropdown for mobile */}
             <div className="sm:hidden">

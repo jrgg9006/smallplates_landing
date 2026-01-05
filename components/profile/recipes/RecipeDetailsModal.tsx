@@ -8,22 +8,30 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Edit } from "lucide-react";
 import Image from "next/image";
-import { getGuestProfileIcon } from "@/lib/utils/profileIcons";
 import { updateRecipe } from "@/lib/supabase/recipes";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { getCookbooksForRecipe } from "@/lib/supabase/cookbooks";
+import { getRecipeGroups } from "@/lib/supabase/groupRecipes";
+import { isGroupMember } from "@/lib/supabase/groupMembers";
 
 interface RecipeDetailsModalProps {
   recipe: RecipeWithGuest | null;
   isOpen: boolean;
   onClose: () => void;
   onRecipeUpdated?: () => void;
+  initialEditMode?: boolean;
 }
 
-export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }: RecipeDetailsModalProps) {
+export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, initialEditMode = false }: RecipeDetailsModalProps) {
   const { user } = useAuth();
   
   // Local state for recipe to allow immediate updates after editing
@@ -41,9 +49,10 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Cookbooks state
-  const [cookbookNames, setCookbookNames] = useState<string[]>([]);
-  const [loadingCookbooks, setLoadingCookbooks] = useState(false);
+  // Groups state
+  const [recipeGroups, setRecipeGroups] = useState<Array<{ group_id: string; group_name: string }>>([]);
+  const [loadingGroups, setLoadingGroups] = useState(false);
+  const [canEdit, setCanEdit] = useState(false);
 
   // Update local recipe when prop changes
   useEffect(() => {
@@ -67,13 +76,16 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
     }
   }, [isOpen]);
 
-  // Reset edit mode when modal closes or recipe changes
+  // Reset edit mode when modal closes or set initial edit mode when modal opens
   useEffect(() => {
     if (!isOpen) {
       setIsEditMode(false);
       setError(null);
+    } else {
+      // Set edit mode based on initialEditMode when modal opens
+      setIsEditMode(initialEditMode);
     }
-  }, [isOpen]);
+  }, [isOpen, initialEditMode]);
 
   // Initialize form state when entering edit mode
   useEffect(() => {
@@ -86,33 +98,56 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
     }
   }, [localRecipe, isEditMode]);
 
-  // Load cookbooks for the recipe when modal opens
+  // Load groups and check permissions when modal opens
   useEffect(() => {
-    const loadCookbooks = async () => {
-      if (!localRecipe || !isOpen) {
-        setCookbookNames([]);
+    const loadGroupsAndCheckPermissions = async () => {
+      if (!localRecipe || !isOpen || !user) {
+        setRecipeGroups([]);
+        setCanEdit(false);
         return;
       }
 
-      setLoadingCookbooks(true);
+      setLoadingGroups(true);
       try {
-        const { data, error } = await getCookbooksForRecipe(localRecipe.id);
-        if (error) {
-          console.error('Error loading cookbooks:', error);
-          setCookbookNames([]);
+        // Get groups for the recipe
+        const { data: groupsData, error: groupsError } = await getRecipeGroups(localRecipe.id);
+        
+        if (groupsError) {
+          console.error('Error loading groups:', groupsError);
+          setRecipeGroups([]);
         } else {
-          setCookbookNames(data || []);
+          const groups = groupsData || [];
+          setRecipeGroups(groups);
+          
+          // Check if user is creator (can always edit)
+          const isCreator = localRecipe.user_id === user.id;
+          
+          // Check if user is member of any group
+          let isMemberOfGroup = false;
+          if (groups.length > 0) {
+            for (const group of groups) {
+              const { data: isMember } = await isGroupMember(group.group_id);
+              if (isMember) {
+                isMemberOfGroup = true;
+                break;
+              }
+            }
+          }
+          
+          // User can edit if they're the creator OR a member of a group
+          setCanEdit(isCreator || isMemberOfGroup);
         }
       } catch (err) {
-        console.error('Unexpected error loading cookbooks:', err);
-        setCookbookNames([]);
+        console.error('Unexpected error loading groups:', err);
+        setRecipeGroups([]);
+        setCanEdit(false);
       } finally {
-        setLoadingCookbooks(false);
+        setLoadingGroups(false);
       }
     };
 
-    loadCookbooks();
-  }, [localRecipe, isOpen]);
+    loadGroupsAndCheckPermissions();
+  }, [localRecipe, isOpen, user]);
 
   const handleCancel = () => {
     setIsEditMode(false);
@@ -175,73 +210,37 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
     }
   };
 
-  // Check if current user created this recipe (can edit recipes they created, regardless of guest attribution)
-  const isOwnRecipe = user && localRecipe && localRecipe.user_id === user.id;
-
   if (!localRecipe) return null;
 
   const guest = localRecipe.guests;
   const guestName = guest 
     ? (guest.printed_name || `${guest.first_name} ${guest.last_name || ''}`.trim())
     : 'Unknown Guest';
-  const guestSubtitle = guest && guest.printed_name
-    ? `${guest.first_name} ${guest.last_name || ''}`.trim()
-    : null;
   const guestEmail = guest?.email || null;
 
   const sourceLabel = localRecipe.guests?.source === 'collection'
     ? 'Collected from link'
     : 'Added manually';
 
-  // Format cookbooks text
-  const formatCookbooksText = () => {
-    if (loadingCookbooks) {
+  // Format groups text
+  const formatGroupsText = () => {
+    if (loadingGroups) {
       return '';
     }
-    if (cookbookNames.length === 0) {
+    if (recipeGroups.length === 0) {
       return '';
     }
-    if (cookbookNames.length === 1) {
-      return `. Active in Cookbook: ${cookbookNames[0]}`;
+    if (recipeGroups.length === 1) {
+      return `. Active in Group: ${recipeGroups[0].group_name}`;
     }
-    return `. Active in Cookbooks: ${cookbookNames.join(', ')}`;
+    return `. Active in Groups: ${recipeGroups.map(g => g.group_name).join(', ')}`;
   };
 
   // Content component for desktop - two column layout
   const desktopContent = (
-    <div className="flex-1 overflow-y-auto flex flex-col">
-      {/* Guest Info Section - Elegant top section */}
-      <div className="flex-shrink-0 flex items-center gap-4 pb-8 mb-8 border-b border-gray-200">
-        <div className="flex-shrink-0">
-          <Image
-            src={getGuestProfileIcon(localRecipe.guest_id, localRecipe.guests?.is_self === true)}
-            alt="Guest profile icon"
-            width={64}
-            height={64}
-            className="rounded-full"
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-base font-medium text-gray-900 font-sans truncate">
-            {guestName}
-          </h3>
-          {guestEmail && guestEmail.trim() && !guestEmail.startsWith('NO_EMAIL_') && (
-            <p className="text-sm text-gray-500 mt-0.5 font-sans truncate">
-              {guestEmail}
-            </p>
-          )}
-          <p className="text-xs text-gray-400 mt-1 font-sans">
-            ({sourceLabel}). Added on {new Date(localRecipe.created_at).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}{formatCookbooksText()}
-          </p>
-        </div>
-      </div>
-      
+    <div className="flex-1 flex flex-col min-w-0">
       {/* Recipe Title and Subtitle */}
-      <div className="flex-shrink-0 mb-8 pb-6 border-b border-gray-200">
+      <div className="flex-shrink-0 mb-6 pb-6 border-b border-gray-200">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <h2 className="font-serif text-4xl font-semibold text-gray-900 leading-tight mb-2">
@@ -251,7 +250,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
               Shared by {guestName}
             </p>
           </div>
-          {isOwnRecipe && !isEditMode && (
+          {canEdit && !isEditMode && (
             <button
               onClick={() => setIsEditMode(true)}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 mt-1"
@@ -266,7 +265,8 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
       {/* Comments/Notes - Full width above ingredients and instructions */}
       {localRecipe.comments && localRecipe.comments.trim() && (
         <div className="flex-shrink-0 mb-8">
-          <pre className="whitespace-pre-wrap font-sans font-light text-base text-gray-700 leading-relaxed m-0">
+          <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans">Special note</Label>
+          <pre className="whitespace-pre-wrap font-sans font-light text-sm text-gray-700 leading-relaxed m-0">
             {localRecipe.comments}
           </pre>
         </div>
@@ -274,13 +274,13 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
 
       {/* Uploaded Files Section - if document_urls exist */}
       {localRecipe.document_urls && localRecipe.document_urls.length > 0 && (
-        <div className="flex-shrink-0 mb-8">
-          <h3 className="text-sm font-medium text-gray-600 mb-3">Uploaded Files</h3>
+        <div className="flex-shrink-0 mb-6">
+          <h3 className="text-sm font-medium text-gray-700 mb-3 font-sans">Uploaded Files</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {localRecipe.document_urls.map((url, index) => {
               const isPDF = url.toLowerCase().endsWith('.pdf') || url.includes('application/pdf');
               return (
-                <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200">
+                <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
                   {isPDF ? (
                     <a
                       href={url}
@@ -318,11 +318,12 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
       )}
 
       {/* Two Column Layout: Ingredients (left) and Instructions (right) */}
-      <div className="flex-1 grid grid-cols-[3fr_7fr] gap-8 pb-6">
+      <div className="flex-1 min-h-0 grid grid-cols-[1fr_2fr] gap-8">
         {/* Left Column - Ingredients */}
-        <div className="flex flex-col min-w-0 overflow-hidden">
+        <div className="flex flex-col h-full">
+          <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans flex-shrink-0">What ingredients you will need</Label>
           {localRecipe.ingredients && localRecipe.ingredients.trim() ? (
-            <pre className="whitespace-pre-wrap break-words font-sans font-light text-base text-gray-700 leading-relaxed m-0 overflow-wrap-anywhere">
+            <pre className="whitespace-pre-wrap break-words font-sans font-light text-sm text-gray-700 leading-relaxed m-0 overflow-wrap-anywhere">
               {localRecipe.ingredients}
             </pre>
           ) : (
@@ -331,9 +332,10 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
         </div>
 
         {/* Right Column - Instructions */}
-        <div className="flex flex-col min-w-0 overflow-hidden">
+        <div className="flex flex-col h-full">
+          <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans flex-shrink-0">The magic happens here</Label>
           {localRecipe.instructions && localRecipe.instructions.trim() ? (
-            <pre className="whitespace-pre-wrap break-words font-serif text-lg text-gray-700 leading-relaxed m-0 overflow-wrap-anywhere">
+            <pre className="whitespace-pre-wrap break-words font-serif text-sm text-gray-700 leading-relaxed m-0 overflow-wrap-anywhere">
               {localRecipe.instructions}
             </pre>
           ) : (
@@ -347,36 +349,6 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
   // Content component for mobile - stacked layout
   const mobileContent = (
     <div className="flex-1 overflow-y-auto flex flex-col">
-      {/* Guest Info Section */}
-      <div className="flex-shrink-0 flex items-center gap-3 pb-6 mb-6 border-b border-gray-200">
-        <div className="flex-shrink-0">
-          <Image
-            src={getGuestProfileIcon(localRecipe.guest_id, localRecipe.guests?.is_self === true)}
-            alt="Guest profile icon"
-            width={56}
-            height={56}
-            className="rounded-full"
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-gray-900 font-sans truncate">
-            {guestName}
-          </h3>
-          {guestEmail && guestEmail.trim() && !guestEmail.startsWith('NO_EMAIL_') && (
-            <p className="text-xs text-gray-500 mt-0.5 font-sans truncate">
-              {guestEmail}
-            </p>
-          )}
-          <p className="text-xs text-gray-400 mt-1 font-sans">
-            ({sourceLabel}). Added on {new Date(localRecipe.created_at).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}{formatCookbooksText()}
-          </p>
-        </div>
-      </div>
-      
       {/* Recipe Title and Subtitle */}
       <div className="flex-shrink-0 mb-6 pb-4 border-b border-gray-200">
         <div className="flex items-start justify-between gap-3">
@@ -388,7 +360,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
               Shared by {guestName}
             </p>
           </div>
-          {isOwnRecipe && !isEditMode && (
+          {canEdit && !isEditMode && (
             <button
               onClick={() => setIsEditMode(true)}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 mt-1"
@@ -403,6 +375,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
       {/* Comments/Notes - Above ingredients and instructions */}
       {localRecipe.comments && localRecipe.comments.trim() && (
         <div className="flex-shrink-0 mb-6">
+          <Label className="text-sm font-medium text-gray-700 mb-3 block font-sans">Special note</Label>
           <pre className="whitespace-pre-wrap font-sans font-light text-base text-gray-700 leading-relaxed m-0">
             {localRecipe.comments}
           </pre>
@@ -412,12 +385,12 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
       {/* Uploaded Files Section - if document_urls exist */}
       {localRecipe.document_urls && localRecipe.document_urls.length > 0 && (
         <div className="flex-shrink-0 mb-6">
-          <h3 className="text-sm font-medium text-gray-600 mb-3">Uploaded Files</h3>
+          <h3 className="text-sm font-medium text-gray-700 mb-3 font-sans">Uploaded Files</h3>
           <div className="grid grid-cols-2 gap-3">
             {localRecipe.document_urls.map((url, index) => {
               const isPDF = url.toLowerCase().endsWith('.pdf') || url.includes('application/pdf');
               return (
-                <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200">
+                <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
                   {isPDF ? (
                     <a
                       href={url}
@@ -458,6 +431,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
       <div className="flex-1 space-y-6 pb-6">
         {/* Ingredients */}
         <div>
+          <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans">What ingredients you will need</Label>
           {localRecipe.ingredients && localRecipe.ingredients.trim() ? (
             <pre className="whitespace-pre-wrap font-sans font-light text-base text-gray-700 leading-relaxed m-0">
               {localRecipe.ingredients}
@@ -469,6 +443,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
 
         {/* Instructions */}
         <div>
+          <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans">The magic happens here</Label>
           {localRecipe.instructions && localRecipe.instructions.trim() ? (
             <pre className="whitespace-pre-wrap font-serif text-base text-gray-700 leading-relaxed m-0">
               {localRecipe.instructions}
@@ -483,88 +458,63 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
 
   // Edit content component for desktop - reusing AddRecipeModal styling patterns
   const desktopEditContent = (
-    <div className="flex-1 overflow-y-auto flex flex-col">
-      {/* Guest Info Section - Same as view mode */}
-      <div className="flex-shrink-0 flex items-center gap-4 pb-8 mb-8 border-b border-gray-200">
-        <div className="flex-shrink-0">
-          <Image
-            src={getGuestProfileIcon(localRecipe.guest_id, localRecipe.guests?.is_self === true)}
-            alt="Guest profile icon"
-            width={64}
-            height={64}
-            className="rounded-full"
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-base font-medium text-gray-900 font-sans truncate">
-            {guestName}
-          </h3>
-          {guestEmail && guestEmail.trim() && !guestEmail.startsWith('NO_EMAIL_') && (
-            <p className="text-sm text-gray-500 mt-0.5 font-sans truncate">
-              {guestEmail}
-            </p>
-          )}
-          <p className="text-xs text-gray-400 mt-1 font-sans">
-            Added on {new Date(localRecipe.created_at).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}{formatCookbooksText()}
-          </p>
-        </div>
-      </div>
-
+    <div className="flex-1 overflow-hidden flex flex-col min-w-0">
       {/* Recipe Title Section - Editable */}
-      <div className="flex-shrink-0 mb-8 pb-6 border-b border-gray-200">
+      <div className="flex-shrink-0 mb-6">
         <input
           type="text"
           value={recipeTitle}
           onChange={(e) => setRecipeTitle(e.target.value)}
           placeholder="Recipe name"
-          className="w-full font-serif text-4xl font-semibold text-gray-900 leading-tight bg-transparent border-0 border-b-2 border-gray-300 px-0 py-2 focus:outline-none focus:border-black placeholder:text-gray-400"
+          className="w-full font-serif text-3xl font-semibold text-gray-900 leading-tight bg-transparent border-0 border-b-2 border-gray-200 px-0 py-4 focus:outline-none focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 placeholder:font-normal transition-all duration-200"
           required
         />
-        <p className="font-serif italic text-lg text-gray-700 mt-2">
+        <p className="font-serif italic text-base text-gray-600 mt-2">
           Shared by {guestName}
         </p>
       </div>
 
       {/* Notes Section - Full width above ingredients and instructions */}
       <div className="flex-shrink-0 mb-8">
+        <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans">Edit the special note (only if necessary)</Label>
         <textarea
           value={recipeNotes}
           onChange={(e) => setRecipeNotes(e.target.value)}
-          placeholder="Any additional notes about this recipe"
-          className="w-full font-sans font-light text-base text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black placeholder:text-gray-400 resize-vertical min-h-[80px]"
+          placeholder="Made this at 2am more times than I will admit."
+          className="w-full text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-white border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 resize-none h-16 transition-all duration-200"
         />
       </div>
 
       {/* Two Column Layout: Ingredients (left) and Instructions (right) */}
-      <div className="flex-1 grid grid-cols-[3fr_7fr] gap-8 pb-6">
+      <div className="flex-1 min-h-0 grid grid-cols-[1fr_2fr] gap-8 pt-2">
         {/* Left Column - Ingredients */}
-        <div className="flex flex-col min-w-0 overflow-hidden">
+        <div className="flex flex-col h-full">
+          <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans flex-shrink-0">What ingredients you will need</Label>
           <textarea
             value={recipeIngredients}
             onChange={(e) => setRecipeIngredients(e.target.value)}
-            placeholder="List the ingredients needed for this recipe"
-            className="w-full font-sans font-light text-base text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black placeholder:text-gray-400 resize-vertical min-h-[200px]"
+            placeholder="Pecorino, not parmesan. Good eggs. The real guanciale."
+            className="flex-1 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-white border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 resize-none transition-all duration-200"
           />
         </div>
 
         {/* Right Column - Instructions */}
-        <div className="flex flex-col min-w-0 overflow-hidden">
+        <div className="flex flex-col h-full">
+          <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans flex-shrink-0">
+            The magic happens here
+          </Label>
           <textarea
             value={recipeInstructions}
             onChange={(e) => setRecipeInstructions(e.target.value)}
-            placeholder="If you have the recipe all in one single piece, just paste in here"
-            className="w-full font-serif text-lg text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black placeholder:text-gray-400 resize-vertical min-h-[200px]"
+            placeholder="Start with cold pan. Trust the process. Save the pasta water—you will need it."
+            className="flex-1 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-white border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 resize-none transition-all duration-200"
           />
         </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-6">
+        <div className="bg-red-50/50 border border-red-200 rounded-xl p-3 mt-4">
           <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
@@ -574,36 +524,6 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
   // Edit content component for mobile - reusing AddRecipeModal styling patterns
   const mobileEditContent = (
     <div className="flex-1 overflow-y-auto flex flex-col">
-      {/* Guest Info Section */}
-      <div className="flex-shrink-0 flex items-center gap-3 pb-6 mb-6 border-b border-gray-200">
-        <div className="flex-shrink-0">
-          <Image
-            src={getGuestProfileIcon(localRecipe.guest_id, localRecipe.guests?.is_self === true)}
-            alt="Guest profile icon"
-            width={56}
-            height={56}
-            className="rounded-full"
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-gray-900 font-sans truncate">
-            {guestName}
-          </h3>
-          {guestEmail && guestEmail.trim() && !guestEmail.startsWith('NO_EMAIL_') && (
-            <p className="text-xs text-gray-500 mt-0.5 font-sans truncate">
-              {guestEmail}
-            </p>
-          )}
-          <p className="text-xs text-gray-400 mt-1 font-sans">
-            Added on {new Date(localRecipe.created_at).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}{formatCookbooksText()}
-          </p>
-        </div>
-      </div>
-
       {/* Recipe Title Section - Editable */}
       <div className="flex-shrink-0 mb-6 pb-4 border-b border-gray-200">
         <input
@@ -611,7 +531,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
           value={recipeTitle}
           onChange={(e) => setRecipeTitle(e.target.value)}
           placeholder="Recipe name"
-          className="w-full font-serif text-3xl font-semibold text-gray-900 leading-tight bg-transparent border-0 border-b-2 border-gray-300 px-0 py-2 focus:outline-none focus:border-black placeholder:text-gray-400"
+          className="w-full font-serif text-3xl font-semibold text-gray-900 leading-tight bg-transparent border-0 border-b-2 border-gray-200 px-0 py-2 focus:outline-none focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 transition-all duration-200"
           required
         />
         <p className="font-serif italic text-base text-gray-700 mt-2">
@@ -623,31 +543,37 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
       <div className="flex-1 space-y-6 pb-6">
         {/* Notes */}
         <div>
+          <Label htmlFor="recipeNotes" className="text-sm font-medium text-gray-600 mb-2 block font-sans">Edit the special note (only if necessary)</Label>
           <textarea
+            id="recipeNotes"
             value={recipeNotes}
             onChange={(e) => setRecipeNotes(e.target.value)}
-            placeholder="Any additional notes about this recipe"
-            className="w-full font-sans font-light text-base text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black placeholder:text-gray-400 resize-vertical min-h-[80px]"
+            placeholder="Made this at 2am more times than I will admit."
+            className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[80px] bg-white transition-all duration-200 placeholder:text-gray-400"
           />
         </div>
 
         {/* Ingredients */}
         <div>
+          <Label htmlFor="recipeIngredients" className="text-sm font-medium text-gray-600 mb-2 block font-sans">What ingredients you will need</Label>
           <textarea
+            id="recipeIngredients"
             value={recipeIngredients}
             onChange={(e) => setRecipeIngredients(e.target.value)}
-            placeholder="List the ingredients needed for this recipe"
-            className="w-full font-sans font-light text-base text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black placeholder:text-gray-400 resize-vertical min-h-[100px]"
+            placeholder="Pecorino, not parmesan. Good eggs. The real guanciale."
+            className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[100px] bg-white transition-all duration-200 placeholder:text-gray-400"
           />
         </div>
 
         {/* Instructions */}
         <div>
+          <Label htmlFor="recipeInstructions" className="text-sm font-medium text-gray-600 mb-2 block font-sans">The magic happens here</Label>
           <textarea
+            id="recipeInstructions"
             value={recipeInstructions}
             onChange={(e) => setRecipeInstructions(e.target.value)}
-            placeholder="If you have the recipe all in one single piece, just paste in here"
-            className="w-full font-serif text-base text-gray-700 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black placeholder:text-gray-400 resize-vertical min-h-[150px]"
+            placeholder="Start with cold pan. Trust the process. Save the pasta water—you will need it."
+            className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[140px] bg-white transition-all duration-200 placeholder:text-gray-400"
           />
         </div>
 
@@ -703,42 +629,42 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated }:
     );
   }
 
-  // Desktop version - Sheet that slides from right
+  // Desktop version - Dialog popup (centered)
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="!w-[50%] !max-w-none h-full flex flex-col overflow-hidden p-8">
-        <SheetHeader className="flex-shrink-0 mb-6">
-          <SheetTitle className="font-serif text-2xl font-semibold">Recipe Details</SheetTitle>
-        </SheetHeader>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl w-[95vw] h-[90vh] max-h-[90vh] flex flex-col overflow-hidden p-0 gap-0 bg-white">
+        <DialogHeader className="flex-shrink-0 px-8 pt-6 pb-2">
+          <DialogTitle className="font-serif text-2xl font-semibold text-gray-900">Recipe Details</DialogTitle>
+        </DialogHeader>
         
-        <div className="flex-1 overflow-hidden flex flex-col relative overflow-y-auto">
+        <div className={`flex-1 flex flex-col pl-8 pr-8 pt-8 pb-6 min-w-0 ${
+          isEditMode ? 'overflow-hidden' : 'overflow-y-auto'
+        }`}>
           {isEditMode ? desktopEditContent : desktopContent}
+        </div>
           
-          {/* Save/Cancel Buttons - Sticky bottom for desktop when in edit mode */}
+        {/* Action Buttons - Fixed position at bottom when in edit mode */}
           {isEditMode && (
-            <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 mt-auto flex-shrink-0">
-              <div className="flex gap-3">
+          <div className="flex justify-end gap-3 flex-shrink-0 bg-white px-8 py-4 border-t border-gray-200">
                 <Button 
+              variant="outline"
                   onClick={handleCancel}
                   disabled={loading}
-                  variant="outline"
-                  className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 py-3 rounded-full"
+              className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-full"
                 >
                   Cancel
                 </Button>
                 <Button 
                   onClick={handleSave}
                   disabled={loading}
-                  className="flex-1 bg-black text-white hover:bg-gray-800 py-3 rounded-full disabled:opacity-50"
+              className="bg-black text-white hover:bg-gray-800 rounded-full disabled:opacity-50"
                 >
                   {loading ? 'Saving...' : 'Save'}
                 </Button>
-              </div>
             </div>
           )}
-        </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }
 

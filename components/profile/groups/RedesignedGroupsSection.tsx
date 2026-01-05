@@ -13,6 +13,7 @@ import { AddRecipesToGroupModal } from "./AddRecipesToGroupModal";
 import { AddFriendToGroupModal } from "./AddFriendToGroupModal";
 import { RemoveRecipeFromGroupModal } from "./RemoveRecipeFromGroupModal";
 import { AddGuestModal } from "../guests/AddGuestModal";
+import { RecipeDetailsModal } from "../recipes/RecipeDetailsModal";
 import { getMyGroups, getUserRoleInGroup, deleteGroup, exitGroup } from "@/lib/supabase/groups";
 import { getGroupRecipes, searchGroupRecipes, removeRecipeFromGroup } from "@/lib/supabase/groupRecipes";
 import type { GroupWithMembers, RecipeWithGuest } from "@/lib/types/database";
@@ -60,6 +61,9 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
   const [removeRecipeModalOpen, setRemoveRecipeModalOpen] = useState(false);
   const [addGuestModalOpen, setAddGuestModalOpen] = useState(false);
   const [recipeToRemove, setRecipeToRemove] = useState<RecipeWithGuest | null>(null);
+  const [recipeDetailsModalOpen, setRecipeDetailsModalOpen] = useState(false);
+  const [selectedRecipe, setSelectedRecipe] = useState<RecipeWithGuest | null>(null);
+  const [recipeDetailsEditMode, setRecipeDetailsEditMode] = useState(false);
   
   // Loading & error state
   const [loading, setLoading] = useState(true);
@@ -278,13 +282,15 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
   };
 
   const handleRecipeClick = (recipe: RecipeWithGuest) => {
-    // TODO: Open recipe details modal
-    // console.log removed for production
+    setSelectedRecipe(recipe);
+    setRecipeDetailsEditMode(false);
+    setRecipeDetailsModalOpen(true);
   };
 
   const handleEditRecipe = (recipe: RecipeWithGuest) => {
-    // TODO: Open edit recipe modal
-    // console.log removed for production
+    setSelectedRecipe(recipe);
+    setRecipeDetailsEditMode(true);
+    setRecipeDetailsModalOpen(true);
   };
 
   const handleRemoveRecipe = (recipe: RecipeWithGuest) => {
@@ -477,6 +483,20 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
           // Optionally refresh recipes if needed to show new guest's contributions
           loadRecipes();
         }}
+      />
+
+      <RecipeDetailsModal
+        recipe={selectedRecipe}
+        isOpen={recipeDetailsModalOpen}
+        onClose={() => {
+          setRecipeDetailsModalOpen(false);
+          setSelectedRecipe(null);
+          setRecipeDetailsEditMode(false);
+        }}
+        onRecipeUpdated={() => {
+          loadRecipes();
+        }}
+        initialEditMode={recipeDetailsEditMode}
       />
     </div>
   );

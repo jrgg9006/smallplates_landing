@@ -145,7 +145,7 @@ export function GuestNavigationSheet({
           {/* Header */}
           <SheetHeader className={`${isMobile ? 'px-6 py-4' : 'px-8 py-6'} border-b border-gray-100`}>
             <SheetTitle className="font-serif text-2xl font-semibold text-[hsl(var(--brand-charcoal))]">
-              Guests
+              Manage Guests
             </SheetTitle>
           </SheetHeader>
 

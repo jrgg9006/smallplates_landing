@@ -9,11 +9,10 @@ interface MoreMenuDropdownProps {
   showCaptainsOption?: boolean;
   onCaptainsClick?: () => void;
   showAddGuestOption?: boolean;
-  onAddGuestClick?: () => void;
   onViewGuestsClick?: () => void;
 }
 
-export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsOption, onCaptainsClick, showAddGuestOption, onAddGuestClick, onViewGuestsClick }: MoreMenuDropdownProps) {
+export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsOption, onCaptainsClick, showAddGuestOption, onViewGuestsClick }: MoreMenuDropdownProps) {
   if (!isOpen) return null;
   
   return (
@@ -37,26 +36,17 @@ export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsO
             Captains
           </button>
         )}
-        {showAddGuestOption && onAddGuestClick && (
+        {showAddGuestOption && onViewGuestsClick && (
           <button
             onClick={() => {
-              onAddGuestClick();
+              onViewGuestsClick();
               onClose();
             }}
             className="w-full text-left px-4 py-2.5 text-sm text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-border))] rounded-lg transition-colors"
           >
-            Add Guest
+            Guests
           </button>
         )}
-        <button
-          onClick={() => {
-            onViewGuestsClick?.();
-            onClose();
-          }}
-          className="w-full text-left px-4 py-2.5 text-sm text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-border))] rounded-lg transition-colors"
-        >
-          Manage Guests
-        </button>
         <button
           onClick={() => {
             onEditProfile();
