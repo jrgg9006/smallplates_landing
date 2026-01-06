@@ -126,7 +126,7 @@ export function GuestDetailsModal({
             {/* Name Row */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="firstName" className="text-sm font-medium text-[hsl(var(--brand-warm-gray))]">
+                <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
                   First Name *
                 </Label>
                 <Input
@@ -138,7 +138,7 @@ export function GuestDetailsModal({
                 />
               </div>
               <div>
-                <Label htmlFor="lastName" className="text-sm font-medium text-[hsl(var(--brand-warm-gray))]">
+                <Label htmlFor="lastName" className="text-sm font-medium text-gray-700">
                   Last Name
                 </Label>
                 <Input
@@ -153,7 +153,7 @@ export function GuestDetailsModal({
 
             {/* Printed Name */}
             <div>
-              <Label htmlFor="printedName" className="text-sm font-medium text-[hsl(var(--brand-warm-gray))]">
+              <Label htmlFor="printedName" className="text-sm font-medium text-gray-700">
                 Printed Name
               </Label>
               <Input
@@ -170,7 +170,7 @@ export function GuestDetailsModal({
 
             {/* Email */}
             <div>
-              <Label htmlFor="email" className="text-sm font-medium text-[hsl(var(--brand-warm-gray))]">
+              <Label htmlFor="email" className="text-sm font-medium text-gray-700">
                 Email
               </Label>
               <Input
@@ -185,7 +185,7 @@ export function GuestDetailsModal({
 
             {/* Phone */}
             <div>
-              <Label htmlFor="phone" className="text-sm font-medium text-[hsl(var(--brand-warm-gray))]">
+              <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
                 Phone
               </Label>
               <Input
@@ -202,7 +202,7 @@ export function GuestDetailsModal({
           {/* Recipes Section - Only show if has recipes */}
           {recipes.length > 0 && (
             <div className="pt-4 border-t border-[hsl(var(--brand-sand))]">
-              <Label className="text-sm font-medium text-[hsl(var(--brand-warm-gray))]">
+              <Label className="text-sm font-medium text-gray-700">
                 Recipes
               </Label>
               <ul className="mt-2 space-y-1">

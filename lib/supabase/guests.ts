@@ -51,13 +51,13 @@ export async function addGuest(formData: GuestFormData) {
 export async function getGuests(groupId?: string, includeArchived = false): Promise<{ data: Guest[] | null; error: string | null }> {
   const supabase = createSupabaseClient();
   
-  // Get the current user
+  // Get the current user (still needed for authentication check)
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) {
     return { data: null, error: 'User not authenticated' };
   }
   
-  // Get guests with their recipes using a left join, filtered by user_id
+  // Get guests with their recipes using a left join
   let query = supabase
     .from('guests')
     .select(`
@@ -65,12 +65,17 @@ export async function getGuests(groupId?: string, includeArchived = false): Prom
       guest_recipes (
         created_at
       )
-    `)
-    .eq('user_id', user.id);
+    `);
 
-  // Filter by group_id if provided
+  // IMPORTANT: When searching by groupId, don't filter by user_id
+  // because guests can be created by different users through collection links
+  // When NOT searching by groupId, filter by user_id to get all user's guests
   if (groupId) {
+    // Search by group_id only (includes guests created by any user via collection links)
     query = query.eq('group_id', groupId);
+  } else {
+    // No groupId provided, so get all guests for the current user
+    query = query.eq('user_id', user.id);
   }
 
   if (!includeArchived) {

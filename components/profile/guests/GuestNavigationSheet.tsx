@@ -55,6 +55,8 @@ export function GuestNavigationSheet({
     const { data, error } = await getGuestsByGroup(groupId);
     if (!error && data) {
       setGuests(data);
+    } else if (error) {
+      console.error('Error loading guests:', error);
     }
     setLoading(false);
   }, [groupId]);
