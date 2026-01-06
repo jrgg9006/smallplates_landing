@@ -119,7 +119,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
   const loadGuests = async () => {
     setGuestsLoading(true);
     try {
-      const { data: guestsData, error: guestsError } = await getGuests(undefined, false);
+      const { data: guestsData, error: guestsError } = await getGuests(groupId || undefined, false);
       
       if (guestsError) {
         console.error('Error loading guests:', guestsError);
@@ -959,6 +959,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
           isOpen={showAddGuestModal}
           onClose={() => setShowAddGuestModal(false)}
           onGuestAdded={handleGuestAdded}
+          groupId={groupId || undefined}
         />
       </>
     );
@@ -1002,6 +1003,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
         isOpen={showAddGuestModal}
         onClose={() => setShowAddGuestModal(false)}
         onGuestAdded={handleGuestAdded}
+        groupId={groupId || undefined}
       />
     </>
   );
