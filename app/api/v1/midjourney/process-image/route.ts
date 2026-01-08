@@ -5,23 +5,23 @@ const RAILWAY_AGENT_URL = process.env.RAILWAY_AGENT_URL || 'https://smallplatesw
 
 export async function POST(request: NextRequest) {
   try {
-    const { dish_name, recipe, recipe_id } = await request.json();
+    const { image_url, dish_name, recipe_id } = await request.json();
 
-    if (!dish_name || !recipe) {
+    if (!image_url) {
       return NextResponse.json(
-        { error: 'dish_name and recipe are required' },
+        { error: 'image_url is required' },
         { status: 400 }
       );
     }
 
-    const response = await fetch(`${RAILWAY_AGENT_URL}/generate-prompt`, {
+    const response = await fetch(`${RAILWAY_AGENT_URL}/process-image`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        dish_name,
-        recipe,
+        image_url,
+        dish_name: dish_name || null,
       }),
     });
 
@@ -50,6 +50,27 @@ export async function POST(request: NextRequest) {
 
     if (recipe_id) {
       const supabase = createSupabaseAdminClient();
+      
+      // Guardar datos extraídos del OCR en guest_recipes
+      if (promptData.recipe_name || promptData.ingredients || promptData.instructions) {
+        const { error: updateError } = await supabase
+          .from('guest_recipes')
+          .update({
+            recipe_name: promptData.recipe_name,
+            ingredients: promptData.ingredients,
+            instructions: promptData.instructions,
+            confidence_score: promptData.confidence_score,
+            raw_recipe_text: promptData.raw_text,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', recipe_id);
+
+        if (updateError) {
+          console.error('❌ Error saving OCR data to Supabase:', updateError);
+        }
+      }
+      
+      // Guardar prompt (igual que con texto)
       const { error: insertError } = await supabase
         .from('midjourney_prompts')
         .upsert({
@@ -75,4 +96,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
