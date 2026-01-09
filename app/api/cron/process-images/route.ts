@@ -8,12 +8,11 @@ import { processRecipeImage, hasValidExtractedData } from '@/lib/supabase/imageP
  */
 export async function GET(request: NextRequest) {
   try {
-    // TODO: Add CRON_SECRET to Vercel environment variables
-    // Temporarily disabled auth for testing
-    // const authHeader = request.headers.get('authorization');
-    // if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    //   return new NextResponse('Unauthorized', { status: 401 });
-    // }
+    // Verificar autorización (Vercel Cron añade este header)
+    const authHeader = request.headers.get('authorization');
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
 
     console.log('🚀 Starting image processing cron job');
     const supabase = createSupabaseAdminClient();
