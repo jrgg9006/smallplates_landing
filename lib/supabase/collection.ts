@@ -4,7 +4,6 @@
  */
 
 import { createSupabaseClient } from './client';
-import { createSupabaseAdminClient } from './admin';
 import { generateSessionId, uploadFilesToStagingWithClient, moveFilesToFinalLocationWithClient, cleanupStagingFiles } from './storage';
 import { generateAndSaveMidjourneyPrompt } from './midjourneyPrompts';
 import { processRecipeImage, hasValidExtractedData, getImagePlaceholderText } from './imageProcessing';
