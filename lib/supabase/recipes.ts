@@ -1,5 +1,4 @@
 import { createSupabaseClient } from '@/lib/supabase/client';
-import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { getCurrentProfile } from '@/lib/supabase/profiles';
 import {
   uploadFilesToStagingWithClient,
