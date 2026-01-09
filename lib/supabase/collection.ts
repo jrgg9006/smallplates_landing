@@ -399,9 +399,7 @@ export async function submitGuestRecipeWithFiles(
     if (recipe && submission.upload_method === 'image' && finalFileUrls.length > 0) {
       console.log('📝 Adding image to processing queue for recipe:', recipe.id);
       
-      // Use admin client for queue operations (bypasses RLS)
-      const adminSupabase = createSupabaseAdminClient();
-      const { error: queueError } = await adminSupabase
+      const { error: queueError } = await supabase
         .from('image_processing_queue')
         .insert({
           recipe_id: recipe.id,
