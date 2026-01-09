@@ -387,12 +387,13 @@ export async function addUserRecipe(recipeData: UserRecipeData, groupId?: string
     const firstName = nameParts[0] || 'My';
     const lastName = nameParts.slice(1).join(' ') || 'Recipes';
 
-    // Check if user has a "self" guest entry
+    // Check if user has a "self" guest entry for this group
     let { data: selfGuest, error: selfGuestError } = await supabase
       .from('guests')
       .select('id')
       .eq('user_id', user.id)
       .eq('is_self', true)
+      .eq('group_id', targetGroupId)
       .single();
 
     // If no self guest exists, create a NEW one
@@ -413,7 +414,8 @@ export async function addUserRecipe(recipeData: UserRecipeData, groupId?: string
           number_of_recipes: 1,
           recipes_received: 0,
           is_archived: false,
-          source: 'manual'
+          source: 'manual',
+          group_id: targetGroupId
         })
         .select('id')
         .single();
@@ -725,43 +727,96 @@ export async function addRecipeWithFiles(
         }
       }
       
-      // Step 6: Process the first uploaded image to extract recipe data
+      // Step 6: Trigger async processing of the first uploaded image
       if (finalFileUrls.length > 0) {
-        console.log('🔄 Processing uploaded image for recipe data extraction...');
-        const { data: processedData, error: processError } = await processRecipeImage(
-          finalFileUrls[0], // Process the first image
-          recipe.id,
-          recipeName
-        );
-        
-        if (processError) {
-          console.error('❌ Error processing recipe image:', processError);
-          // Continue without extracted data - keep placeholder text
-        } else if (hasValidExtractedData(processedData)) {
-          // Update recipe with extracted data if we got valid results (preserve user's title)
-          console.log('✅ Valid recipe data extracted, updating recipe...');
-          const extractedUpdate: GuestRecipeUpdate = {
-            ingredients: processedData!.ingredients || placeholderText.ingredients,
-            instructions: processedData!.instructions || placeholderText.instructions,
-            raw_recipe_text: processedData!.raw_text,
-          };
-          
-          const { error: extractUpdateError } = await supabase
-            .from('guest_recipes')
-            .update(extractedUpdate)
-            .eq('id', recipe.id);
+        // Process in background without blocking the response
+        // Note: Using setTimeout to defer execution to next tick
+        setTimeout(async () => {
+          try {
+            console.log('🔄 Starting async image processing for recipe:', recipe.id);
+            const { data: processedData, error: processError } = await processRecipeImage(
+              finalFileUrls[0],
+              recipe.id,
+              recipeName
+            );
             
-          if (extractUpdateError) {
-            console.error('❌ Error updating recipe with extracted data:', extractUpdateError);
-          } else {
-            console.log('✅ Recipe updated with extracted data');
-            // Update the recipe object to return with new data
-            Object.assign(recipe, extractedUpdate);
+            if (processError) {
+              console.error('❌ Error processing recipe image async:', processError);
+              return;
+            }
+            
+            if (hasValidExtractedData(processedData)) {
+              console.log('✅ Valid recipe data extracted, updating recipe...');
+              
+              const supabase = createSupabaseClient();
+              const extractedUpdate: any = {
+                updated_at: new Date().toISOString(),
+              };
+
+              // Never update recipe_name - always preserve user's title
+              if (processedData!.ingredients) extractedUpdate.ingredients = processedData!.ingredients;
+              if (processedData!.instructions) extractedUpdate.instructions = processedData!.instructions;
+              if (processedData!.raw_text) extractedUpdate.raw_recipe_text = processedData!.raw_text;
+              if (processedData!.confidence_score !== undefined) extractedUpdate.confidence_score = processedData!.confidence_score;
+
+              const { error: updateError } = await supabase
+                .from('guest_recipes')
+                .update(extractedUpdate)
+                .eq('id', recipe.id);
+
+              if (updateError) {
+                console.error('❌ Error updating recipe with extracted data:', updateError);
+              } else {
+                console.log('✅ Recipe updated successfully with extracted data');
+              }
+            } else {
+              console.log('⚠️ No valid data extracted from image, keeping placeholder text');
+            }
+          } catch (error) {
+            console.error('❌ Error in async image processing:', error);
           }
-        } else {
-          console.log('⚠️ No valid data extracted from image, keeping placeholder text');
-        }
+        }, 100); // Small delay to ensure the response is sent first
+        
+        console.log('🔄 Async image processing scheduled for recipe:', recipe.id);
       }
+      
+      // Original sync processing code (now commented out)
+      // if (finalFileUrls.length > 0) {
+      //   console.log('🔄 Processing uploaded image for recipe data extraction...');
+      //   const { data: processedData, error: processError } = await processRecipeImage(
+      //     finalFileUrls[0], // Process the first image
+      //     recipe.id,
+      //     recipeName
+      //   );
+      //   
+      //   if (processError) {
+      //     console.error('❌ Error processing recipe image:', processError);
+      //     // Continue without extracted data - keep placeholder text
+      //   } else if (hasValidExtractedData(processedData)) {
+      //     // Update recipe with extracted data if we got valid results (preserve user's title)
+      //     console.log('✅ Valid recipe data extracted, updating recipe...');
+      //     const extractedUpdate: GuestRecipeUpdate = {
+      //       ingredients: processedData!.ingredients || placeholderText.ingredients,
+      //       instructions: processedData!.instructions || placeholderText.instructions,
+      //       raw_recipe_text: processedData!.raw_text,
+      //     };
+      //     
+      //     const { error: extractUpdateError } = await supabase
+      //       .from('guest_recipes')
+      //       .update(extractedUpdate)
+      //       .eq('id', recipe.id);
+      //       
+      //     if (extractUpdateError) {
+      //       console.error('❌ Error updating recipe with extracted data:', extractUpdateError);
+      //     } else {
+      //       console.log('✅ Recipe updated with extracted data');
+      //       // Update the recipe object to return with new data
+      //       Object.assign(recipe, extractedUpdate);
+      //     }
+      //   } else {
+      //     console.log('⚠️ No valid data extracted from image, keeping placeholder text');
+      //   }
+      // }
     }
 
     // Note: The process-image endpoint handles both data extraction AND prompt generation

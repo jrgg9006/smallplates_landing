@@ -222,6 +222,23 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     ? 'Collected from link'
     : 'Added manually';
 
+  // Helper function to determine if recipe is still processing
+  const isRecipeProcessing = () => {
+    if (localRecipe.upload_method !== 'image') return false;
+    if (!localRecipe.document_urls || localRecipe.document_urls.length === 0) return false;
+    
+    // Check if ingredients/instructions contain placeholder text
+    const ingredients = localRecipe.ingredients || '';
+    const instructions = localRecipe.instructions || '';
+    
+    const isPlaceholderIngredients = ingredients === 'See uploaded images';
+    const isPlaceholderInstructions = instructions.match(/^\d+ images? uploaded$/);
+    
+    return isPlaceholderIngredients || isPlaceholderInstructions;
+  };
+
+  const showProcessingIndicator = isRecipeProcessing();
+
   // Format groups text
   const formatGroupsText = () => {
     if (loadingGroups) {
@@ -294,7 +311,12 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         {/* Left Column - Ingredients */}
         <div className="flex flex-col h-full">
           <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans flex-shrink-0">What ingredients you will need</Label>
-          {localRecipe.ingredients && localRecipe.ingredients.trim() ? (
+          {showProcessingIndicator ? (
+            <div className="flex items-center text-sm text-blue-600 italic font-sans font-light m-0">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+              Processing image...
+            </div>
+          ) : localRecipe.ingredients && localRecipe.ingredients.trim() ? (
             <pre className="whitespace-pre-wrap break-words font-sans font-light text-sm text-gray-700 leading-relaxed m-0 overflow-wrap-anywhere">
               {localRecipe.ingredients}
             </pre>
@@ -306,7 +328,12 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         {/* Right Column - Instructions */}
         <div className="flex flex-col h-full">
           <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans flex-shrink-0">The magic happens here</Label>
-          {localRecipe.instructions && localRecipe.instructions.trim() ? (
+          {showProcessingIndicator ? (
+            <div className="flex items-center text-sm text-blue-600 italic font-sans font-light m-0">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+              Processing image...
+            </div>
+          ) : localRecipe.instructions && localRecipe.instructions.trim() ? (
             <pre className="whitespace-pre-wrap break-words font-sans font-light text-sm text-gray-700 leading-relaxed m-0 overflow-wrap-anywhere">
               {localRecipe.instructions}
             </pre>
@@ -376,7 +403,12 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         {/* Ingredients */}
         <div>
           <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans">What ingredients you will need</Label>
-          {localRecipe.ingredients && localRecipe.ingredients.trim() ? (
+          {showProcessingIndicator ? (
+            <div className="flex items-center text-base text-blue-600 italic font-sans font-light m-0">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+              Processing image...
+            </div>
+          ) : localRecipe.ingredients && localRecipe.ingredients.trim() ? (
             <pre className="whitespace-pre-wrap font-sans font-light text-base text-gray-700 leading-relaxed m-0">
               {localRecipe.ingredients}
             </pre>
@@ -388,7 +420,12 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         {/* Instructions */}
         <div>
           <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans">The magic happens here</Label>
-          {localRecipe.instructions && localRecipe.instructions.trim() ? (
+          {showProcessingIndicator ? (
+            <div className="flex items-center text-base text-blue-600 italic font-sans font-light m-0">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+              Processing image...
+            </div>
+          ) : localRecipe.instructions && localRecipe.instructions.trim() ? (
             <pre className="whitespace-pre-wrap font-sans font-light text-base text-gray-700 leading-relaxed m-0">
               {localRecipe.instructions}
             </pre>

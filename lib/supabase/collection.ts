@@ -394,45 +394,99 @@ export async function submitGuestRecipeWithFiles(
       documentUrlsSaved: recipe.document_urls
     });
 
-    // Process image if this is an image upload
+    // Trigger async processing of the uploaded image
     if (recipe && submission.upload_method === 'image' && finalFileUrls.length > 0) {
-      console.log('🔄 Processing uploaded image for recipe data extraction...');
-      const { data: processedData, error: processError } = await processRecipeImage(
-        finalFileUrls[0], // Process the first image
-        recipe.id,
-        submission.recipe_name.trim()
-      );
-      
-      if (processError) {
-        console.error('❌ Error processing recipe image:', processError);
-        // Continue without extracted data - keep placeholder text
-      } else if (hasValidExtractedData(processedData)) {
-        // Update recipe with extracted data if we got valid results
-        console.log('✅ Valid recipe data extracted, updating recipe...');
-        const { error: extractUpdateError } = await supabase
-          .from('guest_recipes')
-          .update({
-            recipe_name: processedData!.recipe_name || submission.recipe_name.trim(),
-            ingredients: processedData!.ingredients || placeholderText!.ingredients,
-            instructions: processedData!.instructions || placeholderText!.instructions,
-            raw_recipe_text: processedData!.raw_text,
-          })
-          .eq('id', recipe.id);
+      // Process in background without blocking the response
+      // Note: Using setTimeout to defer execution to next tick
+      setTimeout(async () => {
+        try {
+          console.log('🔄 Starting async image processing for recipe:', recipe.id);
+          const { data: processedData, error: processError } = await processRecipeImage(
+            finalFileUrls[0],
+            recipe.id,
+            submission.recipe_name.trim()
+          );
           
-        if (extractUpdateError) {
-          console.error('❌ Error updating recipe with extracted data:', extractUpdateError);
-        } else {
-          console.log('✅ Recipe updated with extracted data');
-          // Update the recipe object to return with new data (preserve user's title)
-          if (processedData!.ingredients) recipe.ingredients = processedData!.ingredients;
-          if (processedData!.instructions) recipe.instructions = processedData!.instructions;
-          if (processedData!.raw_text) recipe.raw_recipe_text = processedData!.raw_text;
+          if (processError) {
+            console.error('❌ Error processing recipe image async:', processError);
+            return;
+          }
+          
+          if (hasValidExtractedData(processedData)) {
+            console.log('✅ Valid recipe data extracted, updating recipe...');
+            
+            const extractedUpdate: any = {
+              updated_at: new Date().toISOString(),
+            };
+
+            // Never update recipe_name - always preserve user's title
+            if (processedData!.ingredients) extractedUpdate.ingredients = processedData!.ingredients;
+            if (processedData!.instructions) extractedUpdate.instructions = processedData!.instructions;
+            if (processedData!.raw_text) extractedUpdate.raw_recipe_text = processedData!.raw_text;
+            if (processedData!.confidence_score !== undefined) extractedUpdate.confidence_score = processedData!.confidence_score;
+
+            const { error: updateError } = await supabase
+              .from('guest_recipes')
+              .update(extractedUpdate)
+              .eq('id', recipe.id);
+
+            if (updateError) {
+              console.error('❌ Error updating recipe with extracted data:', updateError);
+            } else {
+              console.log('✅ Recipe updated successfully with extracted data');
+            }
+          } else {
+            console.log('⚠️ No valid data extracted from image, keeping placeholder text');
+          }
+        } catch (error) {
+          console.error('❌ Error in async image processing:', error);
         }
-      } else {
-        console.log('⚠️ No valid data extracted from image, keeping placeholder text');
-      }
-    } else if (recipe && submission.upload_method !== 'image' && !submission.raw_recipe_text) {
-      // Generate Midjourney prompt asynchronously for text-based recipes
+      }, 100); // Small delay to ensure the response is sent first
+      
+      console.log('🔄 Async image processing scheduled for recipe:', recipe.id);
+    }
+
+    // Original sync processing code (now commented out)
+    // if (recipe && submission.upload_method === 'image' && finalFileUrls.length > 0) {
+    //   console.log('🔄 Processing uploaded image for recipe data extraction...');
+    //   const { data: processedData, error: processError } = await processRecipeImage(
+    //     finalFileUrls[0], // Process the first image
+    //     recipe.id,
+    //     submission.recipe_name.trim()
+    //   );
+    //   
+    //   if (processError) {
+    //     console.error('❌ Error processing recipe image:', processError);
+    //     // Continue without extracted data - keep placeholder text
+    //   } else if (hasValidExtractedData(processedData)) {
+    //     // Update recipe with extracted data if we got valid results
+    //     console.log('✅ Valid recipe data extracted, updating recipe...');
+    //     const { error: extractUpdateError } = await supabase
+    //       .from('guest_recipes')
+    //       .update({
+    //         recipe_name: processedData!.recipe_name || submission.recipe_name.trim(),
+    //         ingredients: processedData!.ingredients || placeholderText!.ingredients,
+    //         instructions: processedData!.instructions || placeholderText!.instructions,
+    //         raw_recipe_text: processedData!.raw_text,
+    //       })
+    //       .eq('id', recipe.id);
+    //       
+    //     if (extractUpdateError) {
+    //       console.error('❌ Error updating recipe with extracted data:', extractUpdateError);
+    //     } else {
+    //       console.log('✅ Recipe updated with extracted data');
+    //       // Update the recipe object to return with new data (preserve user's title)
+    //       if (processedData!.ingredients) recipe.ingredients = processedData!.ingredients;
+    //       if (processedData!.instructions) recipe.instructions = processedData!.instructions;
+    //       if (processedData!.raw_text) recipe.raw_recipe_text = processedData!.raw_text;
+    //     }
+    //   } else {
+    //     console.log('⚠️ No valid data extracted from image, keeping placeholder text');
+    //   }
+    // }
+    
+    // Generate Midjourney prompt asynchronously for text-based recipes (not image uploads)
+    if (recipe && submission.upload_method !== 'image' && !submission.raw_recipe_text) {
       generateAndSaveMidjourneyPrompt(
         recipe.id,
         submission.recipe_name.trim(),
