@@ -9,6 +9,12 @@ const nextConfig = {
         port: '',
         pathname: '/storage/v1/object/public/**',
       },
+      // Allow images from any HTTPS source as a fallback
+      // This is less secure but necessary for handling various image sources
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
     ],
   },
 }

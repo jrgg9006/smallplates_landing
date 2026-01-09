@@ -7,6 +7,7 @@ import {
   generateSessionId,
 } from '@/lib/supabase/storage';
 import { generateAndSaveMidjourneyPrompt } from '@/lib/supabase/midjourneyPrompts';
+import { processRecipeImage, hasValidExtractedData, getImagePlaceholderText } from '@/lib/supabase/imageProcessing';
 import type {
   GuestRecipe,
   GuestRecipeInsert,
@@ -643,12 +644,15 @@ export async function addRecipeWithFiles(
     const recipeName = isUserRecipe ? (formData as UserRecipeData).recipeName : (formData as RecipeFormData).recipe_name;
     const comments = isUserRecipe ? (formData as UserRecipeData).personalNote : (formData as RecipeFormData).comments;
     
+    // Use placeholder text initially
+    const placeholderText = getImagePlaceholderText(files.length);
+    
     const recipeData: GuestRecipeInsert = {
       guest_id: resolvedGuestId,
       user_id: user.id,
       recipe_name: recipeName,
-      ingredients: 'See uploaded images',
-      instructions: `${files.length} images uploaded`,
+      ingredients: placeholderText.ingredients,
+      instructions: placeholderText.instructions,
       comments: comments || null,
       upload_method: 'image',
       document_urls: null, // Will be populated after file move
@@ -720,11 +724,47 @@ export async function addRecipeWithFiles(
           console.log(`🔍 [recipes.ts] Verification read - document_urls:`, verifyData.document_urls);
         }
       }
+      
+      // Step 6: Process the first uploaded image to extract recipe data
+      if (finalFileUrls.length > 0) {
+        console.log('🔄 Processing uploaded image for recipe data extraction...');
+        const { data: processedData, error: processError } = await processRecipeImage(
+          finalFileUrls[0], // Process the first image
+          recipe.id,
+          recipeName
+        );
+        
+        if (processError) {
+          console.error('❌ Error processing recipe image:', processError);
+          // Continue without extracted data - keep placeholder text
+        } else if (hasValidExtractedData(processedData)) {
+          // Update recipe with extracted data if we got valid results (preserve user's title)
+          console.log('✅ Valid recipe data extracted, updating recipe...');
+          const extractedUpdate: GuestRecipeUpdate = {
+            ingredients: processedData!.ingredients || placeholderText.ingredients,
+            instructions: processedData!.instructions || placeholderText.instructions,
+            raw_recipe_text: processedData!.raw_text,
+          };
+          
+          const { error: extractUpdateError } = await supabase
+            .from('guest_recipes')
+            .update(extractedUpdate)
+            .eq('id', recipe.id);
+            
+          if (extractUpdateError) {
+            console.error('❌ Error updating recipe with extracted data:', extractUpdateError);
+          } else {
+            console.log('✅ Recipe updated with extracted data');
+            // Update the recipe object to return with new data
+            Object.assign(recipe, extractedUpdate);
+          }
+        } else {
+          console.log('⚠️ No valid data extracted from image, keeping placeholder text');
+        }
+      }
     }
 
-    // Note: For image-based recipes, we don't generate Midjourney prompts
-    // because we don't have text ingredients/instructions to work with
-    // The prompt generation is only for text-based recipes
+    // Note: The process-image endpoint handles both data extraction AND prompt generation
 
     return { data: recipe, error: null };
   } catch (err) {

@@ -6,6 +6,7 @@
 import { createSupabaseClient } from './client';
 import { generateSessionId, uploadFilesToStagingWithClient, moveFilesToFinalLocationWithClient, cleanupStagingFiles } from './storage';
 import { generateAndSaveMidjourneyPrompt } from './midjourneyPrompts';
+import { processRecipeImage, hasValidExtractedData, getImagePlaceholderText } from './imageProcessing';
 import type { 
   CollectionTokenInfo, 
   CollectionGuestSubmission, 
@@ -345,12 +346,15 @@ export async function submitGuestRecipeWithFiles(
       documentUrls: finalFileUrls
     });
     
+    // Use placeholder text for image uploads initially
+    const placeholderText = submission.upload_method === 'image' ? getImagePlaceholderText(files?.length || 0) : null;
+    
     const recipeData: GuestRecipeInsert = {
       guest_id: guestId,
       user_id: tokenInfo.user_id,
       recipe_name: submission.recipe_name.trim(),
-      ingredients: submission.raw_recipe_text ? 'See full recipe' : (submission.upload_method === 'image' ? 'See uploaded images' : submission.ingredients.trim()),
-      instructions: submission.raw_recipe_text ? 'See full recipe' : (submission.upload_method === 'image' ? 'See uploaded images' : submission.instructions.trim()),
+      ingredients: submission.raw_recipe_text ? 'See full recipe' : (submission.upload_method === 'image' ? placeholderText!.ingredients : submission.ingredients.trim()),
+      instructions: submission.raw_recipe_text ? 'See full recipe' : (submission.upload_method === 'image' ? placeholderText!.instructions : submission.instructions.trim()),
       comments: submission.comments?.trim() || null,
       raw_recipe_text: submission.raw_recipe_text?.trim() || null,
       upload_method: submission.upload_method || 'text',
@@ -390,9 +394,45 @@ export async function submitGuestRecipeWithFiles(
       documentUrlsSaved: recipe.document_urls
     });
 
-    // Generate Midjourney prompt asynchronously (don't block recipe creation)
-    // Only for text-based recipes (not image uploads or raw_recipe_text)
-    if (recipe && submission.upload_method !== 'image' && !submission.raw_recipe_text) {
+    // Process image if this is an image upload
+    if (recipe && submission.upload_method === 'image' && finalFileUrls.length > 0) {
+      console.log('🔄 Processing uploaded image for recipe data extraction...');
+      const { data: processedData, error: processError } = await processRecipeImage(
+        finalFileUrls[0], // Process the first image
+        recipe.id,
+        submission.recipe_name.trim()
+      );
+      
+      if (processError) {
+        console.error('❌ Error processing recipe image:', processError);
+        // Continue without extracted data - keep placeholder text
+      } else if (hasValidExtractedData(processedData)) {
+        // Update recipe with extracted data if we got valid results
+        console.log('✅ Valid recipe data extracted, updating recipe...');
+        const { error: extractUpdateError } = await supabase
+          .from('guest_recipes')
+          .update({
+            recipe_name: processedData!.recipe_name || submission.recipe_name.trim(),
+            ingredients: processedData!.ingredients || placeholderText!.ingredients,
+            instructions: processedData!.instructions || placeholderText!.instructions,
+            raw_recipe_text: processedData!.raw_text,
+          })
+          .eq('id', recipe.id);
+          
+        if (extractUpdateError) {
+          console.error('❌ Error updating recipe with extracted data:', extractUpdateError);
+        } else {
+          console.log('✅ Recipe updated with extracted data');
+          // Update the recipe object to return with new data (preserve user's title)
+          if (processedData!.ingredients) recipe.ingredients = processedData!.ingredients;
+          if (processedData!.instructions) recipe.instructions = processedData!.instructions;
+          if (processedData!.raw_text) recipe.raw_recipe_text = processedData!.raw_text;
+        }
+      } else {
+        console.log('⚠️ No valid data extracted from image, keeping placeholder text');
+      }
+    } else if (recipe && submission.upload_method !== 'image' && !submission.raw_recipe_text) {
+      // Generate Midjourney prompt asynchronously for text-based recipes
       generateAndSaveMidjourneyPrompt(
         recipe.id,
         submission.recipe_name.trim(),
