@@ -730,76 +730,30 @@ export async function addRecipeWithFiles(
       }
       
       // Step 6: Add image to processing queue
-      console.log('🔍 DEBUG: Checking queue conditions', { 
-        finalFileUrlsLength: finalFileUrls.length, 
-        hasUrls: finalFileUrls.length > 0 
-      });
-      
       if (finalFileUrls.length > 0) {
         console.log('📝 Adding image to processing queue for recipe:', recipe.id);
         
-        try {
-          // Call server-side API to add to queue
-          await fetch('/api/v1/recipes/add-to-queue', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              recipe_id: recipe.id,
-              image_url: finalFileUrls[0],
-              recipe_name: recipeName
-            })
+        // Use admin client for queue operations (bypasses RLS)
+        const adminSupabase = createSupabaseAdminClient();
+        const { error: queueError } = await adminSupabase
+          .from('image_processing_queue')
+          .insert({
+            recipe_id: recipe.id,
+            image_url: finalFileUrls[0],
+            recipe_name: recipeName
           });
           
-          console.log('✅ Queue request sent successfully');
-        } catch (queueError) {
-          console.error('❌ Error sending queue request:', queueError);
-          // Don't fail recipe creation
-          console.log('⚠️ Continuing without queue processing');
+        if (queueError) {
+          console.error('❌ Error adding to processing queue:', queueError);
+          // Don't fail recipe creation, just log the error
+        } else {
+          console.log('✅ Image added to processing queue successfully');
         }
       }
       
-      // Original sync processing code (now commented out)
-      // if (finalFileUrls.length > 0) {
-      //   console.log('🔄 Processing uploaded image for recipe data extraction...');
-      //   const { data: processedData, error: processError } = await processRecipeImage(
-      //     finalFileUrls[0], // Process the first image
-      //     recipe.id,
-      //     recipeName
-      //   );
-      //   
-      //   if (processError) {
-      //     console.error('❌ Error processing recipe image:', processError);
-      //     // Continue without extracted data - keep placeholder text
-      //   } else if (hasValidExtractedData(processedData)) {
-      //     // Update recipe with extracted data if we got valid results (preserve user's title)
-      //     console.log('✅ Valid recipe data extracted, updating recipe...');
-      //     const extractedUpdate: GuestRecipeUpdate = {
-      //       ingredients: processedData!.ingredients || placeholderText.ingredients,
-      //       instructions: processedData!.instructions || placeholderText.instructions,
-      //       raw_recipe_text: processedData!.raw_text,
-      //     };
-      //     
-      //     const { error: extractUpdateError } = await supabase
-      //       .from('guest_recipes')
-      //       .update(extractedUpdate)
-      //       .eq('id', recipe.id);
-      //       
-      //     if (extractUpdateError) {
-      //       console.error('❌ Error updating recipe with extracted data:', extractUpdateError);
-      //     } else {
-      //       console.log('✅ Recipe updated with extracted data');
-      //       // Update the recipe object to return with new data
-      //       Object.assign(recipe, extractedUpdate);
-      //     }
-      //   } else {
-      //     console.log('⚠️ No valid data extracted from image, keeping placeholder text');
-      //   }
-      // }
     }
 
-    // Note: The process-image endpoint handles both data extraction AND prompt generation
+    // Note: Image processing is now handled asynchronously by Supabase Edge Functions
 
     return { data: recipe, error: null };
   } catch (err) {
