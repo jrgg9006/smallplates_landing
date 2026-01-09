@@ -4,6 +4,7 @@
  */
 
 import { createSupabaseClient } from './client';
+import { createSupabaseAdminClient } from './admin';
 import { generateSessionId, uploadFilesToStagingWithClient, moveFilesToFinalLocationWithClient, cleanupStagingFiles } from './storage';
 import { generateAndSaveMidjourneyPrompt } from './midjourneyPrompts';
 import { processRecipeImage, hasValidExtractedData, getImagePlaceholderText } from './imageProcessing';
@@ -394,56 +395,26 @@ export async function submitGuestRecipeWithFiles(
       documentUrlsSaved: recipe.document_urls
     });
 
-    // Trigger async processing of the uploaded image
+    // Add image to processing queue
     if (recipe && submission.upload_method === 'image' && finalFileUrls.length > 0) {
-      // Process in background without blocking the response
-      // Note: Using setTimeout to defer execution to next tick
-      setTimeout(async () => {
-        try {
-          console.log('🔄 Starting async image processing for recipe:', recipe.id);
-          const { data: processedData, error: processError } = await processRecipeImage(
-            finalFileUrls[0],
-            recipe.id,
-            submission.recipe_name.trim()
-          );
-          
-          if (processError) {
-            console.error('❌ Error processing recipe image async:', processError);
-            return;
-          }
-          
-          if (hasValidExtractedData(processedData)) {
-            console.log('✅ Valid recipe data extracted, updating recipe...');
-            
-            const extractedUpdate: any = {
-              updated_at: new Date().toISOString(),
-            };
-
-            // Never update recipe_name - always preserve user's title
-            if (processedData!.ingredients) extractedUpdate.ingredients = processedData!.ingredients;
-            if (processedData!.instructions) extractedUpdate.instructions = processedData!.instructions;
-            if (processedData!.raw_text) extractedUpdate.raw_recipe_text = processedData!.raw_text;
-            if (processedData!.confidence_score !== undefined) extractedUpdate.confidence_score = processedData!.confidence_score;
-
-            const { error: updateError } = await supabase
-              .from('guest_recipes')
-              .update(extractedUpdate)
-              .eq('id', recipe.id);
-
-            if (updateError) {
-              console.error('❌ Error updating recipe with extracted data:', updateError);
-            } else {
-              console.log('✅ Recipe updated successfully with extracted data');
-            }
-          } else {
-            console.log('⚠️ No valid data extracted from image, keeping placeholder text');
-          }
-        } catch (error) {
-          console.error('❌ Error in async image processing:', error);
-        }
-      }, 100); // Small delay to ensure the response is sent first
+      console.log('📝 Adding image to processing queue for recipe:', recipe.id);
       
-      console.log('🔄 Async image processing scheduled for recipe:', recipe.id);
+      // Use admin client for queue operations (bypasses RLS)
+      const adminSupabase = createSupabaseAdminClient();
+      const { error: queueError } = await adminSupabase
+        .from('image_processing_queue')
+        .insert({
+          recipe_id: recipe.id,
+          image_url: finalFileUrls[0],
+          recipe_name: submission.recipe_name.trim()
+        });
+        
+      if (queueError) {
+        console.error('❌ Error adding to processing queue:', queueError);
+        // Don't fail the recipe creation, just log the error
+      } else {
+        console.log('✅ Image added to processing queue successfully');
+      }
     }
 
     // Original sync processing code (now commented out)

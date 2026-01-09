@@ -1,4 +1,5 @@
 import { createSupabaseClient } from '@/lib/supabase/client';
+import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { getCurrentProfile } from '@/lib/supabase/profiles';
 import {
   uploadFilesToStagingWithClient,
@@ -678,6 +679,7 @@ export async function addRecipeWithFiles(
 
     // Step 5: Move files to final location
     let finalFileUrls: string[] = [];
+    console.log('🔍 DEBUG: Moving files to final location', { sessionId, fileMetadataCount: fileMetadata.length });
     if (sessionId && fileMetadata.length > 0) {
       const moveResult = await moveFilesToFinalLocationWithClient(
         supabase,
@@ -727,57 +729,35 @@ export async function addRecipeWithFiles(
         }
       }
       
-      // Step 6: Trigger async processing of the first uploaded image
+      // Step 6: Add image to processing queue
+      console.log('🔍 DEBUG: Checking queue conditions', { 
+        finalFileUrlsLength: finalFileUrls.length, 
+        hasUrls: finalFileUrls.length > 0 
+      });
+      
       if (finalFileUrls.length > 0) {
-        // Process in background without blocking the response
-        // Note: Using setTimeout to defer execution to next tick
-        setTimeout(async () => {
-          try {
-            console.log('🔄 Starting async image processing for recipe:', recipe.id);
-            const { data: processedData, error: processError } = await processRecipeImage(
-              finalFileUrls[0],
-              recipe.id,
-              recipeName
-            );
-            
-            if (processError) {
-              console.error('❌ Error processing recipe image async:', processError);
-              return;
-            }
-            
-            if (hasValidExtractedData(processedData)) {
-              console.log('✅ Valid recipe data extracted, updating recipe...');
-              
-              const supabase = createSupabaseClient();
-              const extractedUpdate: any = {
-                updated_at: new Date().toISOString(),
-              };
-
-              // Never update recipe_name - always preserve user's title
-              if (processedData!.ingredients) extractedUpdate.ingredients = processedData!.ingredients;
-              if (processedData!.instructions) extractedUpdate.instructions = processedData!.instructions;
-              if (processedData!.raw_text) extractedUpdate.raw_recipe_text = processedData!.raw_text;
-              if (processedData!.confidence_score !== undefined) extractedUpdate.confidence_score = processedData!.confidence_score;
-
-              const { error: updateError } = await supabase
-                .from('guest_recipes')
-                .update(extractedUpdate)
-                .eq('id', recipe.id);
-
-              if (updateError) {
-                console.error('❌ Error updating recipe with extracted data:', updateError);
-              } else {
-                console.log('✅ Recipe updated successfully with extracted data');
-              }
-            } else {
-              console.log('⚠️ No valid data extracted from image, keeping placeholder text');
-            }
-          } catch (error) {
-            console.error('❌ Error in async image processing:', error);
-          }
-        }, 100); // Small delay to ensure the response is sent first
+        console.log('📝 Adding image to processing queue for recipe:', recipe.id);
         
-        console.log('🔄 Async image processing scheduled for recipe:', recipe.id);
+        try {
+          // Call server-side API to add to queue
+          await fetch('/api/v1/recipes/add-to-queue', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              recipe_id: recipe.id,
+              image_url: finalFileUrls[0],
+              recipe_name: recipeName
+            })
+          });
+          
+          console.log('✅ Queue request sent successfully');
+        } catch (queueError) {
+          console.error('❌ Error sending queue request:', queueError);
+          // Don't fail recipe creation
+          console.log('⚠️ Continuing without queue processing');
+        }
       }
       
       // Original sync processing code (now commented out)
