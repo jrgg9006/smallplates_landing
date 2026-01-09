@@ -1,8 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/cron/process-images",
-      "schedule": "*/5 * * * *"
+      "path": "/api/cron/send-invitations",
+      "schedule": "0 9 * * *"
     }
   ]
 }
