@@ -1,79 +1,68 @@
-### 🔄 Project Awareness & Context
-- **Check `TASK.md`** before starting a new task. If the task isn’t listed, add it with a brief description and today's date.
-- **Use venv_linux** (the virtual environment) whenever executing Python commands, including for unit tests.
+# Small Plates - Wedding Recipe Books Platform
 
-### 🔧 Modify Before Create Principle
-- **ALWAYS explore existing components FIRST** before creating new ones
-- **Search for similar functionality** that can be modified or extended
-- **Check reusable components** that might already solve the problem
-- **Modify existing code** with simple but powerful changes when possible
-- **Creating new components should be the LAST option**, not the first
-- **When asked for new features**: 
-  1. Search what already exists
-  2. Identify what needs fixing/improving
-  3. Modify in the simplest but most effective way
-  4. Only create new if absolutely necessary
+## 🎯 Core Philosophy - READ THIS FIRST
+- **SIMPLE BUT POWERFUL**: Always prefer surgical, minimal changes over complex rewrites
+- **Modify before create**: Search existing code FIRST, only create new files as last resort
+- **Ask before assuming**: If uncertain, ask. Don't guess.
 
-### 🧱 Code Structure & Modularity
-- **Never create a file longer than 500 lines of code.** If a file approaches this limit, refactor by splitting it into modules or helper files.
-- **Organize code into clearly separated modules**, grouped by feature or responsibility.
-  For agents this looks like:
-    - `agent.py` - Main agent definition and execution logic 
-    - `tools.py` - Tool functions used by the agent 
-    - `prompts.py` - System prompts
-- **Use clear, consistent imports** (prefer relative imports within packages).
-- **Use python_dotenv and load_env()** for environment variables.
+## 📋 Project Context
+Small Plates helps couples create collaborative wedding recipe books where guests contribute recipes that are compiled into hardcover books.
 
-### 🧪 Testing & Reliability
-- **Always create Pytest unit tests for new features** (functions, classes, routes, etc).
-- **After updating any logic**, check whether existing unit tests need to be updated. If so, do it.
-- **Tests should live in a `/tests` folder** mirroring the main app structure.
-  - Include at least:
-    - 1 test for expected use
-    - 1 edge case
-    - 1 failure case
+### Tech Stack
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript (strict mode)
+- **Styling**: Tailwind CSS
+- **Database**: Supabase (PostgreSQL + RLS)
+- **Auth**: Supabase Auth
+- **Hosting**: Vercel
+- **Image Processing**: Background jobs via Supabase Edge Functions
 
-### ✅ Task Completion
-- **Mark completed tasks in `TASK.md`** immediately after finishing them.
-- Add new sub-tasks or TODOs discovered during development to `TASK.md` under a “Discovered During Work” section.
+### Key Directories
+- `app/` - Next.js App Router pages and API routes
+- `components/` - Reusable React components
+- `lib/` - Utilities, Supabase client, helpers
+- `supabase/migrations/` - Database migrations
 
-### 📎 Style & Conventions
-- **Use Python** as the primary language.
-- **Follow PEP8**, use type hints, and format with `black`.
-- **Use `pydantic` for data validation**.
-- Use `FastAPI` for APIs and `SQLAlchemy` or `SQLModel` for ORM if applicable.
-- Write **docstrings for every function** using the Google style:
-  ```python
-  def example():
-      """
-      Brief summary.
+## 🔧 How I Want You to Work
 
-      Args:
-          param1 (type): Description.
+### Before Making Changes
+1. **Explore first**: Search for existing components/functions that do something similar
+2. **Understand the pattern**: Look at how similar things are implemented in this codebase
+3. **Propose the minimal change**: What's the smallest edit that solves the problem?
+4. **Only then implement**: Make surgical, precise changes
 
-      Returns:
-          type: Description.
-      """
-  ```
+### Code Style
+- Keep files under 300 lines (refactor if approaching this)
+- Use TypeScript strictly - no `any` types
+- Components: functional with hooks
+- Prefer early returns over nested conditionals
+- Name things clearly - no abbreviations
 
-### 📚 Documentation & Explainability
-- **Update `README.md`** when new features are added, dependencies change, or setup steps are modified.
-- **Comment non-obvious code** and ensure everything is understandable to a mid-level developer.
-- When writing complex logic, **add an inline `# Reason:` comment** explaining the why, not just the what.
+### What NOT to Do
+- Don't create new components if an existing one can be modified
+- Don't install new dependencies without asking
+- Don't refactor unrelated code while fixing something else
+- Don't make "improvements" I didn't ask for
+- Don't run `npm run build` for small changes
 
-### 🧠 AI Behavior Rules
-- **Never assume missing context. Ask questions if uncertain.**
-- **Never hallucinate libraries or functions** – only use known, verified Python packages.
-- **Always confirm file paths and module names** exist before referencing them in code or tests.
-- **Never delete or overwrite existing code** unless explicitly instructed to or if part of a task from `TASK.md`.
-- **NEVER hardcode API keys, secrets, or credentials in client-side code under any circumstances.**
+## 🗄️ Database Rules (Supabase MCP)
+- **NEVER** execute INSERT, UPDATE, DELETE, or DROP without my explicit confirmation
+- Before modifying data, show me the exact query first
+- For destructive operations, wait for me to write "CONFIRMED"
+- When in doubt, run SELECT first to show me affected data
+- Always check RLS policies exist for new tables
 
-### ⚡ Build & Testing Guidelines
-- **DO NOT run `npm run build` for every small change** - it's unnecessary and slows down development
-- **ONLY run `npm run build` when:**
-  - Major feature implementations are complete
-  - Need to verify TypeScript compilation for complex type changes
-  - Before finalizing a significant architectural change
-  - When explicitly requested by the user
-- **For small edits** (text changes, minor fixes, styling adjustments): skip build verification
-- **Use simple TypeScript inspection** to catch obvious errors instead of full builds
+## ✅ Task Management
+- Check `TASK.md` before starting work
+- Add new tasks discovered during development
+- Mark tasks complete when done
+
+## 🧪 Testing
+- Add tests for new features in `/tests`
+- Update existing tests when logic changes
+- At minimum: 1 happy path, 1 edge case, 1 failure case
+
+## 📝 After Completing Work
+- Update README.md if setup steps changed
+- Comment non-obvious code with `// Reason:` explaining WHY
+- Don't leave console.logs in production code

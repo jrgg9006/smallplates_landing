@@ -54,16 +54,29 @@ export default function AdminHomePage() {
     setPasswordError(null);
   };
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (deletePassword === 'DELETE!') {
-      setShowDeletePasswordModal(false);
-      setDeletePassword('');
-      setPasswordError(null);
-      router.push('/admin/users');
-    } else {
-      setPasswordError('Incorrect password');
+
+    try {
+      const response = await fetch('/api/v1/admin/verify-delete-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password: deletePassword }),
+      });
+
+      if (response.ok) {
+        setShowDeletePasswordModal(false);
+        setDeletePassword('');
+        setPasswordError(null);
+        router.push('/admin/users');
+      } else {
+        setPasswordError('Incorrect password');
+        setDeletePassword('');
+      }
+    } catch {
+      setPasswordError('Error verifying password');
       setDeletePassword('');
     }
   };
