@@ -4,14 +4,16 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { getCurrentProfile, updatePersonalInfo } from '@/lib/supabase/profiles';
+import { getCurrentProfile, updatePersonalInfo, getSelfGuestPrintedName } from '@/lib/supabase/profiles';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 export function PersonalInfoForm() {
   const { user } = useAuth();
-  const [fullName, setFullName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [printedName, setPrintedName] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,15 +25,24 @@ export function PersonalInfoForm() {
       try {
         setLoadingProfile(true);
         const { data: profile, error } = await getCurrentProfile();
-        
+
         if (error) {
           setError('Failed to load profile data');
           return;
         }
 
         if (profile) {
-          setFullName(profile.full_name || '');
+          // Split full_name into first and last name
+          const nameParts = (profile.full_name || '').trim().split(' ');
+          setFirstName(nameParts[0] || '');
+          setLastName(nameParts.slice(1).join(' ') || '');
           setPhoneNumber(profile.phone_number || '');
+        }
+
+        // Load printed_name from guest record
+        const { data: guestPrintedName } = await getSelfGuestPrintedName();
+        if (guestPrintedName) {
+          setPrintedName(guestPrintedName);
         }
       } catch (err) {
         setError('Failed to load profile data');
@@ -44,8 +55,8 @@ export function PersonalInfoForm() {
   }, []);
 
   const validateForm = () => {
-    if (!fullName.trim()) {
-      setError('Please enter your full name');
+    if (!firstName.trim()) {
+      setError('Please enter your first name');
       return false;
     }
 
@@ -71,8 +82,10 @@ export function PersonalInfoForm() {
 
     try {
       const updates = {
-        full_name: fullName.trim(),
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
         phone_number: phoneNumber.trim() || undefined,
+        printed_name: printedName.trim() || undefined,
       };
 
       const { error } = await updatePersonalInfo(updates);
@@ -114,20 +127,35 @@ export function PersonalInfoForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Full Name */}
-      <div>
-        <Label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
-          Full Name *
-        </Label>
-        <Input
-          id="fullName"
-          type="text"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-          className="w-full"
-          placeholder="Enter your full name"
-          required
-        />
+      {/* Name Fields */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+            First Name *
+          </Label>
+          <Input
+            id="firstName"
+            type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            className="w-full"
+            placeholder="First name"
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+            Last Name
+          </Label>
+          <Input
+            id="lastName"
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            className="w-full"
+            placeholder="Last name"
+          />
+        </div>
       </div>
 
       {/* Phone Number */}
@@ -144,6 +172,22 @@ export function PersonalInfoForm() {
           placeholder="+1 (555) 123-4567"
         />
         <p className="text-xs text-gray-500 mt-1">Optional - used for order notifications</p>
+      </div>
+
+      {/* Printed Name */}
+      <div>
+        <Label htmlFor="printedName" className="block text-sm font-medium text-gray-700 mb-1">
+          Printed Name
+        </Label>
+        <Input
+          id="printedName"
+          type="text"
+          value={printedName}
+          onChange={(e) => setPrintedName(e.target.value)}
+          className="w-full"
+          placeholder="e.g. Rich G."
+        />
+        <p className="text-xs text-gray-500 mt-1">How your name appears in printed cookbooks</p>
       </div>
 
       {/* Email Display (Read-only) */}

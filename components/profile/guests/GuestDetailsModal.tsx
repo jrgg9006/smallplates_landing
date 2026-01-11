@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface GuestDetailsModalProps {
   guest: Guest | null;
@@ -108,17 +109,34 @@ export function GuestDetailsModal({
 
   if (!guest) return null;
 
+  const isSelf = guest.is_self === true;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl font-semibold text-[hsl(var(--brand-charcoal))]">
-            Guest Details
+            {isSelf ? 'Your Profile' : 'Guest Details'}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+
+          {/* Self guest notice */}
+          {isSelf && (
+            <div className="bg-[hsl(var(--brand-warm-white))] border border-[hsl(var(--brand-sand))] rounded-md p-3">
+              <p className="text-sm text-[hsl(var(--brand-charcoal))]">
+                To edit your personal information, go to{' '}
+                <Link
+                  href="/profile/account"
+                  className="text-[hsl(var(--brand-honey))] hover:underline font-medium"
+                  onClick={onClose}
+                >
+                  Account Settings
+                </Link>
+              </p>
+            </div>
+          )}
           
           {/* Form Fields */}
           <div className="space-y-4">
@@ -127,13 +145,14 @@ export function GuestDetailsModal({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
-                  First Name *
+                  First Name {!isSelf && '*'}
                 </Label>
                 <Input
                   id="firstName"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="mt-1 border-[hsl(var(--brand-sand))] focus:border-[hsl(var(--brand-honey))] focus:ring-[hsl(var(--brand-honey))]"
+                  disabled={isSelf}
+                  className="mt-1 border-[hsl(var(--brand-sand))] focus:border-[hsl(var(--brand-honey))] focus:ring-[hsl(var(--brand-honey))] disabled:bg-gray-50 disabled:text-gray-500"
                   placeholder="First Name"
                 />
               </div>
@@ -145,7 +164,8 @@ export function GuestDetailsModal({
                   id="lastName"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="mt-1 border-[hsl(var(--brand-sand))] focus:border-[hsl(var(--brand-honey))] focus:ring-[hsl(var(--brand-honey))]"
+                  disabled={isSelf}
+                  className="mt-1 border-[hsl(var(--brand-sand))] focus:border-[hsl(var(--brand-honey))] focus:ring-[hsl(var(--brand-honey))] disabled:bg-gray-50 disabled:text-gray-500"
                   placeholder="Last Name"
                 />
               </div>
@@ -160,12 +180,15 @@ export function GuestDetailsModal({
                 id="printedName"
                 value={printedName}
                 onChange={(e) => setPrintedName(e.target.value)}
-                className="mt-1 border-[hsl(var(--brand-sand))] focus:border-[hsl(var(--brand-honey))] focus:ring-[hsl(var(--brand-honey))]"
+                disabled={isSelf}
+                className="mt-1 border-[hsl(var(--brand-sand))] focus:border-[hsl(var(--brand-honey))] focus:ring-[hsl(var(--brand-honey))] disabled:bg-gray-50 disabled:text-gray-500"
                 placeholder="How this name appears in the book"
               />
-              <p className="text-xs text-[hsl(var(--brand-warm-gray))] mt-1">
-                Leave empty to use first and last name.
-              </p>
+              {!isSelf && (
+                <p className="text-xs text-[hsl(var(--brand-warm-gray))] mt-1">
+                  Leave empty to use first and last name.
+                </p>
+              )}
             </div>
 
             {/* Email */}
@@ -178,7 +201,8 @@ export function GuestDetailsModal({
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 border-[hsl(var(--brand-sand))] focus:border-[hsl(var(--brand-honey))] focus:ring-[hsl(var(--brand-honey))]"
+                disabled={isSelf}
+                className="mt-1 border-[hsl(var(--brand-sand))] focus:border-[hsl(var(--brand-honey))] focus:ring-[hsl(var(--brand-honey))] disabled:bg-gray-50 disabled:text-gray-500"
                 placeholder="Email address"
               />
             </div>
@@ -193,7 +217,8 @@ export function GuestDetailsModal({
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="mt-1 border-[hsl(var(--brand-sand))] focus:border-[hsl(var(--brand-honey))] focus:ring-[hsl(var(--brand-honey))]"
+                disabled={isSelf}
+                className="mt-1 border-[hsl(var(--brand-sand))] focus:border-[hsl(var(--brand-honey))] focus:ring-[hsl(var(--brand-honey))] disabled:bg-gray-50 disabled:text-gray-500"
                 placeholder="Phone number"
               />
             </div>
@@ -231,21 +256,33 @@ export function GuestDetailsModal({
 
         {/* Action Buttons */}
         <div className="flex justify-end gap-3 pt-2">
-          <Button 
-            variant="outline"
-            onClick={onClose}
-            disabled={loading}
-            className="border-[hsl(var(--brand-sand))] text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-warm-white))]"
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleSave}
-            disabled={loading || !firstName.trim()}
-            className="bg-[hsl(var(--brand-charcoal))] text-white hover:bg-[hsl(var(--brand-charcoal))]/90"
-          >
-            {loading ? 'Saving...' : 'Save'}
-          </Button>
+          {isSelf ? (
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="border-[hsl(var(--brand-sand))] text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-warm-white))]"
+            >
+              Close
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                onClick={onClose}
+                disabled={loading}
+                className="border-[hsl(var(--brand-sand))] text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-warm-white))]"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={loading || !firstName.trim()}
+                className="bg-[hsl(var(--brand-charcoal))] text-white hover:bg-[hsl(var(--brand-charcoal))]/90"
+              >
+                {loading ? 'Saving...' : 'Save'}
+              </Button>
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>

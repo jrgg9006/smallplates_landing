@@ -345,6 +345,22 @@ export async function submitGuestRecipeWithFiles(
       groupIdToSave: context?.groupId || null,
       documentUrls: finalFileUrls
     });
+
+    // Log warning if creating a collection recipe without group_id (for debugging orphaned recipes)
+    if (!context?.groupId) {
+      console.warn('⚠️ COLLECTION WARNING: Creating recipe WITHOUT group_id', {
+        timestamp: new Date().toISOString(),
+        function: 'submitGuestRecipeWithFiles',
+        hasContext: !!context,
+        contextKeys: context ? Object.keys(context) : [],
+        cookbookId: context?.cookbookId || null,
+        groupId: context?.groupId || null,
+        recipeName: submission.recipe_name,
+        guestName: `${submission.first_name} ${submission.last_name}`,
+        tokenUserId: tokenInfo.user_id,
+        uploadMethod: submission.upload_method,
+      });
+    }
     
     // Use placeholder text for image uploads initially
     const placeholderText = submission.upload_method === 'image' ? getImagePlaceholderText(files?.length || 0) : null;
@@ -627,6 +643,22 @@ export async function submitGuestRecipe(
     }
 
     // Now create the recipe
+    // Log warning if creating a collection recipe without group_id (for debugging orphaned recipes)
+    if (!context?.groupId) {
+      console.warn('⚠️ COLLECTION WARNING: Creating recipe WITHOUT group_id', {
+        timestamp: new Date().toISOString(),
+        function: 'submitGuestRecipe',
+        hasContext: !!context,
+        contextKeys: context ? Object.keys(context) : [],
+        cookbookId: context?.cookbookId || null,
+        groupId: context?.groupId || null,
+        recipeName: submission.recipe_name,
+        guestName: `${submission.first_name} ${submission.last_name}`,
+        tokenUserId: tokenInfo.user_id,
+        uploadMethod: submission.upload_method || 'text',
+      });
+    }
+
     const recipeData: GuestRecipeInsert = {
       guest_id: guestId,
       user_id: tokenInfo.user_id,

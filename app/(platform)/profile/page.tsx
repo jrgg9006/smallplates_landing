@@ -31,8 +31,15 @@ import { Button } from "@/components/ui/button";
 export default function ProfilePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const { 
-    shouldShowOnboarding, 
+
+  // Redirect legacy /profile to /profile/groups
+  // This page is deprecated - all users should use the groups-based experience
+  useEffect(() => {
+    router.replace('/profile/groups');
+  }, [router]);
+
+  const {
+    shouldShowOnboarding,
     completedSteps,
     showWelcomeOverlay,
     showFirstRecipeExperience,

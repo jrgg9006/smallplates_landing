@@ -223,10 +223,11 @@ export async function addRecipeToGroup(groupId: string, recipeId: string, note?:
 
 /**
  * Remove a recipe from a group (recipe can remain in other groups)
+ * If recipe is no longer in any group, marks it as deleted via deleted_at
  */
 export async function removeRecipeFromGroup(recipeId: string, groupId: string) {
   const supabase = createSupabaseClient();
-  
+
   // Get the current user
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) {
@@ -240,7 +241,26 @@ export async function removeRecipeFromGroup(recipeId: string, groupId: string) {
     .eq('recipe_id', recipeId)
     .eq('group_id', groupId);
 
-  return { data: null, error: error?.message || null };
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  // Check if recipe is still in any other group
+  const { data: remainingGroups } = await supabase
+    .from('group_recipes')
+    .select('group_id')
+    .eq('recipe_id', recipeId)
+    .limit(1);
+
+  // If recipe is no longer in any group, mark as deleted
+  if (!remainingGroups || remainingGroups.length === 0) {
+    await supabase
+      .from('guest_recipes')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', recipeId);
+  }
+
+  return { data: null, error: null };
 }
 
 /**

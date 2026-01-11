@@ -47,11 +47,37 @@ export async function updateProfile(updates: ProfileUpdate) {
  */
 export async function isProfileComplete(): Promise<boolean> {
   const { data: profile } = await getCurrentProfile();
-  
+
   if (!profile) return false;
-  
+
   // Check if required fields are filled
   return !!(profile.full_name);
+}
+
+/**
+ * Get the printed_name from the user's self guest record
+ */
+export async function getSelfGuestPrintedName(): Promise<{ data: string | null; error: string | null }> {
+  const supabase = createSupabaseClient();
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  const { data, error } = await supabase
+    .from('guests')
+    .select('printed_name')
+    .eq('user_id', user.id)
+    .eq('is_self', true)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: data?.printed_name || null, error: null };
 }
 
 /**
@@ -70,24 +96,58 @@ export async function getProfileById(userId: string) {
 }
 
 /**
- * Update personal information (name, phone)
+ * Update personal information (name, phone, printed_name)
+ * Also updates the associated guest record where is_self = true
  */
-export async function updatePersonalInfo(updates: { full_name?: string; phone_number?: string | null }) {
+export async function updatePersonalInfo(updates: { first_name?: string; last_name?: string; phone_number?: string | null; printed_name?: string }) {
   const supabase = createSupabaseClient();
-  
+
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) {
     return { data: null, error: 'User not authenticated' };
   }
 
+  // Build profile update with concatenated full_name
+  const profileUpdates: { full_name?: string; phone_number?: string | null } = {};
+
+  if (updates.first_name !== undefined || updates.last_name !== undefined) {
+    const fullName = `${updates.first_name || ''} ${updates.last_name || ''}`.trim();
+    profileUpdates.full_name = fullName;
+  }
+
+  if (updates.phone_number !== undefined) {
+    profileUpdates.phone_number = updates.phone_number;
+  }
+
+  // Update profile
   const { data, error } = await supabase
     .from('profiles')
-    .update(updates)
+    .update(profileUpdates)
     .eq('id', user.id)
     .select()
     .single();
 
-  return { data, error: error?.message || null };
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  // Also update the guest record where is_self = true
+  const hasGuestUpdates = updates.first_name !== undefined || updates.last_name !== undefined || updates.printed_name !== undefined;
+  if (hasGuestUpdates) {
+    const guestUpdates: { first_name?: string; last_name?: string; printed_name?: string } = {};
+    if (updates.first_name !== undefined) guestUpdates.first_name = updates.first_name;
+    if (updates.last_name !== undefined) guestUpdates.last_name = updates.last_name;
+    if (updates.printed_name !== undefined) guestUpdates.printed_name = updates.printed_name;
+
+    await supabase
+      .from('guests')
+      .update(guestUpdates)
+      .eq('user_id', user.id)
+      .eq('is_self', true);
+    // Note: We don't fail if guest update fails - profile is the primary record
+  }
+
+  return { data, error: null };
 }
 
 /**
