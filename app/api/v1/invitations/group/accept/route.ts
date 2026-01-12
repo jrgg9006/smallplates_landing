@@ -253,7 +253,19 @@ export async function POST(request: Request) {
       console.log('✅ New user created successfully:', userId);
     }
 
-    // Step 2: Add user to group as member (using upsert for race condition protection)
+    // Step 2: Mark email as verified in profiles (invitation email serves as verification)
+    await supabaseAdmin
+      .from('profiles')
+      .update({
+        email_verified: true,
+        email_verification_token: null,
+        email_verification_expires_at: null
+      })
+      .eq('id', userId);
+
+    console.log('✅ Email marked as verified (invitation-based verification)');
+
+    // Step 3: Add user to group as member (using upsert for race condition protection)
     const { error: memberError } = await supabaseAdmin
       .from('group_members')
       .upsert({
@@ -276,7 +288,7 @@ export async function POST(request: Request) {
       console.log('✅ User added to group successfully');
     }
 
-    // Step 3: Mark invitation as accepted
+    // Step 4: Mark invitation as accepted
     const { error: updateError } = await supabaseAdmin
       .from('group_invitations')
       .update({

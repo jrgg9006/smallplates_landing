@@ -33,9 +33,7 @@ export async function POST(req: Request) {
     
     const emailData = {
       to: email,
-      subject: userType === 'couple' 
-        ? 'Welcome to SmallPlates! Please verify your email' 
-        : 'Your SmallPlates gift cookbook is ready! Please verify your email',
+      subject: 'Welcome to SmallPlates! Please verify your email',
       templateData: {
         userName: userName || 'there',
         verificationLink,

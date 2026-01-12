@@ -132,11 +132,12 @@ export async function addRecipe(guestId: string, formData: RecipeFormData, group
  */
 export async function getRecipesByGuest(guestId: string) {
   const supabase = createSupabaseClient();
-  
+
   const { data, error } = await supabase
     .from('guest_recipes')
     .select('*')
     .eq('guest_id', guestId)
+    .is('deleted_at', null)
     .order('created_at', { ascending: false });
 
   return { data, error: error?.message || null };

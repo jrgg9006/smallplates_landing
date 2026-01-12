@@ -219,6 +219,42 @@ export async function POST(
       isNewUser = true;
 
       console.log('✅ New user created successfully:', userId);
+
+      // Generate email verification token (direct link requires email verification)
+      const emailVerificationToken = crypto.randomUUID();
+      const emailVerificationExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+      // Update profile with verification token
+      await supabaseAdmin
+        .from('profiles')
+        .update({
+          email_verified: false,
+          email_verification_token: emailVerificationToken,
+          email_verification_expires_at: emailVerificationExpiresAt
+        })
+        .eq('id', userId);
+
+      // Send verification email via Postmark
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ||
+                     process.env.SITE_URL ||
+                     'http://localhost:3000';
+
+      try {
+        await fetch(`${baseUrl}/api/v1/send-verification-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email,
+            token: emailVerificationToken,
+            userType: 'member',
+            userName: fullName
+          })
+        });
+        console.log('✅ Verification email sent to:', email);
+      } catch (emailError) {
+        console.error('⚠️ Failed to send verification email:', emailError);
+        // Don't fail the request - user was created successfully
+      }
     }
 
     // Step 2: Add user to group as member (using upsert for race condition protection)
