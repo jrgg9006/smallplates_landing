@@ -20,7 +20,7 @@ import { addRecipe, addUserRecipe, addRecipeWithFiles } from "@/lib/supabase/rec
 import { addRecipeToCookbook } from "@/lib/supabase/cookbooks";
 import { addRecipeToGroup } from "@/lib/supabase/groupRecipes";
 import { getGuests } from "@/lib/supabase/guests";
-import { getCurrentProfile } from "@/lib/supabase/profiles";
+import { getCurrentProfile, getSelfGuestPrintedName } from "@/lib/supabase/profiles";
 import { Guest } from "@/lib/types/database";
 import { ChevronDown, Plus, PenTool, Camera } from "lucide-react";
 import { RecipeImageUpload } from "./RecipeImageUpload";
@@ -68,6 +68,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>('');
+  const [userPrintedName, setUserPrintedName] = useState<string>('');
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
   // Load guests and user profile when modal opens
@@ -94,6 +95,12 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
         return;
       }
       setUserName(profile.full_name || '');
+
+      // Also load printed_name from guest record
+      const { data: printedName } = await getSelfGuestPrintedName();
+      if (printedName) {
+        setUserPrintedName(printedName);
+      }
     } catch (err) {
       console.error('Error loading user profile:', err);
     }
@@ -165,6 +172,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
     setRecipeInstructions('');
     setRecipeNotes('');
     setError(null);
+    setUserPrintedName('');
   };
 
   // Reset form when modal closes
@@ -614,9 +622,9 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                 from {selectedGuest.printed_name || `${selectedGuest.first_name} ${selectedGuest.last_name || ''}`.trim()}
               </p>
             )}
-            {isMyOwnRecipe && userName && (
+            {isMyOwnRecipe && (userName || userPrintedName) && (
               <p className="font-serif italic text-base text-gray-600 mt-2">
-                from {userName}
+                from {userPrintedName || userName}
               </p>
             )}
           </div>

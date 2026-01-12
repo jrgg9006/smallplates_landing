@@ -120,7 +120,7 @@ export function GuestDetailsModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-6 py-4 max-h-[60vh] overflow-y-auto">
 
           {/* Self guest notice */}
           {isSelf && (
@@ -228,12 +228,12 @@ export function GuestDetailsModal({
           {recipes.length > 0 && (
             <div className="pt-4 border-t border-[hsl(var(--brand-sand))]">
               <Label className="text-sm font-medium text-gray-700">
-                Recipes
+                Recipes ({recipes.length})
               </Label>
               <ul className="mt-2 space-y-1">
                 {recipes.map((recipe) => (
-                  <li 
-                    key={recipe.id} 
+                  <li
+                    key={recipe.id}
                     className="flex items-center gap-2 text-sm text-[hsl(var(--brand-charcoal))]"
                   >
                     <span className="text-[hsl(var(--brand-honey))]">•</span>
