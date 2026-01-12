@@ -72,9 +72,9 @@ interface RecipeCardProps {
 function RecipeCard({ recipe, onClick, onEdit, onRemove }: RecipeCardProps) {
   const [isHovered, setIsHovered] = React.useState(false);
 
-  // Get contributor info
-  const contributorName = recipe.guests 
-    ? `${recipe.guests.first_name} ${recipe.guests.last_name}`.trim()
+  // Get contributor info (prefer printed_name, fallback to first + last name)
+  const contributorName = recipe.guests
+    ? (recipe.guests.printed_name || `${recipe.guests.first_name} ${recipe.guests.last_name}`.trim())
     : 'You';
 
   return (
