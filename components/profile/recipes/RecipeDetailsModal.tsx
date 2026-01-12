@@ -187,6 +187,13 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         return;
       }
 
+      // Mark Midjourney prompt as needing regeneration (if content changed)
+      const supabase = (await import('@/lib/supabase/client')).createSupabaseClient();
+      await supabase
+        .from('midjourney_prompts')
+        .update({ needs_regeneration: true })
+        .eq('recipe_id', localRecipe.id);
+
       // Success! Update local recipe state immediately
       setLocalRecipe({
         ...localRecipe,
