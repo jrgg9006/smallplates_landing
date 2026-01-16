@@ -346,20 +346,32 @@ export async function submitGuestRecipeWithFiles(
       documentUrls: finalFileUrls
     });
 
-    // Log warning if creating a collection recipe without group_id (for debugging orphaned recipes)
+    // Log to debug_logs table if creating a collection recipe without group_id
     if (!context?.groupId) {
-      console.warn('⚠️ COLLECTION WARNING: Creating recipe WITHOUT group_id', {
-        timestamp: new Date().toISOString(),
-        function: 'submitGuestRecipeWithFiles',
-        hasContext: !!context,
-        contextKeys: context ? Object.keys(context) : [],
-        cookbookId: context?.cookbookId || null,
-        groupId: context?.groupId || null,
-        recipeName: submission.recipe_name,
-        guestName: `${submission.first_name} ${submission.last_name}`,
-        tokenUserId: tokenInfo.user_id,
-        uploadMethod: submission.upload_method,
-      });
+      // Fire and forget - don't block recipe creation
+      (async () => {
+        try {
+          await supabase.from('debug_logs').insert({
+            event_type: 'recipe_missing_group_id',
+            user_id: tokenInfo.user_id,
+            context: {
+              function: 'submitGuestRecipeWithFiles',
+              hasContext: !!context,
+              contextKeys: context ? Object.keys(context) : [],
+              cookbookId: context?.cookbookId || null,
+              groupId: context?.groupId || null,
+              recipeName: submission.recipe_name,
+              guestName: `${submission.first_name} ${submission.last_name}`,
+              uploadMethod: submission.upload_method,
+              url: typeof window !== 'undefined' ? window.location.href : null,
+              userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
+            }
+          });
+          console.log('📝 Debug log saved: recipe_missing_group_id');
+        } catch (err) {
+          console.error('Failed to save debug log:', err);
+        }
+      })();
     }
     
     // Use placeholder text for image uploads initially
@@ -643,20 +655,32 @@ export async function submitGuestRecipe(
     }
 
     // Now create the recipe
-    // Log warning if creating a collection recipe without group_id (for debugging orphaned recipes)
+    // Log to debug_logs table if creating a collection recipe without group_id
     if (!context?.groupId) {
-      console.warn('⚠️ COLLECTION WARNING: Creating recipe WITHOUT group_id', {
-        timestamp: new Date().toISOString(),
-        function: 'submitGuestRecipe',
-        hasContext: !!context,
-        contextKeys: context ? Object.keys(context) : [],
-        cookbookId: context?.cookbookId || null,
-        groupId: context?.groupId || null,
-        recipeName: submission.recipe_name,
-        guestName: `${submission.first_name} ${submission.last_name}`,
-        tokenUserId: tokenInfo.user_id,
-        uploadMethod: submission.upload_method || 'text',
-      });
+      // Fire and forget - don't block recipe creation
+      (async () => {
+        try {
+          await supabase.from('debug_logs').insert({
+            event_type: 'recipe_missing_group_id',
+            user_id: tokenInfo.user_id,
+            context: {
+              function: 'submitGuestRecipe',
+              hasContext: !!context,
+              contextKeys: context ? Object.keys(context) : [],
+              cookbookId: context?.cookbookId || null,
+              groupId: context?.groupId || null,
+              recipeName: submission.recipe_name,
+              guestName: `${submission.first_name} ${submission.last_name}`,
+              uploadMethod: submission.upload_method || 'text',
+              url: typeof window !== 'undefined' ? window.location.href : null,
+              userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
+            }
+          });
+          console.log('📝 Debug log saved: recipe_missing_group_id');
+        } catch (err) {
+          console.error('Failed to save debug log:', err);
+        }
+      })();
     }
 
     const recipeData: GuestRecipeInsert = {
