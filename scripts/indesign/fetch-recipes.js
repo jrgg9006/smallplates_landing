@@ -1,9 +1,12 @@
 // scripts/indesign/fetch-recipes.js
 // Script para extraer recetas de Supabase y generar JSON para InDesign
+// v2 - Con descarga de imágenes
 
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
+const http = require('http');
 
 // Cargar variables de entorno desde .env.local
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env.local') });
@@ -22,21 +25,65 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // ============================================
 // CONFIGURACIÓN - Cambiar el group_id aquí
 // ============================================
-const GROUP_ID = '2001e7f6-0204-4d4e-8b23-19f22d7f9739';
+const GROUP_ID = 'da1ff076-b5a4-4a07-8296-3dbedea67f48';
 // ============================================
 
+// ============================================
+// FUNCIÓN PARA DESCARGAR IMAGEN
+// ============================================
+async function downloadImage(url, destPath) {
+  return new Promise((resolve, reject) => {
+    const protocol = url.startsWith('https') ? https : http;
+    
+    const file = fs.createWriteStream(destPath);
+    
+    protocol.get(url, (response) => {
+      if (response.statusCode === 301 || response.statusCode === 302) {
+        file.close();
+        fs.unlink(destPath, () => {});
+        downloadImage(response.headers.location, destPath)
+          .then(resolve)
+          .catch(reject);
+        return;
+      }
+      
+      if (response.statusCode !== 200) {
+        file.close();
+        fs.unlink(destPath, () => {});
+        reject(new Error(`HTTP ${response.statusCode}`));
+        return;
+      }
+      
+      response.pipe(file);
+      
+      file.on('finish', () => {
+        file.close();
+        resolve(true);
+      });
+    }).on('error', (err) => {
+      file.close();
+      fs.unlink(destPath, () => {});
+      reject(err);
+    });
+  });
+}
+
+// ============================================
+// FUNCIÓN PRINCIPAL
+// ============================================
 async function fetchRecipes() {
   console.log('🔄 Conectando a Supabase...');
   console.log(`📚 Buscando recetas del grupo: ${GROUP_ID}`);
 
-  // Obtener recetas con información del guest
   const { data: recipes, error: recipesError } = await supabase
     .from('guest_recipes')
     .select(`
+      id,
       recipe_name,
       comments,
       ingredients,
       instructions,
+      generated_image_url,
       guest_id,
       guests (
         first_name,
@@ -59,44 +106,79 @@ async function fetchRecipes() {
 
   console.log(`✅ Se encontraron ${recipes.length} recetas`);
 
-  // Transformar datos para InDesign
-  const transformedRecipes = recipes.map((recipe, index) => {
-    // Lógica: usar printed_name si existe, sino concatenar first_name + last_name
+  // Crear directorios
+  const outputDir = path.resolve(__dirname, 'output');
+  const imagesDir = path.join(outputDir, 'images', GROUP_ID);
+  
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+  if (!fs.existsSync(imagesDir)) {
+    fs.mkdirSync(imagesDir, { recursive: true });
+  }
+
+  console.log('');
+  console.log('📷 Procesando imágenes...');
+
+  const transformedRecipes = [];
+
+  for (const recipe of recipes) {
     const guest = recipe.guests;
     const guestName = guest?.printed_name || 
                       `${guest?.first_name || ''} ${guest?.last_name || ''}`.trim() ||
                       'Anónimo';
 
-    return {
+    const transformed = {
+      id: recipe.id,
       recipe_name: recipe.recipe_name || '',
       guest_name: guestName,
       comments: recipe.comments || '',
       ingredients: recipe.ingredients || '',
-      instructions: recipe.instructions || ''
+      instructions: recipe.instructions || '',
+      generated_image_url: recipe.generated_image_url || null,
+      local_image_path: null
     };
-  });
 
-  // Guardar JSON con group_id en el nombre
-  const outputDir = path.resolve(__dirname, 'output');
+    if (recipe.generated_image_url) {
+      try {
+        const urlParts = recipe.generated_image_url.split('.');
+        const extension = urlParts[urlParts.length - 1].split('?')[0] || 'png';
+        
+        const imageFileName = `${recipe.id}.${extension}`;
+        const localImagePath = path.join(imagesDir, imageFileName);
+        
+        process.stdout.write(`  📷 ${recipe.recipe_name}... `);
+        await downloadImage(recipe.generated_image_url, localImagePath);
+        
+        transformed.local_image_path = `images/${GROUP_ID}/${imageFileName}`;
+        console.log('✅');
+      } catch (err) {
+        console.log(`⚠️ Error: ${err.message}`);
+      }
+    }
+
+    transformedRecipes.push(transformed);
+  }
+
+  // Guardar JSON
   const outputFileName = `recipes.${GROUP_ID}.json`;
   const outputPath = path.join(outputDir, outputFileName);
 
-  // Crear carpeta output si no existe
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
-
   fs.writeFileSync(outputPath, JSON.stringify(transformedRecipes, null, 2), 'utf8');
+
+  const imagesDownloaded = transformedRecipes.filter(r => r.local_image_path).length;
+  const recipesWithoutImages = transformedRecipes.filter(r => !r.local_image_path).length;
 
   console.log('');
   console.log('═══════════════════════════════════════════');
   console.log(`✅ ¡Listo! ${transformedRecipes.length} recetas exportadas`);
+  console.log(`📷 ${imagesDownloaded} imágenes descargadas`);
+  if (recipesWithoutImages > 0) {
+    console.log(`⚠️  ${recipesWithoutImages} recetas sin imagen`);
+  }
   console.log(`📁 Archivo: ${outputFileName}`);
   console.log(`📂 Ruta: ${outputPath}`);
   console.log('═══════════════════════════════════════════');
-  console.log('');
-  console.log('Próximo paso: Usar este JSON en InDesign');
 }
 
-// Ejecutar
 fetchRecipes().catch(console.error);

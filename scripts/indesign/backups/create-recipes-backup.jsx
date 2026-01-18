@@ -185,8 +185,6 @@ function replaceInTextFrame(tf, recipe) {
             var ph = CONFIG.placeholders[i];
             var value = recipe[ph.field] || "";
             
-            // Convertir saltos de línea a marcador temporal
-            value = value.split("\n").join("<<<BR>>>");
             value = value.split("\\n").join("<<<BR>>>");
             
             app.findTextPreferences.findWhat = ph.find;
@@ -195,7 +193,6 @@ function replaceInTextFrame(tf, recipe) {
             story.changeText();
         }
         
-        // Convertir marcadores a paragraph breaks
         app.findTextPreferences = null;
         app.changeTextPreferences = null;
         app.findTextPreferences.findWhat = "<<<BR>>>";
