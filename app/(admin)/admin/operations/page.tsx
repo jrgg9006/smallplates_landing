@@ -21,6 +21,7 @@ interface RecipeWithProductionStatus {
   created_at: string;
   submitted_at: string | null;
   updated_at: string;
+  generated_image_url: string | null;
   guests: {
     id: string;
     first_name: string;
@@ -84,6 +85,7 @@ export default function OperationsPage() {
   const [updatingField, setUpdatingField] = useState<string | null>(null);
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const [downloadingImages, setDownloadingImages] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   
   // Filters
   const [statusFilter, setStatusFilter] = useState<'all' | 'no_action' | 'in_progress' | 'ready_to_print'>('all');
@@ -606,6 +608,56 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
     }
   };
 
+  const handleUploadGeneratedImage = async (recipeId: string, file: File) => {
+    setUploadingImage(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(`/api/v1/admin/operations/recipes/${recipeId}/upload-image`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to upload image');
+      }
+
+      const result = await response.json();
+      
+      // Update local state
+      setSelectedRecipe(prev => prev ? {
+        ...prev,
+        generated_image_url: result.url,
+        production_status: {
+          ...(prev.production_status || {
+            id: '',
+            text_finalized_in_indesign: false,
+            image_generated: false,
+            image_placed_in_indesign: false,
+            operations_notes: null,
+            production_completed_at: null,
+            needs_review: false,
+          }),
+          image_generated: true,
+        }
+      } : prev);
+
+      // Refresh data
+      handleStatusUpdate();
+      
+      alert('Image uploaded successfully!');
+      
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert(error instanceof Error ? error.message : 'Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -724,7 +776,7 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
           <div className="p-6">
             <RecipeOperationsTable
               recipes={recipes}
-              onRecipeClick={setSelectedRecipe}
+              onRecipeClick={(recipe) => setSelectedRecipe(recipe)}
               onStatusUpdate={handleStatusUpdate}
             />
           </div>
@@ -1018,6 +1070,102 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
                     ) : (
                       <div className="text-base text-gray-500 italic">
                         No Midjourney prompt generated yet for this recipe.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Generated Image Upload Section */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-2xl font-semibold text-gray-900">
+                      Generated Image
+                    </h3>
+                  </div>
+                  <div className="bg-gray-50 border border-gray-200 p-8 rounded-lg shadow-sm">
+                    {selectedRecipe.generated_image_url ? (
+                      <div className="space-y-4">
+                        <div className="relative aspect-square w-64 rounded-lg overflow-hidden bg-gray-100">
+                          <Image
+                            src={selectedRecipe.generated_image_url}
+                            alt={`Generated image for ${selectedRecipe.recipe_name}`}
+                            fill
+                            className="object-cover"
+                            sizes="256px"
+                          />
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <span className="text-sm text-green-600 font-medium flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Image uploaded
+                          </span>
+                          <label className="cursor-pointer">
+                            <span className="text-sm text-blue-600 hover:text-blue-800 underline">
+                              Replace image
+                            </span>
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/jpg,image/webp"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  handleUploadGeneratedImage(selectedRecipe.id, file);
+                                }
+                                e.target.value = '';
+                              }}
+                              disabled={uploadingImage}
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <div className="mb-4">
+                          <svg className="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <p className="text-gray-500 mb-4">No generated image yet</p>
+                        <label className="cursor-pointer">
+                          <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                            uploadingImage 
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-black text-white hover:bg-gray-800'
+                          }`}>
+                            {uploadingImage ? (
+                              <>
+                                <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                <span>Uploading...</span>
+                              </>
+                            ) : (
+                              <>
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                <span>Upload Generated Image</span>
+                              </>
+                            )}
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/jpg,image/webp"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                handleUploadGeneratedImage(selectedRecipe.id, file);
+                              }
+                              e.target.value = '';
+                            }}
+                            disabled={uploadingImage}
+                          />
+                        </label>
                       </div>
                     )}
                   </div>

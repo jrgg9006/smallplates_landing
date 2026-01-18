@@ -16,6 +16,7 @@ interface RecipeWithProductionStatus {
   created_at: string;
   submitted_at: string | null;
   updated_at: string;
+  generated_image_url: string | null;
   guests: {
     id: string;
     first_name: string;
@@ -210,7 +211,7 @@ export function RecipeOperationsTable({
                 onClick={() => onRecipeClick?.(recipe)}
                 className={`hover:bg-gray-50 cursor-pointer ${isUpdating ? 'opacity-50' : ''} ${!recipe.group ? 'bg-orange-50' : ''}`}
               >
-                <td className="px-4 py-3 whitespace-nowrap">
+                <td className="px-4 py-3 max-w-[300px]">
                   <div className="flex items-center gap-2">
                     {(() => {
                       // Normalize image_url - handle both string and array formats
@@ -268,8 +269,8 @@ export function RecipeOperationsTable({
                         </div>
                       ) : null;
                     })()}
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium text-gray-900 truncate" title={recipe.recipe_name || 'Untitled Recipe'}>
                         {recipe.recipe_name || 'Untitled Recipe'}
                       </div>
                     </div>
