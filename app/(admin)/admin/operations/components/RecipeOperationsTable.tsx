@@ -48,6 +48,13 @@ interface RecipeWithProductionStatus {
   midjourney_prompts: {
     generated_prompt: string;
   } | null;
+  recipe_print_ready: {
+    recipe_name_clean: string;
+    ingredients_clean: string;
+    instructions_clean: string;
+    detected_language: string | null;
+    cleaning_version: number | null;
+  } | null;
 }
 
 interface RecipeOperationsTableProps {

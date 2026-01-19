@@ -89,6 +89,11 @@ async function fetchRecipes() {
         first_name,
         last_name,
         printed_name
+      ),
+      recipe_print_ready (
+        recipe_name_clean,
+        ingredients_clean,
+        instructions_clean
       )
     `)
     .eq('group_id', GROUP_ID)
@@ -105,6 +110,18 @@ async function fetchRecipes() {
   }
 
   console.log(`✅ Se encontraron ${recipes.length} recetas`);
+
+  // Contar recetas con versión limpia
+  let recipesWithCleanVersion = 0;
+  for (const recipe of recipes) {
+    const printReady = Array.isArray(recipe.recipe_print_ready)
+      ? recipe.recipe_print_ready[0] || null
+      : recipe.recipe_print_ready || null;
+    if (printReady) recipesWithCleanVersion++;
+  }
+  if (recipesWithCleanVersion > 0) {
+    console.log(`✨ ${recipesWithCleanVersion} recetas tienen versión limpia disponible`);
+  }
 
   // Crear directorios
   const outputDir = path.resolve(__dirname, 'output');
@@ -128,13 +145,21 @@ async function fetchRecipes() {
                       `${guest?.first_name || ''} ${guest?.last_name || ''}`.trim() ||
                       'Anónimo';
 
+    // Manejar recipe_print_ready - puede ser array o objeto único dependiendo de la versión de Supabase
+    const printReady = Array.isArray(recipe.recipe_print_ready)
+      ? recipe.recipe_print_ready[0] || null
+      : recipe.recipe_print_ready || null;
+
     const transformed = {
       id: recipe.id,
-      recipe_name: recipe.recipe_name || '',
+      // Usar versión limpia si existe, sino la original
+      recipe_name: printReady?.recipe_name_clean || recipe.recipe_name || '',
       guest_name: guestName,
       comments: recipe.comments || '',
-      ingredients: recipe.ingredients || '',
-      instructions: recipe.instructions || '',
+      // Usar versión limpia si existe, sino la original
+      ingredients: printReady?.ingredients_clean || recipe.ingredients || '',
+      // Usar versión limpia si existe, sino la original
+      instructions: printReady?.instructions_clean || recipe.instructions || '',
       generated_image_url: recipe.generated_image_url || null,
       local_image_path: null
     };

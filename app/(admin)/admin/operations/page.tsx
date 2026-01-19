@@ -53,6 +53,13 @@ interface RecipeWithProductionStatus {
   midjourney_prompts: {
     generated_prompt: string;
   } | null;
+  recipe_print_ready: {
+    recipe_name_clean: string;
+    ingredients_clean: string;
+    instructions_clean: string;
+    detected_language: string | null;
+    cleaning_version: number | null;
+  } | null;
 }
 
 interface ProductionStats {
@@ -87,6 +94,11 @@ export default function OperationsPage() {
   const [downloadingImages, setDownloadingImages] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   
+  // Toggle states for showing original vs clean versions
+  const [showOriginalName, setShowOriginalName] = useState(false);
+  const [showOriginalIngredients, setShowOriginalIngredients] = useState(false);
+  const [showOriginalInstructions, setShowOriginalInstructions] = useState(false);
+  
   // Filters
   const [statusFilter, setStatusFilter] = useState<'all' | 'no_action' | 'in_progress' | 'ready_to_print'>('all');
   const [groupFilter, setGroupFilter] = useState<string>('all');
@@ -107,6 +119,15 @@ export default function OperationsPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, groupFilter, userFilter, showArchived, isAdmin]);
+
+  // Reset toggle states when recipe changes
+  useEffect(() => {
+    if (selectedRecipe) {
+      setShowOriginalName(false);
+      setShowOriginalIngredients(false);
+      setShowOriginalInstructions(false);
+    }
+  }, [selectedRecipe?.id]);
 
   // Load all users and groups once on initial mount (not from filtered results)
   useEffect(() => {
@@ -276,13 +297,18 @@ export default function OperationsPage() {
   const copyEntireRecipe = async () => {
     if (!selectedRecipe) return;
     
-    const recipeText = `Recipe Title: ${selectedRecipe.recipe_name || 'Untitled Recipe'}
+    // Use clean versions if available, otherwise fall back to original
+    const recipeName = selectedRecipe.recipe_print_ready?.recipe_name_clean || selectedRecipe.recipe_name || 'Untitled Recipe';
+    const ingredients = selectedRecipe.recipe_print_ready?.ingredients_clean || selectedRecipe.ingredients || 'No ingredients provided';
+    const instructions = selectedRecipe.recipe_print_ready?.instructions_clean || selectedRecipe.instructions || 'No instructions provided';
+    
+    const recipeText = `Recipe Title: ${recipeName}
 
 Ingredients:
-${selectedRecipe.ingredients || 'No ingredients provided'}
+${ingredients}
 
 Steps:
-${selectedRecipe.instructions || 'No instructions provided'}`;
+${instructions}`;
 
     try {
       await navigator.clipboard.writeText(recipeText);
@@ -797,12 +823,30 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
               <div className="sticky top-0 bg-white border-b border-gray-200 z-10 shadow-sm">
                 <div className="px-10 py-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-2xl font-bold text-gray-900 pr-2">
-                        {selectedRecipe.recipe_name || 'Untitled Recipe'}
-                      </h2>
+                    <div className="flex items-center gap-2 flex-1">
+                      <div className="flex items-center gap-2 flex-1">
+                        <h2 className="text-2xl font-bold text-gray-900 pr-2">
+                          {showOriginalName || !selectedRecipe.recipe_print_ready?.recipe_name_clean
+                            ? (selectedRecipe.recipe_name || 'Untitled Recipe')
+                            : selectedRecipe.recipe_print_ready.recipe_name_clean}
+                        </h2>
+                        {selectedRecipe.recipe_print_ready?.recipe_name_clean && (
+                          <button
+                            onClick={() => setShowOriginalName(!showOriginalName)}
+                            className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                            title={showOriginalName ? 'Show cleaned version' : 'Show original version'}
+                          >
+                            {showOriginalName ? 'Clean' : 'Original'}
+                          </button>
+                        )}
+                      </div>
                       <button
-                        onClick={() => copyToClipboard(selectedRecipe.recipe_name || 'Untitled Recipe', 'title')}
+                        onClick={() => {
+                          const nameToCopy = showOriginalName || !selectedRecipe.recipe_print_ready?.recipe_name_clean
+                            ? (selectedRecipe.recipe_name || 'Untitled Recipe')
+                            : selectedRecipe.recipe_print_ready.recipe_name_clean;
+                          copyToClipboard(nameToCopy, 'title');
+                        }}
                         className="p-2 text-gray-500 hover:text-gray-900 rounded-full hover:bg-gray-100 transition-colors"
                         title="Copy title"
                       >
@@ -1174,11 +1218,32 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
                 {/* Ingredients Section */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-semibold text-gray-900">
-                      Ingredients
-                    </h3>
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-xl font-semibold text-gray-900">
+                        Ingredients
+                      </h3>
+                      {selectedRecipe.recipe_print_ready?.ingredients_clean && (
+                        <>
+                          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded font-medium">
+                            Cleaned
+                          </span>
+                          <button
+                            onClick={() => setShowOriginalIngredients(!showOriginalIngredients)}
+                            className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                            title={showOriginalIngredients ? 'Show cleaned version' : 'Show original version'}
+                          >
+                            {showOriginalIngredients ? 'Show Clean' : 'Show Original'}
+                          </button>
+                        </>
+                      )}
+                    </div>
                     <button
-                      onClick={() => copyToClipboard(selectedRecipe.ingredients || '', 'ingredients')}
+                      onClick={() => {
+                        const ingredientsToCopy = showOriginalIngredients || !selectedRecipe.recipe_print_ready?.ingredients_clean
+                          ? (selectedRecipe.ingredients || '')
+                          : selectedRecipe.recipe_print_ready.ingredients_clean;
+                        copyToClipboard(ingredientsToCopy, 'ingredients');
+                      }}
                       className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
                       title="Copy to clipboard"
                     >
@@ -1201,7 +1266,9 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
                   </div>
                   <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg shadow-sm">
                     <div className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed select-text font-sans">
-                      {selectedRecipe.ingredients || 'No ingredients provided'}
+                      {showOriginalIngredients || !selectedRecipe.recipe_print_ready?.ingredients_clean
+                        ? (selectedRecipe.ingredients || 'No ingredients provided')
+                        : selectedRecipe.recipe_print_ready.ingredients_clean}
                     </div>
                   </div>
                 </div>
@@ -1209,11 +1276,32 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
                 {/* Steps/Instructions Section */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-semibold text-gray-900">
-                      Steps
-                    </h3>
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-xl font-semibold text-gray-900">
+                        Steps
+                      </h3>
+                      {selectedRecipe.recipe_print_ready?.instructions_clean && (
+                        <>
+                          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded font-medium">
+                            Cleaned
+                          </span>
+                          <button
+                            onClick={() => setShowOriginalInstructions(!showOriginalInstructions)}
+                            className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                            title={showOriginalInstructions ? 'Show cleaned version' : 'Show original version'}
+                          >
+                            {showOriginalInstructions ? 'Show Clean' : 'Show Original'}
+                          </button>
+                        </>
+                      )}
+                    </div>
                     <button
-                      onClick={() => copyToClipboard(selectedRecipe.instructions || '', 'steps')}
+                      onClick={() => {
+                        const instructionsToCopy = showOriginalInstructions || !selectedRecipe.recipe_print_ready?.instructions_clean
+                          ? (selectedRecipe.instructions || '')
+                          : selectedRecipe.recipe_print_ready.instructions_clean;
+                        copyToClipboard(instructionsToCopy, 'steps');
+                      }}
                       className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
                       title="Copy to clipboard"
                     >
@@ -1236,7 +1324,9 @@ ${selectedRecipe.instructions || 'No instructions provided'}`;
                   </div>
                   <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg shadow-sm">
                     <div className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed select-text font-sans">
-                      {selectedRecipe.instructions || 'No instructions provided'}
+                      {showOriginalInstructions || !selectedRecipe.recipe_print_ready?.instructions_clean
+                        ? (selectedRecipe.instructions || 'No instructions provided')
+                        : selectedRecipe.recipe_print_ready.instructions_clean}
                     </div>
                   </div>
                 </div>
