@@ -50,6 +50,8 @@ export async function POST(request: NextRequest) {
 
     if (recipe_id) {
       const supabase = createSupabaseAdminClient();
+      
+      // Save prompt to midjourney_prompts (existing)
       const { error: insertError } = await supabase
         .from('midjourney_prompts')
         .upsert({
@@ -64,6 +66,50 @@ export async function POST(request: NextRequest) {
       if (insertError) {
         console.error('❌ Error saving prompt to Supabase:', insertError);
       }
+
+      // === NUEVO: Save print-ready text to recipe_print_ready ===
+      const printReady = promptData.agent_metadata?.print_ready;
+      if (printReady) {
+        const { error: printReadyError } = await supabase
+          .from('recipe_print_ready')
+          .upsert({
+            recipe_id,
+            recipe_name_clean: printReady.recipe_name_clean,
+            ingredients_clean: printReady.ingredients_clean,
+            instructions_clean: printReady.instructions_clean,
+            detected_language: printReady.detected_language,
+            cleaning_version: printReady.cleaning_version || 1,
+            agent_metadata: printReady,
+            updated_at: new Date().toISOString(),
+          }, {
+            onConflict: 'recipe_id',
+          });
+
+        if (printReadyError) {
+          console.error('❌ Error saving print-ready to Supabase:', printReadyError);
+        } else {
+          console.log('✅ Print-ready text saved for recipe:', recipe_id);
+        }
+      }
+
+      // === NUEVO: Save dish_category to guest_recipes ===
+      const dishCategory = promptData.agent_metadata?.dish_category;
+      if (dishCategory) {
+        const { error: categoryError } = await supabase
+          .from('guest_recipes')
+          .update({ 
+            dish_category: dishCategory,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', recipe_id);
+
+        if (categoryError) {
+          console.error('❌ Error saving dish_category to Supabase:', categoryError);
+        } else {
+          console.log('✅ Dish category saved:', dishCategory, 'for recipe:', recipe_id);
+        }
+      }
+      // === FIN NUEVO ===
     }
 
     return NextResponse.json(promptData);
@@ -75,4 +121,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
