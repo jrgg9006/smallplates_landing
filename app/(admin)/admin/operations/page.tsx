@@ -99,6 +99,17 @@ export default function OperationsPage() {
   const [showOriginalIngredients, setShowOriginalIngredients] = useState(false);
   const [showOriginalInstructions, setShowOriginalInstructions] = useState(false);
   
+  // Edit states for recipe_print_ready
+  const [isEditingText, setIsEditingText] = useState(false);
+  const [editedIngredients, setEditedIngredients] = useState('');
+  const [editedInstructions, setEditedInstructions] = useState('');
+  const [savingEdits, setSavingEdits] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [changesSummary, setChangesSummary] = useState<{
+    ingredients?: { before: string; after: string };
+    instructions?: { before: string; after: string };
+  } | null>(null);
+  
   // Filters
   const [statusFilter, setStatusFilter] = useState<'all' | 'no_action' | 'in_progress' | 'ready_to_print'>('all');
   const [groupFilter, setGroupFilter] = useState<string>('all');
@@ -126,6 +137,12 @@ export default function OperationsPage() {
       setShowOriginalName(false);
       setShowOriginalIngredients(false);
       setShowOriginalInstructions(false);
+      setIsEditingText(false);
+      // Initialize edited values from print_ready or fallback to original
+      const ingredients = selectedRecipe.recipe_print_ready?.ingredients_clean || selectedRecipe.ingredients || '';
+      const instructions = selectedRecipe.recipe_print_ready?.instructions_clean || selectedRecipe.instructions || '';
+      setEditedIngredients(ingredients);
+      setEditedInstructions(instructions);
     }
   }, [selectedRecipe?.id]);
 
@@ -684,6 +701,123 @@ ${instructions}`;
     }
   };
 
+  const handleStartEditing = () => {
+    if (!selectedRecipe) return;
+    // Initialize edited values from print_ready or fallback to original
+    const ingredients = selectedRecipe.recipe_print_ready?.ingredients_clean || selectedRecipe.ingredients || '';
+    const instructions = selectedRecipe.recipe_print_ready?.instructions_clean || selectedRecipe.instructions || '';
+    setEditedIngredients(ingredients);
+    setEditedInstructions(instructions);
+    setIsEditingText(true);
+  };
+
+  const handleCancelEditing = () => {
+    setIsEditingText(false);
+    // Reset to original values
+    if (selectedRecipe) {
+      const ingredients = selectedRecipe.recipe_print_ready?.ingredients_clean || selectedRecipe.ingredients || '';
+      const instructions = selectedRecipe.recipe_print_ready?.instructions_clean || selectedRecipe.instructions || '';
+      setEditedIngredients(ingredients);
+      setEditedInstructions(instructions);
+    }
+  };
+
+  const handleSaveClick = () => {
+    if (!selectedRecipe) return;
+    
+    // Get original values
+    const originalIngredients = selectedRecipe.recipe_print_ready?.ingredients_clean || selectedRecipe.ingredients || '';
+    const originalInstructions = selectedRecipe.recipe_print_ready?.instructions_clean || selectedRecipe.instructions || '';
+    
+    // Calculate changes
+    const changes: typeof changesSummary = {};
+    if (editedIngredients !== originalIngredients) {
+      changes.ingredients = { before: originalIngredients, after: editedIngredients };
+    }
+    if (editedInstructions !== originalInstructions) {
+      changes.instructions = { before: originalInstructions, after: editedInstructions };
+    }
+    
+    // If no changes, just exit edit mode
+    if (!changes.ingredients && !changes.instructions) {
+      setIsEditingText(false);
+      return;
+    }
+    
+    // Show confirmation modal
+    setChangesSummary(changes);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmSave = async () => {
+    if (!selectedRecipe || !changesSummary) return;
+    
+    setSavingEdits(true);
+    
+    try {
+      const response = await fetch(`/api/v1/admin/operations/recipes/${selectedRecipe.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          printReady: {
+            ingredients_clean: editedIngredients,
+            instructions_clean: editedInstructions,
+          },
+          markNeedsReview: true,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to save changes');
+      }
+
+      // Update local state
+      setSelectedRecipe(prev => prev ? {
+        ...prev,
+        recipe_print_ready: {
+          ...(prev.recipe_print_ready || {
+            recipe_name_clean: prev.recipe_name || '',
+            ingredients_clean: '',
+            instructions_clean: '',
+            detected_language: null,
+            cleaning_version: null,
+          }),
+          ingredients_clean: editedIngredients,
+          instructions_clean: editedInstructions,
+        },
+        production_status: {
+          ...(prev.production_status || {
+            id: '',
+            text_finalized_in_indesign: false,
+            image_generated: false,
+            image_placed_in_indesign: false,
+            operations_notes: null,
+            production_completed_at: null,
+            needs_review: false,
+          }),
+          needs_review: true,
+        },
+      } : prev);
+
+      // Refresh data
+      handleStatusUpdate();
+      
+      // Close modal and exit edit mode
+      setShowConfirmModal(false);
+      setIsEditingText(false);
+      setChangesSummary(null);
+      
+      alert('Changes saved successfully!');
+      
+    } catch (error) {
+      console.error('Error saving changes:', error);
+      alert(error instanceof Error ? error.message : 'Failed to save changes');
+    } finally {
+      setSavingEdits(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -862,6 +996,36 @@ ${instructions}`;
                       </button>
                     </div>
                     <div className="flex items-center gap-3">
+                      {/* Edit Text Button */}
+                      {!isEditingText ? (
+                        <button
+                          onClick={handleStartEditing}
+                          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                          title="Edit Ingredients and Steps"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                          <span>Edit text</span>
+                        </button>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={handleCancelEditing}
+                            disabled={savingEdits}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleSaveClick}
+                            disabled={savingEdits}
+                            className="px-4 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Save
+                          </button>
+                        </div>
+                      )}
                       {/* Download Images Button - Show when there are uploaded images */}
                       {((selectedRecipe.document_urls && selectedRecipe.document_urls.length > 0) || selectedRecipe.upload_method === 'image') && (
                         <button
@@ -1222,7 +1386,7 @@ ${instructions}`;
                       <h3 className="text-xl font-semibold text-gray-900">
                         Ingredients
                       </h3>
-                      {selectedRecipe.recipe_print_ready?.ingredients_clean && (
+                      {!isEditingText && selectedRecipe.recipe_print_ready?.ingredients_clean && (
                         <>
                           <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded font-medium">
                             Cleaned
@@ -1237,39 +1401,50 @@ ${instructions}`;
                         </>
                       )}
                     </div>
-                    <button
-                      onClick={() => {
-                        const ingredientsToCopy = showOriginalIngredients || !selectedRecipe.recipe_print_ready?.ingredients_clean
-                          ? (selectedRecipe.ingredients || '')
-                          : selectedRecipe.recipe_print_ready.ingredients_clean;
-                        copyToClipboard(ingredientsToCopy, 'ingredients');
-                      }}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
-                      title="Copy to clipboard"
-                    >
-                      {copiedSection === 'ingredients' ? (
-                        <>
-                          <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          <span className="text-green-600">Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                          <span>Copy</span>
-                        </>
-                      )}
-                    </button>
+                    {!isEditingText && (
+                      <button
+                        onClick={() => {
+                          const ingredientsToCopy = showOriginalIngredients || !selectedRecipe.recipe_print_ready?.ingredients_clean
+                            ? (selectedRecipe.ingredients || '')
+                            : selectedRecipe.recipe_print_ready.ingredients_clean;
+                          copyToClipboard(ingredientsToCopy, 'ingredients');
+                        }}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                        title="Copy to clipboard"
+                      >
+                        {copiedSection === 'ingredients' ? (
+                          <>
+                            <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span className="text-green-600">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            <span>Copy</span>
+                          </>
+                        )}
+                      </button>
+                    )}
                   </div>
                   <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg shadow-sm">
-                    <div className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed select-text font-sans">
-                      {showOriginalIngredients || !selectedRecipe.recipe_print_ready?.ingredients_clean
-                        ? (selectedRecipe.ingredients || 'No ingredients provided')
-                        : selectedRecipe.recipe_print_ready.ingredients_clean}
-                    </div>
+                    {isEditingText ? (
+                      <textarea
+                        value={editedIngredients}
+                        onChange={(e) => setEditedIngredients(e.target.value)}
+                        className="w-full min-h-[200px] px-3 py-2 text-sm text-gray-800 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent font-sans resize-y"
+                        placeholder="Enter ingredients..."
+                      />
+                    ) : (
+                      <div className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed select-text font-sans">
+                        {showOriginalIngredients || !selectedRecipe.recipe_print_ready?.ingredients_clean
+                          ? (selectedRecipe.ingredients || 'No ingredients provided')
+                          : selectedRecipe.recipe_print_ready.ingredients_clean}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1280,7 +1455,7 @@ ${instructions}`;
                       <h3 className="text-xl font-semibold text-gray-900">
                         Steps
                       </h3>
-                      {selectedRecipe.recipe_print_ready?.instructions_clean && (
+                      {!isEditingText && selectedRecipe.recipe_print_ready?.instructions_clean && (
                         <>
                           <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded font-medium">
                             Cleaned
@@ -1295,40 +1470,140 @@ ${instructions}`;
                         </>
                       )}
                     </div>
-                    <button
-                      onClick={() => {
-                        const instructionsToCopy = showOriginalInstructions || !selectedRecipe.recipe_print_ready?.instructions_clean
-                          ? (selectedRecipe.instructions || '')
-                          : selectedRecipe.recipe_print_ready.instructions_clean;
-                        copyToClipboard(instructionsToCopy, 'steps');
-                      }}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
-                      title="Copy to clipboard"
-                    >
-                      {copiedSection === 'steps' ? (
-                        <>
-                          <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          <span className="text-green-600">Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                          <span>Copy</span>
-                        </>
-                      )}
-                    </button>
+                    {!isEditingText && (
+                      <button
+                        onClick={() => {
+                          const instructionsToCopy = showOriginalInstructions || !selectedRecipe.recipe_print_ready?.instructions_clean
+                            ? (selectedRecipe.instructions || '')
+                            : selectedRecipe.recipe_print_ready.instructions_clean;
+                          copyToClipboard(instructionsToCopy, 'steps');
+                        }}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                        title="Copy to clipboard"
+                      >
+                        {copiedSection === 'steps' ? (
+                          <>
+                            <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span className="text-green-600">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            <span>Copy</span>
+                          </>
+                        )}
+                      </button>
+                    )}
                   </div>
                   <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg shadow-sm">
-                    <div className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed select-text font-sans">
-                      {showOriginalInstructions || !selectedRecipe.recipe_print_ready?.instructions_clean
-                        ? (selectedRecipe.instructions || 'No instructions provided')
-                        : selectedRecipe.recipe_print_ready.instructions_clean}
-                    </div>
+                    {isEditingText ? (
+                      <textarea
+                        value={editedInstructions}
+                        onChange={(e) => setEditedInstructions(e.target.value)}
+                        className="w-full min-h-[200px] px-3 py-2 text-sm text-gray-800 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent font-sans resize-y"
+                        placeholder="Enter steps..."
+                      />
+                    ) : (
+                      <div className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed select-text font-sans">
+                        {showOriginalInstructions || !selectedRecipe.recipe_print_ready?.instructions_clean
+                          ? (selectedRecipe.instructions || 'No instructions provided')
+                          : selectedRecipe.recipe_print_ready.instructions_clean}
+                      </div>
+                    )}
                   </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Confirmation Modal */}
+        {showConfirmModal && changesSummary && (
+          <>
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 bg-black bg-opacity-50 z-[60] transition-opacity"
+              onClick={() => !savingEdits && setShowConfirmModal(false)}
+            />
+            
+            {/* Modal */}
+            <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+              <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
+                  <h2 className="text-2xl font-bold text-gray-900">This is what you changed</h2>
+                </div>
+                
+                <div className="px-6 py-6 space-y-6">
+                  {changesSummary.ingredients && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Ingredients</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="text-xs font-medium text-gray-500 mb-1">Before:</div>
+                          <div className="bg-gray-100 border border-gray-200 p-4 rounded-lg text-sm text-gray-800 whitespace-pre-wrap font-sans">
+                            {changesSummary.ingredients.before || '(empty)'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs font-medium text-gray-500 mb-1">After:</div>
+                          <div className="bg-green-50 border border-green-200 p-4 rounded-lg text-sm text-gray-800 whitespace-pre-wrap font-sans">
+                            {changesSummary.ingredients.after || '(empty)'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {changesSummary.instructions && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Steps</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="text-xs font-medium text-gray-500 mb-1">Before:</div>
+                          <div className="bg-gray-100 border border-gray-200 p-4 rounded-lg text-sm text-gray-800 whitespace-pre-wrap font-sans">
+                            {changesSummary.instructions.before || '(empty)'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs font-medium text-gray-500 mb-1">After:</div>
+                          <div className="bg-green-50 border border-green-200 p-4 rounded-lg text-sm text-gray-800 whitespace-pre-wrap font-sans">
+                            {changesSummary.instructions.after || '(empty)'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-end gap-3">
+                  <button
+                    onClick={() => setShowConfirmModal(false)}
+                    disabled={savingEdits}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirmSave}
+                    disabled={savingEdits}
+                    className="px-4 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {savingEdits ? (
+                      <>
+                        <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      'Confirm'
+                    )}
+                  </button>
                 </div>
               </div>
             </div>

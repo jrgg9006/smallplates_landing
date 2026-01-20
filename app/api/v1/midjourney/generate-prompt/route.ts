@@ -40,6 +40,22 @@ export async function POST(request: NextRequest) {
 
     const promptData = await response.json();
 
+    // === DEBUG: Log completo de la respuesta del agente ===
+    console.log('📋 ========================================');
+    console.log('📋 Railway Agent Response for recipe_id:', recipe_id || 'N/A');
+    console.log('📋 ========================================');
+    console.log('📋 Full promptData:', JSON.stringify(promptData, null, 2));
+    console.log('📋 promptData top-level keys:', Object.keys(promptData));
+    console.log('📋 agent_metadata exists?', !!promptData.agent_metadata);
+    console.log('📋 agent_metadata keys:', Object.keys(promptData.agent_metadata || {}));
+    
+    // Check both root level AND agent_metadata
+    console.log('📋 print_ready in root?', !!promptData.print_ready);
+    console.log('📋 print_ready in agent_metadata?', !!promptData.agent_metadata?.print_ready);
+    console.log('📋 dish_category in root?', !!promptData.dish_category);
+    console.log('📋 dish_category in agent_metadata?', !!promptData.agent_metadata?.dish_category);
+    console.log('📋 ========================================');
+
     if (!promptData.generated_prompt) {
       console.error('❌ Invalid response from agent: missing generated_prompt');
       return NextResponse.json(
@@ -68,33 +84,63 @@ export async function POST(request: NextRequest) {
       }
 
       // === NUEVO: Save print-ready text to recipe_print_ready ===
-      const printReady = promptData.agent_metadata?.print_ready;
+      // Check BOTH root level AND agent_metadata (agent returns it at root)
+      const printReady = promptData.print_ready || promptData.agent_metadata?.print_ready;
+      
+      console.log('🔍 Checking print_ready for recipe_id:', recipe_id);
+      console.log('🔍 printReady from root:', promptData.print_ready);
+      console.log('🔍 printReady from agent_metadata:', promptData.agent_metadata?.print_ready);
+      console.log('🔍 Final printReady value:', printReady);
+      console.log('🔍 printReady type:', typeof printReady);
+      console.log('🔍 printReady truthy?', !!printReady);
+      
       if (printReady) {
-        const { error: printReadyError } = await supabase
-          .from('recipe_print_ready')
-          .upsert({
-            recipe_id,
-            recipe_name_clean: printReady.recipe_name_clean,
-            ingredients_clean: printReady.ingredients_clean,
-            instructions_clean: printReady.instructions_clean,
-            detected_language: printReady.detected_language,
-            cleaning_version: printReady.cleaning_version || 1,
-            agent_metadata: printReady,
-            updated_at: new Date().toISOString(),
-          }, {
-            onConflict: 'recipe_id',
-          });
-
-        if (printReadyError) {
-          console.error('❌ Error saving print-ready to Supabase:', printReadyError);
+        console.log('✅ print_ready FOUND! Saving to database...');
+        console.log('✅ print_ready content:', JSON.stringify(printReady, null, 2));
+        
+        // Validate print_ready has required fields
+        if (!printReady.ingredients_clean && !printReady.instructions_clean) {
+          console.warn('⚠️ print_ready exists but missing required fields:', printReady);
         } else {
-          console.log('✅ Print-ready text saved for recipe:', recipe_id);
+          const { error: printReadyError } = await supabase
+            .from('recipe_print_ready')
+            .upsert({
+              recipe_id,
+              recipe_name_clean: printReady.recipe_name_clean,
+              ingredients_clean: printReady.ingredients_clean,
+              instructions_clean: printReady.instructions_clean,
+              detected_language: printReady.detected_language,
+              cleaning_version: printReady.cleaning_version || 1,
+              agent_metadata: printReady,
+              updated_at: new Date().toISOString(),
+            }, {
+              onConflict: 'recipe_id',
+            });
+
+          if (printReadyError) {
+            console.error('❌ Error saving print-ready to Supabase:', printReadyError);
+          } else {
+            console.log('✅ Print-ready text saved successfully for recipe:', recipe_id);
+          }
         }
+      } else {
+        console.warn('⚠️  print_ready NOT FOUND for recipe:', recipe_id);
+        console.warn('⚠️  Checked both root level and agent_metadata.');
+        console.warn('⚠️  This means the Railway agent did not return cleaned text.');
+        console.warn('⚠️  Full response structure:', JSON.stringify(promptData, null, 2));
       }
 
       // === NUEVO: Save dish_category to guest_recipes ===
-      const dishCategory = promptData.agent_metadata?.dish_category;
+      // Check BOTH root level AND agent_metadata (agent returns it at root)
+      const dishCategory = promptData.dish_category || promptData.agent_metadata?.dish_category;
+      
+      console.log('🔍 Checking dish_category for recipe_id:', recipe_id);
+      console.log('🔍 dishCategory from root:', promptData.dish_category);
+      console.log('🔍 dishCategory from agent_metadata:', promptData.agent_metadata?.dish_category);
+      console.log('🔍 Final dishCategory value:', dishCategory);
+      
       if (dishCategory) {
+        console.log('✅ dish_category FOUND! Saving to database...');
         const { error: categoryError } = await supabase
           .from('guest_recipes')
           .update({ 
@@ -108,6 +154,9 @@ export async function POST(request: NextRequest) {
         } else {
           console.log('✅ Dish category saved:', dishCategory, 'for recipe:', recipe_id);
         }
+      } else {
+        console.warn('⚠️  dish_category NOT FOUND for recipe:', recipe_id);
+        console.warn('⚠️  Checked both root level and agent_metadata.');
       }
       // === FIN NUEVO ===
     }
