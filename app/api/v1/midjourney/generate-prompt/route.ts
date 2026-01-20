@@ -40,20 +40,26 @@ export async function POST(request: NextRequest) {
 
     const promptData = await response.json();
 
+    // === DEBUG: Preparar info de debug para la respuesta ===
+    const debugInfo = {
+      topLevelKeys: Object.keys(promptData),
+      hasAgentMetadata: !!promptData.agent_metadata,
+      agentMetadataKeys: Object.keys(promptData.agent_metadata || {}),
+      hasPrintReadyRoot: !!promptData.print_ready,
+      hasPrintReadyMetadata: !!promptData.agent_metadata?.print_ready,
+      hasDishCategoryRoot: !!promptData.dish_category,
+      hasDishCategoryMetadata: !!promptData.agent_metadata?.dish_category,
+      printReadyType: typeof promptData.print_ready,
+      printReadyMetadataType: typeof promptData.agent_metadata?.print_ready,
+      recipeId: recipe_id || null,
+    };
+
     // === DEBUG: Log completo de la respuesta del agente ===
     console.log('📋 ========================================');
     console.log('📋 Railway Agent Response for recipe_id:', recipe_id || 'N/A');
     console.log('📋 ========================================');
     console.log('📋 Full promptData:', JSON.stringify(promptData, null, 2));
-    console.log('📋 promptData top-level keys:', Object.keys(promptData));
-    console.log('📋 agent_metadata exists?', !!promptData.agent_metadata);
-    console.log('📋 agent_metadata keys:', Object.keys(promptData.agent_metadata || {}));
-    
-    // Check both root level AND agent_metadata
-    console.log('📋 print_ready in root?', !!promptData.print_ready);
-    console.log('📋 print_ready in agent_metadata?', !!promptData.agent_metadata?.print_ready);
-    console.log('📋 dish_category in root?', !!promptData.dish_category);
-    console.log('📋 dish_category in agent_metadata?', !!promptData.agent_metadata?.dish_category);
+    console.log('📋 Debug Info:', JSON.stringify(debugInfo, null, 2));
     console.log('📋 ========================================');
 
     if (!promptData.generated_prompt) {
@@ -161,7 +167,12 @@ export async function POST(request: NextRequest) {
       // === FIN NUEVO ===
     }
 
-    return NextResponse.json(promptData);
+    // === TEMPORAL: Agregar debug info a la respuesta ===
+    // TODO: Remover después de diagnosticar
+    return NextResponse.json({
+      ...promptData,
+      _debug: debugInfo,  // Info de debug agregada temporalmente
+    });
   } catch (error) {
     console.error('❌ Error calling Railway agent:', error);
     return NextResponse.json(
