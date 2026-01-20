@@ -7,23 +7,44 @@ export async function POST(request: NextRequest) {
   try {
     const { dish_name, recipe, recipe_id } = await request.json();
 
+    // === DEBUG: Log qué recibimos ===
+    console.log('📨 Received request:', {
+      recipe_id: recipe_id || 'N/A',
+      dish_name: dish_name?.substring(0, 50) || 'N/A',
+      recipeLength: recipe?.length || 0,
+      hasDishName: !!dish_name,
+      hasRecipe: !!recipe,
+    });
+
     if (!dish_name || !recipe) {
+      console.error('❌ Missing required fields:', { dish_name: !!dish_name, recipe: !!recipe });
       return NextResponse.json(
         { error: 'dish_name and recipe are required' },
         { status: 400 }
       );
     }
 
+    // === DEBUG: Log qué vamos a enviar a Railway ===
+    const railwayPayload = {
+      dish_name,
+      recipe,
+    };
+    console.log('🚂 About to call Railway:', {
+      url: `${RAILWAY_AGENT_URL}/generate-prompt`,
+      dish_name: dish_name.substring(0, 50),
+      recipeLength: recipe.length,
+      payloadKeys: Object.keys(railwayPayload),
+    });
+
     const response = await fetch(`${RAILWAY_AGENT_URL}/generate-prompt`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        dish_name,
-        recipe,
-      }),
+      body: JSON.stringify(railwayPayload),
     });
+
+    console.log('🚂 Railway response status:', response.status, response.statusText);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -31,6 +52,7 @@ export async function POST(request: NextRequest) {
         status: response.status,
         statusText: response.statusText,
         error: errorText,
+        url: `${RAILWAY_AGENT_URL}/generate-prompt`,
       });
       return NextResponse.json(
         { error: `Agent returned ${response.status}: ${response.statusText}` },

@@ -17,6 +17,15 @@ ${ingredients}
 Instructions:
 ${instructions}`;
 
+    // === DEBUG: Log qué se está enviando ===
+    console.log('🚀 Calling /api/v1/midjourney/generate-prompt with:', {
+      recipeId,
+      recipeName,
+      ingredientsLength: ingredients.length,
+      instructionsLength: instructions.length,
+      recipeTextLength: recipeText.length,
+    });
+
     const response = await fetch('/api/v1/midjourney/generate-prompt', {
       method: 'POST',
       headers: {
@@ -28,6 +37,8 @@ ${instructions}`;
         recipe_id: recipeId,
       }),
     });
+
+    console.log('📥 Response status:', response.status, response.statusText);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -42,7 +53,14 @@ ${instructions}`;
       };
     }
 
-    await response.json();
+    const responseData = await response.json();
+    console.log('✅ Response received:', {
+      hasGeneratedPrompt: !!responseData.generated_prompt,
+      hasAgentMetadata: !!responseData.agent_metadata,
+      hasPrintReady: !!responseData.print_ready || !!responseData.agent_metadata?.print_ready,
+      debugInfo: responseData._debug,
+    });
+
     console.log('✅ Midjourney prompt generated and saved successfully for recipe:', recipeId);
     return { success: true };
   } catch (error) {
