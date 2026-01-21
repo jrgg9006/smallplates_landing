@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -68,6 +70,14 @@ export default function Footer() {
                     >
                       Book Specifications
                     </button>
+                  </li>
+                  <li>
+                    <Link 
+                      href="/pricing" 
+                      className="font-sans font-light text-base text-white/70 hover:text-white transition-colors"
+                    >
+                      Pricing
+                    </Link>
                   </li>
                 </ul>
               </div>

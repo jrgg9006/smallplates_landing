@@ -26,13 +26,15 @@ export default function Banner() {
           
           {/* Logo - Centered on mobile, left on desktop */}
           <div className="flex-shrink-0 lg:flex-none">
-            <Image
-              src="/images/SmallPlates_logo_horizontal.png"
-              alt="Small Plates & Company"
-              width={200}
-              height={40}
-              priority
-            />
+            <Link href="/" className="inline-block">
+              <Image
+                src="/images/SmallPlates_logo_horizontal.png"
+                alt="Small Plates & Company"
+                width={200}
+                height={40}
+                priority
+              />
+            </Link>
           </div>
 
           {/* Desktop Navigation Buttons */}
