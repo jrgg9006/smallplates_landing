@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 /**
  * THE SOLUTION SECTION — Small Plates Wedding Landing Page
@@ -109,10 +110,12 @@ export default function TheSolution() {
             transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
           >
             <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl bg-gray-200">
-              {/* Placeholder until we have the final image */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <p className="text-gray-400 font-sans text-sm"></p>
-              </div>
+              <Image
+                src="/images/everyone_showedup/everyone_who_showed_up.png"
+                alt="A cookbook made by everyone who showed up"
+                fill
+                className="object-cover"
+              />
             </div>
             
             {/* Caption — adds authenticity */}
