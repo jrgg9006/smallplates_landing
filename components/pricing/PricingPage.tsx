@@ -177,12 +177,12 @@ export default function PricingPage() {
                     className="
                       w-full py-4 px-6 
                       bg-[#D4A854] hover:bg-[#C49A4A] 
-                      text-[#2D2D2D] font-normal text-sm font-sans
+                      text-[#2D2D2D] font-medium text-base font-sans
                       rounded-lg
                       transition-colors duration-200
                     "
                   >
-                    Start the book →
+                    Start Your Book
                   </button>
                 </div>
               </motion.div>
