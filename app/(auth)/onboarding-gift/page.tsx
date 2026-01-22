@@ -8,14 +8,22 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import OnboardingStep from "@/components/onboarding/OnboardingStep";
 import { SelectionCard } from "@/components/onboarding/SelectionCard";
 import { CustomDropdown } from "@/components/onboarding/CustomDropdown";
+import { ProductSelectionStep } from "@/components/onboarding/ProductSelectionStep";
+import { CheckoutSummary } from "@/components/onboarding/CheckoutSummary";
 
 
 /**
  * Step 1 Component - Wedding Timeline
  */
 function Step1({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
-  const { nextStep, previousStep, updateStepData } = useOnboarding();
-  const [selectedTimeline, setSelectedTimeline] = useState<string>("");
+  const { nextStep, previousStep, updateStepData, state } = useOnboarding();
+  
+  // Initialize from saved state if available
+  const savedData = state.answers.step1 as {
+    timeline?: string;
+  } | undefined;
+
+  const [selectedTimeline, setSelectedTimeline] = useState<string>(savedData?.timeline || "");
 
   const timelineOptions = [
     { 
@@ -59,7 +67,7 @@ function Step1({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
   return (
     <OnboardingStep
       stepNumber={1}
-      totalSteps={isAddBookMode ? 2 : 3}
+      totalSteps={isAddBookMode ? 2 : 4}
       title="When's the big day?"
       imageUrl="/images/onboarding/onboarding_lemon.png"
       imageAlt="Wedding planning essentials"
@@ -132,14 +140,78 @@ function Step1({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
 }
 
 /**
- * Step 2 Component - Contact & Gift Setup
+ * Step 2 Component - Product Selection
  */
-function Step2({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
+function Step2Product({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
+  const { nextStep, previousStep, updateProductTier, state } = useOnboarding();
+
+  const handleSelection = (tierId: string) => {
+    updateProductTier(tierId);
+  };
+
+  const handleContinue = () => {
+    if (state.selectedProductTier) {
+      nextStep();
+    }
+  };
+
+  return (
+    <OnboardingStep
+      stepNumber={2}
+      totalSteps={isAddBookMode ? 2 : 4}
+      title="Choose your collection."
+      imageUrl="/images/onboarding/onboarding_lemon.png"
+      imageAlt="Product selection"
+    >
+      <ProductSelectionStep
+        selectedTierId={state.selectedProductTier}
+        onSelect={handleSelection}
+      />
+
+      {/* Navigation */}
+      <div className="flex justify-between mt-8">
+        <button
+          type="button"
+          onClick={previousStep}
+          className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors"
+        >
+          Back
+        </button>
+        <button
+          type="button"
+          onClick={handleContinue}
+          disabled={!state.selectedProductTier}
+          className={`px-8 py-3 rounded-xl font-semibold transition-colors ${
+            state.selectedProductTier
+              ? "bg-[#D4A854] text-white hover:bg-[#c49b4a]"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+          }`}
+        >
+          Continue
+        </button>
+      </div>
+    </OnboardingStep>
+  );
+}
+
+/**
+ * Step 3 Component - Contact & Gift Setup
+ */
+function Step3({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
   const { state, nextStep, previousStep, updateStepData, completeOnboarding } = useOnboarding();
-  const [giftGiverName, setGiftGiverName] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [partnerFirstName, setPartnerFirstName] = useState("");
-  const [relationship, setRelationship] = useState("");
+  
+  // Initialize from saved state if available
+  const savedData = state.answers.step3 as {
+    giftGiverName?: string;
+    firstName?: string;
+    partnerFirstName?: string;
+    relationship?: string;
+  } | undefined;
+
+  const [giftGiverName, setGiftGiverName] = useState(savedData?.giftGiverName || "");
+  const [firstName, setFirstName] = useState(savedData?.firstName || "");
+  const [partnerFirstName, setPartnerFirstName] = useState(savedData?.partnerFirstName || "");
+  const [relationship, setRelationship] = useState(savedData?.relationship || "");
   const [loading, setLoading] = useState(false);
 
 
@@ -149,8 +221,8 @@ function Step2({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
       return;
     }
 
-    // Build step2 data
-    const step2Data = {
+    // Build step3 data
+    const step3Data = {
       ...(isAddBookMode ? {} : { giftGiverName: giftGiverName.trim() }),
       firstName: firstName.trim(),
       partnerFirstName: partnerFirstName.trim(),
@@ -158,16 +230,16 @@ function Step2({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
     };
 
     // Store gift info in context
-    await updateStepData(2, step2Data);
+    await updateStepData(3, step3Data);
     
     // Reason: If add-book mode, complete onboarding directly (skip Step3 account creation)
     if (isAddBookMode) {
       setLoading(true);
       try {
-        // Pass step1 and step2 data directly to avoid async state timing issues
+        // Pass step1 and step3 data directly to avoid async state timing issues
         await completeOnboarding(undefined, undefined, { 
           step1: state.answers.step1,
-          step2: step2Data 
+          step3: step3Data 
         });
       } finally {
         setLoading(false);
@@ -182,8 +254,8 @@ function Step2({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
 
   return (
     <OnboardingStep
-      stepNumber={2}
-      totalSteps={isAddBookMode ? 2 : 3}
+      stepNumber={3}
+      totalSteps={isAddBookMode ? 2 : 4}
       title="Almost there."
       imageUrl="/images/onboarding/onboarding_lemon.png"
       imageAlt="Wedding planning essentials"
@@ -314,14 +386,21 @@ function Step2({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
 }
 
 /**
- * Step 3 Component - Account Creation & Launch
+ * Step 4 Component - Checkout & Account Creation
  */
-function Step3() {
-  const { previousStep, completeOnboarding, updateStepData } = useOnboarding();
+function Step4() {
+  const { previousStep, completeOnboarding, updateStepData, state } = useOnboarding();
+  
+  // Initialize from saved state if available
+  const savedData = state.answers.step4 as {
+    email?: string;
+    password?: string;
+  } | undefined;
+
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState(savedData?.email || "");
+  const [password, setPassword] = useState(savedData?.password || "");
   const [emailError, setEmailError] = useState("");
 
   // Email validation
@@ -345,7 +424,7 @@ function Step3() {
     }
   };
 
-  const handleCreateAccount = async () => {
+  const handleCompletePurchase = async () => {
     if (!validateEmail(email.trim()) || password.length < 6) {
       return;
     }
@@ -354,15 +433,16 @@ function Step3() {
 
     try {
       // Store account info in context
-      updateStepData(3, {
+      await updateStepData(4, {
         email: email.trim(),
         password // In real app, this would be hashed
       });
       
-      // Complete onboarding with all collected data
+      // Generate Gumroad link and redirect
       await completeOnboarding(email.trim(), password);
       
-      setSuccess(true);
+      // Note: completeOnboarding redirects to Gumroad, so we won't reach here
+      setSuccess(false);
       setLoading(false);
     } catch (err) {
       setLoading(false);
@@ -371,128 +451,76 @@ function Step3() {
 
   const isFormValid = validateEmail(email.trim()) && password.length >= 6 && !emailError;
 
+  // Get gift giver and couple info from step 3 (gift giver info step)
+  const step3Data = state.answers.step3 as {
+    giftGiverName?: string;
+    firstName?: string;
+    partnerFirstName?: string;
+    relationship?: string;
+  } | undefined;
+  
+  const giftGiverName = step3Data?.giftGiverName;
+  const coupleNames = step3Data
+    ? {
+        brideFirstName: step3Data.firstName,
+        partnerFirstName: step3Data.partnerFirstName,
+      }
+    : undefined;
+
   return (
     <OnboardingStep
-      stepNumber={3}
-      totalSteps={3}
-      title=""
+      stepNumber={4}
+      totalSteps={4}
+      title="Complete your purchase."
       imageUrl="/images/onboarding/onboarding_lemon.png"
-      imageAlt="Wedding planning essentials"
+      imageAlt="Checkout"
     >
       <div className="max-w-lg mx-auto">
-        {!success ? (
-          <>
-            {/* Personalized Message */}
-            <div className="text-center mb-8 space-y-4">
-              <h2 className="text-lg font-medium text-[#2D2D2D]">
-                Perfect choice.
-              </h2>
-              <p className="text-base text-[#2D2D2D]/70 font-light leading-relaxed">
-                You&apos;re giving something they&apos;ll treasure forever.
-                <br />Let&apos;s create your account to get started.
-              </p>
-            </div>
+        <CheckoutSummary
+          selectedTierId={state.selectedProductTier}
+          coupleNames={coupleNames}
+          giftGiverName={giftGiverName}
+          email={email}
+          password={password}
+          emailError={emailError}
+          loading={loading}
+          onEmailChange={handleEmailChange}
+          onEmailBlur={handleEmailBlur}
+          onPasswordChange={(e) => setPassword(e.target.value)}
+          onCompletePurchase={handleCompletePurchase}
+          isFormValid={isFormValid}
+        />
 
-            {/* Account Creation Form */}
-            <div className="space-y-6 mb-8">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-[#2D2D2D] mb-1">
-                  Email Address
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={handleEmailChange}
-                  onBlur={handleEmailBlur}
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:border-transparent outline-none transition-all ${
-                    emailError 
-                      ? 'border-red-500 focus:ring-red-500' 
-                      : 'border-gray-300 focus:ring-[#D4A854]'
-                  }`}
-                  placeholder="you@example.com"
-                />
-                {emailError && (
-                  <p className="mt-1 text-sm text-red-600">{emailError}</p>
-                )}
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-[#2D2D2D] mb-1">
-                  Create a password
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none transition-all"
-                  placeholder="At least 6 characters"
-                  minLength={6}
-                />
-                {password.length > 0 && password.length < 6 && (
-                  <p className="mt-1 text-sm text-red-600">Password must be at least 6 characters</p>
-                )}
-              </div>
-            </div>
-
-            {/* Confidence building message */}
-            <div className="text-center text-sm text-[#2D2D2D]/50 font-light mb-8">
-              The thoughtful gift everyone will remember.
-            </div>
-
-            {/* Navigation */}
-            <div className="flex justify-between items-center">
-              <button
-                type="button"
-                onClick={previousStep}
-                disabled={loading}
-                className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors disabled:opacity-50"
-              >
-                Back
-              </button>
-              <button
-                type="button"
-                onClick={handleCreateAccount}
-                disabled={!isFormValid || loading}
-                className={`px-12 py-4 rounded-2xl text-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                  isFormValid 
-                    ? "bg-[#D4A854] text-white hover:bg-[#c49b4a]" 
-                    : "bg-gray-300 text-gray-500"
-                }`}
-              >
-                {loading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2 inline-block"></div>
-                    Creating...
-                  </>
-                ) : (
-                  "Start Creating Their Gift"
-                )}
-              </button>
-            </div>
-          </>
-        ) : (
-          /* Success Message */
-          <div className="text-center py-12">
-            <div className="w-20 h-20 bg-[#D4A854]/10 rounded-full mx-auto flex items-center justify-center mb-6">
-              <svg className="w-10 h-10 text-[#D4A854]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-semibold text-[#2D2D2D] mb-3">
-              Perfect choice.
-            </h3>
-            <p className="text-lg text-[#2D2D2D]/70 font-light mb-6">
-              You&apos;re giving them something they&apos;ll treasure forever.
-            </p>
-            <p className="text-base text-[#D4A854] italic font-serif">
-              Still at the table.
-            </p>
-          </div>
-        )}
+        {/* Navigation */}
+        <div className="flex justify-between items-center mt-8">
+          <button
+            type="button"
+            onClick={previousStep}
+            disabled={loading}
+            className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors disabled:opacity-50"
+          >
+            Back
+          </button>
+          <button
+            type="button"
+            onClick={handleCompletePurchase}
+            disabled={!isFormValid || loading}
+            className={`px-12 py-4 rounded-2xl text-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              isFormValid 
+                ? "bg-[#D4A854] text-white hover:bg-[#c49b4a]" 
+                : "bg-gray-300 text-gray-500"
+            }`}
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2 inline-block"></div>
+                Processing...
+              </>
+            ) : (
+              "Complete Purchase"
+            )}
+          </button>
+        </div>
       </div>
     </OnboardingStep>
   );
@@ -508,8 +536,9 @@ function GiftOnboardingContent({ isAddBookMode }: { isAddBookMode: boolean }) {
   return (
     <div className="min-h-screen bg-white">
       {state.currentStep === 1 && <Step1 isAddBookMode={isAddBookMode} />}
-      {state.currentStep === 2 && <Step2 isAddBookMode={isAddBookMode} />}
-      {state.currentStep === 3 && !isAddBookMode && <Step3 />}
+      {state.currentStep === 2 && !isAddBookMode && <Step2Product isAddBookMode={isAddBookMode} />}
+      {state.currentStep === 3 && <Step3 isAddBookMode={isAddBookMode} />}
+      {state.currentStep === 4 && !isAddBookMode && <Step4 />}
     </div>
   );
 }

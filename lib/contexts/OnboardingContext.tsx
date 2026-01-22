@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
   createContext,
   useContext,
@@ -14,14 +14,74 @@ import {
   OnboardingState,
   OnboardingContextType,
 } from "@/lib/types/onboarding";
+import { generateGumroadLink } from "@/lib/payments/gumroad";
 
-const TOTAL_STEPS = 4;
+// Total steps: 5 for couples, 4 for gift givers
+const TOTAL_STEPS_COUPLE = 5;
+const TOTAL_STEPS_GIFT = 4;
 
-const initialState: OnboardingState = {
+const getInitialState = (userType: 'couple' | 'gift_giver'): OnboardingState => ({
   currentStep: 1,
-  totalSteps: TOTAL_STEPS,
+  totalSteps: userType === 'couple' ? TOTAL_STEPS_COUPLE : TOTAL_STEPS_GIFT,
   answers: {},
+  selectedProductTier: null,
   isComplete: false,
+});
+
+/**
+ * Get localStorage key for onboarding state
+ */
+const getStorageKey = (userType: 'couple' | 'gift_giver'): string => {
+  return `onboarding_state_${userType}`;
+};
+
+/**
+ * Load onboarding state from localStorage
+ */
+const loadStateFromStorage = (userType: 'couple' | 'gift_giver'): OnboardingState | null => {
+  if (typeof window === 'undefined') return null;
+  
+  try {
+    const saved = localStorage.getItem(getStorageKey(userType));
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Validate that it has the expected structure
+      if (parsed && typeof parsed === 'object' && 'currentStep' in parsed) {
+        return parsed as OnboardingState;
+      }
+    }
+  } catch (e) {
+    // Ignore parsing errors
+    console.warn('Failed to load onboarding state from localStorage:', e);
+  }
+  
+  return null;
+};
+
+/**
+ * Save onboarding state to localStorage
+ */
+const saveStateToStorage = (userType: 'couple' | 'gift_giver', state: OnboardingState): void => {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    localStorage.setItem(getStorageKey(userType), JSON.stringify(state));
+  } catch (e) {
+    console.warn('Failed to save onboarding state to localStorage:', e);
+  }
+};
+
+/**
+ * Clear onboarding state from localStorage
+ */
+const clearStateFromStorage = (userType: 'couple' | 'gift_giver'): void => {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    localStorage.removeItem(getStorageKey(userType));
+  } catch (e) {
+    console.warn('Failed to clear onboarding state from localStorage:', e);
+  }
 };
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(
@@ -43,8 +103,30 @@ interface OnboardingProviderProps {
  *   userType (string): Type of user - 'couple' or 'gift_giver'
  */
 export function OnboardingProvider({ children, userType = 'couple', skipAuth = false, existingUserId }: OnboardingProviderProps) {
-  const [state, setState] = useState<OnboardingState>(initialState);
+  // Initialize with default state first (to avoid hydration mismatch)
+  const [state, setState] = useState<OnboardingState>(() => getInitialState(userType));
+  const [isHydrated, setIsHydrated] = useState(false);
   const router = useRouter();
+
+  // Load from localStorage after hydration (client-side only)
+  useEffect(() => {
+    const saved = loadStateFromStorage(userType);
+    if (saved && !saved.isComplete) {
+      // Restore saved state, but ensure totalSteps matches current userType
+      setState({
+        ...saved,
+        totalSteps: userType === 'couple' ? TOTAL_STEPS_COUPLE : TOTAL_STEPS_GIFT,
+      });
+    }
+    setIsHydrated(true);
+  }, [userType]);
+
+  // Save state to localStorage whenever it changes (only after hydration)
+  useEffect(() => {
+    if (isHydrated && !state.isComplete) {
+      saveStateToStorage(userType, state);
+    }
+  }, [state, userType, isHydrated]);
 
   /**
    * Navigate to the next step
@@ -70,7 +152,7 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
    * Update data for a specific step
    *
    * Args:
-   *   stepId (number): The step number (1, 2, or 3)
+   *   stepId (number): The step number
    *   data (Record<string, any>): The data to store for this step
    */
   const updateStepData = useCallback(
@@ -91,152 +173,129 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
   );
 
   /**
-   * Complete the onboarding process and create user account
-   * When skipAuth=true, uses existingUserId instead of creating a new account
-   * @param email - Optional email for account creation
-   * @param password - Optional password for account creation
-   * @param directData - Optional data to merge with state.answers (useful when state hasn't updated yet)
+   * Update selected product tier
+   */
+  const updateProductTier = useCallback((tierId: string) => {
+    setState((prev) => ({
+      ...prev,
+      selectedProductTier: tierId,
+    }));
+  }, []);
+
+  /**
+   * Generate Gumroad payment link and redirect
+   * Account creation will happen after payment confirmation (webhook)
+   * @param email - Email for account creation (stored in metadata)
+   * @param password - Password for account creation (stored in metadata, will be used after payment)
+   * @param directData - Optional data to merge with state.answers
    */
   const completeOnboarding = useCallback(
     async (email?: string, password?: string, directData?: Record<string, any>) => {
       try {
-        let userId: string;
-        let finalEmail = email;
+        if (!state.selectedProductTier) {
+          throw new Error("Please select a product tier to continue");
+        }
 
-        if (skipAuth && existingUserId) {
-          // User already authenticated - skip signup
-          // console.log removed for production
-          userId = existingUserId;
-          
-          // Get email from current session if not provided
-          if (!finalEmail) {
-            const supabase = createSupabaseClient();
-            const { data: { user } } = await supabase.auth.getUser();
-            finalEmail = user?.email;
-          }
-        } else {
-          // Normal flow - create new account
+        let finalEmail = email;
           let finalPassword = password;
           
+        // Get email/password from state if not provided
           if (!finalEmail || !finalPassword) {
-            // Fallback to state if parameters not provided
-            const emailStep = userType === 'couple' ? state.answers.step4 : state.answers.step3;
+          const emailStep = userType === 'couple' ? state.answers.step5 : state.answers.step4;
             finalEmail = finalEmail || emailStep?.email;
             finalPassword = finalPassword || emailStep?.password;
           }
 
-          // console.log removed for production
-          // console.log removed for production
-          // console.log removed for production
-          // console.log removed for production
-          // console.log removed for production
-          // console.log removed for production
-          // console.log removed for production
-
           if (!finalEmail || !finalPassword) {
-            throw new Error("Email and password are required to complete onboarding");
-          }
-
-          const supabase = createSupabaseClient();
-
-          // console.log removed for production
-
-          // Create user with signUp (user will be auto-logged in)
-          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email: finalEmail,
-            password: finalPassword,
-            options: {
-              data: {
-                user_type: userType
-              }
-            }
-          });
-
-          if (signUpError || !signUpData.user) {
-            throw new Error(signUpError?.message || "Failed to create user account");
-          }
-
-          // console.log removed for production
-          userId = signUpData.user.id;
+          throw new Error("Email and password are required to complete purchase");
         }
 
-        // Reason: Merge directData with state.answers to handle async state updates
+        // Merge directData with state.answers
         const mergedAnswers = directData 
           ? { ...state.answers, ...directData }
           : state.answers;
 
-        // Create profile/group using API
-        const response = await fetch('/api/v1/create-wedding-profile', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: userId,
-            userData: mergedAnswers,
-            userType: userType,
-            userEmail: finalEmail,
-            isAdditionalBook: skipAuth // Reason: tells API this is an additional book, not first-time setup
-          })
-        });
-
-        const responseData = await response.json();
-
-        if (!response.ok) {
-          console.error('⚠️ Failed to create profile/book');
-          throw new Error(responseData.error || 'Failed to create profile');
+        // Extract couple names from answers
+        // For couples: step3 has couple info, step4 has celebration details
+        // For gift givers: step3 has gift giver + couple info
+        let coupleNames: { brideFirstName?: string; brideLastName?: string; partnerFirstName?: string; partnerLastName?: string } | undefined;
+        
+        if (userType === 'couple') {
+          const coupleInfo = mergedAnswers.step3 as {
+            brideFirstName?: string;
+            brideLastName?: string;
+            partnerFirstName?: string;
+            partnerLastName?: string;
+          } | undefined;
+          
+          if (coupleInfo) {
+            coupleNames = {
+              brideFirstName: coupleInfo.brideFirstName,
+              brideLastName: coupleInfo.brideLastName,
+              partnerFirstName: coupleInfo.partnerFirstName,
+              partnerLastName: coupleInfo.partnerLastName,
+            };
+          }
         } else {
-          // console.log removed for production
-        }
-
-        // Send verification email only for new users (not skipAuth)
-        if (!skipAuth && responseData.data?.emailVerificationToken) {
-          try {
-            const emailResponse = await fetch('/api/v1/send-verification-email', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                email: finalEmail,
-                token: responseData.data.emailVerificationToken,
-                userType: userType,
-                userName: responseData.data.profile?.full_name
-              })
-            });
-
-            if (!emailResponse.ok) {
-              console.error('⚠️ Failed to send verification email, but profile was created');
-            } else {
-              // console.log removed for production
-            }
-          } catch (emailError) {
-            console.error('Error sending verification email:', emailError);
+          const giftInfo = mergedAnswers.step3 as {
+            firstName?: string;
+            partnerFirstName?: string;
+          } | undefined;
+          
+          if (giftInfo) {
+            coupleNames = {
+              brideFirstName: giftInfo.firstName,
+              partnerFirstName: giftInfo.partnerFirstName,
+            };
           }
         }
 
-        setState(prev => ({ ...prev, isComplete: true }));
+        // Generate Gumroad link with metadata
+        const gumroadLink = generateGumroadLink(state.selectedProductTier, {
+          email: finalEmail,
+            userType: userType,
+          coupleNames: coupleNames,
+          giftGiverName: userType === 'gift_giver' ? (mergedAnswers.step3 as { giftGiverName?: string } | undefined)?.giftGiverName : undefined,
+          weddingDate: userType === 'couple' ? (mergedAnswers.step3 as { weddingDate?: string } | undefined)?.weddingDate : undefined,
+          guestCount: userType === 'couple' ? (mergedAnswers.step4 as { guestCount?: string } | undefined)?.guestCount : undefined,
+          planningStage: userType === 'couple' ? (mergedAnswers.step1 as { planningStage?: string } | undefined)?.planningStage : undefined,
+          timeline: userType === 'gift_giver' ? (mergedAnswers.step1 as { timeline?: string } | undefined)?.timeline : undefined,
+          relationship: userType === 'gift_giver' ? (mergedAnswers.step3 as { relationship?: string } | undefined)?.relationship : undefined,
+        });
 
-        // Redirect to profile
-        // console.log removed for production
-        router.push("/profile/groups");
+        // Store onboarding data temporarily (for webhook to use later)
+        // TODO: Store in database or session storage for webhook retrieval
+        // For now, metadata is passed in URL params
+
+        // Clear localStorage before redirecting
+        clearStateFromStorage(userType);
+
+        // Redirect to Gumroad
+        window.location.href = gumroadLink;
 
       } catch (err) {
         console.error("Onboarding completion error:", err);
-        alert(err instanceof Error ? err.message : "Failed to complete onboarding");
+        alert(err instanceof Error ? err.message : "Failed to complete purchase");
+        throw err;
       }
     },
-    [router, state.answers, userType, skipAuth, existingUserId]
+    [state.answers, state.selectedProductTier, userType]
   );
 
   /**
    * Reset onboarding state to initial values
    */
   const resetOnboarding = useCallback(() => {
-    setState(initialState);
-  }, []);
+    clearStateFromStorage(userType);
+    setState(getInitialState(userType));
+  }, [userType]);
 
   const value: OnboardingContextType = {
     state,
     nextStep,
     previousStep,
     updateStepData,
+    updateProductTier,
     completeOnboarding,
     resetOnboarding,
   };
