@@ -85,7 +85,7 @@ function RecipeCard({ recipe, onClick, onEdit, onRemove }: RecipeCardProps) {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Recipe Name with quotes and italic */}
-      <h3 className="recipe-card__title">
+      <h3 className="recipe-card__title line-clamp-3">
         &ldquo;{recipe.recipe_name}&rdquo;
       </h3>
       
