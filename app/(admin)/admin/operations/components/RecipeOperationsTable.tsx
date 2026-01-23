@@ -33,9 +33,9 @@ interface RecipeWithProductionStatus {
   } | null;
   production_status: {
     id: string;
-    text_finalized_in_indesign: boolean;
+    text_finalized_in_indesign: boolean; // Deprecated - kept for backward compatibility
     image_generated: boolean;
-    image_placed_in_indesign: boolean;
+    image_placed_in_indesign: boolean; // Deprecated - kept for backward compatibility
     operations_notes: string | null;
     production_completed_at: string | null;
     needs_review: boolean;
@@ -72,7 +72,7 @@ export function RecipeOperationsTable({
 
   const handleCheckboxChange = async (
     recipeId: string,
-    field: 'text_finalized_in_indesign' | 'image_generated' | 'image_placed_in_indesign',
+    field: 'image_generated',
     checked: boolean
   ) => {
     setUpdatingRecipeId(recipeId);
@@ -191,13 +191,7 @@ export function RecipeOperationsTable({
               Group
             </th>
             <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Text Finalized
-            </th>
-            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
               Image Generated
-            </th>
-            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Image Placed
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Status
@@ -307,36 +301,10 @@ export function RecipeOperationsTable({
                 <td className="px-4 py-3 whitespace-nowrap text-center">
                   <input
                     type="checkbox"
-                    checked={productionStatus?.text_finalized_in_indesign || false}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      handleCheckboxChange(recipe.id, 'text_finalized_in_indesign', e.target.checked);
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                    disabled={isUpdating}
-                    className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
-                  />
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-center">
-                  <input
-                    type="checkbox"
                     checked={productionStatus?.image_generated || false}
                     onChange={(e) => {
                       e.stopPropagation();
                       handleCheckboxChange(recipe.id, 'image_generated', e.target.checked);
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                    disabled={isUpdating}
-                    className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
-                  />
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-center">
-                  <input
-                    type="checkbox"
-                    checked={productionStatus?.image_placed_in_indesign || false}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      handleCheckboxChange(recipe.id, 'image_placed_in_indesign', e.target.checked);
                     }}
                     onClick={(e) => e.stopPropagation()}
                     disabled={isUpdating}

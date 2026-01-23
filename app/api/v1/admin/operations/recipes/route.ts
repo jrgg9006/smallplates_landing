@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get('status') as 'no_action' | 'in_progress' | 'ready_to_print' | null;
     const cookbookId = searchParams.get('cookbookId');
     const userId = searchParams.get('userId');
+    const guestId = searchParams.get('guestId');
     const needsReview = searchParams.get('needsReview');
     const hideArchived = searchParams.get('hideArchived');
 
@@ -19,6 +20,7 @@ export async function GET(req: NextRequest) {
       status?: 'no_action' | 'in_progress' | 'ready_to_print';
       cookbookId?: string | 'not_in_cookbook';
       userId?: string;
+      guestId?: string;
       needsReview?: boolean;
       hideArchived?: boolean;
     } = {};
@@ -33,6 +35,10 @@ export async function GET(req: NextRequest) {
 
     if (userId) {
       filters.userId = userId;
+    }
+
+    if (guestId) {
+      filters.guestId = guestId;
     }
 
     if (needsReview !== null) {

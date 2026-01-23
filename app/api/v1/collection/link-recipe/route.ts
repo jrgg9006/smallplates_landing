@@ -167,15 +167,16 @@ export async function POST(request: NextRequest) {
 
     // If this was a group link, also add to group_recipes so it appears in the group view
     if (groupId) {
-      // Check if already in group_recipes (shouldn't happen, but be safe)
+      // Check if already in group_recipes (active or removed)
       const { data: existingGroupRecipe } = await supabaseAdmin
         .from('group_recipes')
-        .select('group_id, recipe_id')
+        .select('group_id, recipe_id, removed_at')
         .eq('group_id', groupId)
         .eq('recipe_id', recipeId)
         .maybeSingle();
       
       if (!existingGroupRecipe) {
+        // Doesn't exist, insert new
         const { error: groupRecipeError } = await supabaseAdmin
           .from('group_recipes')
           .insert({
@@ -189,7 +190,24 @@ export async function POST(request: NextRequest) {
           console.error('Error adding to group_recipes:', groupRecipeError);
           // Don't fail - recipe is already in cookbook, just log the error
         }
+      } else if (existingGroupRecipe.removed_at) {
+        // Exists but was removed, reactivate it
+        const { error: reactivateError } = await supabaseAdmin
+          .from('group_recipes')
+          .update({
+            removed_at: null,
+            removed_by: null,
+            added_by: profile.id,
+            added_at: new Date().toISOString()
+          })
+          .eq('group_id', groupId)
+          .eq('recipe_id', recipeId);
+
+        if (reactivateError) {
+          console.error('Error reactivating in group_recipes:', reactivateError);
+        }
       }
+      // If it exists and is active, do nothing (already in group)
     }
     
     return NextResponse.json(

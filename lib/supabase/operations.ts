@@ -30,6 +30,7 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
   status?: 'no_action' | 'in_progress' | 'ready_to_print';
   cookbookId?: string | 'not_in_cookbook';
   userId?: string;
+  guestId?: string;
   needsReview?: boolean;
   hideArchived?: boolean;
 }) {
@@ -59,6 +60,7 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
         group_id,
         added_by,
         added_at,
+        removed_at,
         groups (
           id,
           name
@@ -83,6 +85,10 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
     query = query.eq('user_id', filters.userId);
   }
 
+  if (filters?.guestId) {
+    query = query.eq('guest_id', filters.guestId);
+  }
+
   const { data: recipes, error } = await query;
 
   if (error) {
@@ -102,35 +108,49 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
       ? recipe.recipe_production_status[0] || null
       : recipe.recipe_production_status || null;
     
-    // Calculate status based on checkboxes
-    const textFinalized = productionStatus?.text_finalized_in_indesign || false;
+    // Calculate status based on image_generated, needs_review, and recipe_print_ready
+    // Text Finalized and Image Placed are now automated, so we only track Image Generated
+    // Opción C: cleaned text (recipe_print_ready) is required for ready_to_print status
     const imageGenerated = productionStatus?.image_generated || false;
-    const imagePlaced = productionStatus?.image_placed_in_indesign || false;
-    
-    let status: 'no_action' | 'in_progress' | 'ready_to_print';
-    if (!textFinalized && !imageGenerated && !imagePlaced) {
-      status = 'no_action';
-    } else if (textFinalized && imageGenerated && imagePlaced) {
-      status = 'ready_to_print';
-    } else {
-      status = 'in_progress';
-    }
-
-    // Get group info - recipes can be in multiple groups, but we'll show the first one
-    const groupRecipes = recipe.group_recipes || [];
-    const hasGroupAssociation = Array.isArray(groupRecipes) ? groupRecipes.length > 0 : !!groupRecipes;
-    const groupRecipe = Array.isArray(groupRecipes) ? groupRecipes[0] : groupRecipes;
-    const group = hasGroupAssociation && groupRecipe?.groups ? groupRecipe.groups : null;
-    
-    // Handle midjourney_prompts - could be array or single object depending on Supabase version
-    const midjourneyPrompt = Array.isArray(recipe.midjourney_prompts)
-      ? recipe.midjourney_prompts[0] || null
-      : recipe.midjourney_prompts || null;
+    const needsReview = productionStatus?.needs_review || false;
     
     // Handle recipe_print_ready - could be array or single object depending on Supabase version
     const printReady = Array.isArray(recipe.recipe_print_ready)
       ? recipe.recipe_print_ready[0] || null
       : recipe.recipe_print_ready || null;
+    
+    // Check if recipe has cleaned text (recipe_print_ready exists and has content)
+    const hasCleanedText = printReady && (
+      (printReady.ingredients_clean && printReady.ingredients_clean.trim() !== '') ||
+      (printReady.instructions_clean && printReady.instructions_clean.trim() !== '')
+    );
+    
+    let status: 'no_action' | 'in_progress' | 'ready_to_print';
+    if (!imageGenerated) {
+      status = 'no_action';
+    } else if (imageGenerated && (!hasCleanedText || needsReview)) {
+      // In progress if: image generated but missing cleaned text OR needs review
+      status = 'in_progress';
+    } else {
+      // Ready to print if: image generated AND has cleaned text AND doesn't need review
+      status = 'ready_to_print';
+    }
+
+    // Get group info - filter out removed entries (removed_at IS NULL means active)
+    // A recipe is archived if it has NO active group associations
+    const groupRecipes = recipe.group_recipes || [];
+    const activeGroupRecipes = Array.isArray(groupRecipes) 
+      ? groupRecipes.filter((gr: any) => !gr.removed_at)
+      : (!groupRecipes.removed_at ? [groupRecipes] : []);
+    
+    const hasActiveGroupAssociation = activeGroupRecipes.length > 0;
+    const groupRecipe = activeGroupRecipes[0];
+    const group = hasActiveGroupAssociation && groupRecipe?.groups ? groupRecipe.groups : null;
+    
+    // Handle midjourney_prompts - could be array or single object depending on Supabase version
+    const midjourneyPrompt = Array.isArray(recipe.midjourney_prompts)
+      ? recipe.midjourney_prompts[0] || null
+      : recipe.midjourney_prompts || null;
     
     // Debug log for recipes without groups
     if (!group && recipe.id) {
@@ -186,7 +206,7 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
 
 /**
  * Update production status for a recipe (admin version)
- * Auto-sets production_completed_at when all 3 checkboxes become true
+ * Auto-sets production_completed_at when image is generated and doesn't need review
  * Auto-clears needs_review if recipe hasn't been edited since completion
  */
 export async function updateRecipeProductionStatusAdmin(
@@ -211,13 +231,12 @@ export async function updateRecipeProductionStatusAdmin(
 
   let finalUpdates: RecipeProductionStatusUpdate = { ...updates };
 
-  // If all 3 checkboxes are being set to true, set production_completed_at
-  const textFinalized = updates.text_finalized_in_indesign ?? existing?.text_finalized_in_indesign ?? false;
+  // Set production_completed_at when image is generated and doesn't need review
   const imageGenerated = updates.image_generated ?? existing?.image_generated ?? false;
-  const imagePlaced = updates.image_placed_in_indesign ?? existing?.image_placed_in_indesign ?? false;
+  const needsReview = updates.needs_review ?? existing?.needs_review ?? false;
 
-  if (textFinalized && imageGenerated && imagePlaced) {
-    // All checkboxes are true - set completion timestamp if not already set
+  if (imageGenerated && !needsReview) {
+    // Image is generated and doesn't need review - set completion timestamp if not already set
     if (!existing?.production_completed_at) {
       finalUpdates.production_completed_at = new Date().toISOString();
     }
@@ -247,12 +266,12 @@ export async function updateRecipeProductionStatusAdmin(
     // Create new record
     const insertData: RecipeProductionStatusInsert = {
       recipe_id: recipeId,
-      text_finalized_in_indesign: textFinalized,
-      image_generated: imageGenerated,
-      image_placed_in_indesign: imagePlaced,
+      text_finalized_in_indesign: false, // No longer used, but keep for backward compatibility
+      image_generated: updates.image_generated ?? false,
+      image_placed_in_indesign: false, // No longer used, but keep for backward compatibility
       operations_notes: updates.operations_notes ?? null,
       production_completed_at: finalUpdates.production_completed_at || null,
-      needs_review: false,
+      needs_review: updates.needs_review ?? false,
     };
 
     const { data, error } = await supabase
@@ -316,15 +335,18 @@ export async function markRecipeAsReviewedAdmin(recipeId: string) {
 export async function getProductionStatsAdmin() {
   const supabase = createSupabaseAdminClient();
   
-  // Get all recipes with production status
+  // Get all recipes with production status and recipe_print_ready to check for cleaned text
   const { data: recipes, error } = await supabase
     .from('guest_recipes')
     .select(`
       id,
       recipe_production_status (
-        text_finalized_in_indesign,
         image_generated,
-        image_placed_in_indesign
+        needs_review
+      ),
+      recipe_print_ready (
+        ingredients_clean,
+        instructions_clean
       )
     `);
 
@@ -345,22 +367,33 @@ export async function getProductionStatsAdmin() {
       ? recipe.recipe_production_status[0]
       : recipe.recipe_production_status;
     
+    // Handle recipe_print_ready - could be array or single object
+    const printReady = Array.isArray(recipe.recipe_print_ready)
+      ? recipe.recipe_print_ready[0]
+      : recipe.recipe_print_ready;
+    
     if (!status) {
       // No production status = needs action
       recipesNeedingAction++;
       return;
     }
 
-    const textFinalized = status.text_finalized_in_indesign || false;
     const imageGenerated = status.image_generated || false;
-    const imagePlaced = status.image_placed_in_indesign || false;
+    const needsReview = status.needs_review || false;
+    
+    // Check if recipe has cleaned text
+    const hasCleanedText = printReady && (
+      (printReady.ingredients_clean && printReady.ingredients_clean.trim() !== '') ||
+      (printReady.instructions_clean && printReady.instructions_clean.trim() !== '')
+    );
 
-    if (!textFinalized && !imageGenerated && !imagePlaced) {
+    if (!imageGenerated) {
       recipesNeedingAction++;
-    } else if (textFinalized && imageGenerated && imagePlaced) {
+    } else if (imageGenerated && hasCleanedText && !needsReview) {
       recipesReadyToPrint++;
     } else {
-      recipesNeedingAction++; // In progress still needs action
+      // Image generated but missing cleaned text OR needs review = in progress = needs action
+      recipesNeedingAction++;
     }
   });
 

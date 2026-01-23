@@ -56,12 +56,12 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded, isFirstGuest = fa
     setError(null);
 
     try {
-      // Check if guest email already exists (only if email is provided)
+      // Check if guest email already exists in this group (only if email is provided)
       if (email.trim()) {
-        const emailExists = await checkGuestExists(email);
+        const emailExists = await checkGuestExists(email, groupId);
         
         if (emailExists) {
-          setError('A guest with this email already exists');
+          setError('A guest with this email already exists in this group');
           setLoading(false);
           return;
         }

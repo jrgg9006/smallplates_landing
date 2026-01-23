@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { createSupabaseClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -93,6 +93,13 @@ interface User {
   full_name: string | null;
 }
 
+interface Guest {
+  id: string;
+  first_name: string;
+  last_name: string;
+  printed_name: string | null;
+}
+
 export default function OperationsPage() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -100,6 +107,7 @@ export default function OperationsPage() {
   const [stats, setStats] = useState<ProductionStats>({ recipesNeedingAction: 0, recipesReadyToPrint: 0 });
   const [groups, setGroups] = useState<Group[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [guests, setGuests] = useState<Guest[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeWithProductionStatus | null>(null);
   const [updatingField, setUpdatingField] = useState<string | null>(null);
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
@@ -126,6 +134,8 @@ export default function OperationsPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'no_action' | 'in_progress' | 'ready_to_print'>('all');
   const [groupFilter, setGroupFilter] = useState<string>('all');
   const [userFilter, setUserFilter] = useState<string>('all');
+  const [guestFilter, setGuestFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [showArchived, setShowArchived] = useState(false);
   
   const router = useRouter();
@@ -141,7 +151,7 @@ export default function OperationsPage() {
       loadStats();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter, groupFilter, userFilter, showArchived, isAdmin]);
+  }, [statusFilter, groupFilter, userFilter, guestFilter, showArchived, isAdmin]);
 
   // Reset toggle states when recipe changes
   useEffect(() => {
@@ -159,11 +169,12 @@ export default function OperationsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedRecipe?.id]); // Reason: Only reset when recipe ID changes, not on property updates
 
-  // Load all users and groups once on initial mount (not from filtered results)
+  // Load all users, groups, and guests once on initial mount (not from filtered results)
   useEffect(() => {
     if (isAdmin) {
       loadAllUsers();
       loadAllGroups();
+      loadAllGuests();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
@@ -228,6 +239,50 @@ export default function OperationsPage() {
     }
   };
 
+  // Helper function to filter recipes by search query
+  const filterRecipesBySearch = (recipesToFilter: RecipeWithProductionStatus[], query: string): RecipeWithProductionStatus[] => {
+    if (!query.trim()) {
+      return recipesToFilter;
+    }
+    
+    const searchTerm = query.toLowerCase().trim();
+    return recipesToFilter.filter((recipe: RecipeWithProductionStatus) => {
+      // Search in recipe name
+      const recipeName = (recipe.recipe_name || '').toLowerCase();
+      if (recipeName.includes(searchTerm)) return true;
+      
+      // Search in guest name
+      if (recipe.guests) {
+        const guestFirstName = (recipe.guests.first_name || '').toLowerCase();
+        const guestLastName = (recipe.guests.last_name || '').toLowerCase();
+        const guestPrintedName = (recipe.guests.printed_name || '').toLowerCase();
+        const guestFullName = `${guestFirstName} ${guestLastName}`.toLowerCase();
+        if (guestFirstName.includes(searchTerm) || 
+            guestLastName.includes(searchTerm) || 
+            guestPrintedName.includes(searchTerm) ||
+            guestFullName.includes(searchTerm)) {
+          return true;
+        }
+      }
+      
+      // Search in user name
+      if (recipe.profiles) {
+        const userFullName = (recipe.profiles.full_name || '').toLowerCase();
+        const userEmail = (recipe.profiles.email || '').toLowerCase();
+        if (userFullName.includes(searchTerm) || userEmail.includes(searchTerm)) {
+          return true;
+        }
+      }
+      
+      return false;
+    });
+  };
+
+  // Memoized filtered recipes
+  const filteredRecipes = useMemo(() => {
+    return filterRecipesBySearch(recipes, searchQuery);
+  }, [recipes, searchQuery]);
+
   const loadRecipes = async () => {
     try {
       const params = new URLSearchParams();
@@ -239,6 +294,9 @@ export default function OperationsPage() {
       }
       if (userFilter !== 'all') {
         params.append('userId', userFilter);
+      }
+      if (guestFilter !== 'all') {
+        params.append('guestId', guestFilter);
       }
       // By default, we hide archived recipes unless showArchived is true
       // BUT if the user specifically selected "Not in Group", we should show them
@@ -290,6 +348,39 @@ export default function OperationsPage() {
       }));
     } catch (error) {
       console.error('Error loading users:', error);
+    }
+  };
+
+  const loadAllGuests = async () => {
+    try {
+      // Load all recipes without filters to get all guests
+      const response = await fetch('/api/v1/admin/operations/recipes');
+      
+      if (!response.ok) {
+        return;
+      }
+      
+      const data = await response.json();
+      
+      // Extract unique guests from all recipes
+      const uniqueGuests = new Map<string, Guest>();
+      data.forEach((recipe: RecipeWithProductionStatus) => {
+        if (recipe.guests) {
+          uniqueGuests.set(recipe.guests.id, {
+            id: recipe.guests.id,
+            first_name: recipe.guests.first_name,
+            last_name: recipe.guests.last_name,
+            printed_name: recipe.guests.printed_name,
+          });
+        }
+      });
+      setGuests(Array.from(uniqueGuests.values()).sort((a, b) => {
+        const nameA = a.printed_name || `${a.first_name} ${a.last_name}`.trim() || '';
+        const nameB = b.printed_name || `${b.first_name} ${b.last_name}`.trim() || '';
+        return nameA.localeCompare(nameB);
+      }));
+    } catch (error) {
+      console.error('Error loading guests:', error);
     }
   };
 
@@ -352,7 +443,7 @@ ${instructions}`;
 
   const handleProductionToggle = async (
     recipeId: string,
-    field: 'text_finalized_in_indesign' | 'image_generated' | 'image_placed_in_indesign',
+    field: 'image_generated' | 'needs_review',
     value: boolean
   ) => {
     setUpdatingField(field);
@@ -882,6 +973,16 @@ ${instructions}`;
 
       {/* Filters */}
       <div className="bg-white border-b px-6 py-3 flex items-center gap-4 flex-wrap">
+        <div className="flex items-center gap-2 flex-1 min-w-[250px]">
+          <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Search:</label>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search recipes, guests, or users..."
+            className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+          />
+        </div>
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium text-gray-700">Group:</label>
           <select
@@ -893,7 +994,7 @@ ${instructions}`;
             <option value="not_in_cookbook">Not in Group (Archived)</option>
             {groups.map((group) => (
               <option key={group.id} value={group.id}>
-                ({group.owner_name || group.owner_email}) {group.name}
+                {group.name}
               </option>
             ))}
           </select>
@@ -909,6 +1010,21 @@ ${instructions}`;
             {users.map((user) => (
               <option key={user.id} value={user.id}>
                 {user.full_name || user.email}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">Guest:</label>
+          <select
+            value={guestFilter}
+            onChange={(e) => setGuestFilter(e.target.value)}
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent min-w-[200px]"
+          >
+            <option value="all">All Guests</option>
+            {guests.map((guest) => (
+              <option key={guest.id} value={guest.id}>
+                {guest.printed_name || `${guest.first_name} ${guest.last_name}`.trim() || 'Unknown'}
               </option>
             ))}
           </select>
@@ -938,7 +1054,7 @@ ${instructions}`;
           </label>
         </div>
         <div className="text-sm text-gray-600 ml-auto">
-          {recipes.length} recipe{recipes.length !== 1 ? 's' : ''}
+          {filteredRecipes.length} recipe{filteredRecipes.length !== 1 ? 's' : ''}
         </div>
       </div>
 
@@ -948,7 +1064,7 @@ ${instructions}`;
         <div className="h-full bg-white overflow-y-auto">
           <div className="p-6">
             <RecipeOperationsTable
-              recipes={recipes}
+              recipes={filteredRecipes}
               onRecipeClick={(recipe) => setSelectedRecipe(recipe)}
               onStatusUpdate={handleStatusUpdate}
             />
@@ -1119,18 +1235,6 @@ ${instructions}`;
                     <label className="flex items-center gap-1.5">
                       <input
                         type="checkbox"
-                        checked={selectedRecipe.production_status?.text_finalized_in_indesign || false}
-                        onChange={(e) =>
-                          handleProductionToggle(selectedRecipe.id, 'text_finalized_in_indesign', e.target.checked)
-                        }
-                        disabled={updatingField !== null}
-                        className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
-                      />
-                      <span>Text Finalized</span>
-                    </label>
-                    <label className="flex items-center gap-1.5">
-                      <input
-                        type="checkbox"
                         checked={selectedRecipe.production_status?.image_generated || false}
                         onChange={(e) =>
                           handleProductionToggle(selectedRecipe.id, 'image_generated', e.target.checked)
@@ -1143,14 +1247,14 @@ ${instructions}`;
                     <label className="flex items-center gap-1.5">
                       <input
                         type="checkbox"
-                        checked={selectedRecipe.production_status?.image_placed_in_indesign || false}
+                        checked={selectedRecipe.production_status?.needs_review || false}
                         onChange={(e) =>
-                          handleProductionToggle(selectedRecipe.id, 'image_placed_in_indesign', e.target.checked)
+                          handleProductionToggle(selectedRecipe.id, 'needs_review', e.target.checked)
                         }
                         disabled={updatingField !== null}
                         className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
                       />
-                      <span>Image Placed</span>
+                      <span>Needs Review</span>
                     </label>
                   </div>
                 </div>

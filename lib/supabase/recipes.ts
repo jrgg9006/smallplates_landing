@@ -389,20 +389,21 @@ export async function addUserRecipe(recipeData: UserRecipeData, groupId?: string
     const lastName = nameParts.slice(1).join(' ') || 'Recipes';
 
     // Check if user has a "self" guest entry for this group
+    // With the new constraint, users can have one self guest per group
     let { data: selfGuest, error: selfGuestError } = await supabase
       .from('guests')
       .select('id')
       .eq('user_id', user.id)
       .eq('is_self', true)
       .eq('group_id', targetGroupId)
-      .single();
+      .maybeSingle(); // Use maybeSingle() to handle gracefully if not found
 
-    // If no self guest exists, create a NEW one
+    // If no self guest exists for this group, create a NEW one
     // IMPORTANT: We do NOT update existing guests to is_self = true
     // because that would make all their recipes appear as "My Own"
     // even if they were added in a different context
     if (selfGuestError || !selfGuest) {
-      // Try to create a new self guest
+      // Try to create a new self guest for this specific group
       const { data: newSelfGuest, error: createError } = await supabase
         .from('guests')
         .insert({
@@ -422,31 +423,49 @@ export async function addUserRecipe(recipeData: UserRecipeData, groupId?: string
         .single();
 
       if (createError) {
-        // If it fails due to unique constraint, a guest with this email already exists
-        // But we should NOT update it - instead, we need to handle this edge case
+        // Better error handling - Supabase errors can have different structures
         console.error('Failed to create self guest:', createError);
-        const errorMessage = createError.message || createError.details || 'Failed to create recipe collection';
+        const errorMessage = createError.message || 
+                            createError.details || 
+                            (typeof createError === 'string' ? createError : JSON.stringify(createError)) ||
+                            'Failed to create recipe collection';
         
         // Check if it's a unique constraint violation
-        if (errorMessage.includes('unique_guest_per_user')) {
-          // A guest with this email exists but is NOT a self guest
-          // We cannot create a new one due to unique constraint
-          // We also cannot update it because it might have recipes from other contexts
-          // Best solution: return a helpful error message
-          return { 
-            data: null, 
-            error: 'Unable to create your recipe collection. A guest with your email already exists. Please contact support to resolve this issue.' 
-          };
+        const errorString = errorMessage.toLowerCase();
+        if (errorString.includes('unique_guest_per_user') || 
+            errorString.includes('duplicate key') ||
+            errorString.includes('unique constraint')) {
+          // With the new constraint, this means a guest with this email already exists in this group
+          // This shouldn't happen if we checked first, but handle it gracefully
+          // Try to find the existing self guest for this group
+          const { data: existingSelfGuest } = await supabase
+            .from('guests')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('email', user.email || '')
+            .eq('group_id', targetGroupId)
+            .eq('is_self', true)
+            .maybeSingle();
+          
+          if (existingSelfGuest) {
+            // Found it - use the existing one
+            selfGuest = existingSelfGuest;
+          } else {
+            // A non-self guest with this email exists in this group
+            return { 
+              data: null, 
+              error: 'Unable to create your recipe collection. A guest with your email already exists in this group. Please contact support to resolve this issue.' 
+            };
+          }
+        } else {
+          return { data: null, error: errorMessage };
         }
-        
-        return { data: null, error: errorMessage };
+      } else {
+        if (!newSelfGuest) {
+          return { data: null, error: 'Failed to create recipe collection: No guest returned' };
+        }
+        selfGuest = newSelfGuest;
       }
-
-      if (!newSelfGuest) {
-        return { data: null, error: 'Failed to create recipe collection: No guest returned' };
-      }
-
-      selfGuest = newSelfGuest;
     }
 
     // Before adding the recipe, ensure number_of_recipes is sufficient

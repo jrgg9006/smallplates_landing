@@ -399,16 +399,32 @@ export async function getGuestsByStatus(status: Guest['status'], groupId?: strin
 
 /**
  * Check if a guest email already exists for the current user
+ * If groupId is provided, only checks within that specific group
+ * If groupId is not provided, checks across all groups (for backwards compatibility)
  */
-export async function checkGuestExists(email: string): Promise<boolean> {
+export async function checkGuestExists(email: string, groupId?: string | null): Promise<boolean> {
   const supabase = createSupabaseClient();
   
-  const { data } = await supabase
+  // Get the current user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return false;
+  }
+  
+  let query = supabase
     .from('guests')
     .select('id')
+    .eq('user_id', user.id)
     .eq('email', email)
-    .eq('is_archived', false)
-    .single();
+    .eq('is_archived', false);
+  
+  // If groupId is provided, only check within that group
+  if (groupId) {
+    query = query.eq('group_id', groupId);
+  }
+  
+  // Use maybeSingle() instead of single() to handle multiple results gracefully
+  const { data } = await query.maybeSingle();
 
   return !!data;
 }

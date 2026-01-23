@@ -26,10 +26,12 @@ export async function getGroupRecipes(groupId: string): Promise<{ data: RecipeWi
     .maybeSingle();
 
   // Get recipes through the join table with added_by information
+  // Only get active entries (removed_at IS NULL)
   const { data: groupRecipes, error: groupRecipesError } = await supabase
     .from('group_recipes')
     .select('recipe_id, added_by, added_at')
-    .eq('group_id', groupId);
+    .eq('group_id', groupId)
+    .is('removed_at', null);
   
 
   if (groupRecipesError) {
@@ -172,15 +174,56 @@ export async function addRecipeToGroup(groupId: string, recipeId: string, note?:
     return { data: null, error: 'User not authenticated' };
   }
 
-  // Check if recipe is already in this group
+  // Check if recipe is already in this group (active or removed)
   const { data: existing } = await supabase
     .from('group_recipes')
     .select('*')
     .eq('group_id', groupId)
     .eq('recipe_id', recipeId)
-    .single();
+    .maybeSingle();
 
   if (existing) {
+    // If it exists but was removed, reactivate it
+    if (existing.removed_at) {
+      const { error: updateError } = await supabase
+        .from('group_recipes')
+        .update({ 
+          removed_at: null,
+          removed_by: null,
+          added_by: user.id, // Update added_by to current user
+          added_at: new Date().toISOString() // Update added_at to now
+        })
+        .eq('group_id', groupId)
+        .eq('recipe_id', recipeId);
+
+      if (updateError) {
+        return { data: null, error: updateError.message };
+      }
+
+      // Also add to group cookbook if it exists
+      await addRecipeToGroupCookbook(recipeId, groupId, note);
+
+      // Return the recipe with its details
+      const { data: recipe, error: recipeError } = await supabase
+        .from('guest_recipes')
+        .select(`
+          *,
+          guests(
+            first_name,
+            last_name,
+            printed_name,
+            email,
+            is_self,
+            source
+          )
+        `)
+        .eq('id', recipeId)
+        .single();
+
+      return { data: recipe, error: recipeError?.message || null };
+    }
+    
+    // If it exists and is active, return error
     return { data: null, error: 'Recipe is already in this group' };
   }
 
@@ -223,7 +266,8 @@ export async function addRecipeToGroup(groupId: string, recipeId: string, note?:
 
 /**
  * Remove a recipe from a group (recipe can remain in other groups)
- * If recipe is no longer in any group, marks it as deleted via deleted_at
+ * Uses soft delete - sets removed_at and removed_by instead of deleting
+ * If recipe is no longer in any active group, marks it as deleted via deleted_at in guest_recipes
  */
 export async function removeRecipeFromGroup(recipeId: string, groupId: string) {
   const supabase = createSupabaseClient();
@@ -234,25 +278,30 @@ export async function removeRecipeFromGroup(recipeId: string, groupId: string) {
     return { data: null, error: 'User not authenticated' };
   }
 
-  // Remove from the join table
+  // Soft delete: update removed_at and removed_by instead of deleting
   const { error } = await supabase
     .from('group_recipes')
-    .delete()
+    .update({ 
+      removed_at: new Date().toISOString(),
+      removed_by: user.id 
+    })
     .eq('recipe_id', recipeId)
-    .eq('group_id', groupId);
+    .eq('group_id', groupId)
+    .is('removed_at', null); // Only update if not already removed
 
   if (error) {
     return { data: null, error: error.message };
   }
 
-  // Check if recipe is still in any other group
+  // Check if recipe is still in any other active group (removed_at IS NULL)
   const { data: remainingGroups } = await supabase
     .from('group_recipes')
     .select('group_id')
     .eq('recipe_id', recipeId)
+    .is('removed_at', null) // Only count active associations
     .limit(1);
 
-  // If recipe is no longer in any group, mark as deleted
+  // If recipe is no longer in any active group, mark as deleted in guest_recipes
   if (!remainingGroups || remainingGroups.length === 0) {
     await supabase
       .from('guest_recipes')
@@ -460,12 +509,13 @@ export async function getUserRecipesForGroup(excludeGroupId?: string): Promise<{
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
-  // If excludeGroupId is provided, filter out recipes already in that group
+  // If excludeGroupId is provided, filter out recipes already in that group (active only)
   if (excludeGroupId) {
     const { data: groupRecipes } = await supabase
       .from('group_recipes')
       .select('recipe_id')
-      .eq('group_id', excludeGroupId);
+      .eq('group_id', excludeGroupId)
+      .is('removed_at', null); // Only count active associations
 
     if (groupRecipes && groupRecipes.length > 0) {
       const excludeIds = groupRecipes.map(gr => gr.recipe_id);
@@ -536,11 +586,12 @@ export async function getAvailableRecipesForGroup(groupId: string): Promise<{ da
     return { data: null, error: 'User not authenticated' };
   }
 
-  // Get recipes already in this group
+  // Get recipes already in this group (active only)
   const { data: groupRecipes } = await supabase
     .from('group_recipes')
     .select('recipe_id')
-    .eq('group_id', groupId);
+    .eq('group_id', groupId)
+    .is('removed_at', null); // Only count active associations
 
   const excludeIds = groupRecipes?.map(gr => gr.recipe_id) || [];
 
@@ -819,11 +870,12 @@ export async function searchGroupRecipes(groupId: string, searchQuery: string): 
     return { data: null, error: 'User not authenticated' };
   }
 
-  // Get recipes in this group through the join table
+  // Get recipes in this group through the join table (active only)
   const { data: groupRecipes, error: groupRecipesError } = await supabase
     .from('group_recipes')
     .select('recipe_id')
-    .eq('group_id', groupId);
+    .eq('group_id', groupId)
+    .is('removed_at', null); // Only count active associations
 
   if (groupRecipesError) {
     return { data: null, error: groupRecipesError.message };
