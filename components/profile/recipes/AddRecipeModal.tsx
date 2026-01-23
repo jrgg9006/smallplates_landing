@@ -77,7 +77,8 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
       loadGuests();
       loadUserProfile();
     }
-  }, [isOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]); // Reason: loadGuests/loadUserProfile are stable functions, only run on modal open
 
   // Set preselected guest when modal opens with a preselected guest
   useEffect(() => {

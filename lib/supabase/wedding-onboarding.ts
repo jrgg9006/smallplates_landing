@@ -27,9 +27,9 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
       answers,
       answersKeys: Object.keys(answers),
       step1: answers.step1,
-      step2: answers.step2,
       step3: answers.step3,
-      step4: answers.step4
+      step4: answers.step4,
+      step5: answers.step5
     });
     // Use admin client to bypass RLS
     const supabaseAdmin = createClient(
@@ -79,39 +79,39 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
 
     if (userType === 'couple') {
       // Extract couple data
+      // step1 = planning stage, step3 = couple info, step4 = guest count (unused), step5 = email
       const step1Data = answers.step1;
-      const step2Data = answers.step2;
-      const step3Data = answers.step3;
-      const step4Data = answers.step4;
+      const coupleInfoData = answers.step3; // Couple names, wedding date
+      const accountData = answers.step5; // Email/password
 
       // Build full name for the user (person creating the account)
       let fullName = '';
-      if (step2Data?.brideFirstName && step2Data?.brideLastName) {
-        fullName = `${step2Data.brideFirstName} ${step2Data.brideLastName}`;
-      } else if (step2Data?.brideFirstName) {
-        fullName = step2Data.brideFirstName;
+      if (coupleInfoData?.brideFirstName && coupleInfoData?.brideLastName) {
+        fullName = `${coupleInfoData.brideFirstName} ${coupleInfoData.brideLastName}`;
+      } else if (coupleInfoData?.brideFirstName) {
+        fullName = coupleInfoData.brideFirstName;
       }
 
       // Parse wedding date
       let weddingDate = null;
       let weddingDateUndecided = false;
-      if (step2Data?.dateUndecided) {
+      if (coupleInfoData?.dateUndecided) {
         weddingDateUndecided = true;
-      } else if (step2Data?.weddingDate) {
-        weddingDate = step2Data.weddingDate;
+      } else if (coupleInfoData?.weddingDate) {
+        weddingDate = coupleInfoData.weddingDate;
       }
 
       // Debug logging for couple profile
       console.log('🔍 COUPLE PROFILE DEBUG:', {
-        step4Data,
-        email: step4Data?.email,
-        emailExists: !!step4Data?.email,
+        accountData,
+        email: accountData?.email,
+        emailExists: !!accountData?.email,
         fullName,
         individualNames: {
-          couple_first_name: step2Data?.brideFirstName,
-          couple_last_name: step2Data?.brideLastName,
-          couple_partner_first_name: step2Data?.partnerFirstName,
-          couple_partner_last_name: step2Data?.partnerLastName
+          couple_first_name: coupleInfoData?.brideFirstName,
+          couple_last_name: coupleInfoData?.brideLastName,
+          couple_partner_first_name: coupleInfoData?.partnerFirstName,
+          couple_partner_last_name: coupleInfoData?.partnerLastName
         }
       });
 
@@ -120,7 +120,7 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
         profileData = {
           ...profileData,
           full_name: fullName,
-          email: userEmail || step4Data?.email || ''
+          email: userEmail || accountData?.email || ''
         };
       }
 
@@ -137,13 +137,13 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
       }
 
       // Build group name using couple's first names
-      const groupName = step2Data?.brideFirstName && step2Data?.partnerFirstName 
-        ? `${step2Data.brideFirstName} & ${step2Data.partnerFirstName}`
+      const groupName = coupleInfoData?.brideFirstName && coupleInfoData?.partnerFirstName
+        ? `${coupleInfoData.brideFirstName} & ${coupleInfoData.partnerFirstName}`
         : fullName;
 
       // Build couple display name for emails (consistent format)
-      const coupleDisplayName = step2Data?.brideFirstName && step2Data?.partnerFirstName 
-        ? `${step2Data.brideFirstName} & ${step2Data.partnerFirstName}`
+      const coupleDisplayName = coupleInfoData?.brideFirstName && coupleInfoData?.partnerFirstName
+        ? `${coupleInfoData.brideFirstName} & ${coupleInfoData.partnerFirstName}`
         : fullName;
 
       // Group gets event-specific data including both couple members
@@ -153,10 +153,10 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
         wedding_date: weddingDate,
         wedding_date_undecided: weddingDateUndecided,
         wedding_timeline: weddingTimeline,
-        couple_first_name: step2Data?.brideFirstName || null,
-        couple_last_name: step2Data?.brideLastName || null,
-        partner_first_name: step2Data?.partnerFirstName || null,
-        partner_last_name: step2Data?.partnerLastName || null,
+        couple_first_name: coupleInfoData?.brideFirstName || null,
+        couple_last_name: coupleInfoData?.brideLastName || null,
+        partner_first_name: coupleInfoData?.partnerFirstName || null,
+        partner_last_name: coupleInfoData?.partnerLastName || null,
         couple_display_name: coupleDisplayName,
         relationship_to_couple: null, // null for couples since they are the couple
         created_by: userId
@@ -164,16 +164,17 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
 
     } else {
       // Extract gift giver data
+      // step1 = timeline, step3 = gift giver + couple info, step4 = email/password
       const step1Data = answers.step1;
-      const step2Data = answers.step2;
-      const step3Data = answers.step3;
+      const giftGiverInfoData = answers.step3; // giftGiverName, firstName, partnerFirstName, relationship
+      const accountData = answers.step4; // email, password
 
       // Debug logging for gift giver profile
       console.log('🔍 GIFT GIVER PROFILE DEBUG:', {
-        step3Data,
-        email: step3Data?.email,
-        emailExists: !!step3Data?.email,
-        giftGiverName: step2Data?.giftGiverName,
+        accountData,
+        email: accountData?.email,
+        emailExists: !!accountData?.email,
+        giftGiverName: giftGiverInfoData?.giftGiverName,
         isAdditionalBook
       });
 
@@ -181,29 +182,29 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
       if (!isAdditionalBook) {
         profileData = {
           ...profileData,
-          full_name: step2Data?.giftGiverName || '',
-          email: userEmail || step3Data?.email || ''
+          full_name: giftGiverInfoData?.giftGiverName || '',
+          email: userEmail || accountData?.email || ''
         };
       }
 
       // Group gets event-specific data for gift givers
-      const coupleName = `${step2Data?.firstName || ''} & ${step2Data?.partnerFirstName || ''}`.trim();
-      
+      const coupleName = `${giftGiverInfoData?.firstName || ''} & ${giftGiverInfoData?.partnerFirstName || ''}`.trim();
+
       // Build couple display name for emails (same format as couple flow)
-      const coupleDisplayName = step2Data?.firstName && step2Data?.partnerFirstName 
-        ? `${step2Data.firstName} & ${step2Data.partnerFirstName}`
+      const coupleDisplayName = giftGiverInfoData?.firstName && giftGiverInfoData?.partnerFirstName
+        ? `${giftGiverInfoData.firstName} & ${giftGiverInfoData.partnerFirstName}`
         : coupleName;
 
       groupData = {
         name: coupleName,
         description: 'A thoughtful gift collection of recipes',
         wedding_timeline: step1Data?.timeline || null,
-        couple_first_name: step2Data?.firstName || null,
+        couple_first_name: giftGiverInfoData?.firstName || null,
         couple_last_name: null, // Gift giver doesn't provide last names
-        partner_first_name: step2Data?.partnerFirstName || null,
+        partner_first_name: giftGiverInfoData?.partnerFirstName || null,
         partner_last_name: null, // Gift giver doesn't provide last names
         couple_display_name: coupleDisplayName,
-        relationship_to_couple: step2Data?.relationship || null,
+        relationship_to_couple: giftGiverInfoData?.relationship || null,
         created_by: userId
       };
     }

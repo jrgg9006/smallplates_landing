@@ -65,7 +65,8 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
         )
       ),
       midjourney_prompts (
-        generated_prompt
+        generated_prompt,
+        agent_metadata
       ),
       recipe_print_ready (
         recipe_name_clean,

@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { isAdminEmail } from '@/lib/config/admin';
 import { RecipeOperationsTable } from './components/RecipeOperationsTable';
 import Image from 'next/image';
+import PromptEvaluationSection from './components/PromptEvaluationSection';
 
 interface RecipeWithProductionStatus {
   id: string;
@@ -52,6 +53,17 @@ interface RecipeWithProductionStatus {
   } | null;
   midjourney_prompts: {
     generated_prompt: string;
+    agent_metadata?: {
+      base_dish?: string;
+      food_type?: string;
+      eating_method?: string;
+      started_indicator?: string;
+      token_count?: number;
+      hero_element?: string;
+      container_used?: string;
+      generator_version?: string;
+      total_duration_ms?: number;
+    } | null;
   } | null;
   recipe_print_ready: {
     recipe_name_clean: string;
@@ -144,7 +156,8 @@ export default function OperationsPage() {
       setEditedIngredients(ingredients);
       setEditedInstructions(instructions);
     }
-  }, [selectedRecipe?.id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRecipe?.id]); // Reason: Only reset when recipe ID changes, not on property updates
 
   // Load all users and groups once on initial mount (not from filtered results)
   useEffect(() => {
@@ -1378,6 +1391,16 @@ ${instructions}`;
                     )}
                   </div>
                 </div>
+
+                {/* Prompt Evaluation Section */}
+                <PromptEvaluationSection
+                  recipeId={selectedRecipe.id}
+                  promptText={selectedRecipe.midjourney_prompts?.generated_prompt || null}
+                  midjourneyImageUrl={selectedRecipe.generated_image_url || null}
+                  dishCategory={selectedRecipe.midjourney_prompts?.agent_metadata?.food_type || null}
+                  agentMetadata={selectedRecipe.midjourney_prompts?.agent_metadata || null}
+                  onEvaluationSaved={() => handleStatusUpdate()}
+                />
 
                 {/* Ingredients Section */}
                 <div>
