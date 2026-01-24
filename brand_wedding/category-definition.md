@@ -21,7 +21,7 @@ a wedding keepsake they can actually cook from.
 
 We call this:
 
-A collaborative wedding recipe book.
+A wedding cookbook.
 
 It’s not something you scroll.
 It’s not something you use once and store away.

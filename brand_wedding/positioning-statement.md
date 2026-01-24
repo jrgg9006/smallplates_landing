@@ -3,7 +3,7 @@
 For brides and the people around them —
 the ones who actually know her, not just her registry —
 
-Small Plates is the wedding recipe book
+Small Plates is the wedding cookbook
 made by the guests who matter most.
 
 Every person contributes a recipe.
