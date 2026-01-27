@@ -528,23 +528,33 @@ function SuccessScreen() {
     <OnboardingStep
       stepNumber={4}
       totalSteps={4}
-      title="You're all set!"
+      title="It's happening."
       imageUrl="/images/onboarding/onboarding_lemon.png"
       imageAlt="Success"
       hideProgress={true}
     >
-      <div className="max-w-md mx-auto text-center">
-        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-[#D4A854]/10 flex items-center justify-center">
+      <div className="max-w-sm mx-auto text-center">
+        {/* Success Icon */}
+        <div className="w-16 h-16 mx-auto mb-12 rounded-full bg-[#D4A854]/10 flex items-center justify-center">
           <CheckCircle className="w-8 h-8 text-[#D4A854]" />
         </div>
-        <p className="text-[#2D2D2D]/70 mb-8 font-light">
-          Someone from the Small Plates team will reach out shortly to complete your order.
+
+        {/* Single Line */}
+        <p className="text-[#2D2D2D]/60 font-light mb-12">
+          We&apos;ll be in touch within 24 hours.
         </p>
-        <p className="text-sm text-[#2D2D2D]/50 font-light">
-          Questions? Email us at{" "}
+
+        {/* Tagline */}
+        <p className="text-[#D4A854] font-medium text-lg mb-16">
+          You&apos;re about to be the MVP of this wedding.
+        </p>
+
+        {/* Contact */}
+        <p className="text-sm text-[#2D2D2D]/40 font-light">
+          Questions?{" "}
           <a
             href="mailto:team@smallplatesandcompany.com"
-            className="text-[#D4A854] hover:underline"
+            className="text-[#2D2D2D]/50 hover:text-[#D4A854] transition-colors"
           >
             team@smallplatesandcompany.com
           </a>
