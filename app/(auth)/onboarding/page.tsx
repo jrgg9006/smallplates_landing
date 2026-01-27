@@ -7,6 +7,7 @@ import OnboardingStep from "@/components/onboarding/OnboardingStep";
 import { SelectionCard } from "@/components/onboarding/SelectionCard";
 import { ProductSelectionStep } from "@/components/onboarding/ProductSelectionStep";
 import { CheckoutSummary } from "@/components/onboarding/CheckoutSummary";
+import { CheckCircle } from "lucide-react";
 
 /**
  * Step 1 Component - Recipe Count Question
@@ -44,7 +45,7 @@ function Step1() {
     <OnboardingStep
       stepNumber={1}
       totalSteps={5}
-      title="Let's start with the basics."
+      title="Congratulations! Let's start with the basics."
       imageUrl="/images/onboarding/onboarding_lemon.png"
       imageAlt="Wedding planning essentials"
     >
@@ -444,20 +445,18 @@ function Step4() {
 
 /**
  * Step 5 Component - Checkout & Account Creation
+ * Reason: Password removed for soft launch - accounts created manually after Venmo payment
  */
 function Step5() {
   const { previousStep, completeOnboarding, updateStepData, state } = useOnboarding();
-  
+
   // Initialize from saved state if available
   const savedData = state.answers.step5 as {
     email?: string;
-    password?: string;
   } | undefined;
 
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [email, setEmail] = useState(savedData?.email || "");
-  const [password, setPassword] = useState(savedData?.password || "");
   const [emailError, setEmailError] = useState("");
 
   // Email validation
@@ -482,25 +481,22 @@ function Step5() {
   };
 
   const handleCompletePurchase = async () => {
-    if (!validateEmail(email.trim()) || password.length < 6) {
+    if (!validateEmail(email.trim())) {
       return;
     }
 
     setLoading(true);
 
     try {
-      // Store account info in context
+      // Store email in context
       await updateStepData(5, {
         email: email.trim(),
-        password // In real app, this would be hashed
       });
-      
-      // Generate Gumroad link and redirect
-      await completeOnboarding(email.trim(), password);
-      
-      // Note: completeOnboarding redirects to Gumroad, so we won't reach here
-      // But set success state in case of error
-      setSuccess(false);
+
+      // Save to purchase_intents and show success screen
+      await completeOnboarding(email.trim());
+
+      // Note: completeOnboarding sets isComplete=true, which triggers success screen
       setLoading(false);
     } catch (err) {
       console.error("Error in handleCompletePurchase:", err);
@@ -508,7 +504,7 @@ function Step5() {
     }
   };
 
-  const isFormValid = validateEmail(email.trim()) && password.length >= 6 && !emailError;
+  const isFormValid = validateEmail(email.trim()) && !emailError;
 
   // Get couple names from step 3
   const step3Data = state.answers.step3 as {
@@ -540,12 +536,10 @@ function Step5() {
           selectedTierId={state.selectedProductTier}
           coupleNames={coupleNames}
           email={email}
-          password={password}
           emailError={emailError}
           loading={loading}
           onEmailChange={handleEmailChange}
           onEmailBlur={handleEmailBlur}
-          onPasswordChange={(e) => setPassword(e.target.value)}
           onCompletePurchase={handleCompletePurchase}
           isFormValid={isFormValid}
         />
@@ -565,8 +559,8 @@ function Step5() {
             onClick={handleCompletePurchase}
             disabled={!isFormValid || loading}
             className={`px-12 py-4 rounded-2xl text-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-              isFormValid 
-                ? "bg-[#D4A854] text-white hover:bg-[#c49b4a]" 
+              isFormValid
+                ? "bg-[#D4A854] text-white hover:bg-[#c49b4a]"
                 : "bg-gray-300 text-gray-500"
             }`}
           >
@@ -576,7 +570,7 @@ function Step5() {
                 Processing...
               </>
             ) : (
-              "Complete Purchase"
+              "Reserve Your Book"
             )}
           </button>
         </div>
@@ -586,11 +580,51 @@ function Step5() {
 }
 
 /**
+ * Success Screen Component - Shown after completing soft launch checkout
+ * Uses OnboardingStep for consistent styling and X button to close
+ */
+function SuccessScreen() {
+  return (
+    <OnboardingStep
+      stepNumber={5}
+      totalSteps={5}
+      title="You're all set!"
+      imageUrl="/images/onboarding/onboarding_lemon.png"
+      imageAlt="Success"
+      hideProgress={true}
+    >
+      <div className="max-w-md mx-auto text-center">
+        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-[#D4A854]/10 flex items-center justify-center">
+          <CheckCircle className="w-8 h-8 text-[#D4A854]" />
+        </div>
+        <p className="text-[#2D2D2D]/70 mb-8 font-light">
+          Someone from the Small Plates team will reach out shortly to complete your order.
+        </p>
+        <p className="text-sm text-[#2D2D2D]/50 font-light">
+          Questions? Email us at{" "}
+          <a
+            href="mailto:team@smallplatesandcompany.com"
+            className="text-[#D4A854] hover:underline"
+          >
+            team@smallplatesandcompany.com
+          </a>
+        </p>
+      </div>
+    </OnboardingStep>
+  );
+}
+
+/**
  * Main Onboarding Page Component
- * Manages the 4-step questionnaire flow
+ * Manages the 5-step questionnaire flow
  */
 function OnboardingContent() {
   const { state } = useOnboarding();
+
+  // Show success screen when onboarding is complete
+  if (state.isComplete) {
+    return <SuccessScreen />;
+  }
 
   return (
     <div className="min-h-screen bg-white">

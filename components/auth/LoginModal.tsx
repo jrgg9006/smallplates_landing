@@ -221,12 +221,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               </div>
 
               {/* Social Login Buttons */}
+              {/* Reason: Google login disabled for soft launch */}
               <div className="space-y-3">
                 <button
                   type="button"
                   onClick={handleGoogleLogin}
-                  disabled={loading}
-                  className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={true}
+                  className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 rounded-lg transition-colors opacity-50 cursor-not-allowed"
                 >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path

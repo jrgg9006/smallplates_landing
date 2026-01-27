@@ -32,8 +32,9 @@ export default function BookDetailsModal({ isOpen, onClose }: BookDetailsModalPr
 
   const bookSpecs = [
     { label: "Printing", value: "Full-color (CMYK) throughout" },
-    { label: "Size", value: "US Trade (6\" × 9\") – Portrait" },
-    { label: "Cover", value: "Hardcover, Adhesive Casebound or Smyth Sewn binding" },
+    { label: "Size (Premium Book)", value: "US Trade (11\" × 8.5\") – Portrait" },
+    { label: "Size (Classic Book)", value: "US Trade (9\" × 6\") – Portrait" },
+    { label: "Cover", value: "Hardcover, Adhesive Casebound" },
     { label: "Paper", value: "100 lb Satin Text (interior pages)" },
     { label: "Finish", value: "Matte Lamination on cover (outside only)" },
     { label: "Endpapers", value: "White stock" },

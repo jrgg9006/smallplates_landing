@@ -13,12 +13,12 @@ interface CheckoutSummaryProps {
   };
   giftGiverName?: string;
   email: string;
-  password: string;
+  password?: string;
   emailError: string;
   loading: boolean;
   onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onEmailBlur: () => void;
-  onPasswordChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onPasswordChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onCompletePurchase: () => void;
   isFormValid: boolean;
 }
@@ -219,29 +219,32 @@ export function CheckoutSummary({
             )}
           </div>
 
-          <div>
-            <label
-              htmlFor="checkout-password"
-              className="block text-sm font-medium text-[#2D2D2D] mb-1"
-            >
-              Password
-            </label>
-            <input
-              id="checkout-password"
-              type="password"
-              required
-              value={password}
-              onChange={onPasswordChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none transition-all"
-              placeholder="At least 6 characters"
-              minLength={6}
-            />
-            {password.length > 0 && password.length < 6 && (
-              <p className="mt-1 text-sm text-red-600">
-                Password must be at least 6 characters
-              </p>
-            )}
-          </div>
+          {/* Reason: Password field hidden for soft launch - accounts created manually after payment */}
+          {onPasswordChange && (
+            <div>
+              <label
+                htmlFor="checkout-password"
+                className="block text-sm font-medium text-[#2D2D2D] mb-1"
+              >
+                Password
+              </label>
+              <input
+                id="checkout-password"
+                type="password"
+                required
+                value={password}
+                onChange={onPasswordChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none transition-all"
+                placeholder="At least 6 characters"
+                minLength={6}
+              />
+              {password && password.length > 0 && password.length < 6 && (
+                <p className="mt-1 text-sm text-red-600">
+                  Password must be at least 6 characters
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Confidence Building Message */}

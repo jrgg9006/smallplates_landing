@@ -14,7 +14,8 @@ import {
   OnboardingState,
   OnboardingContextType,
 } from "@/lib/types/onboarding";
-import { generateGumroadLink } from "@/lib/payments/gumroad";
+// Reason: Gumroad redirect disabled for soft launch - using purchase_intents table instead
+// import { generateGumroadLink } from "@/lib/payments/gumroad";
 import { createGroup } from "@/lib/supabase/groups";
 
 // Total steps: 5 for couples, 4 for gift givers
@@ -205,24 +206,19 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
         }
 
         let finalEmail = email;
-        let finalPassword = password;
 
-        // Reason: For existing users (add-book mode), password is not required
+        // Reason: For existing users (add-book mode), skip the purchase_intents flow
         const isExistingUser = !!existingUserIdRef.current;
 
-        // Get email/password from state if not provided
-        if (!finalEmail || (!isExistingUser && !finalPassword)) {
+        // Get email from state if not provided
+        // Reason: Password not required for soft launch - accounts created manually after payment
+        if (!finalEmail) {
           const emailStep = userType === 'couple' ? state.answers.step5 : state.answers.step4;
           finalEmail = finalEmail || emailStep?.email;
-          finalPassword = finalPassword || emailStep?.password;
         }
 
         if (!finalEmail) {
           throw new Error("Email is required to complete purchase");
-        }
-
-        if (!isExistingUser && !finalPassword) {
-          throw new Error("Password is required to complete purchase");
         }
 
         // Merge directData with state.answers
@@ -298,29 +294,55 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
           return;
         }
 
-        // For new users, generate Gumroad link with metadata
-        const gumroadLink = generateGumroadLink(state.selectedProductTier, {
+        // Reason: Soft launch flow - save to purchase_intents table instead of Gumroad
+        // Manual payment via Venmo, then manual account creation
+        const supabase = createSupabaseClient();
+
+        // Extract data for purchase_intents table
+        const step3Data = mergedAnswers.step3 as {
+          weddingDate?: string;
+          dateUndecided?: boolean;
+          giftGiverName?: string;
+          relationship?: string;
+        } | undefined;
+
+        const purchaseIntentData = {
           email: finalEmail,
-          userType: userType,
-          coupleNames: coupleNames,
-          giftGiverName: userType === 'gift_giver' ? (mergedAnswers.step3 as { giftGiverName?: string } | undefined)?.giftGiverName : undefined,
-          weddingDate: userType === 'couple' ? (mergedAnswers.step3 as { weddingDate?: string } | undefined)?.weddingDate : undefined,
-          guestCount: userType === 'couple' ? (mergedAnswers.step4 as { guestCount?: string } | undefined)?.guestCount : undefined,
-          planningStage: userType === 'couple' ? (mergedAnswers.step1 as { planningStage?: string } | undefined)?.planningStage : undefined,
-          timeline: userType === 'gift_giver' ? (mergedAnswers.step1 as { timeline?: string } | undefined)?.timeline : undefined,
-          relationship: userType === 'gift_giver' ? (mergedAnswers.step3 as { relationship?: string } | undefined)?.relationship : undefined,
-          existingUserId: existingUserIdRef.current,
-        });
+          selected_tier: state.selectedProductTier,
+          user_type: userType,
+          couple_first_name: coupleNames?.brideFirstName || null,
+          couple_last_name: coupleNames?.brideLastName || null,
+          partner_first_name: coupleNames?.partnerFirstName || null,
+          partner_last_name: coupleNames?.partnerLastName || null,
+          wedding_date: userType === 'couple' && step3Data?.weddingDate && step3Data.weddingDate !== 'undecided'
+            ? step3Data.weddingDate
+            : null,
+          wedding_date_undecided: userType === 'couple' ? (step3Data?.dateUndecided || false) : false,
+          planning_stage: userType === 'couple'
+            ? (mergedAnswers.step1 as { planningStage?: string } | undefined)?.planningStage || null
+            : null,
+          guest_count: userType === 'couple'
+            ? (mergedAnswers.step4 as { guestCount?: string } | undefined)?.guestCount || null
+            : null,
+          gift_giver_name: userType === 'gift_giver' ? step3Data?.giftGiverName || null : null,
+          relationship: userType === 'gift_giver' ? step3Data?.relationship || null : null,
+          timeline: userType === 'gift_giver'
+            ? (mergedAnswers.step1 as { timeline?: string } | undefined)?.timeline || null
+            : null,
+        };
 
-        // Store onboarding data temporarily (for webhook to use later)
-        // TODO: Store in database or session storage for webhook retrieval
-        // For now, metadata is passed in URL params
+        const { error: insertError } = await supabase
+          .from('purchase_intents')
+          .insert(purchaseIntentData);
 
-        // Clear localStorage before redirecting
+        if (insertError) {
+          console.error('Error saving purchase intent:', insertError);
+          throw new Error('Failed to save your information. Please try again.');
+        }
+
+        // Clear localStorage and mark as complete to show success screen
         clearStateFromStorage(userType);
-
-        // Redirect to Gumroad
-        window.location.href = gumroadLink;
+        setState(prev => ({ ...prev, isComplete: true }));
 
       } catch (err) {
         console.error("Onboarding completion error:", err);
