@@ -118,6 +118,23 @@ export default function AdminHomePage() {
         {/* Admin Sections Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
+          {/* Prospects - Soft Launch Leads */}
+          <Link href="/admin/prospects" className="group">
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-[#D4A854] cursor-pointer h-full">
+              <div className="text-5xl mb-4">🎯</div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Prospects</h2>
+              <p className="text-gray-600 mb-4">
+                View and manage soft launch purchase intents
+              </p>
+              <div className="flex items-center text-sm text-gray-500 group-hover:text-[#D4A854] transition-colors">
+                <span>View prospects</span>
+                <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </Link>
+
           {/* Waitlist Management - Active */}
           <Link href="/admin/waitlist" className="group">
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-black cursor-pointer h-full">
