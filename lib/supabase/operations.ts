@@ -33,6 +33,7 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
   guestId?: string;
   needsReview?: boolean;
   hideArchived?: boolean;
+  notifyOptIn?: boolean;
 }) {
   const supabase = createSupabaseAdminClient();
   
@@ -48,7 +49,8 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
         printed_name,
         email,
         is_self,
-        source
+        source,
+        notify_opt_in
       ),
       profiles!guest_recipes_user_id_fkey (
         id,
@@ -199,6 +201,11 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
   // hideArchived = true means we DON'T want to see archived recipes (only show active ones)
   if (filters?.hideArchived === true) {
     filtered = filtered.filter((r: any) => r.group !== null);
+  }
+
+  // Filter by guest notify_opt_in
+  if (filters?.notifyOptIn === true) {
+    filtered = filtered.filter((r: any) => r.guests?.notify_opt_in === true);
   }
 
   return { data: filtered, error: null };

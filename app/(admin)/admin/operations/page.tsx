@@ -137,6 +137,7 @@ export default function OperationsPage() {
   const [guestFilter, setGuestFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showArchived, setShowArchived] = useState(false);
+  const [notifyOptInFilter, setNotifyOptInFilter] = useState(false);
   
   const router = useRouter();
 
@@ -151,7 +152,7 @@ export default function OperationsPage() {
       loadStats();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter, groupFilter, userFilter, guestFilter, showArchived, isAdmin]);
+  }, [statusFilter, groupFilter, userFilter, guestFilter, showArchived, notifyOptInFilter, isAdmin]);
 
   // Reset toggle states when recipe changes
   useEffect(() => {
@@ -302,6 +303,10 @@ export default function OperationsPage() {
       // BUT if the user specifically selected "Not in Group", we should show them
       if (!showArchived && groupFilter !== 'not_in_cookbook') {
         params.append('hideArchived', 'true');
+      }
+
+      if (notifyOptInFilter) {
+        params.append('notifyOptIn', 'true');
       }
 
       const response = await fetch(`/api/v1/admin/operations/recipes?${params.toString()}`);
@@ -1051,6 +1056,17 @@ ${instructions}`;
               className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
             />
             <span className="font-medium text-gray-700">Show archived recipes</span>
+          </label>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={notifyOptInFilter}
+              onChange={(e) => setNotifyOptInFilter(e.target.checked)}
+              className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
+            />
+            <span className="font-medium text-gray-700">Notify opt-in only</span>
           </label>
         </div>
         <div className="text-sm text-gray-600 ml-auto">

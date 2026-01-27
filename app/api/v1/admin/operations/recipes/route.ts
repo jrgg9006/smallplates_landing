@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
     const guestId = searchParams.get('guestId');
     const needsReview = searchParams.get('needsReview');
     const hideArchived = searchParams.get('hideArchived');
+    const notifyOptIn = searchParams.get('notifyOptIn');
 
     const filters: {
       status?: 'no_action' | 'in_progress' | 'ready_to_print';
@@ -23,6 +24,7 @@ export async function GET(req: NextRequest) {
       guestId?: string;
       needsReview?: boolean;
       hideArchived?: boolean;
+      notifyOptIn?: boolean;
     } = {};
 
     if (status) {
@@ -47,6 +49,10 @@ export async function GET(req: NextRequest) {
 
     if (hideArchived !== null) {
       filters.hideArchived = hideArchived === 'true';
+    }
+
+    if (notifyOptIn !== null) {
+      filters.notifyOptIn = notifyOptIn === 'true';
     }
 
     const { data, error } = await getAllRecipesWithProductionStatusAdmin(filters);
