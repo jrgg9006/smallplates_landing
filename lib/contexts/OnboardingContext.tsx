@@ -15,6 +15,7 @@ import {
   OnboardingContextType,
 } from "@/lib/types/onboarding";
 import { generateGumroadLink } from "@/lib/payments/gumroad";
+import { createGroup } from "@/lib/supabase/groups";
 
 // Total steps: 5 for couples, 4 for gift givers
 const TOTAL_STEPS_COUPLE = 5;
@@ -108,25 +109,32 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
   const [isHydrated, setIsHydrated] = useState(false);
   const router = useRouter();
 
+  // Reason: Store existingUserId for use in completeOnboarding to skip password requirement
+  const existingUserIdRef = React.useRef(existingUserId);
+
   // Load from localStorage after hydration (client-side only)
+  // Reason: Skip loading saved state for add-book mode (skipAuth) - always start fresh
   useEffect(() => {
-    const saved = loadStateFromStorage(userType);
-    if (saved && !saved.isComplete) {
-      // Restore saved state, but ensure totalSteps matches current userType
-      setState({
-        ...saved,
-        totalSteps: userType === 'couple' ? TOTAL_STEPS_COUPLE : TOTAL_STEPS_GIFT,
-      });
+    if (!skipAuth) {
+      const saved = loadStateFromStorage(userType);
+      if (saved && !saved.isComplete) {
+        // Restore saved state, but ensure totalSteps matches current userType
+        setState({
+          ...saved,
+          totalSteps: userType === 'couple' ? TOTAL_STEPS_COUPLE : TOTAL_STEPS_GIFT,
+        });
+      }
     }
     setIsHydrated(true);
-  }, [userType]);
+  }, [userType, skipAuth]);
 
   // Save state to localStorage whenever it changes (only after hydration)
+  // Reason: Don't save add-book mode state to localStorage to avoid overwriting normal flow progress
   useEffect(() => {
-    if (isHydrated && !state.isComplete) {
+    if (isHydrated && !state.isComplete && !skipAuth) {
       saveStateToStorage(userType, state);
     }
-  }, [state, userType, isHydrated]);
+  }, [state, userType, isHydrated, skipAuth]);
 
   /**
    * Navigate to the next step
@@ -197,17 +205,24 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
         }
 
         let finalEmail = email;
-          let finalPassword = password;
-          
-        // Get email/password from state if not provided
-          if (!finalEmail || !finalPassword) {
-          const emailStep = userType === 'couple' ? state.answers.step5 : state.answers.step4;
-            finalEmail = finalEmail || emailStep?.email;
-            finalPassword = finalPassword || emailStep?.password;
-          }
+        let finalPassword = password;
 
-          if (!finalEmail || !finalPassword) {
-          throw new Error("Email and password are required to complete purchase");
+        // Reason: For existing users (add-book mode), password is not required
+        const isExistingUser = !!existingUserIdRef.current;
+
+        // Get email/password from state if not provided
+        if (!finalEmail || (!isExistingUser && !finalPassword)) {
+          const emailStep = userType === 'couple' ? state.answers.step5 : state.answers.step4;
+          finalEmail = finalEmail || emailStep?.email;
+          finalPassword = finalPassword || emailStep?.password;
+        }
+
+        if (!finalEmail) {
+          throw new Error("Email is required to complete purchase");
+        }
+
+        if (!isExistingUser && !finalPassword) {
+          throw new Error("Password is required to complete purchase");
         }
 
         // Merge directData with state.answers
@@ -250,10 +265,43 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
           }
         }
 
-        // Generate Gumroad link with metadata
+        // Reason: For existing users (add-book mode), create book directly without payment
+        // TODO: Re-enable Gumroad payment after setup is complete
+        if (isExistingUser && existingUserIdRef.current) {
+          // Create the group directly
+          const groupName = coupleNames?.brideFirstName && coupleNames?.partnerFirstName
+            ? `${coupleNames.brideFirstName} & ${coupleNames.partnerFirstName}'s Recipe Book`
+            : "New Recipe Book";
+
+          const step3Data = mergedAnswers.step3 as {
+            relationship?: string;
+            firstName?: string;
+            partnerFirstName?: string;
+          } | undefined;
+
+          const { error: groupError } = await createGroup({
+            name: groupName,
+            description: `A wedding recipe book for ${coupleNames?.brideFirstName || ''} & ${coupleNames?.partnerFirstName || ''}`,
+            couple_first_name: coupleNames?.brideFirstName,
+            partner_first_name: coupleNames?.partnerFirstName,
+            relationship_to_couple: step3Data?.relationship as "friend" | "family" | "bridesmaid" | "wedding-planner" | "other" | null | undefined,
+            created_by: existingUserIdRef.current,
+          });
+
+          if (groupError) {
+            throw new Error(groupError);
+          }
+
+          // Clear localStorage and redirect to the groups page
+          clearStateFromStorage(userType);
+          router.push('/profile/groups');
+          return;
+        }
+
+        // For new users, generate Gumroad link with metadata
         const gumroadLink = generateGumroadLink(state.selectedProductTier, {
           email: finalEmail,
-            userType: userType,
+          userType: userType,
           coupleNames: coupleNames,
           giftGiverName: userType === 'gift_giver' ? (mergedAnswers.step3 as { giftGiverName?: string } | undefined)?.giftGiverName : undefined,
           weddingDate: userType === 'couple' ? (mergedAnswers.step3 as { weddingDate?: string } | undefined)?.weddingDate : undefined,
@@ -261,6 +309,7 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
           planningStage: userType === 'couple' ? (mergedAnswers.step1 as { planningStage?: string } | undefined)?.planningStage : undefined,
           timeline: userType === 'gift_giver' ? (mergedAnswers.step1 as { timeline?: string } | undefined)?.timeline : undefined,
           relationship: userType === 'gift_giver' ? (mergedAnswers.step3 as { relationship?: string } | undefined)?.relationship : undefined,
+          existingUserId: existingUserIdRef.current,
         });
 
         // Store onboarding data temporarily (for webhook to use later)
@@ -279,7 +328,7 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
         throw err;
       }
     },
-    [state.answers, state.selectedProductTier, userType]
+    [state.answers, state.selectedProductTier, userType, router]
   );
 
   /**

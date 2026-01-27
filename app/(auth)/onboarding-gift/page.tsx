@@ -67,7 +67,7 @@ function Step1({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
   return (
     <OnboardingStep
       stepNumber={1}
-      totalSteps={isAddBookMode ? 2 : 4}
+      totalSteps={isAddBookMode ? 3 : 4}
       title="When's the big day?"
       imageUrl="/images/onboarding/onboarding_lemon.png"
       imageAlt="Wedding planning essentials"
@@ -158,7 +158,7 @@ function Step2Product({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
   return (
     <OnboardingStep
       stepNumber={2}
-      totalSteps={isAddBookMode ? 2 : 4}
+      totalSteps={isAddBookMode ? 3 : 4}
       title="Choose your collection."
       imageUrl="/images/onboarding/onboarding_lemon.png"
       imageAlt="Product selection"
@@ -199,6 +199,7 @@ function Step2Product({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
  */
 function Step3({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
   const { state, nextStep, previousStep, updateStepData, completeOnboarding } = useOnboarding();
+  const { user } = useAuth();
   
   // Initialize from saved state if available
   const savedData = state.answers.step3 as {
@@ -232,14 +233,15 @@ function Step3({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
     // Store gift info in context
     await updateStepData(3, step3Data);
     
-    // Reason: If add-book mode, complete onboarding directly (skip Step3 account creation)
+    // Reason: If add-book mode, complete onboarding directly (skip Step4 account creation)
     if (isAddBookMode) {
       setLoading(true);
       try {
         // Pass step1 and step3 data directly to avoid async state timing issues
-        await completeOnboarding(undefined, undefined, { 
+        // Use existing user's email since they're already authenticated
+        await completeOnboarding(user?.email, undefined, {
           step1: state.answers.step1,
-          step3: step3Data 
+          step3: step3Data
         });
       } finally {
         setLoading(false);
@@ -255,7 +257,7 @@ function Step3({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
   return (
     <OnboardingStep
       stepNumber={3}
-      totalSteps={isAddBookMode ? 2 : 4}
+      totalSteps={isAddBookMode ? 3 : 4}
       title="Almost there."
       imageUrl="/images/onboarding/onboarding_lemon.png"
       imageAlt="Wedding planning essentials"
@@ -536,7 +538,7 @@ function GiftOnboardingContent({ isAddBookMode }: { isAddBookMode: boolean }) {
   return (
     <div className="min-h-screen bg-white">
       {state.currentStep === 1 && <Step1 isAddBookMode={isAddBookMode} />}
-      {state.currentStep === 2 && !isAddBookMode && <Step2Product isAddBookMode={isAddBookMode} />}
+      {state.currentStep === 2 && <Step2Product isAddBookMode={isAddBookMode} />}
       {state.currentStep === 3 && <Step3 isAddBookMode={isAddBookMode} />}
       {state.currentStep === 4 && !isAddBookMode && <Step4 />}
     </div>
@@ -548,13 +550,24 @@ function GiftOnboardingContent({ isAddBookMode }: { isAddBookMode: boolean }) {
  */
 function GiftOnboardingPageInner() {
   const searchParams = useSearchParams();
-  const { user } = useAuth();
-  
+  const { user, loading } = useAuth();
+
   // Reason: add-book mode only applies when user is already authenticated
-  const isAddBookMode = searchParams.get('mode') === 'add-book' && !!user;
+  const wantsAddBookMode = searchParams.get('mode') === 'add-book';
+  const isAddBookMode = wantsAddBookMode && !!user;
+
+  // Reason: Wait for auth to load before rendering if user wants add-book mode
+  // This prevents flash of wrong content and ensures user state is known
+  if (wantsAddBookMode && loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4A854]"></div>
+      </div>
+    );
+  }
 
   return (
-    <OnboardingProvider 
+    <OnboardingProvider
       userType="gift_giver"
       skipAuth={isAddBookMode}
       existingUserId={user?.id}

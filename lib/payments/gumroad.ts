@@ -18,6 +18,8 @@ export interface GumroadMetadata {
   planningStage?: string;
   timeline?: string;
   relationship?: string;
+  // Reason: When set, webhook should add book to existing user instead of creating new account
+  existingUserId?: string;
 }
 
 /**
@@ -78,6 +80,9 @@ export function generateGumroadLink(
   }
   if (metadata.relationship) {
     params.append("relationship", metadata.relationship);
+  }
+  if (metadata.existingUserId) {
+    params.append("existing_user_id", metadata.existingUserId);
   }
 
   // Generate Gumroad link
