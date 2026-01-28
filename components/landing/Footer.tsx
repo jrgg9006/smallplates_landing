@@ -4,10 +4,12 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import BookDetailsModal from './BookDetailsModal';
+import RegistryHowToModal from './RegistryHowToModal';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
   const [isBookDetailsOpen, setIsBookDetailsOpen] = useState(false);
+  const [isRegistryHowToOpen, setIsRegistryHowToOpen] = useState(false);
   
   return (
     <footer className="bg-[#2D2D2D]">
@@ -69,6 +71,14 @@ export default function Footer() {
                       className="font-sans font-light text-base text-white/70 hover:text-white transition-colors text-left"
                     >
                       Book Specifications
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => setIsRegistryHowToOpen(true)}
+                      className="font-sans font-light text-base text-white/70 hover:text-white transition-colors text-left"
+                    >
+                      How to add to your registry
                     </button>
                   </li>
                   <li>
@@ -158,6 +168,12 @@ export default function Footer() {
       <BookDetailsModal 
         isOpen={isBookDetailsOpen} 
         onClose={() => setIsBookDetailsOpen(false)} 
+      />
+
+      {/* Registry How-To Modal */}
+      <RegistryHowToModal
+        isOpen={isRegistryHowToOpen}
+        onClose={() => setIsRegistryHowToOpen(false)}
       />
     </footer>
   );
