@@ -90,10 +90,21 @@ export default function ActivateAccountPage({ params }: { params: Promise<{ toke
       }
 
       setSuccess(true);
-      
-      // Redirect to login after showing success message
+
+      // Auto-login the user with their new credentials
+      const supabase = createSupabaseClient();
+      const { error: loginError } = await supabase.auth.signInWithPassword({
+        email: tokenData!.email,
+        password: password
+      });
+
+      // Redirect after showing success message
       setTimeout(() => {
-        router.push("/?login=true");
+        if (!loginError) {
+          router.push("/profile"); // Go directly to profile
+        } else {
+          router.push("/?login=true"); // Fallback to login page
+        }
       }, 2000);
       
     } catch (err) {
@@ -177,7 +188,7 @@ export default function ActivateAccountPage({ params }: { params: Promise<{ toke
               Welcome to Small Plates!
             </h1>
             <p className="text-lg text-gray-600 mb-6">
-              Your account has been activated successfully. Redirecting you to login...
+              Your account has been activated successfully. Redirecting you to your profile...
             </p>
           </div>
         </div>
