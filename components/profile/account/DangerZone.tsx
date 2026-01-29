@@ -41,7 +41,7 @@ export function DangerZone() {
     setError(null);
 
     try {
-      const { error } = await deleteAccount(currentPassword);
+      const { data, error } = await deleteAccount(currentPassword);
 
       if (error) {
         setError(error);
@@ -49,6 +49,15 @@ export function DangerZone() {
       }
 
       // Account deletion successful - user is automatically signed out
+      // Show success message based on deletion type
+      if (data?.deletionType === 'soft') {
+        // Soft delete - data preserved
+        alert('✅ Your account has been deleted. All your recipes and book data have been preserved.');
+      } else {
+        // Hard delete - completely removed
+        alert('✅ Your account has been permanently deleted.');
+      }
+
       // Redirect to home page
       router.push('/');
     } catch (err) {
@@ -78,13 +87,13 @@ export function DangerZone() {
             </p>
             
             <div className="space-y-2 text-sm text-red-700">
-              <p><strong>This will permanently:</strong></p>
+              <p><strong>What happens when you delete your account:</strong></p>
               <ul className="list-disc list-inside space-y-1 ml-4">
-                <li>Delete your profile and personal information</li>
-                <li>Remove all your guests and their recipe submissions</li>
-                <li>Cancel any pending cookbook orders</li>
-                <li>Disable your recipe collection link</li>
-                <li>Sign you out of all devices</li>
+                <li>If you have recipes, guests, or books: Your account will be deactivated but all your data (recipes, guests, books) will be preserved</li>
+                <li>If you have no content: Your account and all data will be permanently deleted</li>
+                <li>Your recipe collection link will be disabled</li>
+                <li>You will be signed out of all devices</li>
+                <li>This action cannot be undone</li>
               </ul>
             </div>
 

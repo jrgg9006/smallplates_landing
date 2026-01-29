@@ -180,7 +180,12 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4 py-4">
+        {/* Explanation text */}
+        <p className="text-xs sm:text-sm text-[#2D2D2D] leading-relaxed font-light mt-2">
+          A captain will have full access to this book and can help you collect recipes together.
+        </p>
+        
+        <div className="space-y-4 pt-4 pb-2">
           {/* Name Field */}
           <div>
             <Label htmlFor="friendName" className="text-sm font-medium text-gray-600">
@@ -279,7 +284,7 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
           <Button 
             variant="outline"
             onClick={onClose}

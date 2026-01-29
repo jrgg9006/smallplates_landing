@@ -1,50 +1,62 @@
 /**
- * API Route - Delete User (Admin Only)
- * Implements smart deletion:
+ * API Route - Delete Own Account
+ * Allows users to delete their own account using the same smart deletion logic as admin
  * - If user has content (recipes, guests, groups) → Soft delete (preserve data)
  * - If user has no content → Hard delete (remove completely)
  */
 
 import { NextResponse } from 'next/server';
-import { requireAdminAuth } from '@/lib/auth/admin';
+import { createSupabaseClient } from '@/lib/supabase/client';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ userId: string }> }
-) {
+export async function DELETE(request: Request) {
   try {
-    // Check admin authentication
-    await requireAdminAuth();
-
-    const { userId } = await params;
-
-    if (!userId) {
+    const supabase = createSupabaseClient();
+    
+    // Get authenticated user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError || !user) {
       return NextResponse.json(
-        { error: 'User ID is required' },
+        { error: 'User not authenticated' },
+        { status: 401 }
+      );
+    }
+
+    const userId = user.id;
+    const supabaseAdmin = createSupabaseAdminClient();
+
+    // Get password from request body for verification
+    let body;
+    try {
+      body = await request.json();
+    } catch (e) {
+      return NextResponse.json(
+        { error: 'Invalid request body' },
         { status: 400 }
       );
     }
 
-    console.log('🗑️ Admin deleting user:', userId);
+    const { password } = body;
 
-    const supabaseAdmin = createSupabaseAdminClient();
-
-    // First, verify user exists and get waitlist_id if exists
-    const { data: userData, error: getUserError } = await supabaseAdmin.auth.admin.getUserById(userId);
-    
-    if (getUserError || !userData) {
-      console.error('❌ User not found:', getUserError);
+    if (!password) {
       return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
+        { error: 'Password is required' },
+        { status: 400 }
       );
     }
 
-    // Get waitlist_id from user metadata before deleting
-    const waitlistId = userData.user?.user_metadata?.waitlist_id;
-    if (waitlistId) {
-      console.log('📋 Found waitlist_id:', waitlistId);
+    // Verify password
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email: user.email!,
+      password: password
+    });
+
+    if (verifyError) {
+      return NextResponse.json(
+        { error: 'Password is incorrect' },
+        { status: 401 }
+      );
     }
 
     // Check if user already deleted (safety check)
@@ -56,31 +68,36 @@ export async function DELETE(
 
     if (existingProfile?.deleted_at) {
       return NextResponse.json(
-        { error: 'User is already deleted' },
+        { error: 'Account is already deleted' },
         { status: 400 }
       );
     }
 
+    // Get waitlist_id from user metadata before deleting
+    const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
+    const waitlistId = userData?.user?.user_metadata?.waitlist_id;
+
+    console.log('🗑️ User deleting own account:', userId);
+
     // STEP 1: Check if user has any content
-    // We need to preserve recipes and guests if they exist
-    const { data: guests, error: guestsError } = await supabaseAdmin
+    const { data: guests } = await supabaseAdmin
       .from('guests')
       .select('id')
       .eq('user_id', userId)
       .limit(1);
 
-    const { data: recipes, error: recipesError } = await supabaseAdmin
+    const { data: recipes } = await supabaseAdmin
       .from('guest_recipes')
       .select('id')
       .eq('user_id', userId)
       .limit(1);
 
-    const { data: userGroups, error: groupsError } = await supabaseAdmin
+    const { data: userGroups } = await supabaseAdmin
       .from('groups')
       .select('id, name')
       .eq('created_by', userId);
 
-    // Check if any groups have recipes (even if user didn't create them)
+    // Check if any groups have recipes
     let hasGroupContent = false;
     if (userGroups && userGroups.length > 0) {
       const groupIds = userGroups.map(g => g.id);
@@ -134,7 +151,7 @@ export async function DELETE(
           .from('group_members')
           .select('profile_id, role')
           .eq('group_id', group.id)
-          .neq('profile_id', userId); // Exclude the user being deleted
+          .neq('profile_id', userId);
         
         if (membersError) {
           console.error(`⚠️ Error getting members for group ${group.id}:`, membersError);
@@ -201,13 +218,12 @@ export async function DELETE(
       if (softDeleteError) {
         console.error('❌ Error performing soft delete:', softDeleteError);
         return NextResponse.json(
-          { error: `Failed to soft delete user: ${softDeleteError.message}` },
+          { error: `Failed to delete account: ${softDeleteError.message}` },
           { status: 500 }
         );
       }
 
       // Disable auth user (but don't delete to preserve foreign keys)
-      // We'll update the email in auth.users to prevent login
       try {
         const { error: updateAuthError } = await supabaseAdmin.auth.admin.updateUserById(
           userId,
@@ -238,9 +254,12 @@ export async function DELETE(
         }
       }
 
+      // Sign out the user
+      await supabase.auth.signOut();
+
       return NextResponse.json({
         success: true,
-        message: 'User soft deleted successfully - all data preserved',
+        message: 'Account deleted successfully - all data preserved',
         deletionType: 'soft'
       });
 
@@ -248,136 +267,134 @@ export async function DELETE(
       // HARD DELETE: User has no content, safe to delete completely
       console.log('🗑️ User has no content - performing HARD DELETE (complete removal)');
       
-    // Try to delete user from auth.users
-    // This should CASCADE delete all related records in public tables
-    let deleteError = null;
-    
-    try {
-      const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
-      deleteError = error;
-    } catch (err) {
-      console.error('❌ Exception during delete:', err);
-      deleteError = err as any;
-    }
-
-    if (deleteError) {
-      console.error('❌ Error deleting user:', deleteError);
-      console.error('❌ Error details:', JSON.stringify(deleteError, null, 2));
-      
-      // If direct deletion fails, try alternative approach
-      console.log('🔄 Attempting alternative deletion method...');
+      // Try to delete user from auth.users
+      let deleteError = null;
       
       try {
-          // Delete from public tables manually
-        await supabaseAdmin
-          .from('group_invitations')
-          .delete()
-          .eq('invited_by', userId);
+        const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+        deleteError = error;
+      } catch (err) {
+        console.error('❌ Exception during delete:', err);
+        deleteError = err as any;
+      }
+
+      if (deleteError) {
+        console.error('❌ Error deleting user:', deleteError);
+        console.log('🔄 Attempting alternative deletion method...');
         
-        if (userGroups && userGroups.length > 0) {
-          const groupIds = userGroups.map(g => g.id);
+        try {
+          // Delete from public tables manually
           await supabaseAdmin
             .from('group_invitations')
             .delete()
-            .in('group_id', groupIds);
-        }
-        
-        await supabaseAdmin
-          .from('group_members')
-          .delete()
-          .eq('profile_id', userId);
-        
-        await supabaseAdmin
-          .from('group_recipes')
-          .delete()
-          .eq('added_by', userId);
-        
-        await supabaseAdmin
-          .from('groups')
-          .delete()
-          .eq('created_by', userId);
-        
-        await supabaseAdmin
-          .from('guest_recipes')
-          .delete()
-          .eq('user_id', userId);
-        
-        await supabaseAdmin
-          .from('communication_log')
-          .delete()
-          .eq('user_id', userId);
-        
-        await supabaseAdmin
-          .from('guests')
-          .delete()
-          .eq('user_id', userId);
-        
-        await supabaseAdmin
-          .from('cookbooks')
-          .delete()
-          .eq('user_id', userId);
-        
-        await supabaseAdmin
-          .from('shipping_addresses')
-          .delete()
-          .eq('user_id', userId);
-        
-        await supabaseAdmin
-          .from('profiles')
-          .delete()
-          .eq('id', userId);
-        
-        const { error: retryError } = await supabaseAdmin.auth.admin.deleteUser(userId);
-        
-        if (retryError) {
-          console.error('❌ Still failed after manual cleanup:', retryError);
+            .eq('invited_by', userId);
+          
+          if (userGroups && userGroups.length > 0) {
+            const groupIds = userGroups.map(g => g.id);
+            await supabaseAdmin
+              .from('group_invitations')
+              .delete()
+              .in('group_id', groupIds);
+          }
+          
+          await supabaseAdmin
+            .from('group_members')
+            .delete()
+            .eq('profile_id', userId);
+          
+          await supabaseAdmin
+            .from('group_recipes')
+            .delete()
+            .eq('added_by', userId);
+          
+          await supabaseAdmin
+            .from('groups')
+            .delete()
+            .eq('created_by', userId);
+          
+          await supabaseAdmin
+            .from('guest_recipes')
+            .delete()
+            .eq('user_id', userId);
+          
+          await supabaseAdmin
+            .from('communication_log')
+            .delete()
+            .eq('user_id', userId);
+          
+          await supabaseAdmin
+            .from('guests')
+            .delete()
+            .eq('user_id', userId);
+          
+          await supabaseAdmin
+            .from('cookbooks')
+            .delete()
+            .eq('user_id', userId);
+          
+          await supabaseAdmin
+            .from('shipping_addresses')
+            .delete()
+            .eq('user_id', userId);
+          
+          await supabaseAdmin
+            .from('profiles')
+            .delete()
+            .eq('id', userId);
+          
+          const { error: retryError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+          
+          if (retryError) {
+            console.error('❌ Still failed after manual cleanup:', retryError);
+            return NextResponse.json(
+              { error: `Failed to delete account: ${retryError.message}` },
+              { status: 500 }
+            );
+          }
+          
+          console.log('✅ User deleted successfully using alternative method');
+          
+        } catch (cleanupError) {
+          console.error('❌ Error during manual cleanup:', cleanupError);
           return NextResponse.json(
-            { error: `Failed to delete user even after manual cleanup: ${retryError.message}` },
+            { error: `Failed to delete account: ${deleteError.message}. Cleanup attempt also failed.` },
             { status: 500 }
           );
         }
-        
-        console.log('✅ User deleted successfully using alternative method');
-        
-      } catch (cleanupError) {
-        console.error('❌ Error during manual cleanup:', cleanupError);
-        return NextResponse.json(
-          { error: `Failed to delete user: ${deleteError.message}. Cleanup attempt also failed.` },
-          { status: 500 }
-        );
-      }
       } else {
         console.log('✅ User deleted successfully via CASCADE');
-    }
+      }
 
-    // Delete waitlist entry if exists
-    if (waitlistId) {
-      try {
-        await supabaseAdmin
-          .from('waitlist')
-          .delete()
-          .eq('id', waitlistId);
-        console.log('✅ Waitlist entry deleted:', waitlistId);
-      } catch (waitlistError) {
-        console.error('⚠️ Error deleting waitlist entry (non-critical):', waitlistError);
+      // Delete waitlist entry if exists
+      if (waitlistId) {
+        try {
+          await supabaseAdmin
+            .from('waitlist')
+            .delete()
+            .eq('id', waitlistId);
+          console.log('✅ Waitlist entry deleted:', waitlistId);
+        } catch (waitlistError) {
+          console.error('⚠️ Error deleting waitlist entry (non-critical):', waitlistError);
         }
-    }
+      }
 
-    return NextResponse.json({
-      success: true,
-        message: 'User deleted completely (hard delete)',
+      // Sign out (though user will be deleted anyway)
+      await supabase.auth.signOut();
+
+      return NextResponse.json({
+        success: true,
+        message: 'Account permanently deleted',
         deletionType: 'hard'
-    });
+      });
     }
 
   } catch (error) {
-    console.error('❌ Error in delete user route:', error);
+    console.error('❌ Error in delete account route:', error);
     return NextResponse.json(
       { 
-        error: error instanceof Error ? error.message : 'Unauthorized'
+        error: error instanceof Error ? error.message : 'Internal server error'
       },
-      { status: error instanceof Error && error.message.includes('Admin') ? 401 : 500 }
+      { status: 500 }
     );
   }
 }
-

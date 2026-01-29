@@ -217,7 +217,9 @@ export async function updatePassword(currentPassword: string, newPassword: strin
 }
 
 /**
- * Delete user account (irreversible)
+ * Delete user account (uses smart deletion logic)
+ * - If user has content (recipes, guests, groups) → Soft delete (preserve data)
+ * - If user has no content → Hard delete (remove completely)
  */
 export async function deleteAccount(currentPassword: string) {
   const supabase = createSupabaseClient();
@@ -237,28 +239,27 @@ export async function deleteAccount(currentPassword: string) {
     return { data: null, error: 'Current password is incorrect' };
   }
 
-  // Note: This function requires admin privileges on Supabase
-  // For now, we'll mark the profile as deleted and let admin handle the actual deletion
-  const { data, error } = await supabase
-    .from('profiles')
-    .update({ 
-      email: `deleted_${Date.now()}@deleted.local`,
-      full_name: 'Deleted User',
-      phone_number: null,
-      collection_enabled: false
-    })
-    .eq('id', user.id)
-    .select()
-    .single();
+  // Call the API route that uses the same smart deletion logic as admin
+  try {
+    const response = await fetch('/api/v1/users/me/delete', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ password: currentPassword }),
+    });
 
-  if (error) {
-    return { data: null, error: error.message };
+    const result = await response.json();
+
+    if (!response.ok) {
+      return { data: null, error: result.error || 'Failed to delete account' };
+    }
+
+    // User is signed out by the API route
+    return { data: result, error: null };
+  } catch (err) {
+    return { data: null, error: err instanceof Error ? err.message : 'Failed to delete account' };
   }
-
-  // Sign out the user
-  await supabase.auth.signOut();
-
-  return { data, error: null };
 }
 
 // Note: updateShareMessage and resetShareMessage functions have been removed.
