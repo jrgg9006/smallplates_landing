@@ -45,7 +45,13 @@ function Step1() {
     <OnboardingStep
       stepNumber={1}
       totalSteps={5}
-      title="Congratulations! Let's start with the basics."
+      title={
+        <>
+          Congratulations!
+          <br />
+          Let&apos;s start with the basics.
+        </>
+      }
       imageUrl="/images/onboarding/onboarding_lemon.png"
       imageAlt="Wedding planning essentials"
     >

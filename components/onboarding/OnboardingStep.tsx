@@ -5,7 +5,7 @@ import Image from "next/image";
 interface OnboardingStepProps {
   stepNumber: number;
   totalSteps: number;
-  title: string;
+  title: ReactNode;
   description?: string;
   children: ReactNode;
   imageUrl?: string;
