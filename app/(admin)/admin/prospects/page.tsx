@@ -31,6 +31,12 @@ export default function AdminProspectsPage() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [showActivationModal, setShowActivationModal] = useState(false);
+  const [selectedProspect, setSelectedProspect] = useState<PurchaseIntent | null>(null);
+  const [activationEmail, setActivationEmail] = useState('');
+  const [generatingToken, setGeneratingToken] = useState(false);
+  const [activationLink, setActivationLink] = useState<string | null>(null);
+  const [activationError, setActivationError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -118,6 +124,66 @@ export default function AdminProspectsPage() {
       date: date.toLocaleDateString(),
       time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
+  };
+
+  const handleGenerateActivationLink = (prospect: PurchaseIntent) => {
+    setSelectedProspect(prospect);
+    setActivationEmail(prospect.email);
+    setActivationLink(null);
+    setActivationError(null);
+    setShowActivationModal(true);
+  };
+
+  const handleCreateActivationToken = async () => {
+    if (!selectedProspect) return;
+
+    setGeneratingToken(true);
+    setActivationError(null);
+
+    try {
+      const response = await fetch('/api/v1/purchase-activations/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          purchaseIntentId: selectedProspect.id,
+          email: activationEmail.trim() || selectedProspect.email,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate activation link');
+      }
+
+      setActivationLink(data.activationUrl);
+    } catch (err) {
+      console.error('Error generating activation link:', err);
+      setActivationError(err instanceof Error ? err.message : 'Failed to generate activation link');
+    } finally {
+      setGeneratingToken(false);
+    }
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      // You could add a toast notification here
+      alert('Link copied to clipboard!');
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      alert('Failed to copy link. Please copy manually.');
+    }
+  };
+
+  const closeModal = () => {
+    setShowActivationModal(false);
+    setSelectedProspect(null);
+    setActivationEmail('');
+    setActivationLink(null);
+    setActivationError(null);
   };
 
   if (loading || !isAdmin) {
@@ -278,6 +344,14 @@ export default function AdminProspectsPage() {
                               <option value="paid">Paid</option>
                               <option value="cancelled">Cancelled</option>
                             </select>
+                            {prospect.status === 'paid' && (
+                              <button
+                                onClick={() => handleGenerateActivationLink(prospect)}
+                                className="text-xs px-3 py-1.5 bg-[#D4A854] text-white rounded hover:bg-[#c49b4a] transition-colors font-medium mt-1"
+                              >
+                                Generate Activation Link
+                              </button>
+                            )}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -303,6 +377,122 @@ export default function AdminProspectsPage() {
           </button>
         </div>
       </div>
+
+      {/* Activation Link Modal */}
+      {showActivationModal && selectedProspect && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Generate Activation Link</h2>
+                <button
+                  onClick={closeModal}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Prospect Info */}
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <div className="text-sm text-gray-600 mb-2">Prospect Information:</div>
+                <div className="space-y-1 text-sm">
+                  <div><strong>Email:</strong> {selectedProspect.email}</div>
+                  <div><strong>Type:</strong> {selectedProspect.user_type === 'couple' ? 'Couple' : 'Gift Giver'}</div>
+                  {selectedProspect.couple_first_name && (
+                    <div>
+                      <strong>Couple:</strong> {selectedProspect.couple_first_name}
+                      {selectedProspect.partner_first_name && ` & ${selectedProspect.partner_first_name}`}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Email Input */}
+              <div className="mb-6">
+                <label htmlFor="activation-email" className="block text-sm font-medium text-gray-700 mb-2">
+                  Activation Email
+                </label>
+                <input
+                  id="activation-email"
+                  type="email"
+                  value={activationEmail}
+                  onChange={(e) => setActivationEmail(e.target.value)}
+                  placeholder={selectedProspect.email}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Default: {selectedProspect.email}. Change if needed (e.g., for multiple accounts).
+                </p>
+              </div>
+
+              {/* Error Message */}
+              {activationError && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-700">{activationError}</p>
+                </div>
+              )}
+
+              {/* Activation Link Display */}
+              {activationLink && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="text-sm font-medium text-green-800 mb-2">✅ Activation Link Generated!</div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={activationLink}
+                      readOnly
+                      className="flex-1 px-3 py-2 bg-white border border-green-300 rounded text-sm"
+                    />
+                    <button
+                      onClick={() => copyToClipboard(activationLink)}
+                      className="px-4 py-2 bg-[#D4A854] text-white rounded hover:bg-[#c49b4a] transition-colors text-sm font-medium"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <p className="text-xs text-green-700 mt-2">
+                    Send this link to the user. They will use it to create their password and activate their account.
+                  </p>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={closeModal}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  {activationLink ? 'Close' : 'Cancel'}
+                </button>
+                {!activationLink && (
+                  <button
+                    onClick={handleCreateActivationToken}
+                    disabled={generatingToken || !activationEmail.trim()}
+                    className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                      generatingToken || !activationEmail.trim()
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-[#D4A854] text-white hover:bg-[#c49b4a]'
+                    }`}
+                  >
+                    {generatingToken ? (
+                      <>
+                        <span className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
+                        Generating...
+                      </>
+                    ) : (
+                      'Generate Link'
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
