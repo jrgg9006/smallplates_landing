@@ -42,6 +42,7 @@ export async function GET(
         id,
         name,
         description,
+        couple_image_url,
         created_at
       `)
       .eq('id', groupId)
@@ -67,6 +68,7 @@ export async function GET(
         id: group.id,
         name: group.name,
         description: group.description,
+        coupleImageUrl: group.couple_image_url,
         createdAt: group.created_at
       }
     });

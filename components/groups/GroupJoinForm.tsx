@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createSupabaseClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,7 @@ interface GroupJoinFormProps {
   groupData: GroupInfo | null;
   inviterName?: string; // Optional - shows "John invited you to join:" if provided
   subtitle?: string; // Optional custom subtitle
+  coupleImageUrl?: string | null; // Optional couple image URL
   
   // Pre-filled form data
   preFilledData?: {
@@ -58,6 +60,7 @@ export function GroupJoinForm({
   inviterName,
   subtitle,
   preFilledData,
+  coupleImageUrl,
   onJoin,
   verifying = false,
   verifyMessage = "Loading...",
@@ -67,6 +70,9 @@ export function GroupJoinForm({
   autoFocus = false
 }: GroupJoinFormProps) {
   const router = useRouter();
+  
+  // Default image fallback
+  const displayImage = coupleImageUrl || '/images/profile/Hero_Profile_2400.jpg';
   
   // Toggle state - false = create account, true = sign in
   const [hasAccount, setHasAccount] = useState(false);
@@ -234,15 +240,15 @@ export function GroupJoinForm({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-serif font-semibold text-gray-900 mb-4">
+          <h1 className="text-2xl font-serif font-semibold text-[#2D2D2D] mb-4">
             {errorTitle}
           </h1>
-          <p className="text-gray-600 mb-6">
+          <p className="text-[#9A9590] mb-6">
             {verifyError}
           </p>
           <Button 
             onClick={() => router.push('/')}
-            className="bg-black text-white hover:bg-gray-800"
+            className="bg-[#2D2D2D] text-white hover:bg-[#1A1A1A]"
           >
             Go to Home Page
           </Button>
@@ -257,10 +263,10 @@ export function GroupJoinForm({
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-6">
           <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-serif font-semibold text-gray-900 mb-4">
+          <h1 className="text-2xl font-serif font-semibold text-[#2D2D2D] mb-4">
             Welcome to the Cookbook!
           </h1>
-          <p className="text-gray-600 mb-6">
+          <p className="text-[#9A9590] mb-6">
             You&apos;ve successfully joined <span className="font-medium">{groupName}</span> and can now help create this special gift.
             Redirecting to your cookbooks...
           </p>
@@ -276,46 +282,76 @@ export function GroupJoinForm({
       {/* Header */}
       <div className="border-b border-gray-200">
         <div className="max-w-md mx-auto px-6 h-14 flex items-center justify-center">
-          <Image
-            src="/images/SmallPlates_logo_horizontal.png"
-            alt="Small Plates & Co."
-            width={180}
-            height={28}
-            className="mx-auto"
-          />
+          <Link href="/" className="flex items-center hover:opacity-70 transition-opacity">
+            <Image
+              src="/images/SmallPlates_logo_horizontal.png"
+              alt="Small Plates & Co."
+              width={180}
+              height={28}
+              className="mx-auto"
+            />
+          </Link>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-md mx-auto px-6 py-8">
-        <div className="text-center mb-8">
-          <h2 className="text-4xl font-serif font-semibold text-gray-900 mb-2">
-            {title}
-          </h2>
-          {subtitle && (
-            <p className="text-gray-600 mb-4">{subtitle}</p>
-          )}
-          {groupData && (
-            <div className="space-y-2 mt-4">
-              {inviterName ? (
-                <p className="text-gray-600">
-                  <span className="font-medium">{inviterName}</span> invited you to join:
-                </p>
-              ) : (
-                <p className="text-gray-600">
-                  You&apos;ve been invited to join:
-                </p>
-              )}
-              <h3 className="text-2xl font-serif font-bold text-black text-center mt-2 mb-6">
-                {groupData.name}
-              </h3>
+      {/* Main Content - Editorial Layout */}
+      <div className="max-w-6xl mx-auto">
+        {/* Mobile: Stacked layout, Desktop: Two columns */}
+        <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center lg:min-h-[calc(100vh-3.5rem)]">
+          
+          {/* Image Section - Left side on desktop, top on mobile */}
+          {displayImage && (
+            <div className="flex items-center justify-center lg:justify-start mb-6 lg:mb-0">
+              <div className="w-full lg:max-w-sm lg:mx-auto">
+                <div className="relative w-full h-40 sm:h-44 lg:h-[450px] lg:max-h-[60vh] overflow-hidden rounded-lg lg:rounded-xl shadow-sm border border-[#E8E0D5]">
+                  <Image
+                    src={displayImage}
+                    alt={groupData?.name || "Wedding cookbook"}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 400px"
+                    priority
+                  />
+                  {/* Subtle gradient overlay for editorial feel */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#2D2D2D]/5 via-transparent to-transparent lg:bg-gradient-to-r lg:from-[#2D2D2D]/3 lg:via-transparent lg:to-transparent" />
+                </div>
+              </div>
             </div>
           )}
-        </div>
 
-        {/* Account Type Toggle */}
-        <div className="mb-6">
-          <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          {/* Content Section - Right side on desktop, below image on mobile */}
+          <div className="flex items-center">
+            <div className="w-full max-w-md mx-auto px-6 py-6 lg:py-4">
+              
+              {/* Title Section */}
+              <div className="text-center mb-6">
+                <h2 className="text-3xl sm:text-4xl font-serif font-semibold text-[#2D2D2D] mb-2">
+                  {title}
+                </h2>
+                {subtitle && (
+                  <p className="text-[#9A9590] mb-3 text-sm">{subtitle}</p>
+                )}
+                {groupData && (
+                  <div className="space-y-2 mt-4">
+                    {inviterName ? (
+                      <p className="text-[#9A9590] text-sm">
+                        <span className="font-medium text-[#2D2D2D]">{inviterName}</span> invited you to join:
+                      </p>
+                    ) : (
+                      <p className="text-[#9A9590] text-sm">
+                        You&apos;ve been invited to join:
+                      </p>
+                    )}
+                    <h3 className="text-xl sm:text-2xl font-serif font-semibold text-[#2D2D2D]">
+                      {groupData.name}
+                    </h3>
+                  </div>
+                )}
+              </div>
+
+              {/* Account Type Toggle */}
+              <div className="mb-5">
+                <div className="flex items-center space-x-3 p-3 bg-[#FAF7F2] rounded-lg border border-[#E8E0D5]">
             <div className="relative">
               <input
                 id="hasAccount"
@@ -332,23 +368,23 @@ export function GroupJoinForm({
                 className="sr-only"
               />
               <div className={`block w-14 h-8 rounded-full cursor-pointer transition-colors duration-300 ${
-                hasAccount ? 'bg-amber-400' : 'bg-gray-300'
+                hasAccount ? 'bg-[#D4A854]' : 'bg-[#E8E0D5]'
               }`} onClick={() => setHasAccount(!hasAccount)}></div>
               <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-all duration-300 transform shadow-sm ${
                 hasAccount ? 'translate-x-6' : 'translate-x-0'
               } cursor-pointer`} onClick={() => setHasAccount(!hasAccount)}></div>
             </div>
-            <label htmlFor="hasAccount" className="text-sm font-medium text-gray-700 cursor-pointer" onClick={() => setHasAccount(!hasAccount)}>
-              I already have a Small Plates account
-            </label>
-          </div>
-          <p className="text-sm text-gray-600 mt-2 text-center">
-            {hasAccount ? 'Sign in with your existing password' : 'Create your account to start sharing recipes'}
-          </p>
-        </div>
+                  <label htmlFor="hasAccount" className="text-sm font-medium text-[#2D2D2D] cursor-pointer" onClick={() => setHasAccount(!hasAccount)}>
+                    I already have a Small Plates account
+                  </label>
+                </div>
+                <p className="text-xs text-[#9A9590] mt-1.5 text-center">
+                  {hasAccount ? 'Sign in with your existing password' : 'Create your account to start sharing recipes'}
+                </p>
+              </div>
 
-        {/* Form */}
-        <form onSubmit={handleJoinGroup} className="space-y-4">
+              {/* Form */}
+              <form onSubmit={handleJoinGroup} className="space-y-3">
           {/* Name Fields - Only show for new accounts */}
           {!hasAccount && (
             <div className="grid grid-cols-2 gap-4">
@@ -416,7 +452,7 @@ export function GroupJoinForm({
               autoFocus={hasAccount ? autoFocus : false}
             />
             {!hasAccount && (
-              <p className="text-xs text-gray-500 mt-1">Must be at least 8 characters</p>
+              <p className="text-xs text-[#9A9590] mt-1">Must be at least 8 characters</p>
             )}
           </div>
 
@@ -448,7 +484,7 @@ export function GroupJoinForm({
           {/* Submit Button */}
           <Button
             type="submit"
-            className="w-full bg-black text-white hover:bg-gray-800 py-3"
+            className="w-full bg-[#2D2D2D] text-white hover:bg-[#1A1A1A] py-2.5 text-sm font-semibold"
             disabled={loading}
           >
             {loading 
@@ -456,13 +492,14 @@ export function GroupJoinForm({
               : (hasAccount ? 'Sign In & Join Group' : 'Create Account & Join Cookbook')
             }
           </Button>
-        </form>
-
-        {/* Footer */}
-        <div className="mt-8 text-center">
-          <p className="text-xs text-gray-500">
-            {footerText}
-          </p>
+              </form>
+              <div className="mt-6 text-center">
+                <p className="text-xs text-[#9A9590]">
+                  {footerText}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

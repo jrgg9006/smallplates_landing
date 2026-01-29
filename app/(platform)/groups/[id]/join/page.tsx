@@ -7,6 +7,7 @@ interface GroupData {
   id: string;
   name: string;
   description?: string;
+  coupleImageUrl?: string | null;
   createdAt: string;
 }
 
@@ -99,6 +100,7 @@ export default function GroupJoinPage({ params }: GroupJoinPageProps) {
         name: groupData.name,
         description: groupData.description
       } : null}
+      coupleImageUrl={groupData?.coupleImageUrl || null}
       onJoin={handleJoin}
       verifying={verifying}
       verifyMessage="Loading cookbook information..."
