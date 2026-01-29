@@ -222,6 +222,17 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
         return { data: null, error: profileError.message };
       }
       profile = createdProfile;
+
+      // Also update Supabase Auth user metadata with display name
+      if (profileData.full_name) {
+        const { error: metadataError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+          user_metadata: { display_name: profileData.full_name }
+        });
+        if (metadataError) {
+          console.error('Error updating user metadata:', metadataError);
+          // Don't fail - profile was created successfully
+        }
+      }
     }
 
     // Create group using the admin function
