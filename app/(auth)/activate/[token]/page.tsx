@@ -258,7 +258,7 @@ export default function ActivateAccountPage({ params }: { params: Promise<{ toke
           )}
           {tokenData?.coupleNames && (
             <p className="text-sm text-[#D4A854] mt-2">
-              {tokenData.coupleNames}&apos;s Recipe Book
+              {tokenData.coupleNames}&apos;s Cookbook
             </p>
           )}
         </div>
