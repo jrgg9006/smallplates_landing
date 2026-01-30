@@ -159,15 +159,20 @@ export default function GroupsPage() {
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
       setDashboardImageError('Invalid file type. Only JPEG, PNG, and WebP are allowed.');
+      // Reset input on error
+      event.target.value = '';
       return;
     }
 
     // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
       setDashboardImageError('File too large. Maximum size is 5MB.');
+      // Reset input on error
+      event.target.value = '';
       return;
     }
 
+    // Clear previous file and error
     setSelectedDashboardFile(file);
     setDashboardImageError(null);
     
@@ -249,6 +254,10 @@ export default function GroupsPage() {
 
       setSelectedDashboardFile(null);
 
+      // Reset file input
+      const fileInput = document.getElementById('dashboardImageInput') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+
       // Refresh groups data to get the latest state
       if (groupsSectionRef.current) {
         // console.log removed for production
@@ -264,7 +273,11 @@ export default function GroupsPage() {
 
   const handleDashboardImageClick = () => {
     const input = document.getElementById('dashboardImageInput') as HTMLInputElement;
-    input?.click();
+    if (input) {
+      // Reset input value before clicking to ensure onChange always fires
+      input.value = '';
+      input.click();
+    }
   };
 
   // Derive dashboard image directly from selectedGroup to avoid sync issues
