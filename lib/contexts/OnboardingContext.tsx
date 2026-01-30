@@ -266,8 +266,8 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
         if (isExistingUser && existingUserIdRef.current) {
           // Create the group directly
           const groupName = coupleNames?.brideFirstName && coupleNames?.partnerFirstName
-            ? `${coupleNames.brideFirstName} & ${coupleNames.partnerFirstName}'s Recipe Book`
-            : "New Recipe Book";
+            ? `${coupleNames.brideFirstName} & ${coupleNames.partnerFirstName}`
+            : "New Book";
 
           const step3Data = mergedAnswers.step3 as {
             relationship?: string;
