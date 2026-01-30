@@ -197,21 +197,42 @@ export function ShareCollectionModal({
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
       setError('Invalid file type. Only JPEG, PNG, and WebP are allowed.');
+      // Reset input on error
+      event.target.value = '';
       return;
     }
 
     // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
       setError('File too large. Maximum size is 5MB.');
+      // Reset input on error
+      event.target.value = '';
       return;
     }
 
+    // Clear previous file and error
     setSelectedFile(file);
     setError(null);
+    
+    // Auto-upload the file
+    handleUploadImage(file);
   };
 
-  const handleUploadImage = async () => {
-    if (!selectedFile || !groupId) {
+  const handleImageClick = () => {
+    const input = document.getElementById('coupleImageInput') as HTMLInputElement;
+    if (input) {
+      // Reset input value before clicking to ensure onChange always fires
+      input.value = '';
+      // Use click() method directly
+      input.click();
+    } else {
+      console.error('coupleImageInput not found');
+    }
+  };
+
+  const handleUploadImage = async (file?: File) => {
+    const fileToUpload = file || selectedFile;
+    if (!fileToUpload || !groupId) {
       setError('No file selected or group not found');
       return;
     }
@@ -221,7 +242,7 @@ export function ShareCollectionModal({
 
     try {
       const formData = new FormData();
-      formData.append('image', selectedFile);
+      formData.append('image', fileToUpload);
 
       const response = await fetch(`/api/v1/groups/${groupId}/couple-image`, {
         method: 'POST',
@@ -272,6 +293,10 @@ export function ShareCollectionModal({
 
       setCoupleImage(null);
       setSelectedFile(null);
+
+      // Reset file input
+      const fileInput = document.getElementById('coupleImageInput') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
 
     } catch (err) {
       setError('Failed to delete image');
@@ -414,6 +439,7 @@ export function ShareCollectionModal({
                       <div className="space-y-3">
                         <div className="relative w-full h-32 lg:h-40 bg-gray-100 rounded-xl overflow-hidden">
                           <Image
+                            key={coupleImage}
                             src={coupleImage}
                             alt="Couple"
                             fill
@@ -422,9 +448,14 @@ export function ShareCollectionModal({
                         </div>
                         <div className="flex gap-2 justify-end">
                           <Button
+                            type="button"
                             size="sm"
                             variant="outline"
-                            onClick={handleDeleteImage}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleDeleteImage();
+                            }}
                             disabled={isUploadingImage}
                             className="text-red-600 border-red-200 hover:bg-red-50"
                           >
@@ -432,11 +463,13 @@ export function ShareCollectionModal({
                             Remove
                           </Button>
                           <Button
+                            type="button"
                             size="sm"
                             variant="outline"
-                            onClick={() => {
-                              const input = document.getElementById('coupleImageInput') as HTMLInputElement;
-                              input?.click();
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleImageClick();
                             }}
                             disabled={isUploadingImage}
                           >
@@ -450,9 +483,10 @@ export function ShareCollectionModal({
                       <div className="space-y-3">
                         <div 
                           className="border-2 border-dashed border-gray-300 rounded-xl p-6 lg:p-8 text-center hover:border-gray-400 transition-colors cursor-pointer bg-gray-50"
-                          onClick={() => {
-                            const input = document.getElementById('coupleImageInput') as HTMLInputElement;
-                            input?.click();
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleImageClick();
                           }}
                         >
                           <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
@@ -475,46 +509,12 @@ export function ShareCollectionModal({
                       className="hidden"
                     />
 
-                    {/* Selected File Preview */}
-                    {selectedFile && (
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <span className="text-sm text-gray-700 truncate">
-                            {selectedFile.name}
-                          </span>
-                          <span className="text-xs text-gray-500 ml-2">
-                            {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                          </span>
-                        </div>
-                        <div className="flex gap-2 justify-end">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedFile(null);
-                            }}
-                            disabled={isUploadingImage}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={handleUploadImage}
-                            disabled={isUploadingImage}
-                            className="bg-black text-white hover:bg-gray-800"
-                          >
-                            {isUploadingImage ? (
-                              <>
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                Uploading...
-                              </>
-                            ) : (
-                              <>
-                                <Upload className="w-4 h-4 mr-1" />
-                                Upload
-                              </>
-                            )}
-                          </Button>
+                    {/* Upload Status */}
+                    {isUploadingImage && (
+                      <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                          Uploading...
                         </div>
                       </div>
                     )}

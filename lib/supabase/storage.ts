@@ -365,14 +365,18 @@ export async function uploadGroupCoupleImageWithClient(
 
     console.log(`Uploading couple image for group ${groupId} to: ${filePath}`);
 
-    // Remove existing couple image if it exists
-    console.log('Removing existing image if present...');
+    // Remove ALL existing couple images (with all possible extensions) before uploading
+    console.log('Removing all existing couple images if present...');
+    const extensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    const possiblePaths = extensions.map(ext => `groups/${groupId}/couple_image.${ext}`);
+    
     const { error: removeError } = await supabase.storage
       .from('recipes')
-      .remove([filePath]);
+      .remove(possiblePaths);
     
     if (removeError) {
-      console.log('Note: Could not remove existing file (may not exist):', removeError);
+      console.log('Note: Could not remove existing files (may not exist):', removeError);
+      // Continue anyway - we'll overwrite with upsert
     }
 
     // Upload the new image
@@ -398,13 +402,17 @@ export async function uploadGroupCoupleImageWithClient(
     console.log(`Successfully uploaded couple image:`, { data });
 
     // Get public URL for the uploaded image
+    // Add timestamp to URL to prevent browser caching
     console.log('Getting public URL...');
     const { data: { publicUrl } } = supabase.storage
       .from('recipes')
       .getPublicUrl(filePath);
 
-    console.log('Generated public URL:', publicUrl);
-    return { url: publicUrl, error: null };
+    // Add timestamp query param to force browser to reload the image
+    const urlWithCacheBuster = `${publicUrl}?t=${Date.now()}`;
+    
+    console.log('Generated public URL:', urlWithCacheBuster);
+    return { url: urlWithCacheBuster, error: null };
   } catch (error) {
     console.error('Error in uploadGroupCoupleImageWithClient:', error);
     return { url: null, error: 'An unexpected error occurred while uploading image' };
