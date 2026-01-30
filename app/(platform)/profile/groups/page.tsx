@@ -220,6 +220,15 @@ export default function GroupsPage() {
         // console.log removed for production
         await groupsSectionRef.current.loadGroups(true); // Force refresh selected group
         // console.log removed for production
+        
+        // Force a small delay to ensure state is updated, then update selectedGroup
+        setTimeout(async () => {
+          // Get the updated group from the ref
+          const updatedGroup = groupsSectionRef.current?.selectedGroup;
+          if (updatedGroup && updatedGroup.id === selectedGroup.id) {
+            setSelectedGroup(updatedGroup);
+          }
+        }, 100);
       } else {
         console.error('🔍 groupsSectionRef.current is null!');
       }
@@ -276,7 +285,10 @@ export default function GroupsPage() {
     if (input) {
       // Reset input value before clicking to ensure onChange always fires
       input.value = '';
+      // Use click() method directly
       input.click();
+    } else {
+      console.error('dashboardImageInput not found');
     }
   };
 
@@ -418,6 +430,7 @@ export default function GroupsPage() {
             /* Show uploaded dashboard image */
             <>
               <Image
+                key={currentDashboardImage}
                 src={currentDashboardImage}
                 alt="Group dashboard image"
                 fill
@@ -425,20 +438,34 @@ export default function GroupsPage() {
                 sizes="1000px"
               />
               {/* Hover overlay with edit buttons - only show on hover */}
-              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <div 
+                className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                onMouseEnter={(e) => e.stopPropagation()}
+                onMouseLeave={(e) => e.stopPropagation()}
+              >
                 <div className="flex gap-3">
                   <button
-                    onClick={handleDashboardImageClick}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDashboardImageClick();
+                    }}
                     disabled={isUploadingDashboardImage}
-                    className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-warm-white))] text-[hsl(var(--brand-charcoal))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-honey))] hover:text-black transition-all duration-200 shadow-sm"
+                    className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-warm-white))] text-[hsl(var(--brand-charcoal))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-honey))] hover:text-black transition-all duration-200 shadow-sm z-10"
                   >
                     <Upload size={16} />
                     Change
                   </button>
                   <button
-                    onClick={handleDeleteDashboardImage}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDeleteDashboardImage();
+                    }}
                     disabled={isUploadingDashboardImage}
-                    className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-charcoal))] text-[hsl(var(--brand-warm-white))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-warm-gray))] transition-all duration-200 shadow-sm"
+                    className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-charcoal))] text-[hsl(var(--brand-warm-white))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-warm-gray))] transition-all duration-200 shadow-sm z-10"
                   >
                     <X size={16} />
                     Remove
