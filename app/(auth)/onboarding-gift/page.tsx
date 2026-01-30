@@ -69,17 +69,17 @@ function Step1({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
     <OnboardingStep
       stepNumber={1}
       totalSteps={isAddBookMode ? 3 : 4}
-      title="When's the big day?"
+      title="They&apos;re lucky to have you."
       imageUrl="/images/onboarding/onboarding_lemon.png"
       imageAlt="Wedding planning essentials"
     >
       <div className="max-w-lg mx-auto">
         {/* Question */}
         <div className="text-center mb-8">
-          <h2 className="text-lg font-medium text-[#2D2D2D] mb-0">
-            What&apos;s the timeline?
+          <h2 className="text-base font-medium text-[#2D2D2D] mb-1">
+            When&apos;s the big day?
           </h2>
-          <p className="text-[#2D2D2D]/60 font-light">
+          <p className="text-sm text-[#2D2D2D]/60 font-light">
             We&apos;ll make sure everything arrives beautifully and on time.
           </p>
         </div>
@@ -102,7 +102,7 @@ function Step1({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
         <div className="text-center">
           <a 
             href="/onboarding"
-            className="text-sm text-[#2D2D2D]/50 hover:text-[#D4A854] transition-colors font-light"
+            className="text-sm text-[#2D2D2D]/50 hover:text-[#D4A854] transition-colors font-light underline underline-offset-2"
           >
             Are you the couple getting married?
           </a>
@@ -261,10 +261,10 @@ function Step3({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
       <div className="max-w-lg mx-auto">
         {/* Personalized Message */}
         <div className="text-center mb-8">
-          <h2 className="text-lg font-medium text-[#2D2D2D] mb-0">
+          <h2 className="text-base font-medium text-[#2D2D2D] mb-1">
             Just a few details and you&apos;re all set.
           </h2>
-          <p className="text-[#2D2D2D]/60 font-light">
+          <p className="text-sm text-[#2D2D2D]/60 font-light">
             The hardest part is done.
           </p>
         </div>

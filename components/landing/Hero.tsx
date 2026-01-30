@@ -11,7 +11,7 @@ export default function Hero() {
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
   const handleGetStarted = () => {
-    router.push("/onboarding");
+    router.push("/onboarding-gift");
   };
 
   const scrollToHowItWorks = () => {
@@ -53,12 +53,12 @@ export default function Hero() {
             Recipes from the people who love you.
           </motion.h1>
           <motion.p
-            className="font-sans mt-6 text-lg sm:text-xl md:text-2xl font-light text-white/90 max-w-xl leading-relaxed"
+            className="font-sans mt-6 text-lg sm:text-xl md:text-2xl font-light text-white/90 max-w-2xl leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
           >
-            A wedding cookbook made by your guests.
+            A wedding cookbook made by everyone who matters.
             <span className="block mt-1 text-white/80">
               Not a keepsake—a kitchen book.
             </span>
@@ -76,7 +76,7 @@ export default function Hero() {
               className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-8 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#D4A854]"
               data-cta="hero-primary"
             >
-              Start Your Book
+              Give this Gift
             </button>
 
             {/* Secondary CTA */}

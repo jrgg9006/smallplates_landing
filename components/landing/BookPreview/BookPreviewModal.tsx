@@ -24,7 +24,7 @@ export default function BookPreviewModal({
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   const handleCreateCookbook = () => {
-    router.push("/onboarding");
+    router.push("/onboarding-gift");
   };
 
   const handleViewProductDetails = () => {
@@ -68,7 +68,7 @@ export default function BookPreviewModal({
                 onClick={handleCreateCookbook}
               className="px-6 py-3 bg-[#D4A854] text-white rounded-xl hover:bg-[#c49b4a] transition-colors font-medium font-sans"
             >
-              Start Your Book
+              Give this Gift
             </button>
           </div>
         </div>

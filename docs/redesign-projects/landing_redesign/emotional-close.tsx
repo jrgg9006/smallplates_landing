@@ -122,7 +122,7 @@ export default function EmotionalClose() {
             className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-10 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#2D2D2D] focus-visible:ring-[#D4A854]"
             data-cta="emotional-close-primary"
           >
-            Start Your Book
+            Give this Gift
           </button>
         </motion.div>
 

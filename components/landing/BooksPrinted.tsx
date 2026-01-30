@@ -177,7 +177,7 @@ export default function BooksPrinted() {
   };
 
   const handleGetStarted = () => {
-    router.push("/onboarding");
+    router.push("/onboarding-gift");
   };
 
   // Autoplay plugin for carousel
@@ -226,7 +226,7 @@ export default function BooksPrinted() {
               className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-8 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#D4A854]"
               data-cta="proof-primary"
             >
-              Start Your Book
+              Start Their Book
             </button>
           </motion.div>
         </div>

@@ -70,7 +70,7 @@ export default function PricingPage() {
   const router = useRouter();
 
   const handleStartBook = () => {
-    router.push("/onboarding");
+    router.push("/onboarding-gift");
   };
 
   const handleContact = () => {
@@ -182,7 +182,7 @@ export default function PricingPage() {
                       transition-colors duration-200
                     "
                   >
-                    Start Your Book
+                    Give this Gift
                   </button>
                 </div>
               </motion.div>

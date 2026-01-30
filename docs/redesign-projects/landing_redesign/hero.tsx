@@ -21,7 +21,7 @@ import { motion } from "framer-motion";
  *   "A wedding cookbook made by your guests" = clarity
  *   "Not a keepsake—a kitchen book" = Margot's edge
  * 
- * - CTA: "Start Your Book" — active, personal, no pressure
+ * - CTA: "Give this Gift" — active, personal, no pressure
  * 
  * - Secondary: "See how it works" — for those who need more before committing
  */

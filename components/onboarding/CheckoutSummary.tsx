@@ -184,7 +184,7 @@ export function CheckoutSummary({
       {/* Account Creation Form */}
       <div>
         <div className="text-center mb-6">
-          <h2 className="text-lg font-medium text-[#2D2D2D] mb-2">
+          <h2 className="text-base font-medium text-[#2D2D2D] mb-1">
             Create your account
           </h2>
           <p className="text-sm text-[#2D2D2D]/60 font-light">

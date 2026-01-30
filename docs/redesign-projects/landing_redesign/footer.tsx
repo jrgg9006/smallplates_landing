@@ -124,7 +124,7 @@ export default function Footer() {
               href="/onboarding"
               className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-6 py-3 text-base font-medium transition-colors"
             >
-              Start Your Book
+              Give this Gift
             </Link>
           </div>
 

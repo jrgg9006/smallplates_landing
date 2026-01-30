@@ -58,10 +58,10 @@ function Step1() {
       <div className="max-w-lg mx-auto">
         {/* Question */}
         <div className="text-center mb-8 mt-6">
-          <h2 className="text-lg font-medium text-[#2D2D2D] mb-0">
+          <h2 className="text-base font-medium text-[#2D2D2D] mb-1">
             Where are you in the wedding planning?
           </h2>
-          <p className="text-base text-[#2D2D2D]/60 font-light">
+          <p className="text-sm text-[#2D2D2D]/60 font-light">
             This helps us create the perfect timeline for your book.
           </p>
         </div>
@@ -83,7 +83,7 @@ function Step1() {
         <div className="text-center">
           <a 
             href="/onboarding-gift"
-            className="text-sm text-[#2D2D2D]/50 hover:text-[#D4A854] transition-colors font-light"
+            className="text-sm text-[#2D2D2D]/50 hover:text-[#D4A854] transition-colors font-light underline underline-offset-2"
           >
             Giving this as a gift?
           </a>
@@ -221,7 +221,7 @@ function Step3() {
       <div className="max-w-lg mx-auto">
         {/* Question */}
         <div className="text-center mb-8">
-          <h2 className="text-lg font-medium text-[#2D2D2D] mb-0">
+          <h2 className="text-base font-medium text-[#2D2D2D] mb-1">
             Who&apos;s getting married?
           </h2>
           <p className="text-sm text-[#2D2D2D]/60 font-light">
@@ -401,10 +401,10 @@ function Step4() {
       <div className="max-w-lg mx-auto">
         {/* Question */}
         <div className="text-center mb-8">
-          <h2 className="text-lg font-medium text-[#2D2D2D] mb-0">
+          <h2 className="text-base font-medium text-[#2D2D2D] mb-1">
             How many guests are you expecting?
           </h2>
-          <p className="text-[#2D2D2D]/60 font-light">
+          <p className="text-sm text-[#2D2D2D]/60 font-light">
             This helps us plan the perfect size for your book.
           </p>
         </div>

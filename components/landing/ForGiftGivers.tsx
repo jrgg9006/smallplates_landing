@@ -109,7 +109,7 @@ export default function ForGiftGivers() {
               id="gift-givers-heading"
               className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#2D2D2D] relative"
             >
-              Giving this as a{' '}
+              We&apos;ve got {' '}
               <span className="relative inline-block">
                 <span 
                   className="text-[#D4A854] italic font-light"
@@ -117,29 +117,37 @@ export default function ForGiftGivers() {
                     fontFamily: 'Georgia, serif'
                   }}
                 >
-                  gift
+                  you.
                 </span>
-              </span>?
+              </span>
             </h2>
           </div>
 
           {/* Subhead */}
           <p className="mt-6 font-sans font-light text-lg md:text-xl text-[#2D2D2D]/80 text-center max-w-2xl mx-auto">
-            You&apos;re about to give the best wedding gift anyone&apos;s ever received.
+            We make it easy. You get the credit.
           </p>
 
-          {/* The Process */}
-          <div className="mt-10 md:mt-12">
-            <p className="font-sans text-base font-medium text-[#2D2D2D]/60 uppercase tracking-wider mb-6">
-              Here&apos;s the deal:
-            </p>
-            
-            <ol className="space-y-4">
+          {/* The Process - Calm & Supportive */}
+          <div className="mt-10 md:mt-12 mb-12">
+            <div className="space-y-4">
               {[
-                "You start the book.",
-                "You invite the guests.",
-                "They send recipes (we remind them, don't worry).",
-                "We print it. Bride cries. You win."
+                {
+                  title: "Add your crew.",
+                  subtitle: "Invite co-captains to help."
+                },
+                {
+                  title: "You invite your people.",
+                  subtitle: "We handle the reminders."
+                },
+                {
+                  title: "20 recipes make a book.",
+                  subtitle: "Most get 40+."
+                },
+                {
+                  title: "We're here if you need us.",
+                  subtitle: "We help every step."
+                }
               ].map((step, index) => (
                 <motion.li
                   key={index}
@@ -152,24 +160,14 @@ export default function ForGiftGivers() {
                   <span className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-[#D4A854]/20 to-[#D4A854]/30 text-[#D4A854] font-serif font-medium flex items-center justify-center text-base border border-[#D4A854]/30 shadow-sm">
                     {index + 1}
                   </span>
-                  <span className="font-sans font-light text-lg text-[#2D2D2D]/80 pt-1">
-                    {step}
+                  <span className="font-sans font-light text-lg text-[#2D2D2D]/80 pt-2">
+                    <span className="font-normal text-[#2D2D2D]">{step.title}</span>{" "}
+                    <span className="text-[#2D2D2D]/50">{step.subtitle}</span>
                   </span>
                 </motion.li>
               ))}
-            </ol>
+            </div>
           </div>
-
-          {/* Reassurance */}
-          <motion.p
-            className="mt-10 font-sans font-light text-base text-[#2D2D2D]/60 text-center"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            No design skills needed. We handle the hard part.
-          </motion.p>
 
           {/* Pricing Context */}
           <motion.div
@@ -180,11 +178,7 @@ export default function ForGiftGivers() {
             transition={{ duration: 0.5, delay: 0.5 }}
           >
             <p className="font-sans font-light text-center text-[#2D2D2D]/70">
-              <span className="block text-lg">One gift from the group.</span>
-              <span className="block mt-2 text-base text-[#2D2D2D]/60">
-                Split among bridesmaids or family, it&apos;s less than most registry items—
-                <span className="block">and infinitely more meaningful.</span>
-              </span>
+              <span className="block text-lg">Bride cries. You win.</span>
             </p>
             <p className="mt-4 font-serif text-xl text-[#2D2D2D] text-center">
               Books start at $149.
@@ -205,7 +199,7 @@ export default function ForGiftGivers() {
               className="inline-flex items-center justify-center rounded-full bg-[#2D2D2D] hover:bg-[#1a1a1a] text-white px-10 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#2D2D2D]"
               data-cta="gift-givers-primary"
             >
-              Start a Book for Someone
+              Give this Gift
             </button>
           </motion.div>
           
