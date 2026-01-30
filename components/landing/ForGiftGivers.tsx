@@ -125,7 +125,7 @@ export default function ForGiftGivers() {
 
           {/* Subhead */}
           <p className="mt-6 font-sans font-light text-lg md:text-xl text-[#2D2D2D]/80 text-center max-w-2xl mx-auto">
-            We make it easy. You get the credit.
+            The best wedding gift. We help you make it happen.
           </p>
 
           {/* The Process - Calm & Supportive */}
@@ -146,7 +146,7 @@ export default function ForGiftGivers() {
                 },
                 {
                   title: "We're here if you need us.",
-                  subtitle: "We help every step."
+                  subtitle: "We help every step of the way."
                 }
               ].map((step, index) => (
                 <motion.li
