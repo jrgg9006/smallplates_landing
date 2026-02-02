@@ -319,7 +319,7 @@ export function ShareCollectionModal({
         <div className="py-4 overflow-y-auto flex-1 -mx-6 px-6">
           {!showMessageCustomization ? (
             /* Normal single-column layout */
-            <div className="space-y-6">
+            <div className="space-y-6">e
               {/* Hero Message */}
               <div className="text-center space-y-2">
                 <p className="text-gray-900 text-lg">
