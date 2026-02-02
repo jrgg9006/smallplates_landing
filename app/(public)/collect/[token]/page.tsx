@@ -52,15 +52,23 @@ export async function generateMetadata({
       description,
       type: 'website',
       url: `/collect/${token}`,
-      images: [
-        {
-          url: '/images/share-card.svg',
-          width: 1200,
-          height: 630,
-          alt: 'Recipe Collection Form - Small Plates & Company',
-          type: 'image/svg+xml',
-        },
-      ],
+      images: tokenInfo.couple_image_url
+        ? [
+            {
+              url: tokenInfo.couple_image_url,
+              width: 1200,
+              height: 630,
+              alt: `Recipe Collection for ${tokenInfo.couple_names || 'the couple'}`,
+            },
+          ]
+        : [
+            {
+              url: '/images/2SmallPlates-verticallogowhiteback.png',
+              width: 1200,
+              height: 630,
+              alt: 'Small Plates & Company',
+            },
+          ],
       siteName: 'Small Plates & Company',
       locale: 'en_US',
     },
@@ -69,21 +77,23 @@ export async function generateMetadata({
       site: '@smallplatesandco',
       title,
       description,
-      images: [
-        {
-          url: '/images/share-card.svg',
-          alt: 'Recipe Collection Form - Small Plates & Company',
-        },
-      ],
+      images: tokenInfo.couple_image_url
+        ? [
+            {
+              url: tokenInfo.couple_image_url,
+              alt: `Recipe Collection for ${tokenInfo.couple_names || 'the couple'}`,
+            },
+          ]
+        : [
+            {
+              url: '/images/2SmallPlates-verticallogowhiteback.png',
+              alt: 'Small Plates & Company',
+            },
+          ],
     },
     robots: {
       index: true,
       follow: true,
-    },
-    other: {
-      'og:image:width': '1200',
-      'og:image:height': '630',
-      'og:image:type': 'image/svg+xml',
     },
   }
 }
