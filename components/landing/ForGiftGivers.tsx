@@ -181,7 +181,7 @@ export default function ForGiftGivers() {
               <span className="block text-lg">Bride cries. You win.</span>
             </p>
             <p className="mt-4 font-serif text-xl text-[#2D2D2D] text-center">
-              Books start at $149.
+              Books start at $149 <span className="text-[#8A8780]">— most groups split it 3-4 ways.</span>
             </p>
           </motion.div>
 
