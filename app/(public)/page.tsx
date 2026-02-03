@@ -13,6 +13,7 @@ import BooksPrinted from '@/components/landing/BooksPrinted'
 import FoodPerfect from '@/components/landing/FoodPerfect'
 import WhatsIncluded from '@/components/landing/WhatsIncluded'
 import HowItWorks from '@/components/landing/HowItWorks'
+import RegistryInterlude from '@/components/landing/RegistryInterlude'
 import ShareBanner from '@/components/landing/ShareBanner'
 // import PlayModeSelection from '@/components/landing/PlayModeSelection'
 import FAQ from '@/components/landing/FAQ'
@@ -35,6 +36,7 @@ export default function Home() {
         <TheProblem />
         <TheSolution />
         <HowItWorks />
+        <RegistryInterlude />
         <BooksPrinted />
         <ForGiftGivers />
         <EmotionalClose />

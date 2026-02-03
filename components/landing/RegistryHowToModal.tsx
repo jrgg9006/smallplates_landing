@@ -23,7 +23,9 @@ export default function RegistryHowToModal({
               How to add to your registry
             </DialogTitle>
           </DialogHeader>
-          <p className="mt-2 text-sm text-gray-600 font-light">Quick walkthrough.</p>
+          <p className="mt-2 text-sm text-gray-600 font-light">
+            Works with Zola, The Knot, or any registry that lets you add custom gifts. Takes 2 minutes.
+          </p>
         </div>
 
         <div className="px-6 pb-6">
