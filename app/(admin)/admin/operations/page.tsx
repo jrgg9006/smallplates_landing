@@ -641,9 +641,57 @@ ${instructions}`;
     }
   };
 
+  const handleDownloadGeneratedImage = async (recipe: RecipeWithProductionStatus) => {
+    if (!recipe.generated_image_url) {
+      alert('No generated image to download.');
+      return;
+    }
+
+    setDownloadingImages(true);
+
+    try {
+      // Clean filename parts
+      const cleanRecipeName = (recipe.recipe_name || 'Untitled').replace(/[^a-z0-9\s-]/gi, '').replace(/\s+/g, '_');
+      const cleanGuestName = (recipe.guests?.printed_name ||
+        `${recipe.guests?.first_name || ''} ${recipe.guests?.last_name || ''}`.trim() ||
+        'Unknown').replace(/[^a-z0-9\s-]/gi, '').replace(/\s+/g, '_');
+
+      // Fetch the image
+      const response = await fetch(recipe.generated_image_url);
+      if (!response.ok) throw new Error('Failed to fetch image');
+
+      const blob = await response.blob();
+
+      // Create a download link
+      const link = document.createElement('a');
+      const objectUrl = URL.createObjectURL(blob);
+
+      // Get file extension from URL or use jpg as default
+      const urlParts = recipe.generated_image_url.split('.');
+      const extension = urlParts[urlParts.length - 1].split('?')[0] || 'jpg';
+
+      link.href = objectUrl;
+      link.download = `${cleanGuestName}_${cleanRecipeName}_generated.${extension}`;
+
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Clean up
+      URL.revokeObjectURL(objectUrl);
+
+    } catch (error) {
+      console.error('Error downloading generated image:', error);
+      alert('Failed to download generated image. Please try again.');
+    } finally {
+      setDownloadingImages(false);
+    }
+  };
+
   const handleDownloadAllImages = async () => {
     if (!recipes || recipes.length === 0) return;
-    
+
     setDownloadingImages(true);
     
     try {
@@ -1460,6 +1508,23 @@ ${instructions}`;
                               disabled={uploadingImage}
                             />
                           </label>
+                          <button
+                            onClick={() => handleDownloadGeneratedImage(selectedRecipe)}
+                            disabled={downloadingImages}
+                            className="text-sm text-blue-600 hover:text-blue-800 underline disabled:text-gray-400 disabled:cursor-not-allowed flex items-center gap-1"
+                          >
+                            {downloadingImages ? (
+                              <>
+                                <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                Downloading...
+                              </>
+                            ) : (
+                              'Download image'
+                            )}
+                          </button>
                         </div>
                       </div>
                     ) : (
