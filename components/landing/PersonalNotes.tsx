@@ -7,8 +7,8 @@ import Image from "next/image";
 const notes = [
   {
     id: 1,
-    text: "Dear Sarah and James — this is a recipe that Grandma Tati gave us many years ago. She typed it up from what her cousin told her, and the original is barely legible now. I hope this recipe always reminds you of the importance of staying close — and what better place than around the kitchen. Keep family legacies alive for your children and grandchildren. With all my love.",
-    recipe: "Grandma Tati's Paella",
+    text: "Dear Sarah and James — this is a recipe that Grandma Mati gave us many years ago. She typed it up from what her cousin told her, and the original is barely legible now. I hope this recipe always reminds you of the importance of staying close — and what better place than around the kitchen. Keep family legacies alive for your children and grandchildren. With all my love.",
+    recipe: "Grandma Mati's Paella",
     from: "Dad",
     image: "/images/notes_section/grandmas_tatis.jpg",
   },
@@ -31,7 +31,7 @@ const notes = [
     text: "This is my grandmother's recipe — super easy, and it was THE dessert at every family gathering. My cousin started selling them and honestly built a little empire because they're that good. I started making them for the people I love most every Christmas. Now it's yours.",
     recipe: "Date & Walnut Pie",
     from: "Cousin Maria",
-    image: "/images/notes_section/date_pie.jpg",
+    image: "/images/notes_section/date_pie_updated1.jpg",
   },
   {
     id: 5,
