@@ -1,6 +1,6 @@
 // scripts/indesign/fetch-recipes.js
 // Script para extraer recetas de Supabase y generar JSON para InDesign
-// v2 - Con descarga de imágenes
+// v3 - Con soporte para imágenes print-ready (upscaled)
 
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
@@ -84,6 +84,8 @@ async function fetchRecipes() {
       ingredients,
       instructions,
       generated_image_url,
+      generated_image_url_print,
+      image_upscale_status,
       guest_id,
       guests (
         first_name,
@@ -123,6 +125,21 @@ async function fetchRecipes() {
     console.log(`✨ ${recipesWithCleanVersion} recetas tienen versión limpia disponible`);
   }
 
+  // Contar imágenes print-ready vs originales
+  const withPrintImage = recipes.filter(r => r.generated_image_url_print).length;
+  const withOriginalOnly = recipes.filter(r => r.generated_image_url && !r.generated_image_url_print).length;
+  const withoutImage = recipes.filter(r => !r.generated_image_url && !r.generated_image_url_print).length;
+
+  console.log('');
+  console.log('📊 Estado de imágenes:');
+  console.log(`   ✅ ${withPrintImage} con imagen print-ready (4x upscaled)`);
+  if (withOriginalOnly > 0) {
+    console.log(`   ⚠️  ${withOriginalOnly} solo con imagen original (sin upscale)`);
+  }
+  if (withoutImage > 0) {
+    console.log(`   ❌ ${withoutImage} sin ninguna imagen`);
+  }
+
   // Crear directorios
   const outputDir = path.resolve(__dirname, 'output');
   const imagesDir = path.join(outputDir, 'images', GROUP_ID);
@@ -138,6 +155,12 @@ async function fetchRecipes() {
   console.log('📷 Procesando imágenes...');
 
   const transformedRecipes = [];
+  
+  // Tracking para el resumen final
+  let downloadedPrint = 0;
+  let downloadedOriginal = 0;
+  let downloadFailed = 0;
+  const recipesWithOriginalFallback = [];
 
   for (const recipe of recipes) {
     const guest = recipe.guests;
@@ -160,25 +183,48 @@ async function fetchRecipes() {
       ingredients: printReady?.ingredients_clean || recipe.ingredients || '',
       // Usar versión limpia si existe, sino la original
       instructions: printReady?.instructions_clean || recipe.instructions || '',
+      // Guardar ambas URLs para referencia
       generated_image_url: recipe.generated_image_url || null,
-      local_image_path: null
+      generated_image_url_print: recipe.generated_image_url_print || null,
+      image_upscale_status: recipe.image_upscale_status || null,
+      local_image_path: null,
+      image_source: null // 'print' o 'original'
     };
 
-    if (recipe.generated_image_url) {
+    // ============================================
+    // PRIORIZAR generated_image_url_print
+    // Fallback a generated_image_url si no existe
+    // ============================================
+    const imageUrlToUse = recipe.generated_image_url_print || recipe.generated_image_url;
+    const imageSource = recipe.generated_image_url_print ? 'print' : 'original';
+
+    if (imageUrlToUse) {
       try {
-        const urlParts = recipe.generated_image_url.split('.');
+        const urlParts = imageUrlToUse.split('.');
         const extension = urlParts[urlParts.length - 1].split('?')[0] || 'png';
         
         const imageFileName = `${recipe.id}.${extension}`;
         const localImagePath = path.join(imagesDir, imageFileName);
         
-        process.stdout.write(`  📷 ${recipe.recipe_name}... `);
-        await downloadImage(recipe.generated_image_url, localImagePath);
+        const sourceLabel = imageSource === 'print' ? '🖨️' : '⚠️';
+        process.stdout.write(`  ${sourceLabel} ${recipe.recipe_name}... `);
+        
+        await downloadImage(imageUrlToUse, localImagePath);
         
         transformed.local_image_path = `images/${GROUP_ID}/${imageFileName}`;
-        console.log('✅');
+        transformed.image_source = imageSource;
+        
+        if (imageSource === 'print') {
+          downloadedPrint++;
+          console.log('✅ (print-ready)');
+        } else {
+          downloadedOriginal++;
+          recipesWithOriginalFallback.push(recipe.recipe_name);
+          console.log('⚠️ (original - sin upscale)');
+        }
       } catch (err) {
-        console.log(`⚠️ Error: ${err.message}`);
+        downloadFailed++;
+        console.log(`❌ Error: ${err.message}`);
       }
     }
 
@@ -191,19 +237,41 @@ async function fetchRecipes() {
 
   fs.writeFileSync(outputPath, JSON.stringify(transformedRecipes, null, 2), 'utf8');
 
-  const imagesDownloaded = transformedRecipes.filter(r => r.local_image_path).length;
+  const totalImages = downloadedPrint + downloadedOriginal;
   const recipesWithoutImages = transformedRecipes.filter(r => !r.local_image_path).length;
 
   console.log('');
-  console.log('═══════════════════════════════════════════');
+  console.log('═══════════════════════════════════════════════════════════');
   console.log(`✅ ¡Listo! ${transformedRecipes.length} recetas exportadas`);
-  console.log(`📷 ${imagesDownloaded} imágenes descargadas`);
-  if (recipesWithoutImages > 0) {
-    console.log(`⚠️  ${recipesWithoutImages} recetas sin imagen`);
+  console.log('');
+  console.log('📷 Resumen de imágenes:');
+  console.log(`   🖨️  ${downloadedPrint} imágenes print-ready (4x upscaled)`);
+  if (downloadedOriginal > 0) {
+    console.log(`   ⚠️  ${downloadedOriginal} imágenes originales (fallback)`);
   }
+  if (downloadFailed > 0) {
+    console.log(`   ❌ ${downloadFailed} descargas fallidas`);
+  }
+  if (recipesWithoutImages > 0) {
+    console.log(`   ⛔ ${recipesWithoutImages} recetas sin imagen`);
+  }
+  
+  // Mostrar lista de recetas que usaron fallback
+  if (recipesWithOriginalFallback.length > 0) {
+    console.log('');
+    console.log('⚠️  RECETAS SIN IMAGEN PRINT-READY (usaron original):');
+    for (const name of recipesWithOriginalFallback) {
+      console.log(`   • ${name}`);
+    }
+    console.log('');
+    console.log('   💡 Tip: Sube nuevamente la imagen en Operations para');
+    console.log('      que se genere automáticamente la versión print-ready.');
+  }
+  
+  console.log('');
   console.log(`📁 Archivo: ${outputFileName}`);
   console.log(`📂 Ruta: ${outputPath}`);
-  console.log('═══════════════════════════════════════════');
+  console.log('═══════════════════════════════════════════════════════════');
 }
 
 fetchRecipes().catch(console.error);

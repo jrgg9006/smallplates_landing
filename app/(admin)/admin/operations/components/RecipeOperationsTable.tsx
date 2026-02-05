@@ -17,6 +17,8 @@ interface RecipeWithProductionStatus {
   submitted_at: string | null;
   updated_at: string;
   generated_image_url: string | null;
+  image_upscale_status: 'processing' | 'ready' | 'error' | null;
+  image_dimensions: { width: number; height: number } | null;
   guests: {
     id: string;
     first_name: string;
@@ -47,6 +49,17 @@ interface RecipeWithProductionStatus {
   } | null;
   midjourney_prompts: {
     generated_prompt: string;
+    agent_metadata?: {
+      base_dish?: string;
+      food_type?: string;
+      eating_method?: string;
+      started_indicator?: string;
+      token_count?: number;
+      hero_element?: string;
+      container_used?: string;
+      generator_version?: string;
+      total_duration_ms?: number;
+    } | null;
   } | null;
   recipe_print_ready: {
     recipe_name_clean: string;

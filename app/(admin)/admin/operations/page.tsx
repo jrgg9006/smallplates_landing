@@ -23,6 +23,8 @@ interface RecipeWithProductionStatus {
   submitted_at: string | null;
   updated_at: string;
   generated_image_url: string | null;
+  image_upscale_status: 'processing' | 'ready' | 'error' | null;
+  image_dimensions: { width: number; height: number } | null;
   guests: {
     id: string;
     first_name: string;
@@ -1526,6 +1528,31 @@ ${instructions}`;
                             )}
                           </button>
                         </div>
+                        {/* Upscale Status Badge */}
+                        {selectedRecipe.image_upscale_status && (
+                          <div className="mt-2">
+                            {selectedRecipe.image_upscale_status === 'processing' && (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded">
+                                🔄 Processing...
+                              </span>
+                            )}
+                            {selectedRecipe.image_upscale_status === 'ready' && (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">
+                                ✅ Print-ready
+                                {selectedRecipe.image_dimensions && (
+                                  <span className="text-green-600">
+                                    ({selectedRecipe.image_dimensions.width}×{selectedRecipe.image_dimensions.height})
+                                  </span>
+                                )}
+                              </span>
+                            )}
+                            {selectedRecipe.image_upscale_status === 'error' && (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">
+                                ❌ Upscale failed
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div className="text-center py-8">
