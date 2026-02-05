@@ -308,6 +308,8 @@ export default function CollectionForm() {
                 sizes="40vw"
                 className="object-cover"
                 priority
+                quality={100}
+                style={{ objectPosition: `${tokenInfo?.couple_image_position_x ?? 50}% ${tokenInfo?.couple_image_position_y ?? 50}%` }}
               />
             ) : (
               <Image
@@ -347,6 +349,8 @@ export default function CollectionForm() {
                             sizes="100vw"
                             className="object-cover"
                             priority
+                            quality={100}
+                            style={{ objectPosition: `${tokenInfo?.couple_image_position_x ?? 50}% ${tokenInfo?.couple_image_position_y ?? 50}%` }}
                           />
                         </div>
                       </div>

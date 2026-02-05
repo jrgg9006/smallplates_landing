@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Copy, Check, Upload, X, Image as ImageIcon } from "lucide-react";
+import { Copy, Check, Upload, X, Image as ImageIcon, Move } from "lucide-react";
 import { getGroupShareMessage, updateGroupShareMessage, resetGroupShareMessage } from "@/lib/supabase/groups";
 import Image from "next/image";
 
@@ -22,6 +22,8 @@ interface ShareCollectionModalProps {
   groupId?: string | null;
   coupleNames?: string | null;
   currentCoupleImage?: string | null;
+  currentCoupleImagePositionY?: number;
+  currentCoupleImagePositionX?: number;
 }
 
 export function ShareCollectionModal({ 
@@ -33,7 +35,9 @@ export function ShareCollectionModal({
   onStepComplete,
   groupId = null,
   coupleNames = null,
-  currentCoupleImage = null
+  currentCoupleImage = null,
+  currentCoupleImagePositionY = 50,
+  currentCoupleImagePositionX = 50
 }: ShareCollectionModalProps) {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,8 +49,21 @@ export function ShareCollectionModal({
   
   // Image upload state
   const [coupleImage, setCoupleImage] = useState<string | null>(currentCoupleImage);
+  const [coupleImagePositionY, setCoupleImagePositionY] = useState(currentCoupleImagePositionY ?? 50);
+  const [coupleImagePositionX, setCoupleImagePositionX] = useState(currentCoupleImagePositionX ?? 50);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  // Couple image reposition state (2D focal point)
+  const [isRepositioningCoupleImage, setIsRepositioningCoupleImage] = useState(false);
+  const [tempCouplePositionY, setTempCouplePositionY] = useState(50);
+  const [tempCouplePositionX, setTempCouplePositionX] = useState(50);
+  const [coupleDragStartY, setCoupleDragStartY] = useState<number | null>(null);
+  const [coupleDragStartX, setCoupleDragStartX] = useState<number | null>(null);
+  const [coupleDragStartPositionY, setCoupleDragStartPositionY] = useState(50);
+  const [coupleDragStartPositionX, setCoupleDragStartPositionX] = useState(50);
+  const [isSavingCouplePosition, setIsSavingCouplePosition] = useState(false);
+  const coupleRepositionRef = useRef<HTMLDivElement>(null);
 
   // Load custom message when modal opens
   useEffect(() => {
@@ -59,7 +76,9 @@ export function ShareCollectionModal({
   // Sync couple image state when modal opens or currentCoupleImage changes
   useEffect(() => {
     setCoupleImage(currentCoupleImage);
-  }, [currentCoupleImage, isOpen]);
+    setCoupleImagePositionY(currentCoupleImagePositionY ?? 50);
+    setCoupleImagePositionX(currentCoupleImagePositionX ?? 50);
+  }, [currentCoupleImage, currentCoupleImagePositionY, currentCoupleImagePositionX, isOpen]);
 
   // Load custom message from group_members only (no profile fallback)
   const loadCustomMessage = async () => {
@@ -257,8 +276,10 @@ export function ShareCollectionModal({
       }
 
       setCoupleImage(result.url);
+      setCoupleImagePositionY(50);
+      setCoupleImagePositionX(50);
       setSelectedFile(null);
-      
+
       // Reset file input
       const fileInput = document.getElementById('coupleImageInput') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
@@ -292,6 +313,8 @@ export function ShareCollectionModal({
       }
 
       setCoupleImage(null);
+      setCoupleImagePositionY(50);
+      setCoupleImagePositionX(50);
       setSelectedFile(null);
 
       // Reset file input
@@ -303,6 +326,77 @@ export function ShareCollectionModal({
     } finally {
       setIsUploadingImage(false);
     }
+  };
+
+  // Couple image reposition handlers (2D focal point)
+  const handleStartCoupleReposition = () => {
+    setTempCouplePositionY(coupleImagePositionY);
+    setTempCouplePositionX(coupleImagePositionX);
+    setCoupleDragStartPositionY(coupleImagePositionY);
+    setCoupleDragStartPositionX(coupleImagePositionX);
+    setIsRepositioningCoupleImage(true);
+  };
+
+  const handleCoupleRepositionMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    setCoupleDragStartY(clientY);
+    setCoupleDragStartX(clientX);
+    setCoupleDragStartPositionY(tempCouplePositionY);
+    setCoupleDragStartPositionX(tempCouplePositionX);
+  };
+
+  const handleCoupleRepositionMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if (coupleDragStartY === null || coupleDragStartX === null) return;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const container = coupleRepositionRef.current;
+    const containerHeight = container?.clientHeight || 160;
+    const containerWidth = container?.clientWidth || 400;
+    // Reason: sensitivity of 70 means dragging the full container moves ~70% of the range
+    const deltaY = ((clientY - coupleDragStartY) / containerHeight) * 70;
+    const deltaX = ((clientX - coupleDragStartX) / containerWidth) * 70;
+    setTempCouplePositionY(Math.max(0, Math.min(100, coupleDragStartPositionY - deltaY)));
+    setTempCouplePositionX(Math.max(0, Math.min(100, coupleDragStartPositionX - deltaX)));
+  }, [coupleDragStartY, coupleDragStartX, coupleDragStartPositionY, coupleDragStartPositionX]);
+
+  const handleCoupleRepositionMouseUp = () => {
+    setCoupleDragStartY(null);
+    setCoupleDragStartX(null);
+  };
+
+  const handleSaveCoupleReposition = async () => {
+    if (!groupId) return;
+    setIsSavingCouplePosition(true);
+    try {
+      const response = await fetch(`/api/v1/groups/${groupId}/couple-image`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          position_y: Math.round(tempCouplePositionY),
+          position_x: Math.round(tempCouplePositionX),
+        }),
+      });
+      if (response.ok) {
+        setCoupleImagePositionY(Math.round(tempCouplePositionY));
+        setCoupleImagePositionX(Math.round(tempCouplePositionX));
+        setIsRepositioningCoupleImage(false);
+      } else {
+        const result = await response.json();
+        setError(result.error || 'Failed to save position');
+      }
+    } catch {
+      setError('Failed to save position');
+    } finally {
+      setIsSavingCouplePosition(false);
+    }
+  };
+
+  const handleCancelCoupleReposition = () => {
+    setIsRepositioningCoupleImage(false);
+    setCoupleDragStartY(null);
+    setCoupleDragStartX(null);
   };
 
   return (
@@ -437,46 +531,125 @@ export function ShareCollectionModal({
                     {/* Current Image Display */}
                     {coupleImage ? (
                       <div className="space-y-3">
-                        <div className="relative w-full h-32 lg:h-40 bg-gray-100 rounded-xl overflow-hidden">
+                        <div
+                          ref={coupleRepositionRef}
+                          className={`relative bg-gray-100 rounded-xl overflow-hidden ${isRepositioningCoupleImage ? 'h-80 cursor-grab active:cursor-grabbing' : 'h-32 lg:h-40'} w-full`}
+                          {...(isRepositioningCoupleImage ? {
+                            onMouseDown: handleCoupleRepositionMouseDown,
+                            onMouseMove: handleCoupleRepositionMouseMove,
+                            onMouseUp: handleCoupleRepositionMouseUp,
+                            onMouseLeave: handleCoupleRepositionMouseUp,
+                            onTouchStart: handleCoupleRepositionMouseDown,
+                            onTouchMove: handleCoupleRepositionMouseMove,
+                            onTouchEnd: handleCoupleRepositionMouseUp,
+                          } : {})}
+                        >
                           <Image
                             key={coupleImage}
                             src={coupleImage}
                             alt="Couple"
                             fill
-                            className="object-cover"
+                            className="object-cover select-none"
+                            draggable={false}
+                            style={{ objectPosition: `${isRepositioningCoupleImage ? tempCouplePositionX : coupleImagePositionX}% ${isRepositioningCoupleImage ? tempCouplePositionY : coupleImagePositionY}%` }}
                           />
+                          {isRepositioningCoupleImage && (
+                            <>
+                              {/* Vignette mask - dark edges, clear center circle */}
+                              <div
+                                className="absolute inset-0 pointer-events-none"
+                                style={{ background: 'radial-gradient(circle 70px at center, transparent 0%, transparent 50%, rgba(0,0,0,0.55) 100%)' }}
+                              />
+                              {/* Crosshair in center */}
+                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none">
+                                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="opacity-70">
+                                  <line x1="20" y1="4" x2="20" y2="36" stroke="white" strokeWidth="1.5" />
+                                  <line x1="4" y1="20" x2="36" y2="20" stroke="white" strokeWidth="1.5" />
+                                  <circle cx="20" cy="20" r="10" stroke="white" strokeWidth="1.5" fill="none" />
+                                </svg>
+                              </div>
+                              {/* Controls at bottom */}
+                              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-3">
+                                <p className="text-white text-xs font-medium select-none drop-shadow-md">Drag to center focal point</p>
+                                <div className="flex gap-2">
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleCancelCoupleReposition();
+                                    }}
+                                    className="bg-gray-800/80 text-white border-gray-600 hover:bg-gray-700 text-xs backdrop-blur-sm"
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleSaveCoupleReposition();
+                                    }}
+                                    disabled={isSavingCouplePosition}
+                                    className="bg-white/90 text-gray-900 hover:bg-white text-xs backdrop-blur-sm"
+                                  >
+                                    {isSavingCouplePosition ? 'Saving...' : 'Save'}
+                                  </Button>
+                                </div>
+                              </div>
+                            </>
+                          )}
                         </div>
-                        <div className="flex gap-2 justify-end">
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleDeleteImage();
-                            }}
-                            disabled={isUploadingImage}
-                            className="text-red-600 border-red-200 hover:bg-red-50"
-                          >
-                            <X className="w-4 h-4 mr-1" />
-                            Remove
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleImageClick();
-                            }}
-                            disabled={isUploadingImage}
-                          >
-                            <Upload className="w-4 h-4 mr-1" />
-                            Change
-                          </Button>
-                        </div>
+                        {!isRepositioningCoupleImage && (
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleDeleteImage();
+                              }}
+                              disabled={isUploadingImage}
+                              className="text-red-600 border-red-200 hover:bg-red-50"
+                            >
+                              <X className="w-4 h-4 mr-1" />
+                              Remove
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleStartCoupleReposition();
+                              }}
+                              disabled={isUploadingImage}
+                            >
+                              <Move className="w-4 h-4 mr-1" />
+                              Reposition
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleImageClick();
+                              }}
+                              disabled={isUploadingImage}
+                            >
+                              <Upload className="w-4 h-4 mr-1" />
+                              Change
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       /* Upload UI when no image */

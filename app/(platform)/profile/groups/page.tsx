@@ -8,7 +8,7 @@ import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { CaptainsDropdown } from "@/components/profile/groups/CaptainsDropdown";
 import { MoreMenuDropdown } from "@/components/profile/groups/MoreMenuDropdown";
 import { AddFriendToGroupModal } from "@/components/profile/groups/AddFriendToGroupModal";
-import { ChevronDown, Image as ImageIcon, Upload, X } from "lucide-react";
+import { ChevronDown, Image as ImageIcon, Upload, X, Move } from "lucide-react";
 import Image from "next/image";
 import type { GroupWithMembers } from "@/lib/types/database";
 import { useProfileOnboarding, OnboardingSteps } from "@/lib/contexts/ProfileOnboardingContext";
@@ -53,6 +53,14 @@ export default function GroupsPage() {
   const [selectedDashboardFile, setSelectedDashboardFile] = useState<File | null>(null);
   const [isUploadingDashboardImage, setIsUploadingDashboardImage] = useState(false);
   const [dashboardImageError, setDashboardImageError] = useState<string | null>(null);
+
+  // Dashboard image reposition state
+  const [isRepositioning, setIsRepositioning] = useState(false);
+  const [tempPositionY, setTempPositionY] = useState(50);
+  const [dragStartY, setDragStartY] = useState<number | null>(null);
+  const [dragStartPosition, setDragStartPosition] = useState(50);
+  const [isSavingPosition, setIsSavingPosition] = useState(false);
+  const repositionContainerRef = useRef<HTMLDivElement>(null);
   
   // Onboarding context
   const { 
@@ -292,6 +300,70 @@ export default function GroupsPage() {
     }
   };
 
+  // Dashboard image reposition handlers
+  const handleStartReposition = () => {
+    const savedY = selectedGroup?.dashboard_image_position_y ?? 50;
+    setTempPositionY(savedY);
+    setDragStartPosition(savedY);
+    setIsRepositioning(true);
+  };
+
+  const handleRepositionMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    setDragStartY(clientY);
+    setDragStartPosition(tempPositionY);
+  };
+
+  const handleRepositionMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if (dragStartY === null) return;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const containerHeight = repositionContainerRef.current?.clientHeight || 200;
+    const deltaPercent = ((clientY - dragStartY) / containerHeight) * 70;
+    const newPosition = Math.max(0, Math.min(100, dragStartPosition - deltaPercent));
+    setTempPositionY(newPosition);
+  }, [dragStartY, dragStartPosition]);
+
+  const handleRepositionMouseUp = () => {
+    setDragStartY(null);
+  };
+
+  const handleSaveReposition = async () => {
+    if (!selectedGroup) return;
+    setIsSavingPosition(true);
+    try {
+      const response = await fetch(`/api/v1/groups/${selectedGroup.id}/dashboard-image`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ position_y: Math.round(tempPositionY) }),
+      });
+      if (response.ok) {
+        setIsRepositioning(false);
+        if (groupsSectionRef.current) {
+          await groupsSectionRef.current.loadGroups(true);
+          setTimeout(() => {
+            const updatedGroup = groupsSectionRef.current?.selectedGroup;
+            if (updatedGroup && updatedGroup.id === selectedGroup.id) {
+              setSelectedGroup(updatedGroup);
+            }
+          }, 100);
+        }
+      } else {
+        const result = await response.json();
+        setDashboardImageError(result.error || 'Failed to save position');
+      }
+    } catch {
+      setDashboardImageError('Failed to save position');
+    } finally {
+      setIsSavingPosition(false);
+    }
+  };
+
+  const handleCancelReposition = () => {
+    setIsRepositioning(false);
+    setDragStartY(null);
+  };
+
   // Derive dashboard image directly from selectedGroup to avoid sync issues
   const currentDashboardImage = selectedGroup?.image_group_dashboard || null;
 
@@ -425,7 +497,19 @@ export default function GroupsPage() {
           />
         )}
         {/* Hero Image */}
-        <div className="relative w-full h-[200px] mt-6 rounded-2xl overflow-hidden group">
+        <div
+          ref={repositionContainerRef}
+          className={`relative w-full h-[200px] mt-6 rounded-2xl overflow-hidden group ${isRepositioning ? 'cursor-grab active:cursor-grabbing' : ''}`}
+          {...(isRepositioning ? {
+            onMouseDown: handleRepositionMouseDown,
+            onMouseMove: handleRepositionMouseMove,
+            onMouseUp: handleRepositionMouseUp,
+            onMouseLeave: handleRepositionMouseUp,
+            onTouchStart: handleRepositionMouseDown,
+            onTouchMove: handleRepositionMouseMove,
+            onTouchEnd: handleRepositionMouseUp,
+          } : {})}
+        >
           {currentDashboardImage ? (
             /* Show uploaded dashboard image */
             <>
@@ -434,44 +518,91 @@ export default function GroupsPage() {
                 src={currentDashboardImage}
                 alt="Group dashboard image"
                 fill
-                className="object-cover"
+                className="object-cover select-none"
                 sizes="1000px"
+                draggable={false}
+                style={{ objectPosition: `center ${isRepositioning ? tempPositionY : (selectedGroup?.dashboard_image_position_y ?? 50)}%` }}
               />
-              {/* Hover overlay with edit buttons - only show on hover */}
-              <div 
-                className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                onMouseEnter={(e) => e.stopPropagation()}
-                onMouseLeave={(e) => e.stopPropagation()}
-              >
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleDashboardImageClick();
-                    }}
-                    disabled={isUploadingDashboardImage}
-                    className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-warm-white))] text-[hsl(var(--brand-charcoal))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-honey))] hover:text-black transition-all duration-200 shadow-sm z-10"
-                  >
-                    <Upload size={16} />
-                    Change
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleDeleteDashboardImage();
-                    }}
-                    disabled={isUploadingDashboardImage}
-                    className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-charcoal))] text-[hsl(var(--brand-warm-white))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-warm-gray))] transition-all duration-200 shadow-sm z-10"
-                  >
-                    <X size={16} />
-                    Remove
-                  </button>
+              {isRepositioning ? (
+                /* Reposition mode overlay - always visible */
+                <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center gap-3">
+                  <p className="text-white text-sm font-medium select-none">Drag to reposition</p>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleCancelReposition();
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-charcoal))] text-[hsl(var(--brand-warm-white))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-warm-gray))] transition-all duration-200 shadow-sm z-10"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleSaveReposition();
+                      }}
+                      disabled={isSavingPosition}
+                      className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-warm-white))] text-[hsl(var(--brand-charcoal))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-honey))] hover:text-black transition-all duration-200 shadow-sm z-10"
+                    >
+                      {isSavingPosition ? 'Saving...' : 'Save'}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                /* Normal mode - Hover overlay with edit buttons */
+                <div
+                  className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                  onMouseEnter={(e) => e.stopPropagation()}
+                  onMouseLeave={(e) => e.stopPropagation()}
+                >
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleDashboardImageClick();
+                      }}
+                      disabled={isUploadingDashboardImage}
+                      className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-warm-white))] text-[hsl(var(--brand-charcoal))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-honey))] hover:text-black transition-all duration-200 shadow-sm z-10"
+                    >
+                      <Upload size={16} />
+                      Change
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleStartReposition();
+                      }}
+                      disabled={isUploadingDashboardImage}
+                      className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-warm-white))] text-[hsl(var(--brand-charcoal))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-honey))] hover:text-black transition-all duration-200 shadow-sm z-10"
+                    >
+                      <Move size={16} />
+                      Reposition
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleDeleteDashboardImage();
+                      }}
+                      disabled={isUploadingDashboardImage}
+                      className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-charcoal))] text-[hsl(var(--brand-warm-white))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-warm-gray))] transition-all duration-200 shadow-sm z-10"
+                    >
+                      <X size={16} />
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              )}
             </>
           ) : (
             /* Show placeholder with upload prompt */
@@ -637,6 +768,8 @@ export default function GroupsPage() {
               : selectedGroup.couple_first_name || selectedGroup.partner_first_name || null
           }
           currentCoupleImage={selectedGroup.couple_image_url}
+          currentCoupleImagePositionY={selectedGroup.couple_image_position_y ?? 50}
+          currentCoupleImagePositionX={selectedGroup.couple_image_position_x ?? 50}
         />
       )}
 

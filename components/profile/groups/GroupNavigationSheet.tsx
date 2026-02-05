@@ -10,6 +10,7 @@ import type { GroupWithMembers } from "@/lib/types/database";
 // Extend the interface locally to ensure image_group_dashboard is available
 interface GroupWithDashboardImage extends GroupWithMembers {
   image_group_dashboard: string | null;
+  dashboard_image_position_y: number;
 }
 import {
   Sheet,
@@ -126,6 +127,7 @@ export function GroupNavigationSheet({ isOpen, onClose, onGroupSelect, currentGr
                         fill
                         className="object-cover"
                         sizes="(max-width: 400px) 100vw, 400px"
+                        style={{ objectPosition: `center ${group.dashboard_image_position_y ?? 50}%` }}
                       />
                       
                       {/* Dark Overlay */}

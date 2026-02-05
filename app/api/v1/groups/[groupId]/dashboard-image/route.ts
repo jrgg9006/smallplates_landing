@@ -108,7 +108,7 @@ export async function POST(
     console.log('Updating groups table with URL:', url);
     const { error: updateError } = await supabase
       .from('groups')
-      .update({ image_group_dashboard: url })
+      .update({ image_group_dashboard: url, dashboard_image_position_y: 50 })
       .eq('id', groupId);
 
     console.log('Database update result:', { updateError });
@@ -193,7 +193,7 @@ export async function DELETE(
     // Update groups table to remove image URL
     const { error: updateError } = await supabase
       .from('groups')
-      .update({ image_group_dashboard: null })
+      .update({ image_group_dashboard: null, dashboard_image_position_y: 50 })
       .eq('id', groupId);
 
     if (updateError) {
@@ -210,6 +210,84 @@ export async function DELETE(
 
   } catch (error) {
     console.error('Error deleting dashboard image:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * PATCH /api/v1/groups/[groupId]/dashboard-image
+ * Update the vertical position of the dashboard image
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ groupId: string }> }
+) {
+  try {
+    const { groupId } = await params;
+
+    if (!groupId) {
+      return NextResponse.json(
+        { error: 'Group ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const supabase = await createSupabaseServer();
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    const { data: membership, error: memberError } = await supabase
+      .from('group_members')
+      .select('role')
+      .eq('group_id', groupId)
+      .eq('profile_id', user.id)
+      .single();
+
+    if (memberError || !membership) {
+      return NextResponse.json(
+        { error: 'Permission denied. You must be a group member to update the dashboard image.' },
+        { status: 403 }
+      );
+    }
+
+    const body = await request.json();
+    const positionY = body.position_y;
+
+    if (typeof positionY !== 'number' || positionY < 0 || positionY > 100) {
+      return NextResponse.json(
+        { error: 'position_y must be a number between 0 and 100' },
+        { status: 400 }
+      );
+    }
+
+    const { error: updateError } = await supabase
+      .from('groups')
+      .update({ dashboard_image_position_y: Math.round(positionY) })
+      .eq('id', groupId);
+
+    if (updateError) {
+      return NextResponse.json(
+        { error: 'Failed to update image position' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Dashboard image position updated successfully'
+    });
+
+  } catch (error) {
+    console.error('Error updating dashboard image position:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

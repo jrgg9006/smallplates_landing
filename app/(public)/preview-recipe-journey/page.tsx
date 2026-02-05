@@ -33,7 +33,9 @@ export default function PreviewPage() {
     custom_share_signature: null,
     token: 'preview-token',
     is_valid: true,
-    couple_image_url: null
+    couple_image_url: null,
+    couple_image_position_y: 50,
+    couple_image_position_x: 50
   };
 
   // Guest search state

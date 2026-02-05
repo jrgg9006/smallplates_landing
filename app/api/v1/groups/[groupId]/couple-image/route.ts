@@ -108,7 +108,7 @@ export async function POST(
     console.log('Updating groups table with URL:', url);
     const { error: updateError } = await supabase
       .from('groups')
-      .update({ couple_image_url: url })
+      .update({ couple_image_url: url, couple_image_position_y: 50, couple_image_position_x: 50 })
       .eq('id', groupId);
 
     console.log('Database update result:', { updateError });
@@ -193,7 +193,7 @@ export async function DELETE(
     // Update groups table to remove image URL
     const { error: updateError } = await supabase
       .from('groups')
-      .update({ couple_image_url: null })
+      .update({ couple_image_url: null, couple_image_position_y: 50, couple_image_position_x: 50 })
       .eq('id', groupId);
 
     if (updateError) {
@@ -210,6 +210,107 @@ export async function DELETE(
 
   } catch (error) {
     console.error('Error deleting couple image:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * PATCH /api/v1/groups/[groupId]/couple-image
+ * Update the position (focal point) of the couple image
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ groupId: string }> }
+) {
+  try {
+    const { groupId } = await params;
+
+    if (!groupId) {
+      return NextResponse.json(
+        { error: 'Group ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const supabase = await createSupabaseServer();
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    const { data: membership, error: memberError } = await supabase
+      .from('group_members')
+      .select('role')
+      .eq('group_id', groupId)
+      .eq('profile_id', user.id)
+      .single();
+
+    if (memberError || !membership) {
+      return NextResponse.json(
+        { error: 'Permission denied. You must be a group member to update the couple image.' },
+        { status: 403 }
+      );
+    }
+
+    const body = await request.json();
+    const positionY = body.position_y;
+    const positionX = body.position_x;
+
+    const updateData: Record<string, number> = {};
+
+    if (positionY !== undefined) {
+      if (typeof positionY !== 'number' || positionY < 0 || positionY > 100) {
+        return NextResponse.json(
+          { error: 'position_y must be a number between 0 and 100' },
+          { status: 400 }
+        );
+      }
+      updateData.couple_image_position_y = Math.round(positionY);
+    }
+
+    if (positionX !== undefined) {
+      if (typeof positionX !== 'number' || positionX < 0 || positionX > 100) {
+        return NextResponse.json(
+          { error: 'position_x must be a number between 0 and 100' },
+          { status: 400 }
+        );
+      }
+      updateData.couple_image_position_x = Math.round(positionX);
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json(
+        { error: 'At least one of position_x or position_y is required' },
+        { status: 400 }
+      );
+    }
+
+    const { error: updateError } = await supabase
+      .from('groups')
+      .update(updateData)
+      .eq('id', groupId);
+
+    if (updateError) {
+      return NextResponse.json(
+        { error: 'Failed to update image position' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Couple image position updated successfully'
+    });
+
+  } catch (error) {
+    console.error('Error updating couple image position:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

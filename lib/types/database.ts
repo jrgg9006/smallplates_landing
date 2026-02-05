@@ -374,6 +374,9 @@ export interface Database {
           relationship_to_couple: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
           couple_image_url: string | null;
           image_group_dashboard: string | null;
+          dashboard_image_position_y: number;
+          couple_image_position_y: number;
+          couple_image_position_x: number;
           couple_display_name: string | null;
           created_at: string;
           updated_at: string;
@@ -393,6 +396,9 @@ export interface Database {
           relationship_to_couple?: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
           couple_image_url?: string | null;
           image_group_dashboard?: string | null;
+          dashboard_image_position_y?: number;
+          couple_image_position_y?: number;
+          couple_image_position_x?: number;
           couple_display_name?: string | null;
         };
         Update: {
@@ -409,6 +415,9 @@ export interface Database {
           relationship_to_couple?: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
           couple_image_url?: string | null;
           image_group_dashboard?: string | null;
+          dashboard_image_position_y?: number;
+          couple_image_position_y?: number;
+          couple_image_position_x?: number;
           couple_display_name?: string | null;
         };
       };
@@ -732,6 +741,8 @@ export interface CollectionTokenInfo {
   custom_share_signature: string | null;
   couple_names: string | null;
   couple_image_url: string | null;
+  couple_image_position_y: number;
+  couple_image_position_x: number;
   token: string;
   is_valid: boolean;
 }
