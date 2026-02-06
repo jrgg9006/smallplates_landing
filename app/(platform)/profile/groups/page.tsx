@@ -58,10 +58,10 @@ export default function GroupsPage() {
   const [showImageControls, setShowImageControls] = useState(false);
   const [isRepositioning, setIsRepositioning] = useState(false);
   const [tempPositionY, setTempPositionY] = useState(50);
-  const [dragStartY, setDragStartY] = useState<number | null>(null);
-  const [dragStartPosition, setDragStartPosition] = useState(50);
   const [isSavingPosition, setIsSavingPosition] = useState(false);
   const repositionContainerRef = useRef<HTMLDivElement>(null);
+  const dragStartYRef = useRef<number | null>(null);
+  const dragStartPositionRef = useRef(50);
   
   // Onboarding context
   const { 
@@ -305,28 +305,28 @@ export default function GroupsPage() {
   const handleStartReposition = () => {
     const savedY = selectedGroup?.dashboard_image_position_y ?? 50;
     setTempPositionY(savedY);
-    setDragStartPosition(savedY);
+    dragStartPositionRef.current = savedY;
     setIsRepositioning(true);
   };
 
   const handleRepositionMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    setDragStartY(clientY);
-    setDragStartPosition(tempPositionY);
+    dragStartYRef.current = clientY;
+    dragStartPositionRef.current = tempPositionY;
   };
 
-  const handleRepositionMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    if (dragStartY === null) return;
+  const handleRepositionMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if (dragStartYRef.current === null) return;
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
     const containerHeight = repositionContainerRef.current?.clientHeight || 200;
-    const deltaPercent = ((clientY - dragStartY) / containerHeight) * 70;
-    const newPosition = Math.max(0, Math.min(100, dragStartPosition - deltaPercent));
+    const deltaPercent = ((clientY - dragStartYRef.current) / containerHeight) * 70;
+    const newPosition = Math.max(0, Math.min(100, dragStartPositionRef.current - deltaPercent));
     setTempPositionY(newPosition);
-  }, [dragStartY, dragStartPosition]);
+  };
 
   const handleRepositionMouseUp = () => {
-    setDragStartY(null);
+    dragStartYRef.current = null;
   };
 
   const handleSaveReposition = async () => {
@@ -362,7 +362,7 @@ export default function GroupsPage() {
 
   const handleCancelReposition = () => {
     setIsRepositioning(false);
-    setDragStartY(null);
+    dragStartYRef.current = null;
   };
 
   // Derive dashboard image directly from selectedGroup to avoid sync issues
@@ -500,7 +500,7 @@ export default function GroupsPage() {
         {/* Hero Image */}
         <div
           ref={repositionContainerRef}
-          className={`relative w-full h-[200px] mt-6 rounded-2xl overflow-hidden ${isRepositioning ? 'cursor-grab active:cursor-grabbing touch-none' : 'cursor-pointer'}`}
+          className={`relative w-full h-[200px] mt-6 rounded-2xl overflow-hidden group ${isRepositioning ? 'cursor-grab active:cursor-grabbing touch-none' : 'cursor-pointer'}`}
           {...(isRepositioning ? {
             onMouseDown: handleRepositionMouseDown,
             onMouseMove: handleRepositionMouseMove,
@@ -555,9 +555,9 @@ export default function GroupsPage() {
                   </div>
                 </div>
               ) : (
-                /* Normal mode - Click to show edit buttons */
+                /* Normal mode - Hover on desktop, tap on mobile */
                 <div
-                  className={`absolute inset-0 transition-opacity flex items-center justify-center ${showImageControls ? 'bg-black/30 opacity-100' : 'bg-black/30 opacity-0'}`}
+                  className={`absolute inset-0 bg-black/30 transition-opacity flex items-center justify-center ${showImageControls ? 'opacity-100' : 'opacity-0 md:group-hover:opacity-100'}`}
                   onClick={() => setShowImageControls(!showImageControls)}
                 >
                   <div className="flex gap-3">
