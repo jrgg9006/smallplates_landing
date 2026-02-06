@@ -584,7 +584,7 @@ export default function GroupsPage() {
                         handleStartReposition();
                       }}
                       disabled={isUploadingDashboardImage}
-                      className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-warm-white))] text-[hsl(var(--brand-charcoal))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-honey))] hover:text-black transition-all duration-200 shadow-sm z-10"
+                      className="hidden md:flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-warm-white))] text-[hsl(var(--brand-charcoal))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-honey))] hover:text-black transition-all duration-200 shadow-sm z-10"
                     >
                       <Move size={16} />
                       Reposition
