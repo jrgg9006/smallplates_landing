@@ -54,7 +54,8 @@ export default function GroupsPage() {
   const [isUploadingDashboardImage, setIsUploadingDashboardImage] = useState(false);
   const [dashboardImageError, setDashboardImageError] = useState<string | null>(null);
 
-  // Dashboard image reposition state
+  // Dashboard image controls + reposition state
+  const [showImageControls, setShowImageControls] = useState(false);
   const [isRepositioning, setIsRepositioning] = useState(false);
   const [tempPositionY, setTempPositionY] = useState(50);
   const [dragStartY, setDragStartY] = useState<number | null>(null);
@@ -499,7 +500,7 @@ export default function GroupsPage() {
         {/* Hero Image */}
         <div
           ref={repositionContainerRef}
-          className={`relative w-full h-[200px] mt-6 rounded-2xl overflow-hidden group ${isRepositioning ? 'cursor-grab active:cursor-grabbing' : ''}`}
+          className={`relative w-full h-[200px] mt-6 rounded-2xl overflow-hidden ${isRepositioning ? 'cursor-grab active:cursor-grabbing touch-none' : 'cursor-pointer'}`}
           {...(isRepositioning ? {
             onMouseDown: handleRepositionMouseDown,
             onMouseMove: handleRepositionMouseMove,
@@ -554,11 +555,10 @@ export default function GroupsPage() {
                   </div>
                 </div>
               ) : (
-                /* Normal mode - Hover overlay with edit buttons */
+                /* Normal mode - Click to show edit buttons */
                 <div
-                  className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                  onMouseEnter={(e) => e.stopPropagation()}
-                  onMouseLeave={(e) => e.stopPropagation()}
+                  className={`absolute inset-0 transition-opacity flex items-center justify-center ${showImageControls ? 'bg-black/30 opacity-100' : 'bg-black/30 opacity-0'}`}
+                  onClick={() => setShowImageControls(!showImageControls)}
                 >
                   <div className="flex gap-3">
                     <button
@@ -566,6 +566,7 @@ export default function GroupsPage() {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
+                        setShowImageControls(false);
                         handleDashboardImageClick();
                       }}
                       disabled={isUploadingDashboardImage}
@@ -579,6 +580,7 @@ export default function GroupsPage() {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
+                        setShowImageControls(false);
                         handleStartReposition();
                       }}
                       disabled={isUploadingDashboardImage}
@@ -592,6 +594,7 @@ export default function GroupsPage() {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
+                        setShowImageControls(false);
                         handleDeleteDashboardImage();
                       }}
                       disabled={isUploadingDashboardImage}
