@@ -393,11 +393,15 @@ function Step4() {
   // Initialize from saved state if available
   const savedData = state.answers.step4 as {
     email?: string;
+    shippingDestination?: string;
   } | undefined;
 
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState(savedData?.email || "");
   const [emailError, setEmailError] = useState("");
+  const [shippingDestination, setShippingDestination] = useState(savedData?.shippingDestination || "");
+  const [shippingError, setShippingError] = useState("");
+  const [forceExpanded, setForceExpanded] = useState(false);
 
   // Email validation
   const validateEmail = (email: string): boolean => {
@@ -420,7 +424,18 @@ function Step4() {
     }
   };
 
+  const handleShippingChange = (destination: string) => {
+    setShippingDestination(destination);
+    if (shippingError) setShippingError("");
+  };
+
   const handleCompletePurchase = async () => {
+    if (!shippingDestination) {
+      setShippingError("Please select a shipping destination");
+      setForceExpanded(true);
+      return;
+    }
+
     if (!validateEmail(email.trim())) {
       return;
     }
@@ -428,9 +443,10 @@ function Step4() {
     setLoading(true);
 
     try {
-      // Store email in context
+      // Store email and shipping in context
       await updateStepData(4, {
         email: email.trim(),
+        shippingDestination,
       });
 
       // Save to purchase_intents and show success screen
@@ -482,6 +498,10 @@ function Step4() {
           onEmailBlur={handleEmailBlur}
           onCompletePurchase={handleCompletePurchase}
           isFormValid={isFormValid}
+          shippingDestination={shippingDestination}
+          onShippingChange={handleShippingChange}
+          shippingError={shippingError}
+          forceExpanded={forceExpanded}
         />
 
         {/* Navigation */}
@@ -497,9 +517,9 @@ function Step4() {
           <button
             type="button"
             onClick={handleCompletePurchase}
-            disabled={!isFormValid || loading}
+            disabled={loading}
             className={`px-12 py-4 rounded-2xl text-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-              isFormValid
+              isFormValid && shippingDestination
                 ? "bg-[#D4A854] text-white hover:bg-[#c49b4a]"
                 : "bg-gray-300 text-gray-500"
             }`}

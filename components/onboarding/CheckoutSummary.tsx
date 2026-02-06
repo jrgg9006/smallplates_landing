@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { getProductTierById, ProductTier } from "@/lib/data/productTiers";
 
 interface CheckoutSummaryProps {
@@ -21,6 +21,10 @@ interface CheckoutSummaryProps {
   onPasswordChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onCompletePurchase: () => void;
   isFormValid: boolean;
+  shippingDestination: string;
+  onShippingChange: (destination: string) => void;
+  shippingError?: string;
+  forceExpanded?: boolean;
 }
 
 /**
@@ -40,12 +44,26 @@ export function CheckoutSummary({
   onPasswordChange,
   onCompletePurchase,
   isFormValid,
+  shippingDestination,
+  onShippingChange,
+  shippingError,
+  forceExpanded,
 }: CheckoutSummaryProps) {
   const selectedTier: ProductTier | undefined = selectedTierId
     ? getProductTierById(selectedTierId)
     : undefined;
 
   const [isExpanded, setIsExpanded] = useState(false);
+
+  useEffect(() => {
+    if (forceExpanded) setIsExpanded(true);
+  }, [forceExpanded]);
+
+  const shippingCosts: Record<string, number> = { usa: 8, mexico: 21 };
+  const shippingAmount = shippingDestination ? shippingCosts[shippingDestination] : undefined;
+  const total = selectedTier && shippingAmount !== undefined
+    ? selectedTier.price + shippingAmount
+    : undefined;
 
   if (!selectedTier) {
     return (
@@ -74,11 +92,22 @@ export function CheckoutSummary({
           <div className="flex items-center gap-3">
             <div className="text-right">
               <p className="font-serif text-lg text-[#2D2D2D]">
-                ${selectedTier.price}
+                {total !== undefined
+                  ? `$${total}`
+                  : shippingDestination === "other"
+                    ? `$${selectedTier.price} + shipping`
+                    : `$${selectedTier.price}`}
               </p>
-              <p className="text-xs text-[#8A8780] font-light">
-                + Shipping
-              </p>
+              {!shippingDestination && (
+                <p className="text-xs text-[#D4A854] font-medium">
+                  + Select Shipping
+                </p>
+              )}
+              {shippingDestination === "other" && (
+                <p className="text-xs text-[#8A8780] font-light">
+                  Custom quote
+                </p>
+              )}
             </div>
             <svg
               className={`w-4 h-4 text-[#8A8780] transition-transform duration-200 ${
@@ -138,14 +167,6 @@ export function CheckoutSummary({
               </div>
             )}
 
-            {/* Gift Giver Name */}
-            {giftGiverName && (
-              <div className="pt-3 border-t border-gray-200">
-                <p className="text-xs text-[#8A8780] font-light mb-1">From:</p>
-                <p className="text-sm text-[#2D2D2D] font-medium">{giftGiverName}</p>
-              </div>
-            )}
-
             {/* Subtotal */}
             <div className="flex justify-between items-center pt-3 border-t border-gray-200">
               <p className="text-[#2D2D2D] text-sm font-light">Subtotal</p>
@@ -154,27 +175,56 @@ export function CheckoutSummary({
               </p>
             </div>
 
-            {/* Shipping */}
-            <div className="flex justify-between items-start pt-2">
-              <div className="flex-1">
+            {/* Shipping Destination */}
+            <div className="pt-2">
+              <div className="flex justify-between items-center mb-2">
                 <p className="text-[#2D2D2D] text-sm font-light">Shipping</p>
-                <p className="text-xs text-[#8A8780] font-light mt-0.5">
-                  Calculated at checkout
-                </p>
-                <p className="text-xs text-[#8A8780] font-light italic">
-                  (based on delivery location)
+                <p className="font-serif text-base text-[#2D2D2D]">
+                  {shippingDestination === "usa" && "$8"}
+                  {shippingDestination === "mexico" && "$21"}
+                  {shippingDestination === "other" && "Custom"}
+                  {!shippingDestination && "—"}
                 </p>
               </div>
-              <p className="text-sm text-[#8A8780] font-light ml-4">
-                TBD
-              </p>
+              <div className="flex gap-2">
+                {[
+                  { id: "usa", label: "USA", sub: "$8" },
+                  { id: "mexico", label: "Mexico", sub: "$21" },
+                  { id: "other", label: "Other", sub: "Custom" },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => onShippingChange(opt.id)}
+                    className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-colors border ${
+                      shippingDestination === opt.id
+                        ? "bg-[#D4A854]/10 border-[#D4A854] text-[#D4A854]"
+                        : "bg-white border-gray-200 text-[#6B6966] hover:border-gray-300"
+                    }`}
+                  >
+                    {opt.label} <span className="text-[10px] font-light ml-1">{opt.sub}</span>
+                  </button>
+                ))}
+              </div>
+              {shippingDestination === "other" && (
+                <p className="text-xs text-[#8A8780] font-light italic mt-1.5">
+                  We&apos;ll send you a quote for your location.
+                </p>
+              )}
+              {shippingError && (
+                <p className="text-xs text-red-600 mt-1.5">{shippingError}</p>
+              )}
             </div>
 
             {/* Total */}
             <div className="flex justify-between items-center pt-3 border-t border-gray-200">
               <p className="font-medium text-[#2D2D2D] text-sm">Total</p>
               <p className="font-serif text-lg text-[#2D2D2D]">
-                ${selectedTier.price} + shipping
+                {total !== undefined
+                  ? `$${total}`
+                  : shippingDestination === "other"
+                    ? `$${selectedTier.price} + custom shipping`
+                    : `$${selectedTier.price} + shipping`}
               </p>
             </div>
           </div>

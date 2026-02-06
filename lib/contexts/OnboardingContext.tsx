@@ -306,6 +306,11 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
           relationship?: string;
         } | undefined;
 
+        // Extract shipping destination from checkout step (step5 for couples, step4 for gift givers)
+        const checkoutStepData = userType === 'couple'
+          ? mergedAnswers.step5 as { shippingDestination?: string } | undefined
+          : mergedAnswers.step4 as { shippingDestination?: string } | undefined;
+
         const purchaseIntentData = {
           email: finalEmail,
           selected_tier: state.selectedProductTier,
@@ -329,6 +334,7 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
           timeline: userType === 'gift_giver'
             ? (mergedAnswers.step1 as { timeline?: string } | undefined)?.timeline || null
             : null,
+          shipping_destination: checkoutStepData?.shippingDestination || null,
         };
 
         const { error: insertError } = await supabase
