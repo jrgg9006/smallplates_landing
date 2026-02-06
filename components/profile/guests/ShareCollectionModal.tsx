@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -54,16 +54,13 @@ export function ShareCollectionModal({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
-  // Couple image reposition state (2D focal point)
+  // Focal point picker state
   const [isRepositioningCoupleImage, setIsRepositioningCoupleImage] = useState(false);
-  const [tempCouplePositionY, setTempCouplePositionY] = useState(50);
   const [tempCouplePositionX, setTempCouplePositionX] = useState(50);
-  const [coupleDragStartY, setCoupleDragStartY] = useState<number | null>(null);
-  const [coupleDragStartX, setCoupleDragStartX] = useState<number | null>(null);
-  const [coupleDragStartPositionY, setCoupleDragStartPositionY] = useState(50);
-  const [coupleDragStartPositionX, setCoupleDragStartPositionX] = useState(50);
+  const [tempCouplePositionY, setTempCouplePositionY] = useState(50);
   const [isSavingCouplePosition, setIsSavingCouplePosition] = useState(false);
   const coupleRepositionRef = useRef<HTMLDivElement>(null);
+  const isFocalDraggingRef = useRef(false);
 
   // Load custom message when modal opens
   useEffect(() => {
@@ -328,42 +325,38 @@ export function ShareCollectionModal({
     }
   };
 
-  // Couple image reposition handlers (2D focal point)
+  // Focal point picker handlers
   const handleStartCoupleReposition = () => {
-    setTempCouplePositionY(coupleImagePositionY);
     setTempCouplePositionX(coupleImagePositionX);
-    setCoupleDragStartPositionY(coupleImagePositionY);
-    setCoupleDragStartPositionX(coupleImagePositionX);
+    setTempCouplePositionY(coupleImagePositionY);
     setIsRepositioningCoupleImage(true);
   };
 
-  const handleCoupleRepositionMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+  const updateFocalPoint = (e: React.MouseEvent | React.TouchEvent) => {
+    const container = coupleRepositionRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    setCoupleDragStartY(clientY);
-    setCoupleDragStartX(clientX);
-    setCoupleDragStartPositionY(tempCouplePositionY);
-    setCoupleDragStartPositionX(tempCouplePositionX);
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const x = ((clientX - rect.left) / rect.width) * 100;
+    const y = ((clientY - rect.top) / rect.height) * 100;
+    setTempCouplePositionX(Math.max(0, Math.min(100, x)));
+    setTempCouplePositionY(Math.max(0, Math.min(100, y)));
   };
 
-  const handleCoupleRepositionMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    if (coupleDragStartY === null || coupleDragStartX === null) return;
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const container = coupleRepositionRef.current;
-    const containerHeight = container?.clientHeight || 160;
-    const containerWidth = container?.clientWidth || 400;
-    // Reason: sensitivity of 70 means dragging the full container moves ~70% of the range
-    const deltaY = ((clientY - coupleDragStartY) / containerHeight) * 70;
-    const deltaX = ((clientX - coupleDragStartX) / containerWidth) * 70;
-    setTempCouplePositionY(Math.max(0, Math.min(100, coupleDragStartPositionY - deltaY)));
-    setTempCouplePositionX(Math.max(0, Math.min(100, coupleDragStartPositionX - deltaX)));
-  }, [coupleDragStartY, coupleDragStartX, coupleDragStartPositionY, coupleDragStartPositionX]);
+  const handleFocalMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    isFocalDraggingRef.current = true;
+    updateFocalPoint(e);
+  };
 
-  const handleCoupleRepositionMouseUp = () => {
-    setCoupleDragStartY(null);
-    setCoupleDragStartX(null);
+  const handleFocalMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isFocalDraggingRef.current) return;
+    updateFocalPoint(e);
+  };
+
+  const handleFocalMouseUp = () => {
+    isFocalDraggingRef.current = false;
   };
 
   const handleSaveCoupleReposition = async () => {
@@ -395,8 +388,6 @@ export function ShareCollectionModal({
 
   const handleCancelCoupleReposition = () => {
     setIsRepositioningCoupleImage(false);
-    setCoupleDragStartY(null);
-    setCoupleDragStartX(null);
   };
 
   return (
@@ -531,78 +522,80 @@ export function ShareCollectionModal({
                     {/* Current Image Display */}
                     {coupleImage ? (
                       <div className="space-y-3">
-                        <div
-                          ref={coupleRepositionRef}
-                          className={`relative bg-gray-100 rounded-xl overflow-hidden ${isRepositioningCoupleImage ? 'h-80 cursor-grab active:cursor-grabbing' : 'h-32 lg:h-40'} w-full`}
-                          {...(isRepositioningCoupleImage ? {
-                            onMouseDown: handleCoupleRepositionMouseDown,
-                            onMouseMove: handleCoupleRepositionMouseMove,
-                            onMouseUp: handleCoupleRepositionMouseUp,
-                            onMouseLeave: handleCoupleRepositionMouseUp,
-                            onTouchStart: handleCoupleRepositionMouseDown,
-                            onTouchMove: handleCoupleRepositionMouseMove,
-                            onTouchEnd: handleCoupleRepositionMouseUp,
-                          } : {})}
-                        >
-                          <Image
-                            key={coupleImage}
-                            src={coupleImage}
-                            alt="Couple"
-                            fill
-                            className="object-cover select-none"
-                            draggable={false}
-                            style={{ objectPosition: `${isRepositioningCoupleImage ? tempCouplePositionX : coupleImagePositionX}% ${isRepositioningCoupleImage ? tempCouplePositionY : coupleImagePositionY}%` }}
-                          />
-                          {isRepositioningCoupleImage && (
-                            <>
-                              {/* Vignette mask - dark edges, clear center circle */}
+                        {isRepositioningCoupleImage ? (
+                          /* Focal point picker — full uncropped image */
+                          <div className="space-y-3">
+                            <p className="text-sm text-gray-600">Tap on the most important part of your photo.</p>
+                            <div
+                              ref={coupleRepositionRef}
+                              className="relative rounded-xl overflow-hidden cursor-crosshair select-none w-fit mx-auto"
+                              onMouseDown={handleFocalMouseDown}
+                              onMouseMove={handleFocalMouseMove}
+                              onMouseUp={handleFocalMouseUp}
+                              onMouseLeave={handleFocalMouseUp}
+                              onTouchStart={handleFocalMouseDown}
+                              onTouchMove={handleFocalMouseMove}
+                              onTouchEnd={handleFocalMouseUp}
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={coupleImage}
+                                alt="Couple"
+                                className="max-w-full max-h-96 block select-none pointer-events-none"
+                                draggable={false}
+                              />
+                              {/* Vignette centered on focal point */}
                               <div
                                 className="absolute inset-0 pointer-events-none"
-                                style={{ background: 'radial-gradient(circle 70px at center, transparent 0%, transparent 50%, rgba(0,0,0,0.55) 100%)' }}
+                                style={{ background: `radial-gradient(circle 70px at ${tempCouplePositionX}% ${tempCouplePositionY}%, transparent 0%, transparent 50%, rgba(0,0,0,0.55) 100%)` }}
                               />
-                              {/* Crosshair in center */}
-                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none">
+                              {/* Crosshair at focal point */}
+                              <div
+                                className="absolute pointer-events-none select-none"
+                                style={{ left: `${tempCouplePositionX}%`, top: `${tempCouplePositionY}%`, transform: 'translate(-50%, -50%)' }}
+                              >
                                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="opacity-70">
                                   <line x1="20" y1="4" x2="20" y2="36" stroke="white" strokeWidth="1.5" />
                                   <line x1="4" y1="20" x2="36" y2="20" stroke="white" strokeWidth="1.5" />
                                   <circle cx="20" cy="20" r="10" stroke="white" strokeWidth="1.5" fill="none" />
                                 </svg>
                               </div>
-                              {/* Controls at bottom */}
-                              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-3">
-                                <p className="text-white text-xs font-medium select-none drop-shadow-md">Drag to center focal point</p>
-                                <div className="flex gap-2">
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      handleCancelCoupleReposition();
-                                    }}
-                                    className="bg-gray-800/80 text-white border-gray-600 hover:bg-gray-700 text-xs backdrop-blur-sm"
-                                  >
-                                    Cancel
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      handleSaveCoupleReposition();
-                                    }}
-                                    disabled={isSavingCouplePosition}
-                                    className="bg-white/90 text-gray-900 hover:bg-white text-xs backdrop-blur-sm"
-                                  >
-                                    {isSavingCouplePosition ? 'Saving...' : 'Save'}
-                                  </Button>
-                                </div>
-                              </div>
-                            </>
-                          )}
-                        </div>
+                            </div>
+                            {/* Controls outside the image */}
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={handleCancelCoupleReposition}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={handleSaveCoupleReposition}
+                                disabled={isSavingCouplePosition}
+                                className="bg-black text-white hover:bg-gray-800"
+                              >
+                                {isSavingCouplePosition ? 'Saving...' : 'Save'}
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          /* Normal cropped preview */
+                          <div className="relative bg-gray-100 rounded-xl overflow-hidden h-32 lg:h-40 w-full">
+                            <Image
+                              key={coupleImage}
+                              src={coupleImage}
+                              alt="Couple"
+                              fill
+                              className="object-cover select-none"
+                              draggable={false}
+                              style={{ objectPosition: `${coupleImagePositionX}% ${coupleImagePositionY}%` }}
+                            />
+                          </div>
+                        )}
                         {!isRepositioningCoupleImage && (
                           <div className="flex gap-2 justify-end">
                             <Button
