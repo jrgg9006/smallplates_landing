@@ -130,39 +130,18 @@ export async function searchGuestInCollection(
   const supabase = createSupabaseClient();
   
   try {
-    // If groupId is provided, only show guests who have contributed to that specific group
+    // If groupId is provided, search for guests in that specific group by name
     if (groupId) {
       console.log('🔍 Searching guests for specific group:', groupId);
-      
-      // First, get all guest_ids who have contributed to this specific group
-      const { data: guestRecipes, error: recipesError } = await supabase
-        .from('guest_recipes')
-        .select('guest_id')
-        .eq('group_id', groupId)
-        .eq('user_id', userId);
-      
-      if (recipesError) {
-        console.error('Error fetching guest recipes:', recipesError);
-        return { data: null, error: recipesError.message };
-      }
-      
-      // If no recipes found for this group, return empty array
-      if (!guestRecipes || guestRecipes.length === 0) {
-        console.log('📭 No guests have contributed to this group yet');
-        return { data: [], error: null };
-      }
-      
-      // Get unique guest IDs
-      const uniqueGuestIds = [...new Set(guestRecipes.map(r => r.guest_id))];
-      console.log(`📋 Found ${uniqueGuestIds.length} unique guests who contributed to this group`);
-      
-      // Now search for guests matching the name criteria within this group's contributors
+
+      // Search directly in guests table by group_id and name
+      // Reason: also finds guests who exist but have no recipes yet (e.g. previous failed submission)
       const { data: guests, error } = await supabase
         .from('guests')
         .select('*')
         .eq('user_id', userId)
+        .eq('group_id', groupId)
         .eq('is_archived', false)
-        .in('id', uniqueGuestIds)
         .ilike('first_name', `${firstName.trim()}%`)
         .ilike('last_name', `%${lastName.trim()}%`)
         .order('first_name', { ascending: true });
