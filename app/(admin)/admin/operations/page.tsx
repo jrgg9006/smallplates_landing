@@ -812,22 +812,52 @@ ${instructions}`;
 
   const handleUploadGeneratedImage = async (recipeId: string, file: File) => {
     setUploadingImage(true);
-    
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
 
-      const response = await fetch(`/api/v1/admin/operations/recipes/${recipeId}/upload-image`, {
+    try {
+      const extension = file.name.split('.').pop()?.toLowerCase() || 'png';
+
+      // Step 1: Get signed upload URL from API (small JSON request)
+      const signedResponse = await fetch(`/api/v1/admin/operations/recipes/${recipeId}/upload-image`, {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ extension, contentType: file.type }),
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to upload image');
+      if (!signedResponse.ok) {
+        const error = await signedResponse.json();
+        throw new Error(error.error || 'Failed to get upload URL');
       }
 
-      const result = await response.json();
+      const { signedUrl, token, publicUrl } = await signedResponse.json();
+
+      // Step 2: Upload file directly to Supabase Storage via signed URL
+      // Reason: Bypasses both Vercel body size limit and Storage RLS policies
+      const uploadResponse = await fetch(signedUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': file.type,
+          'x-upsert': 'true',
+        },
+        body: file,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+      }
+
+      // Step 3: Update DB via PATCH endpoint (only sends URL string)
+      const patchResponse = await fetch(`/api/v1/admin/operations/recipes/${recipeId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ generated_image_url: publicUrl, image_generated: true }),
+      });
+
+      if (!patchResponse.ok) {
+        const error = await patchResponse.json();
+        throw new Error(error.error || 'Failed to save image URL');
+      }
+
+      const result = { url: publicUrl };
       
       // Update local state
       setSelectedRecipe(prev => prev ? {

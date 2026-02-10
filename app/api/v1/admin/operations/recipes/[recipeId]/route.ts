@@ -8,6 +8,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import type { RecipeProductionStatusUpdate } from '@/lib/types/database';
 
 interface PatchRequestBody extends RecipeProductionStatusUpdate {
+  generated_image_url?: string;
   printReady?: {
     ingredients_clean?: string;
     instructions_clean?: string;
@@ -29,6 +30,18 @@ export async function PATCH(
     const supabase = createSupabaseAdminClient();
     let productionStatusData = null;
     let printReadyData = null;
+
+    // Handle generated_image_url update on guest_recipes table
+    if (body.generated_image_url !== undefined) {
+      const { error: imageUrlError } = await supabase
+        .from('guest_recipes')
+        .update({ generated_image_url: body.generated_image_url })
+        .eq('id', recipeId);
+
+      if (imageUrlError) {
+        return NextResponse.json({ error: imageUrlError.message }, { status: 500 });
+      }
+    }
 
     // Handle production status updates (existing functionality)
     const productionStatusUpdates: RecipeProductionStatusUpdate = {};
