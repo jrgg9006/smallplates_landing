@@ -68,7 +68,7 @@ Small Plates generates revenue through **direct-to-consumer sales** of premium, 
 - Hardcover, lay-flat binding
 - Professional design and layout
 - AI-generated recipe images
-- Up to 120 recipes
+- Up to 72 recipes
 - Archival-quality printing
 - Full color throughout
 

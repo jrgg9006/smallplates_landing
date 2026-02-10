@@ -99,8 +99,8 @@ export function CheckoutSummary({
                     : `$${selectedTier.price}`}
               </p>
               {!shippingDestination && (
-                <p className="text-xs text-[#D4A854] font-medium">
-                  + Select Shipping
+                <p className="text-xs text-[#8A8780] font-light">
+                  + Shipping
                 </p>
               )}
               {shippingDestination === "other" && (
@@ -179,7 +179,7 @@ export function CheckoutSummary({
             <div className="pt-2">
               <div className="flex justify-between items-center mb-2">
                 <p className="text-[#2D2D2D] text-sm font-light">Shipping</p>
-                <p className="font-serif text-base text-[#2D2D2D]">
+                <p className="text-sm text-[#2D2D2D] font-light">
                   {shippingDestination === "usa" && "$8"}
                   {shippingDestination === "mexico" && "$21"}
                   {shippingDestination === "other" && "Custom"}
@@ -202,7 +202,8 @@ export function CheckoutSummary({
                         : "bg-white border-gray-200 text-[#6B6966] hover:border-gray-300"
                     }`}
                   >
-                    {opt.label} <span className="text-[10px] font-light ml-1">{opt.sub}</span>
+                    <span className="block">{opt.label}</span>
+                    <span className="block text-[10px] font-light mt-0.5">{opt.sub}</span>
                   </button>
                 ))}
               </div>

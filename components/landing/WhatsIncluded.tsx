@@ -7,7 +7,7 @@ export default function WhatsIncluded() {
   ];
 
   const rightFeatures = [
-    "Up to 120 recipes",
+    "Up to 72 recipes",
     "Professional photo layout for each recipe",
     "Free shipping in the US",
   ];

@@ -20,7 +20,7 @@ export const productTiers: ProductTier[] = [
     popular: false,
     features: [
       "1 Premium Hardcover (8×10)",
-      "Up to 120 recipes",
+      "Up to 72 recipes",
       "Professional design",
       "Full color throughout",
     ],
