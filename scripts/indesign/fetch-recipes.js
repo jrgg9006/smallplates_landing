@@ -12,8 +12,9 @@ const http = require('http');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env.local') });
 
 // Configuración de Supabase
+// Reason: service_role key bypasses RLS, needed to read recipe_print_ready
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   console.error('❌ Error: No se encontraron las credenciales de Supabase en .env.local');
@@ -25,7 +26,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // ============================================
 // CONFIGURACIÓN - Cambiar el group_id aquí
 // ============================================
-const GROUP_ID = 'da1ff076-b5a4-4a07-8296-3dbedea67f48';
+const GROUP_ID = 'a3698398-3667-4d47-a3e7-16a8e880ef47';
 // ============================================
 
 // ============================================

@@ -5,12 +5,14 @@
 
 var CONFIG = {
     imageFrameLabel: "{{IMAGE}}",
+    // Reason: InDesign auto-converts << >> to guillemets « »
+    // so we search for both versions to ensure find/replace works
     placeholders: [
-        {find: "<<recipe_name>>", field: "recipe_name"},
-        {find: "<<guest_name>>", field: "guest_name"},
-        {find: "<<comments>>", field: "comments"},
-        {find: "<<ingredients>>", field: "ingredients"},
-        {find: "<<instructions>>", field: "instructions"}
+        {find: "<<recipe_name>>", alt: "\u00ABrecipe_name\u00BB", field: "recipe_name"},
+        {find: "<<guest_name>>", alt: "\u00ABguest_name\u00BB", field: "guest_name"},
+        {find: "<<comments>>", alt: "\u00ABcomments\u00BB", field: "comments"},
+        {find: "<<ingredients>>", alt: "\u00ABingredients\u00BB", field: "ingredients"},
+        {find: "<<instructions>>", alt: "\u00ABinstructions\u00BB", field: "instructions"}
     ]
 };
 
@@ -184,15 +186,24 @@ function replaceInTextFrame(tf, recipe) {
         for (var i = 0; i < CONFIG.placeholders.length; i++) {
             var ph = CONFIG.placeholders[i];
             var value = recipe[ph.field] || "";
-            
+
             // Convertir saltos de línea a marcador temporal
             value = value.split("\n").join("<<<BR>>>");
             value = value.split("\\n").join("<<<BR>>>");
-            
+
+            // Intentar con << >> primero
             app.findTextPreferences.findWhat = ph.find;
             app.changeTextPreferences.changeTo = value;
-            
             story.changeText();
+
+            // Intentar con guillemets « » (InDesign auto-convierte << >> a estos)
+            if (ph.alt) {
+                app.findTextPreferences = null;
+                app.changeTextPreferences = null;
+                app.findTextPreferences.findWhat = ph.alt;
+                app.changeTextPreferences.changeTo = value;
+                story.changeText();
+            }
         }
         
         // Convertir marcadores a paragraph breaks
