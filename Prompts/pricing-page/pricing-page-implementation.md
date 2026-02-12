@@ -114,7 +114,7 @@ Make sure these match your current offering:
 
 | Tier | Contents | Price |
 |------|----------|-------|
-| The Book | 1 Premium (8×10) | $149 |
+| The Book | 1 Premium (8×10) | $169 |
 | The Family Collection | 1 Premium + 2 Classic (6×9) | $279 |
 | The Kitchen Table | 1 Premium + 5 Classic (6×9) | $449 |
 

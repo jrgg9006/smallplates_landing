@@ -119,7 +119,7 @@ We are currently in MVP/soft launch. Some processes are manual by design — we'
 
 | Tier | Price | COGS | Gross Profit | Gross Margin |
 |------|-------|------|--------------|--------------|
-| Tier 1 | $149 | $67 | $82 | **55%** |
+| Tier 1 | $169 | $67 | $82 | **55%** |
 | Tier 2 | $279 | $124 | $155 | **56%** |
 | Tier 3 | $449 | $191 | $258 | **57%** |
 | **Blended** | ~$280 | ~$115 | ~$165 | **~56%** |

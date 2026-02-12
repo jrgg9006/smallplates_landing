@@ -187,7 +187,7 @@ The wedding market divides into six distinct spending tiers:
 | Premium album price (Artifact, Mixbook) | $200-$500 | Fortune Business Insights |
 | Shutterfly market share (online) | 20-30% | Fortune Business Insights |
 
-**Implication:** An established $1.4B market exists for similar products (premium wedding books). Our pricing ($149-$449) is competitive with Artifact Uprising ($200-$500).
+**Implication:** An established $1.4B market exists for similar products (premium wedding books). Our pricing ($169-$449) is competitive with Artifact Uprising ($200-$500).
 
 ---
 

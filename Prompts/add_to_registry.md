@@ -228,7 +228,7 @@ export default function AddToRegistryPage() {
                 <li>Go to your Zola registry</li>
                 <li>Click <span className="text-[#2D2D2D]">&quot;Add a gift&quot;</span> → <span className="text-[#2D2D2D]">&quot;Cash fund or custom&quot;</span></li>
                 <li>Name it <span className="text-[#2D2D2D]">&quot;Small Plates Cookbook&quot;</span></li>
-                <li>Set the amount ($149, $279, or $449 depending on your collection)</li>
+                <li>Set the amount ($169, $279, or $449 depending on your collection)</li>
                 <li>Add our link: <span className="text-[#D4A854]">smallplates.co</span></li>
                 <li>Done. Your guests will see it on your registry.</li>
               </ol>
@@ -243,7 +243,7 @@ export default function AddToRegistryPage() {
                 <li>Go to your The Knot registry</li>
                 <li>Click <span className="text-[#2D2D2D]">&quot;Add Gift&quot;</span> → <span className="text-[#2D2D2D]">&quot;Add Cash Fund&quot;</span></li>
                 <li>Name it <span className="text-[#2D2D2D]">&quot;Small Plates Cookbook&quot;</span></li>
-                <li>Set your goal amount ($149, $279, or $449)</li>
+                <li>Set your goal amount ($169, $279, or $449)</li>
                 <li>In the description, add: <span className="text-[#D4A854]">smallplates.co</span></li>
                 <li>Save. Your guests can now contribute.</li>
               </ol>

@@ -252,7 +252,7 @@ Small Plates is **multi-voice** (everyone contributes) and **functional** (used 
 
 **The DIY to Done-For-You Upgrade:**
 
-Couples and organizers attempt DIY because they don't know Small Plates exists. Once they discover us, the value proposition is clear: **pay $149-$449 to eliminate 10+ hours of work and guarantee a beautiful result.**
+Couples and organizers attempt DIY because they don't know Small Plates exists. Once they discover us, the value proposition is clear: **pay $169-$449 to eliminate 10+ hours of work and guarantee a beautiful result.**
 
 ---
 
@@ -368,7 +368,7 @@ $400 |
 $300 |              • Small Plates Tier 2 ($279)
      |
 $200 |    • Storyworth (with extras)
-     |              • Small Plates Tier 1 ($149)
+     |              • Small Plates Tier 1 ($169)
 $150 |    • Average wedding gift ($150)
      |
 $100 |    • Storyworth base ($99)
@@ -384,7 +384,7 @@ $100 |    • Storyworth base ($99)
 
 | Our Price | Comparable | Justification |
 |-----------|------------|---------------|
-| **$149 (Tier 1)** | Average wedding gift ($150) | Exactly at gift benchmark |
+| **$169 (Tier 1)** | Average wedding gift ($150) | Exactly at gift benchmark |
 | **$279 (Tier 2)** | Group gift ($300-800) | Within group gift range, split 4 ways = $70/person |
 | **$449 (Tier 3)** | Bride's bridesmaid gifts budget | Matches what brides spend on bridesmaids |
 

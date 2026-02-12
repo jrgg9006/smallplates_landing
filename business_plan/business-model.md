@@ -84,7 +84,7 @@ Small Plates generates revenue through **direct-to-consumer sales** of premium, 
 
 | Benchmark | Amount | How We Compare |
 |-----------|--------|----------------|
-| Average wedding gift | $150 | Tier 1 at $149 = exactly at benchmark |
+| Average wedding gift | $150 | Tier 1 at $169 = exactly at benchmark |
 | Group gift (4 bridesmaids) | $300-800 | Tier 2 at $279 = $70/person if split 4 ways |
 | Bride's bridesmaid gift budget | $300-800 | Tier 3 at $449 = within typical range |
 | Artifact Uprising album | $150-500 | Competitive with premium photo books |
@@ -93,7 +93,7 @@ Small Plates generates revenue through **direct-to-consumer sales** of premium, 
 
 | Tier | Price Point Logic |
 |------|-------------------|
-| $149 | Below $150 psychological threshold; equals average gift |
+| $169 | Below $150 psychological threshold; equals average gift |
 | $279 | Below $300 threshold; easily splittable ($70 × 4, $56 × 5) |
 | $449 | Below $500 threshold; premium positioning for multiple copies |
 
@@ -230,7 +230,7 @@ ACQUISITION          COLLECTION           PRODUCTION           DELIVERY
 
 | Tier | Price | % of Orders (Est.) | Revenue Contribution |
 |------|-------|--------------------|--------------------|
-| Tier 1 | $149 | 40% | $59.60 per order |
+| Tier 1 | $169 | 40% | $59.60 per order |
 | Tier 2 | $279 | 40% | $111.60 per order |
 | Tier 3 | $449 | 20% | $89.80 per order |
 | **Blended AOV** | | | **$261** |
@@ -265,7 +265,7 @@ ACQUISITION          COLLECTION           PRODUCTION           DELIVERY
 
 | Tier | Price | COGS (Est.) | Gross Profit | Gross Margin |
 |------|-------|-------------|--------------|--------------|
-| Tier 1 | $149 | $58 | $91 | 61% |
+| Tier 1 | $169 | $58 | $91 | 61% |
 | Tier 2 | $279 | $115 | $164 | 59% |
 | Tier 3 | $449 | $182 | $267 | 59% |
 | **Blended** | $261 | ~$105 | ~$156 | **~60%** |
@@ -452,7 +452,7 @@ Every book delivered represents:
 |---------|-------------|
 | **What we sell** | Premium collaborative recipe books for weddings |
 | **Who buys** | Bridesmaids, family, brides (as gifters) |
-| **Price range** | $149 - $449 (custom available) |
+| **Price range** | $169 - $449 (custom available) |
 | **Gross margin** | ~60% |
 | **Key differentiator** | Done-for-you service + premium brand |
 | **Revenue model** | One-time purchase (expansion opportunities exist) |
