@@ -28,7 +28,8 @@
       "Bash(chmod:*)",
       "Bash(npm test)",
       "Bash(npx tsc:*)",
-      "Bash(diff:*)"
+      "Bash(diff:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": []
   }

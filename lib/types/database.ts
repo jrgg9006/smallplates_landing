@@ -479,6 +479,61 @@ export interface Database {
           relationship_to_couple?: string | null;
         };
       };
+      recipe_edit_history: {
+        Row: {
+          id: string;
+          recipe_id: string;
+          edited_by: string;
+          edited_at: string;
+          recipe_name_before: string;
+          ingredients_before: string;
+          instructions_before: string;
+          comments_before: string | null;
+          recipe_name_after: string;
+          ingredients_after: string;
+          instructions_after: string;
+          comments_after: string | null;
+          edit_reason: string | null;
+          edit_target: 'original' | 'print_ready';
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          recipe_id: string;
+          edited_by: string;
+          edited_at?: string;
+          recipe_name_before: string;
+          ingredients_before: string;
+          instructions_before: string;
+          comments_before?: string | null;
+          recipe_name_after: string;
+          ingredients_after: string;
+          instructions_after: string;
+          comments_after?: string | null;
+          edit_reason?: string | null;
+          edit_target?: 'original' | 'print_ready';
+        };
+      };
+      recipe_print_ready: {
+        Row: {
+          recipe_id: string;
+          recipe_name_clean: string;
+          ingredients_clean: string;
+          instructions_clean: string;
+          detected_language: string | null;
+          cleaning_version: number;
+          agent_metadata: Record<string, unknown> | null;
+          updated_at: string;
+        };
+        Update: {
+          recipe_name_clean?: string;
+          ingredients_clean?: string;
+          instructions_clean?: string;
+          detected_language?: string | null;
+          cleaning_version?: number;
+          agent_metadata?: Record<string, unknown> | null;
+        };
+      };
     };
     Functions: {
       get_guest_statistics: {
@@ -575,6 +630,12 @@ export type GroupMemberUpdate = Database['public']['Tables']['group_members']['U
 export type GroupInvitation = Database['public']['Tables']['group_invitations']['Row'];
 export type GroupInvitationInsert = Database['public']['Tables']['group_invitations']['Insert'];
 export type GroupInvitationUpdate = Database['public']['Tables']['group_invitations']['Update'];
+
+export type RecipeEditHistory = Database['public']['Tables']['recipe_edit_history']['Row'];
+export type RecipeEditHistoryInsert = Database['public']['Tables']['recipe_edit_history']['Insert'];
+
+export type RecipePrintReady = Database['public']['Tables']['recipe_print_ready']['Row'];
+export type RecipePrintReadyUpdate = Database['public']['Tables']['recipe_print_ready']['Update'];
 
 // Extended types with relationships
 export interface GuestWithRecipes extends Guest {
