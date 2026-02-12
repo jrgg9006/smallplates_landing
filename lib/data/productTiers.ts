@@ -16,7 +16,7 @@ export const productTiers: ProductTier[] = [
   {
     id: "the-book",
     name: "The Book",
-    price: 149,
+    price: 169,
     popular: false,
     features: [
       "1 Premium Hardcover (8×10)",

@@ -57,7 +57,7 @@ Small Plates generates revenue through **direct-to-consumer sales** of premium, 
 
 | Tier | Name | Contents | Price | Primary Buyer |
 |------|------|----------|-------|---------------|
-| 1 | **The Book** | 1 Premium Hardcover | $149 | Individual gifter, small group |
+| 1 | **The Book** | 1 Premium Hardcover | $169 | Individual gifter, small group |
 | 2 | **The Family Collection** | 1 Premium + 2 Classic | $279 | Bridesmaid group (split 4-5 ways) |
 | 3 | **The Kitchen Table** | 1 Premium + 5 Classic | $449 | Bride as gifter, large family |
 | Custom | **Contact Us** | Flexible configurations | Quoted | Corporate, large weddings |
