@@ -1,6 +1,7 @@
 // scripts/indesign/fetch-recipes.js
 // Script para extraer recetas de Supabase y generar JSON para InDesign
 // v3 - Con soporte para imágenes print-ready (upscaled)
+// TO RUN: node scripts/indesign/fetch-recipes.js
 
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');

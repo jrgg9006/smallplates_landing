@@ -1,0 +1,132 @@
+{
+  "group_id": "a3698398-3667-4d47-a3e7-16a8e880ef47",
+  "couple": {
+    "couple_first_name": "Renata",
+    "partner_first_name": "Javier",
+    "couple_display_name": "Renata & Javier",
+    "wedding_date": null
+  },
+  "contributors": {
+    "count": 34,
+    "list": [
+      {
+        "name": "Alejandra Schafler"
+      },
+      {
+        "name": "Ana Terán"
+      },
+      {
+        "name": "Ceci"
+      },
+      {
+        "name": "Andrea González Oviedo"
+      },
+      {
+        "name": "CAMILA GONZALEZ"
+      },
+      {
+        "name": "Cons Formoso"
+      },
+      {
+        "name": "Cunera Spoor"
+      },
+      {
+        "name": "Dany Schäfler"
+      },
+      {
+        "name": "Elsy Diez"
+      },
+      {
+        "name": "Elsy Castellanos Herrerías"
+      },
+      {
+        "name": "Floriana Diaz Puig"
+      },
+      {
+        "name": "Gabriela Fuentevilla de Díez"
+      },
+      {
+        "name": "Gaby Schafler"
+      },
+      {
+        "name": "GERALDINE VAN GEFFEN"
+      },
+      {
+        "name": "Ines de Juan"
+      },
+      {
+        "name": "Majo Alonso"
+      },
+      {
+        "name": "Male Sánchez"
+      },
+      {
+        "name": "Maria Nieves"
+      },
+      {
+        "name": "Mariana Diez"
+      },
+      {
+        "name": "Martha Cosme Sarquís"
+      },
+      {
+        "name": "Mayra L. Herrera de de la Colina."
+      },
+      {
+        "name": "Norma Zarazua"
+      },
+      {
+        "name": "Paty Garcìa"
+      },
+      {
+        "name": "Pauchis Diez"
+      },
+      {
+        "name": "Paulina Schafler"
+      },
+      {
+        "name": "Rox"
+      },
+      {
+        "name": "Regina Morones"
+      },
+      {
+        "name": "Rosy Brandes"
+      },
+      {
+        "name": "Sofia Diez"
+      },
+      {
+        "name": "Veki Gomez Puig"
+      },
+      {
+        "name": "Veronica Zorrilla"
+      },
+      {
+        "name": "Ximena Diez"
+      },
+      {
+        "name": "Yoya Mercado"
+      },
+      {
+        "name": "Zdena"
+      }
+    ]
+  },
+  "owners": {
+    "count": 1,
+    "list": [
+      {
+        "name": "Norma Zarazua"
+      }
+    ]
+  },
+  "captains": {
+    "count": 1,
+    "list": [
+      {
+        "name": "Gaby campos"
+      }
+    ]
+  }
+}

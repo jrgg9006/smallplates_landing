@@ -51,6 +51,7 @@ Small Plates helps couples create collaborative wedding recipe books where guest
 - For destructive operations, wait for me to write "CONFIRMED"
 - When in doubt, run SELECT first to show me affected data
 - Always check RLS policies exist for new tables
+- **NO exploración masiva de DB**: NO uses el MCP ni agentes para leer tablas, columnas o schema de Supabase de forma exhaustiva. Eso gasta muchos tokens. En su lugar, dame el SQL query y pídeme que yo lo corra en Supabase. Yo te paso el resultado. Usa `lib/types/database.ts` como referencia rápida del schema.
 
 ## ✅ Task Management
 - Check `TASK.md` before starting work

@@ -286,6 +286,15 @@ export default function OperationsPage() {
     return filterRecipesBySearch(recipes, searchQuery);
   }, [recipes, searchQuery]);
 
+  // Unique guest count from filtered recipes
+  const uniqueGuestCount = useMemo(() => {
+    const guestIds = new Set<string>();
+    filteredRecipes.forEach(r => {
+      if (r.guests?.id) guestIds.add(r.guests.id);
+    });
+    return guestIds.size;
+  }, [filteredRecipes]);
+
   const loadRecipes = async () => {
     try {
       const params = new URLSearchParams();
@@ -1149,8 +1158,11 @@ ${instructions}`;
             <span className="font-medium text-gray-700">Notify opt-in only</span>
           </label>
         </div>
-        <div className="text-sm text-gray-600 ml-auto">
-          {filteredRecipes.length} recipe{filteredRecipes.length !== 1 ? 's' : ''}
+        <div className="text-sm text-gray-600 ml-auto flex items-center gap-3">
+          {groupFilter !== 'all' && (
+            <span>{uniqueGuestCount} guest{uniqueGuestCount !== 1 ? 's' : ''}</span>
+          )}
+          <span>{filteredRecipes.length} recipe{filteredRecipes.length !== 1 ? 's' : ''}</span>
         </div>
       </div>
 

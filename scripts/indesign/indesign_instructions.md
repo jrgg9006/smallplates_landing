@@ -23,13 +23,18 @@ Antes de bajar las recetas, necesitas saber el `GROUP_ID` del grupo que quieres 
 
 ---
 
-## PASO 2: Bajar las Recetas de Supabase
+## PASO 2: Bajar los Datos de Supabase
+
+Hay **dos scripts** que bajan datos diferentes. Debes correr ambos.
 
 1. Abre **Terminal** en tu Mac (Cmd + Espacio, escribe "Terminal", Enter)
 2. Navega al proyecto:
    ```
    cd /Users/macbook/Desktop/smallplates_landing
    ```
+
+### 2a. Bajar Recetas
+
 3. Ejecuta el script:
    ```
    node scripts/indesign/fetch-recipes.js
@@ -48,6 +53,21 @@ Antes de bajar las recetas, necesitas saber el `GROUP_ID` del grupo que quieres 
    - **Imagenes**: `scripts/indesign/output/images/{GROUP_ID}/` (una imagen por receta)
 
 > **Ojo:** Si ves recetas listadas como "SIN IMAGEN PRINT-READY", significa que esas usaron la imagen original (menor resolucion). Puedes subir la imagen nuevamente en Operations para que se genere la version upscaled.
+
+### 2b. Bajar Datos del Libro (contributors, captains, pareja)
+
+6. Ejecuta el script:
+   ```
+   node scripts/indesign/fetch-book-data.js
+   ```
+7. Cuando termine, el script genera:
+   - **JSON**: `scripts/indesign/output/book-data.{GROUP_ID}.json`
+8. Este archivo contiene:
+   - **Pareja**: nombres y fecha de boda
+   - **Contributors**: lista unica de guests que contribuyeron al menos 1 receta (y su conteo)
+   - **Captains**: lista de capitanes del grupo para la seccion "Special Thanks"
+
+> **Importante:** Ambos scripts usan el mismo `GROUP_ID`. Si lo cambias en uno, cambialo en el otro tambien.
 
 ---
 
