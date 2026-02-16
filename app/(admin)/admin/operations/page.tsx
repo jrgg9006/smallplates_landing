@@ -1159,6 +1159,15 @@ ${instructions}`;
           </label>
         </div>
         <div className="text-sm text-gray-600 ml-auto flex items-center gap-3">
+          {groupFilter !== 'all' && groupFilter !== 'not_in_cookbook' && (
+            <button
+              onClick={() => copyToClipboard(groupFilter, 'group-id')}
+              className="text-xs text-gray-400 hover:text-gray-600 font-mono transition-colors cursor-pointer"
+              title="Click to copy group ID"
+            >
+              {copiedSection === 'group-id' ? 'Copied!' : `id: ${groupFilter}`}
+            </button>
+          )}
           {groupFilter !== 'all' && (
             <span>{uniqueGuestCount} guest{uniqueGuestCount !== 1 ? 's' : ''}</span>
           )}
