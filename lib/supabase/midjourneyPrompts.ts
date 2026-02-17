@@ -6,7 +6,8 @@ export async function generateAndSaveMidjourneyPrompt(
   recipeId: string,
   recipeName: string,
   ingredients: string,
-  instructions: string
+  instructions: string,
+  comments?: string | null
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const recipeText = `Recipe Title: ${recipeName}
@@ -24,6 +25,7 @@ ${instructions}`;
       ingredientsLength: ingredients.length,
       instructionsLength: instructions.length,
       recipeTextLength: recipeText.length,
+      hasComments: !!comments,
     });
 
     const response = await fetch('/api/v1/midjourney/generate-prompt', {
@@ -35,6 +37,7 @@ ${instructions}`;
         dish_name: recipeName,
         recipe: recipeText,
         recipe_id: recipeId,
+        comments: comments || null,
       }),
     });
 

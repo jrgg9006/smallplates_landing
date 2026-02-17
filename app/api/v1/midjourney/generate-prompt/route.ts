@@ -5,12 +5,13 @@ const RAILWAY_AGENT_URL = process.env.RAILWAY_AGENT_URL || 'https://smallplatesw
 
 export async function POST(request: NextRequest) {
   try {
-    const { dish_name, recipe, recipe_id } = await request.json();
+    const { dish_name, recipe, recipe_id, comments } = await request.json();
 
     console.log('📨 Received request:', {
       recipe_id: recipe_id || 'N/A',
       dish_name: dish_name?.substring(0, 50) || 'N/A',
       recipeLength: recipe?.length || 0,
+      hasComments: !!comments,
     });
 
     if (!dish_name || !recipe) {
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
     const response = await fetch(`${RAILWAY_AGENT_URL}/generate-prompt`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dish_name, recipe }),
+      body: JSON.stringify({ dish_name, recipe, comments: comments || null }),
     });
 
     console.log('🚂 Railway response status:', response.status);
@@ -98,6 +99,7 @@ export async function POST(request: NextRequest) {
             recipe_name_clean: printReady.recipe_name,      // v2 field name
             ingredients_clean: printReady.ingredients,       // v2 field name
             instructions_clean: printReady.instructions,     // v2 field name
+            note_clean: printReady.note || null,             // v2 field name
             detected_language: printReady.language,          // v2 field name
             cleaning_version: 2,  // Mark as v2
             agent_metadata: printReady,

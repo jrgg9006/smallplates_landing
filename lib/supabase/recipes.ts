@@ -112,7 +112,8 @@ export async function addRecipe(guestId: string, formData: RecipeFormData, group
         insertedRecipe.id,
         formData.recipe_name,
         formData.ingredients,
-        formData.instructions
+        formData.instructions,
+        formData.comments || null
       ).catch((error) => {
         // Log but don't throw - we don't want to break recipe creation
         console.error('Failed to generate Midjourney prompt:', error);
@@ -507,7 +508,8 @@ export async function addUserRecipe(recipeData: UserRecipeData, groupId?: string
         data.id,
         recipeData.recipeName,
         recipeData.ingredients,
-        recipeData.instructions
+        recipeData.instructions,
+        recipeData.personalNote || null
       ).catch((error) => {
         // Log but don't throw - we don't want to break recipe creation
         console.error('Failed to generate Midjourney prompt:', error);

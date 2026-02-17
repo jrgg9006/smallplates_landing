@@ -168,7 +168,7 @@ Main tables:
 
 | Tier | Name | Contents | Price |
 |------|------|----------|-------|
-| 1 | The Book | 1 Premium | $149 |
+| 1 | The Book | 1 Premium | $169 |
 | 2 | The Family Collection | 1 Premium + 2 Classic | $279 |
 | 3 | The Kitchen Table | 1 Premium + 5 Classic | $449 |
 | Custom | Contact Us | Flexible configurations | Quote |

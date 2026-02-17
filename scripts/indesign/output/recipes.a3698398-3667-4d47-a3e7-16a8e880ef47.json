@@ -143,17 +143,30 @@
     "image_source": "print"
   },
   {
+    "id": "a2f522a2-b362-42d3-9a27-b522b7f55518",
+    "recipe_name": "Ensalada de Lentejas",
+    "guest_name": "Gabriela Campos",
+    "comments": "QUERIDOS. RENATA Y JAVIER ❤️\nLes deseo que sean muy felices siempre !!\nQue rían muchooooo! Que gocen! DISFRUTEN !! ENJOY !\nLos AMOOOOOOOOOO Y ADOROOOOOOO MILES DE BESOS !!!!",
+    "ingredients": "Lentejas\nPepino\nCilantro\nPerejil\nSal y pimienta al gusto\nAceite de oliva",
+    "instructions": "Colocar las lentejas en remojo unas horas antes, retirar el agua y colocarlas en una olla al fuego con agua limpia y un poco de sal, cocinar por 15 minutos. Pasado el tiempo, escurrir el agua y dejar que las lentejas se enfríen y sequen.\n\nMezclar las lentejas con el pepino finamente picado y cilantro y perejil. Agregar el aceite de oliva, sal y pimienta al gusto.\n\nSi se quiere añadir cebolla morada también queda rico. Mezclar bien y servir.",
+    "generated_image_url": "https://iinnpndsxepvviafrmwz.supabase.co/storage/v1/object/public/recipes/generated/a3698398-3667-4d47-a3e7-16a8e880ef47/a2f522a2-b362-42d3-9a27-b522b7f55518.png",
+    "generated_image_url_print": "https://iinnpndsxepvviafrmwz.supabase.co/storage/v1/object/public/recipes/print/a3698398-3667-4d47-a3e7-16a8e880ef47/a2f522a2-b362-42d3-9a27-b522b7f55518.png",
+    "image_upscale_status": "ready",
+    "local_image_path": "images/a3698398-3667-4d47-a3e7-16a8e880ef47/a2f522a2-b362-42d3-9a27-b522b7f55518.png",
+    "image_source": "print"
+  },
+  {
     "id": "aaf6fe6a-2148-479a-908c-7addf81a2510",
-    "recipe_name": "Ensalada Otoñal con Higo, Queso de Cabra y Prosciutto Crujiente 4 a 6 Personas Para los Higos: •10 a 12 Higos Cortados a la Mitad o En Cuartos •1 Cdita. de Aceite de Oliva Extra Virgen • 1 Cda. de Jugo de Limón • 2 Ramas de Tomillo Fresco, las Hojas Sal y Pimienta, al Gusto Para la Ensalada: • ⅓ de Taza de Queso de Cabra, o Más, al Gusto •200 G de Prosciutto Rebanado Extra Delgado •4 a 6 Tazas de Arúgula Para las Nueces Caramelizadas: •½ Taza de Nueces de Castilla 1 Cda. de Miel de Maple - 1 Cda. de Vinagre Balsámico • Sal y Pimienta, al Gusto Para la Vinagreta: •1 Cda. de Vinagre Balsámico •1 Cda. de Echalote Picado Finamente • Jugo de ½ Limón Amarillo •1 Cdita. de Mostaza Dijon .2 a 3 Cdas. de Aceite de Oliva Extra Virgen 2 Ramas de Tomillo Fresco, las Hojas • Opcional: 1 Cdita. de Miel de Maple Preparación 1. Marina los Higos Mezclándolos En Un Bowl con el Aceite de Oliva, el Limón, el Tomillo, Sal y Pimienta. Mezcla con Cuidado y Reserva. Puedes Asar Ligeramente los Higos Si Quieres Que Se Caramelicen; Es Opcional. 2. Asa el Prosciutto En Un Sartén Sin Aceite Hasta Que Esté Dorado y Crujiente. También Puedes Hornearlo En el Microondas Entre Dos Servilletas de Papel Por 30 Segundos y Repitiendo Hasta Que Lo Veas Crujiente. 3. Saltea las Nueces En Un Sartén con la Miel de Maple y el Vinagre Balsámico. Agrega Una Pizca de Sal y Reserva. 4. Prepara la Vinagreta Mezciando Todos los Ingredientes. Prueba y Ajusta Sazón. 5. Prepara la Ensalada. Mezcla En Un Bowl la Arúgula con 2 Cucharadas de la Vinagreta, Sal y Pimienta. Acomódala En Un Platón Para Formar la Base de la Ensalada. 6. Para Servir, Coloca los Higos, las Nueces y el Prosciutto Sobre la Ensalada. Desmorona el Queso de Cabra y Vierte el Resto de la Vinagreta. Termina con Sal y Pimienta.",
+    "recipe_name": "Ensalada Otoñal con Higo, Queso de Cabra y Prosciutto Crujiente",
     "guest_name": "Rosy Brandes",
-    "comments": "Deliciosa receta que la diafruten",
+    "comments": "Deliciosa receta que la disfruten",
     "ingredients": "Para los higos:\n10 a 12 higos cortados a la mitad o en cuartos\n1 cdita. de aceite de oliva extra virgen\n1 cda. de jugo de limón\n2 ramas de tomillo fresco, las hojas\nSal y pimienta, al gusto\n\nPara la ensalada:\n⅓ de taza de queso de cabra, o más, al gusto\n200 g de prosciutto rebanado extra delgado\n4 a 6 tazas de arúgula\n\nPara las nueces caramelizadas:\n½ taza de nueces de Castilla\n1 cda. de miel de maple\n1 cda. de vinagre balsámico\nSal y pimienta, al gusto\n\nPara la vinagreta:\n1 cda. de vinagre balsámico\n1 cda. de echalote picado finamente\nJugo de ½ limón amarillo\n1 cdita. de mostaza Dijon\n2 a 3 cdas. de aceite de oliva extra virgen\n2 ramas de tomillo fresco, las hojas\nOpcional: 1 cdita. de miel de maple",
     "instructions": "Marina los higos mezclándolos en un bowl con el aceite de oliva, el limón, el tomillo, sal y pimienta. Mezcla con cuidado y reserva. Puedes asar ligeramente los higos si quieres que se caramelicen; es opcional.\n\nAsa el prosciutto en un sartén sin aceite hasta que esté dorado y crujiente. También puedes hornearlo en el microondas entre dos servilletas de papel por 30 segundos y repitiendo hasta que lo veas crujiente.\n\nSaltea las nueces en un sartén con la miel de maple y el vinagre balsámico. Agrega una pizca de sal y reserva.\n\nPrepara la vinagreta mezclando todos los ingredientes. Prueba y ajusta sazón.\n\nPrepara la ensalada. Mezcla en un bowl la arúgula con 2 cucharadas de la vinagreta, sal y pimienta. Acomódala en un platón para formar la base de la ensalada.\n\nPara servir, coloca los higos, las nueces y el prosciutto sobre la ensalada. Desmorona el queso de cabra y vierte el resto de la vinagreta. Termina con sal y pimienta.",
-    "generated_image_url": null,
-    "generated_image_url_print": null,
-    "image_upscale_status": null,
-    "local_image_path": null,
-    "image_source": null
+    "generated_image_url": "https://iinnpndsxepvviafrmwz.supabase.co/storage/v1/object/public/recipes/generated/a3698398-3667-4d47-a3e7-16a8e880ef47/aaf6fe6a-2148-479a-908c-7addf81a2510.png",
+    "generated_image_url_print": "https://iinnpndsxepvviafrmwz.supabase.co/storage/v1/object/public/recipes/print/a3698398-3667-4d47-a3e7-16a8e880ef47/aaf6fe6a-2148-479a-908c-7addf81a2510.png",
+    "image_upscale_status": "ready",
+    "local_image_path": "images/a3698398-3667-4d47-a3e7-16a8e880ef47/aaf6fe6a-2148-479a-908c-7addf81a2510.png",
+    "image_source": "print"
   },
   {
     "id": "dce60d8a-e156-4978-9cc5-234286e2aadf",

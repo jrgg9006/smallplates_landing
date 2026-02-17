@@ -137,6 +137,7 @@ export async function POST(req: NextRequest) {
         dish_name: recipe_name,
         recipe: `${ingredients}\n\n${instructions}`,
         recipe_id: recipe.id,
+        comments: comments || null,
       }),
     }).catch(() => {
       // Reason: fire-and-forget, don't block on prompt generation failure

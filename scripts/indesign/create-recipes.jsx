@@ -145,6 +145,10 @@ function main() {
     if (jsonFile === null) return;
     
     var basePath = jsonFile.parent;
+    // Si el JSON está en un subdirectorio 'data', subir un nivel para encontrar image_assets
+    if (basePath.name === 'data') {
+        basePath = basePath.parent;
+    }
     
     var recipes = readJSON(jsonFile);
     if (recipes === null || recipes.length === 0) {
@@ -339,7 +343,8 @@ function placeImageInSpread(spread, recipe, basePath) {
         return false;
     }
     
-    var imagePath = basePath + "/" + recipe.local_image_path;
+    // Construir la ruta completa usando fsName para compatibilidad entre sistemas
+    var imagePath = basePath.fsName + "/" + recipe.local_image_path;
     var imageFile = new File(imagePath);
     
     if (!imageFile.exists) {

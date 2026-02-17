@@ -17,6 +17,7 @@ interface RecipeWithProductionStatus {
   submitted_at: string | null;
   updated_at: string;
   generated_image_url: string | null;
+  generated_image_url_print: string | null;
   image_upscale_status: 'processing' | 'ready' | 'error' | null;
   image_dimensions: { width: number; height: number } | null;
   guests: {

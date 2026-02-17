@@ -472,7 +472,8 @@ export async function submitGuestRecipeWithFiles(
         recipe.id,
         submission.recipe_name.trim(),
         submission.ingredients.trim(),
-        submission.instructions.trim()
+        submission.instructions.trim(),
+        submission.comments?.trim() || null
       ).catch((error) => {
         // Log but don't throw - we don't want to break recipe creation
         console.error('Failed to generate Midjourney prompt:', error);
@@ -715,7 +716,8 @@ export async function submitGuestRecipe(
         recipe.id,
         submission.recipe_name.trim(),
         submission.ingredients.trim(),
-        submission.instructions.trim()
+        submission.instructions.trim(),
+        submission.comments?.trim() || null
       ).catch((error) => {
         // Log but don't throw - we don't want to break recipe creation
         console.error('Failed to generate Midjourney prompt:', error);

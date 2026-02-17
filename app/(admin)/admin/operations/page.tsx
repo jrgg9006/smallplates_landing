@@ -23,6 +23,7 @@ interface RecipeWithProductionStatus {
   submitted_at: string | null;
   updated_at: string;
   generated_image_url: string | null;
+  generated_image_url_print: string | null;
   image_upscale_status: 'processing' | 'ready' | 'error' | null;
   image_dimensions: { width: number; height: number } | null;
   guests: {
@@ -700,6 +701,54 @@ ${instructions}`;
     }
   };
 
+  const handleDownloadPrintReadyImage = async (recipe: RecipeWithProductionStatus) => {
+    if (!recipe.generated_image_url_print) {
+      alert('No print-ready image available. The image may still be processing.');
+      return;
+    }
+
+    setDownloadingImages(true);
+
+    try {
+      // Clean filename parts
+      const cleanRecipeName = (recipe.recipe_name || 'Untitled').replace(/[^a-z0-9\s-]/gi, '').replace(/\s+/g, '_');
+      const cleanGuestName = (recipe.guests?.printed_name ||
+        `${recipe.guests?.first_name || ''} ${recipe.guests?.last_name || ''}`.trim() ||
+        'Unknown').replace(/[^a-z0-9\s-]/gi, '').replace(/\s+/g, '_');
+
+      // Fetch the image
+      const response = await fetch(recipe.generated_image_url_print);
+      if (!response.ok) throw new Error('Failed to fetch print-ready image');
+
+      const blob = await response.blob();
+
+      // Create a download link
+      const link = document.createElement('a');
+      const objectUrl = URL.createObjectURL(blob);
+
+      // Get file extension from URL or use jpg as default
+      const urlParts = recipe.generated_image_url_print.split('.');
+      const extension = urlParts[urlParts.length - 1].split('?')[0] || 'jpg';
+
+      link.href = objectUrl;
+      link.download = `${cleanGuestName}_${cleanRecipeName}_print-ready.${extension}`;
+
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Clean up
+      URL.revokeObjectURL(objectUrl);
+
+    } catch (error) {
+      console.error('Error downloading print-ready image:', error);
+      alert('Failed to download print-ready image. Please try again.');
+    } finally {
+      setDownloadingImages(false);
+    }
+  };
+
   const handleDownloadAllImages = async () => {
     if (!recipes || recipes.length === 0) return;
 
@@ -855,10 +904,15 @@ ${instructions}`;
       }
 
       // Step 3: Update DB via PATCH endpoint (only sends URL string)
+      // Clear generated_image_url_print since the new image needs to be processed again
       const patchResponse = await fetch(`/api/v1/admin/operations/recipes/${recipeId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ generated_image_url: publicUrl, image_generated: true }),
+        body: JSON.stringify({ 
+          generated_image_url: publicUrl, 
+          image_generated: true,
+          clearPrintReady: true, // This will clear generated_image_url_print, image_upscale_status, and image_dimensions
+        }),
       });
 
       if (!patchResponse.ok) {
@@ -869,9 +923,14 @@ ${instructions}`;
       const result = { url: publicUrl };
       
       // Update local state
+      // Clear generated_image_url_print and reset upscale status since we're uploading a new image.
+      // The Edge Function will detect the generated_image_url change and handle upscaling.
       setSelectedRecipe(prev => prev ? {
         ...prev,
         generated_image_url: result.url,
+        generated_image_url_print: null, // Clear print-ready URL since new image needs processing
+        image_upscale_status: null, // Let backend/upscale process update this
+        image_dimensions: null, // Reset dimensions
         production_status: {
           ...(prev.production_status || {
             id: '',
@@ -894,6 +953,55 @@ ${instructions}`;
     } catch (error) {
       console.error('Error uploading image:', error);
       alert(error instanceof Error ? error.message : 'Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleDeleteGeneratedImage = async (recipeId: string) => {
+    if (!window.confirm('Delete this image (original + print-ready)? This will NOT delete the recipe text.')) {
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const response = await fetch(`/api/v1/admin/operations/recipes/${recipeId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deleteImage: true }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete image');
+      }
+
+      // Safely clear only image-related fields in local state
+      setSelectedRecipe(prev => prev ? {
+        ...prev,
+        generated_image_url: null,
+        generated_image_url_print: null,
+        image_upscale_status: null,
+        image_dimensions: null,
+        production_status: {
+          ...(prev.production_status || {
+            id: '',
+            text_finalized_in_indesign: false,
+            image_generated: false,
+            image_placed_in_indesign: false,
+            operations_notes: null,
+            production_completed_at: null,
+            needs_review: false,
+          }),
+          image_generated: false,
+        },
+      } : prev);
+
+      handleStatusUpdate();
+      alert('Image deleted successfully.');
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      alert(error instanceof Error ? error.message : 'Failed to delete image');
     } finally {
       setUploadingImage(false);
     }
@@ -1182,7 +1290,7 @@ ${instructions}`;
           <div className="p-6">
             <RecipeOperationsTable
               recipes={filteredRecipes}
-              onRecipeClick={(recipe) => setSelectedRecipe(recipe)}
+              onRecipeClick={(recipe) => setSelectedRecipe(recipe as RecipeWithProductionStatus)}
               onStatusUpdate={handleStatusUpdate}
             />
           </div>
@@ -1543,41 +1651,58 @@ ${instructions}`;
                             </svg>
                             Image uploaded
                           </span>
-                          <label className="cursor-pointer">
-                            <span className="text-sm text-blue-600 hover:text-blue-800 underline">
-                              Replace image
-                            </span>
-                            <input
-                              type="file"
-                              accept="image/png,image/jpeg,image/jpg,image/webp"
-                              className="hidden"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  handleUploadGeneratedImage(selectedRecipe.id, file);
-                                }
-                                e.target.value = '';
-                              }}
-                              disabled={uploadingImage}
-                            />
-                          </label>
                           <button
-                            onClick={() => handleDownloadGeneratedImage(selectedRecipe)}
-                            disabled={downloadingImages}
-                            className="text-sm text-blue-600 hover:text-blue-800 underline disabled:text-gray-400 disabled:cursor-not-allowed flex items-center gap-1"
+                            type="button"
+                            onClick={() => handleDeleteGeneratedImage(selectedRecipe.id)}
+                            disabled={uploadingImage}
+                            className="text-sm text-red-600 hover:text-red-800 underline disabled:text-gray-400 disabled:cursor-not-allowed"
                           >
-                            {downloadingImages ? (
-                              <>
-                                <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                </svg>
-                                Downloading...
-                              </>
-                            ) : (
-                              'Download image'
-                            )}
+                            {uploadingImage ? 'Deleting…' : 'Delete image'}
                           </button>
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => handleDownloadGeneratedImage(selectedRecipe)}
+                              disabled={downloadingImages}
+                              className="text-sm text-blue-600 hover:text-blue-800 underline disabled:text-gray-400 disabled:cursor-not-allowed flex items-center gap-1"
+                            >
+                              {downloadingImages ? (
+                                <>
+                                  <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                  </svg>
+                                  Downloading...
+                                </>
+                              ) : (
+                                'Download image'
+                              )}
+                            </button>
+                            {selectedRecipe.generated_image_url_print && (
+                              <button
+                                onClick={() => handleDownloadPrintReadyImage(selectedRecipe)}
+                                disabled={downloadingImages}
+                                className="text-sm text-green-600 hover:text-green-800 underline disabled:text-gray-400 disabled:cursor-not-allowed flex items-center gap-1 font-medium"
+                                title="Download the print-ready (upscaled) version of the image"
+                              >
+                                {downloadingImages ? (
+                                  <>
+                                    <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">
+                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                    </svg>
+                                    Downloading...
+                                  </>
+                                ) : (
+                                  <>
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                                    </svg>
+                                    Download Print-Ready Image
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </div>
                         </div>
                         {/* Upscale Status Badge */}
                         {selectedRecipe.image_upscale_status && (

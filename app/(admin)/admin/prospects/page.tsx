@@ -111,8 +111,8 @@ export default function AdminProspectsPage() {
 
   const getTierBadge = (tier: string) => {
     const labels: Record<string, string> = {
-      'the-book': 'The Book ($149)',
-      'family-collection': 'Family ($249)',
+      'the-book': 'The Book ($169)',
+      'family-collection': 'Family ($279)',
       'kitchen-table': 'Kitchen Table ($349)',
     };
     return labels[tier] || tier;

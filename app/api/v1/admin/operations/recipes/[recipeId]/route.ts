@@ -9,6 +9,8 @@ import type { RecipeProductionStatusUpdate } from '@/lib/types/database';
 
 interface PatchRequestBody extends RecipeProductionStatusUpdate {
   generated_image_url?: string;
+  clearPrintReady?: boolean; // When true, clears generated_image_url_print, image_upscale_status, and image_dimensions
+  deleteImage?: boolean;     // When true, deletes original + print-ready images and clears related fields
   printReady?: {
     ingredients_clean?: string;
     instructions_clean?: string;
@@ -31,11 +33,111 @@ export async function PATCH(
     let productionStatusData = null;
     let printReadyData = null;
 
+    // ============================================================
+    // DELETE IMAGE: remove original + print-ready image safely
+    // ============================================================
+    if (body.deleteImage) {
+      // 1) Load current URLs for this recipe
+      const { data: recipe, error: recipeError } = await supabase
+        .from('guest_recipes')
+        .select('id, generated_image_url, generated_image_url_print')
+        .eq('id', recipeId)
+        .maybeSingle();
+
+      if (recipeError) {
+        return NextResponse.json({ error: recipeError.message }, { status: 500 });
+      }
+
+      const urls: string[] = [];
+      if (recipe?.generated_image_url) urls.push(recipe.generated_image_url);
+      if (recipe?.generated_image_url_print) urls.push(recipe.generated_image_url_print);
+
+      // 2) Derive safe storage paths ONLY for this recipe
+      const marker = '/storage/v1/object/public/recipes/';
+      const pathsToDelete: string[] = [];
+
+      for (const url of urls) {
+        if (typeof url !== 'string') continue;
+        const idx = url.indexOf(marker);
+        if (idx < 0) continue;
+
+        const path = url.substring(idx + marker.length);
+
+        // SECURITY: only allow generated/ or print/ paths that contain this recipeId and no traversal
+        if (
+          (path.startsWith('generated/') || path.startsWith('print/')) &&
+          path.includes(recipeId) &&
+          !path.includes('..')
+        ) {
+          pathsToDelete.push(path);
+        } else {
+          console.warn(
+            `Security: not deleting unexpected path for recipe ${recipeId}:`,
+            path
+          );
+        }
+      }
+
+      // 3) Delete files from storage (images only)
+      if (pathsToDelete.length > 0) {
+        const { error: removeError } = await supabase.storage
+          .from('recipes')
+          .remove(pathsToDelete);
+
+        if (removeError) {
+          console.error('Error deleting image files:', removeError);
+          // We continue anyway to clear DB fields, but return the error message
+        }
+      }
+
+      // 4) Clear image-related fields from guest_recipes (but NEVER touch text/recipe data)
+      const { error: clearError } = await supabase
+        .from('guest_recipes')
+        .update({
+          generated_image_url: null,
+          generated_image_url_print: null,
+          image_upscale_status: null,
+          image_dimensions: null,
+        })
+        .eq('id', recipeId);
+
+      if (clearError) {
+        return NextResponse.json({ error: clearError.message }, { status: 500 });
+      }
+
+      // 5) Optional: mark image_generated as false in production_status, recipe text remains untouched
+      const { error: statusError } = await supabase
+        .from('recipe_production_status')
+        .update({ image_generated: false })
+        .eq('recipe_id', recipeId);
+
+      if (statusError) {
+        console.warn('Error clearing image_generated status:', statusError);
+      }
+
+      return NextResponse.json({
+        success: true,
+        deletedFiles: pathsToDelete,
+      });
+    }
+
     // Handle generated_image_url update on guest_recipes table
     if (body.generated_image_url !== undefined) {
+      const updateData: { generated_image_url: string; generated_image_url_print?: null; image_upscale_status?: null; image_dimensions?: null } = {
+        generated_image_url: body.generated_image_url,
+      };
+      
+      // When replacing the image, clear the print-ready version and reset upscale status
+      // (upscale Edge Function will run when it sees generated_image_url change)
+      if (body.clearPrintReady !== false) {
+        updateData.generated_image_url_print = null;
+        updateData.image_upscale_status = null;
+        updateData.image_dimensions = null;
+      }
+      
       const { error: imageUrlError } = await supabase
         .from('guest_recipes')
-        .update({ generated_image_url: body.generated_image_url })
+        .update(updateData)
         .eq('id', recipeId);
 
       if (imageUrlError) {

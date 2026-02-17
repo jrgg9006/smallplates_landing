@@ -520,6 +520,7 @@ export interface Database {
           recipe_name_clean: string;
           ingredients_clean: string;
           instructions_clean: string;
+          note_clean: string | null;
           detected_language: string | null;
           cleaning_version: number;
           agent_metadata: Record<string, unknown> | null;
@@ -529,6 +530,7 @@ export interface Database {
           recipe_name_clean?: string;
           ingredients_clean?: string;
           instructions_clean?: string;
+          note_clean?: string | null;
           detected_language?: string | null;
           cleaning_version?: number;
           agent_metadata?: Record<string, unknown> | null;

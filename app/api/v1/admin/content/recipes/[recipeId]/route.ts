@@ -28,7 +28,7 @@ export async function GET(
     // Fetch print-ready version (may not exist)
     const { data: printReadyRaw } = await supabase
       .from('recipe_print_ready')
-      .select('recipe_name_clean, ingredients_clean, instructions_clean, detected_language, cleaning_version, updated_at')
+      .select('recipe_name_clean, ingredients_clean, instructions_clean, note_clean, detected_language, cleaning_version, updated_at')
       .eq('recipe_id', recipeId)
       .maybeSingle();
 
@@ -66,14 +66,14 @@ export async function PATCH(
     const supabase = createSupabaseAdminClient();
 
     const body = await req.json();
-    const { recipe_name, ingredients, instructions, comments, edit_reason, target } = body;
+    const { recipe_name, ingredients, instructions, comments, note_clean, edit_reason, target } = body;
     const editTarget: 'original' | 'print_ready' = target === 'print_ready' ? 'print_ready' : 'original';
 
     if (editTarget === 'print_ready') {
       // Editing the print-ready version
       const { data: current } = await supabase
         .from('recipe_print_ready')
-        .select('recipe_name_clean, ingredients_clean, instructions_clean')
+        .select('recipe_name_clean, ingredients_clean, instructions_clean, note_clean')
         .eq('recipe_id', recipeId)
         .single();
 
@@ -91,11 +91,11 @@ export async function PATCH(
           recipe_name_before: current.recipe_name_clean,
           ingredients_before: current.ingredients_clean,
           instructions_before: current.instructions_clean,
-          comments_before: null,
+          comments_before: current.note_clean || null,
           recipe_name_after: recipe_name,
           ingredients_after: ingredients,
           instructions_after: instructions,
-          comments_after: null,
+          comments_after: note_clean || null,
           edit_reason: edit_reason || null,
         });
 
@@ -110,6 +110,7 @@ export async function PATCH(
           recipe_name_clean: recipe_name,
           ingredients_clean: ingredients,
           instructions_clean: instructions,
+          note_clean: note_clean || null,
         })
         .eq('recipe_id', recipeId);
 

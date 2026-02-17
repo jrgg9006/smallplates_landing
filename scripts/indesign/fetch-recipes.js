@@ -31,6 +31,14 @@ const GROUP_ID = 'a3698398-3667-4d47-a3e7-16a8e880ef47';
 // ============================================
 
 // ============================================
+// CONFIGURACIÓN - Directorio de salida personalizado
+// ============================================
+// Si defines CUSTOM_OUTPUT_BASE, los archivos se generarán ahí
+// Si es null, usa el directorio por defecto (scripts/indesign/output)
+const CUSTOM_OUTPUT_BASE = '/Users/macbook/Desktop/SmallPlates_Books/02_Interior';
+// ============================================
+
+// ============================================
 // FUNCIÓN PARA DESCARGAR IMAGEN
 // ============================================
 async function downloadImage(url, destPath) {
@@ -143,8 +151,13 @@ async function fetchRecipes() {
   }
 
   // Crear directorios
-  const outputDir = path.resolve(__dirname, 'output');
-  const imagesDir = path.join(outputDir, 'images', GROUP_ID);
+  const outputBaseDir = CUSTOM_OUTPUT_BASE || path.resolve(__dirname, 'output');
+  const outputDir = CUSTOM_OUTPUT_BASE 
+    ? path.join(outputBaseDir, 'data')
+    : outputBaseDir;
+  const imagesDir = CUSTOM_OUTPUT_BASE
+    ? path.join(outputBaseDir, 'image_assets', GROUP_ID)
+    : path.join(outputBaseDir, 'images', GROUP_ID);
   
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
@@ -213,7 +226,10 @@ async function fetchRecipes() {
         
         await downloadImage(imageUrlToUse, localImagePath);
         
-        transformed.local_image_path = `images/${GROUP_ID}/${imageFileName}`;
+        // Ruta relativa para el JSON (desde el directorio base)
+        transformed.local_image_path = CUSTOM_OUTPUT_BASE
+          ? `image_assets/${GROUP_ID}/${imageFileName}`
+          : `images/${GROUP_ID}/${imageFileName}`;
         transformed.image_source = imageSource;
         
         if (imageSource === 'print') {

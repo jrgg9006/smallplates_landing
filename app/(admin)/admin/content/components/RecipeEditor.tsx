@@ -26,6 +26,7 @@ interface PrintReadyData {
   recipe_name_clean: string;
   ingredients_clean: string;
   instructions_clean: string;
+  note_clean: string | null;
   detected_language: string | null;
   cleaning_version: number;
   updated_at: string;
@@ -49,6 +50,7 @@ export default function RecipeEditor({ recipeId, onClose, onSaved }: RecipeEdito
   const [prRecipeName, setPrRecipeName] = useState('');
   const [prIngredients, setPrIngredients] = useState('');
   const [prInstructions, setPrInstructions] = useState('');
+  const [prNoteClean, setPrNoteClean] = useState('');
   const [hasPrintReady, setHasPrintReady] = useState(false);
   const [prMeta, setPrMeta] = useState<{ language: string | null; version: number; updated: string } | null>(null);
 
@@ -90,6 +92,7 @@ export default function RecipeEditor({ recipeId, onClose, onSaved }: RecipeEdito
         setPrRecipeName(pr.recipe_name_clean);
         setPrIngredients(pr.ingredients_clean);
         setPrInstructions(pr.instructions_clean);
+        setPrNoteClean(pr.note_clean || '');
         setPrMeta({
           language: pr.detected_language,
           version: pr.cleaning_version,
@@ -100,6 +103,7 @@ export default function RecipeEditor({ recipeId, onClose, onSaved }: RecipeEdito
         setPrRecipeName('');
         setPrIngredients('');
         setPrInstructions('');
+        setPrNoteClean('');
         setPrMeta(null);
       }
 
@@ -142,6 +146,8 @@ export default function RecipeEditor({ recipeId, onClose, onSaved }: RecipeEdito
 
       if (isOriginal) {
         payload.comments = comments || null;
+      } else {
+        payload.note_clean = prNoteClean || null;
       }
 
       const res = await fetch(`/api/v1/admin/content/recipes/${recipeId}`, {
@@ -280,18 +286,16 @@ export default function RecipeEditor({ recipeId, onClose, onSaved }: RecipeEdito
                     />
                   </div>
 
-                  {/* Comments only for original — print_ready has no comments */}
-                  {isOriginal && (
-                    <div>
-                      <Label className="text-sm font-medium">Comments</Label>
-                      <textarea
-                        value={comments}
-                        onChange={(e) => setComments(e.target.value)}
-                        rows={3}
-                        className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-y"
-                      />
-                    </div>
-                  )}
+                  {/* Comments / Note */}
+                  <div>
+                    <Label className="text-sm font-medium">{isOriginal ? 'Comments' : 'Note (clean)'}</Label>
+                    <textarea
+                      value={isOriginal ? comments : prNoteClean}
+                      onChange={(e) => isOriginal ? setComments(e.target.value) : setPrNoteClean(e.target.value)}
+                      rows={3}
+                      className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-y"
+                    />
+                  </div>
 
                   <div className="grid grid-cols-[2fr_3fr] gap-4 flex-1 min-h-0">
                     <div className="flex flex-col">
