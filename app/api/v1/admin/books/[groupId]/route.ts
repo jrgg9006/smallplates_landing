@@ -69,7 +69,7 @@ export async function GET(
     const owners = (members || [])
       .filter(m => m.role === 'owner')
       .map(m => {
-        const profile = m.profiles as { full_name: string | null; email: string } | null;
+        const profile = m.profiles as unknown as { full_name: string | null; email: string } | null;
         return {
           profile_id: m.profile_id,
           role: m.role,
@@ -82,7 +82,7 @@ export async function GET(
     const captains = (members || [])
       .filter(m => m.role === 'member')
       .map(m => {
-        const profile = m.profiles as { full_name: string | null; email: string } | null;
+        const profile = m.profiles as unknown as { full_name: string | null; email: string } | null;
         return {
           profile_id: m.profile_id,
           role: m.role,
@@ -97,7 +97,7 @@ export async function GET(
         ? r.recipe_print_ready[0] || null
         : r.recipe_print_ready || null;
 
-      const guest = r.guests as { first_name: string; last_name: string; printed_name: string | null } | null;
+      const guest = r.guests as unknown as { first_name: string; last_name: string; printed_name: string | null } | null;
 
       return {
         id: r.id,

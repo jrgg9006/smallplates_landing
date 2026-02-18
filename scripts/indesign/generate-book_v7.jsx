@@ -183,8 +183,21 @@ function main() {
 
     // Pre-format
     bookData._contributors_formatted = bookData.contributors.list.join("\r");
-    bookData._captains_formatted = bookData.captains.list.join("\r");
     bookData.contributors.count = String(bookData.contributors.count);
+
+    // Reason: Special Thanks shows owners first, then captains (members)
+    var specialThanksList = [];
+    if (bookData.owners && bookData.owners.list) {
+        for (var ow = 0; ow < bookData.owners.list.length; ow++) {
+            specialThanksList.push(bookData.owners.list[ow]);
+        }
+    }
+    if (bookData.captains && bookData.captains.list) {
+        for (var cp = 0; cp < bookData.captains.list.length; cp++) {
+            specialThanksList.push(bookData.captains.list[cp]);
+        }
+    }
+    bookData._captains_formatted = specialThanksList.join("\r");
 
     var recipes = bookData.recipes;
     var recipesWithImages = 0;
