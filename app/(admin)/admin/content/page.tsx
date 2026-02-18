@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createSupabaseClient } from '@/lib/supabase/client';
 import { isAdminEmail } from '@/lib/config/admin';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, Plus, AlertCircle, Users, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -49,6 +49,7 @@ export default function AdminContentPage() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [groups, setGroups] = useState<GroupSummary[]>([]);
   const [selectedGroupId, setSelectedGroupId] = useState('');
@@ -78,6 +79,17 @@ export default function AdminContentPage() {
     setIsAdmin(true);
     setLoading(false);
     fetchGroups();
+
+    // Reason: deep-link support from Book Production → "Edit in Content"
+    const groupParam = searchParams.get('group');
+    const recipeParam = searchParams.get('recipe');
+    if (groupParam) {
+      setSelectedGroupId(groupParam);
+      await fetchGroupDetail(groupParam);
+      if (recipeParam) {
+        setEditingRecipeId(recipeParam);
+      }
+    }
   };
 
   const fetchGroups = async () => {

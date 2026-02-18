@@ -1,16 +1,19 @@
 // ============================================
-// SMALL PLATES — Book Generator v1.4.2
-// 
+// SMALL PLATES — Book Generator v1.5.0
+//
 // Uses AT_END duplication (proven in v10)
 // Then MOVES generated spreads to correct position
 // Adds: fillers, personalization, contributors
 // v1.4.1: Copies recipe title to footer as real text (emoji fix)
 // v1.4.2: Strips emojis from footer copy (keeps title intact)
+// v1.5.0: Footer uses recipe data directly (no recipeTitle label needed)
+//         TOC update tries multiple languages (EN/ES)
+//         Debug alerts for move errors
 // ============================================
 
 var CONFIG = {
     imageFrameLabel: "{{IMAGE}}",
-    
+
     recipePlaceholders: [
         {find: "<<recipe_name>>", alt: "\u00ABrecipe_name\u00BB", field: "recipe_name"},
         {find: "<<guest_name>>", alt: "\u00ABguest_name\u00BB", field: "guest_name"},
@@ -18,7 +21,7 @@ var CONFIG = {
         {find: "<<ingredients>>", alt: "\u00ABingredients\u00BB", field: "ingredients"},
         {find: "<<instructions>>", alt: "\u00ABinstructions\u00BB", field: "instructions"}
     ],
-    
+
     bookPlaceholders: [
         {finds: ["<<couple_first_name>>", "<< couple_first_name >>"], field: "couple.couple_first_name"},
         {finds: ["<<partner_first_name>>", "<< partner_first_name >>"], field: "couple.partner_first_name"},
@@ -27,7 +30,7 @@ var CONFIG = {
         {finds: ["<<contributors_list>>"], field: "_contributors_formatted"},
         {finds: ["<<captains_list>>"], field: "_captains_formatted"}
     ],
-    
+
     labels: {
         recipeA: "TEMPLATE_RECIPE_A",
         recipeB: "TEMPLATE_RECIPE_B",
@@ -47,12 +50,12 @@ var CONFIG = {
 
 function captureFramePositions(spread) {
     var positions = [];
-    
+
     for (var p = 0; p < spread.pages.length; p++) {
         var page = spread.pages[p];
         var pagePositions = [];
         var allItems = page.allPageItems;
-        
+
         for (var i = 0; i < allItems.length; i++) {
             var item = allItems[i];
             pagePositions.push({
@@ -61,34 +64,34 @@ function captureFramePositions(spread) {
                 bounds: item.geometricBounds.slice(0)
             });
         }
-        
+
         positions.push({
             pageIndex: p,
             items: pagePositions
         });
     }
-    
+
     return positions;
 }
 
 function restoreFramePositions(newSpread, savedPositions) {
     for (var p = 0; p < newSpread.pages.length; p++) {
         if (p >= savedPositions.length) break;
-        
+
         var page = newSpread.pages[p];
         var allItems = page.allPageItems;
         var savedItems = savedPositions[p].items;
-        
+
         for (var i = 0; i < allItems.length && i < savedItems.length; i++) {
             try {
                 var item = allItems[i];
                 var saved = savedItems[i];
-                
+
                 if (saved.label !== "" && item.label !== "" && saved.label !== item.label) {
                     $.writeln("WARNING: Label mismatch page " + p + " index " + i);
                     continue;
                 }
-                
+
                 item.geometricBounds = saved.bounds;
             } catch (e) {
                 $.writeln("Position restore error page " + p + " item " + i + ": " + e.message);
@@ -111,11 +114,12 @@ function processRecipeOnTemplate(templateSpread, savedPositions, recipe, basePat
 }
 
 // ============================================
-// COPY TITLE TO FOOTER (v1.4.1 + v1.4.2 emoji strip)
+// COPY TITLE TO FOOTER (v1.5.0)
+// Reason: recipe title may share a text frame with guest name + comments,
+// so we pass the title directly from recipe data instead of reading from a labeled frame.
+// Only requires "recipeFooter" label on the footer text frame in the template.
 // ============================================
 
-// Reason: recipe title may share a text frame with guest name + comments,
-// so we pass the title directly from recipe data instead of reading from a labeled frame
 function copyTitleToFooter(spread, recipeName) {
     if (!recipeName) return;
     var cleanTitle = stripEmojis(recipeName);
@@ -159,35 +163,35 @@ function main() {
         alert("No hay documento abierto.");
         return;
     }
-    
+
     var doc = app.activeDocument;
-    
+
     // ── STEP 1: Load JSON ──
     var jsonFile = File.openDialog("Selecciona el archivo book.JSON", "JSON:*.json");
     if (jsonFile === null) return;
-    
+
     var basePath = jsonFile.parent;
     if (basePath.name === 'data') {
         basePath = basePath.parent;
     }
-    
+
     var bookData = readJSON(jsonFile);
     if (bookData === null || !bookData.couple || !bookData.recipes) {
         alert("Error: JSON no válido.");
         return;
     }
-    
+
     // Pre-format
     bookData._contributors_formatted = bookData.contributors.list.join("\r");
     bookData._captains_formatted = bookData.captains.list.join("\r");
     bookData.contributors.count = String(bookData.contributors.count);
-    
+
     var recipes = bookData.recipes;
     var recipesWithImages = 0;
     for (var j = 0; j < recipes.length; j++) {
         if (recipes[j].local_image_path) recipesWithImages++;
     }
-    
+
     // ── STEP 2: Find labeled spreads ──
     var templateA = findSpreadByLabel(doc, CONFIG.labels.recipeA);
     var templateB = findSpreadByLabel(doc, CONFIG.labels.recipeB);
@@ -198,7 +202,7 @@ function main() {
     var filler4 = findSpreadByLabel(doc, CONFIG.labels.filler4);
     var contributorsSpread = findSpreadByLabel(doc, CONFIG.labels.contributors);
     var objectsSpread = findSpreadByLabel(doc, CONFIG.labels.objectsThatStay);
-    
+
     var missing = [];
     if (!templateA) missing.push("TEMPLATE_RECIPE_A");
     if (!templateB) missing.push("TEMPLATE_RECIPE_B");
@@ -209,13 +213,13 @@ function main() {
     if (!filler4) missing.push("TEMPLATE_FILLER_4");
     if (!contributorsSpread) missing.push("CONTRIBUTORS");
     if (!objectsSpread) missing.push("OBJECTS_THAT_STAY");
-    
+
     if (missing.length > 0) {
         alert("Spreads no encontrados:\n" + missing.join("\n") + "\n\nCorre label-spreads.jsx");
         return;
     }
-    
-    if (!confirm("SMALL PLATES - Book Generator v1.4.2\n\n" +
+
+    if (!confirm("SMALL PLATES - Book Generator v1.5.0\n\n" +
                  "Pareja: " + bookData.couple.couple_display_name + "\n" +
                  "Recetas: " + recipes.length + " (" + recipesWithImages + " con imagen)\n" +
                  "Contributors: " + bookData.contributors.list.length + "\n" +
@@ -223,75 +227,75 @@ function main() {
                  "Generar libro completo?")) {
         return;
     }
-    
+
     // ── STEP 3: Personalize fixed pages (before generation, like v1.3) ──
     $.writeln("\n=== Personalizing fixed pages ===");
     personalizeFixedPages(doc, bookData);
-    
+
     // ── STEP 4: Populate Contributors ──
     $.writeln("\n=== Populating contributors ===");
     contributorsSpread = findSpreadByLabel(doc, CONFIG.labels.contributors);
     if (contributorsSpread) {
         populateContributors(contributorsSpread, bookData);
     }
-    
+
     // ── STEP 5: Capture positions (templates still clean for duplication) ──
     $.writeln("\n=== Capturing positions ===");
     var positionsA = captureFramePositions(templateA);
     var positionsB = captureFramePositions(templateB);
     var positionsC = captureFramePositions(templateC);
-    
+
     // ── STEP 6: Calculate filler distribution ──
     var totalRecipes = recipes.length;
     var fillerInterval = Math.floor(totalRecipes / 4);
-    
+
     var fillerPositions = {};
     fillerPositions[fillerInterval] = filler1;
     fillerPositions[fillerInterval * 2] = filler2;
     fillerPositions[fillerInterval * 3] = filler3;
     fillerPositions[totalRecipes] = filler4;
-    
+
     $.writeln("Fillers after: " + fillerInterval + ", " + (fillerInterval*2) + ", " + (fillerInterval*3) + ", " + totalRecipes);
-    
+
     // ── STEP 7: Generate recipes + fillers AT_END ──
     $.writeln("\n=== Generating recipes (AT_END) ===");
-    
+
     var progressWin = createProgressWindow(totalRecipes);
     progressWin.show();
-    
+
     var stats = {
         success: 0, images: 0, fillers: 0,
         tplA: [], tplB: [], tplC: [], overflow: []
     };
-    
+
     // Track all generated spreads for moving later
     var generatedSpreads = [];
-    
+
     for (var i = 0; i < recipes.length; i++) {
         try {
             var recipeName = recipes[i].recipe_name || ("Receta " + (i + 1));
             updateProgress(progressWin, i + 1, totalRecipes, recipeName);
             $.writeln("\n[" + (i+1) + "] " + recipeName);
-            
+
             // ── CASCADE A → B → C (exact v10 pattern) ──
-            
+
             // Attempt 1: Template A
             var newSpread = processRecipeOnTemplate(templateA, positionsA, recipes[i], basePath);
-            
+
             if (checkForOverflow(newSpread)) {
                 $.writeln("  Overflow A -> B");
                 removeSpread(newSpread);
-                
+
                 // Attempt 2: Template B
                 newSpread = processRecipeOnTemplate(templateB, positionsB, recipes[i], basePath);
-                
+
                 if (checkForOverflow(newSpread)) {
                     $.writeln("  Overflow B -> C");
                     removeSpread(newSpread);
-                    
+
                     // Attempt 3: Template C
                     newSpread = processRecipeOnTemplate(templateC, positionsC, recipes[i], basePath);
-                    
+
                     if (checkForOverflow(newSpread)) {
                         $.writeln("  !! OVERFLOW in C");
                         stats.overflow.push(recipeName);
@@ -303,12 +307,12 @@ function main() {
             } else {
                 stats.tplA.push(recipeName);
             }
-            
+
             if (hasImage(newSpread)) stats.images++;
             copyTitleToFooter(newSpread, recipes[i].recipe_name);
             stats.success++;
             generatedSpreads.push(newSpread);
-            
+
             // ── FILLER after this recipe ──
             var recipeNum = i + 1;
             if (fillerPositions[recipeNum]) {
@@ -317,20 +321,20 @@ function main() {
                 stats.fillers++;
                 $.writeln("  >> Filler inserted");
             }
-            
+
         } catch (e) {
             $.writeln("ERROR #" + (i+1) + ": " + e.message + " (line " + e.line + ")");
         }
     }
-    
+
     progressWin.close();
-    
+
     // ── STEP 8: Move generated spreads to correct position ──
     // IMPORTANT: Move BEFORE deleting templates, otherwise references break
     $.writeln("\n=== Moving spreads to position ===");
-    
+
     objectsSpread = findSpreadByLabel(doc, CONFIG.labels.objectsThatStay);
-    
+
     if (objectsSpread && generatedSpreads.length > 0) {
         var moved = 0;
         var moveErrors = [];
@@ -348,26 +352,23 @@ function main() {
 
         $.writeln(moved + " spreads moved before Objects that Stay");
 
-        // Reason: debug alert since Console is not available in all InDesign versions
         if (moveErrors.length > 0) {
             alert("MOVE ERRORS (" + moveErrors.length + " of " + generatedSpreads.length + "):\n\n" + moveErrors.join("\n"));
-        } else {
-            alert("All " + moved + " spreads moved OK");
         }
     } else {
         alert("WARNING: Could not move spreads.\nobjectsSpread found: " + !!objectsSpread + "\ngenerated: " + generatedSpreads.length);
     }
-    
+
     // ── STEP 9: Delete original templates ──
     $.writeln("\n=== Removing templates ===");
-    
+
     var labelsToRemove = [
         CONFIG.labels.filler4, CONFIG.labels.filler3,
         CONFIG.labels.filler2, CONFIG.labels.filler1,
         CONFIG.labels.recipeC, CONFIG.labels.recipeB,
         CONFIG.labels.recipeA
     ];
-    
+
     var removed = 0;
     for (var t = 0; t < labelsToRemove.length; t++) {
         var found = findSpreadByLabel(doc, labelsToRemove[t]);
@@ -381,30 +382,42 @@ function main() {
             }
         }
     }
-    
+
     // ── STEP 10: TOC ──
-    try {
-        app.menuActions.itemByName("Update Table of Contents").invoke();
-        $.writeln("TOC updated");
-    } catch (e) {
-        $.writeln("TOC: update manually");
+    // Reason: "Update Table of Contents" menu action requires the TOC frame to be selected first
+    var tocUpdated = false;
+    var tocFrame = findItemByLabel(doc, "TOC_FRAME");
+
+    if (tocFrame) {
+        try {
+            app.selection = [tocFrame];
+            app.menuActions.itemByName("Update Table of Contents").invoke();
+            tocUpdated = true;
+            $.writeln("TOC updated via selection");
+        } catch (e) {
+            $.writeln("TOC update failed: " + e.message);
+        }
+        app.selection = [];
+    } else {
+        $.writeln("TOC: TOC_FRAME label not found, skipping auto-update");
     }
-    
+    $.writeln(tocUpdated ? "TOC updated" : "TOC: update manually");
+
     // ── STEP 11: Save ──
     var coupleName = bookData.couple.couple_display_name
         .replace(/[^a-zA-Z0-9\u00e1\u00e9\u00ed\u00f3\u00fa\u00f1\u00c1\u00c9\u00cd\u00d3\u00da\u00d1&\s]/g, "")
         .replace(/\s+/g, "_");
     var savePath = new File(basePath.fsName + "/SmallPlates_" + coupleName + ".indd");
-    
+
     try {
         doc.saveACopy(savePath);
         $.writeln("Saved: " + savePath.fsName);
     } catch (e) {
         $.writeln("Save: " + e.message);
     }
-    
+
     // ── REPORT ──
-    var msg = "LIBRO GENERADO (v1.4.2)\n\n";
+    var msg = "LIBRO GENERADO (v1.5.0)\n\n";
     msg += bookData.couple.couple_display_name + "\n\n";
     msg += "Recetas: " + stats.success + "\n";
     msg += "Imagenes: " + stats.images + "\n";
@@ -413,7 +426,7 @@ function main() {
     msg += "  A: " + stats.tplA.length + "\n";
     msg += "  B: " + stats.tplB.length + "\n";
     msg += "  C: " + stats.tplC.length + "\n";
-    
+
     if (stats.tplB.length > 0) {
         msg += "\nTemplate B:\n";
         for (var b = 0; b < stats.tplB.length; b++) msg += "  " + stats.tplB[b] + "\n";
@@ -426,10 +439,10 @@ function main() {
         msg += "\nOVERFLOW:\n";
         for (var o = 0; o < stats.overflow.length; o++) msg += "  " + stats.overflow[o] + "\n";
     }
-    
+
+    msg += "\nTOC: " + (tocUpdated ? "Actualizado" : "Actualizar manualmente (Layout > Update TOC)");
     msg += "\nGuardado: SmallPlates_" + coupleName + ".indd";
-    msg += "\nRevisa TOC: Layout > Update Table of Contents";
-    
+
     alert(msg);
 }
 
@@ -440,6 +453,19 @@ function main() {
 function findSpreadByLabel(doc, label) {
     for (var i = 0; i < doc.spreads.length; i++) {
         if (doc.spreads[i].label === label) return doc.spreads[i];
+    }
+    return null;
+}
+
+// Reason: finds a page item (text frame, etc.) by script label across all pages
+function findItemByLabel(doc, label) {
+    for (var s = 0; s < doc.spreads.length; s++) {
+        for (var p = 0; p < doc.spreads[s].pages.length; p++) {
+            var items = doc.spreads[s].pages[p].allPageItems;
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].label === label) return items[i];
+            }
+        }
     }
     return null;
 }
@@ -468,21 +494,21 @@ function replaceInAllTextFrames(spread, recipe) {
 function replaceInTextFrame(tf, recipe) {
     try {
         var story = tf.parentStory;
-        
+
         app.findTextPreferences = null;
         app.changeTextPreferences = null;
-        
+
         for (var i = 0; i < CONFIG.recipePlaceholders.length; i++) {
             var ph = CONFIG.recipePlaceholders[i];
             var value = recipe[ph.field] || "";
-            
+
             value = value.split("\n").join("<<<BR>>>");
             value = value.split("\\n").join("<<<BR>>>");
-            
+
             app.findTextPreferences.findWhat = ph.find;
             app.changeTextPreferences.changeTo = value;
             story.changeText();
-            
+
             if (ph.alt) {
                 app.findTextPreferences = null;
                 app.changeTextPreferences = null;
@@ -491,13 +517,13 @@ function replaceInTextFrame(tf, recipe) {
                 story.changeText();
             }
         }
-        
+
         app.findTextPreferences = null;
         app.changeTextPreferences = null;
         app.findTextPreferences.findWhat = "<<<BR>>>";
         app.changeTextPreferences.changeTo = "\r";
         story.changeText();
-        
+
         app.findTextPreferences = null;
         app.changeTextPreferences = null;
     } catch (e) {}
@@ -509,13 +535,13 @@ function replaceInTextFrame(tf, recipe) {
 
 function placeImageInSpread(spread, recipe, basePath) {
     if (!recipe.local_image_path) return false;
-    
+
     var imageFile = new File(basePath.fsName + "/" + recipe.local_image_path);
     if (!imageFile.exists) {
         $.writeln("  Image not found: " + imageFile.fsName);
         return false;
     }
-    
+
     for (var p = 0; p < spread.pages.length; p++) {
         var items = spread.pages[p].allPageItems;
         for (var i = 0; i < items.length; i++) {
@@ -569,14 +595,14 @@ function hasImage(spread) {
 
 function personalizeFixedPages(doc, bookData) {
     var placeholders = CONFIG.bookPlaceholders;
-    
+
     for (var i = 0; i < placeholders.length; i++) {
         var ph = placeholders[i];
         var value = getNestedValue(bookData, ph.field);
         if (value === null || value === undefined) continue;
-        
+
         value = String(value).split("\n").join("\r");
-        
+
         for (var f = 0; f < ph.finds.length; f++) {
             app.findTextPreferences = null;
             app.changeTextPreferences = null;
@@ -588,27 +614,27 @@ function personalizeFixedPages(doc, bookData) {
             }
         }
     }
-    
+
     app.findTextPreferences = null;
     app.changeTextPreferences = null;
 }
 
 function populateContributors(spread, bookData) {
     var placeholders = CONFIG.bookPlaceholders;
-    
+
     for (var i = 0; i < placeholders.length; i++) {
         var ph = placeholders[i];
         var value = getNestedValue(bookData, ph.field);
         if (value === null || value === undefined) continue;
-        
+
         value = String(value).split("\n").join("\r");
-        
+
         for (var f = 0; f < ph.finds.length; f++) {
             app.findTextPreferences = null;
             app.changeTextPreferences = null;
             app.findTextPreferences.findWhat = ph.finds[f];
             app.changeTextPreferences.changeTo = value;
-            
+
             for (var p = 0; p < spread.pages.length; p++) {
                 var items = spread.pages[p].allPageItems;
                 for (var it = 0; it < items.length; it++) {
@@ -619,7 +645,7 @@ function populateContributors(spread, bookData) {
             }
         }
     }
-    
+
     app.findTextPreferences = null;
     app.changeTextPreferences = null;
 }

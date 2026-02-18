@@ -454,6 +454,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           value={recipeTitle}
           onChange={(e) => setRecipeTitle(e.target.value)}
           placeholder="Recipe name"
+          maxLength={60}
           className="w-full font-serif text-3xl font-semibold text-gray-900 leading-tight bg-transparent border-0 border-b-2 border-gray-200 px-0 py-4 focus:outline-none focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 placeholder:font-normal transition-all duration-200"
           required
         />
@@ -519,6 +520,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           value={recipeTitle}
           onChange={(e) => setRecipeTitle(e.target.value)}
           placeholder="Recipe name"
+          maxLength={60}
           className="w-full font-serif text-3xl font-semibold text-gray-900 leading-tight bg-transparent border-0 border-b-2 border-gray-200 px-0 py-2 focus:outline-none focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 transition-all duration-200"
           required
         />

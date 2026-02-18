@@ -14,6 +14,8 @@ export type CommunicationStatus = 'pending' | 'sent' | 'delivered' | 'failed' | 
 // Groups feature types
 export type MemberRole = 'owner' | 'admin' | 'member';
 export type InvitationStatus = 'pending' | 'accepted' | 'declined' | 'expired';
+export type BookStatus = 'active' | 'reviewed' | 'ready_to_print' | 'printed' | 'inactive';
+export type BookReviewStatus = 'pending' | 'approved' | 'needs_revision';
 
 // Main database types
 export interface Database {
@@ -148,6 +150,8 @@ export interface Database {
           approved_at: string | null;
           group_id: string | null;
           source: GuestSource;
+          book_review_status: BookReviewStatus;
+          book_review_notes: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -169,6 +173,8 @@ export interface Database {
           approved_at?: string | null;
           group_id?: string | null;
           source?: GuestSource;
+          book_review_status?: BookReviewStatus;
+          book_review_notes?: string | null;
         };
         Update: {
           recipe_name?: string;
@@ -185,6 +191,8 @@ export interface Database {
           approved_at?: string | null;
           group_id?: string | null;
           source?: GuestSource;
+          book_review_status?: BookReviewStatus;
+          book_review_notes?: string | null;
         };
       };
       communication_log: {
@@ -378,6 +386,10 @@ export interface Database {
           couple_image_position_y: number;
           couple_image_position_x: number;
           couple_display_name: string | null;
+          book_status: BookStatus;
+          book_reviewed_by: string | null;
+          book_reviewed_at: string | null;
+          book_notes: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -400,6 +412,10 @@ export interface Database {
           couple_image_position_y?: number;
           couple_image_position_x?: number;
           couple_display_name?: string | null;
+          book_status?: BookStatus;
+          book_reviewed_by?: string | null;
+          book_reviewed_at?: string | null;
+          book_notes?: string | null;
         };
         Update: {
           name?: string;
@@ -419,6 +435,10 @@ export interface Database {
           couple_image_position_y?: number;
           couple_image_position_x?: number;
           couple_display_name?: string | null;
+          book_status?: BookStatus;
+          book_reviewed_by?: string | null;
+          book_reviewed_at?: string | null;
+          book_notes?: string | null;
         };
       };
       group_members: {
@@ -431,6 +451,7 @@ export interface Database {
           relationship_to_couple: string | null;
           custom_share_message: string | null;
           custom_share_signature: string | null;
+          printed_name: string | null;
         };
         Insert: {
           group_id: string;
@@ -440,6 +461,7 @@ export interface Database {
           relationship_to_couple?: string | null;
           custom_share_message?: string | null;
           custom_share_signature?: string | null;
+          printed_name?: string | null;
         };
         Update: {
           role?: MemberRole;
@@ -447,6 +469,7 @@ export interface Database {
           relationship_to_couple?: string | null;
           custom_share_message?: string | null;
           custom_share_signature?: string | null;
+          printed_name?: string | null;
         };
       };
       group_invitations: {

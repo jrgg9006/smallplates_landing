@@ -607,13 +607,13 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                 value={recipeTitle}
                 onChange={(e) => setRecipeTitle(e.target.value)}
                 placeholder="Late Night Carbonara"
-                maxLength={50}
+                maxLength={60}
                 className="w-full font-serif text-3xl font-semibold text-gray-900 leading-tight border-0 border-b-2 border-gray-200 px-0 py-4 focus:outline-none focus:border-[hsl(var(--brand-honey))] bg-transparent placeholder:text-gray-400 placeholder:font-normal transition-all duration-200"
                 required
               />
-              {recipeTitle.length > 40 && (
+              {recipeTitle.length > 50 && (
                 <span className="absolute right-0 top-4 text-xs text-gray-400">
-                  {recipeTitle.length}/50
+                  {recipeTitle.length}/60
                 </span>
               )}
             </div>
@@ -849,14 +849,14 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
           <div className="flex items-center justify-between mb-1">
             <Label htmlFor="recipeTitle" className="text-sm font-medium text-gray-700">What are we making? <span className="text-[hsl(var(--brand-honey))] text-xs">*</span></Label>
             <span className="text-xs text-gray-400">
-              {recipeTitle.length}/50
+              {recipeTitle.length}/60
             </span>
           </div>
           <Input
             id="recipeTitle"
             value={recipeTitle}
             onChange={(e) => setRecipeTitle(e.target.value)}
-            maxLength={50}
+            maxLength={60}
             className="mt-1"
             placeholder="Late Night Carbonara"
             required

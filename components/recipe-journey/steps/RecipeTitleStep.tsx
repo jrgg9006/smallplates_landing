@@ -8,7 +8,7 @@ interface RecipeTitleStepProps {
   recipeTypeHint?: string;
 }
 
-const MAX_TITLE_LENGTH = 100;
+const MAX_TITLE_LENGTH = 80;
 
 export default function RecipeTitleStep({ recipeName, onChange, recipeTypeHint }: RecipeTitleStepProps) {
   const [pasteWarning, setPasteWarning] = React.useState(false);
