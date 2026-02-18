@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { createSupabaseClient } from '@/lib/supabase/client';
 import { isAdminEmail } from '@/lib/config/admin';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -45,7 +45,15 @@ interface RecipeSummary {
   guests: { first_name: string; last_name: string; email: string; is_self: boolean } | null;
 }
 
-export default function AdminContentPage() {
+export default function AdminContentPageWrapper() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>}>
+      <AdminContentPage />
+    </Suspense>
+  );
+}
+
+function AdminContentPage() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
