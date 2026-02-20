@@ -7,7 +7,7 @@
 export type GuestStatus = 'pending' | 'submitted' | 'reached_out';
 export type GuestSource = 'manual' | 'collection';
 export type RecipeSubmissionStatus = 'draft' | 'submitted' | 'approved' | 'rejected';
-export type CommunicationType = 'invitation' | 'reminder' | 'thank_you' | 'custom';
+export type CommunicationType = 'invitation' | 'reminder' | 'thank_you' | 'custom' | 'recipe_showcase';
 export type CommunicationChannel = 'email' | 'sms' | 'whatsapp';
 export type CommunicationStatus = 'pending' | 'sent' | 'delivered' | 'failed' | 'opened';
 
@@ -152,6 +152,7 @@ export interface Database {
           source: GuestSource;
           book_review_status: BookReviewStatus;
           book_review_notes: string | null;
+          showcase_image_url: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -175,6 +176,7 @@ export interface Database {
           source?: GuestSource;
           book_review_status?: BookReviewStatus;
           book_review_notes?: string | null;
+          showcase_image_url?: string | null;
         };
         Update: {
           recipe_name?: string;
@@ -193,6 +195,7 @@ export interface Database {
           source?: GuestSource;
           book_review_status?: BookReviewStatus;
           book_review_notes?: string | null;
+          showcase_image_url?: string | null;
         };
       };
       communication_log: {
