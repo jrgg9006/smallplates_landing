@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { AlertCircle, Loader2, Save } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { AlertCircle, ChevronLeft, ChevronRight, Loader2, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,10 +16,67 @@ import EditHistoryPanel, { type EditHistoryEntry } from './EditHistoryPanel';
 
 type EditTarget = 'original' | 'print_ready';
 
+/** Textarea that shows visual spacing for blank lines when not focused */
+function VisualTextarea({
+  value,
+  onChange,
+  className = '',
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  className?: string;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (isEditing && textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, [isEditing]);
+
+  if (isEditing) {
+    return (
+      <textarea
+        ref={textareaRef}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onBlur={() => setIsEditing(false)}
+        className={className}
+      />
+    );
+  }
+
+  const lines = value.split('\n');
+
+  return (
+    <div
+      onClick={() => setIsEditing(true)}
+      className={`${className} cursor-text overflow-y-auto`}
+    >
+      {!value ? (
+        <span className="text-gray-400 italic">Click to edit...</span>
+      ) : (
+        lines.map((line, i) =>
+          line.trim() === '' ? (
+            <div key={i} className="h-6 flex items-center my-1">
+              <div className="w-full border-t-2 border-dashed border-amber-300/70" />
+            </div>
+          ) : (
+            <div key={i} className="leading-relaxed">{line}</div>
+          )
+        )
+      )}
+    </div>
+  );
+}
+
 interface RecipeEditorProps {
   recipeId: string | null;
+  recipeIds?: string[];
   onClose: () => void;
   onSaved: () => void;
+  onNavigate?: (recipeId: string) => void;
 }
 
 interface PrintReadyData {
@@ -32,7 +89,7 @@ interface PrintReadyData {
   updated_at: string;
 }
 
-export default function RecipeEditor({ recipeId, onClose, onSaved }: RecipeEditorProps) {
+export default function RecipeEditor({ recipeId, recipeIds = [], onClose, onSaved, onNavigate }: RecipeEditorProps) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -176,12 +233,48 @@ export default function RecipeEditor({ recipeId, onClose, onSaved }: RecipeEdito
 
   return (
     <Sheet open={!!recipeId} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="w-full sm:max-w-[70vw] flex flex-col overflow-hidden">
-        <SheetHeader className="flex-shrink-0">
-          <SheetTitle>Edit Recipe</SheetTitle>
-          <SheetDescription>
-            {guestInfo && <span>Guest: {guestInfo}</span>}
-          </SheetDescription>
+      <SheetContent className="w-full sm:max-w-[95vw] h-[95vh] flex flex-col overflow-hidden">
+        {/* Compact header with navigation */}
+        <SheetHeader className="flex-shrink-0 pb-2">
+          <div className="flex items-center justify-center gap-6">
+            <div className="flex items-baseline gap-3">
+              <SheetTitle className="text-lg">Edit Recipe</SheetTitle>
+              {guestInfo && (
+                <SheetDescription className="text-sm">
+                  Guest: {guestInfo}
+                </SheetDescription>
+              )}
+            </div>
+            {recipeIds.length > 1 && onNavigate && recipeId && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400">
+                  {recipeIds.indexOf(recipeId) + 1} / {recipeIds.length}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const idx = recipeIds.indexOf(recipeId);
+                    if (idx > 0) onNavigate(recipeIds[idx - 1]);
+                  }}
+                  disabled={recipeIds.indexOf(recipeId) === 0}
+                  className="p-1.5 rounded-md border hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const idx = recipeIds.indexOf(recipeId);
+                    if (idx < recipeIds.length - 1) onNavigate(recipeIds[idx + 1]);
+                  }}
+                  disabled={recipeIds.indexOf(recipeId) === recipeIds.length - 1}
+                  className="p-1.5 rounded-md border hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
         </SheetHeader>
 
         {loading ? (
@@ -189,15 +282,81 @@ export default function RecipeEditor({ recipeId, onClose, onSaved }: RecipeEdito
             <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
           </div>
         ) : (
-          <>
-            {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto flex flex-col gap-4 mt-4 pb-4">
-              {/* Version Toggle */}
-              <div className="flex rounded-lg border overflow-hidden">
+          <div className="flex-1 flex gap-4 min-h-0">
+            {/* LEFT: Main form area */}
+            <div className="flex-1 flex flex-col gap-3 min-h-0 min-w-0">
+              {/* Alerts */}
+              {!isOriginal && !hasPrintReady && (
+                <div className="flex items-center gap-2 p-2.5 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700 flex-shrink-0">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  This recipe has not been cleaned yet. No print-ready version exists.
+                </div>
+              )}
+              {error && (
+                <div className="flex items-center gap-2 p-2.5 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex-shrink-0">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div className="p-2.5 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 flex-shrink-0">
+                  {isOriginal ? 'Original' : 'Print-ready'} recipe saved successfully
+                </div>
+              )}
+
+              {(isOriginal || hasPrintReady) && (
+                <>
+                  {/* Recipe Name — compact row */}
+                  <div className="flex-shrink-0">
+                    <Label className="text-sm font-medium">Recipe Name</Label>
+                    <Input
+                      value={isOriginal ? recipeName : prRecipeName}
+                      onChange={(e) => isOriginal ? setRecipeName(e.target.value) : setPrRecipeName(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  {/* Comments / Note — medium */}
+                  <div className="flex-shrink-0">
+                    <Label className="text-sm font-medium">{isOriginal ? 'Comments' : 'Note (clean)'}</Label>
+                    <VisualTextarea
+                      value={isOriginal ? comments : prNoteClean}
+                      onChange={(val) => isOriginal ? setComments(val) : setPrNoteClean(val)}
+                      className="mt-1 w-full min-h-[80px] max-h-[150px] rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    />
+                  </div>
+
+                  {/* Ingredients + Instructions — fill all remaining space */}
+                  <div className="grid grid-cols-[2fr_3fr] gap-4 flex-1 min-h-0">
+                    <div className="flex flex-col min-h-0">
+                      <Label className="text-sm font-medium flex-shrink-0">Ingredients</Label>
+                      <VisualTextarea
+                        value={isOriginal ? ingredients : prIngredients}
+                        onChange={(val) => isOriginal ? setIngredients(val) : setPrIngredients(val)}
+                        className="mt-1 w-full flex-1 min-h-0 rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <div className="flex flex-col min-h-0">
+                      <Label className="text-sm font-medium flex-shrink-0">Instructions</Label>
+                      <VisualTextarea
+                        value={isOriginal ? instructions : prInstructions}
+                        onChange={(val) => isOriginal ? setInstructions(val) : setPrInstructions(val)}
+                        className="mt-1 w-full flex-1 min-h-0 rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* RIGHT: Sidebar — tabs, metadata, save */}
+            <div className="w-48 flex-shrink-0 flex flex-col gap-3 border-l pl-4">
+              {/* Version Toggle — stacked */}
+              <div className="flex flex-col rounded-lg border overflow-hidden">
                 <button
                   type="button"
                   onClick={() => { setActiveTarget('original'); setError(null); setSuccess(false); }}
-                  className={`flex-1 px-4 py-2.5 text-sm font-medium transition-colors ${
+                  className={`px-3 py-2.5 text-sm font-medium transition-colors text-left ${
                     isOriginal
                       ? 'bg-gray-900 text-white'
                       : 'bg-white text-gray-600 hover:bg-gray-50'
@@ -211,7 +370,7 @@ export default function RecipeEditor({ recipeId, onClose, onSaved }: RecipeEdito
                 <button
                   type="button"
                   onClick={() => { setActiveTarget('print_ready'); setError(null); setSuccess(false); }}
-                  className={`flex-1 px-4 py-2.5 text-sm font-medium transition-colors border-l ${
+                  className={`px-3 py-2.5 text-sm font-medium transition-colors border-t text-left ${
                     !isOriginal
                       ? 'bg-gray-900 text-white'
                       : hasPrintReady
@@ -221,19 +380,18 @@ export default function RecipeEditor({ recipeId, onClose, onSaved }: RecipeEdito
                 >
                   Print Ready
                   <span className="block text-xs font-normal opacity-70">
-                    {hasPrintReady ? 'What gets printed' : 'Not available yet'}
+                    {hasPrintReady ? 'What gets printed' : 'Not available'}
                   </span>
                 </button>
               </div>
 
-              {/* Metadata row: print-ready info + edit history count */}
-              <div className="text-xs text-gray-500 flex gap-3">
+              {/* Metadata */}
+              <div className="text-xs text-gray-500 space-y-1">
                 {!isOriginal && hasPrintReady && prMeta && (
                   <>
-                    {prMeta.language && <span>Language: {prMeta.language}</span>}
-                    <span>Version: {prMeta.version}</span>
-                    <span>Updated: {new Date(prMeta.updated).toLocaleDateString()}</span>
-                    <span className="text-gray-300">|</span>
+                    {prMeta.language && <div>Lang: {prMeta.language}</div>}
+                    <div>Version: {prMeta.version}</div>
+                    <div>Updated: {new Date(prMeta.updated).toLocaleDateString()}</div>
                   </>
                 )}
                 {history.length > 0 ? (
@@ -250,103 +408,43 @@ export default function RecipeEditor({ recipeId, onClose, onSaved }: RecipeEdito
               </div>
 
               {showHistory && history.length > 0 && (
-                <EditHistoryPanel history={history} />
-              )}
-
-              {/* No print-ready warning */}
-              {!isOriginal && !hasPrintReady && (
-                <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  This recipe has not been cleaned yet. No print-ready version exists.
+                <div className="overflow-y-auto max-h-40">
+                  <EditHistoryPanel history={history} />
                 </div>
               )}
 
-              {error && (
-                <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  {error}
-                </div>
-              )}
+              {/* Spacer */}
+              <div className="flex-1" />
 
-              {success && (
-                <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
-                  {isOriginal ? 'Original' : 'Print-ready'} recipe saved successfully
-                </div>
-              )}
-
-              {/* Form fields — show original or print-ready */}
+              {/* Edit Reason + Save — pinned to bottom */}
               {(isOriginal || hasPrintReady) && (
-                <>
+                <div className="space-y-2">
                   <div>
-                    <Label className="text-sm font-medium">Recipe Name</Label>
+                    <Label className="text-xs font-medium">Edit Reason</Label>
                     <Input
-                      value={isOriginal ? recipeName : prRecipeName}
-                      onChange={(e) => isOriginal ? setRecipeName(e.target.value) : setPrRecipeName(e.target.value)}
-                      className="mt-1"
+                      value={editReason}
+                      onChange={(e) => setEditReason(e.target.value)}
+                      placeholder="optional"
+                      className="mt-1 text-sm"
                     />
                   </div>
-
-                  {/* Comments / Note */}
-                  <div>
-                    <Label className="text-sm font-medium">{isOriginal ? 'Comments' : 'Note (clean)'}</Label>
-                    <textarea
-                      value={isOriginal ? comments : prNoteClean}
-                      onChange={(e) => isOriginal ? setComments(e.target.value) : setPrNoteClean(e.target.value)}
-                      rows={3}
-                      className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-y"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-[2fr_3fr] gap-4 flex-1 min-h-0">
-                    <div className="flex flex-col">
-                      <Label className="text-sm font-medium flex-shrink-0">Ingredients</Label>
-                      <textarea
-                        value={isOriginal ? ingredients : prIngredients}
-                        onChange={(e) => isOriginal ? setIngredients(e.target.value) : setPrIngredients(e.target.value)}
-                        className="mt-1 w-full flex-1 min-h-[200px] rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-y"
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <Label className="text-sm font-medium flex-shrink-0">Instructions</Label>
-                      <textarea
-                        value={isOriginal ? instructions : prInstructions}
-                        onChange={(e) => isOriginal ? setInstructions(e.target.value) : setPrInstructions(e.target.value)}
-                        className="mt-1 w-full flex-1 min-h-[200px] rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-y"
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
-            </div>
-
-            {/* Sticky bottom bar */}
-            {(isOriginal || hasPrintReady) && (
-              <div className="flex-shrink-0 border-t bg-white pt-3 pb-2 space-y-3">
-                <div>
-                  <Label className="text-sm font-medium">Edit Reason (optional)</Label>
-                  <Input
-                    value={editReason}
-                    onChange={(e) => setEditReason(e.target.value)}
-                    placeholder="e.g., Fixed formatting, corrected ingredient amounts"
-                    className="mt-1"
-                  />
+                  <Button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="w-full"
+                    size="sm"
+                  >
+                    {saving ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                    ) : (
+                      <Save className="w-4 h-4 mr-1" />
+                    )}
+                    Save {isOriginal ? 'Original' : 'Print Ready'}
+                  </Button>
                 </div>
-                <Button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="w-full"
-                >
-                  {saving ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  ) : (
-                    <Save className="w-4 h-4 mr-2" />
-                  )}
-                  Save {isOriginal ? 'Original' : 'Print Ready'}
-                </Button>
-              </div>
-            )}
-          </>
+              )}
+            </div>
+          </div>
         )}
       </SheetContent>
     </Sheet>

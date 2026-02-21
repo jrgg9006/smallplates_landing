@@ -323,8 +323,10 @@ function AdminContentPage() {
       {/* Recipe Editor Sheet */}
       <RecipeEditor
         recipeId={editingRecipeId}
+        recipeIds={recipes.map(r => r.id)}
         onClose={() => setEditingRecipeId(null)}
         onSaved={handleRecipeSaved}
+        onNavigate={(id) => setEditingRecipeId(id)}
       />
 
       {/* Add Recipe Dialog */}
