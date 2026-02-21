@@ -274,8 +274,8 @@ export default function BookReviewOverlay({
                   </p>
                 )}
                 <div className="border-t border-gray-200 my-6" />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div>
+                <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
+                  <div className="min-w-0">
                     <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">
                       Ingredients
                     </h3>
@@ -287,9 +287,13 @@ export default function BookReviewOverlay({
                     <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">
                       Instructions
                     </h3>
-                    <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed font-serif">
-                      {displayInstructions}
-                    </p>
+                    <div className="text-sm text-gray-700 font-serif leading-[1.6]">
+                      {displayInstructions?.split('\n').map((line, i) => (
+                        line.trim() === ''
+                          ? <div key={i} className="h-[2em]" />
+                          : <p key={i} className="m-0">{line}</p>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>

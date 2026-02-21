@@ -141,7 +141,7 @@ export default function ForGiftGivers() {
                   subtitle: "We handle the reminders."
                 },
                 {
-                  title: "20 recipes make a book.",
+                  title: "25 recipes make a book.",
                   subtitle: "Most get 40+."
                 },
                 {

@@ -33,7 +33,7 @@ const tiers = [
     features: [
       "1 Premium Hardcover (8×10)",
       "Lay-flat binding",
-      "Up to 72 recipes",
+      "Up to 50 recipes (total 100 pages)",
       "Professional design",
       "Full color throughout",
     ],

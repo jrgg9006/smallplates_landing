@@ -15,8 +15,8 @@ export default function FAQ() {
       answer: "Guests need about 5 minutes to submit. The whole process — from invites to printed book — takes 4-6 weeks."
     },
     {
-      question: "What if people forget to send recipes?",
-      answer: "We send up to 3 reminders per guest. Most books end up with 30-50+ recipes. People want to be part of this."
+      question: "Can I add recipes in any language?",
+      answer: "Yes, you can add recipes in any language you want."
     },
     {
       question: "Is this just for the bride?",

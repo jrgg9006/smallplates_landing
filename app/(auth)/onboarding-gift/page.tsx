@@ -77,10 +77,10 @@ function Step1({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
         {/* Question */}
         <div className="text-center mb-8">
           <h2 className="text-base font-medium text-[#2D2D2D] mb-1">
-            When&apos;s the big day?
+            When do you want to give this book?
           </h2>
           <p className="text-sm text-[#2D2D2D]/60 font-light">
-            We&apos;ll make sure everything arrives beautifully and on time.
+            Pick the date - we&apos;ll count backwards from there and make sure everything is ready.
           </p>
         </div>
 
