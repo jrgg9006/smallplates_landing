@@ -275,12 +275,22 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
             partnerFirstName?: string;
           } | undefined;
 
+          // Reason: Extract gift date fields from step1 for add-book group creation
+          const step1Data = mergedAnswers.step1 as {
+            gift_date?: string | null;
+            gift_date_undecided?: boolean;
+            book_close_date?: string | null;
+          } | undefined;
+
           const { error: groupError } = await createGroup({
             name: groupName,
             description: `A wedding recipe book for ${coupleNames?.brideFirstName || ''} & ${coupleNames?.partnerFirstName || ''}`,
             couple_first_name: coupleNames?.brideFirstName,
             partner_first_name: coupleNames?.partnerFirstName,
             relationship_to_couple: step3Data?.relationship as "friend" | "family" | "bridesmaid" | "wedding-planner" | "other" | null | undefined,
+            gift_date: step1Data?.gift_date || null,
+            gift_date_undecided: step1Data?.gift_date_undecided || false,
+            book_close_date: step1Data?.book_close_date || null,
             created_by: existingUserIdRef.current,
           });
 
@@ -331,9 +341,17 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
             : null,
           gift_giver_name: userType === 'gift_giver' ? step3Data?.giftGiverName || null : null,
           relationship: userType === 'gift_giver' ? step3Data?.relationship || null : null,
-          timeline: userType === 'gift_giver'
-            ? (mergedAnswers.step1 as { timeline?: string } | undefined)?.timeline || null
+          // Reason: gift_date fields replace deprecated timeline for new records
+          gift_date: userType === 'gift_giver'
+            ? (mergedAnswers.step1 as { gift_date?: string | null } | undefined)?.gift_date || null
             : null,
+          gift_date_undecided: userType === 'gift_giver'
+            ? (mergedAnswers.step1 as { gift_date_undecided?: boolean } | undefined)?.gift_date_undecided || false
+            : false,
+          book_close_date: userType === 'gift_giver'
+            ? (mergedAnswers.step1 as { book_close_date?: string | null } | undefined)?.book_close_date || null
+            : null,
+          timeline: null,
           shipping_destination: checkoutStepData?.shippingDestination || null,
         };
 

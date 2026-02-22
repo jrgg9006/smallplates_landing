@@ -21,11 +21,8 @@ export function ProductSelectionStep({
       {/* Question */}
       <div className="text-center mb-6">
         <h2 className="text-base font-medium text-[#2D2D2D] mb-1">
-          Pick the perfect fit.
+          Which one works?
         </h2>
-        <p className="text-sm text-[#2D2D2D]/60 font-light">
-          Select the option that works best for you.
-        </p>
       </div>
 
       {/* Product Cards - Compact Horizontal Stacked */}

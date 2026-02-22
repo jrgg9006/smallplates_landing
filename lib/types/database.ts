@@ -389,6 +389,9 @@ export interface Database {
           couple_image_position_y: number;
           couple_image_position_x: number;
           couple_display_name: string | null;
+          gift_date: string | null;
+          gift_date_undecided: boolean;
+          book_close_date: string | null;
           book_status: BookStatus;
           book_reviewed_by: string | null;
           book_reviewed_at: string | null;
@@ -415,6 +418,9 @@ export interface Database {
           couple_image_position_y?: number;
           couple_image_position_x?: number;
           couple_display_name?: string | null;
+          gift_date?: string | null;
+          gift_date_undecided?: boolean;
+          book_close_date?: string | null;
           book_status?: BookStatus;
           book_reviewed_by?: string | null;
           book_reviewed_at?: string | null;
@@ -438,6 +444,9 @@ export interface Database {
           couple_image_position_y?: number;
           couple_image_position_x?: number;
           couple_display_name?: string | null;
+          gift_date?: string | null;
+          gift_date_undecided?: boolean;
+          book_close_date?: string | null;
           book_status?: BookStatus;
           book_reviewed_by?: string | null;
           book_reviewed_at?: string | null;
@@ -778,6 +787,9 @@ export interface GroupFormData {
   partner_last_name?: string | null;
   relationship_to_couple?: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
   couple_display_name?: string | null;
+  gift_date?: string | null;
+  gift_date_undecided?: boolean;
+  book_close_date?: string | null;
   created_by?: string;
 }
 

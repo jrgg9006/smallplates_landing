@@ -40,6 +40,9 @@ export async function createGroupAdmin(formData: GroupFormData) {
     partner_first_name: formData.partner_first_name || null,
     partner_last_name: formData.partner_last_name || null,
     relationship_to_couple: formData.relationship_to_couple || null,
+    gift_date: formData.gift_date || null,
+    gift_date_undecided: formData.gift_date_undecided || false,
+    book_close_date: formData.book_close_date || null,
   };
 
   // Create the group
@@ -97,6 +100,9 @@ export async function createGroup(formData: GroupFormData) {
     partner_first_name: formData.partner_first_name || null,
     partner_last_name: formData.partner_last_name || null,
     relationship_to_couple: formData.relationship_to_couple || null,
+    gift_date: formData.gift_date || null,
+    gift_date_undecided: formData.gift_date_undecided || false,
+    book_close_date: formData.book_close_date || null,
   };
 
   // Create the group - triggers will handle member addition and cookbook creation
