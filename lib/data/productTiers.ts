@@ -20,9 +20,8 @@ export const productTiers: ProductTier[] = [
     popular: false,
     features: [
       "1 Premium Hardcover (8×10)",
-      "Up to 50 recipes (total 100 pages)",
-      "Professional design",
-      "Full color throughout",
+      "Up to 50 recipes",
+      "Full color",
     ],
     tagline: "The gift. For the couple.",
   },
@@ -34,7 +33,6 @@ export const productTiers: ProductTier[] = [
     features: [
       "1 Premium Hardcover (8×10)",
       "2 Classic Hardcovers (6×9)",
-      "Same recipes, same design",
       "Three books total",
     ],
     tagline: "One for them. One for each family.",
@@ -47,7 +45,6 @@ export const productTiers: ProductTier[] = [
     features: [
       "1 Premium Hardcover (8×10)",
       "5 Classic Hardcovers (6×9)",
-      "Same recipes, same design",
       "Six books total",
     ],
     tagline: "For the friends who made it happen.",

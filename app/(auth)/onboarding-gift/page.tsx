@@ -494,11 +494,8 @@ function Step3({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
         {/* Personalized Message */}
         <div className="text-center mb-8">
           <h2 className="text-base font-medium text-[#2D2D2D] mb-1">
-            Just a few details and you&apos;re all set.
+            Just a few details. Then the fun part starts.
           </h2>
-          <p className="text-sm text-[#2D2D2D]/60 font-light">
-            Then the fun part starts.
-          </p>
         </div>
 
         {/* Gift Setup Form */}
@@ -558,7 +555,7 @@ function Step3({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
 
               {/* Relationship */}
               <CustomDropdown
-                label="How do you know them?"
+                label="Your relationship to the couple"
                 placeholder="Select your relationship"
                 value={relationship}
                 onChange={setRelationship}
@@ -574,9 +571,6 @@ function Step3({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
             </div>
 
             {/* Confidence building message */}
-            <div className="text-center text-sm text-[#2D2D2D]/50 font-light mb-8">
-              Their recipes. Their words. One book.
-            </div>
 
             {/* Navigation */}
             <div className="flex justify-between items-center">

@@ -94,11 +94,11 @@ function ProductTierCard({ tier, isSelected, onSelect }: ProductTierCardProps) {
           </div>
         </div>
 
-        {/* Content - Compact */}
+        {/* Content */}
         <div className="flex-1 min-w-0">
           {/* Header with Name and Popular Badge */}
-          <div className="flex items-baseline gap-2 mb-1 flex-wrap">
-            <h3 className="font-serif text-base text-[#2D2D2D]">
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <h3 className="font-serif text-lg font-medium text-[#2D2D2D]">
               {tier.name}
             </h3>
             {tier.popular && (
@@ -108,14 +108,14 @@ function ProductTierCard({ tier, isSelected, onSelect }: ProductTierCardProps) {
             )}
           </div>
 
-          {/* Features - Compact, single line */}
-          <p className="font-sans font-light text-[#6B6966] text-xs leading-relaxed mb-0.5">
-            {tier.features.join(" • ")}
+          {/* Tagline - Emotional hook, right under the name */}
+          <p className="italic text-xs text-[#9A9590] mt-0.5 mb-2.5">
+            {tier.tagline}
           </p>
 
-          {/* Tagline - Smaller, subtle */}
-          <p className="font-serif italic text-[#8A8780] text-xs">
-            {tier.tagline}
+          {/* Features - Quiet, secondary */}
+          <p className="text-[12px] text-[#9A9590]/80 leading-relaxed">
+            {tier.features.join(" • ")}
           </p>
         </div>
       </div>
