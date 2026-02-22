@@ -1,42 +1,48 @@
-# Small Plates - Wedding Recipe Books Platform
+# Small Plates & Co. — Wedding Recipe Books Platform
 
-## 🎯 Core Philosophy - READ THIS FIRST
+Guests contribute recipes → we produce a premium hardcover cookbook for the couple.
+Brand essence: cool on the outside, emotional on the inside.
+
+## Core Philosophy - READ THIS FIRST
 - **SIMPLE BUT POWERFUL**: Always prefer surgical, minimal changes over complex rewrites
 - **Modify before create**: Search existing code FIRST, only create new files as last resort
 - **Ask before assuming**: If uncertain, ask. Don't guess.
 
-## 📋 Project Context
-Small Plates helps couples create collaborative wedding recipe books where guests contribute recipes that are compiled into hardcover books.
+## Stack
 
-### Tech Stack
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript (strict mode)
-- **Styling**: Tailwind CSS
-- **Database**: Supabase (PostgreSQL + RLS)
-- **Auth**: Supabase Auth
-- **Hosting**: Vercel
-- **Image Processing**: Background jobs via Supabase Edge Functions
+- Next.js 14 (App Router), TypeScript strict, Tailwind CSS
+- Supabase (PostgreSQL + RLS + Auth + Storage + Edge Functions)
+- Vercel (frontend), Railway (Python AI agents)
+- Postmark (transactional email), OpenAI GPT-4o (recipe cleaning)
+- Brand colors: Honey #D4A854, Warm White #FAF7F2, Soft Charcoal #2D2D2D, Sand #E8E0D5
 
-### Key Directories
-- `app/` - Next.js App Router pages and API routes
-- `components/` - Reusable React components
-- `lib/` - Utilities, Supabase client, helpers
-- `supabase/migrations/` - Database migrations
+## Structure
 
-## 🔧 How I Want You to Work
+- `app/` — Pages, layouts, API routes (App Router)
+- `components/` — React components (ui/, recipe-journey/, profile/)
+- `lib/` — Utilities, Supabase client, helpers
+- `lib/types/database.ts` — Database schema reference (use this instead of querying Supabase)
+- `brand_wedding/` — All brand strategy docs. See @brand_wedding/tone-of-voice.md for voice rules
+- `supabase/migrations/` — Database migrations
 
-### Before Making Changes
-1. **Explore first**: Search for existing components/functions that do something similar
-2. **Understand the pattern**: Look at how similar things are implemented in this codebase
-3. **Propose the minimal change**: What's the smallest edit that solves the problem?
-4. **Only then implement**: Make surgical, precise changes
+## Commands
 
-### Code Style
-- Keep files under 300 lines (refactor if approaching this)
-- Use TypeScript strictly - no `any` types
-- Components: functional with hooks
-- Prefer early returns over nested conditionals
-- Name things clearly - no abbreviations
+- `npm run dev` — Dev server
+- `npm run build` — Production build
+- `npm run lint` — ESLint
+- `npx tsc --noEmit` — Type check (run after TypeScript changes)
+- Single test: `npx jest path/to/file.test.ts`
+
+## Code Rules
+
+- Modify existing files before creating new ones. Search first.
+- No `any` types. Functional components with hooks. Early returns over nesting.
+- Keep files under 300 lines. Refactor if approaching this.
+- No new dependencies without asking.
+- No refactoring unrelated code while fixing something else.
+- No console.logs in production code.
+- Comment non-obvious logic with `// Reason:` explaining WHY.
+- After finishing a series of TypeScript changes, run: `npx tsc --noEmit`
 
 ### What NOT to Do
 - Don't create new components if an existing one can be modified
@@ -45,25 +51,21 @@ Small Plates helps couples create collaborative wedding recipe books where guest
 - Don't make "improvements" I didn't ask for
 - Don't run `npm run build` for small changes
 
-## 🗄️ Database Rules (Supabase MCP)
-- **NEVER** execute INSERT, UPDATE, DELETE, or DROP without my explicit confirmation
-- Before modifying data, show me the exact query first
-- For destructive operations, wait for me to write "CONFIRMED"
-- When in doubt, run SELECT first to show me affected data
-- Always check RLS policies exist for new tables
-- **NO exploración masiva de DB**: NO uses el MCP ni agentes para leer tablas, columnas o schema de Supabase de forma exhaustiva. Eso gasta muchos tokens. En su lugar, dame el SQL query y pídeme que yo lo corra en Supabase. Yo te paso el resultado. Usa `lib/types/database.ts` como referencia rápida del schema.
+## Supabase Rules
 
-## ✅ Task Management
-- Check `TASK.md` before starting work
-- Add new tasks discovered during development
-- Mark tasks complete when done
+NEVER execute INSERT, UPDATE, DELETE, or DROP without explicit confirmation.
+Show me the exact query first and wait for "CONFIRMED".
+Do NOT explore schema via MCP exhaustively — use `lib/types/database.ts` as reference.
+Always check RLS policies exist for new tables.
 
-## 🧪 Testing
-- Add tests for new features in `/tests`
-- Update existing tests when logic changes
-- At minimum: 1 happy path, 1 edge case, 1 failure case
+## Brand Voice (for any user-facing text)
 
-## 📝 After Completing Work
-- Update README.md if setup steps changed
-- Comment non-obvious code with `// Reason:` explaining WHY
-- Don't leave console.logs in production code
+NEVER use these words: cherish, treasure, memories, special, unique, loved ones, celebrate, journey, curated, perfect, amazing.
+USE these words: kitchen, table, people, real, actually, just, done, finally.
+For detailed guidelines, see .claude/skills/brand-guidelines/
+
+## Workflow
+
+- Explore first, then plan, then code. Propose the minimal change that solves the problem.
+- For features touching 3+ files, use plan mode before implementing.
+- Ask before assuming. If uncertain about intent, ask.

@@ -1,187 +1,146 @@
 # Skill: Small Plates Brand Guardian
 
 Use this skill whenever:
-- writing or editing any user-facing copy
-- naming sections, CTAs, product concepts
-- suggesting imagery or visual direction
-- creating campaigns or marketing language
-- drafting narrative, tone, or framing
+- Writing or editing any user-facing copy
+- Naming sections, CTAs, product concepts
+- Suggesting imagery or visual direction
+- Creating campaigns or marketing language
+- Drafting narrative, tone, or framing
+- Building UI components with placeholder or real text
 
 ---
 
 ## Brand Core
 
-Small Plates is NOT a cookbook brand.
+Small Plates is a connection brand, not a cookbook brand.
+Food is the excuse. People are the point.
 
-It is a connection brand. A lifestyle brand.
-Food is the excuse.
-People are the point.
-
-We exist to preserve:
-- belonging
-- memory
-- togetherness
-- warmth
-- story
+Brand line: "Still at the table."
+Acquisition line: "Recipes from the people who love you."
+Never mix them.
 
 ---
 
 ## Files to Reference
 
-Before writing or ideating, consult:
+Before writing or ideating, consult these files in `brand_wedding/`:
 
-Primary:
-- `/brand/idea_and_manifesto.md`
-- `/brand/voice.md`
-- `/brand/personality.md`
-- `/brand/positioning.md`
+**Primary (always read these first):**
+- `brand_wedding/brand-idea.md` — Core concept: "Still at the table"
+- `brand_wedding/tone-of-voice.md` — How we speak, by audience and context
+- `brand_wedding/brand-personality.md` — Who we are, our archetype
 
-Creative POV:
-- `/brand/pov.md`
-- `/brand/audience.md`
+**Positioning & Strategy:**
+- `brand_wedding/positioning-statement.md` — How we position vs. alternatives
+- `brand_wedding/cultural-enemy-wedding.md` — What we stand against
+- `brand_wedding/category-definition.md` — The category we're creating
+- `brand_wedding/value-proposition-for-the-givers...md` — Gift-giver messaging
 
-Visual Rules:
-- `/brand/visuals/principles.md`
-- `/brand/visuals/photography.md`
+**Creative & Narrative:**
+- `brand_wedding/pov.md` — Our point of view on weddings and gifts
+- `brand_wedding/manifesto-wedding.md` — Our beliefs and why we exist
+- `brand_wedding/messaging-framework.md` — What to say to whom, when
+- `brand_wedding/tagline-system.md` — Brand line vs. acquisition line usage
+- `brand_wedding/characters.md` — Brand characters and archetypes
+- `brand_wedding/brand-character-profile.md` — Margot Cole persona
 
-If time is limited:
-1. Read `idea_and_manifesto.md`
-2. Then `voice.md`
+**Visual & Editorial:**
+- `brand_wedding/visual-identity.md` — Colors, typography, logo direction
+- `brand_wedding/visual-identity-principles.md` — Design principles
+- `brand_wedding/photography.md` — Photography style guide
+- `brand_wedding/editorial-brief.md` — Editorial direction
+- `brand_wedding/brand-guide-toeditorial.md` — Editorial standards
+
+**Go-To-Market:**
+- `brand_wedding/trust-architecture.md` — How we build trust
+- `brand_wedding/feel-like-an-engraved-ring.md` — Premium experience principles
+
+If time is limited, read only:
+1. `brand_wedding/brand-idea.md`
+2. `brand_wedding/tone-of-voice.md`
 
 ---
 
 ## Language Rules
 
-Voice must be:
-- warm
-- smart
-- intimate
-- observant
-- human
-- modern but timeless
+### Voice Qualities
+Warm, smart, intimate, observant, human, modern but timeless.
 
-Allowed:
-- short lines
-- poetic phrasing
-- emotional tension
+### Allowed
+Short lines. Poetic phrasing. Emotional tension.
 
-Avoid:
-- corporate language
-- cute language
-- marketing jargon
-- influencer tone
-- recipe-blog clichés
-- cookbook clichés
-- tech-startup tropes
+### NEVER Use These Words
+cherish, treasure, memories, special, unique, loved ones, celebrate, journey, curated, perfect, amazing
 
-Never:
-- sound like a productivity app
-- optimize language for SEO
-- write like a software brand
+### ALWAYS Prefer These Words
+kitchen, table, people, real, actually, just, done, finally
+
+### Avoid
+Corporate language. Cute language. Marketing jargon. Influencer tone.
+Recipe-blog clichés. Cookbook clichés. Tech-startup tropes.
+
+### Never Sound Like
+A productivity app. An SEO-optimized page. A software brand.
 
 ---
 
 ## Visual Guidance
 
-Prefer:
-- people in motion
-- lived-in spaces
-- imperfect lighting
+### Typography
+- Display: Minion Pro (or editorial serif)
+- Body: Inter
+- When using the frontend-design skill, override its font suggestions with these brand fonts
 
-Avoid:
-- sterile food photography
-- studio lighting
-- influencer compositions
-- “contentified” dishes
+### Colors
+- Honey: #D4A854 (primary accent)
+- Warm White: #FAF7F2 (backgrounds)
+- Soft Charcoal: #2D2D2D (text)
+- Sand: #E8E0D5 (secondary)
+- Warm Gray: #9A9590 (muted text)
 
----
-
-## The Test
-
-Before finalizing anything, ask:
-
-1. Would the Host Friend say this?
-2. Does it make food feel like an excuse, not a feature?
-3. Does it honor memory, not performance?
-4. Does this feel human, not branded?
-
-If not, revise.
+### Photography Direction
+Prefer: people in motion, lived-in spaces, imperfect lighting.
+Avoid: sterile food photography, studio lighting, influencer compositions.
 
 ---
 
-## Default Lens
+## The Margot Test
 
-When unsure, choose:
-Emotion > Aesthetics  
-People > Product  
-Gathering > Cooking  
-Memory > Instructions  
-Warmth > Polish
+Before finalizing any copy or design, ask:
+"Would a 28-year-old New York editorial director, champagne in hand on a rooftop, say this?"
 
----
-
-## Go-To-Market Mode (Emotional Safety Lens)
-
-Whenever:
-- writing marketing copy
-- designing onboarding
-- creating CTAs
-- structuring a landing page
-- drafting campaigns or launch content
-- handling objections
-- designing user flows
-
-Consult the following files:
-
-Primary GTM docs:
-- `/go-to-market/objection-map.md`
-- `/go-to-market/purchase-path.md`
-- `/go-to-market/trust-architecture.md`
-- `/go-to-market/language-system.md`
-
-Use these documents to:
-
-- remove emotional friction
-- dissolve vulnerability
-- avoid pressure language
-- preserve emotional dignity
-- prevent cringe
-- normalize imperfection
-- reduce psychological risk
+If she'd roll her eyes → rewrite.
+If she'd say it with a knowing smile → ship it.
 
 ---
 
-## Dual-System Rule
+## Audiences
 
-Brand files define:
-WHO we are.
+- **Bride (receiver):** Terrified of cheesy, wants cool
+- **Organizer:** Wants easy + wants to be the hero
+- **Guests:** Busy, need low friction, "5 min done"
+- **Mom:** Wants substance and permanence
+- **Groom:** Wants practical, not cheesy
 
-Go-to-market files define:
-HOW we protect the user emotionally.
+---
 
-When writing or designing anything outward-facing:
+## Go-To-Market: Emotional Safety
 
-- emotion > persuasion  
-- safety > urgency  
-- composure > hype  
-- taste > tactics  
+When writing marketing copy, onboarding, CTAs, landing pages, or campaigns:
+- Consult `brand_wedding/trust-architecture.md`
+- Remove emotional friction. Dissolve vulnerability.
+- Avoid pressure language. Preserve emotional dignity.
+- Normalize imperfection. Reduce psychological risk.
 
-If brand voice and GTM psychology conflict:
-The GTM documents win.
+### Priority Order When Brand and GTM Conflict
+Emotion > persuasion. Safety > urgency. Composure > hype. Taste > tactics.
 
 ---
 
 ## Final Constraint
 
 Never write in a way that could make a user feel:
-
-- foolish
-- needy
-- awkward
-- insignificant
-- judged
-- embarrassed
+foolish, needy, awkward, insignificant, judged, or embarrassed.
 
 If the copy risks social exposure → revise.
-
 Protect dignity at all costs.
