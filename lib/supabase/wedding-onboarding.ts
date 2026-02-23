@@ -153,6 +153,10 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
         wedding_date: weddingDate,
         wedding_date_undecided: weddingDateUndecided,
         wedding_timeline: weddingTimeline,
+        // Reason: gift_date fields from date picker (step1) for both flows
+        gift_date: step1Data?.gift_date || null,
+        gift_date_undecided: step1Data?.gift_date_undecided || false,
+        book_close_date: step1Data?.book_close_date || null,
         couple_first_name: coupleInfoData?.brideFirstName || null,
         couple_last_name: coupleInfoData?.brideLastName || null,
         partner_first_name: coupleInfoData?.partnerFirstName || null,
@@ -199,6 +203,10 @@ export async function createUserProfileAdmin(userId: string, answers: Onboarding
         name: coupleName,
         description: 'A thoughtful gift collection of recipes',
         wedding_timeline: step1Data?.timeline || null,
+        // Reason: gift_date fields from date picker (step1) for both flows
+        gift_date: step1Data?.gift_date || null,
+        gift_date_undecided: step1Data?.gift_date_undecided || false,
+        book_close_date: step1Data?.book_close_date || null,
         couple_first_name: giftGiverInfoData?.firstName || null,
         couple_last_name: null, // Gift giver doesn't provide last names
         partner_first_name: giftGiverInfoData?.partnerFirstName || null,

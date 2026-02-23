@@ -59,7 +59,7 @@ export function CheckoutSummary({
     if (forceExpanded) setIsExpanded(true);
   }, [forceExpanded]);
 
-  const shippingCosts: Record<string, number> = { usa: 8, mexico: 21 };
+  const shippingCosts: Record<string, number> = { usa: 15, mexico: 10 };
   const shippingAmount = shippingDestination ? shippingCosts[shippingDestination] : undefined;
   const total = selectedTier && shippingAmount !== undefined
     ? selectedTier.price + shippingAmount
@@ -180,16 +180,16 @@ export function CheckoutSummary({
               <div className="flex justify-between items-center mb-2">
                 <p className="text-[#2D2D2D] text-sm font-light">Shipping</p>
                 <p className="text-sm text-[#2D2D2D] font-light">
-                  {shippingDestination === "usa" && "$8"}
-                  {shippingDestination === "mexico" && "$21"}
+                  {shippingDestination === "usa" && "$15"}
+                  {shippingDestination === "mexico" && "$10"}
                   {shippingDestination === "other" && "Custom"}
                   {!shippingDestination && "—"}
                 </p>
               </div>
               <div className="flex gap-2">
                 {[
-                  { id: "usa", label: "USA", sub: "$8" },
-                  { id: "mexico", label: "Mexico", sub: "$21" },
+                  { id: "usa", label: "USA", sub: "$15" },
+                  { id: "mexico", label: "Mexico", sub: "$10" },
                   { id: "other", label: "Other", sub: "Custom" },
                 ].map((opt) => (
                   <button

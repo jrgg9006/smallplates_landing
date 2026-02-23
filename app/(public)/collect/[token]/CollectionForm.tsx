@@ -11,6 +11,24 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
+// Reason: Format book_close_date as "Month Dth" for the deadline line, returns null if date is in the past
+function formatDeadlineDate(dateString: string): string | null {
+  try {
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    // Reason: Compare date-only (ignore time) to avoid timezone edge cases
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (date < today) return null;
+    const monthName = date.toLocaleDateString('en-US', { month: 'long' });
+    const d = date.getDate();
+    const suffix = (d >= 11 && d <= 13) ? 'th' : ['th','st','nd','rd','th','th','th','th','th','th'][d % 10];
+    return `${monthName} ${d}${suffix}`;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Generate personalized request message based on user's full name
  * Always returns "A Personal Note:" as title, only the couple names change
@@ -371,22 +389,40 @@ export default function CollectionForm() {
                       <div>
                         {(() => {
                           // If there's a saved custom message, show it
+                          const deadlineFormatted = tokenInfo?.book_close_date ? formatDeadlineDate(tokenInfo.book_close_date) : null;
+
                           if (tokenInfo?.custom_share_message) {
                             const note = tokenInfo.custom_share_message;
-                            
+
                             return (
                               <div>
-                                <p className="text-gray-700 text-base lg:text-lg xl:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1 mb-12">{note}</p>
+                                <p className="text-gray-700 text-base lg:text-lg xl:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1 mb-12">
+                                  {note}
+                                  {deadlineFormatted && (
+                                    <>
+                                      <br /><br />
+                                      <span>Add yours by {deadlineFormatted}.</span>
+                                    </>
+                                  )}
+                                </p>
                               </div>
                             );
                           } else {
                             // Default message with couple names
                             const coupleDisplayName = tokenInfo?.couple_names || 'your friends';
                             const defaultNote = `You're adding a recipe to ${coupleDisplayName}'s wedding cookbook. Doesn't have to be fancy—just something you actually make. It'll live in their kitchen forever.`;
-                            
+
                             return (
                               <div>
-                                <p className="text-gray-700 text-base lg:text-lg xl:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1 mb-12">{defaultNote}</p>
+                                <p className="text-gray-700 text-base lg:text-lg xl:text-xl leading-relaxed font-light md:first-letter:text-6xl md:first-letter:font-serif md:first-letter:float-left md:first-letter:mr-3 md:first-letter:mt-1 mb-12">
+                                  {defaultNote}
+                                  {deadlineFormatted && (
+                                    <>
+                                      <br /><br />
+                                      <span>Recipes close {deadlineFormatted}.</span>
+                                    </>
+                                  )}
+                                </p>
                               </div>
                             );
                           }

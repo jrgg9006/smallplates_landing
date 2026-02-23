@@ -26,6 +26,20 @@ import { getUserCollectionToken } from "@/lib/supabase/collection";
 import { createShareURL } from "@/lib/utils/sharing";
 import type { Guest } from "@/lib/types/database";
 
+// Reason: Format book_close_date as "Month Dth" with ordinal suffix (no year)
+function getDeadlineText(dateString: string): string {
+  try {
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    const monthName = date.toLocaleDateString('en-US', { month: 'long' });
+    const d = date.getDate();
+    const suffix = (d >= 11 && d <= 13) ? 'th' : ['th','st','nd','rd','th','th','th','th','th','th'][d % 10];
+    return `${monthName} ${d}${suffix}`;
+  } catch {
+    return 'soon';
+  }
+}
+
 export default function GroupsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -662,10 +676,22 @@ export default function GroupsPage() {
             {selectedGroup?.name || 'My Cookbook'}
           </h1>
           <p className="cookbook-metadata">
-            {getWeddingDisplayText(
-              selectedGroup?.wedding_date || null,
-              selectedGroup?.wedding_date_undecided || false,
-              selectedGroup?.wedding_timeline as WeddingTimeline
+            {selectedGroup?.book_close_date ? (
+              <>Recipes due {getDeadlineText(selectedGroup.book_close_date)}</>
+            ) : selectedGroup?.gift_date_undecided ? (
+              <a
+                href="#"
+                onClick={(e) => { e.preventDefault(); /* TODO: open date edit flow */ }}
+                className="hover:underline"
+              >
+                No deadline set
+              </a>
+            ) : (
+              getWeddingDisplayText(
+                selectedGroup?.wedding_date || null,
+                selectedGroup?.wedding_date_undecided || false,
+                selectedGroup?.wedding_timeline as WeddingTimeline
+              )
             )} · {recipeCount} recipes{uniqueContributors > 0 ? ` from ${uniqueContributors} people` : ''}
           </p>
         </div>

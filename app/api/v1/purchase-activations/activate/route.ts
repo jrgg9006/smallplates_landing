@@ -145,9 +145,16 @@ export async function POST(request: Request) {
 
     // Convert purchase intent data to onboarding format
     const onboardingData: OnboardingData = {
-      step1: purchaseIntent.user_type === 'couple' 
-        ? { planningStage: purchaseIntent.planning_stage || undefined }
-        : { timeline: purchaseIntent.timeline || undefined },
+      step1: {
+        // Reason: gift_date fields used by both couple and gift_giver flows
+        gift_date: purchaseIntent.gift_date || undefined,
+        gift_date_undecided: purchaseIntent.gift_date_undecided || false,
+        book_close_date: purchaseIntent.book_close_date || undefined,
+        // Legacy fields (deprecated but kept for compatibility)
+        ...(purchaseIntent.user_type === 'couple'
+          ? { planningStage: purchaseIntent.planning_stage || undefined }
+          : { timeline: purchaseIntent.timeline || undefined }),
+      },
       step3: purchaseIntent.user_type === 'couple'
         ? {
             brideFirstName: purchaseIntent.couple_first_name || '',
@@ -163,12 +170,9 @@ export async function POST(request: Request) {
             partnerFirstName: purchaseIntent.partner_first_name || '',
             relationship: purchaseIntent.relationship || ''
           },
-      step4: purchaseIntent.user_type === 'couple'
-        ? { guestCount: purchaseIntent.guest_count || undefined }
-        : { email: activation.email },
-      step5: purchaseIntent.user_type === 'couple' 
-        ? { email: activation.email }
-        : undefined
+      // Reason: Both flows now have checkout at step4
+      step4: { email: activation.email },
+      step5: undefined
     };
 
     // Create profile and group using existing function

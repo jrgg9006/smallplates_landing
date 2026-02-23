@@ -43,32 +43,33 @@ export async function generateMetadata({
   const defaultDescription = `${displayName} invites you to share your favorite recipe with them! They will print a cookbook with recipes from family and friends.`
   const description = tokenInfo.custom_share_message || defaultDescription
   
+  // Reason: proxy couple image through our API to resize (1200x630), compress (<600KB),
+  // and serve from our domain — Supabase adds x-robots-tag:none which can block crawlers
+  const ogImageUrl = tokenInfo.couple_image_url
+    ? `/api/og-image?url=${encodeURIComponent(tokenInfo.couple_image_url)}`
+    : '/images/2SmallPlates-verticallogowhiteback.png'
+
+  const ogImageAlt = tokenInfo.couple_image_url
+    ? `Recipe Collection for ${tokenInfo.couple_names || 'the couple'}`
+    : 'Small Plates & Company'
+
   return {
     title,
     description,
-    metadataBase: new URL('https://smallplatesandcompany.com'),
+    metadataBase: new URL('https://www.smallplatesandcompany.com'),
     openGraph: {
       title,
       description,
       type: 'website',
       url: `/collect/${token}`,
-      images: tokenInfo.couple_image_url
-        ? [
-            {
-              url: tokenInfo.couple_image_url,
-              width: 1200,
-              height: 630,
-              alt: `Recipe Collection for ${tokenInfo.couple_names || 'the couple'}`,
-            },
-          ]
-        : [
-            {
-              url: '/images/2SmallPlates-verticallogowhiteback.png',
-              width: 1200,
-              height: 630,
-              alt: 'Small Plates & Company',
-            },
-          ],
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: ogImageAlt,
+        },
+      ],
       siteName: 'Small Plates & Company',
       locale: 'en_US',
     },
@@ -77,19 +78,12 @@ export async function generateMetadata({
       site: '@smallplatesandco',
       title,
       description,
-      images: tokenInfo.couple_image_url
-        ? [
-            {
-              url: tokenInfo.couple_image_url,
-              alt: `Recipe Collection for ${tokenInfo.couple_names || 'the couple'}`,
-            },
-          ]
-        : [
-            {
-              url: '/images/2SmallPlates-verticallogowhiteback.png',
-              alt: 'Small Plates & Company',
-            },
-          ],
+      images: [
+        {
+          url: ogImageUrl,
+          alt: ogImageAlt,
+        },
+      ],
     },
     robots: {
       index: true,

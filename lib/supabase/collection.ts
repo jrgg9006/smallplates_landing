@@ -55,13 +55,14 @@ export async function validateCollectionToken(token: string, groupId?: string | 
     let coupleImageUrl: string | null = null;
     let coupleImagePositionY = 50;
     let coupleImagePositionX = 50;
+    let bookCloseDate: string | null = null;
 
     // If groupId is provided, get group-specific message, couple names, and image
     if (groupId) {
       // Get group info for couple names and image
       const { data: group } = await supabase
         .from('groups')
-        .select('couple_first_name, partner_first_name, couple_image_url, couple_image_position_y, couple_image_position_x')
+        .select('couple_first_name, partner_first_name, couple_image_url, couple_image_position_y, couple_image_position_x, book_close_date')
         .eq('id', groupId)
         .single();
 
@@ -78,6 +79,7 @@ export async function validateCollectionToken(token: string, groupId?: string | 
         coupleImageUrl = group.couple_image_url;
         coupleImagePositionY = group.couple_image_position_y ?? 50;
         coupleImagePositionX = group.couple_image_position_x ?? 50;
+        bookCloseDate = group.book_close_date ?? null;
       }
 
       // Get group-specific message from group_members
@@ -106,6 +108,7 @@ export async function validateCollectionToken(token: string, groupId?: string | 
         couple_image_url: coupleImageUrl,
         couple_image_position_y: coupleImagePositionY,
         couple_image_position_x: coupleImagePositionX,
+        book_close_date: bookCloseDate,
         token,
         is_valid: true,
       },

@@ -252,6 +252,9 @@ export async function updateGroup(groupId: string, updates: GroupFormData) {
     partner_first_name: updates.partner_first_name,
     partner_last_name: updates.partner_last_name,
     relationship_to_couple: updates.relationship_to_couple,
+    gift_date: updates.gift_date,
+    gift_date_undecided: updates.gift_date_undecided,
+    book_close_date: updates.book_close_date,
   };
 
   const { data, error } = await supabase

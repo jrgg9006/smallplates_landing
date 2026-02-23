@@ -844,6 +844,7 @@ export interface CollectionTokenInfo {
   couple_image_url: string | null;
   couple_image_position_y: number;
   couple_image_position_x: number;
+  book_close_date: string | null;
   token: string;
   is_valid: boolean;
 }

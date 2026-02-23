@@ -4,117 +4,10 @@ import React from "react";
 import { useState } from "react";
 import { OnboardingProvider, useOnboarding } from "@/lib/contexts/OnboardingContext";
 import OnboardingStep from "@/components/onboarding/OnboardingStep";
-import { SelectionCard } from "@/components/onboarding/SelectionCard";
 import { ProductSelectionStep } from "@/components/onboarding/ProductSelectionStep";
 import { CheckoutSummary } from "@/components/onboarding/CheckoutSummary";
+import { DatePickerStep } from "@/components/onboarding/DatePickerStep";
 import { CheckCircle } from "lucide-react";
-
-/**
- * Step 1 Component - Recipe Count Question
- */
-function Step1() {
-  const { nextStep, updateStepData, state } = useOnboarding();
-  
-  // Initialize from saved state if available
-  const savedData = state.answers.step1 as {
-    planningStage?: string;
-  } | undefined;
-
-  const [selectedPlanningStage, setSelectedPlanningStage] = useState<string>(savedData?.planningStage || "");
-
-  const planningStageOptions = [
-    { value: "just-engaged", label: "Just got engaged" },
-    { value: "deep-planning", label: "Deep in planning mode" },
-    { value: "almost-done", label: "Almost done (please help)" },
-    { value: "just-exploring", label: "Just exploring for now" },
-  ];
-
-  const handleSelection = (value: string) => {
-    setSelectedPlanningStage(value);
-    // Store the answer in onboarding context
-    updateStepData(1, { planningStage: value });
-  };
-
-  const handleContinue = () => {
-    if (selectedPlanningStage) {
-      nextStep();
-    }
-  };
-
-  return (
-    <OnboardingStep
-      stepNumber={1}
-      totalSteps={5}
-      title={
-        <>
-          Congratulations!
-          <br />
-          Let&apos;s start with the basics.
-        </>
-      }
-      imageUrl="/images/onboarding/onboarding_lemon.png"
-      imageAlt="Wedding planning essentials"
-    >
-      <div className="max-w-lg mx-auto">
-        {/* Question */}
-        <div className="text-center mb-8 mt-6">
-          <h2 className="text-base font-medium text-[#2D2D2D] mb-1">
-            Where are you in the wedding planning?
-          </h2>
-          <p className="text-sm text-[#2D2D2D]/60 font-light">
-            This helps us create the perfect timeline for your book.
-          </p>
-        </div>
-
-        {/* Selection Cards */}
-        <div className="space-y-3 mb-8">
-          {planningStageOptions.map((option) => (
-            <SelectionCard
-              key={option.value}
-              value={option.value}
-              label={option.label}
-              isSelected={selectedPlanningStage === option.value}
-              onClick={handleSelection}
-            />
-          ))}
-        </div>
-        
-        {/* Gift Flow Link */}
-        <div className="text-center">
-          <a 
-            href="/onboarding-gift"
-            className="text-sm text-[#2D2D2D]/50 hover:text-[#D4A854] transition-colors font-light underline underline-offset-2"
-          >
-            Giving this as a gift?
-          </a>
-        </div>
-      </div>
-
-      {/* Navigation */}
-      <div className="flex justify-between mt-6">
-        <button
-          type="button"
-          onClick={() => window.history.back()}
-          className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors"
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          onClick={handleContinue}
-          disabled={!selectedPlanningStage}
-          className={`px-8 py-3 rounded-xl font-semibold transition-colors ${
-            selectedPlanningStage
-              ? "bg-[#D4A854] text-white hover:bg-[#c49b4a]"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
-        >
-          Continue
-        </button>
-      </div>
-    </OnboardingStep>
-  );
-}
 
 /**
  * Step 2 Component - Product Selection
@@ -135,7 +28,7 @@ function Step2() {
   return (
     <OnboardingStep
       stepNumber={2}
-      totalSteps={5}
+      totalSteps={4}
       title="Choose your collection."
       imageUrl="/images/onboarding/onboarding_lemon.png"
       imageAlt="Product selection"
@@ -176,7 +69,7 @@ function Step2() {
  */
 function Step3() {
   const { nextStep, previousStep, updateStepData, state } = useOnboarding();
-  
+
   // Initialize from saved state if available
   const savedData = state.answers.step3 as {
     brideFirstName?: string;
@@ -196,7 +89,7 @@ function Step3() {
 
   const handleContinue = () => {
     if (brideFirstName.trim() && brideLastName.trim() && partnerFirstName.trim() && partnerLastName.trim() && (weddingDate || dateUndecided)) {
-      updateStepData(3, { 
+      updateStepData(3, {
         brideFirstName: brideFirstName.trim(),
         brideLastName: brideLastName.trim(),
         partnerFirstName: partnerFirstName.trim(),
@@ -213,7 +106,7 @@ function Step3() {
   return (
     <OnboardingStep
       stepNumber={3}
-      totalSteps={5}
+      totalSteps={4}
       title="Now for the good part."
       imageUrl="/images/onboarding/onboarding_lemon.png"
       imageAlt="Wedding planning essentials"
@@ -222,11 +115,8 @@ function Step3() {
         {/* Question */}
         <div className="text-center mb-8">
           <h2 className="text-base font-medium text-[#2D2D2D] mb-1">
-            Who&apos;s getting married?
+            Who&apos;s getting married? Let&apos;s make this personal.
           </h2>
-          <p className="text-sm text-[#2D2D2D]/60 font-light">
-            Let&apos;s make this personal.
-          </p>
         </div>
 
         {/* Form Fields */}
@@ -314,7 +204,7 @@ function Step3() {
               }`}
               style={{ minWidth: '0', maxWidth: '100%' }}
             />
-            
+
             <div className="mt-3">
               <label className="flex items-center">
                 <input
@@ -360,104 +250,14 @@ function Step3() {
 }
 
 /**
- * Step 4 Component - Wedding Celebration Details
- */
-function Step4() {
-  const { nextStep, previousStep, updateStepData, state } = useOnboarding();
-  
-  // Initialize from saved state if available
-  const savedData = state.answers.step4 as {
-    guestCount?: string;
-  } | undefined;
-
-  const [selectedGuestCount, setSelectedGuestCount] = useState<string>(savedData?.guestCount || "");
-
-  const guestCountOptions = [
-    { value: "intimate", label: "Intimate gathering (under 50)" },
-    { value: "perfect", label: "Perfect size (50-100)" },
-    { value: "big", label: "Big celebration (100+)" },
-    { value: "undecided", label: "Still figuring it out" },
-  ];
-
-  const handleSelection = (value: string) => {
-    setSelectedGuestCount(value);
-    updateStepData(4, { guestCount: value });
-  };
-
-  const handleContinue = () => {
-    if (selectedGuestCount) {
-      nextStep();
-    }
-  };
-
-  return (
-    <OnboardingStep
-      stepNumber={4}
-      totalSteps={5}
-      title="Tell us about your celebration."
-      imageUrl="/images/onboarding/onboarding_lemon.png"
-      imageAlt="Wedding planning essentials"
-    >
-      <div className="max-w-lg mx-auto">
-        {/* Question */}
-        <div className="text-center mb-8">
-          <h2 className="text-base font-medium text-[#2D2D2D] mb-1">
-            How many guests are you expecting?
-          </h2>
-          <p className="text-sm text-[#2D2D2D]/60 font-light">
-            This helps us plan the perfect size for your book.
-          </p>
-        </div>
-
-        {/* Selection Cards */}
-        <div className="space-y-3 mb-8">
-          {guestCountOptions.map((option) => (
-            <SelectionCard
-              key={option.value}
-              value={option.value}
-              label={option.label}
-              isSelected={selectedGuestCount === option.value}
-              onClick={handleSelection}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Navigation */}
-      <div className="flex justify-between mt-8">
-        <button
-          type="button"
-          onClick={previousStep}
-          className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors"
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          onClick={handleContinue}
-          disabled={!selectedGuestCount}
-          className={`px-8 py-3 rounded-xl font-semibold transition-colors ${
-            selectedGuestCount
-              ? "bg-[#D4A854] text-white hover:bg-[#c49b4a]"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
-        >
-          Continue
-        </button>
-      </div>
-    </OnboardingStep>
-  );
-}
-
-/**
- * Step 5 Component - Checkout & Account Creation
+ * Step 4 Component - Checkout & Account Creation
  * Reason: Password removed for soft launch - accounts created manually after Venmo payment
  */
-function Step5() {
+function Step4() {
   const { previousStep, completeOnboarding, updateStepData, state } = useOnboarding();
 
   // Initialize from saved state if available
-  const savedData = state.answers.step5 as {
+  const savedData = state.answers.step4 as {
     email?: string;
     shippingDestination?: string;
   } | undefined;
@@ -510,7 +310,7 @@ function Step5() {
 
     try {
       // Store email and shipping in context
-      await updateStepData(5, {
+      await updateStepData(4, {
         email: email.trim(),
         shippingDestination,
       });
@@ -535,7 +335,7 @@ function Step5() {
     partnerFirstName?: string;
     partnerLastName?: string;
   } | undefined;
-  
+
   const coupleNames = step3Data
     ? {
         brideFirstName: step3Data.brideFirstName,
@@ -547,8 +347,8 @@ function Step5() {
 
   return (
     <OnboardingStep
-      stepNumber={5}
-      totalSteps={5}
+      stepNumber={4}
+      totalSteps={4}
       title="Complete your purchase."
       imageUrl="/images/onboarding/onboarding_lemon.png"
       imageAlt="Checkout"
@@ -612,8 +412,8 @@ function Step5() {
 function SuccessScreen() {
   return (
     <OnboardingStep
-      stepNumber={5}
-      totalSteps={5}
+      stepNumber={4}
+      totalSteps={4}
       title="It's happening."
       imageUrl="/images/onboarding/onboarding_lemon.png"
       imageAlt="Success"
@@ -652,7 +452,7 @@ function SuccessScreen() {
 
 /**
  * Main Onboarding Page Component
- * Manages the 5-step questionnaire flow
+ * Manages the 4-step questionnaire flow
  */
 function OnboardingContent() {
   const { state } = useOnboarding();
@@ -664,11 +464,20 @@ function OnboardingContent() {
 
   return (
     <div className="min-h-screen bg-white">
-      {state.currentStep === 1 && <Step1 />}
+      {state.currentStep === 1 && (
+        <DatePickerStep
+          stepNumber={1}
+          totalSteps={4}
+          title="Congratulations. Let&apos;s make the book."
+          question="When do you want the book?"
+          hint="Pick a date. Most couples have it ready a few weeks after the wedding."
+          switchFlowText="Giving this as a gift?"
+          switchFlowHref="/onboarding-gift"
+        />
+      )}
       {state.currentStep === 2 && <Step2 />}
       {state.currentStep === 3 && <Step3 />}
       {state.currentStep === 4 && <Step4 />}
-      {state.currentStep === 5 && <Step5 />}
     </div>
   );
 }

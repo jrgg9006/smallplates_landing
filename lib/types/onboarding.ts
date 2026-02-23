@@ -15,10 +15,13 @@ export interface OnboardingAnswer {
 }
 
 export interface OnboardingData {
-  // Step 1: Planning stage (couples) or Timeline (gift givers)
+  // Step 1: Date picker (both flows) + legacy fields
   step1?: {
-    planningStage?: string; // For couples
-    timeline?: string; // For gift givers
+    gift_date?: string | null;
+    gift_date_undecided?: boolean;
+    book_close_date?: string | null;
+    planningStage?: string; // Deprecated — kept for activation compatibility
+    timeline?: string; // Deprecated — kept for activation compatibility
   };
   // Step 2: Product selection is stored in selectedProductTier, not in answers
   // Step 3: Couple information (couples) or Gift giver + couple info (gift givers)

@@ -18,8 +18,8 @@ import {
 // import { generateGumroadLink } from "@/lib/payments/gumroad";
 import { createGroup } from "@/lib/supabase/groups";
 
-// Total steps: 5 for couples, 4 for gift givers
-const TOTAL_STEPS_COUPLE = 5;
+// Total steps: 4 for both couples and gift givers
+const TOTAL_STEPS_COUPLE = 4;
 const TOTAL_STEPS_GIFT = 4;
 
 const getInitialState = (userType: 'couple' | 'gift_giver'): OnboardingState => ({
@@ -213,7 +213,8 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
         // Get email from state if not provided
         // Reason: Password not required for soft launch - accounts created manually after payment
         if (!finalEmail) {
-          const emailStep = userType === 'couple' ? state.answers.step5 : state.answers.step4;
+          // Reason: Both flows now have checkout at step4
+          const emailStep = state.answers.step4;
           finalEmail = finalEmail || emailStep?.email;
         }
 
@@ -316,10 +317,8 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
           relationship?: string;
         } | undefined;
 
-        // Extract shipping destination from checkout step (step5 for couples, step4 for gift givers)
-        const checkoutStepData = userType === 'couple'
-          ? mergedAnswers.step5 as { shippingDestination?: string } | undefined
-          : mergedAnswers.step4 as { shippingDestination?: string } | undefined;
+        // Reason: Both flows now have checkout at step4
+        const checkoutStepData = mergedAnswers.step4 as { shippingDestination?: string } | undefined;
 
         const purchaseIntentData = {
           email: finalEmail,
@@ -333,24 +332,14 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
             ? step3Data.weddingDate
             : null,
           wedding_date_undecided: userType === 'couple' ? (step3Data?.dateUndecided || false) : false,
-          planning_stage: userType === 'couple'
-            ? (mergedAnswers.step1 as { planningStage?: string } | undefined)?.planningStage || null
-            : null,
-          guest_count: userType === 'couple'
-            ? (mergedAnswers.step4 as { guestCount?: string } | undefined)?.guestCount || null
-            : null,
+          planning_stage: null, // Deprecated — replaced by date picker
+          guest_count: null, // Deprecated — step removed
           gift_giver_name: userType === 'gift_giver' ? step3Data?.giftGiverName || null : null,
           relationship: userType === 'gift_giver' ? step3Data?.relationship || null : null,
-          // Reason: gift_date fields replace deprecated timeline for new records
-          gift_date: userType === 'gift_giver'
-            ? (mergedAnswers.step1 as { gift_date?: string | null } | undefined)?.gift_date || null
-            : null,
-          gift_date_undecided: userType === 'gift_giver'
-            ? (mergedAnswers.step1 as { gift_date_undecided?: boolean } | undefined)?.gift_date_undecided || false
-            : false,
-          book_close_date: userType === 'gift_giver'
-            ? (mergedAnswers.step1 as { book_close_date?: string | null } | undefined)?.book_close_date || null
-            : null,
+          // Reason: Both flows now use the date picker in step1
+          gift_date: (mergedAnswers.step1 as { gift_date?: string | null } | undefined)?.gift_date || null,
+          gift_date_undecided: (mergedAnswers.step1 as { gift_date_undecided?: boolean } | undefined)?.gift_date_undecided || false,
+          book_close_date: (mergedAnswers.step1 as { book_close_date?: string | null } | undefined)?.book_close_date || null,
           timeline: null,
           shipping_destination: checkoutStepData?.shippingDestination || null,
         };
