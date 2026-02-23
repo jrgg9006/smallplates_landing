@@ -1,13 +1,16 @@
 "use client";
 
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { OnboardingProvider, useOnboarding } from "@/lib/contexts/OnboardingContext";
 import OnboardingStep from "@/components/onboarding/OnboardingStep";
 import { ProductSelectionStep } from "@/components/onboarding/ProductSelectionStep";
 import { CheckoutSummary } from "@/components/onboarding/CheckoutSummary";
 import { DatePickerStep } from "@/components/onboarding/DatePickerStep";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Calendar } from "lucide-react";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/style.css";
+import { format } from "date-fns";
 
 /**
  * Step 2 Component - Product Selection
@@ -84,8 +87,52 @@ function Step3() {
   const [brideLastName, setBrideLastName] = useState<string>(savedData?.brideLastName || "");
   const [partnerFirstName, setPartnerFirstName] = useState<string>(savedData?.partnerFirstName || "");
   const [partnerLastName, setPartnerLastName] = useState<string>(savedData?.partnerLastName || "");
-  const [weddingDate, setWeddingDate] = useState<string>(savedData?.weddingDate && savedData.weddingDate !== "undecided" ? savedData.weddingDate : "");
+  const [weddingDate, setWeddingDate] = useState<Date | undefined>(() => {
+    if (savedData?.weddingDate && savedData.weddingDate !== "undecided") {
+      return new Date(savedData.weddingDate + "T00:00:00");
+    }
+    return undefined;
+  });
   const [dateUndecided, setDateUndecided] = useState<boolean>(savedData?.dateUndecided || false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+
+  const calendarRef = useRef<HTMLDivElement>(null);
+  const dateInputRef = useRef<HTMLDivElement>(null);
+
+  // Reason: Close calendar on click outside or Escape key
+  useEffect(() => {
+    if (!calendarOpen) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        calendarRef.current && !calendarRef.current.contains(e.target as Node) &&
+        dateInputRef.current && !dateInputRef.current.contains(e.target as Node)
+      ) {
+        setCalendarOpen(false);
+      }
+    };
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setCalendarOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [calendarOpen]);
+
+  const handleDateSelect = useCallback((date: Date | undefined) => {
+    setWeddingDate(date);
+    setDateUndecided(false);
+    if (date) setCalendarOpen(false);
+  }, []);
+
+  const handleCalendarToggle = useCallback(() => {
+    setCalendarOpen((prev) => !prev);
+  }, []);
 
   const handleContinue = () => {
     if (brideFirstName.trim() && brideLastName.trim() && partnerFirstName.trim() && partnerLastName.trim() && (weddingDate || dateUndecided)) {
@@ -94,7 +141,7 @@ function Step3() {
         brideLastName: brideLastName.trim(),
         partnerFirstName: partnerFirstName.trim(),
         partnerLastName: partnerLastName.trim(),
-        weddingDate: dateUndecided ? "undecided" : weddingDate,
+        weddingDate: dateUndecided ? "undecided" : weddingDate ? format(weddingDate, "yyyy-MM-dd") : "",
         dateUndecided
       });
       nextStep();
@@ -185,25 +232,71 @@ function Step3() {
             </div>
           </div>
 
-          {/* Wedding Date */}
+          {/* Wedding Date — custom calendar matching Step 1 */}
           <div>
-            <label htmlFor="weddingDate" className="block text-sm font-medium text-[#2D2D2D] mb-1">
+            <label className="block text-sm font-medium text-[#2D2D2D] mb-1">
               Wedding Date
             </label>
-            <input
-              id="weddingDate"
-              type="date"
-              value={weddingDate}
-              onChange={(e) => {
-                setWeddingDate(e.target.value);
-                if (e.target.value) setDateUndecided(false);
-              }}
-              disabled={dateUndecided}
-              className={`w-full max-w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none transition-all ${
-                dateUndecided ? 'bg-gray-100 text-gray-500' : ''
-              }`}
-              style={{ minWidth: '0', maxWidth: '100%' }}
-            />
+            <div className="relative">
+              <div
+                ref={dateInputRef}
+                role="button"
+                tabIndex={0}
+                onClick={handleCalendarToggle}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleCalendarToggle(); } }}
+                className="w-full h-12 px-4 flex items-center rounded-xl cursor-pointer transition-all duration-200"
+                style={{
+                  background: dateUndecided ? "#F3F4F6" : "#FAF7F2",
+                  border: `1px solid ${weddingDate ? "#D4A854" : calendarOpen ? "#D4A854" : "#E8E0D5"}`,
+                  boxShadow: calendarOpen ? "0 0 0 2px rgba(212, 168, 84, 0.15)" : "none",
+                }}
+              >
+                <Calendar className="w-[18px] h-[18px] text-[#9A9590] mr-2.5 flex-shrink-0" strokeWidth={1.5} />
+                {weddingDate ? (
+                  <span className="text-[15px] font-medium text-[#2D2D2D] flex-1 text-left">
+                    {format(weddingDate, "MMMM d, yyyy")}
+                  </span>
+                ) : dateUndecided ? (
+                  <span className="text-[15px] italic text-[#9A9590] flex-1 text-left">
+                    We&apos;ll decide later
+                  </span>
+                ) : (
+                  <span className="text-[15px] text-[#9A9590] flex-1 text-left">
+                    Pick a date
+                  </span>
+                )}
+              </div>
+
+              {/* Calendar popover */}
+              {calendarOpen && (
+                <div
+                  ref={calendarRef}
+                  className="absolute left-0 right-0 z-50 mt-2 bg-white rounded-xl p-4 flex justify-center"
+                  style={{
+                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+                    animation: "step3CalendarIn 200ms ease-out forwards",
+                  }}
+                >
+                  <DayPicker
+                    mode="single"
+                    selected={weddingDate}
+                    onSelect={handleDateSelect}
+                    defaultMonth={weddingDate || new Date()}
+                    style={{
+                      ["--rdp-accent-color" as string]: "#D4A854",
+                      ["--rdp-accent-background-color" as string]: "#D4A854",
+                      ["--rdp-today-color" as string]: "#D4A854",
+                      ["--rdp-selected-font" as string]: "bold",
+                      ["--rdp-day-height" as string]: "44px",
+                      ["--rdp-day-width" as string]: "44px",
+                      ["--rdp-selected-border" as string]: "none",
+                      fontFamily: "inherit",
+                      color: "#2D2D2D",
+                    }}
+                  />
+                </div>
+              )}
+            </div>
 
             <div className="mt-3">
               <label className="flex items-center">
@@ -212,7 +305,10 @@ function Step3() {
                   checked={dateUndecided}
                   onChange={(e) => {
                     setDateUndecided(e.target.checked);
-                    if (e.target.checked) setWeddingDate("");
+                    if (e.target.checked) {
+                      setWeddingDate(undefined);
+                      setCalendarOpen(false);
+                    }
                   }}
                   className="rounded border-gray-300 text-[#D4A854] focus:ring-[#D4A854] mr-2"
                 />
@@ -245,6 +341,13 @@ function Step3() {
           Continue
         </button>
       </div>
+
+      <style jsx>{`
+        @keyframes step3CalendarIn {
+          from { opacity: 0; transform: scale(0.98); }
+          to { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
     </OnboardingStep>
   );
 }
