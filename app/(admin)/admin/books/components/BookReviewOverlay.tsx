@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { X, ChevronLeft, ChevronRight, Check, AlertTriangle, Loader2 } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Check, AlertTriangle, Loader2, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { BookReviewStatus } from '@/lib/types/database';
 
@@ -44,15 +44,25 @@ export default function BookReviewOverlay({
   // Reason: local copy so we can update review status in-memory without refetching
   const [localRecipes, setLocalRecipes] = useState<ReviewRecipe[]>(recipes);
   const [currentIndex, setCurrentIndex] = useState(() => {
+    // Reason: prioritize pending, then needs_revision, so the admin lands on the first recipe needing attention
     const firstPending = recipes.findIndex(r => r.book_review_status === 'pending');
-    return firstPending >= 0 ? firstPending : 0;
+    if (firstPending >= 0) return firstPending;
+    const firstRevision = recipes.findIndex(r => r.book_review_status === 'needs_revision');
+    return firstRevision >= 0 ? firstRevision : 0;
   });
   const [showSummary, setShowSummary] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
   const [showNotesInput, setShowNotesInput] = useState(false);
   const [notesValue, setNotesValue] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [markingReviewed, setMarkingReviewed] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editIngredients, setEditIngredients] = useState('');
+  const [editInstructions, setEditInstructions] = useState('');
+  const [editNote, setEditNote] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
   const notesInputRef = useRef<HTMLInputElement>(null);
 
   const recipe = localRecipes[currentIndex];
@@ -98,23 +108,27 @@ export default function BookReviewOverlay({
   }, [groupId]);
 
   const advanceToNext = useCallback(() => {
-    // Find next pending recipe after current
+    // Reason: look for any non-approved recipe (pending OR needs_revision) so the admin
+    // can flow through all recipes that still need attention without jumping to summary
+    const needsAttention = (r: ReviewRecipe) => r.book_review_status !== 'approved';
+
+    // Find next non-approved recipe after current
     const afterCurrent = localRecipes.findIndex(
-      (r, i) => i > currentIndex && r.book_review_status === 'pending'
+      (r, i) => i > currentIndex && needsAttention(r)
     );
     if (afterCurrent >= 0) {
       setCurrentIndex(afterCurrent);
       return;
     }
-    // Wrap around: find any pending before current
+    // Wrap around: find any non-approved before current
     const beforeCurrent = localRecipes.findIndex(
-      r => r.book_review_status === 'pending'
+      (r, i) => i !== currentIndex && needsAttention(r)
     );
-    if (beforeCurrent >= 0 && beforeCurrent !== currentIndex) {
+    if (beforeCurrent >= 0) {
       setCurrentIndex(beforeCurrent);
       return;
     }
-    // No pending left — show summary
+    // All approved — show summary
     setShowSummary(true);
   }, [localRecipes, currentIndex]);
 
@@ -162,10 +176,74 @@ export default function BookReviewOverlay({
     }
   };
 
+  const handleStartEdit = useCallback(() => {
+    if (!recipe?.print_ready) return;
+    setEditName(recipe.print_ready.recipe_name_clean);
+    setEditIngredients(recipe.print_ready.ingredients_clean);
+    setEditInstructions(recipe.print_ready.instructions_clean);
+    setEditNote(recipe.print_ready.note_clean || '');
+    setShowOriginal(false);
+    setIsEditing(true);
+  }, [recipe]);
+
+  const handleCancelEdit = useCallback(() => {
+    setIsEditing(false);
+  }, []);
+
+  const handleSaveEdit = useCallback(async () => {
+    if (!recipe || savingEdit) return;
+    setSavingEdit(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/v1/admin/content/recipes/${recipe.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipe_name: editName,
+          ingredients: editIngredients,
+          instructions: editInstructions,
+          note_clean: editNote || null,
+          edit_reason: 'Edited during book review',
+          target: 'print_ready',
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to save edit');
+      }
+      // Reason: update local state so the review continues with the corrected text
+      setLocalRecipes(prev => prev.map(r =>
+        r.id === recipe.id
+          ? {
+              ...r,
+              print_ready: {
+                ...r.print_ready!,
+                recipe_name_clean: editName,
+                ingredients_clean: editIngredients,
+                instructions_clean: editInstructions,
+                note_clean: editNote || null,
+              },
+            }
+          : r
+      ));
+      setIsEditing(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save edit');
+    } finally {
+      setSavingEdit(false);
+    }
+  }, [recipe, savingEdit, editName, editIngredients, editInstructions, editNote]);
+
   // Keyboard navigation
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (showSummary) return;
+
+      // Reason: block all shortcuts when editing text, only allow Escape to cancel
+      if (isEditing) {
+        if (e.key === 'Escape') handleCancelEdit();
+        return;
+      }
 
       if (e.key === 'Escape') {
         if (showNotesInput) {
@@ -185,6 +263,16 @@ export default function BookReviewOverlay({
         return;
       }
 
+      if (e.key === 'o' || e.key === 'O') {
+        setShowOriginal(v => !v);
+        return;
+      }
+
+      if (e.key === 'e' || e.key === 'E') {
+        if (recipe?.has_print_ready) handleStartEdit();
+        return;
+      }
+
       if (e.key === 'ArrowLeft' && currentIndex > 0) {
         setCurrentIndex(i => i - 1);
       } else if (e.key === 'ArrowRight' && currentIndex < total - 1) {
@@ -197,10 +285,12 @@ export default function BookReviewOverlay({
 
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [showSummary, showNotesInput, currentIndex, total, onClose, handleApprove, handleNeedsRevision]);
+  }, [showSummary, showNotesInput, isEditing, currentIndex, total, onClose, handleApprove, handleNeedsRevision, handleStartEdit, handleCancelEdit, recipe]);
 
   // Reset notes input when navigating
   useEffect(() => {
+    setShowOriginal(false);
+    setIsEditing(false);
     setShowNotesInput(false);
     setNotesValue('');
     setError(null);
@@ -208,11 +298,19 @@ export default function BookReviewOverlay({
 
   const progressPercent = total > 0 ? ((total - pendingCount) / total) * 100 : 0;
 
-  // Use clean/print-ready versions when available
-  const displayName = recipe?.print_ready?.recipe_name_clean || recipe?.recipe_name || '';
-  const displayIngredients = recipe?.print_ready?.ingredients_clean || recipe?.ingredients || '';
-  const displayInstructions = recipe?.print_ready?.instructions_clean || recipe?.instructions || '';
-  const displayNote = recipe?.print_ready?.note_clean ?? recipe?.comments ?? null;
+  // Use clean/print-ready versions when available, toggle to original with showOriginal
+  const displayName = showOriginal
+    ? (recipe?.recipe_name || '')
+    : (recipe?.print_ready?.recipe_name_clean || recipe?.recipe_name || '');
+  const displayIngredients = showOriginal
+    ? (recipe?.ingredients || '')
+    : (recipe?.print_ready?.ingredients_clean || recipe?.ingredients || '');
+  const displayInstructions = showOriginal
+    ? (recipe?.instructions || '')
+    : (recipe?.print_ready?.instructions_clean || recipe?.instructions || '');
+  const displayNote = showOriginal
+    ? (recipe?.comments ?? null)
+    : (recipe?.print_ready?.note_clean ?? recipe?.comments ?? null);
   const displayImage = recipe?.generated_image_url_print || recipe?.generated_image_url || null;
 
   return (
@@ -260,40 +358,85 @@ export default function BookReviewOverlay({
           {/* Book spread */}
           <div className="flex-1 flex overflow-hidden">
             {/* Left page — recipe text */}
-            <div className="flex-1 bg-[#FAF7F2] overflow-y-auto p-8 lg:p-12">
+            <div className={`flex-1 overflow-y-auto p-8 lg:p-12 transition-colors duration-200 ${
+              isEditing ? 'bg-blue-50' : showOriginal ? 'bg-amber-50' : 'bg-[#FAF7F2]'
+            }`}>
               <div className="max-w-xl mx-auto">
+                {showOriginal && (
+                  <div className="mb-4 px-3 py-1.5 bg-amber-200/60 text-amber-800 text-xs font-medium rounded inline-block">
+                    Viewing Original
+                  </div>
+                )}
+                {isEditing && (
+                  <div className="mb-4 px-3 py-1.5 bg-blue-200/60 text-blue-800 text-xs font-medium rounded inline-block">
+                    Editing Print Ready
+                  </div>
+                )}
                 <p className="text-xs uppercase tracking-[0.2em] text-gray-400 font-serif mb-2">
                   {recipe.guest_name}
                 </p>
-                <h1 className="text-3xl lg:text-4xl font-serif text-gray-900 mb-4 leading-tight">
-                  {displayName}
-                </h1>
-                {displayNote && (
+                {isEditing ? (
+                  <input
+                    value={editName}
+                    onChange={e => setEditName(e.target.value)}
+                    className="w-full text-3xl lg:text-4xl font-serif text-gray-900 mb-4 leading-tight bg-white border border-blue-200 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                ) : (
+                  <h1 className="text-3xl lg:text-4xl font-serif text-gray-900 mb-4 leading-tight">
+                    {displayName}
+                  </h1>
+                )}
+                {isEditing ? (
+                  <input
+                    value={editNote}
+                    onChange={e => setEditNote(e.target.value)}
+                    placeholder="Personal note (optional)"
+                    className="w-full text-sm italic text-gray-500 font-serif mb-6 bg-white border border-blue-200 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                ) : displayNote ? (
                   <p className="text-sm italic text-gray-500 font-serif mb-6">
                     &ldquo;{displayNote}&rdquo;
                   </p>
-                )}
+                ) : null}
                 <div className="border-t border-gray-200 my-6" />
                 <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
                   <div className="min-w-0">
                     <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">
                       Ingredients
                     </h3>
-                    <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed font-serif">
-                      {displayIngredients}
-                    </p>
+                    {isEditing ? (
+                      <textarea
+                        value={editIngredients}
+                        onChange={e => setEditIngredients(e.target.value)}
+                        rows={10}
+                        className="w-full text-sm text-gray-700 font-serif leading-relaxed bg-white border border-blue-200 rounded px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      />
+                    ) : (
+                      <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed font-serif">
+                        {displayIngredients}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">
                       Instructions
                     </h3>
-                    <div className="text-sm text-gray-700 font-serif leading-[1.6]">
-                      {displayInstructions?.split('\n').map((line, i) => (
-                        line.trim() === ''
-                          ? <div key={i} className="h-[2em]" />
-                          : <p key={i} className="m-0">{line}</p>
-                      ))}
-                    </div>
+                    {isEditing ? (
+                      <textarea
+                        value={editInstructions}
+                        onChange={e => setEditInstructions(e.target.value)}
+                        rows={14}
+                        className="w-full text-sm text-gray-700 font-serif leading-[1.6] bg-white border border-blue-200 rounded px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      />
+                    ) : (
+                      <div className="text-sm text-gray-700 font-serif leading-[1.6]">
+                        {displayInstructions?.split('\n').map((line, i) => (
+                          line.trim() === ''
+                            ? <div key={i} className="h-[2em]" />
+                            : <p key={i} className="m-0">{line}</p>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -315,84 +458,134 @@ export default function BookReviewOverlay({
 
           {/* Bottom action bar */}
           <div className="bg-gray-800 px-6 py-3 flex items-center justify-between shrink-0">
-            {/* Left: prev */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-gray-400 hover:text-white hover:bg-gray-700"
-              disabled={currentIndex === 0}
-              onClick={() => setCurrentIndex(i => i - 1)}
-            >
-              <ChevronLeft className="w-4 h-4 mr-1" />
-              Previous
-            </Button>
+            {isEditing ? (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-400 hover:text-white hover:bg-gray-700"
+                  onClick={handleCancelEdit}
+                  disabled={savingEdit}
+                >
+                  Cancel
+                </Button>
+                <span className="text-xs text-blue-400 font-medium">Editing Print Ready</span>
+                <Button
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={handleSaveEdit}
+                  disabled={savingEdit}
+                >
+                  {savingEdit ? (
+                    <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                  ) : (
+                    <Check className="w-3 h-3 mr-1" />
+                  )}
+                  Save
+                </Button>
+              </>
+            ) : (
+              <>
+                {/* Left: prev */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-400 hover:text-white hover:bg-gray-700"
+                  disabled={currentIndex === 0}
+                  onClick={() => setCurrentIndex(i => i - 1)}
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  Previous
+                </Button>
 
-            {/* Center: status badge */}
-            <div className="flex items-center gap-2">
-              <ReviewBadge status={recipe.book_review_status} />
-              {recipe.book_review_notes && recipe.book_review_status === 'needs_revision' && (
-                <span className="text-xs text-amber-300 max-w-[200px] truncate">
-                  {recipe.book_review_notes}
-                </span>
-              )}
-            </div>
+                {/* Center: status badge + original toggle + edit */}
+                <div className="flex items-center gap-2">
+                  <ReviewBadge status={recipe.book_review_status} />
+                  {recipe.book_review_notes && recipe.book_review_status === 'needs_revision' && (
+                    <span className="text-xs text-amber-300 max-w-[200px] truncate">
+                      {recipe.book_review_notes}
+                    </span>
+                  )}
+                  {recipe.has_print_ready && (
+                    <>
+                      <button
+                        onClick={() => setShowOriginal(v => !v)}
+                        className={`text-xs px-2 py-1 rounded transition-colors ${
+                          showOriginal
+                            ? 'bg-amber-500/30 text-amber-300'
+                            : 'bg-gray-700 text-gray-400 hover:text-gray-300'
+                        }`}
+                      >
+                        {showOriginal ? 'Clean' : 'Original'} <span className="text-[10px] opacity-60 ml-1">O</span>
+                      </button>
+                      <button
+                        onClick={handleStartEdit}
+                        className="text-xs px-2 py-1 rounded bg-gray-700 text-gray-400 hover:text-gray-300 transition-colors flex items-center gap-1"
+                      >
+                        <Pencil className="w-3 h-3" /> Edit <span className="text-[10px] opacity-60 ml-0.5">E</span>
+                      </button>
+                    </>
+                  )}
+                </div>
 
-            {/* Right: actions */}
-            <div className="flex items-center gap-2">
-              {showNotesInput && (
-                <input
-                  ref={notesInputRef}
-                  type="text"
-                  value={notesValue}
-                  onChange={e => setNotesValue(e.target.value)}
-                  placeholder="What needs to be fixed?"
-                  className="bg-gray-700 text-white text-sm px-3 py-1.5 rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-500 w-64"
-                  onKeyDown={e => {
-                    if (e.key === 'Escape') {
-                      setShowNotesInput(false);
-                      setNotesValue('');
-                    }
-                  }}
-                />
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-amber-500 text-amber-400 hover:bg-amber-500/20 hover:text-amber-300"
-                onClick={handleNeedsRevision}
-                disabled={saving}
-              >
-                {saving && showNotesInput ? (
-                  <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                ) : (
-                  <AlertTriangle className="w-3 h-3 mr-1" />
-                )}
-                {showNotesInput ? 'Submit' : 'Needs Revision'}
-              </Button>
-              <Button
-                size="sm"
-                className="bg-green-600 hover:bg-green-700 text-white"
-                onClick={handleApprove}
-                disabled={saving}
-              >
-                {saving && !showNotesInput ? (
-                  <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                ) : (
-                  <Check className="w-3 h-3 mr-1" />
-                )}
-                Approve
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-gray-400 hover:text-white hover:bg-gray-700"
-                disabled={currentIndex >= total - 1}
-                onClick={() => setCurrentIndex(i => i + 1)}
-              >
-                Next
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            </div>
+                {/* Right: actions */}
+                <div className="flex items-center gap-2">
+                  {showNotesInput && (
+                    <input
+                      ref={notesInputRef}
+                      type="text"
+                      value={notesValue}
+                      onChange={e => setNotesValue(e.target.value)}
+                      placeholder="What needs to be fixed?"
+                      className="bg-gray-700 text-white text-sm px-3 py-1.5 rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-500 w-64"
+                      onKeyDown={e => {
+                        if (e.key === 'Escape') {
+                          setShowNotesInput(false);
+                          setNotesValue('');
+                        }
+                      }}
+                    />
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-amber-500 text-amber-400 hover:bg-amber-500/20 hover:text-amber-300"
+                    onClick={handleNeedsRevision}
+                    disabled={saving}
+                  >
+                    {saving && showNotesInput ? (
+                      <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                    ) : (
+                      <AlertTriangle className="w-3 h-3 mr-1" />
+                    )}
+                    {showNotesInput ? 'Submit' : 'Needs Revision'}
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                    onClick={handleApprove}
+                    disabled={saving}
+                  >
+                    {saving && !showNotesInput ? (
+                      <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                    ) : (
+                      <Check className="w-3 h-3 mr-1" />
+                    )}
+                    Approve
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-400 hover:text-white hover:bg-gray-700"
+                    disabled={currentIndex >= total - 1}
+                    onClick={() => setCurrentIndex(i => i + 1)}
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Error inline */}
