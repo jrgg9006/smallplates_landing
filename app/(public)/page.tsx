@@ -15,6 +15,7 @@ import WhatsIncluded from '@/components/landing/WhatsIncluded'
 import HowItWorks from '@/components/landing/HowItWorks'
 import RegistryInterlude from '@/components/landing/RegistryInterlude'
 import PersonalNotes from '@/components/landing/PersonalNotes'
+import TheBook from '@/components/landing/TheBook'
 import ShareBanner from '@/components/landing/ShareBanner'
 // import PlayModeSelection from '@/components/landing/PlayModeSelection'
 import FAQ from '@/components/landing/FAQ'
@@ -40,6 +41,7 @@ export default function Home() {
         <RegistryInterlude />
         <BooksPrinted />
         <PersonalNotes />
+        <TheBook />
         <ForGiftGivers />
         <EmotionalClose />
         <FAQ />

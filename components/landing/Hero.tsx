@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import BookPreviewModal from "./BookPreview/BookPreviewModal";
 
 export default function Hero() {
   const router = useRouter();
-  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
   const handleGetStarted = () => {
     router.push("/onboarding-gift");
@@ -89,25 +87,22 @@ export default function Hero() {
             </button>
           </motion.div>
 
-          {/* Optional: Preview link — kept subtle, for those who want to explore */}
+          {/* Scroll link to The Book section */}
           <motion.button
             type="button"
-            onClick={() => setIsPreviewModalOpen(true)}
+            onClick={() => {
+              document.getElementById("the-book-heading")?.scrollIntoView({ behavior: "smooth" });
+            }}
             className="mt-4 text-sm text-white/60 hover:text-white/90 transition-colors duration-200 focus:outline-none"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 1.2, ease: "easeOut" }}
           >
-            Preview a sample book →
+            See the book &rarr;
           </motion.button>
         </div>
       </div>
 
-      {/* Book Preview Modal */}
-      <BookPreviewModal
-        isOpen={isPreviewModalOpen}
-        onClose={() => setIsPreviewModalOpen(false)}
-      />
     </section>
   );
 }
