@@ -30,6 +30,7 @@ interface BookReviewOverlayProps {
   groupId: string;
   coupleName: string;
   recipes: ReviewRecipe[];
+  imageCacheBuster?: number;
   onClose: () => void;
   onReviewComplete: () => void;
 }
@@ -38,6 +39,7 @@ export default function BookReviewOverlay({
   groupId,
   coupleName,
   recipes,
+  imageCacheBuster,
   onClose,
   onReviewComplete,
 }: BookReviewOverlayProps) {
@@ -154,23 +156,23 @@ export default function BookReviewOverlay({
     }
   }, [showNotesInput, recipe, saving, saveReview, notesValue, advanceToNext]);
 
-  const handleMarkReviewed = async () => {
+  const handleMarkReadyToPrint = async () => {
     setMarkingReviewed(true);
     setError(null);
     try {
       const res = await fetch(`/api/v1/admin/books/${groupId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ book_status: 'reviewed' }),
+        body: JSON.stringify({ book_status: 'ready_to_print' }),
       });
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Failed to mark as reviewed');
+        throw new Error(data.error || 'Failed to mark as ready to print');
       }
       onReviewComplete();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to mark as reviewed');
+      setError(err instanceof Error ? err.message : 'Failed to mark as ready to print');
     } finally {
       setMarkingReviewed(false);
     }
@@ -311,7 +313,9 @@ export default function BookReviewOverlay({
   const displayNote = showOriginal
     ? (recipe?.comments ?? null)
     : (recipe?.print_ready?.note_clean ?? recipe?.comments ?? null);
-  const displayImage = recipe?.generated_image_url_print || recipe?.generated_image_url || null;
+  const rawImage = recipe?.generated_image_url_print || recipe?.generated_image_url || null;
+  // Reason: append cache buster so browser fetches fresh image after re-upload in operations
+  const displayImage = rawImage && imageCacheBuster ? `${rawImage}?v=${imageCacheBuster}` : rawImage;
 
   return (
     <div className="fixed inset-0 z-[100] bg-gray-900 flex flex-col">
@@ -348,7 +352,7 @@ export default function BookReviewOverlay({
           pendingCount={pendingCount}
           allApproved={allApproved}
           onRecipeClick={(i) => { setCurrentIndex(i); setShowSummary(false); }}
-          onMarkReviewed={handleMarkReviewed}
+          onMarkReviewed={handleMarkReadyToPrint}
           markingReviewed={markingReviewed}
           error={error}
           onClose={onClose}
@@ -750,12 +754,12 @@ function SummaryView({
             ) : (
               <Check className="w-4 h-4 mr-2" />
             )}
-            Mark as Reviewed
+            Mark Ready to Print
           </Button>
         </div>
         {!allApproved && (
           <p className="text-xs text-gray-500 text-center">
-            All recipes must be approved before marking the book as reviewed
+            All recipes must be approved before marking the book as ready to print
           </p>
         )}
       </div>

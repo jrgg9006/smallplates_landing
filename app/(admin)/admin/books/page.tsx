@@ -12,7 +12,7 @@ import BookDetailSheet from './components/BookDetailSheet';
 
 const COLUMNS: { status: BookStatus; label: string; color: string; bgColor: string }[] = [
   { status: 'active', label: 'Active', color: 'text-blue-700', bgColor: 'bg-blue-50 border-blue-200' },
-  { status: 'reviewed', label: 'Reviewed', color: 'text-amber-700', bgColor: 'bg-amber-50 border-amber-200' },
+  { status: 'reviewed', label: 'In Review', color: 'text-amber-700', bgColor: 'bg-amber-50 border-amber-200' },
   { status: 'ready_to_print', label: 'Ready to Print', color: 'text-green-700', bgColor: 'bg-green-50 border-green-200' },
   { status: 'printed', label: 'Printed', color: 'text-gray-600', bgColor: 'bg-gray-50 border-gray-200' },
 ];

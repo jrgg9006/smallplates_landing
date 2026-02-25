@@ -49,11 +49,11 @@ export async function GET() {
       .in('group_id', groupIds)
       .is('deleted_at', null);
 
-    // Fetch all recipes with image info to determine truly print-ready ones
-    // (clean text + print image, exclude soft-deleted)
+    // Fetch all recipes with image + review info to determine truly print-ready ones
+    // (clean text + print image + not flagged in book review, exclude soft-deleted)
     const { data: allRecipes } = await supabase
       .from('guest_recipes')
-      .select('id, group_id, generated_image_url_print')
+      .select('id, group_id, generated_image_url_print, book_review_status')
       .in('group_id', groupIds)
       .is('deleted_at', null);
 
@@ -76,9 +76,16 @@ export async function GET() {
         (prodStatus || []).filter(ps => ps.needs_review).map(ps => ps.recipe_id)
       );
 
-      // Reason: "print-ready" = clean text + print image + no ops review needed
+      // Reason: "print-ready" = clean text + print image + no ops review needed + not flagged in book review
       (allRecipes || []).forEach(r => {
-        if (r.group_id && cleanRecipeIds.has(r.id) && r.generated_image_url_print && !needsReviewIds.has(r.id)) {
+        const reviewStatus = (r as Record<string, unknown>).book_review_status as string | null;
+        if (
+          r.group_id &&
+          cleanRecipeIds.has(r.id) &&
+          r.generated_image_url_print &&
+          !needsReviewIds.has(r.id) &&
+          reviewStatus !== 'needs_revision'
+        ) {
           printReadyMap[r.group_id] = (printReadyMap[r.group_id] || 0) + 1;
         }
       });

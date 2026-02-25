@@ -75,7 +75,7 @@ interface BookDetail {
 
 const STATUS_LABELS: Record<BookStatus, string> = {
   active: 'Active',
-  reviewed: 'Reviewed',
+  reviewed: 'In Review',
   ready_to_print: 'Ready to Print',
   printed: 'Printed',
   inactive: 'Inactive',
@@ -127,6 +127,8 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
   const [editingNotes, setEditingNotes] = useState(false);
   const [notesValue, setNotesValue] = useState('');
   const [reviewOverlayOpen, setReviewOverlayOpen] = useState(false);
+  // Reason: cache-busting for images — Supabase storage URLs stay the same after re-upload
+  const [fetchTimestamp, setFetchTimestamp] = useState(Date.now());
 
   const fetchDetail = useCallback(async (groupId: string) => {
     setLoading(true);
@@ -136,6 +138,7 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
         const data = await res.json();
         setDetail(data);
         setNotesValue(data.group.book_notes || '');
+        setFetchTimestamp(Date.now());
       }
     } finally {
       setLoading(false);
@@ -467,7 +470,7 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                     Mark Inactive
                   </Button>
                 )}
-                {/* Reason: active books must go through recipe-by-recipe review before advancing */}
+                {/* Reason: active and in-review books go through recipe-by-recipe review overlay */}
                 {currentStatus === 'active' ? (
                   <Button
                     size="sm"
@@ -475,6 +478,14 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                     disabled={detail.recipes.length === 0}
                   >
                     Start Book Review ({detail.recipes.length} recipes)
+                  </Button>
+                ) : currentStatus === 'reviewed' ? (
+                  <Button
+                    size="sm"
+                    onClick={() => setReviewOverlayOpen(true)}
+                    disabled={detail.recipes.length === 0}
+                  >
+                    Continue Review ({detail.recipes.length} recipes)
                   </Button>
                 ) : nextStatus ? (
                   <Button
@@ -495,6 +506,7 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                 groupId={detail.group.id}
                 coupleName={detail.group.couple_display_name}
                 recipes={detail.recipes}
+                imageCacheBuster={fetchTimestamp}
                 onClose={() => {
                   setReviewOverlayOpen(false);
                   if (book) fetchDetail(book.id);

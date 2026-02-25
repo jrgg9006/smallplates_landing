@@ -206,6 +206,47 @@ export async function PATCH(
           return NextResponse.json({ error: error.message }, { status: 500 });
         }
       }
+
+      // Reason: auto-transition book status based on recipe review statuses
+      const { data: currentGroup } = await supabase
+        .from('groups')
+        .select('book_status')
+        .eq('id', groupId)
+        .single();
+
+      const bookStatus = (currentGroup?.book_status || 'active') as BookStatus;
+
+      const { data: allRecipes } = await supabase
+        .from('guest_recipes')
+        .select('id, book_review_status')
+        .eq('group_id', groupId)
+        .is('deleted_at', null);
+
+      if (allRecipes && allRecipes.length > 0) {
+        const statuses = allRecipes.map(r => (r as Record<string, unknown>).book_review_status as string);
+        const allApproved = statuses.every(s => s === 'approved');
+        const anyReviewed = statuses.some(s => s === 'approved' || s === 'needs_revision');
+
+        let newBookStatus: BookStatus | null = null;
+
+        // Reason: check allApproved first — it's a stronger condition than anyReviewed
+        if ((bookStatus === 'active' || bookStatus === 'reviewed') && allApproved) {
+          newBookStatus = 'ready_to_print';
+        } else if (bookStatus === 'active' && anyReviewed) {
+          newBookStatus = 'reviewed';
+        } else if (bookStatus === 'ready_to_print' && !allApproved) {
+          newBookStatus = 'reviewed';
+        }
+
+        if (newBookStatus && newBookStatus !== bookStatus) {
+          const autoUpdate: Record<string, unknown> = { book_status: newBookStatus };
+          if (newBookStatus === 'reviewed' && bookStatus === 'active') {
+            autoUpdate.book_reviewed_by = user.id;
+            autoUpdate.book_reviewed_at = new Date().toISOString();
+          }
+          await supabase.from('groups').update(autoUpdate).eq('id', groupId);
+        }
+      }
     }
 
     // Handle status transition
@@ -226,8 +267,8 @@ export async function PATCH(
         );
       }
 
-      // Reason: enforce that ALL recipes must be approved before moving to 'reviewed'
-      if (currentStatus === 'active' && newStatus === 'reviewed') {
+      // Reason: enforce that ALL recipes must be approved before moving to 'ready_to_print'
+      if (newStatus === 'ready_to_print') {
         const { data: recipes } = await supabase
           .from('guest_recipes')
           .select('id, book_review_status')
@@ -236,7 +277,7 @@ export async function PATCH(
 
         if (!recipes || recipes.length === 0) {
           return NextResponse.json(
-            { error: 'Cannot mark as reviewed: no recipes in this book' },
+            { error: 'Cannot mark as ready to print: no recipes in this book' },
             { status: 400 }
           );
         }
@@ -246,7 +287,7 @@ export async function PATCH(
         );
         if (unapproved.length > 0) {
           return NextResponse.json(
-            { error: `Cannot mark as reviewed: ${unapproved.length} recipe(s) are not yet approved` },
+            { error: `Cannot mark as ready to print: ${unapproved.length} recipe(s) are not yet approved` },
             { status: 400 }
           );
         }
