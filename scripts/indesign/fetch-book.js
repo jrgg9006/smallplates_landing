@@ -27,7 +27,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // ============================================
 // CONFIGURACIÓN - Cambiar el group_id aquí
 // ============================================
-const GROUP_ID = 'a3698398-3667-4d47-a3e7-16a8e880ef47';
+const GROUP_ID = '79670c62-9aa9-4d75-ad9a-7a72478d6f39';
 // ============================================
 
 // ============================================
@@ -339,8 +339,10 @@ async function fetchBook() {
     recipes: transformedRecipes
   };
 
-  // Guardar JSON
-  const outputFileName = `book.${GROUP_ID}.json`;
+  // Guardar JSON — nombre legible con nombres de los novios
+  const coupleName = `${(group.couple_first_name || '').trim()}y${(group.partner_first_name || '').trim()}`
+    .replace(/\s+/g, '');
+  const outputFileName = `book.${coupleName}.json`;
   const outputPath = path.join(dataDir, outputFileName);
   fs.writeFileSync(outputPath, JSON.stringify(bookData, null, 2), 'utf8');
 

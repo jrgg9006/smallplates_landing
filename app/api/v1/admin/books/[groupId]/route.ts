@@ -61,6 +61,7 @@ export async function GET(
         recipe_production_status(needs_review)
       `)
       .eq('group_id', groupId)
+      .is('deleted_at', null)
       .order('recipe_name');
 
     const coupleDisplayName = group.couple_display_name ||
@@ -230,7 +231,8 @@ export async function PATCH(
         const { data: recipes } = await supabase
           .from('guest_recipes')
           .select('id, book_review_status')
-          .eq('group_id', groupId);
+          .eq('group_id', groupId)
+          .is('deleted_at', null);
 
         if (!recipes || recipes.length === 0) {
           return NextResponse.json(

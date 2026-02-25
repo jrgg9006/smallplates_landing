@@ -42,18 +42,20 @@ export async function GET() {
       .eq('is_archived', false)
       .gt('recipes_received', 0);
 
-    // Fetch recipe counts
+    // Fetch recipe counts (exclude soft-deleted)
     const { data: recipes } = await supabase
       .from('guest_recipes')
       .select('group_id')
-      .in('group_id', groupIds);
+      .in('group_id', groupIds)
+      .is('deleted_at', null);
 
     // Fetch all recipes with image info to determine truly print-ready ones
-    // (clean text + print image)
+    // (clean text + print image, exclude soft-deleted)
     const { data: allRecipes } = await supabase
       .from('guest_recipes')
       .select('id, group_id, generated_image_url_print')
-      .in('group_id', groupIds);
+      .in('group_id', groupIds)
+      .is('deleted_at', null);
 
     const recipeIds = (allRecipes || []).map(r => r.id);
     const printReadyMap: Record<string, number> = {};
