@@ -48,6 +48,11 @@ interface RecipeWithProductionStatus {
     id: string;
     name: string;
   } | null;
+  archived_from_group: {
+    id: string;
+    name: string;
+    removed_by_name: string | null;
+  } | null;
   midjourney_prompts: {
     generated_prompt: string;
     agent_metadata?: {
@@ -116,6 +121,37 @@ export function RecipeOperationsTable({
     }
   };
 
+
+  const handleRestore = async (recipeId: string) => {
+    if (!confirm('Restore this recipe? It will be visible in its group again.')) {
+      return;
+    }
+
+    setUpdatingRecipeId(recipeId);
+
+    try {
+      const response = await fetch(`/api/v1/admin/operations/recipes/${recipeId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ restore: true }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(`Error restoring: ${error.error}`);
+        return;
+      }
+
+      if (onStatusUpdate) {
+        onStatusUpdate();
+      }
+    } catch (error) {
+      console.error('Error restoring recipe:', error);
+      alert('Failed to restore recipe');
+    } finally {
+      setUpdatingRecipeId(null);
+    }
+  };
 
   const handleMarkAsReviewed = async (recipeId: string) => {
     if (!confirm('Mark this recipe as reviewed? This will clear the needs review flag.')) {
@@ -308,7 +344,24 @@ export function RecipeOperationsTable({
                     {recipe.group ? (
                       <span>{recipe.group.name}</span>
                     ) : (
-                      <span className="text-orange-600 font-medium">Archived</span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-orange-600 font-medium">Archived</span>
+                        {recipe.archived_from_group && (
+                          <span className="text-xs text-gray-400">
+                            ({recipe.archived_from_group.name}{recipe.archived_from_group.removed_by_name ? ` · by ${recipe.archived_from_group.removed_by_name}` : ''})
+                          </span>
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRestore(recipe.id);
+                          }}
+                          className="text-xs text-blue-600 hover:text-blue-800 underline"
+                          disabled={isUpdating}
+                        >
+                          Restore
+                        </button>
+                      </div>
                     )}
                   </div>
                 </td>

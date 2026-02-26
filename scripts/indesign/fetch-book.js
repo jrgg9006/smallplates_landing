@@ -27,7 +27,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // ============================================
 // CONFIGURACIÓN - Cambiar el group_id aquí
 // ============================================
-const GROUP_ID = '79670c62-9aa9-4d75-ad9a-7a72478d6f39';
+const GROUP_ID = '2001e7f6-0204-4d4e-8b23-19f22d7f9739';
 // ============================================
 
 // ============================================
@@ -112,29 +112,10 @@ async function fetchBook() {
   console.log('');
 
   // ============================================
-  // PARTE 2: CONTRIBUTORS (guests con recetas)
+  // PARTE 2: CONTRIBUTORS — se deriva de las recetas más adelante
+  // (después de PARTE 4, para incluir a cualquier persona con receta
+  // en el libro, ya sea guest, capitán u owner)
   // ============================================
-  console.log('── PASO 2: Contributors ──');
-
-  const { data: contributors, error: contributorsError } = await supabase
-    .from('guests')
-    .select('first_name, last_name, printed_name')
-    .eq('group_id', GROUP_ID)
-    .eq('is_archived', false)
-    .gt('recipes_received', 0)
-    .order('first_name');
-
-  if (contributorsError) {
-    console.error('❌ Error al obtener contributors:', contributorsError.message);
-    process.exit(1);
-  }
-
-  const contributorList = contributors.map(g => 
-    g.printed_name || `${g.first_name || ''} ${g.last_name || ''}`.trim() || 'Anónimo'
-  );
-
-  console.log(`   👥 ${contributorList.length} contributors`);
-  console.log('');
 
   // ============================================
   // PARTE 3: OWNERS + CAPTAINS
@@ -169,6 +150,25 @@ async function fetchBook() {
   // ============================================
   console.log('── PASO 4: Recetas ──');
 
+  // Get active recipe IDs from group_recipes (source of truth for group membership)
+  const { data: activeGroupRecipes, error: grError } = await supabase
+    .from('group_recipes')
+    .select('recipe_id')
+    .eq('group_id', GROUP_ID)
+    .is('removed_at', null);
+
+  if (grError) {
+    console.error('❌ Error al obtener group_recipes:', grError.message);
+    process.exit(1);
+  }
+
+  const activeRecipeIds = (activeGroupRecipes || []).map(gr => gr.recipe_id);
+
+  if (activeRecipeIds.length === 0) {
+    console.log('⚠️ No se encontraron recetas activas para este grupo.');
+    process.exit(0);
+  }
+
   const { data: recipes, error: recipesError } = await supabase
     .from('guest_recipes')
     .select(`
@@ -192,7 +192,8 @@ async function fetchBook() {
         instructions_clean
       )
     `)
-    .eq('group_id', GROUP_ID)
+    .in('id', activeRecipeIds)
+    .is('deleted_at', null)
     .order('recipe_name');
 
   if (recipesError) {
@@ -300,6 +301,29 @@ async function fetchBook() {
 
     transformedRecipes.push(transformed);
   }
+
+  // ============================================
+  // PARTE 2b: CONTRIBUTORS (derivados de las recetas del libro)
+  // Cualquier persona con receta es contributor, sin importar
+  // si también es capitán u owner
+  // ============================================
+  console.log('');
+  console.log('── PASO 2: Contributors (desde recetas) ──');
+
+  // Deduplicate by normalized name (trim whitespace, collapse multiple spaces)
+  const contributorSet = new Set();
+  const contributorList = [];
+  for (const recipe of transformedRecipes) {
+    const name = (recipe.guest_name || '').replace(/\s+/g, ' ').trim();
+    if (name && !contributorSet.has(name)) {
+      contributorSet.add(name);
+      contributorList.push(name);
+    }
+  }
+  contributorList.sort((a, b) => a.localeCompare(b));
+
+  console.log(`   👥 ${contributorList.length} contributors`);
+  console.log('');
 
   // ============================================
   // PARTE 6: GENERAR JSON UNIFICADO

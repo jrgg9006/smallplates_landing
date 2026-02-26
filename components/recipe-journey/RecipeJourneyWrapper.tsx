@@ -641,7 +641,13 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
 
   const current = journeySteps[currentStepIndex]?.key;
 
+  // Reason: Show legal notice only on steps where actual submission happens
+  const isSubmitStep = current === 'imageUpload' ||
+    (current === 'personalNote' && !!recipeData.rawRecipeText) ||
+    current === 'summary';
+
   const bottomNav = (
+    <div className="flex flex-col gap-2">
     <div className="flex items-center justify-between">
       {current !== 'success' ? (
         <button
@@ -714,6 +720,15 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
           {submitting ? 'Submitting…' : submitSuccess ? 'Submitted!' : 'Add my creation'}
         </button>
       )}
+    </div>
+    {isSubmitStep && (
+      <p className="text-[11px] text-gray-400 text-center leading-relaxed">
+        By submitting, you agree to our{' '}
+        <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-500">Terms</a>
+        {' '}and{' '}
+        <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-500">Privacy Policy</a>.
+      </p>
+    )}
     </div>
   );
 

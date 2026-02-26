@@ -27,14 +27,7 @@ export async function GET(
       return NextResponse.json({ error: groupError.message }, { status: 404 });
     }
 
-    // 2. Contributors (guests with recipes, not archived)
-    const { data: contributors } = await supabase
-      .from('guests')
-      .select('id, first_name, last_name, printed_name, recipes_received')
-      .eq('group_id', groupId)
-      .eq('is_archived', false)
-      .gt('recipes_received', 0)
-      .order('first_name');
+    // 2. Contributors — derived from actual recipes in step 4 (see below)
 
     // 3. Owners & Captains
     const { data: members } = await supabase
@@ -46,23 +39,82 @@ export async function GET(
       .eq('group_id', groupId)
       .in('role', ['owner', 'member']);
 
-    // 4. Recipes with print-ready versions
-    const { data: recipes } = await supabase
-      .from('guest_recipes')
-      .select(`
-        id, recipe_name, ingredients, instructions, comments,
-        image_url, generated_image_url, generated_image_url_print, image_upscale_status,
-        guest_id, book_review_status, book_review_notes,
-        guests(first_name, last_name, printed_name),
-        recipe_print_ready(
-          recipe_name_clean, ingredients_clean, instructions_clean,
-          note_clean, cleaning_version
-        ),
-        recipe_production_status(needs_review)
-      `)
+    // 4. Recipes via group_recipes (source of truth for group membership)
+    // Reason: guest_recipes.group_id can be stale when recipes are linked/moved between groups.
+    // group_recipes tracks the actual add/remove operations.
+    const { data: activeGroupRecipes } = await supabase
+      .from('group_recipes')
+      .select('recipe_id')
       .eq('group_id', groupId)
-      .is('deleted_at', null)
-      .order('recipe_name');
+      .is('removed_at', null);
+
+    const activeRecipeIds = (activeGroupRecipes || []).map(gr => gr.recipe_id);
+
+    const { data: recipes } = activeRecipeIds.length > 0
+      ? await supabase
+          .from('guest_recipes')
+          .select(`
+            id, recipe_name, ingredients, instructions, comments,
+            image_url, generated_image_url, generated_image_url_print, image_upscale_status,
+            guest_id, book_review_status, book_review_notes,
+            guests(first_name, last_name, printed_name),
+            recipe_print_ready(
+              recipe_name_clean, ingredients_clean, instructions_clean,
+              note_clean, cleaning_version
+            ),
+            recipe_production_status(needs_review)
+          `)
+          .in('id', activeRecipeIds)
+          .is('deleted_at', null)
+          .order('recipe_name')
+      : { data: null };
+
+    // 5. Archived recipes (removed from group) for admin visibility
+    const { data: removedGroupRecipes } = await supabase
+      .from('group_recipes')
+      .select('recipe_id, removed_at, removed_by')
+      .eq('group_id', groupId)
+      .not('removed_at', 'is', null);
+
+    let archivedRecipes: { id: string; recipe_name: string; guest_name: string; removed_at: string; removed_by_name: string | null }[] = [];
+
+    if (removedGroupRecipes && removedGroupRecipes.length > 0) {
+      const removedRecipeIds = removedGroupRecipes.map(gr => gr.recipe_id);
+
+      // Fetch recipe + guest info
+      const { data: removedRecipeData } = await supabase
+        .from('guest_recipes')
+        .select('id, recipe_name, guests(first_name, last_name, printed_name)')
+        .in('id', removedRecipeIds);
+
+      // Batch-fetch who removed them
+      const removedByIds = [...new Set(removedGroupRecipes.filter(gr => gr.removed_by).map(gr => gr.removed_by as string))];
+      const removedByNames = new Map<string, string>();
+      if (removedByIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name, email')
+          .in('id', removedByIds);
+        (profiles || []).forEach(p => {
+          removedByNames.set(p.id, p.full_name || p.email || 'Unknown');
+        });
+      }
+
+      // Build a lookup from recipe_id to group_recipes info
+      const removedMap = new Map(removedGroupRecipes.map(gr => [gr.recipe_id, gr]));
+
+      archivedRecipes = (removedRecipeData || []).map(r => {
+        const guest = r.guests as unknown as { first_name: string; last_name: string; printed_name: string | null } | null;
+        const grEntry = removedMap.get(r.id);
+        return {
+          id: r.id,
+          recipe_name: r.recipe_name,
+          guest_name: guest?.printed_name || `${guest?.first_name || ''} ${guest?.last_name || ''}`.trim() || 'Unknown',
+          removed_at: grEntry?.removed_at || '',
+          removed_by_name: grEntry?.removed_by ? removedByNames.get(grEntry.removed_by) || null : null,
+        };
+      });
+    }
 
     const coupleDisplayName = group.couple_display_name ||
       `${group.couple_first_name || ''} & ${group.partner_first_name || ''}`.trim();
@@ -132,6 +184,28 @@ export async function GET(
       };
     });
 
+    // Reason: Derive contributors from actual recipes in the book, not from the guests table.
+    // A person is a contributor if they have a recipe — regardless of being captain/owner.
+    const contributorMap = new Map<string, { id: string; first_name: string; last_name: string; printed_name: string | null; recipes_received: number }>();
+    for (const r of (recipes || [])) {
+      const guest = r.guests as unknown as { first_name: string; last_name: string; printed_name: string | null } | null;
+      if (!r.guest_id || !guest) continue;
+      const existing = contributorMap.get(r.guest_id);
+      if (existing) {
+        existing.recipes_received++;
+      } else {
+        contributorMap.set(r.guest_id, {
+          id: r.guest_id,
+          first_name: guest.first_name,
+          last_name: guest.last_name,
+          printed_name: guest.printed_name,
+          recipes_received: 1,
+        });
+      }
+    }
+    const contributors = Array.from(contributorMap.values())
+      .sort((a, b) => (a.first_name || '').localeCompare(b.first_name || ''));
+
     return NextResponse.json({
       group: {
         id: group.id,
@@ -147,10 +221,11 @@ export async function GET(
         book_reviewed_at: group.book_reviewed_at,
         book_notes: group.book_notes,
       },
-      contributors: contributors || [],
+      contributors,
       owners,
       captains,
       recipes: formattedRecipes,
+      archived_recipes: archivedRecipes,
     });
   } catch (error) {
     return NextResponse.json(
@@ -267,8 +342,9 @@ export async function PATCH(
         );
       }
 
-      // Reason: enforce that ALL recipes must be approved before moving to 'ready_to_print'
-      if (newStatus === 'ready_to_print') {
+      // Reason: enforce that ALL recipes must be approved before moving FORWARD to 'ready_to_print'
+      // Skip validation when going backward from 'printed' — the book was already validated
+      if (newStatus === 'ready_to_print' && currentStatus !== 'printed') {
         const { data: recipes } = await supabase
           .from('guest_recipes')
           .select('id, book_review_status')

@@ -54,6 +54,11 @@ interface RecipeWithProductionStatus {
     id: string;
     name: string;
   } | null;
+  archived_from_group: {
+    id: string;
+    name: string;
+    removed_by_name: string | null;
+  } | null;
   midjourney_prompts: {
     generated_prompt: string;
     agent_metadata?: {

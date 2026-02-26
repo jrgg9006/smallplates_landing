@@ -63,6 +63,7 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
         added_by,
         added_at,
         removed_at,
+        removed_by,
         groups (
           id,
           name
@@ -102,7 +103,32 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
   }
 
   // console.log removed for production
-  
+
+  // Reason: Batch-fetch profile names for all removed_by user IDs,
+  // so we can show who archived each recipe without N+1 queries
+  const removedByIds = new Set<string>();
+  for (const recipe of recipes) {
+    const grs = recipe.group_recipes || [];
+    const entries = Array.isArray(grs) ? grs : [grs];
+    for (const gr of entries) {
+      if (gr.removed_by) removedByIds.add(gr.removed_by);
+    }
+  }
+
+  const removedByNames = new Map<string, string>();
+  if (removedByIds.size > 0) {
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, full_name, email')
+      .in('id', Array.from(removedByIds));
+
+    if (profiles) {
+      for (const p of profiles) {
+        removedByNames.set(p.id, p.full_name || p.email || 'Unknown');
+      }
+    }
+  }
+
   // Transform and filter results
   const transformedRecipes = recipes.map((recipe: any) => {
     // Handle production status - could be array or single object depending on Supabase version
@@ -141,13 +167,28 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
     // Get group info - filter out removed entries (removed_at IS NULL means active)
     // A recipe is archived if it has NO active group associations
     const groupRecipes = recipe.group_recipes || [];
-    const activeGroupRecipes = Array.isArray(groupRecipes) 
-      ? groupRecipes.filter((gr: any) => !gr.removed_at)
-      : (!groupRecipes.removed_at ? [groupRecipes] : []);
-    
+    const allGroupRecipes = Array.isArray(groupRecipes) ? groupRecipes : [groupRecipes];
+    const activeGroupRecipes = allGroupRecipes.filter((gr: any) => !gr.removed_at);
+
     const hasActiveGroupAssociation = activeGroupRecipes.length > 0;
     const groupRecipe = activeGroupRecipes[0];
     const group = hasActiveGroupAssociation && groupRecipe?.groups ? groupRecipe.groups : null;
+
+    // Reason: Track which group an archived recipe was removed from,
+    // so group filters can still show archived recipes from that group
+    let archivedFromGroup: { id: string; name: string; removed_by_name: string | null } | null = null;
+    if (!group) {
+      const removedGroupRecipes = allGroupRecipes.filter((gr: any) => gr.removed_at && gr.groups);
+      if (removedGroupRecipes.length > 0) {
+        const removedEntry = removedGroupRecipes[0];
+        const removedGroup = removedEntry.groups;
+        archivedFromGroup = {
+          id: removedGroup.id,
+          name: removedGroup.name,
+          removed_by_name: removedEntry.removed_by ? removedByNames.get(removedEntry.removed_by) || null : null,
+        };
+      }
+    }
     
     // Handle midjourney_prompts - could be array or single object depending on Supabase version
     const midjourneyPrompt = Array.isArray(recipe.midjourney_prompts)
@@ -167,6 +208,7 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
         id: group.id,
         name: group.name,
       } : null,
+      archived_from_group: archivedFromGroup,
       midjourney_prompts: midjourneyPrompt,
       recipe_print_ready: printReady,
     };
@@ -185,7 +227,12 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
       // console.log removed for production
       filtered = filtered.filter((r: any) => !r.group);
     } else {
-      filtered = filtered.filter((r: any) => r.group?.id === filters.cookbookId);
+      // Reason: Include archived recipes that were removed from this group,
+      // so admins can see which recipes were deleted from a specific book
+      filtered = filtered.filter((r: any) =>
+        r.group?.id === filters.cookbookId ||
+        r.archived_from_group?.id === filters.cookbookId
+      );
     }
   }
 

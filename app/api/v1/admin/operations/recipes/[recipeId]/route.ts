@@ -11,6 +11,7 @@ interface PatchRequestBody extends RecipeProductionStatusUpdate {
   generated_image_url?: string;
   clearPrintReady?: boolean; // When true, clears generated_image_url_print, image_upscale_status, and image_dimensions
   deleteImage?: boolean;     // When true, deletes original + print-ready images and clears related fields
+  restore?: boolean;         // When true, clears deleted_at on guest_recipes and removed_at/removed_by on group_recipes
   printReady?: {
     ingredients_clean?: string;
     instructions_clean?: string;
@@ -32,6 +33,33 @@ export async function PATCH(
     const supabase = createSupabaseAdminClient();
     let productionStatusData = null;
     let printReadyData = null;
+
+    // ============================================================
+    // RESTORE: clear deleted_at and removed_at so recipe is active again
+    // ============================================================
+    if (body.restore) {
+      // Reason: Both guest_recipes.deleted_at and group_recipes.removed_at must be cleared
+      // to fully restore an archived recipe back to its group
+      const { error: restoreRecipeError } = await supabase
+        .from('guest_recipes')
+        .update({ deleted_at: null })
+        .eq('id', recipeId);
+
+      if (restoreRecipeError) {
+        return NextResponse.json({ error: restoreRecipeError.message }, { status: 500 });
+      }
+
+      const { error: restoreGroupError } = await supabase
+        .from('group_recipes')
+        .update({ removed_at: null, removed_by: null })
+        .eq('recipe_id', recipeId);
+
+      if (restoreGroupError) {
+        return NextResponse.json({ error: restoreGroupError.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true, restored: true });
+    }
 
     // ============================================================
     // DELETE IMAGE: remove original + print-ready image safely

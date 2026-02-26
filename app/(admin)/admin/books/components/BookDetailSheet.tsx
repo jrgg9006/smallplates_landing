@@ -52,6 +52,14 @@ interface RecipeData {
   book_review_notes: string | null;
 }
 
+interface ArchivedRecipe {
+  id: string;
+  recipe_name: string;
+  guest_name: string;
+  removed_at: string;
+  removed_by_name: string | null;
+}
+
 interface BookDetail {
   group: {
     id: string;
@@ -71,6 +79,7 @@ interface BookDetail {
   owners: Member[];
   captains: Member[];
   recipes: RecipeData[];
+  archived_recipes: ArchivedRecipe[];
 }
 
 const STATUS_LABELS: Record<BookStatus, string> = {
@@ -120,6 +129,7 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
   const [contributorsExpanded, setContributorsExpanded] = useState(false);
   const [membersExpanded, setMembersExpanded] = useState(false);
   const [notesExpanded, setNotesExpanded] = useState(false);
+  const [archivedExpanded, setArchivedExpanded] = useState(false);
 
   // Inline editing state
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -168,6 +178,9 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
       if (res.ok) {
         await fetchDetail(book.id);
         onStatusChange();
+      } else {
+        const data = await res.json().catch(() => null);
+        alert(data?.error || 'Something went wrong');
       }
     } finally {
       setSaving(false);
@@ -431,6 +444,37 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                   </div>
                 ))}
               </Section>
+
+              {/* Archived Recipes */}
+              {detail.archived_recipes.length > 0 && (
+                <Section
+                  title={`Archived Recipes (${detail.archived_recipes.length})`}
+                  collapsible
+                  expanded={archivedExpanded}
+                  onToggle={() => setArchivedExpanded(!archivedExpanded)}
+                >
+                  {archivedExpanded && (
+                    <div className="space-y-1">
+                      {detail.archived_recipes.map(ar => (
+                        <div key={ar.id} className="flex items-center justify-between py-1.5 px-2 rounded bg-orange-50">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-sm text-gray-900 truncate">{ar.recipe_name}</span>
+                            <span className="text-xs text-gray-400 flex-shrink-0">by {ar.guest_name}</span>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0 text-xs text-gray-400">
+                            <span>
+                              {new Date(ar.removed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </span>
+                            {ar.removed_by_name && (
+                              <span>· removed by {ar.removed_by_name}</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </Section>
+              )}
             </div>
 
             {/* Sticky Footer */}

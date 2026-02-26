@@ -34,33 +34,37 @@ export async function GET() {
       return NextResponse.json([]);
     }
 
-    // Fetch contributor counts (guests with recipes, not archived)
-    const { data: contributors } = await supabase
-      .from('guests')
-      .select('group_id')
+    // Reason: group_recipes is the source of truth for group membership,
+    // not guest_recipes.group_id which can be stale for linked/moved recipes
+    const { data: activeGroupRecipes } = await supabase
+      .from('group_recipes')
+      .select('group_id, recipe_id')
       .in('group_id', groupIds)
-      .eq('is_archived', false)
-      .gt('recipes_received', 0);
+      .is('removed_at', null);
 
-    // Fetch recipe counts (exclude soft-deleted)
-    const { data: recipes } = await supabase
-      .from('guest_recipes')
-      .select('group_id')
-      .in('group_id', groupIds)
-      .is('deleted_at', null);
+    const activeRecipeIds = (activeGroupRecipes || []).map(gr => gr.recipe_id);
 
-    // Fetch all recipes with image + review info to determine truly print-ready ones
-    // (clean text + print image + not flagged in book review, exclude soft-deleted)
-    const { data: allRecipes } = await supabase
-      .from('guest_recipes')
-      .select('id, group_id, generated_image_url_print, book_review_status')
-      .in('group_id', groupIds)
-      .is('deleted_at', null);
+    // Fetch recipe details for active group_recipes entries (exclude soft-deleted)
+    const { data: allRecipes } = activeRecipeIds.length > 0
+      ? await supabase
+          .from('guest_recipes')
+          .select('id, guest_id, generated_image_url_print, book_review_status')
+          .in('id', activeRecipeIds)
+          .is('deleted_at', null)
+      : { data: null };
 
-    const recipeIds = (allRecipes || []).map(r => r.id);
+    // Build a recipe_id -> group_id map from group_recipes
+    const recipeToGroupMap = new Map<string, string>();
+    (activeGroupRecipes || []).forEach(gr => {
+      recipeToGroupMap.set(gr.recipe_id, gr.group_id);
+    });
+
+    const activeRecipeIdsSet = new Set((allRecipes || []).map(r => r.id));
     const printReadyMap: Record<string, number> = {};
 
-    if (recipeIds.length > 0) {
+    if (activeRecipeIdsSet.size > 0) {
+      const recipeIds = Array.from(activeRecipeIdsSet);
+
       const { data: printReady } = await supabase
         .from('recipe_print_ready')
         .select('recipe_id')
@@ -78,15 +82,16 @@ export async function GET() {
 
       // Reason: "print-ready" = clean text + print image + no ops review needed + not flagged in book review
       (allRecipes || []).forEach(r => {
+        const groupId = recipeToGroupMap.get(r.id);
         const reviewStatus = (r as Record<string, unknown>).book_review_status as string | null;
         if (
-          r.group_id &&
+          groupId &&
           cleanRecipeIds.has(r.id) &&
           r.generated_image_url_print &&
           !needsReviewIds.has(r.id) &&
           reviewStatus !== 'needs_revision'
         ) {
-          printReadyMap[r.group_id] = (printReadyMap[r.group_id] || 0) + 1;
+          printReadyMap[groupId] = (printReadyMap[groupId] || 0) + 1;
         }
       });
     }
@@ -103,15 +108,25 @@ export async function GET() {
     const recipeCountMap: Record<string, number> = {};
     const ownerNameMap: Record<string, string[]> = {};
 
-    (contributors || []).forEach(g => {
-      if (g.group_id) {
-        contributorCountMap[g.group_id] = (contributorCountMap[g.group_id] || 0) + 1;
+    // Reason: Derive contributor counts from recipes, not from guests table.
+    // A contributor is a unique guest_id with a recipe in the book.
+    const guestsByGroup = new Map<string, Set<string>>();
+    (allRecipes || []).forEach(r => {
+      const groupId = recipeToGroupMap.get(r.id);
+      if (groupId && r.guest_id) {
+        if (!guestsByGroup.has(groupId)) guestsByGroup.set(groupId, new Set());
+        guestsByGroup.get(groupId)!.add(r.guest_id);
       }
     });
+    guestsByGroup.forEach((guests, groupId) => {
+      contributorCountMap[groupId] = guests.size;
+    });
 
-    (recipes || []).forEach(r => {
-      if (r.group_id) {
-        recipeCountMap[r.group_id] = (recipeCountMap[r.group_id] || 0) + 1;
+    // Reason: count only recipes that exist in guest_recipes and aren't soft-deleted
+    (allRecipes || []).forEach(r => {
+      const groupId = recipeToGroupMap.get(r.id);
+      if (groupId) {
+        recipeCountMap[groupId] = (recipeCountMap[groupId] || 0) + 1;
       }
     });
 
