@@ -21,8 +21,9 @@ export default function HowItWorks() {
       number: "03",
       title: "We make the book.",
       description: "Designed. Printed. Hardcover. Delivered.",
-      image: "/images/HowitWorks_images/how_step1.png",
-      imageAlt: "Finished hardcover cookbook"
+      image: "/images/HowitWorks_images/how_step3.png",
+      imageAlt: "Finished hardcover cookbook",
+      imagePosition: "object-bottom" as const
     }
   ];
 
@@ -72,12 +73,12 @@ export default function HowItWorks() {
               </div>
 
               {/* Image */}
-              <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-6">
+              <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-6 bg-white">
                 <Image
                   src={step.image}
                   alt={step.imageAlt}
                   fill
-                  className="object-contain"
+                  className={`object-contain ${"imagePosition" in step ? step.imagePosition : ""}`}
                   sizes="(max-width: 768px) 100vw, 33vw"
                 />
               </div>
