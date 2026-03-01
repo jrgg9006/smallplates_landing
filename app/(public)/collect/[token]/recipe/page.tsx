@@ -16,6 +16,7 @@ interface GuestData {
   lastName: string;
   email?: string;
   phone?: string;
+  printedName?: string;
   existing: boolean;
 }
 

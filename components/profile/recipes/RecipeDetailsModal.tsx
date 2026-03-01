@@ -220,8 +220,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   if (!localRecipe) return null;
 
   const guest = localRecipe.guests;
-  const guestName = guest 
-    ? (guest.printed_name || `${guest.first_name} ${guest.last_name || ''}`.trim())
+  const guestRealName = guest ? `${guest.first_name} ${guest.last_name || ''}`.trim() : '';
+  const guestName = guest
+    ? (guest.printed_name ? `${guest.printed_name} (${guestRealName})` : guestRealName)
     : 'Unknown Guest';
   const guestEmail = guest?.email || null;
 
@@ -260,40 +261,35 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     return `. Active in Groups: ${recipeGroups.map(g => g.group_name).join(', ')}`;
   };
 
-  // Content component for desktop - two column layout
+  // Content component for desktop - book-style layout
   const desktopContent = (
     <div className="flex-1 flex flex-col min-w-0">
-      {/* Recipe Title and Subtitle */}
-      <div className="flex-shrink-0 mb-6 pb-6 border-b border-gray-200">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <h2 className="font-serif text-4xl font-semibold text-gray-900 leading-tight mb-2">
-              {localRecipe.recipe_name || 'Untitled Recipe'}
-            </h2>
-            <p className="font-serif italic text-lg text-gray-700">
-              Shared by {guestName}
-            </p>
-          </div>
-          {canEdit && !isEditMode && (
-            <button
-              onClick={() => setIsEditMode(true)}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 mt-1"
-              aria-label="Edit recipe"
-            >
-              <Edit className="h-5 w-5 text-gray-600" />
-            </button>
-          )}
-        </div>
+      {/* Guest name — small caps */}
+      <div className="flex items-start justify-between gap-4 mb-1">
+        <p className="text-sm uppercase tracking-[0.2em] text-gray-400 font-serif">
+          {guestName}
+        </p>
+        {canEdit && !isEditMode && (
+          <button
+            onClick={() => setIsEditMode(true)}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
+            aria-label="Edit recipe"
+          >
+            <Edit className="h-5 w-5 text-gray-600" />
+          </button>
+        )}
       </div>
 
-      {/* Comments/Notes - Full width above ingredients and instructions */}
+      {/* Recipe title */}
+      <h2 className="font-serif text-3xl lg:text-4xl font-semibold text-[#2D2D2D] leading-tight mb-4">
+        {localRecipe.recipe_name || 'Untitled Recipe'}
+      </h2>
+
+      {/* Personal note */}
       {localRecipe.comments && localRecipe.comments.trim() && (
-        <div className="flex-shrink-0 mb-8">
-          <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans">Special note</Label>
-          <pre className="whitespace-pre-wrap font-sans font-light text-sm text-gray-700 leading-relaxed m-0">
-            {localRecipe.comments}
-          </pre>
-        </div>
+        <p className="text-base italic text-gray-500 font-serif mb-6">
+          &ldquo;{localRecipe.comments}&rdquo;
+        </p>
       )}
 
       {/* Recipe Image */}
@@ -313,39 +309,41 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         </div>
       )}
 
-      {/* Two Column Layout: Ingredients (left) and Instructions (right) */}
-      <div className="flex-1 min-h-0 grid grid-cols-[1fr_2fr] gap-8">
-        {/* Left Column - Ingredients */}
-        <div className="flex flex-col h-full">
-          <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans flex-shrink-0">What ingredients you will need</Label>
+      <div className="border-t border-gray-200 my-6" />
+
+      {/* Two Column Layout — matches print layout */}
+      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
+        {/* Ingredients */}
+        <div>
+          <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Ingredients</h3>
           {showProcessingIndicator ? (
             <div className="flex items-center text-sm text-blue-600 italic font-sans font-light m-0">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
               Processing image...
             </div>
           ) : localRecipe.ingredients && localRecipe.ingredients.trim() ? (
-            <pre className="whitespace-pre-wrap break-words font-sans font-light text-sm text-gray-700 leading-relaxed m-0 overflow-wrap-anywhere">
+            <pre className="whitespace-pre-wrap break-words font-serif text-base text-gray-700 leading-relaxed m-0">
               {localRecipe.ingredients}
             </pre>
           ) : (
-            <p className="text-sm text-gray-400 italic font-sans font-light m-0">No ingredients provided</p>
+            <p className="text-sm text-gray-400 italic">No ingredients provided</p>
           )}
         </div>
 
-        {/* Right Column - Instructions */}
-        <div className="flex flex-col h-full">
-          <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans flex-shrink-0">The magic happens here</Label>
+        {/* Instructions */}
+        <div>
+          <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Instructions</h3>
           {showProcessingIndicator ? (
             <div className="flex items-center text-sm text-blue-600 italic font-sans font-light m-0">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
               Processing image...
             </div>
           ) : localRecipe.instructions && localRecipe.instructions.trim() ? (
-            <pre className="whitespace-pre-wrap break-words font-sans font-light text-sm text-gray-700 leading-relaxed m-0 overflow-wrap-anywhere">
+            <pre className="whitespace-pre-wrap break-words font-serif text-base text-gray-700 leading-[1.6] m-0">
               {localRecipe.instructions}
             </pre>
           ) : (
-            <p className="text-sm text-gray-400 italic font-sans font-light m-0">No instructions provided</p>
+            <p className="text-sm text-gray-400 italic">No instructions provided</p>
           )}
         </div>
       </div>
@@ -355,37 +353,32 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   // Content component for mobile - stacked layout
   const mobileContent = (
     <div className="flex-1 overflow-y-auto flex flex-col">
-      {/* Recipe Title and Subtitle */}
-      <div className="flex-shrink-0 mb-6 pb-4 border-b border-gray-200">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <h2 className="font-serif text-3xl font-semibold text-gray-900 leading-tight mb-2">
-              {localRecipe.recipe_name || 'Untitled Recipe'}
-            </h2>
-            <p className="font-serif italic text-base text-gray-700">
-              Shared by {guestName}
-            </p>
-          </div>
-          {canEdit && !isEditMode && (
-            <button
-              onClick={() => setIsEditMode(true)}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 mt-1"
-              aria-label="Edit recipe"
-            >
-              <Edit className="h-5 w-5 text-gray-600" />
-            </button>
-          )}
-        </div>
+      {/* Guest name — small caps */}
+      <div className="flex items-start justify-between gap-3 mb-1">
+        <p className="text-sm uppercase tracking-[0.2em] text-gray-400 font-serif">
+          {guestName}
+        </p>
+        {canEdit && !isEditMode && (
+          <button
+            onClick={() => setIsEditMode(true)}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
+            aria-label="Edit recipe"
+          >
+            <Edit className="h-5 w-5 text-gray-600" />
+          </button>
+        )}
       </div>
 
-      {/* Comments/Notes - Above ingredients and instructions */}
+      {/* Recipe title */}
+      <h2 className="font-serif text-3xl font-semibold text-[#2D2D2D] leading-tight mb-4">
+        {localRecipe.recipe_name || 'Untitled Recipe'}
+      </h2>
+
+      {/* Personal note */}
       {localRecipe.comments && localRecipe.comments.trim() && (
-        <div className="flex-shrink-0 mb-6">
-          <Label className="text-sm font-medium text-gray-700 mb-3 block font-sans">Special note</Label>
-          <pre className="whitespace-pre-wrap font-sans font-light text-base text-gray-700 leading-relaxed m-0">
-            {localRecipe.comments}
-          </pre>
-        </div>
+        <p className="text-base italic text-gray-500 font-serif mb-6">
+          &ldquo;{localRecipe.comments}&rdquo;
+        </p>
       )}
 
       {/* Recipe Image */}
@@ -405,39 +398,41 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         </div>
       )}
 
+      <div className="border-t border-gray-200 my-6" />
+
       {/* Stacked Layout for Mobile */}
       <div className="flex-1 space-y-6 pb-6">
         {/* Ingredients */}
         <div>
-          <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans">What ingredients you will need</Label>
+          <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Ingredients</h3>
           {showProcessingIndicator ? (
-            <div className="flex items-center text-base text-blue-600 italic font-sans font-light m-0">
+            <div className="flex items-center text-sm text-blue-600 italic m-0">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
               Processing image...
             </div>
           ) : localRecipe.ingredients && localRecipe.ingredients.trim() ? (
-            <pre className="whitespace-pre-wrap font-sans font-light text-base text-gray-700 leading-relaxed m-0">
+            <pre className="whitespace-pre-wrap break-words font-serif text-base text-gray-700 leading-relaxed m-0">
               {localRecipe.ingredients}
             </pre>
           ) : (
-            <p className="text-sm text-gray-400 italic font-sans font-light m-0">No ingredients provided</p>
+            <p className="text-sm text-gray-400 italic">No ingredients provided</p>
           )}
         </div>
 
         {/* Instructions */}
         <div>
-          <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans">The magic happens here</Label>
+          <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Instructions</h3>
           {showProcessingIndicator ? (
-            <div className="flex items-center text-base text-blue-600 italic font-sans font-light m-0">
+            <div className="flex items-center text-sm text-blue-600 italic m-0">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
               Processing image...
             </div>
           ) : localRecipe.instructions && localRecipe.instructions.trim() ? (
-            <pre className="whitespace-pre-wrap font-sans font-light text-base text-gray-700 leading-relaxed m-0">
+            <pre className="whitespace-pre-wrap break-words font-serif text-base text-gray-700 leading-[1.6] m-0">
               {localRecipe.instructions}
             </pre>
           ) : (
-            <p className="text-sm text-gray-400 italic font-sans font-light m-0">No instructions provided</p>
+            <p className="text-sm text-gray-400 italic">No instructions provided</p>
           )}
         </div>
       </div>
@@ -447,56 +442,53 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   // Edit content component for desktop - reusing AddRecipeModal styling patterns
   const desktopEditContent = (
     <div className="flex-1 flex flex-col min-w-0">
-      {/* Recipe Title Section - Editable */}
-      <div className="flex-shrink-0 mb-6">
-        <input
-          type="text"
-          value={recipeTitle}
-          onChange={(e) => setRecipeTitle(e.target.value)}
-          placeholder="Recipe name"
-          maxLength={60}
-          className="w-full font-serif text-3xl font-semibold text-gray-900 leading-tight bg-transparent border-0 border-b-2 border-gray-200 px-0 py-4 focus:outline-none focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 placeholder:font-normal transition-all duration-200"
-          required
-        />
-        <p className="font-serif italic text-base text-gray-600 mt-2">
-          Shared by {guestName}
-        </p>
-      </div>
+      {/* Guest name — small caps */}
+      <p className="text-sm uppercase tracking-[0.2em] text-gray-400 font-serif mb-1">
+        {guestName}
+      </p>
 
-      {/* Notes Section - Full width above ingredients and instructions */}
-      <div className="flex-shrink-0 mb-8">
-        <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans">Edit the special note (only if necessary)</Label>
+      {/* Recipe Title - Editable */}
+      <input
+        type="text"
+        value={recipeTitle}
+        onChange={(e) => setRecipeTitle(e.target.value)}
+        placeholder="Recipe name"
+        maxLength={60}
+        className="w-full font-serif text-3xl lg:text-4xl font-semibold text-[#2D2D2D] leading-tight bg-transparent border-0 border-b-2 border-gray-200 px-0 py-2 mb-4 focus:outline-none focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 placeholder:font-normal transition-all duration-200"
+        required
+      />
+
+      {/* Personal note - Editable */}
+      <div className="flex-shrink-0 mb-6">
         <textarea
           value={recipeNotes}
           onChange={(e) => setRecipeNotes(e.target.value)}
-          placeholder="Made this at 2am more times than I will admit."
-          className="w-full text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-white border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 resize-none min-h-[80px] transition-all duration-200"
+          placeholder="Add a personal note..."
+          className="w-full text-base italic text-gray-500 font-serif leading-relaxed bg-white border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 placeholder:not-italic resize-none min-h-[60px] transition-all duration-200"
         />
       </div>
 
-      {/* Two Column Layout: Ingredients (left) and Instructions (right) */}
-      <div className="flex-1 min-h-0 grid grid-cols-[1fr_2fr] gap-8">
-        {/* Left Column - Ingredients */}
-        <div className="flex flex-col h-full">
-          <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans flex-shrink-0">What ingredients you will need</Label>
+      {/* Two Column Layout — matches print layout */}
+      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
+        {/* Ingredients */}
+        <div className="flex flex-col">
+          <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Ingredients</h3>
           <textarea
             value={recipeIngredients}
             onChange={(e) => setRecipeIngredients(e.target.value)}
             placeholder="Pecorino, not parmesan. Good eggs. The real guanciale."
-            className="flex-1 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-white border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 resize-none font-sans transition-all duration-200"
+            className="flex-1 text-base text-gray-700 leading-relaxed whitespace-pre-wrap bg-white border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 resize-none font-serif transition-all duration-200 min-h-[120px]"
           />
         </div>
 
-        {/* Right Column - Instructions */}
-        <div className="flex flex-col h-full">
-          <Label className="text-sm font-medium text-gray-600 mb-2 block font-sans flex-shrink-0">
-            The magic happens here
-          </Label>
+        {/* Instructions */}
+        <div className="flex flex-col">
+          <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Instructions</h3>
           <textarea
             value={recipeInstructions}
             onChange={(e) => setRecipeInstructions(e.target.value)}
             placeholder="Start with cold pan. Trust the process. Save the pasta water—you will need it."
-            className="flex-1 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-white border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 resize-none font-sans transition-all duration-200"
+            className="flex-1 text-base text-gray-700 leading-[1.6] whitespace-pre-wrap bg-white border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 resize-none font-serif transition-all duration-200 min-h-[200px]"
           />
         </div>
       </div>
@@ -513,57 +505,54 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   // Edit content component for mobile - reusing AddRecipeModal styling patterns
   const mobileEditContent = (
     <div className="flex-1 overflow-y-auto flex flex-col">
-      {/* Recipe Title Section - Editable */}
-      <div className="flex-shrink-0 mb-6 pb-4 border-b border-gray-200">
-        <input
-          type="text"
-          value={recipeTitle}
-          onChange={(e) => setRecipeTitle(e.target.value)}
-          placeholder="Recipe name"
-          maxLength={60}
-          className="w-full font-serif text-3xl font-semibold text-gray-900 leading-tight bg-transparent border-0 border-b-2 border-gray-200 px-0 py-2 focus:outline-none focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 transition-all duration-200"
-          required
-        />
-        <p className="font-serif italic text-base text-gray-700 mt-2">
-          Shared by {guestName}
-        </p>
-      </div>
+      {/* Guest name — small caps */}
+      <p className="text-sm uppercase tracking-[0.2em] text-gray-400 font-serif mb-1">
+        {guestName}
+      </p>
+
+      {/* Recipe Title - Editable */}
+      <input
+        type="text"
+        value={recipeTitle}
+        onChange={(e) => setRecipeTitle(e.target.value)}
+        placeholder="Recipe name"
+        maxLength={60}
+        className="w-full font-serif text-3xl font-semibold text-[#2D2D2D] leading-tight bg-transparent border-0 border-b-2 border-gray-200 px-0 py-2 mb-4 focus:outline-none focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 transition-all duration-200"
+        required
+      />
+
+      {/* Personal note - Editable */}
+      <textarea
+        id="recipeNotes"
+        value={recipeNotes}
+        onChange={(e) => setRecipeNotes(e.target.value)}
+        placeholder="Add a personal note..."
+        className="w-full text-base italic text-gray-500 font-serif leading-relaxed bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 placeholder:not-italic resize-none min-h-[60px] transition-all duration-200"
+      />
 
       {/* Stacked Layout for Mobile */}
       <div className="flex-1 space-y-6 pb-6">
-        {/* Notes */}
-        <div>
-          <Label htmlFor="recipeNotes" className="text-sm font-medium text-gray-600 mb-2 block font-sans">Edit the special note (only if necessary)</Label>
-          <textarea
-            id="recipeNotes"
-            value={recipeNotes}
-            onChange={(e) => setRecipeNotes(e.target.value)}
-            placeholder="Made this at 2am more times than I will admit."
-            className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[80px] bg-white transition-all duration-200 placeholder:text-gray-400"
-          />
-        </div>
-
         {/* Ingredients */}
         <div>
-          <Label htmlFor="recipeIngredients" className="text-sm font-medium text-gray-600 mb-2 block font-sans">What ingredients you will need</Label>
+          <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Ingredients</h3>
           <textarea
             id="recipeIngredients"
             value={recipeIngredients}
             onChange={(e) => setRecipeIngredients(e.target.value)}
             placeholder="Pecorino, not parmesan. Good eggs. The real guanciale."
-            className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[100px] bg-white font-sans transition-all duration-200 placeholder:text-gray-400"
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[100px] bg-white font-serif transition-all duration-200 placeholder:text-gray-400"
           />
         </div>
 
         {/* Instructions */}
         <div>
-          <Label htmlFor="recipeInstructions" className="text-sm font-medium text-gray-600 mb-2 block font-sans">The magic happens here</Label>
+          <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Instructions</h3>
           <textarea
             id="recipeInstructions"
             value={recipeInstructions}
             onChange={(e) => setRecipeInstructions(e.target.value)}
             placeholder="Start with cold pan. Trust the process. Save the pasta water—you will need it."
-            className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[140px] bg-white font-sans transition-all duration-200 placeholder:text-gray-400"
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[140px] bg-white font-serif transition-all duration-200 placeholder:text-gray-400"
           />
         </div>
 

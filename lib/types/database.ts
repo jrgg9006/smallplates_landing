@@ -832,6 +832,7 @@ export interface CollectionGuestSubmission {
   upload_method?: 'text' | 'audio' | 'image';
   document_urls?: string[];
   audio_url?: string;
+  printed_name?: string;
 }
 
 export interface CollectionTokenInfo {

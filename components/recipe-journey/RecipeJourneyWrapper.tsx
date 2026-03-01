@@ -25,6 +25,7 @@ interface GuestData {
   lastName: string;
   email?: string;
   phone?: string;
+  printedName?: string;
   existing: boolean;
 }
 
@@ -343,7 +344,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         raw_recipe_text: undefined,
         upload_method: 'image',
         document_urls: [], // Will be populated by the new function
-        audio_url: undefined
+        audio_url: undefined,
+        printed_name: guestData.printedName || undefined
       };
 
       // Simulate progress during submission
@@ -460,7 +462,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         raw_recipe_text: recipeData.rawRecipeText,
         upload_method: recipeData.uploadMethod,
         document_urls: recipeData.documentUrls,
-        audio_url: recipeData.audioUrl
+        audio_url: recipeData.audioUrl,
+        printed_name: guestData.printedName || undefined
       };
 
       // Submit the recipe with cookbook/group context
@@ -531,7 +534,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         ingredients: '', // Empty for raw mode
         instructions: '', // Empty for raw mode
         comments: recipeData.personalNote.trim() || undefined, // Now includes personal note
-        raw_recipe_text: textToSubmit // Use the raw text
+        raw_recipe_text: textToSubmit, // Use the raw text
+        printed_name: guestData.printedName || undefined
       };
 
       // Submit the recipe with cookbook/group context
@@ -896,7 +900,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
               ingredients={recipeData.uploadMethod === 'image' ? 'Images uploaded' : recipeData.ingredients}
               instructions={recipeData.uploadMethod === 'image' ? `${recipeData.documentUrls?.length || 0} images uploaded` : recipeData.instructions}
               personalNote={recipeData.personalNote}
-              guestName={`${guestData.firstName} ${guestData.lastName}`.trim()}
+              guestName={guestData.printedName || `${guestData.firstName} ${guestData.lastName}`.trim()}
               onEditSection={onEditSection}
             />
           </motion.div>

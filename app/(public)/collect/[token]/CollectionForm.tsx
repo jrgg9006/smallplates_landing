@@ -4,9 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { validateCollectionToken, searchGuestInCollection, getCollectionSocialProof } from '@/lib/supabase/collection';
+import { validateCollectionToken, getCollectionSocialProof } from '@/lib/supabase/collection';
 import SocialProofBanner from '@/components/recipe-journey/SocialProofBanner';
-import type { CollectionTokenInfo, Guest } from '@/lib/types/database';
+import type { CollectionTokenInfo } from '@/lib/types/database';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -34,11 +34,7 @@ function formatDeadlineDate(dateString: string): string | null {
  * Always returns "A Personal Note:" as title, only the couple names change
  */
 function generatePersonalizedMessage(fullName: string, rawFullName: string | null) {
-  // Always show "A Personal Note:" as title
-  // Only difference is if we show couple names or "our friends"
-  
   if (!rawFullName) {
-    // No name available - use generic fallback
     return {
       beforeName: 'A Personal Note:',
       name: '',
@@ -46,20 +42,13 @@ function generatePersonalizedMessage(fullName: string, rawFullName: string | nul
     };
   }
 
-  // Check if it's a couple (contains " and ")
   if (fullName.includes(' and ')) {
-    // Extract first names for couple
-    const parts = fullName.split(' and ');
-    const firstPersonFirstName = parts[0]?.split(' ')[0] || '';
-    const secondPersonFirstName = parts[1]?.split(' ')[0] || '';
-    
     return {
       beforeName: 'A Personal Note:',
       name: '',
       afterName: '',
     };
   } else {
-    // Single person
     return {
       beforeName: 'A Personal Note:',
       name: '',
@@ -73,67 +62,41 @@ export default function CollectionForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = params.token as string;
-  
+
   // Get cookbook/group context from query parameters to preserve during navigation
   const cookbookId = searchParams.get('cookbook');
   const groupId = searchParams.get('group');
-  
-  
-  // Mobile debugging - log component mount
-  useEffect(() => {
-    // Component mount logging removed for production
-  }, [token]);
-  
+
   // State management
   const [tokenInfo, setTokenInfo] = useState<CollectionTokenInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [debugLogs, setDebugLogs] = useState<string[]>([]);
-  
-  // Mobile debugging - console and visual logs
-  const addDebugLog = (message: string) => {
-    // console.log removed for production
-    setDebugLogs(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
-  };
-  
-  // Guest search state
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [searching, setSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<Guest[]>([]);
-  const [searchCompleted, setSearchCompleted] = useState(false);
-  const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
-  const [fullName, setFullName] = useState('');
-  // 1) Add showNameEntry state
-  const [showNameEntry, setShowNameEntry] = useState(false);
+
   // Social proof state
   const [socialProofCount, setSocialProofCount] = useState<number>(0);
+
+  // Guest name state
+  const [fullName, setFullName] = useState('');
+  const [printedName, setPrintedName] = useState('');
+  const [showPrintedName, setShowPrintedName] = useState(false);
 
   // Validate token on component mount
   useEffect(() => {
     async function validateToken() {
-      // console.log removed for production
-      
       if (!token) {
-        console.error('❌ Mobile Debug - No token provided');
         setError('No collection link provided');
         setLoading(false);
         return;
       }
 
       try {
-        addDebugLog('📡 Calling validateCollectionToken');
         const { data, error } = await validateCollectionToken(token, groupId);
-        
-        addDebugLog(`📡 Response: ${error ? 'ERROR: ' + error : 'SUCCESS'}`);
-        
+
         if (error || !data) {
-          addDebugLog('❌ Token validation failed: ' + error);
           setError(error || 'Invalid collection link');
         } else {
-          addDebugLog('✅ Token validation success');
           setTokenInfo(data);
-          
+
           // Fetch social proof data (only if groupId exists)
           if (groupId) {
             const { data: proofData } = await getCollectionSocialProof(groupId);
@@ -142,89 +105,19 @@ export default function CollectionForm() {
             }
           }
         }
-      } catch (err) {
-        addDebugLog('💥 validateCollectionToken error: ' + String(err));
+      } catch {
         setError('Failed to validate collection link');
       }
-      
+
       setLoading(false);
-      // console.log removed for production
     }
 
     validateToken();
   }, [token, groupId]);
 
-  // Handle guest search
-  const handleSearch = async () => {
-    // console.log removed for production
-    
-    if (!tokenInfo || !firstName.trim()) {
-      // console.log removed for production
-      return;
-    }
-
-    setSearching(true);
-    setError(null);
-
-    try {
-      const { data: guest, error } = await searchGuestInCollection(
-        tokenInfo.user_id,
-        firstName.trim(),
-        lastName.trim(),
-        groupId  // Pass groupId to filter guests by specific group
-      );
-
-      if (error) {
-        setError(error);
-      } else {
-        setSearchResults(guest || []);
-        setSearchCompleted(true);
-      }
-    } catch (err) {
-      setError('Failed to search for guest');
-      console.error('Search error:', err);
-    } finally {
-      setSearching(false);
-    }
-  };
-
-  // Handle guest selection
-  const handleGuestSelect = (guest: Guest) => {
-    setSelectedGuest(guest);
-    const guestData = {
-      id: guest.id,
-      firstName: guest.first_name,
-      lastName: guest.last_name,
-      email: guest.email,
-      phone: guest.phone,
-      existing: true
-    };
-
-    // Store guest data AND context in session storage for the recipe form with error handling
-    try {
-      if (typeof window !== 'undefined' && window.sessionStorage) {
-        sessionStorage.setItem('collectionGuestData', JSON.stringify(guestData));
-        // Store cookbook/group context as backup
-        if (cookbookId || groupId) {
-          const contextToStore = { cookbookId, groupId };
-          // console.log removed for production
-          sessionStorage.setItem('collectionContext', JSON.stringify(contextToStore));
-        }
-      }
-    } catch (error) {
-      // console.log removed for production
-      // Continue anyway - we can handle missing sessionStorage in the recipe page
-    }
-    
-    // Navigate to recipe form, preserving query parameters
-    const queryString = cookbookId ? `?cookbook=${cookbookId}` : groupId ? `?group=${groupId}` : '';
-    router.push(`/collect/${token}/recipe${queryString}`);
-  };
-
-  // Handle continue for new guest
-  // 4) Update handleContinueAsNew to require fullName and derive names ONLY from there if showNameEntry is true
-  const handleContinueAsNew = () => {
-    let name = fullName.trim();
+  // Handle continue — derive first/last from fullName
+  const handleContinue = () => {
+    const name = fullName.trim();
     if (!name) return;
     const parts = name.split(/\s+/);
     const derivedLast = parts.length > 1 ? parts.pop() as string : '';
@@ -232,22 +125,19 @@ export default function CollectionForm() {
     const guestData = {
       firstName: derivedFirst.trim(),
       lastName: derivedLast.trim(),
+      printedName: printedName.trim() || undefined,
       existing: false
     };
     try {
       if (typeof window !== 'undefined' && window.sessionStorage) {
         sessionStorage.setItem('collectionGuestData', JSON.stringify(guestData));
-        // Store cookbook/group context as backup
         if (cookbookId || groupId) {
-          const contextToStore = { cookbookId, groupId };
-          // console.log removed for production
-          sessionStorage.setItem('collectionContext', JSON.stringify(contextToStore));
+          sessionStorage.setItem('collectionContext', JSON.stringify({ cookbookId, groupId }));
         }
       }
     } catch {
       // ignore
     }
-    // Navigate to recipe form, preserving query parameters
     const queryString = cookbookId ? `?cookbook=${cookbookId}` : groupId ? `?group=${groupId}` : '';
     router.push(`/collect/${token}/recipe${queryString}`);
   };
@@ -276,19 +166,6 @@ export default function CollectionForm() {
               <p className="text-sm text-gray-500">
                 Please check the link or contact the person who shared it with you.
               </p>
-              
-              {/* Debug info for troubleshooting */}
-              <div className="mt-4 p-4 bg-gray-100 rounded text-left text-sm">
-                <p><strong>Debug Info:</strong></p>
-                <p>Token: {token}</p>
-                <p>Error: {error}</p>
-                <p>Debug Logs:</p>
-                <div className="max-h-40 overflow-y-auto bg-gray-50 p-2 rounded">
-                  {debugLogs.map((log, index) => (
-                    <div key={index} className="text-xs font-mono">{log}</div>
-                  ))}
-                </div>
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -349,11 +226,7 @@ export default function CollectionForm() {
               {(() => {
                 const userName = tokenInfo?.user_name || '';
                 const rawFullName = tokenInfo?.raw_full_name || null;
-                // console.log removed for production
-                // console.log removed for production
-                // console.log removed for production
                 const personalizedMessage = generatePersonalizedMessage(userName, rawFullName);
-                // console.log removed for production
                 return (
                   <div className="text-left">
                     {/* Mobile Couple Image - shown above Personal Note title */}
@@ -373,7 +246,7 @@ export default function CollectionForm() {
                         </div>
                       </div>
                     )}
-                    
+
                     <h1 className="text-2xl lg:text-3xl font-semibold text-[#2D2D2D] mb-4 font-serif">
                       {personalizedMessage.beforeName}
                       {personalizedMessage.name && (
@@ -383,12 +256,11 @@ export default function CollectionForm() {
                       )}
                       {personalizedMessage.afterName}
                     </h1>
-                    
+
                     {/* Personal Message from Share Collection Modal */}
                     <div className="mb-6">
                       <div>
                         {(() => {
-                          // If there's a saved custom message, show it
                           const deadlineFormatted = tokenInfo?.book_close_date ? formatDeadlineDate(tokenInfo.book_close_date) : null;
 
                           if (tokenInfo?.custom_share_message) {
@@ -408,7 +280,6 @@ export default function CollectionForm() {
                               </div>
                             );
                           } else {
-                            // Default message with couple names
                             const coupleDisplayName = tokenInfo?.couple_names || 'your friends';
                             const defaultNote = `You're adding a recipe to ${coupleDisplayName}'s wedding cookbook. Doesn't have to be fancy—just something you actually make. It'll live in their kitchen forever.`;
 
@@ -429,217 +300,103 @@ export default function CollectionForm() {
                         })()}
                       </div>
                     </div>
-                    
+
                     {/* Social Proof Banner */}
                     <SocialProofBanner count={socialProofCount} />
-                    
+
                     <div className="text-sm text-gray-500 mb-6">
-                      Find your name. Add your recipe. Done.
+                      Add your name. Add your recipe. Done.
                     </div>
                   </div>
                 );
               })()}
 
-              {/* Search Form */}
+              {/* Name Entry Form */}
               <div className="space-y-4">
-              <div className="flex gap-4 items-end">
-                <div className="w-20">
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                    First initial
+                <div className="space-y-2">
+                  <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
+                    Your name
                   </label>
-                  <Input
-                    id="firstName"
-                    value={firstName}
-                    onChange={(e) => {
-                      const value = e.target.value.slice(0, 1).toUpperCase();
-                      addDebugLog(`✏️ firstName: ${value}`);
-                      setFirstName(value);
-                    }}
-                    placeholder=""
-                    disabled={searching}
-                    maxLength={1}
-                    className="text-center bg-white"
-                    autoComplete="given-name"
-                    inputMode="text"
-                  />
+                  <div className="flex gap-4 items-center">
+                    <Input
+                      id="fullName"
+                      value={fullName}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        const next = (fullName.length === 0 && raw.length > 0)
+                          ? raw.replace(/^./, (c) => c.toUpperCase())
+                          : raw;
+                        setFullName(next);
+                      }}
+                      placeholder="Your full name"
+                      autoComplete="name"
+                      className="h-10 bg-white"
+                    />
+                    <Button
+                      onClick={handleContinue}
+                      disabled={!fullName.trim()}
+                      className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${
+                        !fullName.trim()
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : 'bg-[#D4A854] text-white hover:bg-[#c49b4a]'
+                      }`}
+                    >
+                      Continue
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                    Last name
-                  </label>
-                  <Input
-                    id="lastName"
-                    value={lastName}
-                    onChange={(e) => {
-                      const raw = e.target.value;
-                      const next = (lastName.length === 0 && raw.length > 0)
-                        ? raw.replace(/^./, (c) => c.toUpperCase())
-                        : raw;
-                      addDebugLog(`✏️ lastName: ${next}`);
-                      setLastName(next);
+
+                {!showPrintedName ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPrintedName(true);
+                      setTimeout(() => document.getElementById('printedName')?.focus(), 100);
                     }}
-                    placeholder=""
-                    disabled={searching}
-                    className="bg-white"
-                    autoComplete="family-name"
-                    inputMode="text"
-                  />
-                </div>
-                <Button 
-                  onClick={() => {
-                    addDebugLog('🔍 Search button clicked');
-                    handleSearch();
-                  }}
-                  disabled={!firstName.trim() || searching}
-                  className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[80px] transition-colors ${
-                    !firstName.trim() || searching 
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                      : 'bg-[#D4A854] text-white hover:bg-[#c49b4a]'
-                  }`}
-                >
-                  {searching ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Searching...
-                    </>
-                  ) : (
-                    "Search"
-                  )}
-                </Button>
-              </div>
-
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                <p className="text-sm text-red-600">{error}</p>
-              </div>
-            )}
-
-            {/* Name entry when user explicitly chooses "I don't see my name" */}
-            {searchCompleted && showNameEntry && (
-              <div className="space-y-2 mt-6">
-                <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                <div className="flex gap-4 items-center">
-                  <Input
-                    id="fullName"
-                    value={fullName}
-                    onChange={(e) => {
-                      const raw = e.target.value;
-                      const next = (fullName.length === 0 && raw.length > 0)
-                        ? raw.replace(/^./, (c) => c.toUpperCase())
-                        : raw;
-                      setFullName(next);
-                    }}
-                    placeholder="Your full name"
-                    autoComplete="name"
-                    className="h-10"
-                  />
-                  <Button
-                    onClick={handleContinueAsNew}
-                    disabled={!fullName.trim()}
-                    className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!fullName.trim() ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[#D4A854] text-white hover:bg-[#c49b4a]'}`}
+                    className="text-xs text-gray-400 hover:text-gray-500 transition-colors -mt-2 italic"
                   >
-                    Continue
-                  </Button>
-                </div>
-                <p className="text-sm text-gray-500 mt-1">This is how we&apos;ll print your name in the cookbook.</p>
-              </div>
-            )}
-
-            {/* Search Results */}
-            {searchCompleted && !showNameEntry && (
-              <div className="border-t border-[#D4A854]/20 pt-6">
-                {searchResults.length > 0 ? (
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-medium text-[#2D2D2D] font-serif">
-                      That&apos;s you, right?
-                    </h3>
-                    <div className="space-y-3">
-                      {searchResults.map((guest) => (
-                        <button
-                          key={guest.id}
-                          onClick={() => handleGuestSelect(guest)}
-                          className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-[#D4A854]/50 hover:bg-[#FAF7F2] transition-colors text-left bg-white"
-                        >
-                          <span className="text-[#2D2D2D] font-medium">
-                            {guest.first_name} {guest.last_name}
-                          </span>
-                          <svg 
-                            className="w-5 h-5 text-[#D4A854]" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </button>
-                      ))}
+                    Want a different name in the book?
+                  </button>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="printedName" className="block text-sm font-medium text-gray-700">
+                        Name in the book
+                      </label>
                       <button
+                        type="button"
                         onClick={() => {
-                          setShowNameEntry(true);
-                          setSelectedGuest(null);
-                          setFullName('');
-                          // Optionally: scroll/focus
-                          setTimeout(() => document.getElementById('fullName')?.focus(), 100);
+                          setShowPrintedName(false);
+                          setPrintedName('');
                         }}
-                        className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-[#D4A854]/50 hover:bg-[#FAF7F2] transition-colors text-left bg-white"
+                        className="text-gray-400 hover:text-gray-500 transition-colors"
                       >
-                        <span className="text-[#2D2D2D] font-medium">
-                          I don&apos;t see my name
-                        </span>
-                        <svg 
-                          className="w-5 h-5 text-[#D4A854]" 
-                          fill="none" 
-                          stroke="currentColor" 
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                     </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-medium text-[#2D2D2D] font-serif">
-                      Not on the list yet? No problem.
-                    </h3>
-                    <p className="text-gray-600 mb-4 text-sm">
-                      We&apos;ll add you when you submit your recipe.
+                    <Input
+                      id="printedName"
+                      value={printedName}
+                      onChange={(e) => setPrintedName(e.target.value)}
+                      placeholder='e.g., "Mama", "Your favorite brother"'
+                      autoComplete="off"
+                      className="h-10 bg-white"
+                    />
+                    <p className="text-xs text-gray-500">
+                      This is how your name will be printed in the cookbook.
                     </p>
-                    {/* Ask for full name with inline Continue button (visual match to search row) */}
-                    <div className="space-y-2">
-                      <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                      <div className="flex gap-4 items-center">
-                        <Input
-                          id="fullName"
-                          value={fullName}
-                          onChange={(e) => {
-                            const raw = e.target.value;
-                            const next = (fullName.length === 0 && raw.length > 0)
-                              ? raw.replace(/^./, (c) => c.toUpperCase())
-                              : raw;
-                            setFullName(next);
-                          }}
-                          placeholder={firstName || lastName ? `e.g., John ${lastName}` : 'Your full name'}
-                          autoComplete="name"
-                          className="h-10"
-                        />
-                        <Button
-                          onClick={handleContinueAsNew}
-                          disabled={!((fullName || firstName).trim())}
-                          className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!((fullName || firstName).trim()) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[#D4A854] text-white hover:bg-[#c49b4a]'}`}
-                        >
-                          Continue
-                        </Button>
-                      </div>
-                      <p className="text-sm text-gray-500 mt-1">This is how we&apos;ll print your name in the cookbook.</p>
-                    </div>
                   </div>
                 )}
               </div>
-            )}
+
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

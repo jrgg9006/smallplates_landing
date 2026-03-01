@@ -281,6 +281,7 @@ export async function submitGuestRecipeWithFiles(
         recipes_received: 0,
         is_archived: false,
         group_id: context?.groupId || null,
+        printed_name: submission.printed_name?.trim() || null,
       };
 
       const { data: newGuest, error: guestError } = await supabase
@@ -628,6 +629,7 @@ export async function submitGuestRecipe(
         recipes_received: 0,
         is_archived: false,
         group_id: context?.groupId || null,
+        printed_name: submission.printed_name?.trim() || null,
       };
 
       const { data: newGuest, error: guestError } = await supabase
