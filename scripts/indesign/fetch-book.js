@@ -27,7 +27,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // ============================================
 // CONFIGURACIÓN - Cambiar el group_id aquí
 // ============================================
-const GROUP_ID = '2001e7f6-0204-4d4e-8b23-19f22d7f9739';
+const GROUP_ID = 'd47584eb-d32a-421f-bd51-04c08dc318d5';
 // ============================================
 
 // ============================================
