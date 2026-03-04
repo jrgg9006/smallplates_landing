@@ -58,7 +58,7 @@ export default function Hero() {
           >
             A wedding cookbook made by everyone who matters.
             <span className="block mt-1 text-white/80">
-              Not a keepsake—a kitchen book.
+              Not a keepsake. An authentic cookbook.
             </span>
           </motion.p>
           <motion.div

@@ -76,9 +76,8 @@ export default function TheSolution() {
               </p>
 
               <p className="font-sans font-light text-lg md:text-xl text-[#2D2D2D]/80 leading-relaxed">
-                It&apos;s not a gift you display.
-                <span className="block">It&apos;s a gift you use—stained, dog-eared,</span>
-                <span className="block">and opened on random Tuesday nights for years.</span>
+                Not perfect. It&apos;s authentic.
+                <span className="block">That&apos;s what makes it a real book.</span>
               </p>
             </div>
 

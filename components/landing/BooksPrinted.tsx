@@ -208,7 +208,7 @@ export default function BooksPrinted() {
               Real recipes. Real people. Real books.
             </h2>
             <p className="font-sans font-light text-lg md:text-xl lg:text-2xl text-[#2D2D2D]/70 max-w-2xl">
-              Every page has a name. Every name has a story.
+              They send the recipe. We make it look like this.
             </p>
           </motion.div>
           

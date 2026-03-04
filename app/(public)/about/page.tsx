@@ -64,11 +64,11 @@ export default function AboutUs() {
               </p>
               
               <p className="text-[#2D2D2D] text-lg md:text-xl leading-relaxed font-light">
-                We believe food is how families really connect. Not in dining rooms with good china, but in kitchens on Tuesday nights. A recipe isn&apos;t just instructions—it&apos;s presence. It&apos;s your grandmother&apos;s hands guiding yours. It&apos;s love you can taste.
+                We believe food is how families really connect. Not in fancy dining rooms, but in kitchens on Tuesday nights. A recipe isn&apos;t just instructions—it&apos;s presence. It&apos;s your grandmother&apos;s hands guiding yours. It&apos;s love you can taste.
               </p>
               
               <p className="text-[#2D2D2D] text-lg md:text-xl leading-relaxed font-light">
-                That&apos;s why we created wedding cookbooks. Not keepsakes that sit on shelves, but kitchen books that get stained and dog-eared. Every page holds a name, a story, a piece of someone who was there. It&apos;s the kind of gift that matters—not because it&apos;s expensive, but because it&apos;s real.
+                That&apos;s why we created wedding cookbooks. Not keepsakes that sit on shelves, but kitchen books that get stained and dog-eared. Every page holds a name, a story, a piece of someone who was there. It&apos;s the kind of gift that matters—not because it&apos;s expensive, but because it&apos;s real and authentic.
               </p>
               
               <p className="text-[#2D2D2D] text-lg md:text-xl leading-relaxed font-light">

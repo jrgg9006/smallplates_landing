@@ -28,7 +28,6 @@ import DetailStrip from "@/components/landing/TheBook/DetailStrip";
 const specTags = [
   "Hardcover",
   "Full color",
-  "Handmade",
   "8 \u00d7 10 in",
   "Matte finish",
 ];
@@ -63,7 +62,7 @@ export default function TheBook() {
             What shows up at your door.
           </h2>
           <p className="mt-5 font-sans font-light text-base md:text-lg text-[#9A9590] max-w-[520px] mx-auto leading-relaxed">
-            Every book is hardcover, full color, and handmade. Because what&apos;s
+            Every book is hardcover and full color. Because what&apos;s
             inside deserves to be held in something real.
           </p>
         </motion.div>
@@ -170,13 +169,13 @@ export default function TheBook() {
               </p>
 
               <h3 className="font-serif text-2xl md:text-3xl font-normal text-[#2D2D2D] leading-tight mb-6">
-                A real book. Made by hand. Made to last.
+                A real book. Made to last.
               </h3>
 
               <div className="space-y-4">
                 <p className="font-sans font-light text-base md:text-lg text-[#9A9590] leading-relaxed">
                   Every Small Plates book is a hardcover cookbook &mdash; professionally
-                  designed, printed in full color, and bound by hand in our workshop.
+                  designed and printed in full color.
                   No templates. No shortcuts.
                 </p>
                 <p className="font-sans font-light text-base md:text-lg text-[#9A9590] leading-relaxed">
@@ -217,7 +216,7 @@ export default function TheBook() {
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
           <p className="font-serif text-2xl md:text-3xl font-medium text-[#2D2D2D] leading-snug">
-            Designed by us. Bound by hand. Printed for them.
+            Designed by us. Printed for them.
           </p>
           <p className="mt-3 font-serif text-2xl md:text-3xl font-medium text-[#2D2D2D] leading-snug">
             Made to be{" "}
