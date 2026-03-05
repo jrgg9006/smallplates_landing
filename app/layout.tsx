@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import './globals.css'
 import { AuthProvider } from '@/lib/contexts/AuthContext'
 import { Analytics } from '@vercel/analytics/react'
@@ -38,6 +39,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-96BCVQ91GC"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-96BCVQ91GC');
+          `}
+        </Script>
         <link rel="stylesheet" href="https://use.typekit.net/fvk8ngw.css" />
       </head>
       <body className="antialiased bg-white text-gray-900">
