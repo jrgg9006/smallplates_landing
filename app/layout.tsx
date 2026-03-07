@@ -6,27 +6,27 @@ import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
 export const metadata: Metadata = {
-  title: 'Small Plates & Company — Psst...pass a plate',
-  description: 'A book experience made with your loved ones\' recipes — high-quality hardcover books that bring memories to life.',
-  metadataBase: new URL('https://smallplates.co'),
+  title: 'Small Plates & Company — Finally, a wedding gift people actually use',
+  description: 'A wedding cookbook made by the people who showed up. Their recipes. Their stories. Your kitchen. Not a keepsake—a kitchen book.',
+  metadataBase: new URL('https://www.smallplatesandcompany.com'),
   openGraph: {
-    title: 'Small Plates & Company',
-    description: 'A book experience made with your loved ones\' recipes.',
+    title: 'Small Plates & Company — Finally, a wedding gift people actually use',
+    description: 'A wedding cookbook made by everyone who matters. Not a keepsake—a kitchen book.',
     type: 'website',
-    url: 'https://smallplates.co/',
+    url: 'https://www.smallplatesandcompany.com/',
     images: [
       {
         url: '/images/landing_hero_image2.jpg',
         width: 1200,
         height: 630,
-        alt: 'Small Plates & Company - Psst...pass a plate',
+        alt: 'Small Plates & Company — A wedding cookbook made by your people',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Small Plates & Company',
-    description: 'A book experience made with your loved ones\' recipes.',
+    title: 'Small Plates & Company — Finally, a wedding gift people actually use',
+    description: 'A wedding cookbook made by everyone who matters. Not a keepsake—a kitchen book.',
     images: ['/images/landing_hero_image2.jpg'],
   },
 }
