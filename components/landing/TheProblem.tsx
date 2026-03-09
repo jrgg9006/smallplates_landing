@@ -61,7 +61,7 @@ export default function TheProblem() {
           
           <p className="font-sans text-lg font-light md:text-xl text-[#2D2D2D]/70 leading-relaxed">
             Not because people don&apos;t care.
-            <span className="block">Because an object can't carry a person inside it.</span>
+            <span className="block">Because an object can&apos;t carry a person inside it.</span>
           </p>
         </motion.div>
 

@@ -29,6 +29,7 @@ function StatusBadge({ status, source }: { status: Guest["status"]; source?: Gue
   const sourceLabels: Record<GuestSource, string> = {
     manual: "Added Manually",
     collection: "Collection Link",
+    imported: "Imported",
   };
 
   const displayLabel =

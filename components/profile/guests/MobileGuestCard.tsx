@@ -35,6 +35,7 @@ function MobileStatusBadge({ status, source }: { status: GuestWithMeta["status"]
   const sourceLabels: Record<GuestSource, string> = {
     manual: "Added Manually",
     collection: "Collection Link",
+    imported: "Imported",
   };
 
   const displayLabel =
