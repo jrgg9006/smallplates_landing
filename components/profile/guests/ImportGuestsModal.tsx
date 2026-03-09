@@ -268,7 +268,7 @@ export function ImportGuestsModal({
 
       {/* Modal */}
       <div
-        className="relative w-full max-w-[600px] rounded-2xl bg-[#FAF7F2] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.15)]
+        className="relative w-full max-w-[600px] rounded-2xl bg-[#FAF7F2] p-8 max-sm:p-5 shadow-[0_20px_60px_rgba(0,0,0,0.15)]
                     max-sm:max-w-none max-sm:rounded-none max-sm:rounded-t-2xl max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:max-h-[90vh] max-sm:overflow-y-auto"
       >
         {/* Close button */}
@@ -487,9 +487,16 @@ export function ImportGuestsModal({
                     </div>
 
                     {!isDisabled && hasContact && (
-                      <span className="text-[10px] text-[#999] flex-shrink-0 whitespace-nowrap">
-                        {[guest.email, guest.phone].filter(Boolean).join(" · ")}
-                      </span>
+                      <>
+                        {/* Desktop: full email · phone */}
+                        <span className="text-[10px] text-[#999] flex-shrink-0 whitespace-nowrap hidden sm:inline">
+                          {[guest.email, guest.phone].filter(Boolean).join(" · ")}
+                        </span>
+                        {/* Mobile: just email or phone, truncated */}
+                        <span className="text-[10px] text-[#999] truncate max-w-[140px] flex-shrink-0 sm:hidden">
+                          {guest.email || guest.phone}
+                        </span>
+                      </>
                     )}
 
                     {isDisabled && (

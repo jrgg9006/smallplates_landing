@@ -251,7 +251,7 @@ export function GuestNavigationSheet({
           </div>
 
           {/* Footer - Import & Add Guest Buttons */}
-          <div className={`${isMobile ? 'px-4 py-4' : 'p-6'} border-t border-gray-100 space-y-2`}>
+          <div className={`${isMobile ? 'px-4 py-4 pb-8' : 'p-6'} border-t border-gray-100 space-y-2`}>
             {/* Import button */}
             <button
               onClick={() => setShowImportModal(true)}
