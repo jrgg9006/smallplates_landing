@@ -287,7 +287,7 @@ export function GuestNavigationSheet({
       {showImportModal && (
         <ImportGuestsModal
           groupId={groupId}
-          onClose={() => setShowImportModal(false)}
+          onClose={() => { setShowImportModal(false); onClose(); }}
           onImportComplete={(count) => {
             setShowImportModal(false);
             loadGuests();

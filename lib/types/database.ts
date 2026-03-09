@@ -5,7 +5,7 @@
 
 // Enums and basic types
 export type GuestStatus = 'pending' | 'submitted' | 'reached_out';
-export type GuestSource = 'manual' | 'collection';
+export type GuestSource = 'manual' | 'collection' | 'imported';
 export type RecipeSubmissionStatus = 'draft' | 'submitted' | 'approved' | 'rejected';
 export type CommunicationType = 'invitation' | 'reminder' | 'thank_you' | 'custom' | 'recipe_showcase';
 export type CommunicationChannel = 'email' | 'sms' | 'whatsapp';

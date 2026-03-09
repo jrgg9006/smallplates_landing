@@ -9,7 +9,7 @@ import type { GuestInsert } from "@/lib/types/database";
 interface ImportGuestsModalProps {
   groupId: string;
   onClose: () => void;
-  onImportComplete: () => void;
+  onImportComplete: (count: number) => void;
 }
 
 type Step = "select-source" | "upload-file" | "select-guests";
@@ -47,8 +47,6 @@ export function ImportGuestsModal({
   const [isDragOver, setIsDragOver] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const stepNumber = step === "select-source" ? 1 : step === "upload-file" ? 2 : 3;
 
   const parseFile = useCallback(
     async (file: File): Promise<ParsedGuest[]> => {
@@ -222,7 +220,7 @@ export function ImportGuestsModal({
             Math.random().toString(36).substr(2, 9),
         phone: g.phone || null,
         status: "pending" as const,
-        source: "manual" as const,
+        source: "imported" as const,
         number_of_recipes: 1,
         recipes_received: 0,
         is_archived: false,
@@ -237,8 +235,7 @@ export function ImportGuestsModal({
       return;
     }
 
-    onImportComplete();
-    onClose();
+    onImportComplete(toInsert.length);
   };
 
   const selectableGuests = parsedGuests.filter((g) => !g.alreadyExists);
@@ -271,7 +268,7 @@ export function ImportGuestsModal({
 
       {/* Modal */}
       <div
-        className="relative w-full max-w-[520px] rounded-2xl bg-[#FAF7F2] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.15)]
+        className="relative w-full max-w-[600px] rounded-2xl bg-[#FAF7F2] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.15)]
                     max-sm:max-w-none max-sm:rounded-none max-sm:rounded-t-2xl max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:max-h-[90vh] max-sm:overflow-y-auto"
       >
         {/* Close button */}
@@ -287,9 +284,6 @@ export function ImportGuestsModal({
           <h2 className="font-serif text-2xl font-semibold">
             Import Guests
           </h2>
-          <p className="text-xs text-[#999] mt-1">
-            Step {stepNumber} of 3
-          </p>
         </div>
 
         {/* ==================== STEP 1: Select Source ==================== */}
@@ -302,32 +296,20 @@ export function ImportGuestsModal({
             <div className="flex gap-3 mb-4">
               {/* Zola card */}
               <button
-                onClick={() => setSource("zola")}
-                className={`flex-1 rounded-xl border-[1.5px] p-6 text-center cursor-pointer transition-all
-                  ${
-                    source === "zola"
-                      ? "border-[#D4A854] bg-[#FFF8EC]"
-                      : "border-[#E8E0D5] bg-white hover:border-[#D4A854]/60"
-                  }`}
+                onClick={() => { setSource("zola"); setStep("upload-file"); }}
+                className={`flex-1 rounded-xl border-[1.5px] p-6 flex items-center justify-center cursor-pointer transition-all
+                  border-[#E8E0D5] bg-white hover:border-[#D4A854] hover:bg-[#FFF8EC]`}
               >
-                <span className="text-base font-semibold text-[#000]">
-                  Zola
-                </span>
+                <img src="/images/guest_modal/Zola_Logo.png" alt="Zola" className="h-5 object-contain" />
               </button>
 
               {/* The Knot card */}
               <button
-                onClick={() => setSource("the_knot")}
-                className={`flex-1 rounded-xl border-[1.5px] p-6 text-center cursor-pointer transition-all
-                  ${
-                    source === "the_knot"
-                      ? "border-[#D4A854] bg-[#FFF8EC]"
-                      : "border-[#E8E0D5] bg-white hover:border-[#D4A854]/60"
-                  }`}
+                onClick={() => { setSource("the_knot"); setStep("upload-file"); }}
+                className={`flex-1 rounded-xl border-[1.5px] p-6 flex items-center justify-center cursor-pointer transition-all
+                  border-[#E8E0D5] bg-white hover:border-[#D4A854] hover:bg-[#FFF8EC]`}
               >
-                <span className="text-base font-semibold text-[#810031]">
-                  The Knot
-                </span>
+                <img src="/images/guest_modal/knot_logo.png" alt="The Knot" className="h-5 object-contain" />
               </button>
             </div>
 
@@ -336,29 +318,12 @@ export function ImportGuestsModal({
               here.
             </p>
 
-            <button
-              onClick={() => {
-                if (source) setStep("upload-file");
-              }}
-              disabled={!source}
-              className="w-full py-3.5 rounded-lg bg-[#D4A854] text-white font-medium transition-opacity
-                         disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
-            >
-              Continue
-            </button>
           </div>
         )}
 
         {/* ==================== STEP 2: Upload File ==================== */}
         {step === "upload-file" && (
           <div>
-            <button
-              onClick={() => setStep("select-source")}
-              className="text-sm text-[#999] hover:text-[#2D2D2D] mb-4 transition-colors"
-            >
-              &larr; Back
-            </button>
-
             <p className="text-sm text-[#2D2D2D] mb-4">
               Upload your{" "}
               {source === "zola" ? "Zola" : "The Knot"} guest list (CSV or
@@ -446,29 +411,26 @@ export function ImportGuestsModal({
             {error && (
               <p className="text-sm text-red-600 mt-3">{error}</p>
             )}
+
+            <button
+              onClick={() => setStep("select-source")}
+              className="w-full text-center text-sm text-[#999] hover:text-[#2D2D2D] mt-6 transition-colors"
+            >
+              &larr; Back
+            </button>
           </div>
         )}
 
         {/* ==================== STEP 3: Select Guests ==================== */}
         {step === "select-guests" && (
           <div>
-            <button
-              onClick={() => {
-                setStep("upload-file");
-                setError(null);
-              }}
-              className="text-sm text-[#999] hover:text-[#2D2D2D] mb-4 transition-colors"
-            >
-              &larr; Back
-            </button>
-
-            <p className="text-sm text-[#2D2D2D] mb-4">
+            <p className="text-xs text-[#2D2D2D] mb-3">
               Select who to add to your book
             </p>
 
             {/* Select All / Counter */}
-            <div className="flex items-center justify-between mb-3">
-              <label className="flex items-center gap-2 cursor-pointer">
+            <div className="flex items-center justify-between mb-2">
+              <label className="flex items-center gap-1.5 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={
@@ -476,30 +438,30 @@ export function ImportGuestsModal({
                     selectedCount === selectableGuests.length
                   }
                   onChange={toggleSelectAll}
-                  className="w-[18px] h-[18px] rounded accent-[#D4A854] cursor-pointer"
+                  className="w-4 h-4 rounded accent-[#D4A854] cursor-pointer"
                 />
-                <span className="text-sm text-[#2D2D2D]">
+                <span className="text-xs text-[#2D2D2D]">
                   {selectedCount === selectableGuests.length
                     ? "Deselect All"
                     : "Select All"}
                 </span>
               </label>
-              <span className="text-sm text-[#999]">
+              <span className="text-xs text-[#999]">
                 {selectedCount} of {selectableGuests.length} selected
               </span>
             </div>
 
             {/* Guest list */}
-            <div className="max-h-[320px] overflow-y-auto rounded-lg border border-[#E8E0D5] bg-white">
+            <div className="max-h-[340px] overflow-y-auto rounded-lg border border-[#E8E0D5] bg-white">
               {parsedGuests.map((guest) => {
                 const isDisabled = guest.alreadyExists;
                 const isSelected = selectedIds.has(guest.id);
-                const noEmail = !guest.email;
+                const hasContact = guest.email || guest.phone;
 
                 return (
                   <div
                     key={guest.id}
-                    className={`flex items-center gap-3 px-4 py-3 border-b border-[#E8E0D5] last:border-b-0
+                    className={`flex items-center gap-2 px-3 py-2 border-b border-[#E8E0D5] last:border-b-0
                       ${isDisabled ? "opacity-60" : ""}`}
                   >
                     <input
@@ -507,26 +469,26 @@ export function ImportGuestsModal({
                       checked={isSelected && !isDisabled}
                       disabled={isDisabled}
                       onChange={() => !isDisabled && toggleGuest(guest.id)}
-                      className="w-[18px] h-[18px] flex-shrink-0 rounded accent-[#D4A854] cursor-pointer disabled:cursor-not-allowed"
+                      className="w-4 h-4 flex-shrink-0 rounded accent-[#D4A854] cursor-pointer disabled:cursor-not-allowed"
                     />
 
-                    <div className="flex-1 min-w-0 flex items-center gap-1.5">
-                      <span className="text-sm font-medium text-[#2D2D2D] truncate">
+                    <div className="flex-1 min-w-0 flex items-center gap-1">
+                      <span className="text-xs font-medium text-[#2D2D2D] truncate">
                         {guest.first_name} {guest.last_name}
                       </span>
-                      {noEmail && (
-                        <span title="No email — they can still be added">
+                      {!hasContact && (
+                        <span title="No email or phone">
                           <AlertTriangle
-                            size={14}
+                            size={12}
                             className="text-[#D4A854] flex-shrink-0"
                           />
                         </span>
                       )}
                     </div>
 
-                    {guest.email && !isDisabled && (
-                      <span className="text-xs text-[#999] max-w-[160px] truncate hidden sm:block">
-                        {guest.email}
+                    {!isDisabled && hasContact && (
+                      <span className="text-[10px] text-[#999] flex-shrink-0 whitespace-nowrap">
+                        {[guest.email, guest.phone].filter(Boolean).join(" · ")}
                       </span>
                     )}
 
@@ -540,23 +502,34 @@ export function ImportGuestsModal({
               })}
             </div>
 
-            {/* CTA */}
-            <button
-              onClick={handleImport}
-              disabled={selectedCount === 0 || isLoading}
-              className="w-full mt-4 py-3.5 rounded-lg bg-[#D4A854] text-white font-medium transition-opacity
-                         disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 flex items-center justify-center gap-2"
-            >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                `Add ${selectedCount} guest${selectedCount !== 1 ? "s" : ""} to Small Plates`
-              )}
-            </button>
-
             {error && (
-              <p className="text-sm text-red-600 mt-3">{error}</p>
+              <p className="text-xs text-red-600 mt-2">{error}</p>
             )}
+
+            {/* Back + CTA */}
+            <div className="flex items-center justify-between mt-3">
+              <button
+                onClick={() => {
+                  setStep("upload-file");
+                  setError(null);
+                }}
+                className="text-xs text-[#999] hover:text-[#2D2D2D] transition-colors"
+              >
+                &larr; Back
+              </button>
+              <button
+                onClick={handleImport}
+                disabled={selectedCount === 0 || isLoading}
+                className="px-4 py-2 rounded-lg bg-[#D4A854] text-white text-xs font-medium transition-opacity
+                           disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 flex items-center gap-1.5"
+              >
+                {isLoading ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  `Add ${selectedCount} guest${selectedCount !== 1 ? "s" : ""}`
+                )}
+              </button>
+            </div>
           </div>
         )}
       </div>
