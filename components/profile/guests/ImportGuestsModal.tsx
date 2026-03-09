@@ -9,7 +9,7 @@ import type { GuestInsert } from "@/lib/types/database";
 interface ImportGuestsModalProps {
   groupId: string;
   onClose: () => void;
-  onImportComplete: (count: number) => void;
+  onImportComplete: () => void;
 }
 
 type Step = "select-source" | "upload-file" | "select-guests";
@@ -47,6 +47,8 @@ export function ImportGuestsModal({
   const [isDragOver, setIsDragOver] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const stepNumber = step === "select-source" ? 1 : step === "upload-file" ? 2 : 3;
 
   const parseFile = useCallback(
     async (file: File): Promise<ParsedGuest[]> => {
@@ -217,7 +219,7 @@ export function ImportGuestsModal({
           "NO_EMAIL_" +
             Date.now() +
             "_" +
-            Math.random().toString(36).substring(2, 11),
+            Math.random().toString(36).substr(2, 9),
         phone: g.phone || null,
         status: "pending" as const,
         source: "manual" as const,
@@ -235,7 +237,7 @@ export function ImportGuestsModal({
       return;
     }
 
-    onImportComplete(toInsert.length);
+    onImportComplete();
     onClose();
   };
 
@@ -269,9 +271,8 @@ export function ImportGuestsModal({
 
       {/* Modal */}
       <div
-        className={`relative w-full rounded-2xl bg-[#FAF7F2] shadow-[0_20px_60px_rgba(0,0,0,0.15)]
-                    max-sm:max-w-none max-sm:rounded-none max-sm:rounded-t-2xl max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:max-h-[90vh] max-sm:overflow-y-auto
-                    ${step === "select-guests" ? "max-w-[640px] p-6" : "max-w-[520px] p-8"}`}
+        className="relative w-full max-w-[520px] rounded-2xl bg-[#FAF7F2] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.15)]
+                    max-sm:max-w-none max-sm:rounded-none max-sm:rounded-t-2xl max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:max-h-[90vh] max-sm:overflow-y-auto"
       >
         {/* Close button */}
         <button
@@ -283,63 +284,82 @@ export function ImportGuestsModal({
 
         {/* Header */}
         <div className="mb-6">
-          <h2 className="font-serif text-2xl font-semibold text-[#2D2D2D]">
+          <h2 className="font-serif text-2xl font-semibold">
             Import Guests
           </h2>
+          <p className="text-xs text-[#999] mt-1">
+            Step {stepNumber} of 3
+          </p>
         </div>
 
         {/* ==================== STEP 1: Select Source ==================== */}
         {step === "select-source" && (
           <div>
-            <p className="text-xs sm:text-sm text-[#2D2D2D] leading-relaxed font-light mb-5">
+            <p className="text-sm text-[#2D2D2D] mb-5">
               Where is your guest list from?
             </p>
 
             <div className="flex gap-3 mb-4">
               {/* Zola card */}
               <button
-                onClick={() => {
-                  setSource("zola");
-                  setStep("upload-file");
-                }}
-                className="flex-1 rounded-xl border-[1.5px] p-6 flex items-center justify-center cursor-pointer transition-all
-                  border-[#E8E0D5] bg-white hover:border-[#D4A854] hover:bg-[#FFF8EC]"
+                onClick={() => setSource("zola")}
+                className={`flex-1 rounded-xl border-[1.5px] p-6 text-center cursor-pointer transition-all
+                  ${
+                    source === "zola"
+                      ? "border-[#D4A854] bg-[#FFF8EC]"
+                      : "border-[#E8E0D5] bg-white hover:border-[#D4A854]/60"
+                  }`}
               >
-                <img
-                  src="/images/guest_modal/Zola_Logo.png"
-                  alt="Zola"
-                  className="h-5 object-contain"
-                />
+                <span className="text-base font-semibold text-[#000]">
+                  Zola
+                </span>
               </button>
 
               {/* The Knot card */}
               <button
-                onClick={() => {
-                  setSource("the_knot");
-                  setStep("upload-file");
-                }}
-                className="flex-1 rounded-xl border-[1.5px] p-6 flex items-center justify-center cursor-pointer transition-all
-                  border-[#E8E0D5] bg-white hover:border-[#D4A854] hover:bg-[#FFF8EC]"
+                onClick={() => setSource("the_knot")}
+                className={`flex-1 rounded-xl border-[1.5px] p-6 text-center cursor-pointer transition-all
+                  ${
+                    source === "the_knot"
+                      ? "border-[#D4A854] bg-[#FFF8EC]"
+                      : "border-[#E8E0D5] bg-white hover:border-[#D4A854]/60"
+                  }`}
               >
-                <img
-                  src="/images/guest_modal/knot_logo.png"
-                  alt="The Knot"
-                  className="h-5 object-contain"
-                />
+                <span className="text-base font-semibold text-[#810031]">
+                  The Knot
+                </span>
               </button>
             </div>
 
-            <p className="text-xs text-[#999] mt-4">
+            <p className="text-xs text-[#999] mb-6">
               Export your guest list from your registry account, then upload it
               here.
             </p>
+
+            <button
+              onClick={() => {
+                if (source) setStep("upload-file");
+              }}
+              disabled={!source}
+              className="w-full py-3.5 rounded-lg bg-[#D4A854] text-white font-medium transition-opacity
+                         disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
+            >
+              Continue
+            </button>
           </div>
         )}
 
         {/* ==================== STEP 2: Upload File ==================== */}
         {step === "upload-file" && (
           <div>
-            <p className="text-xs sm:text-sm text-[#2D2D2D] leading-relaxed font-light mb-4">
+            <button
+              onClick={() => setStep("select-source")}
+              className="text-sm text-[#999] hover:text-[#2D2D2D] mb-4 transition-colors"
+            >
+              &larr; Back
+            </button>
+
+            <p className="text-sm text-[#2D2D2D] mb-4">
               Upload your{" "}
               {source === "zola" ? "Zola" : "The Knot"} guest list (CSV or
               Excel)
@@ -426,26 +446,29 @@ export function ImportGuestsModal({
             {error && (
               <p className="text-sm text-red-600 mt-3">{error}</p>
             )}
-
-            <button
-              onClick={() => setStep("select-source")}
-              className="w-full mt-4 text-sm text-[#999] hover:text-[#2D2D2D] transition-colors text-center"
-            >
-              &larr; Back
-            </button>
           </div>
         )}
 
         {/* ==================== STEP 3: Select Guests ==================== */}
         {step === "select-guests" && (
           <div>
-            <p className="text-xs sm:text-sm text-[#2D2D2D] leading-relaxed font-light mb-4">
+            <button
+              onClick={() => {
+                setStep("upload-file");
+                setError(null);
+              }}
+              className="text-sm text-[#999] hover:text-[#2D2D2D] mb-4 transition-colors"
+            >
+              &larr; Back
+            </button>
+
+            <p className="text-sm text-[#2D2D2D] mb-4">
               Select who to add to your book
             </p>
 
             {/* Select All / Counter */}
-            <div className="flex items-center justify-between mb-2">
-              <label className="flex items-center gap-1.5 cursor-pointer">
+            <div className="flex items-center justify-between mb-3">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={
@@ -453,30 +476,30 @@ export function ImportGuestsModal({
                     selectedCount === selectableGuests.length
                   }
                   onChange={toggleSelectAll}
-                  className="w-4 h-4 rounded accent-[#D4A854] cursor-pointer"
+                  className="w-[18px] h-[18px] rounded accent-[#D4A854] cursor-pointer"
                 />
-                <span className="text-xs text-[#2D2D2D]">
+                <span className="text-sm text-[#2D2D2D]">
                   {selectedCount === selectableGuests.length
                     ? "Deselect All"
                     : "Select All"}
                 </span>
               </label>
-              <span className="text-xs text-[#999]">
+              <span className="text-sm text-[#999]">
                 {selectedCount} of {selectableGuests.length} selected
               </span>
             </div>
 
             {/* Guest list */}
-            <div className="max-h-[50vh] overflow-y-auto rounded-lg border border-[#E8E0D5] bg-white">
+            <div className="max-h-[320px] overflow-y-auto rounded-lg border border-[#E8E0D5] bg-white">
               {parsedGuests.map((guest) => {
                 const isDisabled = guest.alreadyExists;
                 const isSelected = selectedIds.has(guest.id);
-                const noContact = !guest.email && !guest.phone;
+                const noEmail = !guest.email;
 
                 return (
                   <div
                     key={guest.id}
-                    className={`flex items-center gap-2 px-3 py-2 border-b border-[#E8E0D5] last:border-b-0
+                    className={`flex items-center gap-3 px-4 py-3 border-b border-[#E8E0D5] last:border-b-0
                       ${isDisabled ? "opacity-60" : ""}`}
                   >
                     <input
@@ -484,36 +507,27 @@ export function ImportGuestsModal({
                       checked={isSelected && !isDisabled}
                       disabled={isDisabled}
                       onChange={() => !isDisabled && toggleGuest(guest.id)}
-                      className="w-4 h-4 flex-shrink-0 rounded accent-[#D4A854] cursor-pointer disabled:cursor-not-allowed"
+                      className="w-[18px] h-[18px] flex-shrink-0 rounded accent-[#D4A854] cursor-pointer disabled:cursor-not-allowed"
                     />
 
-                    <div className="flex-1 min-w-0 flex items-center gap-1">
-                      <span className="text-[13px] font-medium text-[#2D2D2D] truncate">
+                    <div className="flex-1 min-w-0 flex items-center gap-1.5">
+                      <span className="text-sm font-medium text-[#2D2D2D] truncate">
                         {guest.first_name} {guest.last_name}
                       </span>
-                      {noContact && (
-                        <span title="No email or phone — they can still be added">
+                      {noEmail && (
+                        <span title="No email — they can still be added">
                           <AlertTriangle
-                            size={12}
+                            size={14}
                             className="text-[#D4A854] flex-shrink-0"
                           />
                         </span>
                       )}
                     </div>
 
-                    {!isDisabled && (guest.email || guest.phone) && (
-                      <div className="flex-shrink-0 flex items-center gap-3 hidden sm:flex">
-                        {guest.email && (
-                          <span className="text-[11px] text-[#999] max-w-[160px] truncate">
-                            {guest.email}
-                          </span>
-                        )}
-                        {guest.phone && (
-                          <span className="text-[11px] text-[#999] max-w-[120px] truncate">
-                            {guest.phone}
-                          </span>
-                        )}
-                      </div>
+                    {guest.email && !isDisabled && (
+                      <span className="text-xs text-[#999] max-w-[160px] truncate hidden sm:block">
+                        {guest.email}
+                      </span>
                     )}
 
                     {isDisabled && (
@@ -526,34 +540,23 @@ export function ImportGuestsModal({
               })}
             </div>
 
-            {error && (
-              <p className="text-xs text-red-600 mt-2">{error}</p>
-            )}
+            {/* CTA */}
+            <button
+              onClick={handleImport}
+              disabled={selectedCount === 0 || isLoading}
+              className="w-full mt-4 py-3.5 rounded-lg bg-[#D4A854] text-white font-medium transition-opacity
+                         disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                `Add ${selectedCount} guest${selectedCount !== 1 ? "s" : ""} to Small Plates`
+              )}
+            </button>
 
-            {/* CTA + Back */}
-            <div className="flex items-center justify-between mt-3">
-              <button
-                onClick={() => {
-                  setStep("upload-file");
-                  setError(null);
-                }}
-                className="text-xs text-[#999] hover:text-[#2D2D2D] transition-colors flex-shrink-0"
-              >
-                &larr; Back
-              </button>
-              <button
-                onClick={handleImport}
-                disabled={selectedCount === 0 || isLoading}
-                className="py-2 px-6 rounded-lg bg-[#D4A854] text-white text-xs font-medium transition-opacity
-                           disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 flex items-center justify-center gap-2"
-              >
-                {isLoading ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  `Add ${selectedCount} guest${selectedCount !== 1 ? "s" : ""} to Small Plates`
-                )}
-              </button>
-            </div>
+            {error && (
+              <p className="text-sm text-red-600 mt-3">{error}</p>
+            )}
           </div>
         )}
       </div>
