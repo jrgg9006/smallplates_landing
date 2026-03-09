@@ -3,8 +3,9 @@ import { createSupabaseServer } from '@/lib/supabase/server';
 import { sendGuestInvitationEmail } from '@/lib/email/send-invitation-email';
 
 // Reason: Prevent harassment and protect Postmark reputation
-const MAX_REMINDERS_PER_HOUR = 20;
-const MAX_EMAILS_PER_GUEST = 5;
+const MAX_REMINDERS_PER_HOUR = 10;
+const MAX_EMAILS_PER_GUEST = 3;
+const MAX_EMAILS_PER_GROUP_MONTHLY = 500;
 
 export async function POST(request: NextRequest) {
   try {
@@ -76,6 +77,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: `This guest has already received ${MAX_EMAILS_PER_GUEST} emails` },
         { status: 400 }
+      );
+    }
+
+    // ── Guard: monthly limit per group ──
+    const monthAgoCutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { count: monthlyEmails } = await supabase
+      .from('guests')
+      .select('id', { count: 'exact', head: true })
+      .eq('group_id', groupId)
+      .gte('last_email_sent_at', monthAgoCutoff)
+      .gt('emails_sent_count', 0);
+
+    if ((monthlyEmails || 0) >= MAX_EMAILS_PER_GROUP_MONTHLY) {
+      return NextResponse.json(
+        { error: 'Monthly email limit for this group reached.' },
+        { status: 429 }
       );
     }
 

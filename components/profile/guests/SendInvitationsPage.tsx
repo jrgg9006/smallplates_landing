@@ -304,6 +304,17 @@ export function SendInvitationsPage({
       <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-57px)]">
         {/* ── Left column: Email Preview (scrolls independently) ── */}
         <div className="lg:w-[68%] bg-[#F5F5F4] lg:overflow-y-auto flex items-start justify-center p-8 lg:p-12">
+          <div className="w-full max-w-[560px]">
+          {/* Hint: upload couple image */}
+          {!coupleImageUrl && (
+            <p className="text-xs text-[#9A9590] mb-4 text-center">
+              Want to add a photo to the email? Upload one in your{" "}
+              <button onClick={onBack} className="underline hover:text-[#2D2D2D] transition-colors">
+                Collect Recipes settings
+              </button>.
+            </p>
+          )}
+
           {/* Email card container */}
           <div className="w-full max-w-[560px] rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.08)] overflow-hidden">
             {/* "New Email" header bar */}
@@ -405,6 +416,7 @@ export function SendInvitationsPage({
                 )}
               </div>
             </div>
+          </div>
           </div>
         </div>
 

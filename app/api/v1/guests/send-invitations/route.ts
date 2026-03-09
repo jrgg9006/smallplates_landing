@@ -4,7 +4,8 @@ import { sendGuestInvitationEmail } from '@/lib/email/send-invitation-email';
 
 // Reason: These limits protect against abuse and keep our Postmark reputation clean
 const MAX_GUESTS_PER_REQUEST = 100;
-const MAX_INVITATIONS_PER_DAY = 500;
+const MAX_INVITATIONS_PER_DAY = 200;
+const MAX_EMAILS_PER_GROUP_MONTHLY = 500;
 const COOLDOWN_SECONDS = 30;
 
 export async function POST(request: NextRequest) {
@@ -76,8 +77,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Reason: Only process up to what's left in the daily allowance
-    const safeGuestIds = guestIds.slice(0, Math.min(guestIds.length, remaining));
+    // ── Guard: monthly limit per group — max emails per group per 30 days ──
+    const monthAgoCutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { count: monthlySent } = await supabase
+      .from('guests')
+      .select('id', { count: 'exact', head: true })
+      .eq('group_id', groupId)
+      .gte('invitation_started_at', monthAgoCutoff);
+
+    const monthlyRemaining = MAX_EMAILS_PER_GROUP_MONTHLY - (monthlySent || 0);
+    if (monthlyRemaining <= 0) {
+      return NextResponse.json(
+        { error: 'Monthly email limit for this group reached. Try again next month.' },
+        { status: 429 }
+      );
+    }
+
+    // Reason: Only process up to what's left in the daily and monthly allowance
+    const safeGuestIds = guestIds.slice(0, Math.min(guestIds.length, remaining, monthlyRemaining));
 
     // Fetch group data for email template
     const { data: group } = await supabase
