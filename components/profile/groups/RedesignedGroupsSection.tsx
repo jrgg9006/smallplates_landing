@@ -22,6 +22,7 @@ interface GroupsSectionProps {
   onGroupChange?: (group: GroupWithMembers | null) => void;
   onLoadingChange?: (loading: boolean) => void;
   onRecipeCountChange?: (count: number, uniqueContributors: number) => void;
+  onImportGuests?: (source: "zola" | "the_knot") => void;
 }
 
 export interface GroupsSectionRef {
@@ -41,10 +42,11 @@ export interface GroupsSectionRef {
   loadGroups: (forceRefreshSelected?: boolean) => Promise<void>;
 }
 
-export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({ 
-  onGroupChange, 
+export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectionProps>(({
+  onGroupChange,
   onLoadingChange,
-  onRecipeCountChange 
+  onRecipeCountChange,
+  onImportGuests
 }, ref) => {
   const [groups, setGroups] = useState<GroupWithMembers[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<GroupWithMembers | null>(null);
@@ -401,6 +403,7 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
           onEditRecipe={handleEditRecipe}
           onRemoveRecipe={handleRemoveRecipe}
           searchValue={searchValue}
+          onImportGuests={onImportGuests}
         />
       ) : (
         <div className="flex items-center justify-center py-8">

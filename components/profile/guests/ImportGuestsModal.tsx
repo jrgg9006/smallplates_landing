@@ -10,6 +10,7 @@ interface ImportGuestsModalProps {
   groupId: string;
   onClose: () => void;
   onImportComplete: (count: number) => void;
+  initialSource?: Source;
 }
 
 type Step = "select-source" | "upload-file" | "select-guests";
@@ -36,9 +37,10 @@ export function ImportGuestsModal({
   groupId,
   onClose,
   onImportComplete,
+  initialSource,
 }: ImportGuestsModalProps) {
-  const [step, setStep] = useState<Step>("select-source");
-  const [source, setSource] = useState<Source>(null);
+  const [step, setStep] = useState<Step>(initialSource ? "upload-file" : "select-source");
+  const [source, setSource] = useState<Source>(initialSource ?? null);
   const [parsedGuests, setParsedGuests] = useState<ParsedGuest[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);

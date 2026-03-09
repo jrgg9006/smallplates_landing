@@ -25,6 +25,7 @@ import { GuestDetailsModal } from "@/components/profile/guests/GuestDetailsModal
 import { getUserCollectionToken } from "@/lib/supabase/collection";
 import { createShareURL } from "@/lib/utils/sharing";
 import type { Guest } from "@/lib/types/database";
+import { ImportGuestsModal } from "@/components/profile/guests/ImportGuestsModal";
 
 // Reason: Format book_close_date as "Month Dth" with ordinal suffix (no year)
 function getDeadlineText(dateString: string): string {
@@ -55,6 +56,7 @@ export default function GroupsPage() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showGuestSheet, setShowGuestSheet] = useState(false);
   const [showGuestDetailsModal, setShowGuestDetailsModal] = useState(false);
+  const [importSource, setImportSource] = useState<"zola" | "the_knot" | null>(null);
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [collectionToken, setCollectionToken] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -763,11 +765,12 @@ export default function GroupsPage() {
         
         {/* Recipe Grid */}
         <div className="mt-8 pb-16">
-          <GroupsSection 
-            ref={groupsSectionRef} 
-            onGroupChange={handleGroupChange} 
+          <GroupsSection
+            ref={groupsSectionRef}
+            onGroupChange={handleGroupChange}
             onLoadingChange={handleGroupsLoadingChange}
             onRecipeCountChange={handleRecipeCountChange}
+            onImportGuests={(source) => setImportSource(source)}
           />
         </div>
       </main>
@@ -817,6 +820,20 @@ export default function GroupsPage() {
           onAddGuest={() => {
             setShowGuestSheet(false);
             handleAddGuest();
+          }}
+        />
+      )}
+
+      {/* Import Guests Modal (from empty state) */}
+      {importSource && selectedGroup && (
+        <ImportGuestsModal
+          groupId={selectedGroup.id}
+          initialSource={importSource}
+          onClose={() => setImportSource(null)}
+          onImportComplete={() => {
+            setImportSource(null);
+            // Reason: Refresh group data to reflect new guests
+            groupsSectionRef.current?.loadGroups(true);
           }}
         />
       )}

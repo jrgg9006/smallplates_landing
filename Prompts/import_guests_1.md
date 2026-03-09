@@ -46,7 +46,7 @@ Inside `GuestNavigationSheet.tsx`, locate the bottom section where the `+ Add Gu
 **Add a new button ABOVE the existing `+ Add Guest` button.** The two buttons should stack vertically like this:
 
 ```
-[ ↑ Import from  [Zola logo]  [The Knot logo] ]   ← NEW (secondary style)
+[ ↑ Import guests from  [Zola logo]  [The Knot logo] ]   ← NEW (secondary style)
 [ + Add Guest ]                                     ← EXISTING (unchanged)
 ```
 

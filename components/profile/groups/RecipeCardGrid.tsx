@@ -9,14 +9,16 @@ interface RecipeCardGridProps {
   onEditRecipe: (recipe: RecipeWithGuest) => void;
   onRemoveRecipe: (recipe: RecipeWithGuest) => void;
   searchValue?: string;
+  onImportGuests?: (source: "zola" | "the_knot") => void;
 }
 
-export function RecipeCardGrid({ 
-  recipes, 
-  onRecipeClick, 
-  onEditRecipe, 
+export function RecipeCardGrid({
+  recipes,
+  onRecipeClick,
+  onEditRecipe,
   onRemoveRecipe,
-  searchValue = ""
+  searchValue = "",
+  onImportGuests
 }: RecipeCardGridProps) {
   // Filter recipes based on search
   const filteredRecipes = searchValue 
@@ -40,9 +42,28 @@ export function RecipeCardGrid({
   if (filteredRecipes.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-base text-[hsl(var(--brand-warm-gray))]">
+        <p className="text-sm text-[hsl(var(--brand-warm-gray))]">
           No recipes yet. That&rsquo;s about to change.
         </p>
+        {onImportGuests && (
+          <p className="text-sm text-[hsl(var(--brand-warm-gray))] mt-4 flex items-center justify-center gap-2">
+            Import guests from
+            <button
+              onClick={() => onImportGuests("zola")}
+              className="opacity-40 hover:opacity-70 transition-opacity"
+            >
+              <img src="/images/guest_modal/Zola_Logo.png" alt="Zola" className="h-3.5 object-contain grayscale" />
+            </button>
+            or
+            <button
+              onClick={() => onImportGuests("the_knot")}
+              className="opacity-40 hover:opacity-70 transition-opacity"
+            >
+              <img src="/images/guest_modal/knot_logo.png" alt="The Knot" className="h-3.5 object-contain grayscale" />
+            </button>
+            — we&rsquo;ll send the invite.
+          </p>
+        )}
       </div>
     );
   }
