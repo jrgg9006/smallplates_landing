@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 import { sendGuestInvitationEmail } from '@/lib/email/send-invitation-email';
 
+// Reason: These limits protect against abuse and keep our Postmark reputation clean
+const MAX_GUESTS_PER_REQUEST = 100;
+const MAX_INVITATIONS_PER_DAY = 500;
+const COOLDOWN_SECONDS = 30;
+
 export async function POST(request: NextRequest) {
   try {
     const { guestIds, groupId } = await request.json();
@@ -9,6 +14,14 @@ export async function POST(request: NextRequest) {
     if (!guestIds?.length || !groupId) {
       return NextResponse.json(
         { error: 'guestIds and groupId are required' },
+        { status: 400 }
+      );
+    }
+
+    // ── Guard: batch size cap ──
+    if (guestIds.length > MAX_GUESTS_PER_REQUEST) {
+      return NextResponse.json(
+        { error: `Maximum ${MAX_GUESTS_PER_REQUEST} guests per request` },
         { status: 400 }
       );
     }
@@ -32,10 +45,44 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not a member of this group' }, { status: 403 });
     }
 
+    // ── Guard: cooldown — prevent rapid-fire requests ──
+    const cooldownCutoff = new Date(Date.now() - COOLDOWN_SECONDS * 1000).toISOString();
+    const { count: recentSends } = await supabase
+      .from('guests')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gte('invitation_started_at', cooldownCutoff);
+
+    if (recentSends && recentSends > 0) {
+      return NextResponse.json(
+        { error: 'Please wait a moment before sending more invitations' },
+        { status: 429 }
+      );
+    }
+
+    // ── Guard: daily limit — max invitations per 24h across all groups ──
+    const dayAgoCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count: dailySent } = await supabase
+      .from('guests')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gte('invitation_started_at', dayAgoCutoff);
+
+    const remaining = MAX_INVITATIONS_PER_DAY - (dailySent || 0);
+    if (remaining <= 0) {
+      return NextResponse.json(
+        { error: 'Daily invitation limit reached. Try again tomorrow.' },
+        { status: 429 }
+      );
+    }
+
+    // Reason: Only process up to what's left in the daily allowance
+    const safeGuestIds = guestIds.slice(0, Math.min(guestIds.length, remaining));
+
     // Fetch group data for email template
     const { data: group } = await supabase
       .from('groups')
-      .select('couple_first_name, partner_first_name, couple_image_url, created_by')
+      .select('name, couple_first_name, partner_first_name, couple_image_url, created_by')
       .eq('id', groupId)
       .single();
 
@@ -45,7 +92,7 @@ export async function POST(request: NextRequest) {
 
     const coupleNames = [group.couple_first_name, group.partner_first_name]
       .filter(Boolean)
-      .join(' & ') || 'The Couple';
+      .join(' & ') || group.name || 'The Couple';
 
     // Get collection token from the group creator's profile
     const { data: creatorProfile } = await supabase
@@ -75,9 +122,8 @@ export async function POST(request: NextRequest) {
     let failed = 0;
     const errors: string[] = [];
 
-    // Send emails sequentially to avoid rate limits
-    for (const guestId of guestIds) {
-      // Fetch guest and validate
+    // Send emails sequentially to avoid Postmark rate limits
+    for (const guestId of safeGuestIds) {
       const { data: guest } = await supabase
         .from('guests')
         .select('id, first_name, last_name, email, group_id, invitation_started_at')
@@ -96,14 +142,12 @@ export async function POST(request: NextRequest) {
         continue;
       }
 
-      // Skip if no valid email
       if (!guest.email || guest.email.startsWith('NO_EMAIL_')) {
         failed++;
         errors.push(`${guest.first_name} has no email`);
         continue;
       }
 
-      // Skip if already invited
       if (guest.invitation_started_at) {
         failed++;
         errors.push(`${guest.first_name} already invited`);
@@ -121,7 +165,6 @@ export async function POST(request: NextRequest) {
       });
 
       if (result.success) {
-        // Update guest invitation tracking
         await supabase
           .from('guests')
           .update({

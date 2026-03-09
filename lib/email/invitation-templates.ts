@@ -1,6 +1,6 @@
 /**
  * Email invitation templates for guest recipe collection
- * 
+ *
  * Variables available:
  * - coupleDisplayName: "Ana & Pedro" (formatted for emails)
  * - guestName: "María"
@@ -14,14 +14,14 @@ interface InvitationTemplateParams {
   collectionLink: string;
   coupleImageUrl?: string;
   captainName?: string;
-  recipeCount?: number; // For social proof in Email 3 (only shown if ≥10)
+  recipeCount?: number;
 }
 
 // Base template wrapper with all styles
 function baseTemplate(content: string, subject: string, captainName?: string): string {
   return `<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" 
-xmlns:v="urn:schemas-microsoft-com:vml" 
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+xmlns:v="urn:schemas-microsoft-com:vml"
 xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="UTF-8">
@@ -32,25 +32,18 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
   <meta name="supported-color-schemes" content="light dark">
   <title>${subject} - Small Plates & Co.</title>
   <style type="text/css">
-    /* Reset styles */
     body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
     table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
-    img { -ms-interpolation-mode: bicubic; }
-
-    /* Remove default styling */
-    img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+    img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
     table { border-collapse: collapse !important; }
     body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
 
-    /* Mobile styles */
     @media screen and (max-width: 600px) {
-      .mobile-padding { padding: 20px !important; }
-      .mobile-center { text-align: center !important; }
-      table[class="wrapper"] { width: 100% !important; }
-      .couple-image { width: 80px !important; height: 80px !important; }
+      .mobile-padding { padding: 24px !important; }
+      .couple-image { width: 120px !important; height: 120px !important; }
+      .hero-name { font-size: 28px !important; }
     }
 
-    /* Dark mode support */
     @media (prefers-color-scheme: dark) {
       body, .darkmode-bg { background-color: #1a1a1a !important; }
       .container-bg { background-color: #2d2d2d !important; }
@@ -59,51 +52,59 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
       .footer-text { color: #999999 !important; }
     }
 
-    /* Button hover effect */
     .button-td, .button-a { transition: all 100ms ease-in; }
-    .button-td:hover, .button-a:hover { background: #C19940 !important; }
+    .button-td:hover, .button-a:hover { background: #444444 !important; }
   </style>
 </head>
 <body style="margin: 0; padding: 0; word-spacing: normal; background-color: #FAF7F2;" class="darkmode-bg">
+  <!-- Preheader text (hidden, shown in Gmail inbox preview) -->
+  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+    We're making them a cookbook. A real one. Your page is waiting.
+    &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  </div>
   <div role="article" aria-roledescription="email" lang="en">
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" width="100%" style="border-collapse: collapse;">
       <tr>
         <td align="center" style="padding: 40px 20px;">
-          <!-- Email Container -->
-          <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" width="100%" style="max-width: 600px; border-collapse: collapse;" class="wrapper">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" width="100%" style="max-width: 560px; border-collapse: collapse;" class="wrapper">
             <tr>
-              <td align="center" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; padding: 40px;" class="container-bg mobile-padding">
+              <td align="center" style="background-color: #ffffff; border-radius: 8px; overflow: hidden;" class="container-bg">
 
-                <!-- Logo Section -->
+                <!-- Email Content -->
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
-                    <td align="center" style="padding-bottom: 30px;">
-                      <img src="https://smallplatesandcompany.com/images/SmallPlates_logo_horizontal.png" 
-                           alt="Small Plates & Co." 
-                           width="180" 
-                           height="auto" 
-                           style="display: block; margin: 0 auto; max-width: 180px; height: auto; font-family: Georgia, serif; font-size: 24px; font-weight: 600; color: #2D2D2D; text-align: center;" />
+                    <td align="center" style="padding: 48px 40px;" class="mobile-padding">
+                      ${content}
                     </td>
                   </tr>
                 </table>
 
-                ${content}
-
-                <!-- Footer -->
+                <!-- Footer divider + logo + attribution -->
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
-                    <td align="center" style="padding-top: 30px; border-top: 1px solid #E8E0D5;">
+                    <td style="padding: 0 40px;">
+                      <div style="border-top: 1px solid #F0EDE8;"></div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align="center" style="padding: 24px 40px 32px;">
+                      <img src="https://smallplatesandcompany.com/images/SmallPlates_logo_horizontal1.png"
+                           alt="Small Plates & Co."
+                           width="120"
+                           height="auto"
+                           style="display: block; margin: 0 auto 16px; max-width: 120px; height: auto; opacity: 0.4;" />
                       ${captainName ? `
-                      <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #B8B0A8; line-height: 1.5; text-align: center;" class="footer-text">
-                        Sent with ♥ by ${captainName}
+                      <p style="margin: 0 0 6px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #9A9590; line-height: 1.5; text-align: center;" class="footer-text">
+                        This invitation was sent by ${captainName} via Small Plates &amp; Co.
                       </p>
-                      ` : ''}
-                      <p style="margin: 0 0 8px 0; font-family: Georgia, serif; font-size: 14px; color: #9A9590; line-height: 1.5; text-align: center; font-style: italic;" class="footer-text">
-                        Recipes from the people who love you.
+                      <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #C4BDB6; line-height: 1.5; text-align: center;" class="footer-text">
+                        If you don't know ${captainName} or didn't expect this invitation, you can safely ignore this email.
                       </p>
+                      ` : `
                       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #9A9590; line-height: 1.5; text-align: center;" class="footer-text">
-                        Small Plates & Co.
+                        Small Plates &amp; Co.
                       </p>
+                      `}
                     </td>
                   </tr>
                 </table>
@@ -119,114 +120,122 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
 </html>`;
 }
 
-// Couple image section (if image URL provided)
+// Couple image section — rounded rectangle, not circle
 function coupleImageSection(coupleImageUrl: string | undefined, coupleDisplayName: string): string {
-  // Use placeholder image if no couple image is provided
-  const imageUrl = coupleImageUrl || 'https://smallplatesandcompany.com/images/emails/email_placeholder.jpg';
-  
+  if (!coupleImageUrl) return '';
+
   return `
-                <!-- Couple Image -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td align="center" style="padding-bottom: 24px;">
-                      <img src="${imageUrl}" 
-                           alt="${coupleDisplayName}" 
-                           width="100" 
-                           height="100" 
-                           class="couple-image"
-                           style="display: block; width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #E8E0D5;" />
-                    </td>
-                  </tr>
-                </table>`;
+                      <!-- Couple Image -->
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                          <td align="center" style="padding-bottom: 40px;">
+                            <img src="${coupleImageUrl}"
+                                 alt="${coupleDisplayName}"
+                                 width="140"
+                                 height="140"
+                                 class="couple-image"
+                                 style="display: block; width: 140px; height: 140px; border-radius: 16px; object-fit: cover;" />
+                          </td>
+                        </tr>
+                      </table>`;
 }
 
-// CTA Button
-function ctaButton(link: string, text: string = "Add Your Recipe"): string {
+// CTA Button — dark charcoal, uppercase tracking
+function ctaButton(link: string, text: string = "ADD YOUR RECIPE"): string {
   return `
-                <!-- CTA Button -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
-                  <tr>
-                    <td align="center" style="padding: 32px 0;">
-                      <!--[if mso]>
-                      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${link}" style="height:52px;v-text-anchor:middle;width:200px;" arcsize="58%" stroke="f" fillcolor="#D4A854">
-                        <w:anchorlock/>
-                        <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:16px;font-weight:500;">${text}</center>
-                      </v:roundrect>
-                      <![endif]-->
-                      <!--[if !mso]><!-->
-                      <a href="${link}" 
-                         style="display: inline-block; 
-                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
-                                font-size: 16px; 
-                                font-weight: 500; 
-                                color: #ffffff; 
-                                text-decoration: none; 
-                                padding: 16px 32px; 
-                                border-radius: 30px; 
-                                background-color: #D4A854;
-                                transition: background-color 0.2s ease;">
-                        ${text}
-                      </a>
-                      <!--<![endif]-->
-                    </td>
-                  </tr>
-                </table>`;
+                      <!-- CTA Button -->
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+                        <tr>
+                          <td align="center" style="padding: 40px 0 0;">
+                            <!--[if mso]>
+                            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${link}" style="height:48px;v-text-anchor:middle;width:220px;" arcsize="10%" stroke="f" fillcolor="#2D2D2D">
+                              <w:anchorlock/>
+                              <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:12px;font-weight:500;letter-spacing:2px;">${text}</center>
+                            </v:roundrect>
+                            <![endif]-->
+                            <!--[if !mso]><!-->
+                            <a href="${link}"
+                               class="button-a"
+                               style="display: inline-block;
+                                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                                      font-size: 12px;
+                                      font-weight: 500;
+                                      letter-spacing: 2px;
+                                      color: #ffffff;
+                                      text-decoration: none;
+                                      padding: 16px 40px;
+                                      border-radius: 4px;
+                                      background-color: #2D2D2D;">
+                              ${text}
+                            </a>
+                            <!--<![endif]-->
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- Subtext -->
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                          <td align="center" style="padding-top: 16px;">
+                            <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #9A9590; line-height: 1.5; text-align: center;">
+                              5 minutes. That's it.
+                            </p>
+                          </td>
+                        </tr>
+                      </table>`;
+}
+
+// Hero section — label + couple names + gold line
+function heroSection(coupleDisplayName: string): string {
+  return `
+                      <!-- Hero: Couple Names -->
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                          <td align="center">
+                            <p style="margin: 0 0 12px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #9A9590; text-align: center;">
+                              A wedding cookbook gift for
+                            </p>
+                            <h1 style="margin: 0 0 12px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 36px; font-weight: 400; color: #2D2D2D; line-height: 1.2; text-align: center;" class="darkmode-text hero-name">
+                              ${coupleDisplayName}
+                            </h1>
+                            <!-- Gold divider -->
+                            <div style="width: 48px; height: 1px; background-color: #D4A854; margin: 0 auto 40px;"></div>
+                          </td>
+                        </tr>
+                      </table>`;
 }
 
 // ============================================
 // EMAIL 1: Initial Invitation
 // ============================================
 export function invitationEmail1(params: InvitationTemplateParams): { subject: string; html: string } {
-  const { coupleDisplayName, guestName, collectionLink, coupleImageUrl } = params;
-  
+  const { coupleDisplayName, collectionLink, coupleImageUrl } = params;
+
   const subject = `You're invited to ${coupleDisplayName}'s wedding cookbook`;
-  
+
   const content = `
-                ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
+                      ${heroSection(coupleDisplayName)}
 
-                <!-- Header -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td align="center" style="padding-bottom: 24px;">
-                      <h1 style="margin: 0; font-family: Georgia, serif; font-size: 26px; font-weight: 400; color: #2D2D2D; line-height: 1.3; text-align: center;" class="darkmode-text">
-                        ${coupleDisplayName} are getting married. We're giving them a special gift.
-                      </h1>
-                    </td>
-                  </tr>
-                </table>
+                      ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
 
-                <!-- Main Content -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td align="center">
-                      <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-                        Hi ${guestName},
-                      </p>
-                      <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-                        We are collecting recipes from everyone who loves ${coupleDisplayName} and turning it into a real cookbook.
-                      </p>
-                      <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-                        It's not going on a shelf. It's going in their kitchen. The place where their marriage actually happens.
-                      </p>
-                      <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-                        Doesn't have to be fancy. The pasta you always make. The thing you bring to every dinner. Whatever feels like you.
-                      </p>
-                    </td>
-                  </tr>
-                </table>
+                      <!-- Body Copy -->
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                          <td align="center" style="max-width: 340px; margin: 0 auto;">
+                            <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
+                              We're making them a cookbook. A real one. With recipes from the people who matter most to them.
+                            </p>
+                            <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
+                              Send a recipe and you're in their kitchen.
+                            </p>
+                            <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #2D2D2D; font-weight: 600; line-height: 1.6; text-align: center;" class="darkmode-text">
+                              Doesn't have to be fancy. Just has to be yours.
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
 
-                ${ctaButton(collectionLink)}
-
-                <!-- Subtext -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td align="center">
-                      <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 14px; color: #9A9590; line-height: 1.5; text-align: center;">
-                        Takes about 5 minutes.
-                      </p>
-                    </td>
-                  </tr>
-                </table>`;
+                      ${ctaButton(collectionLink)}`;
 
   return { subject, html: baseTemplate(content, subject, params.captainName) };
 }
@@ -236,55 +245,29 @@ export function invitationEmail1(params: InvitationTemplateParams): { subject: s
 // ============================================
 export function invitationEmail2(params: InvitationTemplateParams): { subject: string; html: string } {
   const { coupleDisplayName, guestName, collectionLink, coupleImageUrl } = params;
-  
+
   const subject = `Still thinking what recipe to send?`;
-  
+
   const content = `
-                ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
+                      ${heroSection(coupleDisplayName)}
 
-                <!-- Header -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td align="center" style="padding-bottom: 24px;">
-                      <h1 style="margin: 0; font-family: Georgia, serif; font-size: 26px; font-weight: 400; color: #2D2D2D; line-height: 1.3; text-align: center;" class="darkmode-text">
-                        Still thinking what recipe to send?
-                      </h1>
-                    </td>
-                  </tr>
-                </table>
+                      ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
 
-                <!-- Main Content -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td align="center">
-                      <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-                        Hi ${guestName},
-                      </p>
-                      <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-                        Here's the secret about ${coupleDisplayName}'s cookbook: the best recipes are the ones you already make.
-                      </p>
-                      <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-                        You know—that thing you throw together on Tuesdays. The dip that disappears first at parties. Your hangover cure. The sandwich that fixes bad days.
-                      </p>
-                      <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-                        Just pick one and write it like you're texting a friend. Or just take a photo if it's already written down somewhere.
-                      </p>
-                    </td>
-                  </tr>
-                </table>
+                      <!-- Body Copy -->
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                          <td align="center">
+                            <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
+                              Hi ${guestName}, ${coupleDisplayName}'s cookbook is coming together and your page is still open.
+                            </p>
+                            <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #2D2D2D; font-weight: 600; line-height: 1.6; text-align: center;" class="darkmode-text">
+                              Send a recipe and you're in their kitchen.
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
 
-                ${ctaButton(collectionLink)}
-
-                <!-- Subtext -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td align="center">
-                      <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 14px; color: #9A9590; line-height: 1.5; text-align: center;">
-                        Takes 5 minutes, promise.
-                      </p>
-                    </td>
-                  </tr>
-                </table>`;
+                      ${ctaButton(collectionLink)}`;
 
   return { subject, html: baseTemplate(content, subject, params.captainName) };
 }
@@ -294,62 +277,42 @@ export function invitationEmail2(params: InvitationTemplateParams): { subject: s
 // ============================================
 export function invitationEmail3(params: InvitationTemplateParams): { subject: string; html: string } {
   const { coupleDisplayName, guestName, collectionLink, coupleImageUrl, recipeCount } = params;
-  
-  // Show social proof only if we have 10+ recipes
+
   const showSocialProof = recipeCount && recipeCount >= 10;
-  
-  const subject = showSocialProof 
+
+  const subject = showSocialProof
     ? `${coupleDisplayName}'s cookbook is taking shape`
     : `There's still time`;
-  
-  const headerText = showSocialProof
-    ? `${coupleDisplayName}'s cookbook is taking shape`
-    : `There's still time`;
-  
-  const mainContent = showSocialProof
-    ? `<p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-         Hi ${guestName},
+
+  const bodyContent = showSocialProof
+    ? `<p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
+         Hi ${guestName}, ${recipeCount} people have already shared their recipes.
        </p>
-       <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-         ${recipeCount} people have already shared their recipes. Every page tells a story about someone who loves them.
-       </p>
-       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-         There's still room for yours. The pasta dish you always make. That dessert everyone asks about. Whatever feels like you.
+       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #2D2D2D; font-weight: 600; line-height: 1.6; text-align: center;" class="darkmode-text">
+         There's still room for yours.
        </p>`
-    : `<p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-         Hi ${guestName},
+    : `<p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
+         Hi ${guestName}, we know life gets busy. But if you've been meaning to add your recipe to ${coupleDisplayName}'s book, now's a good time.
        </p>
-       <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-         We know life gets busy. But if you've been meaning to add your recipe to ${coupleDisplayName}'s book, now's a good time.
-       </p>
-       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-         Five minutes. One recipe. A page in their kitchen forever.
+       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #2D2D2D; font-weight: 600; line-height: 1.6; text-align: center;" class="darkmode-text">
+         Five minutes. One recipe. A page in their kitchen.
        </p>`;
-  
+
   const content = `
-                ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
+                      ${heroSection(coupleDisplayName)}
 
-                <!-- Header -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td align="center" style="padding-bottom: 24px;">
-                      <h1 style="margin: 0; font-family: Georgia, serif; font-size: 26px; font-weight: 400; color: #2D2D2D; line-height: 1.3; text-align: center;" class="darkmode-text">
-                        ${headerText}
-                      </h1>
-                    </td>
-                  </tr>
-                </table>
+                      ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
 
-                <!-- Main Content -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td align="center">
-                      ${mainContent}
-                    </td>
-                  </tr>
-                </table>
+                      <!-- Body Copy -->
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                          <td align="center">
+                            ${bodyContent}
+                          </td>
+                        </tr>
+                      </table>
 
-                ${ctaButton(collectionLink)}`;
+                      ${ctaButton(collectionLink)}`;
 
   return { subject, html: baseTemplate(content, subject, params.captainName) };
 }
@@ -359,41 +322,29 @@ export function invitationEmail3(params: InvitationTemplateParams): { subject: s
 // ============================================
 export function invitationEmail4(params: InvitationTemplateParams): { subject: string; html: string } {
   const { coupleDisplayName, guestName, collectionLink, coupleImageUrl } = params;
-  
+
   const subject = `Last call for ${coupleDisplayName}'s book`;
-  
+
   const content = `
-                ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
+                      ${heroSection(coupleDisplayName)}
 
-                <!-- Header -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td align="center" style="padding-bottom: 24px;">
-                      <h1 style="margin: 0; font-family: Georgia, serif; font-size: 26px; font-weight: 400; color: #2D2D2D; line-height: 1.3; text-align: center;" class="darkmode-text">
-                        One last nudge
-                      </h1>
-                    </td>
-                  </tr>
-                </table>
+                      ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
 
-                <!-- Main Content -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td align="center">
-                      <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-                        Hi ${guestName},
-                      </p>
-                      <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-                        This is our last reminder about ${coupleDisplayName}'s recipe book. If you'd like to be part of it, we'd love to have you.
-                      </p>
-                      <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-                        No hard feelings if not—but the door's still open.
-                      </p>
-                    </td>
-                  </tr>
-                </table>
+                      <!-- Body Copy -->
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                          <td align="center">
+                            <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
+                              Hi ${guestName}, this is our last reminder about ${coupleDisplayName}'s recipe book.
+                            </p>
+                            <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #2D2D2D; font-weight: 600; line-height: 1.6; text-align: center;" class="darkmode-text">
+                              No hard feelings if not. But the door's still open.
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
 
-                ${ctaButton(collectionLink)}`;
+                      ${ctaButton(collectionLink)}`;
 
   return { subject, html: baseTemplate(content, subject, params.captainName) };
 }

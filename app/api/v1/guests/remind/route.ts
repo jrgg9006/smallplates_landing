@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 import { sendGuestInvitationEmail } from '@/lib/email/send-invitation-email';
 
+// Reason: Prevent harassment and protect Postmark reputation
+const MAX_REMINDERS_PER_HOUR = 20;
+const MAX_EMAILS_PER_GUEST = 5;
+
 export async function POST(request: NextRequest) {
   try {
     const { guestId, groupId } = await request.json();
@@ -32,6 +36,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not a member of this group' }, { status: 403 });
     }
 
+    // ── Guard: hourly reminder limit per user ──
+    const hourAgoCutoff = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: recentReminders } = await supabase
+      .from('guests')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gte('last_email_sent_at', hourAgoCutoff)
+      .gt('emails_sent_count', 1);
+
+    if ((recentReminders || 0) >= MAX_REMINDERS_PER_HOUR) {
+      return NextResponse.json(
+        { error: 'Too many reminders sent recently. Try again later.' },
+        { status: 429 }
+      );
+    }
+
     // Fetch guest
     const { data: guest } = await supabase
       .from('guests')
@@ -51,10 +71,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Guest has no valid email' }, { status: 400 });
     }
 
+    // ── Guard: max emails per guest ──
+    if ((guest.emails_sent_count || 0) >= MAX_EMAILS_PER_GUEST) {
+      return NextResponse.json(
+        { error: `This guest has already received ${MAX_EMAILS_PER_GUEST} emails` },
+        { status: 400 }
+      );
+    }
+
     // Fetch group data for email
     const { data: group } = await supabase
       .from('groups')
-      .select('couple_first_name, partner_first_name, couple_image_url, created_by')
+      .select('name, couple_first_name, partner_first_name, couple_image_url, created_by')
       .eq('id', groupId)
       .single();
 
@@ -64,7 +92,7 @@ export async function POST(request: NextRequest) {
 
     const coupleNames = [group.couple_first_name, group.partner_first_name]
       .filter(Boolean)
-      .join(' & ') || 'The Couple';
+      .join(' & ') || group.name || 'The Couple';
 
     // Get collection token
     const { data: creatorProfile } = await supabase

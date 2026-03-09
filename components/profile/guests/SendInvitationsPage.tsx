@@ -145,6 +145,8 @@ export function SendInvitationsPage({
 
       if (response.ok) {
         setSendResult({ sent: data.sent, failed: data.failed });
+        // Reason: Auto-dismiss success toast after 4 seconds
+        setTimeout(() => setSendResult(null), 4000);
         setSelectedIds(new Set());
         await loadGuests();
         setActiveTab("sent");
@@ -705,7 +707,7 @@ export function SendInvitationsPage({
                           <div className="flex items-center gap-2">
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-[#9A9590]">
                               <Clock size={12} />
-                              Pending
+                              Awaiting recipe
                             </span>
                             <button
                               onClick={() => handleRemind(guest.id)}
