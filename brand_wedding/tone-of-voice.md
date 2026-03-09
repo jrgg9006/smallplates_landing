@@ -1,5 +1,5 @@
 # Tone of Voice Guide
-## Small Plates — Version 2.0
+## Small Plates — Version 3.0
 
 ---
 
@@ -9,24 +9,23 @@
 
 ## The Voice
 
-Small Plates sounds like the friend who always knows.
+Small Plates sounds like the friend who always knows — and says it before you ask.
 
 Knows the restaurant you should try.
-Knows the song you'll love before you hear it.
-Knows when to push and when to let it be.
+Knows the gift that will actually land.
+Knows when something is wrong with your plan, and tells you.
 
-She doesn't explain herself.
-She doesn't over-sell.
-She just says it—and you trust her.
+She doesn't soften it.
+She doesn't wait for the right moment.
+She just says it — because she respects you enough to be honest.
 
-Because she's always right about these things.
-
-Not loud. Not quiet.
-Just... certain.
+Not loud. Not harsh.
+Just certain. And a little ahead of everyone else.
 
 The kind of voice that makes you lean in,
 not because she's whispering,
-but because what she's saying is worth hearing.
+but because what she's saying is true
+and nobody else was going to say it.
 
 ---
 
@@ -53,9 +52,9 @@ We don't explain why this matters. We show it.
 
 ---
 
-## The Four Principles
+## The Five Principles
 
-Every piece of Small Plates communication should feel like these four things—in different proportions depending on context and audience.
+Every piece of Small Plates communication should feel like these five things — in different proportions depending on context and audience.
 
 ---
 
@@ -67,20 +66,26 @@ But we're not soft about it.
 Warmth doesn't mean gentle.
 It means present. Real. Human.
 
-We're the friend who shows up with food when you're sad—
-and also tells you when you're being ridiculous.
+We're the friend who shows up with food when you're sad —
+and tells you when you're being ridiculous *before* you make the mistake, not after.
+
+Warmth doesn't protect you from the truth.
+It's what makes the truth land without damage.
 
 **Warm with edge** = Love that doesn't coddle.
 
 We sound like:
 - Someone who actually knows you
 - A friend, not a brand
+- Someone who names the thing nobody's naming
 - Honest, even when it's easier not to be
+- A friend who says "honestly? skip it" — and you know they're right
 
 We don't sound like:
 - A greeting card
 - Customer service
 - Someone trying too hard to be liked
+- Someone who softens until the point disappears
 
 ---
 
@@ -137,70 +142,61 @@ We make people want to act.
 But we never pressure. Never guilt. Never create fake urgency.
 
 The energy comes from excitement, not anxiety.
-"You're going to want to do this" — not "You need to do this now."
 
-**Moving, not pushing** = Invitation with energy.
+**Moving, not pushing** = Forward motion without force.
 
 We sound like:
-- Someone sharing something good
-- Excited, not desperate
-- Confident the product speaks for itself
+- Someone with a good idea who wants to share it
+- A brand that makes you want to move
+- Energizing without being exhausting
 
 We don't sound like:
-- A salesperson
-- An alarm clock
-- Someone who needs you to say yes
+- A countdown timer
+- A sales pitch
+- Someone who needs you to buy this right now
 
 ---
 
-## The Rhythm
+### 5. Say the Quiet Part
 
-Small Plates has a distinctive beat.
-Fast enough to feel alive. Slow enough to feel intentional.
+The wedding industry is afraid of the truth.
+We're not.
 
-### Short punches.
-### Then a longer thought that lets the idea land and gives it room to breathe.
-### Then short again.
+Not to provoke. Not to stand out.
+But because we have enough confidence to be honest
+when everyone else is being careful.
 
-We don't drag.
-We don't rush.
-We move.
+Most gifts end up in a drawer — and everyone knows it.
+Most wedding keepsakes get one look and disappear — and everyone knows it.
+A cookbook sounds like something your aunt would give you — and that's the exact thing we have to earn our way out of.
 
----
+We say these things.
+Not to be contrarian. Not to make anyone uncomfortable.
+But because naming the real thing is the only way to offer something real instead.
 
-### The Line Break Rule — Updated
+**Say the quiet part** = Name what everyone's thinking and nobody's saying.
 
-Line breaks are emphasis, not decoration.
+We sound like:
+- A brand that doesn't need to protect the industry it's in
+- Someone who finally says what's in the room
+- Honest without being harsh. Direct without being rude.
+- The person who says "most wedding gifts end up in a drawer" — and then shows you why this one won't
 
-Use them to create rhythm.
-Use them to let a thought land.
-Don't use them to make everything feel "poetic."
-
-**Good:**
-> A recipe from your best friend.
-> A note from your grandmother.
-> A reason to cook together.
-
-**Bad:**
-> A recipe.
-> From your best friend.
-> A note.
-> From your grandmother.
-> A reason.
-> To cook.
-> Together.
-
-The first has rhythm. The second has asthma.
+We don't sound like:
+- A brand that plays it safe to avoid offending anyone
+- Provocative for the sake of attention
+- Someone who softens the truth until it disappears
+- Edgy without substance
 
 ---
 
-## Vocabulary
+## The Vocabulary
 
 ### Words We Use
 
 | Word | Why | Energy |
 |------|-----|--------|
-| **Kitchen** | Where real life happens. Where this book lives. | Grounded, real |
+| **Kitchen** | Where this book lives. | Grounded, real |
 | **Table** | Connection point. "Still at the table." | Warm, central |
 | **People** | Always "people." Human, direct. | Inclusive, real |
 | **Real** | Opposite of performed. Real kitchens, real marriages. | Confident, honest |
@@ -208,6 +204,7 @@ The first has rhythm. The second has asthma.
 | **Just** | "Just send something." Reduces friction. | Easy, light |
 | **Done** | "5 minutes. You're done." Creates completion. | Satisfying, efficient |
 | **Finally** | "Finally, a wedding gift that..." Positions against status quo. | Fresh, confident |
+| **Honestly** | Opens the truth. "Honestly? Most gifts disappear." | Permission to be real |
 
 ---
 
@@ -250,6 +247,16 @@ The first has rhythm. The second has asthma.
 > "Get in the book."
 
 > "Your recipe. Their kitchen. Forever."
+
+> "Most wedding gifts end up in a drawer. We're fine saying that."
+
+> "A cookbook sounds boring. Until you read what they wrote."
+
+> "The registry is full of things you'll return. This isn't one of them."
+
+> "Your future mother-in-law will contribute a recipe. That's probably the first real conversation you'll have with her."
+
+> "Doesn't have to be sentimental. It will be anyway."
 
 ---
 
@@ -319,7 +326,7 @@ Confident. Stylish. Zero drama. Like recommending a restaurant we know she'll lo
 Guests feeling like spectators. The wedding being "just another wedding."
 
 **What she needs to hear:**
-"This makes your guests part of the story. They're not just attending—they're contributing to something that lasts."
+"This makes your guests part of the story. They're not just attending — they're contributing to something that lasts."
 
 **How we sound to her:**
 Empowering. Exciting. Like we're letting her in on a secret.
@@ -335,20 +342,6 @@ Empowering. Exciting. Like we're letting her in on a secret.
 > This is that.
 >
 > [Start your book →]
-
-**Example — Email to bride starting her own book:**
-> You're not just planning a wedding.
-> You're building something.
->
-> A book filled with the people who matter most.
-> Every recipe is a person. Every page is presence.
->
-> And the best part?
-> They get to be part of it.
->
-> Let's go.
->
-> [Invite your guests →]
 
 ---
 
@@ -381,17 +374,6 @@ Clear. Energizing. "You've got this."
 > 4. Bride cries. You win.
 >
 > [Start the book →]
-
-**Example — Email during collection:**
-> 23 recipes in. 19 to go.
->
-> You're doing great.
-> The book is filling up.
-> [Bride's name] has no idea what's coming.
->
-> Need to nudge a few people? We've got reminder templates ready.
->
-> [Send reminders →]
 
 ---
 
@@ -457,7 +439,7 @@ Light. Zero pressure. A little funny. "Just do it, it's easy."
 ### The Mom
 
 **Who she is:**
-- Wants everything perfect for her daughter
+- Wants everything right for her daughter
 - Appreciates tradition but respects her daughter's taste
 - Doesn't want anything juvenile or superficial
 
@@ -697,6 +679,7 @@ The key: we can go low-energy, but we should never go passive. Even quiet moment
 ### Do
 
 - **Start strong.** First sentence earns the second.
+- **Name the uncomfortable thing.** The truth about wedding gifts, about keepsakes, about what people actually use — say it before they think it. That's what builds trust.
 - **End with momentum.** Last line should make them want to act or feel something.
 - **Use "you."** We're talking to someone, not at them.
 - **Be specific.** "Your mom's pasta" > "a family recipe."
@@ -715,6 +698,7 @@ The key: we can go low-energy, but we should never go passive. Even quiet moment
 - **Don't guilt or pressure.** Energy yes, anxiety no.
 - **Don't use emojis.** Exception: Stories, sparingly.
 - **Don't sacrifice clarity for style.** If it's cool but confusing, rewrite.
+- **Don't soften until there's nothing left.** Edge is not cruelty. It's honesty.
 
 ---
 
@@ -725,8 +709,9 @@ Before publishing anything, ask two questions:
 **Question 1:**
 > "Would our 28-year-old New York woman, champagne in hand on a rooftop, say this?"
 
-If it sounds like something she'd roll her eyes at—rewrite.
-If it sounds like something she'd say with a knowing smile—ship it.
+If it sounds like something she'd roll her eyes at — rewrite.
+If it sounds like something she'd say with a knowing smile — ship it.
+If it sounds like something she'd say that makes everyone at the table go quiet for a second — even better.
 
 **Question 2:**
 > "Does this make someone want to do something?"
@@ -746,6 +731,7 @@ If the answer is yes, you're good.
 | Direct, Not Blunt | Clear, efficient, confident | Cold, harsh, robotic |
 | Effortless, Not Lazy | Natural, flowing, crafted | Sloppy, trying too hard to be casual |
 | Moving, Not Pushing | Energetic, inviting, exciting | Pressuring, guilt-tripping, urgent |
+| Say the Quiet Part | Honest about the real thing | Provocative, contrarian, edgy for show |
 
 | Always | Never |
 |--------|-------|
@@ -754,6 +740,7 @@ If the answer is yes, you're good.
 | Be specific | Use empty words |
 | Respect their time | Over-explain |
 | Make it feel easy | Make it feel like work |
+| Name the real thing | Protect the industry |
 
 ---
 
@@ -770,14 +757,14 @@ We earn them.
 We don't beg for action.
 We make people want to move.
 
-We're the friend with the good idea,
-the one who shows up with the plan,
-the one who makes things happen
-without making it feel heavy.
+And when everyone else in the room is being careful —
+we're the one who says the thing.
+Calmly. Without drama.
+Because someone had to.
 
 That's how Small Plates sounds.
 
 ---
 
 *Tone of Voice Guide — Small Plates*
-*Version 2.0*
+*Version 3.0*

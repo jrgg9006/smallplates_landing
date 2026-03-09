@@ -1,48 +1,67 @@
-# Brand Manifesto — Weddings
+# Brand Manifesto
+## Small Plates & Co. — Version 2.0
 
-We live in a world that made gift-giving easy.
-Too easy.
+---
 
-Click. Ship. Done.
-A registry. A box. A thing.
+The wedding ends.
 
-But somewhere along the way,
-we stopped giving pieces of ourselves.
+The guests go home.
+The flowers die.
+The dress gets boxed.
 
-We believe food is the most human way to connect.
+And the blender they gave you
+doesn't remember anyone's name.
 
-Not just something we make —
-something we give.
+---
 
-Recipes aren't instructions.
-They're stories. Memories. Pieces of a life
-passed from one hand to another.
+Most wedding gifts are well-intentioned.
+Most of them disappear anyway.
 
-We believe the things we keep in our homes should matter.
-They should remind us of who we are.
-And who showed up.
+Not because people don't care.
+Because objects without people inside them
+can't hold a presence.
 
-That's Small Plates.
+A registry item says: I showed up.
+It doesn't say: I know you.
+It doesn't say: I'm still here.
 
-A book made by the people who love you.
-A kitchen filled with their voices.
-A table that remembers.
+---
+
+We believe the people who showed up for you
+shouldn't have to leave.
+
+Not their voices.
+Not their recipes.
+Not the handwriting of someone who loves you
+on a page you'll open on a Tuesday
+three years from now.
+
+---
+
+Small Plates is a book made by the people who love you.
 
 Every page holds a name.
-A note.
-A reason to cook together.
+A recipe.
+A note that sounds exactly like them.
 
 Not for perfect meals.
 For full ones.
 
-Because in the end,
-it was never about the food.
+The kind where someone says
+"this is my grandmother's" —
+and for a moment,
+she's in the kitchen with you.
 
-It's about the people.
-The laughter.
-The life you build around the table.
+---
 
-This is what we protect.
-This is what we keep.
-This is what we pass on.
+That's what we're building.
 
+Not a keepsake.
+Not a wedding product.
+
+A kitchen full of people
+who are still at the table.
+
+---
+
+*Small Plates & Co.*

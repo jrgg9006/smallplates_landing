@@ -61,7 +61,7 @@ export default function TheProblem() {
           
           <p className="font-sans text-lg font-light md:text-xl text-[#2D2D2D]/70 leading-relaxed">
             Not because people don&apos;t care.
-            <span className="block">Because caring is hard to fit in a box.</span>
+            <span className="block">Because an object can't carry a person inside it.</span>
           </p>
         </motion.div>
 
@@ -84,7 +84,6 @@ export default function TheProblem() {
           viewport={{ once: true }}
           transition={{ duration: 0.7, delay: 0.5, ease: "easeOut" }}
         >
-          What if the gift wasn&apos;t a thing?
           <span className="block mt-2">What if it was the people?</span>
         </motion.p>
 

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { Search, Plus, User, Check, Clock, ChevronDown } from "lucide-react";
+import { Search, Plus, User, Check, Clock, ChevronDown, Upload } from "lucide-react";
+import { ImportGuestsModal } from "./ImportGuestsModal";
 import { getGuestsByGroup } from "@/lib/supabase/guests";
 import type { Guest } from "@/lib/types/database";
 import {
@@ -41,6 +42,8 @@ export function GuestNavigationSheet({
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "submitted">("all");
   const [isMobile, setIsMobile] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importSuccessCount, setImportSuccessCount] = useState<number | null>(null);
 
   // Responsive detection
   useEffect(() => {
@@ -132,7 +135,8 @@ export function GuestNavigationSheet({
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
+    <>
+    <Sheet open={isOpen && !showImportModal} onOpenChange={onClose}>
       <SheetContent 
         side={isMobile ? "bottom" : "left"} 
         className={isMobile 
@@ -151,6 +155,15 @@ export function GuestNavigationSheet({
             </SheetTitle>
           </SheetHeader>
 
+          {/* Success toast */}
+          {importSuccessCount !== null && (
+            <div className="mx-4 mt-3 px-4 py-2.5 rounded-lg bg-[#D4A854]/10 border border-[#D4A854]/30 flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+              <Check size={14} className="text-[#D4A854] flex-shrink-0" />
+              <span className="text-xs text-[#2D2D2D]">
+                {importSuccessCount} guest{importSuccessCount !== 1 ? "s" : ""} added
+              </span>
+            </div>
+          )}
 
           {/* Search and Filter */}
           <div className={`${isMobile ? 'px-4 py-3' : 'px-6 py-4'}`}>
@@ -220,7 +233,7 @@ export function GuestNavigationSheet({
                     >
                       <div className="flex items-center justify-between gap-3">
                         {/* Guest name */}
-                        <p className="font-normal text-[hsl(var(--brand-charcoal))] truncate flex-1">
+                        <p className="text-sm font-normal text-[hsl(var(--brand-charcoal))] truncate flex-1">
                           {guest.first_name} {guest.last_name || ''}
                         </p>
                         
@@ -237,14 +250,29 @@ export function GuestNavigationSheet({
             )}
           </div>
 
-          {/* Footer - Add Guest Button */}
-          <div className={`${isMobile ? 'px-4 py-4' : 'p-6'} border-t border-gray-100`}>
+          {/* Footer - Import & Add Guest Buttons */}
+          <div className={`${isMobile ? 'px-4 py-4' : 'p-6'} border-t border-gray-100 space-y-2`}>
+            {/* Import button */}
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="w-full py-3 px-4 rounded-lg bg-[#FAF7F2] border-[1.5px] border-dashed border-[#D4A854]
+                         flex items-center justify-center gap-2 text-[#2D2D2D] text-sm font-medium
+                         hover:bg-[#E8E0D5] hover:border-solid transition-all"
+            >
+              <Upload size={16} className="text-[#D4A854]" />
+              <span>Import guests from</span>
+              <img src="/images/guest_modal/Zola_Logo.png" alt="Zola" className="h-2.5 object-contain" />
+              <span className="text-[#999]">/</span>
+              <img src="/images/guest_modal/knot_logo.png" alt="The Knot" className="h-2.5 object-contain" />
+            </button>
+
+            {/* Existing Add Guest button */}
             <button
               onClick={() => {
                 onAddGuest?.();
               }}
-              className="w-full py-3 border-2 border-dashed border-[hsl(var(--brand-warm-gray))]/30 rounded-lg 
-                         flex items-center justify-center gap-2 text-[hsl(var(--brand-warm-gray))] 
+              className="w-full py-3 border-2 border-dashed border-[hsl(var(--brand-warm-gray))]/30 rounded-lg
+                         flex items-center justify-center gap-2 text-[hsl(var(--brand-warm-gray))]
                          hover:border-[hsl(var(--brand-honey))] hover:text-[hsl(var(--brand-honey))] transition-colors"
             >
               <Plus size={20} />
@@ -253,6 +281,21 @@ export function GuestNavigationSheet({
           </div>
         </div>
       </SheetContent>
+
     </Sheet>
+
+      {showImportModal && (
+        <ImportGuestsModal
+          groupId={groupId}
+          onClose={() => setShowImportModal(false)}
+          onImportComplete={(count) => {
+            setShowImportModal(false);
+            loadGuests();
+            setImportSuccessCount(count);
+            setTimeout(() => setImportSuccessCount(null), 3500);
+          }}
+        />
+      )}
+    </>
   );
 }

@@ -62,15 +62,15 @@ export default function AboutUs() {
               <p className="text-[#2D2D2D] text-lg md:text-xl leading-relaxed font-light first-letter:text-6xl first-letter:font-serif first-letter:float-left first-letter:mr-3 first-letter:mt-1">
                 Wedding registries are broken. Another blender gathering dust. Another set of towels that gets returned. Another gift that says nothing about the giver or the life being celebrated.
               </p>
-              
+
               <p className="text-[#2D2D2D] text-lg md:text-xl leading-relaxed font-light">
                 We believe food is how families really connect. Not in fancy dining rooms, but in kitchens on Tuesday nights. A recipe isn&apos;t just instructions—it&apos;s presence. It&apos;s your grandmother&apos;s hands guiding yours. It&apos;s love you can taste.
               </p>
-              
+
               <p className="text-[#2D2D2D] text-lg md:text-xl leading-relaxed font-light">
                 That&apos;s why we created wedding cookbooks. Not keepsakes that sit on shelves, but kitchen books that get stained and dog-eared. Every page holds a name, a story, a piece of someone who was there. It&apos;s the kind of gift that matters—not because it&apos;s expensive, but because it&apos;s real and authentic.
               </p>
-              
+
               <p className="text-[#2D2D2D] text-lg md:text-xl leading-relaxed font-light">
                 Because the best wedding gift isn&apos;t something from a store. It&apos;s something from the heart, bound between covers, meant to be opened every time they&apos;re hungry and wondering what to make for dinner.
               </p>

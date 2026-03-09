@@ -828,6 +828,7 @@ export default function GroupsPage() {
         onClose={() => {
           setShowGuestDetailsModal(false);
           setSelectedGuest(null);
+          setShowGuestSheet(true);
         }}
         onGuestUpdated={() => {
           // Refresh guests in the navigation sheet by reloading

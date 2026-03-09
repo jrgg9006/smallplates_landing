@@ -1,5 +1,5 @@
 # Brand Positioning
-## Small Plates & Co. — Version 2.0
+## Small Plates & Co. — Version 3.0
 
 ---
 
@@ -14,8 +14,6 @@
 > **Unlike cash funds that disappear, registry items that blend in, or photo albums that live on shelves—**
 >
 > **Small Plates lives in the kitchen. A book filled with recipes from the people who showed up. A reminder, every time you cook, that they're still with you.**
->
-> **We don't preserve memories. We extend presence.**
 
 ---
 
@@ -27,7 +25,7 @@
 
 ## Internal One-Liner
 
-> **We turn the presence of your wedding guests into something you live with—not something you store.**
+> **We turn the presence of your wedding guests into something you live with — not something you store.**
 
 ---
 
@@ -37,12 +35,12 @@ Positioning is not the Brand Idea. It's how the Brand Idea meets the market.
 
 | Element | What It Is | Small Plates |
 |---------|------------|--------------|
-| **Brand Idea** | The deepest truth we represent | Vivid Presence |
+| **Brand Idea** | The deepest truth we represent | "The people who matter to you shouldn't disappear from your life when the wedding ends." |
 | **Positioning** | How we occupy space in the market | The wedding gift that keeps everyone present |
 | **Brand Line** | Poetic expression of the idea | "Still at the table" |
 | **Acquisition Line** | Functional explanation | "Recipes from the people who love you" |
 
-The Brand Idea is internal—it guides decisions. Positioning is external—it guides perception.
+The Brand Idea is internal — it guides decisions. Positioning is external — it guides perception.
 
 ---
 
@@ -50,8 +48,8 @@ The Brand Idea is internal—it guides decisions. Positioning is external—it g
 
 ```
 BRAND IDEA
-"Vivid Presence"
-The people who love you stay in your life—not as memories, but as presence.
+"The people who matter to you shouldn't disappear
+from your life when the wedding ends."
             │
             ▼
 POSITIONING
@@ -76,15 +74,11 @@ PROOF POINTS
 
 # The Five Positioning Questions
 
-Positioning answers five fundamental questions. Here's how Small Plates answers each.
-
 ---
 
 ## 1. Who Is This For?
 
 ### The Audience Ecosystem
-
-Small Plates has multiple audiences, but positioning must focus on the **emotional center**—the person whose approval validates the purchase.
 
 | Role | Who | Function |
 |------|-----|----------|
@@ -95,23 +89,19 @@ Small Plates has multiple audiences, but positioning must focus on the **emotion
 
 ### The Strategic Insight
 
-The Organizer is the transactional buyer—she makes the purchase. But the **Bride is the positioning target**. If the Bride wouldn't want it, the Organizer won't buy it.
+The Organizer is the transactional buyer — she makes the purchase. But the **Bride is the positioning target**. If the Bride wouldn't want it, the Organizer won't buy it.
 
 The Bride is the taste filter. She determines whether Small Plates is "cool" or "cheesy." Every positioning choice must pass through her.
 
 ### Positioning Target Statement
 
-> **Couples who want their wedding to mean something beyond the day—and the people who love them enough to make that possible.**
-
-This captures both the emotional buyer (the couple) and the transactional buyer (the people around them) in one statement.
+> **Couples who want their wedding to mean something beyond the day — and the people who love them enough to make that possible.**
 
 ---
 
 ## 2. What Are We?
 
 ### Three Levels of "What"
-
-Most brands describe themselves at the category level. Strong brands describe themselves at the meaning level.
 
 | Level | Description | Small Plates |
 |-------|-------------|--------------|
@@ -123,17 +113,12 @@ Most brands describe themselves at the category level. Strong brands describe th
 
 > **Small Plates is how the people at your wedding become part of your marriage.**
 
-This is the definition that connects to Vivid Presence. The product isn't a book—it's a mechanism for ongoing presence.
-
 ### What We Are Not
-
-Clarity requires knowing what we are *not*:
 
 | We Are Not | Why |
 |------------|-----|
 | A keepsake | Keepsakes are stored; we're used |
 | A photo album | Photo albums are looked at; we're cooked from |
-| A memory book | Memory is past-tense; presence is now |
 | A registry item | Registry items are transactional; we're relational |
 | A wedding favor | Favors are forgettable; we're permanent |
 | A DIY project | DIY is a burden; we're a service |
@@ -144,31 +129,27 @@ Clarity requires knowing what we are *not*:
 
 ### The Competitive Landscape
 
-Small Plates competes across multiple categories:
-
 | Category | Examples | What They Offer | What They Lack |
 |----------|----------|-----------------|----------------|
-| Cash Funds | Zola, Honeyfund | Convenience, flexibility | No presence—just money that disappears into life |
-| Registry Items | Amazon, Crate & Barrel | Utility, choice | No presence—objects without meaning |
-| Photo Books | Artifact Uprising, Mixbook | Beautiful memories | Passive presence—you look, you don't live |
+| Cash Funds | Zola, Honeyfund | Convenience, flexibility | No presence — just money that disappears into life |
+| Registry Items | Amazon, Crate & Barrel | Utility, choice | No presence — objects without people inside them |
+| Photo Books | Artifact Uprising, Mixbook | Beautiful images | Passive — you look, you don't live |
 | DIY Recipe Books | Create Cookbooks, Heritage | Collaboration | No design, no completion, no quality |
 | Personalized Gifts | The Night Sky, Etsy | Customization | Single-voice, symbolic, not functional |
 
 ### The Cultural Alternative
 
-But our real competition isn't another product. It's a **condition**.
+Our real competition isn't another product. It's a **condition**.
 
 > **After the wedding, everyone goes home.**
 >
-> The flowers die. The dress gets boxed. The photos go into an album that gets opened less and less each year. The guests become people you see at holidays—if that. Their presence at your wedding becomes a memory that fades.
+> The flowers die. The dress gets boxed. The guests become people you see at holidays — if that. Their presence at your wedding fades into the background of your daily life.
 >
-> **That's the alternative to Small Plates: the natural disappearance of presence.**
+> **That's the alternative to Small Plates: the natural disappearance of people.**
 
 ### Why This Frame Matters
 
-Positioning against specific competitors (Artifact Uprising, Zola) makes us reactive. Positioning against a **cultural condition** (the disappearance of presence) makes us essential.
-
-We're not saying "we're better than photo albums." We're saying "without us, the people who showed up for your wedding slowly fade from your daily life."
+Positioning against specific competitors makes us reactive. Positioning against a **cultural condition** — the disappearance of the people who showed up — makes us essential.
 
 ### The Competitive Frame
 
@@ -191,13 +172,11 @@ We're not saying "we're better than photo albums." We're saying "without us, the
 | Emotional | ✗ | ✗ | ✓ | ✗ | ✓ |
 | Permanent | ✗ | ✓ | ✓ | ✓ | ✓ |
 | Done-for-you | ✓ | ✓ | Partial | ✗ | ✓ |
-| Vivid Presence | ✗ | ✗ | ✗ | ✗ | **✓** |
+| Keeps people present | ✗ | ✗ | ✗ | ✗ | **✓** |
 
 ### The Unique Offer
 
-Only Small Plates delivers **Vivid Presence**—the combination of collaboration, function, and emotional depth that keeps people actively present in your life.
-
-> **The people who were at your wedding stay in your life—not as a memory you revisit, but as a presence you live with. Every recipe is a person. Every meal is a quiet reunion.**
+> **The people who were at your wedding stay in your life — not as something you look at, but as a presence you live with. Every recipe is a person. Every meal is a quiet reunion.**
 
 ### The Differentiation Hierarchy
 
@@ -216,26 +195,22 @@ Features can be copied. Meaning cannot.
 
 ### Proof Points
 
-The positioning claim—"keeps everyone present"—requires proof. Here's what makes it credible:
-
 | Proof Point | What It Demonstrates |
 |-------------|----------------------|
 | **The book lives in the kitchen** | Presence is daily, not ceremonial. You encounter it while cooking, not while reminiscing. |
 | **Every recipe has a name and a note** | Presence is specific, not anonymous. Each contributor is identified. |
 | **The book is designed to be used** | Presence is active, not preserved. Stains and wear are signs of life, not damage. |
 | **Professional design, done-for-you** | The experience matches the promise. This isn't a DIY project that gets abandoned. |
-| **Contributors write personal notes** | The presence has voice. It's not just a recipe—it's a person speaking. |
+| **Contributors write personal notes** | The presence has voice. It's not just a recipe — it's a person speaking. |
 | **The book lasts for years** | Presence endures. This isn't a consumable; it's a permanent fixture. |
 
-### The Reason to Believe (RTB)
+### The Reason to Believe
 
-> **Small Plates creates presence because the book lives where life happens—in the kitchen—and every page carries a specific person: their name, their recipe, their words. It's not designed to be preserved. It's designed to be used. And through use, the presence stays vivid.**
+> **Small Plates creates presence because the book lives where life happens — in the kitchen — and every page carries a specific person: their name, their recipe, their words. It's not designed to be preserved. It's designed to be used. And through use, the people stay.**
 
 ---
 
 # Positioning by Audience
-
-The core positioning adapts for different audiences while maintaining the same essence.
 
 ---
 
@@ -243,9 +218,7 @@ The core positioning adapts for different audiences while maintaining the same e
 
 **Her question:** "Is this cool? Is this something I'd actually want?"
 
-**Positioning for her:**
-
-> This isn't another registry gift that ends up in a closet. It's a cookbook made by the people who showed up to your wedding—their recipes, their notes, their presence. You'll cook from it on random Tuesday nights. You'll see their names while you're making dinner. They're still there. Still at the table.
+> This isn't another registry gift that ends up in a closet. It's a cookbook made by the people who showed up to your wedding — their recipes, their notes, their presence. You'll cook from it on random Tuesday nights. You'll see their names while you're making dinner. They're still there. Still at the table.
 
 **Key message:** The people stay present in your daily life.
 
@@ -255,9 +228,7 @@ The core positioning adapts for different audiences while maintaining the same e
 
 **Her question:** "Is this the gift that makes me the hero?"
 
-**Positioning for her:**
-
-> You want to give something that actually matters—not another thing that gets returned or forgotten. Small Plates is different. Everyone contributes a recipe. We turn it into a beautiful book. She'll have it in her kitchen for decades. And every time she cooks from it, she'll think of the people who made it—including you.
+> You want to give something that actually matters — not another thing that gets returned or forgotten. Small Plates is different. Everyone contributes a recipe. We turn it into a beautiful book. She'll have it in her kitchen for decades. And every time she cooks from it, she'll think of the people who made it — including you.
 
 **Key message:** This gift keeps giving. And you made it happen.
 
@@ -267,9 +238,7 @@ The core positioning adapts for different audiences while maintaining the same e
 
 **Their question:** "Why should I bother? This sounds like work."
 
-**Positioning for them:**
-
-> Five minutes. One recipe. You're not just giving a gift—you're staying in their life. Your recipe becomes a page in their kitchen. Your name, your note, your presence—there every time they cook it. This is how you show up beyond the wedding.
+> Five minutes. One recipe. You're not just giving a gift — you're staying in their life. Your recipe becomes a page in their kitchen. Your name, your note, your presence — there every time they cook it. This is how you show up beyond the wedding.
 
 **Key message:** Five minutes now. Presence forever.
 
@@ -279,9 +248,7 @@ The core positioning adapts for different audiences while maintaining the same e
 
 **Her question:** "Is this serious or just trendy?"
 
-**Positioning for her:**
-
-> This isn't a trend. It's a hardcover book, professionally printed, made to last decades. Filled with recipes from everyone who was there—family recipes that might otherwise be lost. It's how the wedding becomes part of their home. How everyone who came stays part of their life.
+> This isn't a trend. It's a hardcover book, professionally printed, made to last decades. Filled with recipes from everyone who was there — including ones that might otherwise be lost. It's how the wedding becomes part of their home. How everyone who came stays part of their life.
 
 **Key message:** Permanence. Substance. Legacy.
 
@@ -291,8 +258,6 @@ The core positioning adapts for different audiences while maintaining the same e
 
 **His question:** "Is this cheesy?"
 
-**Positioning for him:**
-
 > It's a cookbook. Real recipes from people you actually know. You'll use it on weeknights. Nothing cheesy about that.
 
 **Key message:** Practical, not sentimental.
@@ -300,8 +265,6 @@ The core positioning adapts for different audiences while maintaining the same e
 ---
 
 # Competitive Positioning Statements
-
-When directly compared to alternatives, here's how we position:
 
 ---
 
@@ -319,19 +282,19 @@ When directly compared to alternatives, here's how we position:
 
 ## vs. Photo Albums
 
-> Photo albums are memories you look at. Small Plates is presence you live with. One sits on a shelf. The other lives in your kitchen.
+> Photo albums are something you look at. Small Plates is something you live with. One sits on a shelf. The other lives in your kitchen.
 
 ---
 
 ## vs. DIY Recipe Books
 
-> You could spend 10+ hours chasing recipes, designing pages, and hoping it gets done. Or you could let us handle it—and guarantee it's beautiful. Same idea. Different experience.
+> You could spend 10+ hours chasing recipes, designing pages, and hoping it gets done. Or you could let us handle it — and guarantee it's beautiful. Same idea. Completely different experience.
 
 ---
 
 ## vs. Doing Nothing
 
-> After the wedding, everyone goes home. The flowers die. The guests become memories. Unless you give them a reason to stay. Small Plates is that reason.
+> After the wedding, everyone goes home. The guests become people you see at holidays — if that. Unless you give them a reason to stay. Small Plates is that reason.
 
 ---
 
@@ -347,13 +310,11 @@ When directly compared to alternatives, here's how we position:
 
 ## Always Connect to Presence
 
-Every positioning statement should answer: **"How does this keep people present?"**
+Every positioning statement should answer: **"Does this keep people from disappearing?"**
 
 If the statement doesn't connect to presence, revise it until it does.
 
 ## Never Position on Features Alone
-
-Features (collaboration, professional design, premium printing) are proof points, not positioning. They support the claim; they don't make the claim.
 
 | Feature | How to Position It |
 |---------|-------------------|
@@ -369,65 +330,29 @@ Before any external communication, ask:
 
 | Question | Required Answer |
 |----------|-----------------|
-| Does this connect to Vivid Presence? | Yes |
+| Does this connect to the brand idea? | Yes |
 | Does this answer "why should I care?" | Yes |
 | Would Margot Cole say this with a knowing smile? | Yes |
 | Does this differentiate from all alternatives? | Yes |
 | Is this about meaning, not just features? | Yes |
 
-If any answer is "No," revise before publishing.
-
 ---
 
 # Summary
 
-## The Positioning in One View
-
 | Element | Content |
 |---------|---------|
+| **Brand Idea** | "The people who matter to you shouldn't disappear from your life when the wedding ends." |
 | **Positioning Statement** | The wedding gift that keeps everyone present |
-| **For Whom** | Couples who want their wedding to last beyond the day—and the people who love them |
+| **For Whom** | Couples who want their wedding to last beyond the day — and the people who love them |
 | **What We Are** | How the people at your wedding become part of your marriage |
-| **Against What** | The natural disappearance of presence after the wedding ends |
-| **Unique Offer** | Vivid Presence—the people stay in your life, not as memories, but as active presence |
+| **Against What** | The natural disappearance of people after the wedding ends |
+| **Unique Offer** | The people stay in your life — not as something you look at, but as a presence you live with |
 | **Proof Points** | Lives in kitchen, names on every page, designed for use, professional quality |
 | **Brand Line** | "Still at the table" |
 | **Acquisition Line** | "Recipes from the people who love you" |
 
 ---
 
-# What Comes Next
-
-With Brand Idea and Brand Positioning established, the next layer is:
-
-**Visual Identity Principles** — What does Vivid Presence look like? What does "the wedding gift that keeps everyone present" feel like visually?
-
-This is where strategy becomes design.
-
----
-
 *Brand Positioning Document — Small Plates & Co.*
-*Version 2.0*
-*Developed in collaboration with Pentagram*
-
-
-V.0 # Positioning — Weddings
-
-For brides and the people around them —
-the ones who actually know her, not just her registry —
-
-Small Plates is the wedding cookbook
-made by the guests who matter most.
-
-Every person contributes a recipe.
-Every recipe becomes a page.
-Every page becomes a reason to cook together.
-
-Unlike photo books that live on shelves,
-gifts that live in closets,
-or registries that live in carts —
-
-Small Plates lives in the kitchen.
-
-Where the marriage actually happens.
-
+*Version 3.0*

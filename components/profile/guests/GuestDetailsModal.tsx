@@ -60,7 +60,8 @@ export function GuestDetailsModal({
       setFirstName(guest.first_name || '');
       setLastName(guest.last_name || '');
       setPrintedName(guest.printed_name || '');
-      setEmail(guest.email || '');
+      // Reason: NO_EMAIL_ placeholders are internal — show empty field to the user
+      setEmail(guest.email?.startsWith('NO_EMAIL_') ? '' : guest.email || '');
       setPhone(guest.phone || '');
       setError(null);
       fetchRecipes();
@@ -80,11 +81,13 @@ export function GuestDetailsModal({
     setError(null);
 
     try {
+      // Reason: If user leaves email empty, keep the original DB value (may be a NO_EMAIL_ placeholder)
+      const emailValue = email.trim() || (guest.email ?? '');
       const updates = {
         first_name: firstName.trim(),
         last_name: lastName.trim() || '',
         printed_name: printedName.trim() || null,
-        email: email.trim() || '',
+        email: emailValue,
         phone: phone.trim() || null,
       };
 
@@ -270,9 +273,9 @@ export function GuestDetailsModal({
                 variant="outline"
                 onClick={onClose}
                 disabled={loading}
-                className="border-[hsl(var(--brand-sand))] text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-warm-white))]"
+                className="border-[hsl(var(--brand-sand))] text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-sand))]/30 hover:text-[hsl(var(--brand-charcoal))]"
               >
-                Cancel
+                Back
               </Button>
               <Button
                 onClick={handleSave}

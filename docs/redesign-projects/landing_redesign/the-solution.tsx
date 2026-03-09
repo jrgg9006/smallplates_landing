@@ -70,9 +70,9 @@ export default function TheSolution() {
             {/* Body copy */}
             <div className="mt-8 space-y-6">
               <p className="font-sans text-lg md:text-xl text-[#2D2D2D]/80 leading-relaxed">
-                Every guest contributes a recipe.
-                <span className="block">Every recipe becomes a page.</span>
-                <span className="block">Every page is a reason to cook together.</span>
+                Every guest owns a page.
+                <span className="block">Every page holds a recipe, a note, a name.</span>
+                <span className="block">Every name stays in their kitchen — forever.</span>
               </p>
 
               <p className="font-sans text-lg md:text-xl text-[#2D2D2D]/80 leading-relaxed">
