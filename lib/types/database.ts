@@ -87,6 +87,10 @@ export interface Database {
           source: GuestSource;
           is_archived: boolean;
           is_self: boolean;
+          invitation_started_at: string | null;
+          last_email_sent_at: string | null;
+          emails_sent_count: number;
+          invitation_paused_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -110,6 +114,10 @@ export interface Database {
           source?: GuestSource;
           is_archived?: boolean;
           is_self?: boolean;
+          invitation_started_at?: string | null;
+          last_email_sent_at?: string | null;
+          emails_sent_count?: number;
+          invitation_paused_at?: string | null;
         };
         Update: {
           first_name?: string;
@@ -129,6 +137,10 @@ export interface Database {
           is_archived?: boolean;
           is_self?: boolean;
           group_id?: string | null;
+          invitation_started_at?: string | null;
+          last_email_sent_at?: string | null;
+          emails_sent_count?: number;
+          invitation_paused_at?: string | null;
         };
       };
       guest_recipes: {

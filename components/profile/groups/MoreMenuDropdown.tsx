@@ -10,9 +10,11 @@ interface MoreMenuDropdownProps {
   onCaptainsClick?: () => void;
   showAddGuestOption?: boolean;
   onViewGuestsClick?: () => void;
+  showSendInvitationsOption?: boolean;
+  onSendInvitationsClick?: () => void;
 }
 
-export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsOption, onCaptainsClick, showAddGuestOption, onViewGuestsClick }: MoreMenuDropdownProps) {
+export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsOption, onCaptainsClick, showAddGuestOption, onViewGuestsClick, showSendInvitationsOption, onSendInvitationsClick }: MoreMenuDropdownProps) {
   if (!isOpen) return null;
   
   return (
@@ -45,6 +47,17 @@ export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsO
             className="w-full text-left px-4 py-2.5 text-sm text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-border))] rounded-lg transition-colors"
           >
             Guests
+          </button>
+        )}
+        {showSendInvitationsOption && onSendInvitationsClick && (
+          <button
+            onClick={() => {
+              onSendInvitationsClick();
+              onClose();
+            }}
+            className="w-full text-left px-4 py-2.5 text-sm text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-border))] rounded-lg transition-colors"
+          >
+            Send Invitations
           </button>
         )}
         <button
