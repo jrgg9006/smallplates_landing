@@ -211,7 +211,7 @@ function heroSection(coupleDisplayName: string): string {
 export function invitationEmail1(params: InvitationTemplateParams): { subject: string; html: string } {
   const { coupleDisplayName, collectionLink, coupleImageUrl } = params;
 
-  const subject = `You're invited to ${coupleDisplayName}'s wedding cookbook`;
+  const subject = `${coupleDisplayName} need your recipe`;
 
   const content = `
                       ${heroSection(coupleDisplayName)}

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { Guest } from "@/lib/types/database";
-import { updateGuest } from "@/lib/supabase/guests";
+import { updateGuest, deleteGuest } from "@/lib/supabase/guests";
 import { getRecipesByGuest } from "@/lib/supabase/recipes";
 import {
   Dialog,
@@ -39,6 +39,8 @@ export function GuestDetailsModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [recipes, setRecipes] = useState<any[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Fetch recipes for this guest
   const fetchRecipes = useCallback(async () => {
@@ -64,6 +66,7 @@ export function GuestDetailsModal({
       setEmail(guest.email?.startsWith('NO_EMAIL_') ? '' : guest.email || '');
       setPhone(guest.phone || '');
       setError(null);
+      setShowDeleteConfirm(false);
       fetchRecipes();
     }
   }, [guest, isOpen, fetchRecipes]);
@@ -107,6 +110,27 @@ export function GuestDetailsModal({
       console.error('Error updating guest:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!guest) return;
+    setDeleting(true);
+    setError(null);
+
+    try {
+      const { error } = await deleteGuest(guest.id);
+      if (error) {
+        setError(error);
+        setDeleting(false);
+        return;
+      }
+      onClose();
+      onGuestUpdated?.();
+    } catch {
+      setError('Failed to delete guest. Please try again.');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -257,35 +281,84 @@ export function GuestDetailsModal({
           )}
         </div>
 
+        {/* Delete Confirmation */}
+        {showDeleteConfirm && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-3">
+            {recipes.length > 0 ? (
+              <p className="text-sm text-red-600">
+                This guest has {recipes.length} recipe{recipes.length !== 1 ? 's' : ''}. Remove {recipes.length !== 1 ? 'them' : 'it'} first before deleting.
+              </p>
+            ) : (
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm text-red-600">
+                  Delete this guest?
+                </p>
+                <div className="flex gap-2 flex-shrink-0">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowDeleteConfirm(false)}
+                    disabled={deleting}
+                    className="h-8 px-3 text-xs border-red-200 text-red-600 hover:bg-red-50"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="h-8 px-3 text-xs bg-red-600 text-white hover:bg-red-700"
+                  >
+                    {deleting ? 'Deleting...' : 'Yes, delete'}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Action Buttons */}
-        <div className="flex justify-end gap-3 pt-2">
-          {isSelf ? (
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="border-[hsl(var(--brand-sand))] text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-warm-white))]"
+        <div className="flex justify-between items-center pt-2">
+          {/* Delete — left side, only for non-self guests */}
+          {!isSelf ? (
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={showDeleteConfirm}
+              className="text-xs text-[#9A9590] hover:text-red-600 transition-colors disabled:opacity-40"
             >
-              Close
-            </Button>
+              Delete guest
+            </button>
           ) : (
-            <>
+            <div />
+          )}
+
+          <div className="flex gap-3">
+            {isSelf ? (
               <Button
                 variant="outline"
                 onClick={onClose}
-                disabled={loading}
-                className="border-[hsl(var(--brand-sand))] text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-sand))]/30 hover:text-[hsl(var(--brand-charcoal))]"
+                className="border-[hsl(var(--brand-sand))] text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-warm-white))]"
               >
-                Back
+                Close
               </Button>
-              <Button
-                onClick={handleSave}
-                disabled={loading || !firstName.trim()}
-                className="bg-[hsl(var(--brand-charcoal))] text-white hover:bg-[hsl(var(--brand-charcoal))]/90"
-              >
-                {loading ? 'Saving...' : 'Save'}
-              </Button>
-            </>
-          )}
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={onClose}
+                  disabled={loading}
+                  className="border-[hsl(var(--brand-sand))] text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-sand))]/30 hover:text-[hsl(var(--brand-charcoal))]"
+                >
+                  Back
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  disabled={loading || !firstName.trim()}
+                  className="bg-[hsl(var(--brand-charcoal))] text-white hover:bg-[hsl(var(--brand-charcoal))]/90"
+                >
+                  {loading ? 'Saving...' : 'Save'}
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

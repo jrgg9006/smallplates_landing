@@ -113,11 +113,11 @@ export function ImportGuestsModal({
         }
       }
 
-      // Deduplication check against existing guests
+      // Deduplication check against existing guests (by email, name, or phone)
       const supabase = createSupabaseClient();
       const { data: existing } = await supabase
         .from("guests")
-        .select("email")
+        .select("first_name, last_name, email, phone")
         .eq("group_id", groupId)
         .eq("is_archived", false);
 
@@ -127,12 +127,28 @@ export function ImportGuestsModal({
           .filter((e): e is string => !!e && !e.startsWith("no_email_"))
       );
 
-      return guests.map((g) => ({
-        ...g,
-        alreadyExists: g.email
-          ? existingEmails.has(g.email.toLowerCase())
-          : false,
-      }));
+      const existingNames = new Set(
+        existing
+          ?.map((g) => `${g.first_name?.trim().toLowerCase()}|${g.last_name?.trim().toLowerCase()}`)
+          .filter(Boolean)
+      );
+
+      const existingPhones = new Set(
+        existing
+          ?.map((g) => g.phone?.replace(/\D/g, ""))
+          .filter((p): p is string => !!p && p.length > 0)
+      );
+
+      return guests.map((g) => {
+        const emailMatch = g.email ? existingEmails.has(g.email.toLowerCase()) : false;
+        const nameMatch = existingNames.has(`${g.first_name.trim().toLowerCase()}|${g.last_name.trim().toLowerCase()}`);
+        const phoneMatch = g.phone ? existingPhones.has(g.phone.replace(/\D/g, "")) : false;
+
+        return {
+          ...g,
+          alreadyExists: emailMatch || nameMatch || phoneMatch,
+        };
+      });
     },
     [source, groupId]
   );

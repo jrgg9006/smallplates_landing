@@ -238,7 +238,7 @@ export function SendInvitationsPage({
     });
   };
 
-  const emailSubject = `You're invited to ${coupleNames}'s wedding cookbook`;
+  const emailSubject = `${coupleNames} need your recipe`;
 
   return (
     <div>
