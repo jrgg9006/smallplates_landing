@@ -522,29 +522,31 @@ export function SendInvitationsPage({
               <div>
                 {/* First + Last Name */}
                 <div className="py-5 border-b border-[#F5F5F4]">
-                  <div className="flex gap-3 mb-1">
-                    <p className="flex-1 text-sm font-semibold text-[#2D2D2D]">
-                      First Name <span className="text-[#D4A854]">*</span>
-                    </p>
-                    <p className="flex-1 text-sm font-semibold text-[#2D2D2D]">
-                      Last Name
-                    </p>
-                  </div>
-                  <div className="flex gap-3">
-                    <input
-                      type="text"
-                      placeholder="First Name"
-                      value={newGuestFirst}
-                      onChange={(e) => setNewGuestFirst(e.target.value)}
-                      className="flex-1 px-4 py-2.5 text-sm border border-[#E8E0D5] rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-[#2D2D2D] focus:outline-none focus:border-[#D4A854] focus:ring-1 focus:ring-[#D4A854]"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Last Name"
-                      value={newGuestLast}
-                      onChange={(e) => setNewGuestLast(e.target.value)}
-                      className="flex-1 px-4 py-2.5 text-sm border border-[#E8E0D5] rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-[#2D2D2D] focus:outline-none focus:border-[#D4A854] focus:ring-1 focus:ring-[#D4A854]"
-                    />
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-3">
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-[#2D2D2D] mb-1">
+                        First Name <span className="text-[#D4A854]">*</span>
+                      </p>
+                      <input
+                        type="text"
+                        placeholder="First Name"
+                        value={newGuestFirst}
+                        onChange={(e) => setNewGuestFirst(e.target.value)}
+                        className="w-full px-4 py-2.5 text-sm border border-[#E8E0D5] rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-[#2D2D2D] focus:outline-none focus:border-[#D4A854] focus:ring-1 focus:ring-[#D4A854]"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-[#2D2D2D] mb-1">
+                        Last Name
+                      </p>
+                      <input
+                        type="text"
+                        placeholder="Last Name"
+                        value={newGuestLast}
+                        onChange={(e) => setNewGuestLast(e.target.value)}
+                        className="w-full px-4 py-2.5 text-sm border border-[#E8E0D5] rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-[#2D2D2D] focus:outline-none focus:border-[#D4A854] focus:ring-1 focus:ring-[#D4A854]"
+                      />
+                    </div>
                   </div>
                 </div>
 

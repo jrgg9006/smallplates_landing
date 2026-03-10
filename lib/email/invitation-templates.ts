@@ -60,7 +60,6 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
   <!-- Preheader text (hidden, shown in Gmail inbox preview) -->
   <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
     We're making them a cookbook. A real one. Your page is waiting.
-    &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
   </div>
   <div role="article" aria-roledescription="email" lang="en">
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" width="100%" style="border-collapse: collapse;">
@@ -208,7 +207,7 @@ function heroSection(coupleDisplayName: string): string {
 // ============================================
 // EMAIL 1: Initial Invitation
 // ============================================
-export function invitationEmail1(params: InvitationTemplateParams): { subject: string; html: string } {
+export function invitationEmail1(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
   const { coupleDisplayName, collectionLink, coupleImageUrl } = params;
 
   const subject = `${coupleDisplayName} need your recipe`;
@@ -237,13 +236,25 @@ export function invitationEmail1(params: InvitationTemplateParams): { subject: s
 
                       ${ctaButton(collectionLink)}`;
 
-  return { subject, html: baseTemplate(content, subject, params.captainName) };
+  const text = `A wedding cookbook gift for ${coupleDisplayName}
+
+We're making them a cookbook. A real one. With recipes from the people who matter most to them.
+
+Send a recipe and you're in their kitchen.
+
+Doesn't have to be fancy. Just has to be yours.
+
+Add your recipe: ${collectionLink}
+
+5 minutes. That's it.${params.captainName ? `\n\nThis invitation was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
+
+  return { subject, html: baseTemplate(content, subject, params.captainName), text };
 }
 
 // ============================================
 // EMAIL 2: First Reminder
 // ============================================
-export function invitationEmail2(params: InvitationTemplateParams): { subject: string; html: string } {
+export function invitationEmail2(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
   const { coupleDisplayName, guestName, collectionLink, coupleImageUrl } = params;
 
   const subject = `Still thinking what recipe to send?`;
@@ -269,13 +280,23 @@ export function invitationEmail2(params: InvitationTemplateParams): { subject: s
 
                       ${ctaButton(collectionLink)}`;
 
-  return { subject, html: baseTemplate(content, subject, params.captainName) };
+  const text = `Hi ${guestName},
+
+${coupleDisplayName}'s cookbook is coming together and your page is still open.
+
+Send a recipe and you're in their kitchen.
+
+Add your recipe: ${collectionLink}
+
+5 minutes. That's it.${params.captainName ? `\n\nThis invitation was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
+
+  return { subject, html: baseTemplate(content, subject, params.captainName), text };
 }
 
 // ============================================
 // EMAIL 3: Second Reminder with Social Proof
 // ============================================
-export function invitationEmail3(params: InvitationTemplateParams): { subject: string; html: string } {
+export function invitationEmail3(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
   const { coupleDisplayName, guestName, collectionLink, coupleImageUrl, recipeCount } = params;
 
   const showSocialProof = recipeCount && recipeCount >= 10;
@@ -314,13 +335,19 @@ export function invitationEmail3(params: InvitationTemplateParams): { subject: s
 
                       ${ctaButton(collectionLink)}`;
 
-  return { subject, html: baseTemplate(content, subject, params.captainName) };
+  const textBody = showSocialProof
+    ? `Hi ${guestName},\n\n${recipeCount} people have already shared their recipes.\n\nThere's still room for yours.`
+    : `Hi ${guestName},\n\nWe know life gets busy. But if you've been meaning to add your recipe to ${coupleDisplayName}'s book, now's a good time.\n\nFive minutes. One recipe. A page in their kitchen.`;
+
+  const text = `${textBody}\n\nAdd your recipe: ${collectionLink}\n\n5 minutes. That's it.${params.captainName ? `\n\nThis invitation was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
+
+  return { subject, html: baseTemplate(content, subject, params.captainName), text };
 }
 
 // ============================================
 // EMAIL 4: Last Reminder
 // ============================================
-export function invitationEmail4(params: InvitationTemplateParams): { subject: string; html: string } {
+export function invitationEmail4(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
   const { coupleDisplayName, guestName, collectionLink, coupleImageUrl } = params;
 
   const subject = `Last call for ${coupleDisplayName}'s book`;
@@ -346,14 +373,24 @@ export function invitationEmail4(params: InvitationTemplateParams): { subject: s
 
                       ${ctaButton(collectionLink)}`;
 
-  return { subject, html: baseTemplate(content, subject, params.captainName) };
+  const text = `Hi ${guestName},
+
+This is our last reminder about ${coupleDisplayName}'s recipe book.
+
+No hard feelings if not. But the door's still open.
+
+Add your recipe: ${collectionLink}
+
+5 minutes. That's it.${params.captainName ? `\n\nThis invitation was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
+
+  return { subject, html: baseTemplate(content, subject, params.captainName), text };
 }
 
 // Helper to get template by number
 export function getInvitationTemplate(
   emailNumber: 1 | 2 | 3 | 4,
   params: InvitationTemplateParams
-): { subject: string; html: string } {
+): { subject: string; html: string; text: string } {
   switch (emailNumber) {
     case 1:
       return invitationEmail1(params);

@@ -45,9 +45,8 @@ Before writing or ideating, consult these files in `brand_wedding/`:
 - `brand_wedding/brand-character-profile.md` — Margot Cole persona
 
 **Visual & Editorial:**
-- `brand_wedding/visual-identity.md` — Colors, typography, logo direction
-- `brand_wedding/visual-identity-principles.md` — Design principles
-- `brand_wedding/photography.md` — Photography style guide
+- `brand_wedding/visual-identity.md` — Colors, typography, logo, applications (tactical toolkit)
+- `brand_wedding/creative-direction.md` — Visual philosophy, photography, creative direction (strategic vision)
 - `brand_wedding/editorial-brief.md` — Editorial direction
 - `brand_wedding/brand-guide-toeditorial.md` — Editorial standards
 

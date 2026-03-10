@@ -30,7 +30,7 @@ export async function sendGuestInvitationEmail({
     const displayName = coupleName || coupleDisplayName || 'The Couple';
     
     // Get the template
-    const { subject, html } = getInvitationTemplate(emailNumber, {
+    const { subject, html, text } = getInvitationTemplate(emailNumber, {
       coupleDisplayName: displayName,
       guestName,
       collectionLink,
@@ -44,8 +44,9 @@ export async function sendGuestInvitationEmail({
       To: to,
       Subject: subject,
       HtmlBody: html,
+      TextBody: text,
       ReplyTo: 'team@smallplatesandcompany.com',
-      MessageStream: 'outbound', // or your transactional stream name
+      MessageStream: 'outbound',
     });
 
     console.log(`Invitation email ${emailNumber} sent to ${to}, MessageID: ${result.MessageID}`);

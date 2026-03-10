@@ -268,6 +268,20 @@ export async function updateGroup(groupId: string, updates: GroupFormData) {
 }
 
 /**
+ * Close a book for new recipe submissions
+ */
+export async function closeBook(groupId: string) {
+  const supabase = createSupabaseClient();
+  const { data, error } = await supabase
+    .from('groups')
+    .update({ book_closed_by_user: new Date().toISOString() })
+    .eq('id', groupId)
+    .select()
+    .single();
+  return { data, error: error?.message || null };
+}
+
+/**
  * Delete a group (only owners can delete)
  */
 export async function deleteGroup(groupId: string) {

@@ -12,9 +12,10 @@ interface MoreMenuDropdownProps {
   onViewGuestsClick?: () => void;
   showSendInvitationsOption?: boolean;
   onSendInvitationsClick?: () => void;
+  onCloseBookClick?: () => void;
 }
 
-export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsOption, onCaptainsClick, showAddGuestOption, onViewGuestsClick, showSendInvitationsOption, onSendInvitationsClick }: MoreMenuDropdownProps) {
+export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsOption, onCaptainsClick, showAddGuestOption, onViewGuestsClick, showSendInvitationsOption, onSendInvitationsClick, onCloseBookClick }: MoreMenuDropdownProps) {
   if (!isOpen) return null;
   
   return (
@@ -69,6 +70,20 @@ export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsO
         >
           Edit Profile
         </button>
+        {onCloseBookClick && (
+          <>
+            <div className="my-1 border-t border-[hsl(var(--brand-border))]" />
+            <button
+              onClick={() => {
+                onCloseBookClick();
+                onClose();
+              }}
+              className="w-full text-left px-4 py-2.5 text-sm text-[hsl(var(--brand-honey))] hover:bg-[hsl(var(--brand-border))] rounded-lg transition-colors"
+            >
+              Close Book
+            </button>
+          </>
+        )}
       </div>
     </>
   );

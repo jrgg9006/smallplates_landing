@@ -107,20 +107,20 @@
   /* Button Components - Updated per Implementation Guide */
   .btn-primary {
     @apply bg-[hsl(var(--brand-honey))] hover:bg-[hsl(var(--brand-honey-dark))] 
-           text-white font-medium text-sm px-6 py-3 rounded-full 
+           text-white font-medium text-sm px-6 py-3 rounded-full
            transition-colors duration-200;
   }
   
   .btn-secondary {
     @apply bg-transparent border border-[hsl(var(--brand-border-button))] 
            hover:border-[hsl(var(--brand-honey))] hover:text-[hsl(var(--brand-honey))]
-           text-[hsl(var(--brand-charcoal))] font-medium text-sm px-6 py-3 rounded-full 
+           text-[hsl(var(--brand-charcoal))] font-medium text-sm px-6 py-3 rounded-full
            transition-all duration-200;
   }
 
   .btn-tertiary {
     @apply bg-transparent border border-[hsl(var(--brand-border-button))] 
-           text-[hsl(var(--brand-light-gray))] text-sm px-5 py-3 rounded-full 
+           text-[hsl(var(--brand-light-gray))] text-sm px-5 py-3 rounded-full
            transition-all duration-200;
   }
   

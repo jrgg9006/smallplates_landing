@@ -27,6 +27,9 @@ import { createShareURL } from "@/lib/utils/sharing";
 import type { Guest } from "@/lib/types/database";
 import { ImportGuestsModal } from "@/components/profile/guests/ImportGuestsModal";
 import { SendInvitationsPage } from "@/components/profile/guests/SendInvitationsPage";
+import { CloseBookModal } from "@/components/profile/groups/CloseBookModal";
+import { ReviewRecipesModal } from "@/components/profile/groups/ReviewRecipesModal";
+import { closeBook } from "@/lib/supabase/groups";
 
 // Reason: Format book_close_date as "Month Dth" with ordinal suffix (no year)
 function getDeadlineText(dateString: string): string {
@@ -62,6 +65,10 @@ export default function GroupsPage() {
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [collectionToken, setCollectionToken] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [showCloseBookModal, setShowCloseBookModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [isClosingBook, setIsClosingBook] = useState(false);
+  const [bookReviewed, setBookReviewed] = useState(false);
   
   // Profile state
   const [senderName, setSenderName] = useState<string | null>(null);
@@ -147,6 +154,49 @@ export default function GroupsPage() {
 
   const handleViewGuests = () => {
     setShowGuestSheet(true);
+  };
+
+  const handleCloseBook = () => {
+    setShowCloseBookModal(true);
+  };
+
+  const handleReviewRecipes = () => {
+    setShowCloseBookModal(false);
+    setShowReviewModal(true);
+  };
+
+  const handleMarkReviewed = () => {
+    setShowReviewModal(false);
+    setBookReviewed(true);
+    setShowCloseBookModal(true);
+  };
+
+  const handleConfirmCloseBook = async () => {
+    if (!selectedGroup) return;
+    setIsClosingBook(true);
+    try {
+      const { error } = await closeBook(selectedGroup.id);
+      if (error) {
+        console.error('Failed to close book:', error);
+        return;
+      }
+      setShowCloseBookModal(false);
+      setBookReviewed(false);
+      // Reason: Refresh group data so book_closed_by_user is updated in state
+      if (groupsSectionRef.current) {
+        await groupsSectionRef.current.loadGroups(true);
+        setTimeout(() => {
+          const updatedGroup = groupsSectionRef.current?.selectedGroup;
+          if (updatedGroup && updatedGroup.id === selectedGroup.id) {
+            setSelectedGroup(updatedGroup);
+          }
+        }, 100);
+      }
+    } catch (err) {
+      console.error('Error closing book:', err);
+    } finally {
+      setIsClosingBook(false);
+    }
   };
 
   const handleGroupChange = (group: GroupWithMembers | null) => {
@@ -796,6 +846,7 @@ export default function GroupsPage() {
                   showAddGuestOption={isMobile}
                   showSendInvitationsOption={isMobile}
                   onSendInvitationsClick={handleSendInvitations}
+                  onCloseBookClick={!selectedGroup?.book_closed_by_user ? handleCloseBook : undefined}
                 />
                 {/* Captains dropdown for mobile */}
                 <div className="sm:hidden">
@@ -812,6 +863,8 @@ export default function GroupsPage() {
                 onLoadingChange={handleGroupsLoadingChange}
                 onRecipeCountChange={handleRecipeCountChange}
                 onImportGuests={(source) => setImportSource(source)}
+                onCloseBookClick={!selectedGroup?.book_closed_by_user ? handleCloseBook : undefined}
+                bookClosed={!!selectedGroup?.book_closed_by_user}
               />
             </div>
       </main>
@@ -876,6 +929,28 @@ export default function GroupsPage() {
             // Reason: Refresh group data to reflect new guests
             groupsSectionRef.current?.loadGroups(true);
           }}
+        />
+      )}
+
+      {/* Close Book Modal */}
+      <CloseBookModal
+        isOpen={showCloseBookModal}
+        onClose={() => { setShowCloseBookModal(false); setBookReviewed(false); }}
+        onReview={handleReviewRecipes}
+        onConfirmClose={handleConfirmCloseBook}
+        loading={isClosingBook}
+        reviewed={bookReviewed}
+        recipeCount={recipeCount}
+        uniqueContributors={uniqueContributors}
+      />
+
+      {/* Review Recipes Modal */}
+      {selectedGroup && (
+        <ReviewRecipesModal
+          isOpen={showReviewModal}
+          onClose={() => setShowReviewModal(false)}
+          onMarkReviewed={handleMarkReviewed}
+          groupId={selectedGroup.id}
         />
       )}
 

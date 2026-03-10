@@ -232,6 +232,54 @@ export default function CollectionForm() {
     );
   }
 
+  // Reason: Show closed state when book_closed_by_user is set — no recipes can be added
+  if (tokenInfo?.book_closed_by_user) {
+    const coupleDisplayName = tokenInfo.couple_names || 'the couple';
+    return (
+      <div className="min-h-screen bg-white">
+        {/* Header */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-center">
+            <Link href="/" className="hover:opacity-80 transition-opacity">
+              <Image
+                src="/images/SmallPlates_logo_horizontal.png"
+                alt="Small Plates & Co"
+                width={200}
+                height={40}
+                priority
+              />
+            </Link>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] px-4">
+          <div className="text-center max-w-md">
+            {tokenInfo.couple_image_url && (
+              <div className="relative w-32 h-32 mx-auto mb-8 rounded-full overflow-hidden">
+                <Image
+                  src={tokenInfo.couple_image_url}
+                  alt="Couple Photo"
+                  fill
+                  className="object-cover"
+                  style={{ objectPosition: `${tokenInfo.couple_image_position_x ?? 50}% ${tokenInfo.couple_image_position_y ?? 50}%` }}
+                />
+              </div>
+            )}
+            <h1 className="text-2xl lg:text-3xl font-semibold text-[#2D2D2D] font-serif mb-4">
+              This book has been closed.
+            </h1>
+            <p className="text-gray-600 text-base lg:text-lg leading-relaxed mb-2">
+              {coupleDisplayName}&apos;s cookbook is being created and will be delivered soon.
+            </p>
+            <p className="text-gray-500 text-sm">
+              Thank you for being part of it.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}

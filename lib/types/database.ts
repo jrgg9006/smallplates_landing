@@ -407,6 +407,7 @@ export interface Database {
           book_status: BookStatus;
           book_reviewed_by: string | null;
           book_reviewed_at: string | null;
+          book_closed_by_user: string | null;
           book_notes: string | null;
           created_at: string;
           updated_at: string;
@@ -436,6 +437,7 @@ export interface Database {
           book_status?: BookStatus;
           book_reviewed_by?: string | null;
           book_reviewed_at?: string | null;
+          book_closed_by_user?: string | null;
           book_notes?: string | null;
         };
         Update: {
@@ -462,6 +464,7 @@ export interface Database {
           book_status?: BookStatus;
           book_reviewed_by?: string | null;
           book_reviewed_at?: string | null;
+          book_closed_by_user?: string | null;
           book_notes?: string | null;
         };
       };
@@ -858,6 +861,7 @@ export interface CollectionTokenInfo {
   couple_image_position_y: number;
   couple_image_position_x: number;
   book_close_date: string | null;
+  book_closed_by_user: string | null;
   token: string;
   is_valid: boolean;
 }

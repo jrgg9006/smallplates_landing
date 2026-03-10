@@ -129,7 +129,7 @@ export function GuestNavigationSheet({
     }
     return {
       icon: <Clock size={14} className="text-[hsl(var(--brand-warm-gray))]" />,
-      text: "Pending",
+      text: "Awaiting Recipe",
       className: "text-[hsl(var(--brand-warm-gray))]"
     };
   };

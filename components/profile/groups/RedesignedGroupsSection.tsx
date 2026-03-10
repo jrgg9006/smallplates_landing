@@ -23,6 +23,8 @@ interface GroupsSectionProps {
   onLoadingChange?: (loading: boolean) => void;
   onRecipeCountChange?: (count: number, uniqueContributors: number) => void;
   onImportGuests?: (source: "zola" | "the_knot") => void;
+  onCloseBookClick?: () => void;
+  bookClosed?: boolean;
 }
 
 export interface GroupsSectionRef {
@@ -46,7 +48,9 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
   onGroupChange,
   onLoadingChange,
   onRecipeCountChange,
-  onImportGuests
+  onImportGuests,
+  onCloseBookClick,
+  bookClosed = false
 }, ref) => {
   const [groups, setGroups] = useState<GroupWithMembers[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<GroupWithMembers | null>(null);
@@ -395,16 +399,45 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
         </div>
       )}
 
+      {/* Book Closed Banner */}
+      {selectedGroup && bookClosed && (
+        <div className="bg-[hsl(var(--brand-sand))]/50 rounded-xl px-5 py-4">
+          <p className="text-sm font-medium text-[hsl(var(--brand-charcoal))]">
+            This cookbook is being created and will be delivered soon.
+          </p>
+          <p className="text-xs text-[hsl(var(--brand-warm-gray))] mt-1">
+            Questions? Reach out to team@smallplatesandcompany.com
+          </p>
+        </div>
+      )}
+
+      {/* Close Book Banner */}
+      {selectedGroup && !bookClosed && recipes.length >= 25 && onCloseBookClick && (
+        <div className="bg-[hsl(var(--brand-sand))]/50 rounded-xl px-4 py-3 flex items-center justify-between">
+          <p className="text-sm text-[hsl(var(--brand-charcoal))]">
+            {recipes.length} recipes in the book. That&apos;s enough for something real.
+          </p>
+          <button
+            onClick={onCloseBookClick}
+            className="text-sm font-medium text-[hsl(var(--brand-honey))] hover:underline whitespace-nowrap ml-4"
+          >
+            Close the book &rarr;
+          </button>
+        </div>
+      )}
+
       {/* Recipe Grid */}
       {selectedGroup ? (
-        <RecipeCardGrid
-          recipes={recipes}
-          onRecipeClick={handleRecipeClick}
-          onEditRecipe={handleEditRecipe}
-          onRemoveRecipe={handleRemoveRecipe}
-          searchValue={searchValue}
-          onImportGuests={onImportGuests}
-        />
+        <div className={bookClosed ? 'opacity-60 pointer-events-none' : ''}>
+          <RecipeCardGrid
+            recipes={recipes}
+            onRecipeClick={handleRecipeClick}
+            onEditRecipe={handleEditRecipe}
+            onRemoveRecipe={handleRemoveRecipe}
+            searchValue={searchValue}
+            onImportGuests={onImportGuests}
+          />
+        </div>
       ) : (
         <div className="flex items-center justify-center py-8">
           <div className="text-center">
