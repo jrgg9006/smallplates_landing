@@ -13,6 +13,7 @@ import BooksPrinted from '@/components/landing/BooksPrinted'
 import FoodPerfect from '@/components/landing/FoodPerfect'
 import WhatsIncluded from '@/components/landing/WhatsIncluded'
 import HowItWorks from '@/components/landing/HowItWorks'
+import GuestListStrip from '@/components/landing/GuestListStrip'
 import RegistryInterlude from '@/components/landing/RegistryInterlude'
 import PersonalNotes from '@/components/landing/PersonalNotes'
 import TheBook from '@/components/landing/TheBook'
@@ -38,6 +39,7 @@ export default function Home() {
         <TheProblem />
         <TheSolution />
         <HowItWorks />
+        <GuestListStrip />
         <RegistryInterlude />
         <BooksPrinted />
         <PersonalNotes />
