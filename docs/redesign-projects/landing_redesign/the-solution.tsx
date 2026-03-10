@@ -21,7 +21,7 @@ import { motion } from "framer-motion";
  *   Margot's differentiation. She doesn't say "unlike other gifts." She just
  *   states what this IS and trusts you to understand what it's NOT.
  * 
- * - "stained, dog-eared, and opened on random Tuesday nights"
+ * - "stained and opened on random Tuesday nights"
  *   This is very Margot. She doesn't pretend things stay perfect. The best
  *   things are used, worn, lived in.
  * 
@@ -77,7 +77,7 @@ export default function TheSolution() {
 
               <p className="font-sans text-lg md:text-xl text-[#2D2D2D]/80 leading-relaxed">
                 It's not a gift you display.
-                <span className="block">It's a gift you use—stained, dog-eared,</span>
+                <span className="block">It's a gift you use—stained,</span>
                 <span className="block">and opened on random Tuesday nights for years.</span>
               </p>
             </div>

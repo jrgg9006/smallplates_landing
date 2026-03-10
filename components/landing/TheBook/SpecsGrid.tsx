@@ -90,9 +90,9 @@ const specs = [
     ),
   },
   {
-    heading: "Sewn and glued binding.",
+    heading: "PUR-glued binding.",
     description:
-      "Not stapled. Not cheap. Made the way books were meant to be made \u2014 to stay open on the counter while you cook.",
+      "Bound with Polyurethane Reactive glue \u2014 the strongest binding available. Made to stay open on the counter while you cook.",
     icon: (
       <svg
         viewBox="0 0 30 30"
@@ -113,7 +113,7 @@ const specs = [
   {
     heading: "Built for the counter.",
     description:
-      "Matte lamination. Thick pages. A binding that stays flat when you\u2019re cooking. Made to get used \u2014 stained, dog-eared, and open on a Tuesday night.",
+      "Matte lamination. Thick pages. A hardcover built to handle real kitchen life \u2014 stained and open on a Tuesday night.",
     icon: (
       <svg
         viewBox="0 0 30 30"

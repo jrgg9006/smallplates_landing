@@ -32,7 +32,7 @@ export default function HandmadeCallout() {
 
         {/* Label */}
         <p className="absolute bottom-6 left-0 right-0 text-center font-serif italic text-white/20 text-sm tracking-wide">
-          sewn by hand
+          one of a kind
         </p>
 
         {/* Photo placeholder note */}
@@ -45,27 +45,27 @@ export default function HandmadeCallout() {
       <div className="bg-[#F5F1EB] p-8 md:p-12 lg:p-16 flex flex-col justify-center">
         {/* Eyebrow */}
         <p className="font-sans text-sm font-medium tracking-widest text-[#D4A854] uppercase mb-4">
-          Handmade
+          One of one
         </p>
 
         <h3 className="font-serif text-2xl md:text-3xl font-medium text-[#2D2D2D] leading-tight mb-6">
-          Every book is sewn and bound by hand.
+          Every book is one of a kind.
         </h3>
 
         <div className="space-y-4">
           <p className="font-sans font-light text-sm md:text-base text-[#2D2D2D]/80 leading-relaxed">
-            Because every book is different &mdash; different recipes, different people, different size &mdash; each one is assembled individually in our workshop. Sewn, glued, pressed, and inspected by hand.
+            Different recipes. Different people. Different stories. Every book we produce exists exactly once &mdash; because the people inside it are never the same twice.
           </p>
 
           <p className="font-sans font-light text-sm md:text-base text-[#2D2D2D]/80 leading-relaxed">
-            No assembly line. No mass production. The same way bookbinders have worked for generations.
+            No templates. No stock content. Your book is designed, laid out, and printed from scratch &mdash; built around the real recipes your people actually sent in.
           </p>
         </div>
 
         {/* Pull quote */}
         <blockquote className="mt-8 border-l-2 border-[#D4A854] pl-5">
           <p className="font-serif italic text-base md:text-lg text-[#2D2D2D]/70 leading-relaxed">
-            &ldquo;Handmade means no two books are identical. Small variations in the binding are a sign of craft, not a flaw &mdash; they&apos;re proof that a person, not a machine, made your book.&rdquo;
+            &ldquo;No two books are the same &mdash; because no two couples&apos; people are the same. That&apos;s the whole point.&rdquo;
           </p>
         </blockquote>
       </div>

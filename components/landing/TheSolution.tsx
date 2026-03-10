@@ -21,7 +21,7 @@ import Image from "next/image";
  *   Margot's differentiation. She doesn't say "unlike other gifts." She just
  *   states what this IS and trusts you to understand what it's NOT.
  * 
- * - "stained, dog-eared, and opened on random Tuesday nights"
+ * - "stained and opened on random Tuesday nights"
  *   This is very Margot. She doesn't pretend things stay perfect. The best
  *   things are used, worn, lived in.
  * 

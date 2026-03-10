@@ -104,7 +104,7 @@ export default function TheBook() {
                     }}
                   >
                     <Image
-                      src="/images/TheBookSection/book-cover-front-thebooksection.png"
+                      src="/images/TheBookSection/book-cover-front-thebooksection.jpg"
                       alt="Small Plates wedding cookbook — hardcover front"
                       fill
                       className="object-cover"

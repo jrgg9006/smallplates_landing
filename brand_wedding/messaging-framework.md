@@ -203,7 +203,7 @@ Each audience has different needs, fears, and questions. The core message adapts
 >
 > **Not a decoration. Not a keepsake you'll never open. A kitchen book.**
 >
-> **The kind you grab on a Tuesday when you don't know what to cook. The kind that gets stained and dog-eared and used.**
+> **The kind you grab on a Tuesday when you don't know what to cook. The kind that gets stained and used.**
 >
 > **Real food. Real people. Real life.**
 
@@ -387,7 +387,7 @@ Proof Points are the **rational reasons to believe**. When someone is emotionall
 | Proof Point | Message |
 |-------------|---------|
 | **It's easy** | "No design skills needed. No chasing people. We handle the reminders, the design, the printing." |
-| **It's a gift that gets used** | "Not a keepsake that sits on a shelf. A kitchen book that gets stained, dog-eared, and opened every week." |
+| **It's a gift that gets used** | "Not a keepsake that sits on a shelf. A kitchen book that gets stained and opened every week." |
 | **It's personal** | "Every page has a name. A note. A recipe from someone who actually knows them." |
 | **It's permanent** | "Hardcover. Professionally printed. Made to last decades, not months." |
 | **It's unique** | "No two books are alike. Each one is made entirely by the people who love that specific couple." |
@@ -462,7 +462,7 @@ Common doubts and objections from each audience, and how to respond.
 |-----------|----------|
 | **"Isn't it just a cookbook?"** | "It's a cookbook made by the people who love you. Every recipe has a name, a note, a story. It's not instructions—it's presence." |
 | **"We already have recipes online"** | "The internet doesn't have your grandmother's handwriting. Or your best friend's hangover cure. Or your uncle's terrible joke in the margins." |
-| **"Will we actually use it?"** | "It's designed to be used. Hardcover. Lay-flat binding. Made to get stained and dog-eared. This isn't a keepsake—it's a kitchen book." |
+| **"Will we actually use it?"** | "It's designed to be used. Hardcover. Lay-flat binding. Made to get stained. This isn't a keepsake—it's a kitchen book." |
 
 ---
 

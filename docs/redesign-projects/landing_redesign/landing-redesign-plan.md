@@ -195,7 +195,7 @@ Every recipe becomes a page.
 Every page is a reason to cook together.
 
 It's not a gift you display.
-It's a gift you use — stained, dog-eared, 
+It's a gift you use — stained, 
 and opened on random Tuesday nights for years."
 
 CTA: "Start Your Book →"
@@ -207,7 +207,7 @@ CTA: "Start Your Book →"
 - Luz natural, algo de desorden controlado (una taza, ingredientes)
 - Dirección AI: "Cookbook open on marble kitchen counter, natural light, warm tones, recipe page visible with handwriting, coffee cup nearby, lived-in kitchen, editorial food photography style"
 
-**Alineación Margot:** "Everyone who showed up" — esa frase tiene peso. Margot sabe que en una boda, mostrar presencia importa. "Stained, dog-eared" — ella no pretende que las cosas se queden perfectas. Las cosas buenas se usan.
+**Alineación Margot:** "Everyone who showed up" — esa frase tiene peso. Margot sabe que en una boda, mostrar presencia importa. "Stained" — ella no pretende que las cosas se queden perfectas. Las cosas buenas se usan.
 
 ---
 
