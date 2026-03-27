@@ -22,7 +22,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ exists: false });
     }
 
-    return NextResponse.json({ exists: true, fullName: profile.full_name });
+    // Reason: Check if user already has groups — if so, they completed onboarding and should go to dashboard
+    const { count } = await supabaseAdmin
+      .from('group_members')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', profile.id)
+      .eq('role', 'owner');
+
+    return NextResponse.json({
+      exists: true,
+      fullName: profile.full_name,
+      hasGroups: (count ?? 0) > 0,
+    });
   } catch {
     return NextResponse.json({ exists: false });
   }

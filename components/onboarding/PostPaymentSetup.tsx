@@ -74,6 +74,11 @@ export function PostPaymentSetup({ userType }: PostPaymentSetupProps) {
       .then(res => res.json())
       .then(data => {
         if (data.exists) {
+          // Reason: User already has groups — they completed onboarding before. Send them to dashboard.
+          if (data.hasGroups) {
+            router.push("/profile/groups");
+            return;
+          }
           setIsExistingUser(true);
           if (data.fullName) setBuyerName(data.fullName);
         }
