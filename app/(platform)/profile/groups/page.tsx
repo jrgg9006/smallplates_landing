@@ -500,44 +500,9 @@ export default function GroupsPage() {
     }
   }, [user, loading, router]);
 
-  // Reason: Redirect to complete-setup ONLY if user has zero groups (nothing to show on dashboard).
-  // Users with 1+ groups always land on dashboard — incomplete orders will surface in "My Books" (Phase 2).
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const checkIncompleteOrders = async () => {
-      const { createSupabaseClient } = await import("@/lib/supabase/client");
-      const supabase = createSupabaseClient();
-
-      const [ordersResult, groupsResult] = await Promise.all([
-        supabase
-          .from('orders')
-          .select('id, stripe_payment_intent, user_type')
-          .eq('user_id', user.id)
-          .eq('status', 'paid'),
-        supabase
-          .from('group_members')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', user.id)
-          .eq('role', 'owner'),
-      ]);
-
-      const paidOrders = ordersResult.data || [];
-      const groupCount = groupsResult.count || 0;
-
-      // Reason: Only redirect if user has NO groups — they have nothing to see on the dashboard.
-      // If they have groups, never block access.
-      if (groupCount === 0 && paidOrders.length > groupCount) {
-        const incompleteOrder = paidOrders[paidOrders.length - 1];
-        if (incompleteOrder?.stripe_payment_intent) {
-          const type = incompleteOrder.user_type || 'gift_giver';
-          router.push(`/complete-setup?pi=${incompleteOrder.stripe_payment_intent}&type=${type}`);
-        }
-      }
-    };
-
-    checkIncompleteOrders();
-  }, [user, router]);
+  // Reason: Incomplete-order redirect to /complete-setup removed entirely.
+  // Users who need to complete setup arrive via email magic link, not through login.
+  // The dashboard must always be accessible for logged-in users.
 
   // Handle GroupsSection loading state changes
   const handleGroupsLoadingChange = useCallback((isLoading: boolean) => {
