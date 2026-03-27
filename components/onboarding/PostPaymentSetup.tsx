@@ -167,8 +167,6 @@ export function PostPaymentSetup({ userType }: PostPaymentSetupProps) {
       }
 
       await completeOnboarding();
-      // Reason: sessionStorage flag survives React strict mode double-renders unlike URL params
-      sessionStorage.setItem('onboarding_just_completed', 'true');
       router.push("/profile/groups");
     } catch {
       setError("Something went wrong. Please try again.");

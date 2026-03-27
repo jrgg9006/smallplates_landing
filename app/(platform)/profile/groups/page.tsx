@@ -87,8 +87,6 @@ export default function GroupsPage() {
   const repositionContainerRef = useRef<HTMLDivElement>(null);
   const dragStartYRef = useRef<number | null>(null);
   const dragStartPositionRef = useRef(50);
-  // Reason: Ref survives React strict mode double-renders unlike sessionStorage (which gets cleared on first read)
-  const skipIncompleteCheckRef = useRef(false);
   
   // Onboarding context
   const { 
@@ -502,24 +500,15 @@ export default function GroupsPage() {
     }
   }, [user, loading, router]);
 
-  // Reason: Check if user has a paid order without a group (abandoned after payment).
-  // Skip this check if user just completed onboarding (sessionStorage flag set by PostPaymentSetup).
+  // Reason: Redirect to complete-setup ONLY if user has zero groups (nothing to show on dashboard).
+  // Users with 1+ groups always land on dashboard — incomplete orders will surface in "My Books" (Phase 2).
   useEffect(() => {
     if (!user?.id) return;
-
-    // Reason: Read sessionStorage once, persist decision in ref so strict mode re-runs still skip
-    if (sessionStorage.getItem('onboarding_just_completed') === 'true') {
-      sessionStorage.removeItem('onboarding_just_completed');
-      skipIncompleteCheckRef.current = true;
-    }
-    if (skipIncompleteCheckRef.current) return;
 
     const checkIncompleteOrders = async () => {
       const { createSupabaseClient } = await import("@/lib/supabase/client");
       const supabase = createSupabaseClient();
 
-      // Reason: Compare paid orders vs groups owned by user.
-      // If orders > groups, there's an order that hasn't been converted to a group yet.
       const [ordersResult, groupsResult] = await Promise.all([
         supabase
           .from('orders')
@@ -536,8 +525,9 @@ export default function GroupsPage() {
       const paidOrders = ordersResult.data || [];
       const groupCount = groupsResult.count || 0;
 
-      if (paidOrders.length > groupCount) {
-        // Reason: Find the most recent paid order to use for setup redirect
+      // Reason: Only redirect if user has NO groups — they have nothing to see on the dashboard.
+      // If they have groups, never block access.
+      if (groupCount === 0 && paidOrders.length > groupCount) {
         const incompleteOrder = paidOrders[paidOrders.length - 1];
         if (incompleteOrder?.stripe_payment_intent) {
           const type = incompleteOrder.user_type || 'gift_giver';
