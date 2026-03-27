@@ -518,19 +518,31 @@ export default function GroupsPage() {
       const { createSupabaseClient } = await import("@/lib/supabase/client");
       const supabase = createSupabaseClient();
 
-      const { data: orders } = await supabase
-        .from('orders')
-        .select('id, stripe_payment_intent, user_type, couple_name')
-        .eq('user_id', user.id)
-        .eq('status', 'paid')
-        .is('couple_name', null)
-        .limit(1);
+      // Reason: Compare paid orders vs groups owned by user.
+      // If orders > groups, there's an order that hasn't been converted to a group yet.
+      const [ordersResult, groupsResult] = await Promise.all([
+        supabase
+          .from('orders')
+          .select('id, stripe_payment_intent, user_type')
+          .eq('user_id', user.id)
+          .eq('status', 'paid'),
+        supabase
+          .from('group_members')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('role', 'admin'),
+      ]);
 
-      const incompleteOrder = orders?.[0];
+      const paidOrders = ordersResult.data || [];
+      const groupCount = groupsResult.count || 0;
 
-      if (incompleteOrder?.stripe_payment_intent) {
-        const type = incompleteOrder.user_type || 'gift_giver';
-        router.push(`/complete-setup?pi=${incompleteOrder.stripe_payment_intent}&type=${type}`);
+      if (paidOrders.length > groupCount) {
+        // Reason: Find the most recent paid order to use for setup redirect
+        const incompleteOrder = paidOrders[paidOrders.length - 1];
+        if (incompleteOrder?.stripe_payment_intent) {
+          const type = incompleteOrder.user_type || 'gift_giver';
+          router.push(`/complete-setup?pi=${incompleteOrder.stripe_payment_intent}&type=${type}`);
+        }
       }
     };
 
