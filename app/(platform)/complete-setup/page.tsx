@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { OnboardingProvider, useOnboarding } from "@/lib/contexts/OnboardingContext";
 import { PostPaymentSetup } from "@/components/onboarding/PostPaymentSetup";
@@ -34,9 +34,11 @@ function SetupWithContext({ pi, email, userType }: { pi: string; email: string; 
 function CompleteSetupContent() {
   const searchParams = useSearchParams();
   const { user, loading } = useAuth();
+  const router = useRouter();
   const pi = searchParams.get("pi");
   const type = searchParams.get("type") === "couple" ? "couple" : "gift_giver";
   const [settingSession, setSettingSession] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   // Reason: generateLink (admin API) produces implicit flow links with #access_token in the hash.
   // But createBrowserClient from @supabase/ssr uses PKCE and ignores hash fragments.
@@ -67,7 +69,28 @@ function CompleteSetupContent() {
       .catch(() => setSettingSession(false));
   }, [loading, user]);
 
-  if (loading || settingSession) {
+  // Reason: If user already has groups, they completed onboarding before — send them to dashboard.
+  useEffect(() => {
+    if (!user?.id || loading || settingSession) return;
+
+    const checkExistingGroups = async () => {
+      const supabase = createSupabaseClient();
+      const { count } = await supabase
+        .from('group_members')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('role', 'owner');
+
+      if (count && count > 0) {
+        setRedirecting(true);
+        router.push('/profile/groups');
+      }
+    };
+
+    checkExistingGroups();
+  }, [user?.id, loading, settingSession, router]);
+
+  if (loading || settingSession || redirecting) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#FAF8F4" }}>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4A854]" />
