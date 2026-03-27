@@ -519,7 +519,7 @@ export default function GroupsPage() {
           .from('group_members')
           .select('id', { count: 'exact', head: true })
           .eq('user_id', user.id)
-          .eq('role', 'admin'),
+          .eq('role', 'owner'),
       ]);
 
       const paidOrders = ordersResult.data || [];
