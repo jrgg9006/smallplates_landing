@@ -116,6 +116,24 @@ they can hold.
 
 ---
 
+### 5. Organizer Confidence
+
+Trust for the organizer isn't built with warmth.
+It's built with competence.
+
+She trusts us when she sees:
+- progress indicators that update in real time
+- automated reminders she didn't have to send
+- a dashboard that gives her control without requiring action
+- professional design quality she couldn't achieve alone
+
+Organizer trust is operational:
+"They have this handled. I don't need to worry."
+
+Not reassurance. Evidence.
+
+---
+
 ## Our Silent Contract
 
 When someone uses Small Plates,
@@ -151,9 +169,11 @@ we succeeded.
 
 ## The Trust Test
 
-Every feature, asset, and message must pass one question:
+Every feature, asset, and message must pass two questions:
 
-"Does this handle the bride with care?"
+**Question 1:** "Does this handle the bride with care?"
 
-If not:
+**Question 2:** "Does this make the organizer feel confident and in control?"
+
+If either answer is no:
 it doesn’t ship.

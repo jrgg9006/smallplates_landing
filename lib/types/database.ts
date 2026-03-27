@@ -3,6 +3,9 @@
  * Generated to match the Supabase schema
  */
 
+// Order status type
+export type OrderStatus = 'paid' | 'processing' | 'in_production' | 'shipped' | 'delivered' | 'refunded' | 'error';
+
 // Enums and basic types
 export type GuestStatus = 'pending' | 'submitted' | 'reached_out';
 export type GuestSource = 'manual' | 'collection' | 'imported';
@@ -689,6 +692,45 @@ export type RecipeEditHistoryInsert = Database['public']['Tables']['recipe_edit_
 export type RecipePrintReady = Database['public']['Tables']['recipe_print_ready']['Row'];
 export type RecipePrintReadyUpdate = Database['public']['Tables']['recipe_print_ready']['Update'];
 
+// Order types
+export interface Order {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string | null;
+  email: string;
+  stripe_session_id: string;
+  stripe_payment_intent: string | null;
+  amount_total: number | null;
+  book_quantity: number;
+  shipping_country: string;
+  shipping_address: Record<string, unknown> | null;
+  couple_name: string | null;
+  user_type: string;
+  purchase_intent_id: string | null;
+  onboarding_data: Record<string, unknown> | null;
+  status: OrderStatus;
+  error_message: string | null;
+}
+
+export interface OrderInsert {
+  id?: string;
+  user_id?: string | null;
+  email: string;
+  stripe_session_id: string;
+  stripe_payment_intent?: string | null;
+  amount_total?: number | null;
+  book_quantity?: number;
+  shipping_country?: string;
+  shipping_address?: Record<string, unknown> | null;
+  couple_name?: string | null;
+  user_type?: string;
+  purchase_intent_id?: string | null;
+  onboarding_data?: Record<string, unknown> | null;
+  status?: OrderStatus;
+  error_message?: string | null;
+}
+
 // Extended types with relationships
 export interface GuestWithRecipes extends Guest {
   guest_recipes: GuestRecipe[];
@@ -701,6 +743,28 @@ export interface GuestWithCommunications extends Guest {
 export interface GuestFull extends Guest {
   guest_recipes: GuestRecipe[];
   communication_log: CommunicationLog[];
+}
+
+// Recipe data for the book review page (includes print-ready version)
+export interface RecipeForReview {
+  id: string;
+  recipe_name: string;
+  ingredients: string | null;
+  instructions: string | null;
+  comments: string | null;
+  upload_method: string | null;
+  document_urls: string[] | null;
+  guests: {
+    first_name: string;
+    last_name: string;
+    printed_name: string | null;
+  } | null;
+  print_ready: {
+    recipe_name_clean: string;
+    ingredients_clean: string;
+    instructions_clean: string;
+    note_clean: string | null;
+  } | null;
 }
 
 // Recipe with guest information

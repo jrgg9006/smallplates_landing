@@ -78,9 +78,9 @@ export function CaptainsDropdown({ isOpen, selectedGroup, onClose, onInviteCapta
   
   // Get captains data from selectedGroup
   const captains = selectedGroup?.group_members?.map(member => ({
-    name: member.profiles?.full_name || 'Unknown',
+    name: member.profiles?.full_name || member.profiles?.email?.split('@')[0] || 'Unknown',
     role: member.role === 'admin' ? 'Creator' : 'Captain',
-    initial: (member.profiles?.full_name?.[0] || 'U').toUpperCase()
+    initial: (member.profiles?.full_name?.[0] || member.profiles?.email?.[0] || 'U').toUpperCase()
   })) || [
     { name: "Ana Martínez", role: "Creator", initial: "A" },
     { name: "Ricardo García", role: "Captain", initial: "R" },

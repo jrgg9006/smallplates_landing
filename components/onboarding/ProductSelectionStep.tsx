@@ -1,131 +1,129 @@
 "use client";
 
-import React from "react";
-import { productTiers, ProductTier } from "@/lib/data/productTiers";
+import React, { useState } from "react";
+import { ShippingCountry } from "@/lib/types/onboarding";
+import {
+  BASE_BOOK_PRICE,
+  ADDITIONAL_BOOK_PRICE,
+  calculateSubtotal,
+} from "@/lib/stripe/pricing";
 
 interface ProductSelectionStepProps {
-  selectedTierId: string | null;
-  onSelect: (tierId: string) => void;
+  bookQuantity: number;
+  onUpdateQuantity: (quantity: number) => void;
+  // Reason: Keep these props for backward compat — not used in current design
+  shippingCountry?: ShippingCountry | null;
+  onUpdateCountry?: (country: ShippingCountry) => void;
+  selectedTierId?: string | null;
+  onSelect?: (tierId: string) => void;
 }
+
+const bookOptions = Array.from({ length: 10 }, (_, i) => {
+  const qty = i + 1;
+  const total = calculateSubtotal(qty);
+  return { qty, total };
+});
 
 /**
  * Product Selection Step Component
- * Editorial, compact design - Kinfolk style
+ * Clean dropdown selector inspired by Storyworth, styled in Small Plates brand
  */
 export function ProductSelectionStep({
-  selectedTierId,
-  onSelect,
+  bookQuantity,
+  shippingCountry,
+  onUpdateQuantity,
+  onUpdateCountry,
 }: ProductSelectionStepProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const subtotal = calculateSubtotal(bookQuantity);
+
+  const handleSelect = (qty: number) => {
+    onUpdateQuantity(qty);
+    setIsOpen(false);
+  };
+
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Question */}
-      <div className="text-center mb-6">
-        <h2 className="text-base font-medium text-[#2D2D2D] mb-1">
-          Which one works?
-        </h2>
-      </div>
+    <div className="max-w-lg mx-auto">
+      {/* Book quantity selector */}
+      <div className="mb-6">
+        <p className="text-base font-medium text-[#2D2D2D] mb-6 text-center">
+          First book $169. Each additional copy $119.
+        </p>
 
-      {/* Product Cards - Compact Horizontal Stacked */}
-      <div className="space-y-3 mb-8">
-        {productTiers.map((tier) => (
-          <ProductTierCard
-            key={tier.id}
-            tier={tier}
-            isSelected={selectedTierId === tier.id}
-            onSelect={() => onSelect(tier.id)}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-interface ProductTierCardProps {
-  tier: ProductTier;
-  isSelected: boolean;
-  onSelect: () => void;
-}
-
-/**
- * Individual Product Tier Card - Compact Editorial Style
- */
-function ProductTierCard({ tier, isSelected, onSelect }: ProductTierCardProps) {
-  return (
-    <button
-      type="button"
-      onClick={onSelect}
-      className={`
-        relative w-full text-left rounded-lg border transition-all duration-200
-        hover:shadow-sm p-4
-        flex items-center justify-between gap-4
-        ${
-          isSelected
-            ? tier.popular
-              ? "border-[#D4A854] bg-[#FBF6EC]/20"
-              : "border-[#D4A854] bg-[#E8E0D5]/30"
-            : "border-gray-200 bg-white hover:border-gray-300"
-        }
-      `}
-    >
-      {/* Left Section - Radio + Content */}
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-        {/* Radio Button - Smaller */}
-        <div className="flex-shrink-0">
-          <div
-            className={`w-4 h-4 rounded-full border transition-all duration-200 flex items-center justify-center ${
-              isSelected
-                ? "border-[#D4A854] bg-[#D4A854]"
-                : "border-gray-300"
-            }`}
+        {/* Custom dropdown */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl border border-gray-300 bg-white text-left transition-all hover:border-[#D4A854] focus:outline-none focus:ring-2 focus:ring-[#D4A854]/20 focus:border-[#D4A854]"
           >
-            {isSelected && (
-              <svg
-                className="w-2.5 h-2.5 text-white"
-                fill="currentColor"
-                viewBox="0 0 20 20"
+            <span className="text-[15px] text-[#2D2D2D]">
+              {bookQuantity === 1
+                ? `1 copy — $${BASE_BOOK_PRICE}`
+                : `${bookQuantity} copies — $${subtotal}`}
+            </span>
+            <svg
+              className={`w-4 h-4 text-[#8A8780] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {isOpen && (
+            <>
+              {/* Backdrop */}
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setIsOpen(false)}
+              />
+
+              {/* Dropdown */}
+              <div
+                className="absolute left-0 right-0 z-50 mt-1 bg-white rounded-xl border border-gray-200 overflow-hidden"
+                style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}
               >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            )}
-          </div>
+                {bookOptions.map(({ qty, total }) => (
+                  <button
+                    key={qty}
+                    type="button"
+                    onClick={() => handleSelect(qty)}
+                    className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${
+                      bookQuantity === qty
+                        ? "bg-[#FAF7F2] text-[#2D2D2D]"
+                        : "hover:bg-[#FAF7F2]/60 text-[#2D2D2D]"
+                    }`}
+                  >
+                    <span className="text-[14px]">
+                      {qty === 1 ? "1 copy" : `${qty} copies`}
+                      {qty > 1 && (
+                        <span className="text-[12px] text-[#9A9590] ml-1.5">
+                          +${ADDITIONAL_BOOK_PRICE * (qty - 1)}
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-[14px] text-[#2D2D2D]/70">
+                      ${total}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          {/* Header with Name and Popular Badge */}
-          <div className="flex items-baseline gap-2 flex-wrap">
-            <h3 className="font-serif text-lg font-medium text-[#2D2D2D]">
-              {tier.name}
-            </h3>
-            {tier.popular && (
-              <span className="inline-block bg-[#FBF6EC] text-[#D4A854] text-[10px] font-medium tracking-wider uppercase px-2 py-0.5 rounded-full">
-                Most popular
-              </span>
-            )}
-          </div>
-
-          {/* Tagline - Emotional hook, right under the name */}
-          <p className="italic text-xs text-[#9A9590] mt-0.5 mb-2.5">
-            {tier.tagline}
-          </p>
-
-          {/* Features - Quiet, secondary */}
-          <p className="text-[12px] text-[#9A9590]/80 leading-relaxed">
-            {tier.features.join(" • ")}
-          </p>
-        </div>
-      </div>
-
-      {/* Right Section - Price - Compact */}
-      <div className="flex-shrink-0">
-        <div className="font-serif text-xl text-[#2D2D2D]">
-          ${tier.price}
+        <div className="mt-5 px-5 py-4 rounded-xl bg-[#F5F3F0] text-center">
+          <span className="text-[#D4A854] text-base mr-1.5" style={{ fontFamily: "'Georgia', serif", fontStyle: "italic" }}>
+            Tip
+          </span>
+          <span className="text-[13px] text-[#6B6560]">
+            Many people want extra copies for family and close friends.
+          </span>
         </div>
       </div>
-    </button>
+
+    </div>
   );
 }

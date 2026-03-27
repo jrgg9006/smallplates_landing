@@ -99,7 +99,7 @@ export async function getProfileById(userId: string) {
  * Update personal information (name, phone, printed_name)
  * Also updates the associated guest record where is_self = true
  */
-export async function updatePersonalInfo(updates: { first_name?: string; last_name?: string; phone_number?: string | null; printed_name?: string }) {
+export async function updatePersonalInfo(updates: { full_name?: string; phone_number?: string | null; printed_name?: string }) {
   const supabase = createSupabaseClient();
 
   const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -107,12 +107,10 @@ export async function updatePersonalInfo(updates: { first_name?: string; last_na
     return { data: null, error: 'User not authenticated' };
   }
 
-  // Build profile update with concatenated full_name
   const profileUpdates: { full_name?: string; phone_number?: string | null } = {};
 
-  if (updates.first_name !== undefined || updates.last_name !== undefined) {
-    const fullName = `${updates.first_name || ''} ${updates.last_name || ''}`.trim();
-    profileUpdates.full_name = fullName;
+  if (updates.full_name !== undefined) {
+    profileUpdates.full_name = updates.full_name;
   }
 
   if (updates.phone_number !== undefined) {
@@ -132,11 +130,15 @@ export async function updatePersonalInfo(updates: { first_name?: string; last_na
   }
 
   // Also update the guest record where is_self = true
-  const hasGuestUpdates = updates.first_name !== undefined || updates.last_name !== undefined || updates.printed_name !== undefined;
+  const hasGuestUpdates = updates.full_name !== undefined || updates.printed_name !== undefined;
   if (hasGuestUpdates) {
     const guestUpdates: { first_name?: string; last_name?: string; printed_name?: string } = {};
-    if (updates.first_name !== undefined) guestUpdates.first_name = updates.first_name;
-    if (updates.last_name !== undefined) guestUpdates.last_name = updates.last_name;
+    // Reason: Guest table uses separate first/last columns — split full_name for sync
+    if (updates.full_name !== undefined) {
+      const parts = updates.full_name.trim().split(' ');
+      guestUpdates.first_name = parts[0] || '';
+      guestUpdates.last_name = parts.slice(1).join(' ') || '';
+    }
     if (updates.printed_name !== undefined) guestUpdates.printed_name = updates.printed_name;
 
     await supabase

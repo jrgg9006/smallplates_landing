@@ -107,15 +107,12 @@ export default function ForGiftGivers() {
             
             <h2
               id="gift-givers-heading"
-              className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#2D2D2D] relative"
+              className="type-heading relative"
             >
               We&apos;ve got {' '}
               <span className="relative inline-block">
                 <span 
                   className="text-[#D4A854] italic font-light"
-                  style={{
-                    fontFamily: 'Georgia, serif'
-                  }}
                 >
                   you.
                 </span>
@@ -124,8 +121,8 @@ export default function ForGiftGivers() {
           </div>
 
           {/* Subhead */}
-          <p className="mt-6 font-sans font-light text-lg md:text-xl text-[#2D2D2D]/80 text-center max-w-2xl mx-auto">
-            The best wedding gift. We help you make it happen.
+          <p className="mt-6 type-body text-center max-w-2xl mx-auto">
+            You set it up. We do the rest.
           </p>
 
           {/* The Process - Calm & Supportive */}
@@ -134,7 +131,7 @@ export default function ForGiftGivers() {
               {[
                 {
                   title: "Add your crew.",
-                  subtitle: "Invite co-captains to help."
+                  subtitle: "Split the cost, share the credit."
                 },
                 {
                   title: "You invite your people.",
@@ -145,8 +142,8 @@ export default function ForGiftGivers() {
                   subtitle: "Most get 40+."
                 },
                 {
-                  title: "We're here if you need us.",
-                  subtitle: "We help every step of the way."
+                  title: "Everything's tracked.",
+                  subtitle: "Check the dashboard anytime."
                 }
               ].map((step, index) => (
                 <motion.li
@@ -199,7 +196,7 @@ export default function ForGiftGivers() {
               className="inline-flex items-center justify-center rounded-full bg-[#2D2D2D] hover:bg-[#1a1a1a] text-white px-10 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#2D2D2D]"
               data-cta="gift-givers-primary"
             >
-              Give this Gift
+              Start the Book
             </button>
           </motion.div>
           

@@ -2,69 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { BASE_BOOK_PRICE, ADDITIONAL_BOOK_PRICE } from "@/lib/stripe/pricing";
 
 /**
- * PRICING PAGE — Small Plates & Co.
- * 
- * Voice: Margot Cole (direct, factual, warm)
- * Purpose: Clear information about pricing tiers. No fluff.
- * 
- * Design rationale:
- * - Clean cards on Warm White background
- * - Tier 2 subtly highlighted with Honey border + "Most popular" tag
- * - Serif for names/prices (editorial feel)
- * - Sans for features (clarity)
- * - Generous whitespace throughout
- * - No bullets — cleaner, more editorial
- * 
- * Copy rationale:
- * - Header uses Option B: "Three ways to give it."
- * - Each tier has a functional description + emotional tagline
- * - The tagline is what makes it Margot — she doesn't just list features,
- *   she tells you what it's FOR
+ * PRICING PAGE — Single product, editorial layout.
+ *
+ * Design: A centered "invitation-style" card as the visual centerpiece,
+ * with the two price points side by side (equal weight, different context).
+ * Decorative flourishes match ForGiftGivers section language.
+ * Features listed with honey accent dots.
  */
-
-const tiers = [
-  {
-    id: "the-book",
-    name: "The Book",
-    price: 169,
-    popular: false,
-    features: [
-      "1 Premium Hardcover (8×10)",
-      "Up to 50 recipes (total 100 pages)",
-      "Professional design",
-      "Full color throughout",
-    ],
-    tagline: "The gift. For the couple.",
-  },
-  {
-    id: "family-collection",
-    name: "The Family Collection",
-    price: 279,
-    popular: true,
-    features: [
-      "1 Premium Hardcover (8×10)",
-      "2 Classic Hardcovers (6×9)",
-      "Same recipes, same design",
-      "Three books total",
-    ],
-    tagline: "One for them. One for each family.",
-  },
-  {
-    id: "kitchen-table",
-    name: "The Kitchen Table",
-    price: 449,
-    popular: false,
-    features: [
-      "1 Premium Hardcover (8×10)",
-      "5 Classic Hardcovers (6×9)",
-      "Same recipes, same design",
-      "Six books total",
-    ],
-    tagline: "For the friends who made it happen.",
-  },
-];
 
 export default function PricingPage() {
   const router = useRouter();
@@ -79,172 +26,189 @@ export default function PricingPage() {
 
   return (
     <main className="min-h-screen bg-[#FAF9F7]">
-      {/* Header Section */}
-      <section className="pt-24 pb-12 md:pt-32 md:pb-16">
-        <div className="mx-auto max-w-4xl px-6 text-center">
+      {/* Header */}
+      <section className="pt-24 pb-6 md:pt-32 md:pb-10">
+        <div className="mx-auto max-w-3xl px-6 text-center">
           <motion.h1
-            className="font-serif text-4xl md:text-5xl text-[#2D2D2D] mb-4"
+            className="type-heading font-normal"
+            style={{ letterSpacing: "-0.02em" }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            Three ways to give it.
+            One book. Everything included.
           </motion.h1>
           <motion.p
-            className="font-sans font-light text-base md:text-lg text-[#2D2D2D]/70 leading-relaxed"
+            className="mt-4 type-body-small text-[#9A9590]"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            Same book. Same recipes. Different configurations.
+            No tiers. No packages. Just the book.
           </motion.p>
         </div>
       </section>
 
-      {/* Pricing Cards */}
-      <section className="pb-16 md:pb-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-stretch">
-            {tiers.map((tier, index) => (
-              <motion.div
-                key={tier.id}
-                className={`
-                  relative bg-white rounded-lg p-8 md:p-10
-                  transition-shadow duration-200 ease-out
-                  hover:shadow-[0_4px_20px_rgba(45,45,45,0.08)]
-                  flex flex-col
-                  ${tier.popular 
-                    ? "border-2 border-[#D4A854]" 
-                    : "border border-[#F0EDE8]"
-                  }
-                `}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-              >
-                {/* Popular Tag */}
-                {tier.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="inline-block bg-[#FBF6EC] text-[#D4A854] text-xs font-medium tracking-wide uppercase px-4 py-1.5 rounded-full">
-                      Most popular
-                    </span>
-                  </div>
-                )}
-
-                {/* Top Section */}
-                <div>
-                  {/* Tier Name */}
-                  <h2 className="font-serif text-2xl text-[#2D2D2D] mb-2">
-                    {tier.name}
-                  </h2>
-
-                  {/* Price */}
-                  <div className="mb-6">
-                    <span className="font-serif text-4xl text-[#2D2D2D]">
-                      ${tier.price}
-                    </span>
-                  </div>
-
-                  {/* Divider */}
-                  <div className="w-full h-px bg-[#F0EDE8] mb-6" />
-
-                  {/* Features */}
-                  <ul className="space-y-3 mb-6">
-                    {tier.features.map((feature, i) => (
-                      <li 
-                        key={i} 
-                        className="font-sans font-light text-[#2D2D2D] text-[15px] leading-relaxed" 
-                      >
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Bottom Section - Fixed position for alignment */}
-                <div className="mt-auto">
-                  {/* Divider */}
-                  <div className="w-full h-px bg-[#F0EDE8] mb-6" />
-
-                  {/* Tagline */}
-                  <p className="font-serif italic text-[#8A8780] text-base mb-8">
-                    {tier.tagline}
-                  </p>
-
-                  {/* CTA Button */}
-                  <button
-                    onClick={handleStartBook}
-                    className="
-                      w-full py-4 px-6 
-                      bg-[#D4A854] hover:bg-[#C49A4A] 
-                      text-[#2D2D2D] font-medium text-base font-sans
-                      rounded-lg
-                      transition-colors duration-200
-                    "
-                  >
-                    Give this Gift
-                  </button>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Custom Option */}
-      <section className="pb-12 md:pb-16">
-        <div className="mx-auto max-w-4xl px-6 text-center">
+      {/* Pricing Card — the centerpiece */}
+      <section className="pb-16 md:pb-20">
+        <div className="mx-auto max-w-2xl px-6">
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
+            className="relative bg-white rounded-2xl shadow-xl border border-[#D4A854]/20 overflow-hidden"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
           >
-            <p className="text-[#8A8780] text-lg mb-2">
-              Need something different?
-            </p>
-            <button
-              onClick={handleContact}
-              className="
-                text-[#2D2D2D] font-normal font-sans
-                underline underline-offset-4 decoration-[#D4A854]
-                hover:text-[#D4A854]
-                transition-colors duration-200
-              "
-            >
-              Let&apos;s figure it out →
-            </button>
+            {/* Decorative corner flourishes */}
+            <div className="absolute top-4 left-4 w-10 h-10 opacity-[0.08]">
+              <svg viewBox="0 0 48 48" className="w-full h-full text-[#D4A854]">
+                <path d="M6 6C6 6 24 2 42 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                <path d="M6 6C6 6 2 24 6 42" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <div className="absolute top-4 right-4 w-10 h-10 opacity-[0.08] -scale-x-100">
+              <svg viewBox="0 0 48 48" className="w-full h-full text-[#D4A854]">
+                <path d="M6 6C6 6 24 2 42 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                <path d="M6 6C6 6 2 24 6 42" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <div className="absolute bottom-4 left-4 w-10 h-10 opacity-[0.08] -scale-y-100">
+              <svg viewBox="0 0 48 48" className="w-full h-full text-[#D4A854]">
+                <path d="M6 6C6 6 24 2 42 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                <path d="M6 6C6 6 2 24 6 42" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <div className="absolute bottom-4 right-4 w-10 h-10 opacity-[0.08] scale-[-1]">
+              <svg viewBox="0 0 48 48" className="w-full h-full text-[#D4A854]">
+                <path d="M6 6C6 6 24 2 42 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                <path d="M6 6C6 6 2 24 6 42" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+              </svg>
+            </div>
+
+            <div className="px-8 py-10 md:px-12 md:py-14">
+              {/* Two prices side by side */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-0 sm:divide-x sm:divide-[#F0EDE8] mb-10">
+                {/* First book */}
+                <div className="text-center sm:pr-8">
+                  <p className="font-sans text-xs font-medium tracking-[0.15em] text-[#9A9590] uppercase mb-3">
+                    Your first book
+                  </p>
+                  <div className="flex items-baseline justify-center">
+                    <span className="font-serif text-3xl md:text-4xl text-[#2D2D2D]/50">$</span>
+                    <span className="font-serif text-6xl md:text-7xl text-[#2D2D2D] leading-none">
+                      {BASE_BOOK_PRICE}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm text-[#9A9590]">+ shipping</p>
+                </div>
+
+                {/* Additional copies */}
+                <div className="text-center sm:pl-8">
+                  <p className="font-sans text-xs font-medium tracking-[0.15em] text-[#9A9590] uppercase mb-3">
+                    Each additional copy
+                  </p>
+                  <div className="flex items-baseline justify-center">
+                    <span className="font-serif text-3xl md:text-4xl text-[#2D2D2D]/50">$</span>
+                    <span className="font-serif text-6xl md:text-7xl text-[#2D2D2D] leading-none">
+                      {ADDITIONAL_BOOK_PRICE}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm text-[#9A9590]">same book, same quality</p>
+                </div>
+              </div>
+
+              {/* Context note */}
+              <p className="text-center font-serif italic text-[#9A9590] text-base mb-10">
+                Most people order 2–3. One for the couple, one for each family.
+              </p>
+
+              {/* Honey rule */}
+              <div className="flex items-center gap-4 mb-10">
+                <div className="flex-1 h-px bg-[#F0EDE8]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[#D4A854]" />
+                <div className="flex-1 h-px bg-[#F0EDE8]" />
+              </div>
+
+              {/* What's included */}
+              <h2 className="text-center font-serif text-lg text-[#2D2D2D] mb-6">
+                Every book includes
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 max-w-lg mx-auto mb-3">
+                {[
+                  "50 recipes included",
+                  "Premium hardcover, 8 × 10 in",
+                  "Professionally designed",
+                  "Full color throughout",
+                  "Personal notes from every guest",
+                  "Full platform access",
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-2.5">
+                    <span className="mt-2 w-1.5 h-1.5 rounded-full bg-[#D4A854] flex-shrink-0" />
+                    <span className="text-[15px] text-[#6B6966] font-light leading-relaxed">
+                      {item}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-center text-sm text-[#D4A854] mt-5">
+                Need more than 50 recipes? Additional available.
+              </p>
+            </div>
+
+            {/* CTA strip at bottom of card */}
+            <div className="bg-[#FDFCFA] border-t border-[#F0EDE8] px-8 py-8 md:px-12 text-center">
+              <p className="font-serif italic text-[#2D2D2D] text-lg mb-5">
+                Bride cries. You win.
+              </p>
+              <button
+                onClick={handleStartBook}
+                className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-10 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#D4A854]"
+              >
+                Start the Book
+              </button>
+              <div className="mt-5">
+                <button
+                  onClick={handleContact}
+                  className="text-[#9A9590] text-sm hover:text-[#D4A854] transition-colors duration-200"
+                >
+                  Need something different? Let&apos;s figure it out →
+                </button>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Fine Print */}
+      {/* A few things to know — flat text, no card */}
       <section className="pb-24 md:pb-32">
-        <div className="mx-auto max-w-3xl px-6">
+        <div className="mx-auto max-w-2xl px-6">
           <motion.div
-            className="bg-[#F5F3EF] rounded-lg p-8 md:p-10"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.7 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
           >
-            <h3 className="font-serif text-xl text-[#2D2D2D] mb-6">
+            <h3 className="font-serif text-xl text-[#2D2D2D] mb-8">
               A few things to know
             </h3>
-            
-            <div className="space-y-4 text-[15px] text-[#6B6966] leading-relaxed font-light">
+
+            <div className="space-y-6 text-[15px] text-[#9A9590] leading-relaxed font-light">
               <p>
-                <span className="font-medium text-[#2D2D2D] font-sans">Shipping</span> is 
+                <span className="font-medium text-[#2D2D2D] font-sans">Shipping</span> is
                 calculated at checkout and paid separately.
               </p>
+              <div className="h-px bg-[#F0EDE8]" />
               <p>
-                <span className="font-medium text-[#2D2D2D]">Timeline:</span> Most 
-                books are ready 3-4 weeks after recipe collection closes.
+                <span className="font-medium text-[#2D2D2D]">Timeline:</span> Most
+                books are ready 3–4 weeks after recipe collection closes.
               </p>
+              <div className="h-px bg-[#F0EDE8]" />
               <p>
-                <span className="font-medium text-[#2D2D2D]">What&apos;s included:</span> Professional 
-                design, recipe images, quality printing, and full access to the platform.
+                <span className="font-medium text-[#2D2D2D]">What&apos;s included:</span> 50
+                recipes, professional design, recipe images, quality printing, and full
+                access to the platform.
               </p>
+              <div className="h-px bg-[#F0EDE8]" />
               <p>
-                <span className="font-medium text-[#2D2D2D]">What&apos;s not included:</span> Stress. 
+                <span className="font-medium text-[#2D2D2D]">What&apos;s not included:</span> Stress.
                 We handle the reminders, the design, the production. You just invite people.
               </p>
             </div>

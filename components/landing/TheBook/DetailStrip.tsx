@@ -96,10 +96,10 @@ export default function DetailStrip() {
           transition={{ duration: 0.5, delay: index * 0.08 }}
         >
           {detail.visual}
-          <h4 className="font-serif text-base md:text-lg font-medium text-[#2D2D2D] mt-4 mb-1">
+          <h4 className="type-subheading text-base md:text-lg mt-4 mb-1">
             {detail.title}
           </h4>
-          <p className="font-sans font-light text-sm text-[#2D2D2D]/60 leading-relaxed">
+          <p className="type-caption text-[#2D2D2D]/60">
             {detail.description}
           </p>
         </motion.div>

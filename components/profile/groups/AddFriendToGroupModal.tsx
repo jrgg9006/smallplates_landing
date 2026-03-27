@@ -14,13 +14,6 @@ import { UserPlus, Copy, Check } from "lucide-react";
 import type { GroupWithMembers } from "@/lib/types/database";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { getCurrentProfile } from "@/lib/supabase/profiles";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface AddFriendToGroupModalProps {
   isOpen: boolean;
@@ -222,29 +215,6 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
             <p className="text-xs text-gray-500 mt-1">
               An invitation to join will be sent to this email
             </p>
-          </div>
-
-          {/* Relationship Field */}
-          <div>
-            <Label htmlFor="relationship" className="text-sm font-medium text-gray-600">
-              How does this Captain know the couple?
-            </Label>
-            <Select
-              value={formData.relationship}
-              onValueChange={(value) => handleInputChange('relationship', value)}
-              disabled={loading}
-            >
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Select relationship" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="friend">Friend</SelectItem>
-                <SelectItem value="family">Family</SelectItem>
-                <SelectItem value="bridesmaid">Bridesmaid</SelectItem>
-                <SelectItem value="wedding-planner">Wedding Planner</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           {/* Copy Invite Link Button */}

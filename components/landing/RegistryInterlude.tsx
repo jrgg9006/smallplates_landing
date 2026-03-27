@@ -9,7 +9,7 @@ export default function RegistryInterlude() {
 
   return (
     <section
-      className="bg-white pt-2 pb-10 md:pt-4 md:pb-12"
+      className="bg-white py-10 md:py-12"
       aria-label="Registry information for couples"
     >
       <div className="mx-auto max-w-2xl px-6 md:px-8">
@@ -22,12 +22,12 @@ export default function RegistryInterlude() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           {/* Headline - Minion Pro Italic */}
-          <h2 className="font-serif text-xl md:text-2xl text-[#2D2D2D] italic mb-3">
+          <h2 className="type-accent text-xl md:text-2xl mb-3">
             Wait — is this your wedding?
           </h2>
 
           {/* Body text */}
-          <p className="font-sans text-[15px] md:text-base text-[#8A8780] font-light leading-relaxed mb-6">
+          <p className="type-body-small text-[15px] md:text-base text-[#8A8780] mb-6">
             You can put this on your registry.<br className="hidden sm:inline" />
             Your people fund it. They fill it. You keep it.
           </p>

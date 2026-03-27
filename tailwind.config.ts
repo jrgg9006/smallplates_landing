@@ -35,9 +35,14 @@ const config: Config = {
   				'serif'
   			],
   			sans: [
-  				'Inter',
+  				'var(--font-inter)',
   				'-apple-system',
   				'BlinkMacSystemFont',
+  				'sans-serif'
+  			],
+  			'dm-sans': [
+  				'var(--font-dm-sans)',
+  				'-apple-system',
   				'sans-serif'
   			]
   		},

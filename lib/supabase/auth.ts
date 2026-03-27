@@ -60,16 +60,23 @@ export async function signUpWithEmail(email: string, password: string) {
 /**
  * Sign in with Google OAuth
  *
+ * Args:
+ *   options.loginHint (string): Pre-fill the Google email field
+ *   options.redirectTo (string): Override the default post-auth redirect
+ *
  * Returns:
  *   Promise<{error: string | null}>
  */
-export async function signInWithGoogle() {
+export async function signInWithGoogle(options?: { loginHint?: string; redirectTo?: string }) {
   const supabase = createSupabaseClient();
+
+  const defaultRedirect = `${window.location.origin}/api/v1/auth/callback?next=/profile/groups`;
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${window.location.origin}/api/v1/auth/callback?next=/profile/groups`,
+      redirectTo: options?.redirectTo || defaultRedirect,
+      ...(options?.loginHint ? { queryParams: { login_hint: options.loginHint } } : {}),
     },
   });
 

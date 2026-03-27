@@ -474,12 +474,13 @@ export async function submitGuestRecipeWithFiles(
     // }
     
     // Generate Midjourney prompt asynchronously for text-based recipes (not image uploads)
-    if (recipe && submission.upload_method !== 'image' && !submission.raw_recipe_text) {
+    if (recipe && submission.upload_method !== 'image') {
+      const isRawText = !!submission.raw_recipe_text;
       generateAndSaveMidjourneyPrompt(
         recipe.id,
         submission.recipe_name.trim(),
-        submission.ingredients.trim(),
-        submission.instructions.trim(),
+        isRawText ? submission.raw_recipe_text! : submission.ingredients.trim(),
+        isRawText ? '' : submission.instructions.trim(),
         submission.comments?.trim() || null
       ).catch((error) => {
         // Log but don't throw - we don't want to break recipe creation
@@ -718,13 +719,14 @@ export async function submitGuestRecipe(
       .single();
 
     // Generate Midjourney prompt asynchronously (don't block recipe creation)
-    // Only for text-based recipes (not image uploads or raw_recipe_text)
-    if (recipe && submission.upload_method !== 'image' && !submission.raw_recipe_text) {
+    // Reason: Include raw_recipe_text submissions so pasted recipes also get cleaned
+    if (recipe && submission.upload_method !== 'image') {
+      const isRawText = !!submission.raw_recipe_text;
       generateAndSaveMidjourneyPrompt(
         recipe.id,
         submission.recipe_name.trim(),
-        submission.ingredients.trim(),
-        submission.instructions.trim(),
+        isRawText ? submission.raw_recipe_text! : submission.ingredients.trim(),
+        isRawText ? '' : submission.instructions.trim(),
         submission.comments?.trim() || null
       ).catch((error) => {
         // Log but don't throw - we don't want to break recipe creation

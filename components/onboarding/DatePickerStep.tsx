@@ -23,7 +23,7 @@ interface DatePickerStepProps {
   totalSteps: number;
   title: string;
   question: string;
-  hint: string;
+  hint: React.ReactNode;
   switchFlowText: string;
   switchFlowHref: string;
   isAddBookMode?: boolean;
@@ -173,14 +173,14 @@ export function DatePickerStep({
         <div
           className="overflow-hidden transition-all duration-200 ease-in-out"
           style={{
-            maxHeight: showHint ? "50px" : "0px",
+            maxHeight: showHint ? "80px" : "0px",
             opacity: showHint ? 1 : 0,
             marginBottom: showHint ? "16px" : "0px",
           }}
         >
-          <p className="text-sm text-[#2D2D2D]/60 font-light text-center">
+          <div className="text-sm text-[#2D2D2D]/60 font-light text-center">
             {hint}
-          </p>
+          </div>
         </div>
 
         {/* Date input field + popover wrapper */}
@@ -285,7 +285,7 @@ export function DatePickerStep({
               }}
             >
               Your book arrives by {format(selectedDate, "MMMM")} {selectedDate.getDate()}.
-              {" "}You collect the recipes &mdash; we handle the rest.
+              {" "}
             </p>
           </div>
         )}

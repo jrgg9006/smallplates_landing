@@ -163,12 +163,12 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
       .eq('user_id', userId)
       .eq('is_self', true)
       .eq('is_archived', false)
-      .single();
-    
+      .maybeSingle();
+
     if (error || !selfGuest) {
       return false;
     }
-    
+
     return (selfGuest.recipes_received || 0) > 0;
   }, []);
 

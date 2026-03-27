@@ -6,14 +6,14 @@ export default function HowItWorks() {
     {
       number: "01",
       title: "You invite.",
-      description: "Share a link with your guests. We'll remind them—you don't have to chase anyone.",
+      description: "Add or import guests and share a link.",
       image: "/images/HowitWorks_images/how_step1.png",
       imageAlt: "Invitation being shared via phone"
     },
     {
       number: "02",
       title: "They send recipes.",
-      description: "Their favorites. Their stories. Takes 5 minutes.",
+      description: "Their favorites. Their stories. We send the reminders.",
       image: "/images/HowitWorks_images/how_step2.png",
       imageAlt: "Person submitting a recipe with a photo"
     },
@@ -45,12 +45,12 @@ export default function HowItWorks() {
         >
           <h2
             id="how-it-works-heading"
-            className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#2D2D2D]"
+            className="type-heading"
           >
             Here&apos;s how it happens.
           </h2>
-          <p className="mt-4 font-sans text-lg md:text-xl text-[#2D2D2D]/60 font-light">
-            Simpler than you think.
+          <p className="mt-4 type-body text-[#2D2D2D]/60">
+            Three steps. Easier than you think.
           </p>
         </motion.div>
 
@@ -84,12 +84,12 @@ export default function HowItWorks() {
               </div>
 
               {/* Title */}
-              <h3 className="font-serif text-2xl md:text-3xl font-medium text-[#2D2D2D] mb-3">
+              <h3 className="type-subheading mb-3">
                 {step.title}
               </h3>
 
               {/* Description */}
-              <p className="font-sans font-light text-base md:text-lg text-[#2D2D2D]/70 max-w-xs mx-auto">
+              <p className="type-body-small max-w-xs mx-auto">
                 {step.description}
               </p>
             </motion.div>

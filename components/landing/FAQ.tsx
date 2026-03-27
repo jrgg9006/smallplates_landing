@@ -19,6 +19,10 @@ export default function FAQ() {
       answer: "Yes, you can add recipes in any language you want."
     },
     {
+      question: "What if guests don't send their recipes?",
+      answer: "We send up to 3 reminders per guest — so you don't have to. Most books end up with 30-50+ recipes. People want to be part of this."
+    },
+    {
       question: "Is this just for the bride?",
       answer: "It's for their kitchen. Their meals. Their life. If they eat, it's for both of them."
     },
@@ -33,7 +37,7 @@ export default function FAQ() {
       <div className="mx-auto max-w-4xl px-6 md:px-8">
         {/* Section Title */}
         <motion.h2 
-          className="font-serif text-3xl md:text-4xl lg:text-5xl text-center font-medium text-[#2D2D2D] mb-12"
+          className="type-heading text-center mb-12"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -57,10 +61,10 @@ export default function FAQ() {
                 ease: "easeOut" 
               }}
             >
-              <h3 className="font-serif text-xl md:text-2xl font-medium text-[#2D2D2D] mb-3">
+              <h3 className="type-subheading text-xl md:text-2xl mb-3">
                 {faq.question}
               </h3>
-              <p className="font-sans font-light text-base md:text-lg text-[#2D2D2D]/70 leading-relaxed">
+              <p className="type-body-small">
                 {faq.answer}
               </p>
             </motion.div>

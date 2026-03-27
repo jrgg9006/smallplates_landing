@@ -146,15 +146,30 @@ function readJSON(filePath) {
 // FUNCIONES DE POSICIONAMIENTO
 // ============================================
 
+// ============================================
+// VALORES CONFIRMADOS DE MIXAM
+// Actualizados manualmente con el dato real de cada orden.
+// Si el page count está aquí, usar este valor.
+// Si no, caer al cálculo automático.
+// ============================================
+var MIXAM_CONFIRMED = {
+    88:  0.510,
+    140: 0.690,
+    156: 0.750
+    // Agregar más conforme se confirmen:
+    // 100: 0.xxx,
+    // 120: 0.xxx,
+};
+
 function calculateSpineWidth(pageCount) {
-    // Fórmula calibrada con Mixam:
+    if (MIXAM_CONFIRMED.hasOwnProperty(String(pageCount))) {
+        return MIXAM_CONFIRMED[pageCount];
+    }
+    // Fallback: fórmula calibrada con Mixam
     // 156 páginas → 78 hojas × 0.009615"/hoja = 0.75"
     var sheets = pageCount / 2;
     var spine = sheets * BASE.PAPER_THICKNESS_PER_SHEET;
-    
-    // Redondear a 2 decimales (Mixam trabaja así)
     spine = Math.round(spine * 100) / 100;
-    
     return spine;
 }
 

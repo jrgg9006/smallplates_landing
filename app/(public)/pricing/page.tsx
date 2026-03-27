@@ -6,7 +6,7 @@ import PricingPage from "@/components/pricing/PricingPage";
 export const metadata: Metadata = {
   title: "Pricing — Small Plates & Co.",
   description:
-    "Three ways to give a wedding cookbook made by the guests. Books start at $169.",
+    "One book. Everything included. First book $169, additional copies $119 each.",
 };
 
 export default function Pricing() {

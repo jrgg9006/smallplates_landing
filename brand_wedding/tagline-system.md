@@ -136,6 +136,17 @@ The Acquisition Line can have minor variations depending on context:
 | "Your people. Their recipes. One book." | Punchy, for short ads |
 | "A wedding gift made by everyone who loves them." | Third person, for organizers |
 
+### Organizer Variations
+
+Specific line variations for organizer-facing communications:
+
+| Variation | Use case |
+|-----------|----------|
+| "A wedding gift made by everyone. Managed by no one." | Organizer landing page hero, ads targeting MOH |
+| "Meaningful gift. Zero management overhead." | Organizer value prop, dashboard header |
+| "You set it up. We handle the rest." | How-it-works for organizers, onboarding |
+| "Bride cries. You're the hero. Nobody got stressed." | Organizer CTA, email subject lines |
+
 ---
 
 ## How They Work Together
@@ -159,6 +170,29 @@ The emotional line closes it.
 
 **4. Delivery (inside the book):**
 > Last page: "Still at the table."
+
+---
+
+### The Organizer Journey
+
+**1. Discovery (Instagram ad / word of mouth):**
+> "A wedding gift made by everyone. Managed by no one."
+> Finally — a group gift that doesn't require a group chat.
+> [See how it works →]
+
+**2. Consideration (organizer landing page):**
+> Hero: "Meaningful gift. Zero management overhead."
+> How it works: "You set it up. We handle the rest."
+> Below: "Check the dashboard. Not the group chat."
+
+**3. Purchase (setup confirmation):**
+> "Your book is live. Invitations go out today. Reminders are automated. Check your dashboard anytime — or don't. We'll flag anything that needs you."
+
+**4. Collection (progress email):**
+> "28 of 42 recipes in. Reminder #2 goes out tomorrow. Everything's on track."
+
+**5. Delivery (organizer notification):**
+> "The book is done. It's on its way. You did this — without losing your mind."
 
 ---
 

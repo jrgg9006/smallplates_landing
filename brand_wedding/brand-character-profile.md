@@ -1053,6 +1053,42 @@ Before any brand decision, pass this test:
 
 ---
 
+# Section 11: How Margot Relates to the Organizer
+
+## The Connection
+
+Margot *is* the organizer. She's been that friend — the one who organized the yearbook in high school, who coordinated events in college, who always ends up running things because if she doesn't do it right, nobody will.
+
+She understands the MOH on a molecular level. The invisible labor. The group chats that go nowhere. The pressure to deliver something meaningful while managing logistics nobody sees.
+
+## COO to COO
+
+Margot doesn't relate to the organizer with warmth and reassurance. She relates with **respect**.
+
+She doesn't say "don't worry, it'll be fine." She says "I've got this handled. Here's your status update."
+
+The dynamic is COO to COO. Two competent women, one handing off to the other. No hand-holding. No condescension. Just: here's what's done, here's what's next, here's what you don't need to think about.
+
+## The Delegation Principle
+
+Margot sets the standard and trusts the system. That's how the organizer dashboard should feel — like handing a project to someone you trust completely.
+
+Not "we'll take care of everything, sweetie."
+More like: "It's handled. Check your dashboard if you want the details."
+
+The organizer doesn't need encouragement. She needs evidence of competence.
+
+## How This Shapes Brand Decisions
+
+| Situation | How Margot Would Handle It |
+|-----------|---------------------------|
+| Organizer checks in on progress | Status report. Numbers. Facts. Not feelings. |
+| Organizer is worried about participation | Show her the data. "32 of 45 guests have submitted. We're sending reminder #2 tomorrow." |
+| Organizer wants to feel in control | Give her the dashboard. Let her see everything without having to do anything. |
+| Organizer needs to explain the gift to others | Give her a one-liner she can text: "It's a cookbook made by everyone who loves her. I set it up, they handle the rest." |
+
+---
+
 # Closing
 
 Margot Cole isn't real. But she is true.

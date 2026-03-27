@@ -31,14 +31,12 @@ export default function BookDetailsModal({ isOpen, onClose }: BookDetailsModalPr
   if (!isOpen) return null;
 
   const bookSpecs = [
-    { label: "Printing", value: "Full-color (CMYK) throughout" },
-    { label: "Size (Premium Book)", value: "US Trade (11\" × 8.5\") – Portrait" },
-    { label: "Size (Classic Book)", value: "US Trade (9\" × 6\") – Portrait" },
-    { label: "Cover", value: "Hardcover, Adhesive Casebound" },
+    { label: "Format", value: "Hardcover, Adhesive Casebound (PUR)" },
+    { label: "Size", value: "US Letter Tall (8\" × 10\") – Portrait" },
+    { label: "Printing", value: "Full-color throughout" },
     { label: "Paper", value: "100 lb Satin Text (interior pages)" },
-    { label: "Finish", value: "Matte Lamination on cover (outside only)" },
-    { label: "Endpapers", value: "White stock" },
-    { label: "Page Count", value: "Personalized (variable per collection)" },
+    { label: "Finish", value: "Matte Lamination on cover" },
+    { label: "Recipes", value: "50 included — additional recipes available" },
   ];
 
   return (
@@ -56,7 +54,7 @@ export default function BookDetailsModal({ isOpen, onClose }: BookDetailsModalPr
 
       {/* Modal container */}
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="relative bg-white rounded-lg shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="relative bg-white rounded-lg shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
           {/* Close button */}
           <button
             type="button"
@@ -80,46 +78,41 @@ export default function BookDetailsModal({ isOpen, onClose }: BookDetailsModalPr
           </button>
 
           {/* Modal content */}
-          <div className="p-8 md:p-12">
-            {/* Header with more top spacing */}
-            <div className="pt-8 md:pt-8 mb-10">
-              <h1 id="modal-title" className="font-serif text-3xl md:text-4xl font-medium text-[#2D2D2D] mb-6 text-center">
+          <div className="p-6 md:p-10">
+            {/* Header */}
+            <div className="pt-4 md:pt-6 mb-8">
+              <p className="type-eyebrow text-center mb-4">The Book</p>
+              <h1 id="modal-title" className="font-serif text-2xl md:text-3xl font-normal text-[#2D2D2D] text-center mb-4">
                 Your Kitchen. Their Love.
               </h1>
-              
-              <p className="text-lg text-[#2D2D2D]/70 leading-relaxed max-w-2xl mx-auto text-center font-light">
-                This isn&apos;t just a cookbook. It&apos;s everyone who loves you, gathered in one place. Each page designed to be opened, stained, and treasured—because the best gifts are the ones you actually use.
+              <p className="type-body-small text-center max-w-lg mx-auto">
+                Everyone who loves you, gathered in one place. Each page designed to be opened, stained, and lived in.
               </p>
-              
-              {/* Decorative divider */}
-              <div className="flex justify-center mt-8">
-                <div className="w-16 h-px bg-gray-300"></div>
-              </div>
             </div>
 
-            {/* Book Specifications with editorial design */}
-            <div className="mb-10">
-              <h2 className="font-serif text-2xl text-[#2D2D2D] mb-8 text-center">
-                Book Specifications
-              </h2>
-              <dl className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-                {bookSpecs.map((spec, index) => (
-                  <div key={index} className="border-l-2 border-gray-200 pl-4 py-1">
-                    <dt className="text-xs uppercase tracking-wider text-gray-500 mb-1">
-                      {spec.label}
-                    </dt>
-                    <dd className="text-base text-gray-900">
-                      {spec.value}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
+            {/* Divider */}
+            <div className="flex justify-center mb-8">
+              <div className="w-12 h-px bg-[#E8E0D5]"></div>
             </div>
 
-            {/* Footer text with elegant styling */}
-            <div className="border-t border-gray-200 pt-8">
-              <p className="text-base text-[#2D2D2D]/70 leading-relaxed text-center italic max-w-2xl mx-auto font-light">
-                Built to live in your kitchen for decades, not gather dust on a shelf. <span className="font-serif not-italic text-[#2D2D2D]/50">Still at the table.</span>
+            {/* Specifications */}
+            <dl className="grid grid-cols-2 gap-x-8 gap-y-5 max-w-lg mx-auto mb-8">
+              {bookSpecs.map((spec, index) => (
+                <div key={index}>
+                  <dt className="type-eyebrow mb-1">
+                    {spec.label}
+                  </dt>
+                  <dd className="font-sans text-sm text-[#2D2D2D]">
+                    {spec.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+
+            {/* Footer */}
+            <div className="border-t border-[#E8E0D5] pt-6">
+              <p className="type-caption italic text-center">
+                Built to live in your kitchen for decades. Not a shelf.
               </p>
             </div>
           </div>

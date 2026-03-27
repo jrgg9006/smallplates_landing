@@ -87,11 +87,22 @@ PROOF POINTS
 | **Contributors** | Wedding Guests | They participate. They become the content. They are the presence. |
 | **Influencers** | Mother, Planner, Groom | They advise, recommend, approve, or veto. |
 
+### The Audience Ecosystem Hierarchy
+
+| Priority | Role | Who | Function |
+|----------|------|-----|----------|
+| **1. Primary Strategic Target (Buyer)** | The Organizer | MOH, bridesmaid, sister, mother | She discovers, she buys, she coordinates. She is the decision-maker. |
+| **2. Taste Gatekeeper (Receiver)** | The Bride | The couple | She validates. If she wouldn't want it, the Organizer won't buy it. |
+| **3. Contributors** | The Guests | Wedding attendees | They participate. They become the content. |
+| **4. Influencers** | Mother, Planner, Groom | Advisory circle | They advise, recommend, approve, or veto. |
+
 ### The Strategic Insight
 
-The Organizer is the transactional buyer — she makes the purchase. But the **Bride is the positioning target**. If the Bride wouldn't want it, the Organizer won't buy it.
+The Organizer is the primary strategic target — she discovers, she decides, she buys. The **Bride is the taste gatekeeper**. If the Bride wouldn't want it, the Organizer won't buy it — but the Organizer is the one we need to reach, convince, and serve.
 
-The Bride is the taste filter. She determines whether Small Plates is "cool" or "cheesy." Every positioning choice must pass through her.
+The Bride is the taste filter. She determines whether Small Plates is "cool" or "cheesy." Every positioning choice must pass through her approval. But the Organizer is the one with the credit card, the logistics, and the emotional labor. She is who we sell to. The Bride is who we design for.
+
+**The LTV insight:** A bridesmaid is a bridesmaid an average of five times in her life. Win her once, and she becomes a repeat buyer across multiple weddings. The Organizer isn't just the buyer — she's the growth engine.
 
 ### Positioning Target Statement
 
@@ -122,6 +133,8 @@ The Bride is the taste filter. She determines whether Small Plates is "cool" or 
 | A registry item | Registry items are transactional; we're relational |
 | A wedding favor | Favors are forgettable; we're permanent |
 | A DIY project | DIY is a burden; we're a service |
+| Another chore | Chores deplete the organizer; we restore her confidence |
+| An ambush expense | Hidden costs erode trust; our pricing is clear and upfront |
 
 ---
 
@@ -224,13 +237,20 @@ Features can be copied. Meaning cannot.
 
 ---
 
-## For The Organizer (Bridesmaid, Sister, Mother)
+## For The Organizer (MOH, Bridesmaid, Sister, Mother)
 
-**Her question:** "Is this the gift that makes me the hero?"
+**Her question:** "Is this easy enough that I won't lose my mind — and meaningful enough that I'll look like a genius?"
 
-> You want to give something that actually matters — not another thing that gets returned or forgotten. Small Plates is different. Everyone contributes a recipe. We turn it into a beautiful book. She'll have it in her kitchen for decades. And every time she cooks from it, she'll think of the people who made it — including you.
+**Her real fears:**
+- Ineptitude: "What if I can't pull this off?"
+- Subjugation: "What if this becomes another thing where I do all the work and someone else gets the credit?"
+- Depletion: "What if this drains me when I'm already running on empty?"
 
-**Key message:** This gift keeps giving. And you made it happen.
+> You're already managing 14 things for this wedding. This isn't one of them. You set it up. You invite the guests. We handle the reminders, the design, the printing — all of it. You check a dashboard, not a to-do list. And when she opens that book and starts crying? That's your moment. You made it happen. Without losing your mind.
+
+**Key message:** Meaningful gift. Zero management overhead. You get the credit.
+
+**The positioning for her:** Small Plates isn't another task. It's the one thing on your wedding list that handles itself — and makes you look like the friend who gets it right every time.
 
 ---
 
@@ -290,6 +310,12 @@ Features can be copied. Meaning cannot.
 
 > You could spend 10+ hours chasing recipes, designing pages, and hoping it gets done. Or you could let us handle it — and guarantee it's beautiful. Same idea. Completely different experience.
 
+### The Friendship Risk
+
+DIY isn't just work. It's texting your best friend for the fourth time about a recipe she hasn't sent. It's the awkward silence when your college roommate still hasn't responded. It's watching a relationship quietly strain under the weight of a gift that was supposed to bring people together.
+
+Small Plates removes that risk entirely. We send the reminders. We do the follow-ups. Your friendships stay intact.
+
 ---
 
 ## vs. Doing Nothing
@@ -313,6 +339,12 @@ Features can be copied. Meaning cannot.
 Every positioning statement should answer: **"Does this keep people from disappearing?"**
 
 If the statement doesn't connect to presence, revise it until it does.
+
+## Always Serve the Organizer
+
+Every positioning statement should also answer: **"Does this make the organizer feel confident and in control — without adding to her workload?"**
+
+If the statement creates cognitive load for the organizer, simplify it.
 
 ## Never Position on Features Alone
 

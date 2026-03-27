@@ -665,9 +665,17 @@ export function SendInvitationsPage({
                           className="w-[18px] h-[18px] rounded border-gray-300 text-[#D4A854] focus:ring-[#D4A854]"
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-[15px] font-medium text-[#2D2D2D] truncate">
-                            {guest.first_name} {guest.last_name || ""}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-[15px] font-medium text-[#2D2D2D] truncate">
+                              {guest.first_name} {guest.last_name || ""}
+                            </p>
+                            {(guest.recipes_received || 0) > 0 && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#D4A854]/10 text-[#D4A854] flex-shrink-0">
+                                <Check size={10} />
+                                Recipe in
+                              </span>
+                            )}
+                          </div>
                           <p className="text-sm text-[#9A9590] truncate mt-0.5">
                             {guest.email}
                           </p>

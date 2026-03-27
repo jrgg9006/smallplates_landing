@@ -56,7 +56,7 @@ export default function TheProblem() {
         >
           <p className="font-sans text-lg md:text-xl text-[#2D2D2D]/80 leading-relaxed">
             Another blender. Another towel set. Another thing
-            <span className="block">that ends up in a closet—or returned.</span>
+            <span className="block">that ends up in a closet or returned.</span>
           </p>
           
           <p className="font-sans text-lg md:text-xl text-[#2D2D2D]/70 leading-relaxed">

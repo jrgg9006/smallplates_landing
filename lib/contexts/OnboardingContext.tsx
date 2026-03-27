@@ -8,18 +8,17 @@ import {
   ReactNode,
   useCallback,
 } from "react";
-import { useRouter } from "next/navigation";
-import { createSupabaseClient } from "@/lib/supabase/client";
 import {
   OnboardingState,
   OnboardingContextType,
+  ShippingCountry,
 } from "@/lib/types/onboarding";
-// Reason: Gumroad redirect disabled for soft launch - using purchase_intents table instead
-// import { generateGumroadLink } from "@/lib/payments/gumroad";
-import { createGroup } from "@/lib/supabase/groups";
 
-// Total steps: 4 for both couples and gift givers
+// Reason: Bump this when the step order changes to invalidate stale localStorage
+const STATE_VERSION = 4;
+
 const TOTAL_STEPS_COUPLE = 4;
+// Reason: Couple flow is now 1. Date → 2. Copies → 3. Payment → 4. Setup (same as gift)
 const TOTAL_STEPS_GIFT = 4;
 
 const getInitialState = (userType: 'couple' | 'gift_giver'): OnboardingState => ({
@@ -27,7 +26,11 @@ const getInitialState = (userType: 'couple' | 'gift_giver'): OnboardingState => 
   totalSteps: userType === 'couple' ? TOTAL_STEPS_COUPLE : TOTAL_STEPS_GIFT,
   answers: {},
   selectedProductTier: null,
+  bookQuantity: 1,
+  shippingCountry: null,
   isComplete: false,
+  paymentIntentId: null,
+  clientSecret: null,
 });
 
 /**
@@ -47,8 +50,8 @@ const loadStateFromStorage = (userType: 'couple' | 'gift_giver'): OnboardingStat
     const saved = localStorage.getItem(getStorageKey(userType));
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Validate that it has the expected structure
-      if (parsed && typeof parsed === 'object' && 'currentStep' in parsed) {
+      // Validate structure and version — discard stale state from old step layouts
+      if (parsed && typeof parsed === 'object' && 'currentStep' in parsed && parsed._version === STATE_VERSION) {
         return parsed as OnboardingState;
       }
     }
@@ -67,7 +70,7 @@ const saveStateToStorage = (userType: 'couple' | 'gift_giver', state: Onboarding
   if (typeof window === 'undefined') return;
   
   try {
-    localStorage.setItem(getStorageKey(userType), JSON.stringify(state));
+    localStorage.setItem(getStorageKey(userType), JSON.stringify({ ...state, _version: STATE_VERSION }));
   } catch (e) {
     console.warn('Failed to save onboarding state to localStorage:', e);
   }
@@ -108,10 +111,6 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
   // Initialize with default state first (to avoid hydration mismatch)
   const [state, setState] = useState<OnboardingState>(() => getInitialState(userType));
   const [isHydrated, setIsHydrated] = useState(false);
-  const router = useRouter();
-
-  // Reason: Store existingUserId for use in completeOnboarding to skip password requirement
-  const existingUserIdRef = React.useRef(existingUserId);
 
   // Load from localStorage after hydration (client-side only)
   // Reason: Skip loading saved state for add-book mode (skipAuth) - always start fresh
@@ -119,10 +118,20 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
     if (!skipAuth) {
       const saved = loadStateFromStorage(userType);
       if (saved && !saved.isComplete) {
-        // Restore saved state, but ensure totalSteps matches current userType
+        const totalSteps = userType === 'couple' ? TOTAL_STEPS_COUPLE : TOTAL_STEPS_GIFT;
+        // Reason: If payment already completed and user was past step 3, resume there.
+        // Don't force-jump if user was still on steps 1-3 with a stale paymentIntentId.
+        const restoredStep = saved.currentStep;
+
         setState({
           ...saved,
-          totalSteps: userType === 'couple' ? TOTAL_STEPS_COUPLE : TOTAL_STEPS_GIFT,
+          totalSteps,
+          currentStep: restoredStep,
+          // Reason: Migrate old localStorage state that lacks new fields
+          bookQuantity: saved.bookQuantity ?? 1,
+          shippingCountry: saved.shippingCountry ?? null,
+          paymentIntentId: saved.paymentIntentId ?? null,
+          clientSecret: saved.clientSecret ?? null,
         });
       }
     }
@@ -192,178 +201,39 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
   }, []);
 
   /**
-   * Generate Gumroad payment link and redirect
-   * Account creation will happen after payment confirmation (webhook)
-   * @param email - Email for account creation (stored in metadata)
-   * @param password - Password for account creation (stored in metadata, will be used after payment)
-   * @param directData - Optional data to merge with state.answers
+   * Store Stripe payment intent info after creating a PI
+   */
+  const setPaymentInfo = useCallback((paymentIntentId: string, clientSecret: string) => {
+    setState((prev) => ({
+      ...prev,
+      paymentIntentId,
+      clientSecret,
+    }));
+  }, []);
+
+  /**
+   * Update book quantity and shipping country selection
+   */
+  const updateBookSelection = useCallback((quantity: number, country: ShippingCountry) => {
+    setState((prev) => ({
+      ...prev,
+      bookQuantity: quantity,
+      shippingCountry: country,
+      // Reason: Keep selectedProductTier in sync for backward compat with purchase_intents
+      selectedProductTier: 'the-book',
+    }));
+  }, []);
+
+  /**
+   * Legacy completeOnboarding — payment is now handled inline by CheckoutSummary.
+   * Kept for interface compatibility.
    */
   const completeOnboarding = useCallback(
-    async (email?: string, password?: string, directData?: Record<string, any>) => {
-      try {
-        if (!state.selectedProductTier) {
-          throw new Error("Please select a product tier to continue");
-        }
-
-        let finalEmail = email;
-
-        // Reason: For existing users (add-book mode), skip the purchase_intents flow
-        const isExistingUser = !!existingUserIdRef.current;
-
-        // Get email from state if not provided
-        // Reason: Password not required for soft launch - accounts created manually after payment
-        if (!finalEmail) {
-          // Reason: Both flows now have checkout at step4
-          const emailStep = state.answers.step4;
-          finalEmail = finalEmail || emailStep?.email;
-        }
-
-        if (!finalEmail) {
-          throw new Error("Email is required to complete purchase");
-        }
-
-        // Merge directData with state.answers
-        const mergedAnswers = directData 
-          ? { ...state.answers, ...directData }
-          : state.answers;
-
-        // Extract couple names from answers
-        // For couples: step3 has couple info, step4 has celebration details
-        // For gift givers: step3 has gift giver + couple info
-        let coupleNames: { brideFirstName?: string; brideLastName?: string; partnerFirstName?: string; partnerLastName?: string } | undefined;
-        
-        if (userType === 'couple') {
-          const coupleInfo = mergedAnswers.step3 as {
-            brideFirstName?: string;
-            brideLastName?: string;
-            partnerFirstName?: string;
-            partnerLastName?: string;
-          } | undefined;
-          
-          if (coupleInfo) {
-            coupleNames = {
-              brideFirstName: coupleInfo.brideFirstName,
-              brideLastName: coupleInfo.brideLastName,
-              partnerFirstName: coupleInfo.partnerFirstName,
-              partnerLastName: coupleInfo.partnerLastName,
-            };
-          }
-        } else {
-          const giftInfo = mergedAnswers.step3 as {
-            firstName?: string;
-            partnerFirstName?: string;
-          } | undefined;
-          
-          if (giftInfo) {
-            coupleNames = {
-              brideFirstName: giftInfo.firstName,
-              partnerFirstName: giftInfo.partnerFirstName,
-            };
-          }
-        }
-
-        // Reason: For existing users (add-book mode), create book directly without payment
-        // TODO: Re-enable Gumroad payment after setup is complete
-        if (isExistingUser && existingUserIdRef.current) {
-          // Create the group directly
-          const groupName = coupleNames?.brideFirstName && coupleNames?.partnerFirstName
-            ? `${coupleNames.brideFirstName} & ${coupleNames.partnerFirstName}`
-            : "New Book";
-
-          const step3Data = mergedAnswers.step3 as {
-            relationship?: string;
-            firstName?: string;
-            partnerFirstName?: string;
-          } | undefined;
-
-          // Reason: Extract gift date fields from step1 for add-book group creation
-          const step1Data = mergedAnswers.step1 as {
-            gift_date?: string | null;
-            gift_date_undecided?: boolean;
-            book_close_date?: string | null;
-          } | undefined;
-
-          const { error: groupError } = await createGroup({
-            name: groupName,
-            description: `A wedding recipe book for ${coupleNames?.brideFirstName || ''} & ${coupleNames?.partnerFirstName || ''}`,
-            couple_first_name: coupleNames?.brideFirstName,
-            partner_first_name: coupleNames?.partnerFirstName,
-            relationship_to_couple: step3Data?.relationship as "friend" | "family" | "bridesmaid" | "wedding-planner" | "other" | null | undefined,
-            gift_date: step1Data?.gift_date || null,
-            gift_date_undecided: step1Data?.gift_date_undecided || false,
-            book_close_date: step1Data?.book_close_date || null,
-            created_by: existingUserIdRef.current,
-          });
-
-          if (groupError) {
-            throw new Error(groupError);
-          }
-
-          // Clear localStorage and redirect to the groups page
-          clearStateFromStorage(userType);
-          router.push('/profile/groups');
-          return;
-        }
-
-        // Reason: Soft launch flow - save to purchase_intents table instead of Gumroad
-        // Manual payment via Venmo, then manual account creation
-        const supabase = createSupabaseClient();
-
-        // Extract data for purchase_intents table
-        const step3Data = mergedAnswers.step3 as {
-          weddingDate?: string;
-          dateUndecided?: boolean;
-          giftGiverName?: string;
-          relationship?: string;
-        } | undefined;
-
-        // Reason: Both flows now have checkout at step4
-        const checkoutStepData = mergedAnswers.step4 as { shippingDestination?: string } | undefined;
-
-        const purchaseIntentData = {
-          email: finalEmail,
-          selected_tier: state.selectedProductTier,
-          user_type: userType,
-          couple_first_name: coupleNames?.brideFirstName || null,
-          couple_last_name: coupleNames?.brideLastName || null,
-          partner_first_name: coupleNames?.partnerFirstName || null,
-          partner_last_name: coupleNames?.partnerLastName || null,
-          wedding_date: userType === 'couple' && step3Data?.weddingDate && step3Data.weddingDate !== 'undecided'
-            ? step3Data.weddingDate
-            : null,
-          wedding_date_undecided: userType === 'couple' ? (step3Data?.dateUndecided || false) : false,
-          planning_stage: null, // Deprecated — replaced by date picker
-          guest_count: null, // Deprecated — step removed
-          gift_giver_name: userType === 'gift_giver' ? step3Data?.giftGiverName || null : null,
-          relationship: userType === 'gift_giver' ? step3Data?.relationship || null : null,
-          // Reason: Both flows now use the date picker in step1
-          gift_date: (mergedAnswers.step1 as { gift_date?: string | null } | undefined)?.gift_date || null,
-          gift_date_undecided: (mergedAnswers.step1 as { gift_date_undecided?: boolean } | undefined)?.gift_date_undecided || false,
-          book_close_date: (mergedAnswers.step1 as { book_close_date?: string | null } | undefined)?.book_close_date || null,
-          timeline: null,
-          shipping_destination: checkoutStepData?.shippingDestination || null,
-        };
-
-        const { error: insertError } = await supabase
-          .from('purchase_intents')
-          .insert(purchaseIntentData);
-
-        if (insertError) {
-          console.error('Error saving purchase intent:', insertError);
-          throw new Error('Failed to save your information. Please try again.');
-        }
-
-        // Clear localStorage and mark as complete to show success screen
-        clearStateFromStorage(userType);
-        setState(prev => ({ ...prev, isComplete: true }));
-
-      } catch (err) {
-        console.error("Onboarding completion error:", err);
-        alert(err instanceof Error ? err.message : "Failed to complete purchase");
-        throw err;
-      }
+    async () => {
+      clearStateFromStorage(userType);
+      setState(prev => ({ ...prev, isComplete: true }));
     },
-    [state.answers, state.selectedProductTier, userType, router]
+    [userType]
   );
 
   /**
@@ -380,6 +250,8 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
     previousStep,
     updateStepData,
     updateProductTier,
+    updateBookSelection,
+    setPaymentInfo,
     completeOnboarding,
     resetOnboarding,
   };

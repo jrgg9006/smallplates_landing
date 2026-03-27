@@ -10,13 +10,10 @@ export async function generateAndSaveMidjourneyPrompt(
   comments?: string | null
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const recipeText = `Recipe Title: ${recipeName}
-
-Ingredients:
-${ingredients}
-
-Instructions:
-${instructions}`;
+    // Reason: When instructions is empty, this is a raw pasted recipe — send text as-is without labels
+    const recipeText = instructions
+      ? `Recipe Title: ${recipeName}\n\nIngredients:\n${ingredients}\n\nInstructions:\n${instructions}`
+      : `Recipe Title: ${recipeName}\n\n${ingredients}`;
 
     // === DEBUG: Log qué se está enviando ===
     console.log('🚀 Calling /api/v1/midjourney/generate-prompt with:', {

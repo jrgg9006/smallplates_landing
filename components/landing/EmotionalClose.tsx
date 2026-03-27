@@ -60,13 +60,13 @@ export default function EmotionalClose() {
         >
           <p 
             id="emotional-close-heading"
-            className="font-serif text-2xl sm:text-3xl md:text-4xl text-white/90 leading-relaxed font-light"
+            className="type-accent text-2xl sm:text-3xl md:text-4xl text-white/90 leading-relaxed font-light"
           >
             Ten years from now,
             <span className="block">you&apos;ll open this book on a random Tuesday.</span>
           </p>
 
-          <p className="font-serif text-2xl sm:text-3xl md:text-4xl text-white/80 leading-relaxed font-light">
+          <p className="type-accent text-2xl sm:text-3xl md:text-4xl text-white/80 leading-relaxed font-light">
             You&apos;ll see a name.
             <span className="block">You&apos;ll remember a face.</span>
             <span className="block">You&apos;ll cook something that tastes like being loved.</span>
@@ -86,7 +86,7 @@ export default function EmotionalClose() {
 
         {/* The Reframe */}
         <motion.p
-          className="font-serif text-xl sm:text-2xl md:text-3xl text-white/70 leading-relaxed font-light"
+          className="type-accent text-xl sm:text-2xl md:text-3xl text-white/70 leading-relaxed font-light"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -99,7 +99,7 @@ export default function EmotionalClose() {
 
         {/* The Brand Line */}
         <motion.p
-          className="mt-16 md:mt-20 font-serif text-3xl sm:text-4xl md:text-5xl text-[#D4A854] font-medium italic"
+          className="mt-16 md:mt-20 type-heading text-[#D4A854] italic"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}

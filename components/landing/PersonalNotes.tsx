@@ -7,7 +7,7 @@ import Image from "next/image";
 const notes = [
   {
     id: 1,
-    text: "Dear Sarah and James — this is a recipe that Grandma Mati gave us many years ago. She typed it up from what her cousin told her, and the original is barely legible now. I hope this recipe always reminds you of the importance of staying close — and what better place than around the kitchen. Keep family legacies alive for your children and grandchildren. With all my love.",
+    text: "...I hope this recipe always reminds you of the importance of staying close — and what better place than around the kitchen. Keep family legacies alive for your children and grandchildren. With all my love.",
     recipe: "Grandma Mati's Paella",
     from: "Dad",
     image: "/images/notes_section/grandmas_tatis.jpg",
@@ -28,14 +28,14 @@ const notes = [
   },
   {
     id: 4,
-    text: "This is my grandmother's recipe — super easy, and it was THE dessert at every family gathering. My cousin started selling them and honestly built a little empire because they're that good. I started making them for the people I love most every Christmas. Now it's yours.",
+    text: "...My cousin started selling them and honestly built a little empire because they're that good. I started making them for the people I love most every Christmas. Now it's yours.",
     recipe: "Date & Walnut Pie",
     from: "Cousin Maria",
     image: "/images/notes_section/date_pie_updated1.jpg",
   },
   {
     id: 5,
-    text: "May your life together be full of quiet mornings, long breakfasts, and small rituals that become big memories. And when something doesn't turn out perfect, remember that love — like this recipe — always gets better when you make it together.",
+    text: "...May your life together be full of quiet mornings, long breakfasts, and small rituals that become big memories.",
     recipe: "Imperfect Pancakes",
     from: "Pilar & Mark",
     image: "/images/notes_section/something_not_perfect.jpg",
@@ -118,7 +118,7 @@ export default function PersonalNotes() {
           <div className="order-1 lg:order-2 lg:pl-8 relative z-10">
             {/* Headline */}
             <motion.h2
-              className="font-serif text-2xl md:text-3xl lg:text-4xl text-[#2D2D2D] text-center lg:text-left mb-6"
+              className="type-subheading text-2xl md:text-3xl lg:text-4xl text-center lg:text-left mb-6"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -144,16 +144,16 @@ export default function PersonalNotes() {
                   className="text-center lg:text-left"
                 >
                   {/* The note text */}
-                  <blockquote className="font-serif text-lg md:text-xl lg:text-[22px] text-[#2D2D2D] italic leading-relaxed mb-8">
+                  <blockquote className="type-accent text-lg md:text-xl lg:text-[22px] leading-relaxed mb-8">
                     &ldquo;{currentNote.text}&rdquo;
                   </blockquote>
 
                   {/* Recipe name and contributor */}
                   <div className="space-y-1">
-                    <p className="font-sans text-[15px] md:text-base font-medium text-[#8A8780]">
+                    <p className="type-caption text-[15px] md:text-base font-medium">
                       — {currentNote.recipe}
                     </p>
-                    <p className="font-sans text-sm text-[#8A8780]/70">
+                    <p className="type-caption text-[#8A8780]/70">
                       from {currentNote.from}
                     </p>
                   </div>

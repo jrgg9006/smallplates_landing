@@ -25,6 +25,16 @@ Small Plates makes this possible. Every recipe is a person. Every meal is a quie
 
 Still at the table.
 
+### The Organizer Layer
+
+The Brand Idea has two faces:
+
+**For the couple:** "The people who matter to you shouldn't disappear from your life when the wedding ends."
+
+**For the organizer:** "You are the one who makes sure they don't."
+
+The couple receives the presence. The organizer creates the conditions for it. Without her — without the invitation, the coordination, the decision to do something different — the people disappear like they always do. She is the catalyst. The Brand Idea acknowledges the couple's experience. The Organizer Layer acknowledges who made it possible.
+
 ---
 
 ## Three Levels of the Same Idea
@@ -95,6 +105,16 @@ Note: Always tether this back to the full phrase when onboarding new team member
 > A wedding is a single night. But the people who showed up — who traveled, who dressed up, who stood there with you — they don't have to disappear when it's over. Small Plates turns their presence into something you live with. Not a photo you look at. Not a gift you store. A book you cook from. Every recipe is a person. Every meal is a reunion. They're still there. Still at the table.
 
 Use for: About pages, manifestos, brand storytelling, investor narratives, emotional content.
+
+---
+
+## 4. Organizer (Strategic)
+
+> **"You made sure they stayed."**
+
+Use for: Dashboard copy, organizer CTAs, post-purchase communications to the organizer, confirmation emails, progress updates.
+
+This articulation speaks directly to the person who set the book in motion. It's not emotional in the same way as the consumer expression — it's operational respect. It says: the presence happened because you acted. You didn't just give a gift. You made sure the people stayed.
 
 ---
 
@@ -171,6 +191,15 @@ If no, reconsider.
 | Can we be emotional? | **Yes, but earned** | Emotion should emerge from the reality of presence, not from sentimental language. |
 | Do we name uncomfortable truths? | **Yes** | Saying the real thing is what earns trust. |
 
+## Organizer Decisions
+
+| Question | Answer | Reasoning |
+|----------|--------|-----------|
+| Should the organizer feel like a project manager? | **No** | She should feel like an executive who delegates to a trusted system. |
+| Should dashboard copy be warm and fuzzy? | **No** | It should be operational and respectful — status reports, not encouragement. |
+| Should we reassure her constantly? | **No** | We should respect her by being competent. Competence is the reassurance. |
+| Should the organizer feel emotional credit? | **Yes** | When the bride cries, the organizer should feel "I made that happen." |
+
 ## Design Decisions
 
 | Question | Answer | Reasoning |
@@ -205,6 +234,15 @@ If no, reconsider.
 | Special, unique, magical | Generic wedding language |
 | Forever, eternal, timeless | Too abstract; presence is concrete |
 | Perfect, curated, treasured | Wedding-industry softness; presence is real, not polished |
+
+## Words Aligned with the Organizer Layer
+
+| Use | Feeling |
+|-----|---------|
+| Relief, handled, done | Burden lifted |
+| Progress, dashboard, status | Operational confidence |
+| Automated, reminders, system | Delegation, not labor |
+| Confident, in control, managed | Agency without effort |
 
 ---
 

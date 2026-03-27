@@ -55,29 +55,29 @@ export default function TheSolution() {
             transition={{ duration: 0.7, ease: "easeOut" }}
           >
             {/* Eyebrow */}
-            <p className="font-sans text-sm font-medium tracking-widest text-[#D4A854] uppercase mb-4">
+            <p className="type-eyebrow mb-4">
               This is Small Plates
             </p>
 
             {/* Headline */}
             <h2
               id="solution-heading"
-              className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#2D2D2D] leading-tight"
+              className="type-heading"
             >
               A cookbook made by everyone who showed up.
             </h2>
 
             {/* Body copy */}
             <div className="mt-8 space-y-6">
-              <p className="font-sans font-light text-lg md:text-xl text-[#2D2D2D]/80 leading-relaxed">
+              <p className="type-body">
                 Every guest owns a page.
-                <span className="block">Every page holds a recipe, a note, a name..</span>
+                <span className="block">Every page holds a recipe, a note, a name.</span>
                 <span className="block">Every name stays in their kitchen — forever.</span>
               </p>
 
-              <p className="font-sans font-light text-lg md:text-xl text-[#2D2D2D]/80 leading-relaxed">
-                Not perfect. It&apos;s authentic.
-                <span className="block">That&apos;s what makes it a real book.</span>
+              <p className="type-body">
+                Hardcover. Professionally designed.
+                <span className="block">Made to get stained and opened on a Tuesday night.</span>
               </p>
             </div>
 

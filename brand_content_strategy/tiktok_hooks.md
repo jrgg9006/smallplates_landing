@@ -467,7 +467,7 @@ Los hooks de mayor retención siguen estas estructuras:
 > Every guest contributes a recipe before the big day.
 > Their names. Their handwriting. Their favorite dish.
 > It's a hardcover book — designed to get used.
-> She'll cook from it on random Tuesdays. Spill wine on it. Dog-ear the pages.
+> She'll cook from it on random Tuesdays. Spill wine on it.
 > That's the point.
 > Small Plates. The wedding gift that actually lives in the kitchen."
 
@@ -505,7 +505,6 @@ Los hooks de mayor retención siguen estas estructuras:
 **Filming Notes for Ana:**
 - El libro debe verse como un libro real de cocina, no como un producto de e-commerce
 - Si el libro ya tiene páginas con recetas, que se vean cuando lo abre
-- "Dog-ear the pages" es una frase que humaniza el producto — decirla con convicción
 
 ---
 

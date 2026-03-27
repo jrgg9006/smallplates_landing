@@ -86,6 +86,7 @@ The one who dares to suggest something different.
 The one who protects the details.  
 The one who takes care of things calmly.  
 The one who solves without making it heavy.
+The one who sees the MOH drowning in logistics and says: "Give me that. I’ll handle it."
 
 She isn’t the loudest in the room,  
 but people listen when she speaks.
@@ -156,6 +157,8 @@ We never make anyone feel:
 
 Our presence should always lower stress — never raise it.
 
+Every interaction with the organizer should reduce her cognitive load — not add to it.
+
 ---
 
 ## Emotional Range
@@ -220,10 +223,22 @@ Small Plates is:
 > a way to honor the relationship without turning it into something corny —  
 > emotional, but not embarrassing.
 
-**For the bridesmaids**  
-Small Plates is:  
-> the cool group project with a real heart —  
-> the thing they’re proud to organize and gift.
+**For the organizer (MOH, bridesmaid, sister)**
+Small Plates is:
+> the COO who reports to her COO.
+> She delegates. We execute. She gets the credit.
+>
+> She doesn’t need to chase recipes, design pages, or send reminders.
+> She needs to set it up, invite the guests, and check the dashboard.
+> We handle everything else — the follow-ups, the design, the printing.
+>
+> When the bride opens that book, the organizer is the hero.
+> Not because she did all the work.
+> Because she chose the right thing.
+>
+> That’s what Small Plates is for the organizer:
+> the gift that makes her look like a genius
+> without making her feel like an intern.
 
 ---
 

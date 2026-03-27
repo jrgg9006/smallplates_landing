@@ -39,11 +39,11 @@ export default function AboutUs() {
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="text-center"
             >
-              <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight text-[#2D2D2D] mb-8">
+              <h1 className="type-display mb-8">
                 We believe
               </h1>
               <div className="w-24 h-px bg-[#D4A854] mx-auto mb-8"></div>
-              <h2 className="font-serif text-2xl md:text-3xl text-[#2D2D2D]/70 font-light italic">
+              <h2 className="type-accent text-2xl md:text-3xl text-[#2D2D2D]/70 font-light">
                 wedding gifts should matter.
               </h2>
             </motion.div>
@@ -59,19 +59,19 @@ export default function AboutUs() {
               transition={{ duration: 1, delay: 0.3 }}
               className="space-y-8"
             >
-              <p className="text-[#2D2D2D] text-lg md:text-xl leading-loose font-light first-letter:text-6xl first-letter:font-serif first-letter:float-left first-letter:mr-3 first-letter:mt-1">
+              <p className="type-body text-[#2D2D2D] first-letter:text-6xl first-letter:font-serif first-letter:float-left first-letter:mr-3 first-letter:mt-1">
                 Wedding registries are broken. Another blender gathering dust. Another set of towels that gets returned. Another gift that says nothing about the giver or the life being celebrated.
               </p>
 
-              <p className="text-[#2D2D2D] text-lg md:text-xl leading-loose font-light">
+              <p className="type-body text-[#2D2D2D]">
                 We believe food is how families really connect. Not in fancy dining rooms, but in kitchens on Tuesday nights. A recipe isn&apos;t just instructions&mdash;it&apos;s presence. It&apos;s your grandmother&apos;s hands guiding yours. It&apos;s love you can taste.
               </p>
 
-              <p className="text-[#2D2D2D] text-lg md:text-xl leading-loose font-light">
-                That&apos;s why we created wedding cookbooks. Not keepsakes that sit on shelves, but kitchen books that get stained and dog-eared. Every page holds a name, a story, a piece of someone who was there. It&apos;s the kind of gift that matters&mdash;not because it&apos;s expensive, but because it&apos;s real and authentic.
+              <p className="type-body text-[#2D2D2D]">
+                That&apos;s why we created wedding cookbooks. Not keepsakes that sit on shelves, but kitchen books that get stained. Every page holds a name, a story, a piece of someone who was there. It&apos;s the kind of gift that matters&mdash;not because it&apos;s expensive, but because it&apos;s real and authentic.
               </p>
 
-              <p className="text-[#2D2D2D] text-lg md:text-xl leading-loose font-light">
+              <p className="type-body text-[#2D2D2D]">
                 Because the best wedding gift isn&apos;t something from a store. It&apos;s something from the heart, bound between covers, meant to be opened every time they&apos;re hungry and wondering what to make for dinner.
               </p>
             </motion.div>
@@ -84,7 +84,7 @@ export default function AboutUs() {
               className="mt-16 text-center"
             >
               <div className="w-16 h-px bg-[#D4A854] mx-auto mb-8"></div>
-              <p className="font-serif text-2xl md:text-3xl text-[#D4A854] italic">
+              <p className="type-accent text-2xl md:text-3xl text-[#D4A854]">
                 Still at the table.
               </p>
             </motion.div>

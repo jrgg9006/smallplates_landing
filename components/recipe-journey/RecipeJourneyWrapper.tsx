@@ -155,7 +155,10 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         const summaryIndex = journeySteps.findIndex(s => s.key === 'summary');
         setCurrentStepIndex(summaryIndex);
       } else if (currentStep?.key === 'recipeTitle') {
-        // After recipe title, ALWAYS go to personal note first
+        if (recipeData.rawRecipeText) {
+          // Reason: Raw text flow skips note step — submit is handled by button onClick
+          return;
+        }
         const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
         setCurrentStepIndex(personalNoteIndex);
       } else if (currentStep?.key === 'imageUpload') {
@@ -648,6 +651,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
   // Reason: Show legal notice only on steps where actual submission happens
   const isSubmitStep = current === 'imageUpload' ||
     (current === 'personalNote' && !!recipeData.rawRecipeText) ||
+    (current === 'recipeTitle' && !!recipeData.rawRecipeText) ||
     current === 'summary';
 
   const bottomNav = (
@@ -687,30 +691,35 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         <button
           type="button"
           onClick={
-            current === 'imageUpload' 
-              ? handleSubmitWithImages  // Submit from image upload step
-              : current === 'personalNote' 
-                ? (recipeData.rawRecipeText 
+            current === 'imageUpload'
+              ? handleSubmitWithImages
+              : current === 'personalNote'
+                ? (recipeData.rawRecipeText
                     ? handleSubmitRawTextFromButton
-                    : handleNext)  // Raw text: submit, Regular: continue to form/image
-                : handleNext
+                    : handleNext)
+                : (current === 'recipeTitle' && recipeData.rawRecipeText)
+                  ? handleSubmitRawTextFromButton
+                  : handleNext
           }
           disabled={
-            (current === 'recipeForm' && !canContinueFromForm()) || 
+            (current === 'recipeForm' && !canContinueFromForm()) ||
             (current === 'recipeTitle' && !recipeData.recipeName.trim()) ||
             (current === 'imageUpload' && (selectedFiles.length === 0 || uploadingImages)) ||
-            (current === 'personalNote' && recipeData.rawRecipeText && submitting) || 
+            (current === 'personalNote' && recipeData.rawRecipeText && submitting) ||
+            (current === 'recipeTitle' && recipeData.rawRecipeText && submitting) ||
             submitting
           }
           className="px-8 py-3 rounded-full bg-[#D4A854] text-white hover:bg-[#c49b4a] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {current === 'imageUpload' 
-            ? (uploadingImages ? `Submitting... ${uploadProgress}%` : 'Submit Small Plate')  // Now submit from image upload step
-            : current === 'personalNote'
-              ? (recipeData.rawRecipeText 
-                  ? (submitting ? 'Submitting...' : 'Submit Small Plate')  // Raw text flow submits directly
-                  : 'Continue')  // Regular flow continues to recipe form or image upload
-            : (journeySteps[currentStepIndex]?.ctaLabel ?? 'Continue')
+          {current === 'imageUpload'
+            ? (uploadingImages ? `Submitting... ${uploadProgress}%` : 'Submit Small Plate')
+            : (current === 'recipeTitle' && recipeData.rawRecipeText)
+              ? (submitting ? 'Submitting...' : 'Submit Small Plate')
+              : current === 'personalNote'
+                ? (recipeData.rawRecipeText
+                    ? (submitting ? 'Submitting...' : 'Submit Small Plate')
+                    : 'Continue')
+                : (journeySteps[currentStepIndex]?.ctaLabel ?? 'Continue')
           }
         </button>
       ) : (

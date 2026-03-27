@@ -8,13 +8,23 @@ Small Plates is not just:
 
 We live where two things meet:
 
-1. A one-time shared ritual before the wedding that connects guests and the bride 
-2. A physical book that lives in the couple’s kitchen
+1. A one-time shared ritual before the wedding that connects guests and the couple
+2. A physical book that lives in the couple's kitchen
 
-The ritual:
-friends and family sharing their recipes
-as a way of saying:
-"I want to be present in your new home."
+The ritual doesn't happen on its own.
+
+One person decides this wedding deserves more
+than a registry and a generic gift.
+She invites. She sets it in motion.
+She watches the dashboard as recipes arrive.
+We handle the rest.
+
+Without her — without the organizer —
+recipes don't arrive.
+The book doesn't start.
+The presence never happens.
+
+She is the catalyst.
 
 The book:
 a wedding keepsake they can actually cook from.
@@ -23,9 +33,8 @@ We call this:
 
 A wedding cookbook.
 
-It’s not something you scroll.
-It’s not something you use once and store away.
+It's not something you scroll.
+It's not something you use once and store away.
 
-It’s an experience that ends in a book.
-And a book that keeps the experience alive.
-
+It's an experience set in motion by someone who cared enough to act —
+and a book that keeps that action alive.

@@ -51,6 +51,19 @@ She is not: basic, cheesy, overly traditional, Pinterest-predictable.
 
 ---
 
+## The Woman We're Designing With
+
+> **Would the MOH — organized, exhausted, holding everything together — feel respected by this? Would she feel like a collaborator, not a customer?**
+
+She is: competent, stretched thin, quietly proud, detail-oriented.
+She is not: someone who needs hand-holding, coddling, or cheerful reassurance.
+
+Her experience should feel organized and professional — like a well-run project, not a craft activity. The dashboard should feel like a status report from a trusted partner. The communications should feel like working with someone who respects her time.
+
+Design for her means: clean interfaces, clear progress indicators, operational language, zero decorative elements in functional contexts.
+
+---
+
 # The Five Principles
 
 ## 1. Presence, Not Memory
@@ -270,6 +283,25 @@ Rules:
 
 ---
 
+## Type 4 — The Orchestrator's View
+
+**Purpose:** Show the organizer's hidden role. The person behind the gift.
+**Format:** Candid, documentary. Focus on the private moment before the public one.
+
+Images we want:
+- A phone screen showing the dashboard — recipe count, progress bar. The organizer checking in from a coffee shop.
+- The organizer holding the finished book before the bride sees it. The private moment of satisfaction.
+- A notification on a phone: "3 new recipes submitted." Life continuing around it.
+- The organizer at the wedding, watching the bride open the book. Not the bride's reaction — the organizer's.
+
+Rules:
+- Show the organizer as competent, not stressed.
+- The dashboard should look clean and functional, not decorative.
+- These images work as social proof for other organizers: "that could be me."
+- Never show the organizer chasing people or looking overwhelmed.
+
+---
+
 # Text as Image
 
 Small Plates has a weapon that purely visual brands don't: **copy that lands.**
@@ -315,6 +347,12 @@ Hands matter. What hands hold matters more. A cast iron skillet says "we will bu
 **Law Three: Tension Creates Interest**
 
 Tension is the distance between expectation and reality. A bride in a suit instead of a gown — tension. Wedding attire in a garden, not a church — tension. Elegance holding a cast iron pan — tension. Without tension, photographs are forgettable.
+
+**Law Four: The Invisible Hand**
+
+Occasionally, reveal the organizer's hidden orchestration. The person who set this in motion, who invited the guests, who checked the dashboard — she's usually invisible in the final product. But sometimes, showing her moment of quiet satisfaction is more powerful than showing the bride's tears.
+
+The invisible hand is the organizer who made it all happen without anyone knowing. When we reveal her, we validate every organizer watching.
 
 ---
 

@@ -21,7 +21,8 @@ export async function GET(request: Request) {
 
     if (error) {
       console.error("Error exchanging code for session:", error.message);
-      return NextResponse.redirect(`${origin}?error=auth_failed`);
+      // Reason: Send to recovery page so expired magic link users can request a fresh one
+      return NextResponse.redirect(`${origin}/recover-setup`);
     }
   }
 

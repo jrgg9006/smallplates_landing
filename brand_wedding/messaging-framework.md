@@ -99,26 +99,63 @@ Each audience has different needs, fears, and questions. The core message adapts
 
 ---
 
-## 2.3 The Organizer (Bridesmaid / Sister / Best Friend)
+## 2.3 The Organizer (MOH / Bridesmaid / Sister / Best Friend)
+
+The organizer operates in two modes. The message must serve both.
+
+---
+
+### 2.3a The Organizer — As Gift Buyer
 
 **Who she is:**
-- The one actually buying and managing this
-- Wants to impress the bride
-- Wants this to be easy (she has enough wedding stress)
-- Wants to be the gift-giving hero
+- The one with the credit card and the group chat
+- Already overwhelmed by wedding logistics
+- Needs to know this won't become her problem
+- Wants a gift that reflects well on the group without requiring group coordination
 
 **Her internal question:**
-> "Is this going to be complicated? Will the bride love it? Am I going to look good?"
+> "Is this going to add to my workload? Or can I hand it off?"
+
+**Her three fears:**
+- **Ineptitude:** "What if the final product looks bad and it's on me?"
+- **Subjugation:** "What if I end up doing all the work while everyone else just signs their name?"
+- **Depletion:** "I'm already running on empty. I can't take on one more thing."
 
 **The message for her:**
 
-> **You're about to give the best wedding gift anyone's ever received.**
+> **You're managing enough for this wedding.**
 >
-> **Here's how it works: You invite the guests. They send recipes. We turn it into a book. Bride cries. You win.**
+> **This gift manages itself.**
 >
-> **No design skills needed. No chasing people (we send reminders). No stress.**
+> **You set it up in 5 minutes. You invite the guests with a link. We send the reminders. We design the book. We print it and ship it.**
 >
-> **Just the glory of being the friend who thought of this.**
+> **You check a dashboard — not a to-do list.**
+>
+> **Bride cries. You're the one who made it happen. Without losing your mind.**
+
+---
+
+### 2.3b The Organizer — As Experience Orchestrator
+
+**Who she is:**
+- The friend who wants the gift to feel like it came from everyone
+- Wants to create a collective moment, not just buy a product
+- Needs the process to feel participatory without being chaotic
+
+**Her internal question:**
+> "Can I make this feel like it came from all of us — without doing all the work?"
+
+**The message for her:**
+
+> **This isn't just a gift from you. It's a gift from everyone.**
+>
+> **Every guest contributes a recipe and a note. Every recipe becomes a page. And together, they become a book that carries all of them into the couple's kitchen.**
+>
+> **You're not assembling a project. You're orchestrating a moment.**
+>
+> **The difference? You invite. We handle everything else.**
+>
+> **One book. Dozens of people. Zero group-chat drama.**
 
 ---
 
@@ -438,10 +475,13 @@ Common doubts and objections from each audience, and how to respond.
 
 | Objection | Response |
 |-----------|----------|
-| **"This seems complicated"** | "You invite. They send. We make the book. That's it. No design skills, no chasing people—we send the reminders." |
+| **"This seems complicated"** | "You invite. They send. We make the book. That's it. No design skills, no chasing people — we send the reminders." |
 | **"What if people don't participate?"** | "We send up to 3 reminders per guest. Most books end up with 30-50+ recipes. People want to be part of this." |
 | **"How long does it take?"** | "Guests need about 5 minutes to submit. The whole process from start to printed book takes 4-6 weeks." |
-| **"Is it expensive?"** | "It's one gift from the group, not per person. Divided among bridesmaids or family, it's less than most registry items—and infinitely more meaningful." |
+| **"Is it expensive?"** | "It's one gift from the group, not per person. Divided among bridesmaids or family, it's less than most registry items — and it actually stays in the kitchen." |
+| **"What if this becomes another thing I have to chase?"** | "You don't chase anyone. Reminders are automated. You check the dashboard when you want — or don't. We flag anything that actually needs your attention." |
+| **"What if the bride thinks it's cheesy?"** | "The book is professionally designed. Hardcover. Minimal. It looks like something from a design studio, not a craft project. The bride's taste filter will approve." |
+| **"I don't want to be the nag"** | "You won't be. We send the reminders — not you. Your name never appears on a follow-up. As far as the guests know, it's all coming from us." |
 
 ---
 
@@ -494,9 +534,9 @@ Quick reference tables for anyone on the team who needs to write something.
 
 | Audience | One-Line Message | Tone | Key Proof Point |
 |----------|------------------|------|-----------------|
-| **Bride (receiver)** | "A cookbook that carries your people into the life you're about to build." | Cool, aspirational | It's unique, it's permanent |
-| **Bride (creator)** | "Turn your guests into contributors. Make your wedding something they're part of." | Empowering, exciting | It's collaborative, it's memorable |
-| **Organizer** | "You invite. They send. We make the book. Bride cries. You win." | Clear, energizing | It's easy, we handle reminders |
+| **Organizer** | "Meaningful gift. Zero management overhead. Bride cries. You're the hero." | Operational respect, COO-to-COO | Dashboard, automated reminders, no chasing |
+| **Bride (receiver)** | "A cookbook that carries your people into the life you're about to build." | Cool, aspirational | It's personal, it's permanent |
+| **Bride (creator)** | "Turn your guests into contributors. Make your wedding something they're part of." | Empowering, exciting | It's collaborative, it lasts |
 | **Guests** | "5 minutes. One recipe. You'll be in their kitchen forever." | Light, no pressure | It's easy, doesn't have to be fancy |
 | **Mom** | "An heirloom for her kitchen. Filled with everyone who loves her." | Warm, substantial | It's permanent, professionally printed |
 | **Groom** | "A cookbook. Real recipes. Real food. You'll actually use it." | Direct, practical | It gets used, it's practical |

@@ -58,7 +58,7 @@ export default function Banner() {
                   href="/onboarding-gift"
                   className="inline-flex items-center justify-center rounded-full bg-black text-white px-5 py-2 text-sm font-semibold hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black"
                 >
-                  Give this Gift
+                  Start the Book
                 </Link>
               </>
             )}
@@ -109,7 +109,7 @@ export default function Banner() {
                   className="block w-full text-center py-3 px-4 rounded-full bg-black text-white font-semibold hover:bg-gray-800 transition-colors"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Give this Gift
+                  Start the Book
                 </Link>
               </>
             )}

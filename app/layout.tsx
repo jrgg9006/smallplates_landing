@@ -1,6 +1,25 @@
 import type { Metadata } from 'next'
+import { DM_Sans, Inter } from 'next/font/google'
 import Script from 'next/script'
 import './globals.css'
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500'],
+  variable: '--font-dm-sans',
+  display: 'swap',
+  fallback: ['-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+  adjustFontFallback: false,
+})
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
+  variable: '--font-inter',
+  display: 'swap',
+  fallback: ['-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+  adjustFontFallback: false,
+})
 import { AuthProvider } from '@/lib/contexts/AuthContext'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
@@ -37,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${dmSans.variable} ${inter.variable}`}>
       <head>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-96BCVQ91GC"

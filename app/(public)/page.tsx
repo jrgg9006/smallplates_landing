@@ -7,6 +7,7 @@ import Hero from '@/components/landing/Hero'
 import TheProblem from '@/components/landing/TheProblem'
 import TheSolution from '@/components/landing/TheSolution'
 import ForGiftGivers from '@/components/landing/ForGiftGivers'
+import YourTools from '@/components/landing/YourTools'
 import EmotionalClose from '@/components/landing/EmotionalClose'
 import FeatureGrid from '@/components/landing/FeatureGrid'
 import BooksPrinted from '@/components/landing/BooksPrinted'
@@ -39,12 +40,13 @@ export default function Home() {
         <TheProblem />
         <TheSolution />
         <HowItWorks />
-        <GuestListStrip />
+        <YourTools />
+        {/* <GuestListStrip /> */}
         <RegistryInterlude />
         <BooksPrinted />
         <PersonalNotes />
         <TheBook />
-        <ForGiftGivers />
+        {/* <ForGiftGivers /> */}
         <EmotionalClose />
         <FAQ />
         {/* Hidden sections - not part of wedding flow */}

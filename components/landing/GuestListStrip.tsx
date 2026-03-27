@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 export default function GuestListStrip() {
   return (
     <section
-      className="w-full bg-[#FAF7F2] py-16 md:py-20 mb-16 md:mb-24 px-6 md:px-8 text-center"
+      className="w-full bg-[#FAF7F2] py-16 md:py-20 px-6 md:px-8 text-center"
       style={{
         borderTop: "1px solid rgba(45,45,45,0.07)",
         borderBottom: "1px solid rgba(45,45,45,0.07)",
@@ -49,13 +49,13 @@ export default function GuestListStrip() {
         </div>
 
         {/* Headline */}
-        <p className="font-serif text-xl md:text-2xl font-normal text-[#2D2D2D]">
-          Already on The Knot or Zola?
+        <p className="type-subheading text-xl md:text-3xl font-normal">
+          Bring the guest list from The Knot or Zola
         </p>
 
         {/* Subtext */}
-        <p className="font-sans font-light text-base text-[#2D2D2D]/50">
-          Import your guest list. Send emails requesting recipes in one click.
+        <p className="type-body-small text-[#2D2D2D]/50 max-w-md">
+          The guest list is already built. Get it from the couple, import it, and invite everyone, even the people you&apos;ve never met.
         </p>
       </motion.div>
     </section>

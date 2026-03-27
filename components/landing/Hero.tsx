@@ -43,7 +43,7 @@ export default function Hero() {
         <div className="max-w-3xl">
           <motion.h1 
             id="hero-title" 
-            className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight text-white leading-[1.1]"
+            className="type-display text-white leading-[1.1]"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
@@ -51,14 +51,14 @@ export default function Hero() {
             Recipes from the people who love you.
           </motion.h1>
           <motion.p
-            className="font-sans mt-6 text-lg sm:text-xl md:text-2xl font-light text-white/90 max-w-2xl leading-relaxed"
+            className="type-body mt-6 sm:text-xl md:text-2xl text-white/90 max-w-2xl"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
           >
-            A wedding cookbook made by everyone who matters.
+            A wedding cookbook made by everyone who showed up.
             <span className="block mt-1 text-white/80">
-              Not a keepsake. An authentic cookbook.
+              You set it up. We handle the rest.
             </span>
           </motion.p>
           <motion.div
@@ -74,7 +74,7 @@ export default function Hero() {
               className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-8 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#D4A854]"
               data-cta="hero-primary"
             >
-              Give this Gift
+              Start the Book
             </button>
 
             {/* Secondary CTA */}

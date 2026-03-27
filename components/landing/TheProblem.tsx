@@ -37,7 +37,7 @@ export default function TheProblem() {
         {/* Main statement */}
         <motion.h2
           id="problem-heading"
-          className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#2D2D2D] leading-tight"
+          className="type-heading"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
@@ -54,20 +54,20 @@ export default function TheProblem() {
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
         >
-          <p className="font-sans font-light text-lg md:text-xl text-[#2D2D2D]/80 leading-relaxed">
+          <p className="type-body">
             Another blender. Another towel set. Another thing
-            <span className="block">that ends up in a closet—or returned.</span>
+            <span className="block">that ends up in a closet or returned.</span>
           </p>
           
-          <p className="font-sans text-lg font-light md:text-xl text-[#2D2D2D]/70 leading-relaxed">
-            Not because people don&apos;t care.
-            <span className="block">Because an object can&apos;t carry a person inside it.</span>
+          <p className="type-body">
+            A gift that says &ldquo;I was there&rdquo; isn&apos;t the same
+            <span className="block">as a gift that says &ldquo;I know you.&rdquo;</span>
           </p>
         </motion.div>
 
         {/* Visual break */}
         <motion.div
-          className="my-12 md:my-16 flex justify-center"
+          className="my-8 md:my-10 flex justify-center"
           initial={{ opacity: 0, scaleX: 0 }}
           whileInView={{ opacity: 1, scaleX: 1 }}
           viewport={{ once: true }}
@@ -78,13 +78,13 @@ export default function TheProblem() {
 
         {/* The pivot — the question that opens the door */}
         <motion.p
-          className="font-serif text-2xl sm:text-3xl md:text-4xl text-[#2D2D2D] leading-snug italic"
+          className="type-accent text-2xl sm:text-3xl md:text-4xl leading-snug"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, delay: 0.5, ease: "easeOut" }}
         >
-          <span className="block mt-2">What if it was the people?</span>
+          <span className="block mt-2">You know her. The gift should too.</span>
         </motion.p>
 
       </div>

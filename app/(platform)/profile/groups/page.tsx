@@ -28,7 +28,7 @@ import type { Guest } from "@/lib/types/database";
 import { ImportGuestsModal } from "@/components/profile/guests/ImportGuestsModal";
 import { SendInvitationsPage } from "@/components/profile/guests/SendInvitationsPage";
 import { CloseBookModal } from "@/components/profile/groups/CloseBookModal";
-import { ReviewRecipesModal } from "@/components/profile/groups/ReviewRecipesModal";
+import { ReviewRecipesPage } from "@/components/profile/groups/review/ReviewRecipesPage";
 import { closeBook } from "@/lib/supabase/groups";
 
 // Reason: Format book_close_date as "Month Dth" with ordinal suffix (no year)
@@ -61,12 +61,11 @@ export default function GroupsPage() {
   const [showGuestSheet, setShowGuestSheet] = useState(false);
   const [showGuestDetailsModal, setShowGuestDetailsModal] = useState(false);
   const [importSource, setImportSource] = useState<"zola" | "the_knot" | null>(null);
-  const [activeView, setActiveView] = useState<'book' | 'send-invitations'>('book');
+  const [activeView, setActiveView] = useState<'book' | 'send-invitations' | 'review-recipes'>('book');
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [collectionToken, setCollectionToken] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [showCloseBookModal, setShowCloseBookModal] = useState(false);
-  const [showReviewModal, setShowReviewModal] = useState(false);
   const [isClosingBook, setIsClosingBook] = useState(false);
   const [bookReviewed, setBookReviewed] = useState(false);
   
@@ -88,6 +87,8 @@ export default function GroupsPage() {
   const repositionContainerRef = useRef<HTMLDivElement>(null);
   const dragStartYRef = useRef<number | null>(null);
   const dragStartPositionRef = useRef(50);
+  // Reason: Ref survives React strict mode double-renders unlike sessionStorage (which gets cleared on first read)
+  const skipIncompleteCheckRef = useRef(false);
   
   // Onboarding context
   const { 
@@ -162,11 +163,11 @@ export default function GroupsPage() {
 
   const handleReviewRecipes = () => {
     setShowCloseBookModal(false);
-    setShowReviewModal(true);
+    setActiveView('review-recipes');
   };
 
   const handleMarkReviewed = () => {
-    setShowReviewModal(false);
+    setActiveView('book');
     setBookReviewed(true);
     setShowCloseBookModal(true);
   };
@@ -501,6 +502,41 @@ export default function GroupsPage() {
     }
   }, [user, loading, router]);
 
+  // Reason: Check if user has a paid order without a group (abandoned after payment).
+  // Skip this check if user just completed onboarding (sessionStorage flag set by PostPaymentSetup).
+  useEffect(() => {
+    if (!user?.id) return;
+
+    // Reason: Read sessionStorage once, persist decision in ref so strict mode re-runs still skip
+    if (sessionStorage.getItem('onboarding_just_completed') === 'true') {
+      sessionStorage.removeItem('onboarding_just_completed');
+      skipIncompleteCheckRef.current = true;
+    }
+    if (skipIncompleteCheckRef.current) return;
+
+    const checkIncompleteOrders = async () => {
+      const { createSupabaseClient } = await import("@/lib/supabase/client");
+      const supabase = createSupabaseClient();
+
+      const { data: orders } = await supabase
+        .from('orders')
+        .select('id, stripe_payment_intent, user_type, couple_name')
+        .eq('user_id', user.id)
+        .eq('status', 'paid')
+        .is('couple_name', null)
+        .limit(1);
+
+      const incompleteOrder = orders?.[0];
+
+      if (incompleteOrder?.stripe_payment_intent) {
+        const type = incompleteOrder.user_type || 'gift_giver';
+        router.push(`/complete-setup?pi=${incompleteOrder.stripe_payment_intent}&type=${type}`);
+      }
+    };
+
+    checkIncompleteOrders();
+  }, [user, router]);
+
   // Handle GroupsSection loading state changes
   const handleGroupsLoadingChange = useCallback((isLoading: boolean) => {
     setGroupsLoading(isLoading);
@@ -558,7 +594,7 @@ export default function GroupsPage() {
         />
       )}
 
-      {/* Header — hidden during send-invitations view */}
+      {/* Header — hidden during full-screen views */}
       {activeView === 'book' && (
         <ProfileHeader
           onGroupSelect={handleGroupSelectFromNav}
@@ -570,16 +606,21 @@ export default function GroupsPage() {
       {activeView === 'send-invitations' && selectedGroup && (
         <SendInvitationsPage
           groupId={selectedGroup.id}
-          coupleNames={
-            [selectedGroup.couple_first_name, selectedGroup.partner_first_name]
-              .filter(Boolean)
-              .join(" & ") || selectedGroup.name
-          }
+          coupleNames={selectedGroup.name}
           coupleImageUrl={selectedGroup.couple_image_url}
           collectionUrl={collectionToken ? createShareURL(window.location.origin, collectionToken, { groupId: selectedGroup.id }) : null}
           senderName={senderName}
           onBack={() => setActiveView('book')}
           onOpenGuestSheet={() => setShowGuestSheet(true)}
+        />
+      )}
+
+      {/* Review Recipes — full-screen view */}
+      {activeView === 'review-recipes' && selectedGroup && (
+        <ReviewRecipesPage
+          groupId={selectedGroup.id}
+          onBack={() => setActiveView('book')}
+          onMarkReviewed={handleMarkReviewed}
         />
       )}
 
@@ -888,11 +929,7 @@ export default function GroupsPage() {
           collectionUrl={createShareURL(window.location.origin, collectionToken, { groupId: selectedGroup.id })}
           userName={user?.email?.split('@')[0] || null}
           groupId={selectedGroup.id}
-          coupleNames={
-            selectedGroup.couple_first_name && selectedGroup.partner_first_name
-              ? `${selectedGroup.couple_first_name} & ${selectedGroup.partner_first_name}`
-              : selectedGroup.couple_first_name || selectedGroup.partner_first_name || null
-          }
+          coupleNames={selectedGroup.name || null}
           currentCoupleImage={selectedGroup.couple_image_url}
           currentCoupleImagePositionY={selectedGroup.couple_image_position_y ?? 50}
           currentCoupleImagePositionX={selectedGroup.couple_image_position_x ?? 50}
@@ -944,15 +981,6 @@ export default function GroupsPage() {
         uniqueContributors={uniqueContributors}
       />
 
-      {/* Review Recipes Modal */}
-      {selectedGroup && (
-        <ReviewRecipesModal
-          isOpen={showReviewModal}
-          onClose={() => setShowReviewModal(false)}
-          onMarkReviewed={handleMarkReviewed}
-          groupId={selectedGroup.id}
-        />
-      )}
 
       {/* Guest Details Modal */}
       <GuestDetailsModal

@@ -205,6 +205,10 @@ We don't sound like:
 | **Done** | "5 minutes. You're done." Creates completion. | Satisfying, efficient |
 | **Finally** | "Finally, a wedding gift that..." Positions against status quo. | Fresh, confident |
 | **Honestly** | Opens the truth. "Honestly? Most gifts disappear." | Permission to be real |
+| **Handled** | "It's handled." Removes burden. | Relief, confidence |
+| **Dashboard** | "Check your dashboard." Gives control without work. | Operational, modern |
+| **Automated** | "Reminders are automated." Removes labor. | Efficient, trustworthy |
+| **Progress** | "23 recipes in." Shows momentum without requiring action. | Satisfying, informed |
 
 ---
 
@@ -345,35 +349,48 @@ Empowering. Exciting. Like we're letting her in on a secret.
 
 ---
 
-### The Organizer (Bridesmaid / Sister / Best Friend)
+### The Organizer (MOH / Bridesmaid / Sister / Best Friend)
 
 **Who she is:**
 - The one actually buying and managing this
-- Wants to impress the bride
-- Wants this to be easy (she has enough wedding stress)
-- Wants to be the hero
+- Already carrying 14 things for this wedding
+- Wants to be the hero without becoming the martyr
+- Needs this to be handled, not just "easy"
 
-**What she fears:**
-This being complicated. People not participating. The final product being half-empty.
+**Her three fears:**
+- **Ineptitude:** "What if this falls apart and it's my fault?"
+- **Subjugation:** "What if this becomes another thing where I do all the work?"
+- **Depletion:** "What if I don't have the bandwidth for one more task?"
+
+**What she fears is NOT:**
+"Will this work?" — she's smarter than that.
+Her real fear: "Will this become MY problem?"
 
 **What she needs to hear:**
-"This is easy. We do the hard part. You just invite. And you're going to look like a genius."
+"You're managing 14 things for this wedding. This isn't one of them. You set it up. We handle the rest. Check the dashboard when you want — but you don't have to."
 
 **How we sound to her:**
-Clear. Energizing. "You've got this."
+COO to COO. Operational respect. Not "you've got this" — more like "it's handled."
 
 **Example — Landing page for organizers:**
-> You're about to give the best wedding gift
-> anyone's ever received.
+> You're managing enough for this wedding.
+> This isn't another thing to manage.
 >
-> Here's how it works:
+> Here's what you do:
 >
-> 1. You invite the guests.
-> 2. They send recipes (we remind them, don't worry).
-> 3. We make it into a book.
-> 4. Bride cries. You win.
+> 1. Set up the book (5 minutes).
+> 2. Invite the guests (we give you the link).
+> 3. That's it. We send reminders. We design it. We print it.
+>
+> You check the dashboard when you want.
+> You don't chase anyone.
+> Bride cries. You're the hero.
 >
 > [Start the book →]
+
+**Example — Dashboard notification:**
+> 28 of 42 recipes in. 3 reminders sent.
+> Everything's on track. Nothing for you to do.
 
 ---
 
@@ -552,6 +569,33 @@ Direct. Practical. Zero fluff.
 
 ---
 
+### Organizer Dashboard & Communications
+
+**Tone:** Operational. Respectful. Like a status report from a trusted partner.
+
+**Example — Progress update email:**
+> **Subject:** Your book: 34 of 48 recipes in.
+>
+> Here's where things stand:
+>
+> 34 recipes submitted. 14 remaining.
+> Reminder #2 goes out tomorrow.
+> Estimated completion: on track.
+>
+> Nothing for you to do right now.
+>
+> [View dashboard →]
+
+**Example — Dashboard welcome:**
+> Your book is in progress.
+> Guests are submitting. Reminders are automated.
+> You'll see everything here — recipes, progress, timeline.
+>
+> We'll flag anything that needs your attention.
+> Otherwise, we've got it.
+
+---
+
 ### Email — Marketing
 
 **Tone:** Intriguing. Confident. Makes you click.
@@ -662,7 +706,7 @@ Different moments need different energy. Here's the range:
 | Context | Energy Level | Feels Like |
 |---------|--------------|------------|
 | Guest reminders | High | "Come on, let's go, you've got this" |
-| Organizer dashboard | Medium-High | "You're doing great, here's what's next" |
+| Organizer dashboard | Medium | "Status report from a trusted partner" |
 | Homepage | Medium-High | "This is good, let me show you" |
 | How it works | Medium | "Here's the deal, super simple" |
 | Bride-as-creator flow | Medium-High | "You're building something amazing" |
@@ -687,6 +731,7 @@ The key: we can go low-energy, but we should never go passive. Even quiet moment
 - **Sound certain.** "This is good" > "We think you'll like this."
 - **Mix short and long.** Rhythm matters.
 - **Read it out loud.** If it sounds like a brand, rewrite it.
+- **Speak to the organizer as an equal.** She's not a customer to reassure. She's a peer to respect.
 
 ### Don't
 
@@ -699,6 +744,7 @@ The key: we can go low-energy, but we should never go passive. Even quiet moment
 - **Don't use emojis.** Exception: Stories, sparingly.
 - **Don't sacrifice clarity for style.** If it's cool but confusing, rewrite.
 - **Don't soften until there's nothing left.** Edge is not cruelty. It's honesty.
+- **Don't reassure when you should respect.** The organizer doesn't need "don't worry." She needs "it's handled."
 
 ---
 

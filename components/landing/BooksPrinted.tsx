@@ -204,10 +204,10 @@ export default function BooksPrinted() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-medium text-[#2D2D2D] mb-4">
+            <h2 className="type-heading mb-4">
               Real recipes. Real people. Real books.
             </h2>
-            <p className="font-sans font-light text-lg md:text-xl lg:text-2xl text-[#2D2D2D]/70 max-w-2xl">
+            <p className="type-body text-[#2D2D2D]/70 lg:text-2xl max-w-2xl">
               They send the recipe. We make it look like this.
             </p>
           </motion.div>

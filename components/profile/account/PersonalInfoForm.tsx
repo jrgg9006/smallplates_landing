@@ -10,8 +10,7 @@ import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 export function PersonalInfoForm() {
   const { user } = useAuth();
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [printedName, setPrintedName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,10 +31,7 @@ export function PersonalInfoForm() {
         }
 
         if (profile) {
-          // Split full_name into first and last name
-          const nameParts = (profile.full_name || '').trim().split(' ');
-          setFirstName(nameParts[0] || '');
-          setLastName(nameParts.slice(1).join(' ') || '');
+          setFullName(profile.full_name || '');
           setPhoneNumber(profile.phone_number || '');
         }
 
@@ -55,8 +51,8 @@ export function PersonalInfoForm() {
   }, []);
 
   const validateForm = () => {
-    if (!firstName.trim()) {
-      setError('Please enter your first name');
+    if (!fullName.trim()) {
+      setError('Please enter your name');
       return false;
     }
 
@@ -81,14 +77,11 @@ export function PersonalInfoForm() {
     setSuccess(false);
 
     try {
-      const updates = {
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
+      const { error } = await updatePersonalInfo({
+        full_name: fullName.trim(),
         phone_number: phoneNumber.trim() || undefined,
         printed_name: printedName.trim() || undefined,
-      };
-
-      const { error } = await updatePersonalInfo(updates);
+      });
 
       if (error) {
         setError(error);
@@ -127,35 +120,20 @@ export function PersonalInfoForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Name Fields */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-            First Name *
-          </Label>
-          <Input
-            id="firstName"
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            className="w-full"
-            placeholder="First name"
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-            Last Name
-          </Label>
-          <Input
-            id="lastName"
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            className="w-full"
-            placeholder="Last name"
-          />
-        </div>
+      {/* Name */}
+      <div>
+        <Label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+          Name *
+        </Label>
+        <Input
+          id="fullName"
+          type="text"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          className="w-full"
+          placeholder="Your name"
+          required
+        />
       </div>
 
       {/* Phone Number */}

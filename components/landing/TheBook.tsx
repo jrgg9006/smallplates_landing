@@ -56,12 +56,12 @@ export default function TheBook() {
         >
           <h2
             id="the-book-heading"
-            className="font-serif text-3xl sm:text-4xl md:text-5xl font-normal text-[#1A1A1A] leading-tight"
+            className="type-heading font-normal text-[#1A1A1A]"
             style={{ letterSpacing: "-0.02em" }}
           >
-            What shows up at your door.
+            What shows up at her door.
           </h2>
-          <p className="mt-5 font-sans font-light text-base md:text-lg text-[#9A9590] max-w-[520px] mx-auto leading-relaxed">
+          <p className="mt-5 type-body-small text-[#9A9590] max-w-[520px] mx-auto">
             Every book is hardcover and full color. Because what&apos;s
             inside deserves to be held in something real.
           </p>
@@ -164,21 +164,21 @@ export default function TheBook() {
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
             >
-              <p className="font-sans text-[11px] font-medium tracking-[0.15em] text-[#D4A854] uppercase mb-4">
+              <p className="type-eyebrow mb-4">
                 The Book
               </p>
 
-              <h3 className="font-serif text-2xl md:text-3xl font-normal text-[#2D2D2D] leading-tight mb-6">
+              <h3 className="type-subheading font-normal mb-6">
                 A real book. Made to last.
               </h3>
 
               <div className="space-y-4">
-                <p className="font-sans font-light text-base md:text-lg text-[#9A9590] leading-relaxed">
+                <p className="type-body-small text-[#9A9590]">
                   Every Small Plates book is a hardcover cookbook &mdash; professionally
                   designed and printed in full color.
                   No templates. No shortcuts.
                 </p>
-                <p className="font-sans font-light text-base md:text-lg text-[#9A9590] leading-relaxed">
+                <p className="type-body-small text-[#9A9590]">
                   Each book is different, because every couple&apos;s people are different.
                 </p>
               </div>
@@ -230,12 +230,12 @@ export default function TheBook() {
               className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-8 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#D4A854]"
               data-cta="the-book-primary"
             >
-              Give this Gift
+              Start the Book
             </button>
           </div>
 
           {/* TODO: Link to full specifications page (not yet built) */}
-          <span className="mt-4 inline-block font-sans text-sm text-[#8A8780] cursor-default">
+          <span className="mt-4 inline-block type-caption cursor-default">
             Full book specifications &rarr;
           </span>
         </motion.div>

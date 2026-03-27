@@ -153,10 +153,10 @@ export default function SpecsGrid() {
             transition={{ duration: 0.5, delay: index * 0.05 }}
           >
             <div className="text-[#D4A854] mb-5">{spec.icon}</div>
-            <h3 className="font-serif text-lg md:text-xl font-medium text-[#2D2D2D] mb-3">
+            <h3 className="type-subheading text-lg md:text-xl mb-3">
               {spec.heading}
             </h3>
-            <p className="font-sans font-light text-[15px] text-[#2D2D2D]/70 leading-relaxed">
+            <p className="type-body-small text-[15px]">
               {spec.description}
             </p>
           </motion.div>

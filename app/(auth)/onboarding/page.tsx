@@ -1,64 +1,59 @@
 "use client";
 
-import React from "react";
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { OnboardingProvider, useOnboarding } from "@/lib/contexts/OnboardingContext";
 import OnboardingStep from "@/components/onboarding/OnboardingStep";
 import { ProductSelectionStep } from "@/components/onboarding/ProductSelectionStep";
-import { CheckoutSummary } from "@/components/onboarding/CheckoutSummary";
 import { DatePickerStep } from "@/components/onboarding/DatePickerStep";
-import { CheckCircle, Calendar } from "lucide-react";
-import { DayPicker } from "react-day-picker";
-import "react-day-picker/style.css";
-import { format } from "date-fns";
+import { PostPaymentSetup } from "@/components/onboarding/PostPaymentSetup";
+import { Lock } from "lucide-react";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import {
+  BASE_BOOK_PRICE,
+  ADDITIONAL_BOOK_PRICE,
+  calculateSubtotal,
+  calculateShipping,
+} from "@/lib/stripe/pricing";
+
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+);
 
 /**
- * Step 2 Component - Product Selection
+ * Step 2 Component - Product Selection (quantity-based)
  */
 function Step2() {
-  const { nextStep, previousStep, updateProductTier, state } = useOnboarding();
+  const { nextStep, previousStep, updateBookSelection, state } = useOnboarding();
 
-  const handleSelection = (tierId: string) => {
-    updateProductTier(tierId);
-  };
-
-  const handleContinue = () => {
-    if (state.selectedProductTier) {
-      nextStep();
-    }
-  };
+  const canContinue = state.bookQuantity >= 1;
 
   return (
     <OnboardingStep
       stepNumber={2}
-      totalSteps={4}
-      title="Choose your collection."
+      totalSteps={3}
+      title="How many copies?"
       imageUrl="/images/onboarding/onboarding_lemon.png"
       imageAlt="Product selection"
     >
       <ProductSelectionStep
-        selectedTierId={state.selectedProductTier}
-        onSelect={handleSelection}
+        bookQuantity={state.bookQuantity}
+        shippingCountry={state.shippingCountry}
+        onUpdateQuantity={(qty) =>
+          updateBookSelection(qty, state.shippingCountry || 'US')
+        }
+        onUpdateCountry={(country) =>
+          updateBookSelection(state.bookQuantity, country)
+        }
       />
 
-      {/* Navigation */}
       <div className="flex justify-between mt-8">
+        <button type="button" onClick={previousStep} className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors">Back</button>
         <button
           type="button"
-          onClick={previousStep}
-          className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors"
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          onClick={handleContinue}
-          disabled={!state.selectedProductTier}
-          className={`px-8 py-3 rounded-xl font-semibold transition-colors ${
-            state.selectedProductTier
-              ? "bg-[#D4A854] text-white hover:bg-[#c49b4a]"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
+          onClick={nextStep}
+          disabled={!canContinue}
+          className={`px-8 py-3 rounded-xl font-semibold transition-colors ${canContinue ? "bg-[#D4A854] text-white hover:bg-[#c49b4a]" : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}
         >
           Continue
         </button>
@@ -68,486 +63,213 @@ function Step2() {
 }
 
 /**
- * Step 3 Component - Couple Information
+ * Step 3 — Payment with embedded Stripe Elements
  */
-function Step3() {
-  const { nextStep, previousStep, updateStepData, state } = useOnboarding();
+function Step3Payment() {
+  const { state, previousStep, nextStep, setPaymentInfo, updateStepData } = useOnboarding();
 
-  // Initialize from saved state if available
-  const savedData = state.answers.step3 as {
-    brideFirstName?: string;
-    brideLastName?: string;
-    partnerFirstName?: string;
-    partnerLastName?: string;
-    weddingDate?: string;
-    dateUndecided?: boolean;
-  } | undefined;
+  const [clientSecret, setClientSecret] = useState<string | null>(state.clientSecret);
+  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(state.paymentIntentId);
+  const [isCreatingPI, setIsCreatingPI] = useState(false);
+  const [piError, setPiError] = useState("");
+  const piCreatedRef = useRef(false);
 
-  const [brideFirstName, setBrideFirstName] = useState<string>(savedData?.brideFirstName || "");
-  const [brideLastName, setBrideLastName] = useState<string>(savedData?.brideLastName || "");
-  const [partnerFirstName, setPartnerFirstName] = useState<string>(savedData?.partnerFirstName || "");
-  const [partnerLastName, setPartnerLastName] = useState<string>(savedData?.partnerLastName || "");
-  const [weddingDate, setWeddingDate] = useState<Date | undefined>(() => {
-    if (savedData?.weddingDate && savedData.weddingDate !== "undecided") {
-      return new Date(savedData.weddingDate + "T00:00:00");
-    }
-    return undefined;
-  });
-  const [dateUndecided, setDateUndecided] = useState<boolean>(savedData?.dateUndecided || false);
-  const [calendarOpen, setCalendarOpen] = useState(false);
+  const savedEmail = (state.answers.step3 as { email?: string } | undefined)?.email || "";
+  const [email, setEmail] = useState(savedEmail);
+  const [emailError, setEmailError] = useState("");
 
-  const calendarRef = useRef<HTMLDivElement>(null);
-  const dateInputRef = useRef<HTMLDivElement>(null);
+  const total = calculateSubtotal(state.bookQuantity) + calculateShipping(state.bookQuantity, 'US');
 
-  // Reason: Close calendar on click outside or Escape key
   useEffect(() => {
-    if (!calendarOpen) return;
+    if (clientSecret || piCreatedRef.current) return;
+    piCreatedRef.current = true;
+    setIsCreatingPI(true);
 
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        calendarRef.current && !calendarRef.current.contains(e.target as Node) &&
-        dateInputRef.current && !dateInputRef.current.contains(e.target as Node)
-      ) {
-        setCalendarOpen(false);
-      }
-    };
+    const step1Data = state.answers.step1 as {
+      gift_date?: string | null;
+      gift_date_undecided?: boolean;
+      book_close_date?: string | null;
+    } | undefined;
 
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setCalendarOpen(false);
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEscape);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [calendarOpen]);
-
-  const handleDateSelect = useCallback((date: Date | undefined) => {
-    setWeddingDate(date);
-    setDateUndecided(false);
-    if (date) setCalendarOpen(false);
+    fetch("/api/stripe/create-payment-intent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        bookQuantity: state.bookQuantity,
+        userType: "couple",
+        giftDate: step1Data?.gift_date || null,
+        giftDateUndecided: step1Data?.gift_date_undecided || false,
+        bookCloseDate: step1Data?.book_close_date || null,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.clientSecret && data.paymentIntentId) {
+          setClientSecret(data.clientSecret);
+          setPaymentIntentId(data.paymentIntentId);
+          setPaymentInfo(data.paymentIntentId, data.clientSecret);
+        } else {
+          setPiError(data.error || "Failed to initialize payment");
+        }
+      })
+      .catch(() => setPiError("Failed to initialize payment"))
+      .finally(() => setIsCreatingPI(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleCalendarToggle = useCallback(() => {
-    setCalendarOpen((prev) => !prev);
-  }, []);
-
-  const handleContinue = () => {
-    if (brideFirstName.trim() && brideLastName.trim() && partnerFirstName.trim() && partnerLastName.trim() && (weddingDate || dateUndecided)) {
-      updateStepData(3, {
-        brideFirstName: brideFirstName.trim(),
-        brideLastName: brideLastName.trim(),
-        partnerFirstName: partnerFirstName.trim(),
-        partnerLastName: partnerLastName.trim(),
-        weddingDate: dateUndecided ? "undecided" : weddingDate ? format(weddingDate, "yyyy-MM-dd") : "",
-        dateUndecided
-      });
-      nextStep();
-    }
-  };
-
-  const isFormValid = brideFirstName.trim() && brideLastName.trim() && partnerFirstName.trim() && partnerLastName.trim() && (weddingDate || dateUndecided);
+  if (isCreatingPI || !clientSecret) {
+    return (
+      <OnboardingStep stepNumber={3} totalSteps={3} title="Let's finish your order" imageUrl="/images/onboarding/onboarding_lemon.png" imageAlt="Checkout">
+        <div className="flex items-center justify-center py-16">
+          {piError ? (
+            <div className="text-center">
+              <p className="text-red-600 mb-4">{piError}</p>
+              <button onClick={previousStep} className="text-[#D4A854] hover:underline">Go back</button>
+            </div>
+          ) : (
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4A854]" />
+          )}
+        </div>
+      </OnboardingStep>
+    );
+  }
 
   return (
-    <OnboardingStep
-      stepNumber={3}
-      totalSteps={4}
-      title="Now for the good part."
-      imageUrl="/images/onboarding/onboarding_lemon.png"
-      imageAlt="Wedding planning essentials"
+    <Elements
+      stripe={stripePromise}
+      options={{
+        clientSecret,
+        appearance: {
+          theme: "stripe",
+          variables: { colorPrimary: "#2D2D2D", colorBackground: "#F5F5F5", colorText: "#2D2D2D", borderRadius: "12px", fontFamily: "system-ui, -apple-system, sans-serif" },
+          rules: {
+            ".Input": { border: "1px solid #E5E7EB", boxShadow: "none", padding: "12px 16px" },
+            ".Input:focus": { border: "1px solid #D4A854", boxShadow: "0 0 0 2px rgba(212, 168, 84, 0.2)" },
+          },
+        },
+      }}
     >
-      <div className="max-w-lg mx-auto">
-        {/* Question */}
-        <div className="text-center mb-8">
-          <h2 className="text-base font-medium text-[#2D2D2D] mb-1">
-            Who&apos;s getting married? Let&apos;s make this personal.
-          </h2>
-        </div>
-
-        {/* Form Fields */}
-        <div className="space-y-6">
-          {/* Your Names */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="brideFirstName" className="block text-sm font-medium text-[#2D2D2D] mb-1">
-                First Name
-              </label>
-              <input
-                id="brideFirstName"
-                type="text"
-                required
-                value={brideFirstName}
-                onChange={(e) => setBrideFirstName(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none transition-all"
-                placeholder="Your first name"
-              />
-            </div>
-            <div>
-              <label htmlFor="brideLastName" className="block text-sm font-medium text-[#2D2D2D] mb-1">
-                Last Name
-              </label>
-              <input
-                id="brideLastName"
-                type="text"
-                required
-                value={brideLastName}
-                onChange={(e) => setBrideLastName(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none transition-all"
-                placeholder="Your last name"
-              />
-            </div>
-          </div>
-
-          {/* Partner Names */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="partnerFirstName" className="block text-sm font-medium text-[#2D2D2D] mb-1">
-                Partner&apos;s First Name
-              </label>
-              <input
-                id="partnerFirstName"
-                type="text"
-                required
-                value={partnerFirstName}
-                onChange={(e) => setPartnerFirstName(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none transition-all"
-                placeholder="Partner's first name"
-              />
-            </div>
-            <div>
-              <label htmlFor="partnerLastName" className="block text-sm font-medium text-[#2D2D2D] mb-1">
-                Partner&apos;s Last Name
-              </label>
-              <input
-                id="partnerLastName"
-                type="text"
-                required
-                value={partnerLastName}
-                onChange={(e) => setPartnerLastName(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none transition-all"
-                placeholder="Partner's last name"
-              />
-            </div>
-          </div>
-
-          {/* Wedding Date — custom calendar matching Step 1 */}
-          <div>
-            <label className="block text-sm font-medium text-[#2D2D2D] mb-1">
-              Wedding Date
-            </label>
-            <div className="relative">
-              <div
-                ref={dateInputRef}
-                role="button"
-                tabIndex={0}
-                onClick={handleCalendarToggle}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleCalendarToggle(); } }}
-                className="w-full h-12 px-4 flex items-center rounded-xl cursor-pointer transition-all duration-200"
-                style={{
-                  background: dateUndecided ? "#F3F4F6" : "#FAF7F2",
-                  border: `1px solid ${weddingDate ? "#D4A854" : calendarOpen ? "#D4A854" : "#E8E0D5"}`,
-                  boxShadow: calendarOpen ? "0 0 0 2px rgba(212, 168, 84, 0.15)" : "none",
-                }}
-              >
-                <Calendar className="w-[18px] h-[18px] text-[#9A9590] mr-2.5 flex-shrink-0" strokeWidth={1.5} />
-                {weddingDate ? (
-                  <span className="text-[15px] font-medium text-[#2D2D2D] flex-1 text-left">
-                    {format(weddingDate, "MMMM d, yyyy")}
-                  </span>
-                ) : dateUndecided ? (
-                  <span className="text-[15px] italic text-[#9A9590] flex-1 text-left">
-                    We&apos;ll decide later
-                  </span>
-                ) : (
-                  <span className="text-[15px] text-[#9A9590] flex-1 text-left">
-                    Pick a date
-                  </span>
-                )}
-              </div>
-
-              {/* Calendar popover */}
-              {calendarOpen && (
-                <div
-                  ref={calendarRef}
-                  className="absolute left-0 right-0 z-50 mt-2 bg-white rounded-xl p-4 flex justify-center"
-                  style={{
-                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
-                    animation: "step3CalendarIn 200ms ease-out forwards",
-                  }}
-                >
-                  <DayPicker
-                    mode="single"
-                    selected={weddingDate}
-                    onSelect={handleDateSelect}
-                    defaultMonth={weddingDate || new Date()}
-                    style={{
-                      ["--rdp-accent-color" as string]: "#D4A854",
-                      ["--rdp-accent-background-color" as string]: "#D4A854",
-                      ["--rdp-today-color" as string]: "#D4A854",
-                      ["--rdp-selected-font" as string]: "bold",
-                      ["--rdp-day-height" as string]: "44px",
-                      ["--rdp-day-width" as string]: "44px",
-                      ["--rdp-selected-border" as string]: "none",
-                      fontFamily: "inherit",
-                      color: "#2D2D2D",
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="mt-3">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={dateUndecided}
-                  onChange={(e) => {
-                    setDateUndecided(e.target.checked);
-                    if (e.target.checked) {
-                      setWeddingDate(undefined);
-                      setCalendarOpen(false);
-                    }
-                  }}
-                  className="rounded border-gray-300 text-[#D4A854] focus:ring-[#D4A854] mr-2"
-                />
-                <span className="text-sm text-[#2D2D2D]/70">We&apos;re still deciding</span>
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation */}
-      <div className="flex justify-between mt-8">
-        <button
-          type="button"
-          onClick={previousStep}
-          className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors"
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          onClick={handleContinue}
-          disabled={!isFormValid}
-          className={`px-8 py-3 rounded-xl font-semibold transition-colors ${
-            isFormValid
-              ? "bg-[#D4A854] text-white hover:bg-[#c49b4a]"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
-        >
-          Continue
-        </button>
-      </div>
-
-      <style jsx>{`
-        @keyframes step3CalendarIn {
-          from { opacity: 0; transform: scale(0.98); }
-          to { opacity: 1; transform: scale(1); }
-        }
-      `}</style>
-    </OnboardingStep>
+      <CouplePaymentForm
+        email={email}
+        setEmail={setEmail}
+        emailError={emailError}
+        setEmailError={setEmailError}
+        paymentIntentId={paymentIntentId!}
+        clientSecret={clientSecret!}
+        total={total}
+        bookQuantity={state.bookQuantity}
+        previousStep={previousStep}
+        nextStep={nextStep}
+        updateStepData={updateStepData}
+      />
+    </Elements>
   );
 }
 
-/**
- * Step 4 Component - Checkout & Account Creation
- * Reason: Password removed for soft launch - accounts created manually after Venmo payment
- */
-function Step4() {
-  const { previousStep, completeOnboarding, updateStepData, state } = useOnboarding();
+function CouplePaymentForm({
+  email, setEmail, emailError, setEmailError,
+  paymentIntentId, clientSecret, total, bookQuantity,
+  previousStep, nextStep, updateStepData,
+}: {
+  email: string; setEmail: (v: string) => void;
+  emailError: string; setEmailError: (v: string) => void;
+  paymentIntentId: string; clientSecret: string; total: number; bookQuantity: number;
+  previousStep: () => void; nextStep: () => void;
+  updateStepData: (step: number, data: Record<string, unknown>) => Promise<void>;
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
 
-  // Initialize from saved state if available
-  const savedData = state.answers.step4 as {
-    email?: string;
-    shippingDestination?: string;
-  } | undefined;
-
-  const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState(savedData?.email || "");
-  const [emailError, setEmailError] = useState("");
-  const [shippingDestination, setShippingDestination] = useState(savedData?.shippingDestination || "");
-  const [shippingError, setShippingError] = useState("");
-  const [forceExpanded, setForceExpanded] = useState(false);
-
-  // Email validation
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const validateEmail = (val: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
 
   const handleEmailBlur = () => {
-    if (email.trim() && !validateEmail(email.trim())) {
-      setEmailError("Please enter a valid email address");
-    } else {
-      setEmailError("");
-    }
+    if (email.trim() && !validateEmail(email.trim())) setEmailError("Please enter a valid email address");
+    else setEmailError("");
   };
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-    if (emailError) {
-      setEmailError("");
-    }
-  };
+  const handleSubmit = async () => {
+    if (!stripe || !elements) return;
+    if (!email.trim()) { setEmailError("Please enter your email address"); return; }
+    if (!validateEmail(email.trim())) { setEmailError("Please enter a valid email address"); return; }
 
-  const handleShippingChange = (destination: string) => {
-    setShippingDestination(destination);
-    if (shippingError) setShippingError("");
-  };
-
-  const handleCompletePurchase = async () => {
-    if (!shippingDestination) {
-      setShippingError("Please select a shipping destination");
-      setForceExpanded(true);
-      return;
-    }
-
-    if (!validateEmail(email.trim())) {
-      return;
-    }
-
-    setLoading(true);
+    setIsSubmitting(true);
+    setPaymentError("");
 
     try {
-      // Store email and shipping in context
-      await updateStepData(4, {
-        email: email.trim(),
-        shippingDestination,
+      await fetch("/api/stripe/update-payment-intent", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentIntentId, clientSecret, metadata: { email: email.trim() } }),
       });
 
-      // Save to purchase_intents and show success screen
-      await completeOnboarding(email.trim());
+      await updateStepData(3, { email: email.trim() });
 
-      // Note: completeOnboarding sets isComplete=true, which triggers success screen
-      setLoading(false);
-    } catch (err) {
-      console.error("Error in handleCompletePurchase:", err);
-      setLoading(false);
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          receipt_email: email.trim(),
+          return_url: `${window.location.origin}/order-confirmation?payment_intent=${paymentIntentId}`,
+        },
+        redirect: "if_required",
+      });
+
+      if (error) { setPaymentError(error.message || "Payment failed. Please try again."); setIsSubmitting(false); return; }
+      nextStep();
+    } catch {
+      setPaymentError("Something went wrong. Please try again.");
+      setIsSubmitting(false);
     }
   };
 
-  const isFormValid = validateEmail(email.trim()) && !emailError;
-
-  // Get couple names from step 3
-  const step3Data = state.answers.step3 as {
-    brideFirstName?: string;
-    brideLastName?: string;
-    partnerFirstName?: string;
-    partnerLastName?: string;
-  } | undefined;
-
-  const coupleNames = step3Data
-    ? {
-        brideFirstName: step3Data.brideFirstName,
-        brideLastName: step3Data.brideLastName,
-        partnerFirstName: step3Data.partnerFirstName,
-        partnerLastName: step3Data.partnerLastName,
-      }
-    : undefined;
+  const additionalCopies = bookQuantity - 1;
 
   return (
-    <OnboardingStep
-      stepNumber={4}
-      totalSteps={4}
-      title="Complete your purchase."
-      imageUrl="/images/onboarding/onboarding_lemon.png"
-      imageAlt="Checkout"
-    >
-      <div className="max-w-lg mx-auto">
-        <CheckoutSummary
-          selectedTierId={state.selectedProductTier}
-          coupleNames={coupleNames}
-          email={email}
-          emailError={emailError}
-          loading={loading}
-          onEmailChange={handleEmailChange}
-          onEmailBlur={handleEmailBlur}
-          onCompletePurchase={handleCompletePurchase}
-          isFormValid={isFormValid}
-          shippingDestination={shippingDestination}
-          onShippingChange={handleShippingChange}
-          shippingError={shippingError}
-          forceExpanded={forceExpanded}
-        />
-
-        {/* Navigation */}
-        <div className="flex justify-between items-center mt-8">
-          <button
-            type="button"
-            onClick={previousStep}
-            disabled={loading}
-            className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors disabled:opacity-50"
-          >
-            Back
-          </button>
-          <button
-            type="button"
-            onClick={handleCompletePurchase}
-            disabled={loading}
-            className={`px-12 py-4 rounded-2xl text-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-              isFormValid && shippingDestination
-                ? "bg-[#D4A854] text-white hover:bg-[#c49b4a]"
-                : "bg-gray-300 text-gray-500"
-            }`}
-          >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2 inline-block"></div>
-                Processing...
-              </>
-            ) : (
-              "Reserve Your Book"
-            )}
-          </button>
-        </div>
-      </div>
-    </OnboardingStep>
-  );
-}
-
-/**
- * Success Screen Component - Shown after completing soft launch checkout
- * Uses OnboardingStep for consistent styling and X button to close
- */
-function SuccessScreen() {
-  return (
-    <OnboardingStep
-      stepNumber={4}
-      totalSteps={4}
-      title="It's happening."
-      imageUrl="/images/onboarding/onboarding_lemon.png"
-      imageAlt="Success"
-      hideProgress={true}
-    >
-      <div className="max-w-sm mx-auto text-center">
-        {/* Success Icon */}
-        <div className="w-16 h-16 mx-auto mb-12 rounded-full bg-[#D4A854]/10 flex items-center justify-center">
-          <CheckCircle className="w-8 h-8 text-[#D4A854]" />
+    <OnboardingStep stepNumber={3} totalSteps={3} title="Let's finish your order" imageUrl="/images/onboarding/onboarding_lemon.png" imageAlt="Checkout">
+      <div className="max-w-lg mx-auto mt-6">
+        <div className="mb-6 text-sm text-[#2D2D2D]/60">
+          <div className="flex justify-between py-1"><span>The Book</span><span>${BASE_BOOK_PRICE}</span></div>
+          {additionalCopies > 0 && (
+            <div className="flex justify-between py-1">
+              <span>{additionalCopies} additional {additionalCopies === 1 ? "copy" : "copies"}{additionalCopies >= 2 ? ` ($${ADDITIONAL_BOOK_PRICE} each)` : ""}</span>
+              <span>${additionalCopies * ADDITIONAL_BOOK_PRICE}</span>
+            </div>
+          )}
+          <div className="flex justify-between py-1"><span>Shipping</span><span>${calculateShipping(bookQuantity, 'US')}</span></div>
+          <div className="border-t border-gray-200 mt-2 pt-2 flex justify-between text-[#2D2D2D] font-medium"><span>Total</span><span>${total}</span></div>
         </div>
 
-        {/* Single Line */}
-        <p className="text-[#2D2D2D]/60 font-light mb-12">
-          We&apos;ll be in touch within 24 hours.
-        </p>
+        <div className="mb-4">
+          <label htmlFor="couple-email" className="block text-sm font-medium text-[#2D2D2D] mb-1">Your email</label>
+          <input id="couple-email" type="email" required value={email}
+            onChange={(e) => { setEmail(e.target.value); if (emailError) setEmailError(""); if (paymentError) setPaymentError(""); }}
+            onBlur={handleEmailBlur}
+            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none transition-all ${emailError ? "border-red-400" : "border-gray-300"}`}
+            placeholder="your@email.com" />
+          {emailError && <p className="text-sm text-red-500 mt-1">{emailError}</p>}
+          <p className="text-xs text-[#2D2D2D]/50 mt-1.5">Receipt and login link will be sent here.</p>
+        </div>
 
-        {/* Tagline */}
-        <p className="text-[#D4A854] font-medium text-lg mb-16">
-          You just started something beautiful.
-        </p>
+        <div className="mb-6"><PaymentElement options={{ layout: "tabs" }} /></div>
 
-        {/* Contact */}
-        <p className="text-sm text-[#2D2D2D]/40 font-light">
-          Questions?{" "}
-          <a
-            href="mailto:team@smallplatesandcompany.com"
-            className="text-[#2D2D2D]/50 hover:text-[#D4A854] transition-colors"
-          >
-            team@smallplatesandcompany.com
-          </a>
-        </p>
+        {(paymentError || emailError) && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg"><p className="text-sm text-red-600">{emailError || paymentError}</p></div>
+        )}
+
+        <div className="flex justify-between items-center mb-4">
+          <button type="button" onClick={previousStep} className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors">Back</button>
+          <button type="button" onClick={handleSubmit} disabled={!stripe || isSubmitting}
+            className={`px-8 py-3 rounded-xl font-semibold transition-colors ${stripe && !isSubmitting ? "bg-[#2D2D2D] text-white hover:bg-[#1a1a1a]" : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}>
+            {isSubmitting ? "Processing..." : `Purchase for $${total}`}
+          </button>
+        </div>
+
+        <div className="flex items-center justify-center gap-2 text-xs text-[#2D2D2D]/40">
+          <Lock className="w-3 h-3" />
+          <span>Secure checkout powered by</span>
+          <img src="/images/logo_svg/stripe_logo.png" alt="Stripe" className="h-4 opacity-40" />
+        </div>
       </div>
     </OnboardingStep>
   );
@@ -555,39 +277,30 @@ function SuccessScreen() {
 
 /**
  * Main Onboarding Page Component
- * Manages the 4-step questionnaire flow
  */
 function OnboardingContent() {
   const { state } = useOnboarding();
-
-  // Show success screen when onboarding is complete
-  if (state.isComplete) {
-    return <SuccessScreen />;
-  }
 
   return (
     <div className="min-h-screen bg-white">
       {state.currentStep === 1 && (
         <DatePickerStep
           stepNumber={1}
-          totalSteps={4}
+          totalSteps={3}
           title="Congratulations. Let&apos;s make the book."
           question="When do you want the book?"
-          hint="Pick a date. Most couples have it ready a few weeks after the wedding."
+          hint="Most couples have it ready a few weeks before the wedding."
           switchFlowText="Giving this as a gift?"
           switchFlowHref="/onboarding-gift"
         />
       )}
       {state.currentStep === 2 && <Step2 />}
-      {state.currentStep === 3 && <Step3 />}
-      {state.currentStep === 4 && <Step4 />}
+      {state.currentStep === 3 && <Step3Payment />}
+      {state.currentStep === 4 && <PostPaymentSetup userType="couple" />}
     </div>
   );
 }
 
-/**
- * Page wrapper with OnboardingProvider
- */
 export default function OnboardingPage() {
   return (
     <OnboardingProvider userType="couple">

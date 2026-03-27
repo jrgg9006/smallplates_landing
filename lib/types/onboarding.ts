@@ -51,12 +51,18 @@ export interface OnboardingData {
   };
 }
 
+export type ShippingCountry = 'US' | 'MX';
+
 export interface OnboardingState {
   currentStep: number;
   totalSteps: number;
   answers: OnboardingData;
   selectedProductTier: string | null;
+  bookQuantity: number;
+  shippingCountry: ShippingCountry | null;
   isComplete: boolean;
+  paymentIntentId: string | null;
+  clientSecret: string | null;
 }
 
 export interface OnboardingContextType {
@@ -65,6 +71,8 @@ export interface OnboardingContextType {
   previousStep: () => void;
   updateStepData: (stepId: number, data: Record<string, any>) => Promise<void>;
   updateProductTier: (tierId: string) => void;
+  updateBookSelection: (quantity: number, country: ShippingCountry) => void;
+  setPaymentInfo: (paymentIntentId: string, clientSecret: string) => void;
   completeOnboarding: (email?: string, password?: string, directData?: Record<string, any>) => Promise<void>;
   resetOnboarding: () => void;
 }

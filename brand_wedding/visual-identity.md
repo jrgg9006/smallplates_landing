@@ -222,6 +222,23 @@ Minimum clear space around logo = height of "S" in "Small." No other elements sh
 - Still warm, never cold
 - Honey accents for status and progress
 
+## Organizer Dashboard & Communications
+
+**Dashboard:**
+- Clean, functional layout — no decorative elements
+- Progress indicators in Honey (progress bars, completion percentages)
+- Inter for all functional text — recipe counts, dates, status labels
+- Calm spacing — generous padding between sections
+- Warm White background with Sand cards for recipe previews
+- Soft Charcoal for primary text, Warm Gray for secondary info
+
+**Organizer Emails:**
+- Same warmth as other emails but more structured
+- Data-forward: recipe counts, completion status, next steps
+- Inter for body text (operational context, not emotional)
+- Honey accents for progress indicators and CTA buttons
+- No decorative flourishes — respect her time
+
 ---
 
 # Technical Reference

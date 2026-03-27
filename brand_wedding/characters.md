@@ -46,33 +46,44 @@ They know me.”
 
 ---
 
-## The Bridesmaid — The Protector
+## The Organizer — The General
 
-She is the engine.
+She is the engine. The one who actually makes things happen.
 
 She carries:
-- responsibility
-- comparison
-- pressure
-- love
-- fear of getting it wrong
+- the logistics nobody sees
+- the emotional weight of getting it right
+- the pressure of representing the group
+- the exhaustion of being the responsible one
+- love — deep, fierce, unspoken
+
+Her three fears:
+- **Ineptitude:** “What if I can’t pull this off?”
+- **Subjugation:** “What if I do all the work and someone else gets the credit — or worse, the bride never knows?”
+- **Depletion:** “What if this drains me when I’m already running on fumes?”
 
 Her secret question:
-“Will she remember what I gave her?”
+“Can I pull this off without losing my mind — and still make her cry?”
 
 She doesn’t want:
-a gift that blends in.
+another project to manage.
+Another group chat to chase.
+Another thing that depends entirely on her.
 
 She wants:
-a moment that lands.
+glory without grief.
+Proof she’s the friend who gets it right.
+A done-for-you system that makes her look like a genius.
 
-Small Plates gives her:
-- emotional confidence  
-- creative relief  
-- proof that she chose right  
+What Small Plates gives her:
+- automated reminders (she doesn’t chase anyone)
+- a dashboard that shows progress (she stays informed without doing the work)
+- professional design (she doesn’t need taste or design skills)
+- emotional credit (when the bride cries, she’s the one who made it happen)
 
 When she gives it, she should feel:
-“I gave her something only *I* would think of.”
+“I didn’t just give her a gift.
+I gave her all of her people — and I didn’t lose my mind doing it.”
 
 ---
 
@@ -145,7 +156,7 @@ Not the focus.
 But deeply aware.
 
 He wants:
-her to feel cherished.
+her to feel seen and held.
 
 When Small Plates enters the picture, it should feel:
 “This is something she’ll keep.”
@@ -154,15 +165,18 @@ When Small Plates enters the picture, it should feel:
 
 ## The System View
 
-Bride = emotional center  
-Bridesmaid = momentum  
-Mother = permanence  
-Planner = credibility  
-Guests = meaning  
-Groom = witness  
+Organizer = catalyst and buyer
+Bride = emotional center and taste gatekeeper
+Mother = permanence
+Planner = credibility
+Guests = meaning
+Groom = witness
 
 Small Plates only works if:
-everyone feels acknowledged —
-but one person feels chosen.
+two people feel chosen —
+the bride as the center of the book,
+and the organizer as the hero who made it happen.
 
-That person is the bride.
+The bride receives the gift.
+The organizer receives the glory.
+Both feel seen. Both feel held.

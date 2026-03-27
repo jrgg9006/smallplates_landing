@@ -71,9 +71,10 @@ export function GroupJoinForm({
 }: GroupJoinFormProps) {
   const router = useRouter();
   
-  // Default image fallback
-  const displayImage = coupleImageUrl || '/images/profile/Hero_Profile_2400.jpg';
-  
+  // Reason: Only show image section if couple actually uploaded one — no broken placeholder
+  const [imageError, setImageError] = useState(false);
+  const displayImage = (coupleImageUrl && !imageError) ? coupleImageUrl : null;
+
   // Toggle state - false = create account, true = sign in
   const [hasAccount, setHasAccount] = useState(false);
   
@@ -297,7 +298,7 @@ export function GroupJoinForm({
       {/* Main Content - Editorial Layout */}
       <div className="max-w-6xl mx-auto">
         {/* Mobile: Stacked layout, Desktop: Two columns */}
-        <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center lg:min-h-[calc(100vh-3.5rem)]">
+        <div className={`lg:items-center lg:min-h-[calc(100vh-3.5rem)] ${displayImage ? 'lg:grid lg:grid-cols-2 lg:gap-8' : 'flex justify-center'}`}>
           
           {/* Image Section - Left side on desktop, top on mobile */}
           {displayImage && (
@@ -311,6 +312,7 @@ export function GroupJoinForm({
                     className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 400px"
                     priority
+                    onError={() => setImageError(true)}
                   />
                   {/* Subtle gradient overlay for editorial feel */}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#2D2D2D]/5 via-transparent to-transparent lg:bg-gradient-to-r lg:from-[#2D2D2D]/3 lg:via-transparent lg:to-transparent" />

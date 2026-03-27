@@ -149,7 +149,7 @@ Headline: "Wedding gifts have a problem."
 
 Body: 
 "Another blender. Another towel set. Another thing 
-that ends up in a closet — or returned.
+that ends up in a closet or returned.
 
 Not because people don't care.
 Because caring is hard to fit in a box."

@@ -35,7 +35,7 @@ export default function Footer() {
             </p>
             
             {/* Descriptor */}
-            <p className="mt-4 font-sans font-light text-base text-white/60 max-w-sm">
+            <p className="mt-4 type-body-small text-white/60 max-w-sm">
               Wedding cookbooks made by the people who love you.
               Not keepsakes—kitchen books.
             </p>
@@ -46,7 +46,7 @@ export default function Footer() {
             <div className="grid grid-cols-2 gap-8">
               {/* Product */}
               <div>
-                <h3 className="font-sans text-sm font-medium uppercase tracking-wider text-white/40 mb-4">
+                <h3 className="type-eyebrow text-white/40 mb-4">
                   Product
                 </h3>
                 <ul className="space-y-3">
@@ -94,7 +94,7 @@ export default function Footer() {
 
               {/* Company */}
               <div>
-                <h3 className="font-sans text-sm font-medium uppercase tracking-wider text-white/40 mb-4">
+                <h3 className="type-eyebrow text-white/40 mb-4">
                   Company
                 </h3>
                 <ul className="space-y-3">
@@ -128,7 +128,7 @@ export default function Footer() {
               href="/onboarding-gift"
               className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-6 py-3 text-base font-medium transition-colors"
             >
-              Give this Gift
+              Start the Book
             </Link>
           </div>
         </div>

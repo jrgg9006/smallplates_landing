@@ -14,7 +14,7 @@ Header (h1, bold, serif — igual que el actual):
 "They're lucky to have you."
 
 Subheader (body, medium weight):
-"When do you want to give the book?"
+"The spaant to give the book?"
 
 Helper text (small, color warm-gray #9A9590):
 "Pick the date — we'll count backward from there and make sure everything's ready."

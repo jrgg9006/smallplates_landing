@@ -44,27 +44,27 @@ export default function HandmadeCallout() {
       {/* Right Panel — Text */}
       <div className="bg-[#F5F1EB] p-8 md:p-12 lg:p-16 flex flex-col justify-center">
         {/* Eyebrow */}
-        <p className="font-sans text-sm font-medium tracking-widest text-[#D4A854] uppercase mb-4">
+        <p className="type-eyebrow mb-4">
           One of one
         </p>
 
-        <h3 className="font-serif text-2xl md:text-3xl font-medium text-[#2D2D2D] leading-tight mb-6">
+        <h3 className="type-subheading mb-6">
           Every book is one of a kind.
         </h3>
 
         <div className="space-y-4">
-          <p className="font-sans font-light text-sm md:text-base text-[#2D2D2D]/80 leading-relaxed">
+          <p className="type-body-small text-[#2D2D2D]/80">
             Different recipes. Different people. Different stories. Every book we produce exists exactly once &mdash; because the people inside it are never the same twice.
           </p>
 
-          <p className="font-sans font-light text-sm md:text-base text-[#2D2D2D]/80 leading-relaxed">
+          <p className="type-body-small text-[#2D2D2D]/80">
             No templates. No stock content. Your book is designed, laid out, and printed from scratch &mdash; built around the real recipes your people actually sent in.
           </p>
         </div>
 
         {/* Pull quote */}
         <blockquote className="mt-8 border-l-2 border-[#D4A854] pl-5">
-          <p className="font-serif italic text-base md:text-lg text-[#2D2D2D]/70 leading-relaxed">
+          <p className="type-accent text-base md:text-lg text-[#2D2D2D]/70 leading-relaxed">
             &ldquo;No two books are the same &mdash; because no two couples&apos; people are the same. That&apos;s the whole point.&rdquo;
           </p>
         </blockquote>

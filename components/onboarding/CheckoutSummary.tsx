@@ -1,306 +1,189 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { getProductTierById, ProductTier } from "@/lib/data/productTiers";
+import React, { useState } from "react";
+import { ShippingCountry } from "@/lib/types/onboarding";
 
 interface CheckoutSummaryProps {
-  selectedTierId: string | null;
-  coupleNames?: {
-    brideFirstName?: string;
-    brideLastName?: string;
-    partnerFirstName?: string;
-    partnerLastName?: string;
-  };
-  giftGiverName?: string;
+  bookQuantity: number;
+  shippingCountry: ShippingCountry | null;
+  onShippingChange: (country: ShippingCountry) => void;
   email: string;
-  password?: string;
   emailError: string;
-  loading: boolean;
   onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onEmailBlur: () => void;
-  onPasswordChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onCompletePurchase: () => void;
   isFormValid: boolean;
-  shippingDestination: string;
-  onShippingChange: (destination: string) => void;
-  shippingError?: string;
-  forceExpanded?: boolean;
+  onPaymentError: (message: string) => void;
+  onSavePurchaseIntent: () => Promise<string | null>;
+  onBack: () => void;
+  userType: 'couple' | 'gift_giver';
+  existingUserId?: string;
 }
 
 /**
- * Checkout Summary Component
- * Displays order summary and account creation form before payment
+ * Pre-checkout step — collects email + shipping, then redirects to Stripe Hosted Checkout.
+ * Intentionally minimal: Stripe handles the order summary and payment form.
  */
 export function CheckoutSummary({
-  selectedTierId,
-  coupleNames,
-  giftGiverName,
+  bookQuantity,
+  shippingCountry,
+  onShippingChange,
   email,
-  password,
   emailError,
-  loading,
   onEmailChange,
   onEmailBlur,
-  onPasswordChange,
-  onCompletePurchase,
   isFormValid,
-  shippingDestination,
-  onShippingChange,
-  shippingError,
-  forceExpanded,
+  onPaymentError,
+  onSavePurchaseIntent,
+  onBack,
+  userType,
+  existingUserId,
 }: CheckoutSummaryProps) {
-  const selectedTier: ProductTier | undefined = selectedTierId
-    ? getProductTierById(selectedTierId)
-    : undefined;
+  const [processing, setProcessing] = useState(false);
 
-  const [isExpanded, setIsExpanded] = useState(false);
+  const canPay = isFormValid && shippingCountry !== null;
 
-  useEffect(() => {
-    if (forceExpanded) setIsExpanded(true);
-  }, [forceExpanded]);
+  const handleCheckout = async () => {
+    if (!canPay) return;
 
-  const shippingCosts: Record<string, number> = { usa: 15, mexico: 10 };
-  const shippingAmount = shippingDestination ? shippingCosts[shippingDestination] : undefined;
-  const total = selectedTier && shippingAmount !== undefined
-    ? selectedTier.price + shippingAmount
-    : undefined;
+    setProcessing(true);
 
-  if (!selectedTier) {
-    return (
-      <div className="text-center text-red-600">
-        Please select a product tier to continue.
-      </div>
-    );
-  }
+    try {
+      const purchaseIntentId = await onSavePurchaseIntent();
+      if (!purchaseIntentId) {
+        onPaymentError("Failed to save your information. Please try again.");
+        setProcessing(false);
+        return;
+      }
+
+      const res = await fetch("/api/stripe/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.trim(),
+          bookQuantity,
+          shippingCountry,
+          userType,
+          purchaseIntentId,
+          ...(existingUserId ? { existingUserId } : {}),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.url) {
+        onPaymentError(data.error || "Failed to start checkout. Please try again.");
+        setProcessing(false);
+        return;
+      }
+
+      window.location.href = data.url;
+    } catch (err) {
+      console.error("Checkout error:", err);
+      onPaymentError("Something went wrong. Please try again.");
+      setProcessing(false);
+    }
+  };
 
   return (
-    <div className="max-w-lg mx-auto space-y-8">
-      {/* Order Summary - Collapsible */}
-      <div className="bg-[#FAF9F7] rounded-lg border border-gray-200 overflow-hidden">
-        {/* Header - Always Visible */}
-        <button
-          type="button"
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center justify-between p-4 hover:bg-[#F5F3EF] transition-colors"
+    <div className="max-w-lg mx-auto space-y-8 mt-10">
+      {/* Email */}
+      <div>
+        <label
+          htmlFor="checkout-email"
+          className="block text-sm font-medium text-[#2D2D2D] mb-1"
         >
-          <div className="flex items-center gap-3">
-            <h3 className="font-serif text-base text-[#2D2D2D]">Order Summary</h3>
-            <span className="text-xs text-[#8A8780] font-light">
-              {selectedTier.name}
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <p className="font-serif text-lg text-[#2D2D2D]">
-                {total !== undefined
-                  ? `$${total}`
-                  : shippingDestination === "other"
-                    ? `$${selectedTier.price} + shipping`
-                    : `$${selectedTier.price}`}
-              </p>
-              {!shippingDestination && (
-                <p className="text-xs text-[#8A8780] font-light">
-                  + Shipping
-                </p>
-              )}
-              {shippingDestination === "other" && (
-                <p className="text-xs text-[#8A8780] font-light">
-                  Custom quote
-                </p>
-              )}
-            </div>
-            <svg
-              className={`w-4 h-4 text-[#8A8780] transition-transform duration-200 ${
-                isExpanded ? "rotate-180" : ""
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </div>
-        </button>
-
-        {/* Expandable Content */}
-        {isExpanded && (
-          <div className="px-4 pb-4 border-t border-gray-200 pt-4 space-y-4">
-            {/* Selected Product Details */}
-            <div>
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <p className="font-medium text-[#2D2D2D] text-sm">{selectedTier.name}</p>
-                  <p className="text-xs text-[#8A8780] font-light mt-0.5">
-                    {selectedTier.tagline}
-                  </p>
-                </div>
-              </div>
-              
-              {/* Features included */}
-              <ul className="mt-2 space-y-1">
-                {selectedTier.features.map((feature, i) => (
-                  <li
-                    key={i}
-                    className="text-xs text-[#6B6966] font-light flex items-start"
-                  >
-                    <span className="mr-2 text-[#D4A854]">•</span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Couple Names */}
-            {coupleNames && (
-              <div className="pt-3 border-t border-gray-200">
-                <p className="text-xs text-[#8A8780] font-light mb-1">For:</p>
-                <p className="text-sm text-[#2D2D2D] font-medium">
-                  {coupleNames.brideFirstName} {coupleNames.brideLastName}
-                  {coupleNames.partnerFirstName &&
-                    ` & ${coupleNames.partnerFirstName} ${coupleNames.partnerLastName || ""}`}
-                </p>
-              </div>
-            )}
-
-            {/* Subtotal */}
-            <div className="flex justify-between items-center pt-3 border-t border-gray-200">
-              <p className="text-[#2D2D2D] text-sm font-light">Subtotal</p>
-              <p className="font-serif text-base text-[#2D2D2D]">
-                ${selectedTier.price}
-              </p>
-            </div>
-
-            {/* Shipping Destination */}
-            <div className="pt-2">
-              <div className="flex justify-between items-center mb-2">
-                <p className="text-[#2D2D2D] text-sm font-light">Shipping</p>
-                <p className="text-sm text-[#2D2D2D] font-light">
-                  {shippingDestination === "usa" && "$15"}
-                  {shippingDestination === "mexico" && "$10"}
-                  {shippingDestination === "other" && "Custom"}
-                  {!shippingDestination && "—"}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                {[
-                  { id: "usa", label: "USA", sub: "$15" },
-                  { id: "mexico", label: "Mexico", sub: "$10" },
-                  { id: "other", label: "Other", sub: "Custom" },
-                ].map((opt) => (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => onShippingChange(opt.id)}
-                    className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-colors border ${
-                      shippingDestination === opt.id
-                        ? "bg-[#D4A854]/10 border-[#D4A854] text-[#D4A854]"
-                        : "bg-white border-gray-200 text-[#6B6966] hover:border-gray-300"
-                    }`}
-                  >
-                    <span className="block">{opt.label}</span>
-                    <span className="block text-[10px] font-light mt-0.5">{opt.sub}</span>
-                  </button>
-                ))}
-              </div>
-              {shippingDestination === "other" && (
-                <p className="text-xs text-[#8A8780] font-light italic mt-1.5">
-                  We&apos;ll send you a quote for your location.
-                </p>
-              )}
-              {shippingError && (
-                <p className="text-xs text-red-600 mt-1.5">{shippingError}</p>
-              )}
-            </div>
-
-            {/* Total */}
-            <div className="flex justify-between items-center pt-3 border-t border-gray-200">
-              <p className="font-medium text-[#2D2D2D] text-sm">Total</p>
-              <p className="font-serif text-lg text-[#2D2D2D]">
-                {total !== undefined
-                  ? `$${total}`
-                  : shippingDestination === "other"
-                    ? `$${selectedTier.price} + custom shipping`
-                    : `$${selectedTier.price} + shipping`}
-              </p>
-            </div>
-          </div>
+          Your email
+        </label>
+        <p className="text-xs text-[#8A8780] font-light mb-2">
+          This is where we send your dashboard login. No password needed.
+        </p>
+        <input
+          id="checkout-email"
+          type="email"
+          required
+          value={email}
+          onChange={onEmailChange}
+          onBlur={onEmailBlur}
+          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:border-transparent outline-none transition-all ${
+            emailError
+              ? "border-red-500 focus:ring-red-500"
+              : "border-gray-300 focus:ring-[#D4A854]"
+          }`}
+          placeholder="you@example.com"
+        />
+        {emailError && (
+          <p className="mt-1 text-sm text-red-600">{emailError}</p>
         )}
       </div>
 
-      {/* Account Creation Form */}
+      {/* Shipping Destination */}
       <div>
-        <div className="text-center mb-6">
-          <h2 className="text-base font-medium text-[#2D2D2D] mb-1">
-            Create your account
-          </h2>
-          <p className="text-sm text-[#2D2D2D]/60 font-light">
-            We&apos;ll use this to manage your book and send updates.
-          </p>
-        </div>
-
-        <div className="space-y-4 mb-6">
-          <div>
-            <label
-              htmlFor="checkout-email"
-              className="block text-sm font-medium text-[#2D2D2D] mb-1"
-            >
-              Email Address
-            </label>
-            <input
-              id="checkout-email"
-              type="email"
-              required
-              value={email}
-              onChange={onEmailChange}
-              onBlur={onEmailBlur}
-              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:border-transparent outline-none transition-all ${
-                emailError
-                  ? "border-red-500 focus:ring-red-500"
-                  : "border-gray-300 focus:ring-[#D4A854]"
+        <p className="text-sm font-medium text-[#2D2D2D] mb-1">
+          Where are we shipping?
+        </p>
+        <p className="text-xs text-[#8A8780] font-light mb-3">
+          We&apos;ll collect the full address later.
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          {([
+            { id: "US" as ShippingCountry, label: "United States", flag: "🇺🇸" },
+            { id: "MX" as ShippingCountry, label: "Mexico", flag: "🇲🇽" },
+          ]).map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => onShippingChange(opt.id)}
+              className={`py-3 px-4 rounded-xl text-sm transition-all border ${
+                shippingCountry === opt.id
+                  ? "bg-[#D4A854]/10 border-[#D4A854] text-[#2D2D2D] font-medium"
+                  : "bg-white border-gray-200 text-[#6B6966] hover:border-gray-300"
               }`}
-              placeholder="you@example.com"
-            />
-            {emailError && (
-              <p className="mt-1 text-sm text-red-600">{emailError}</p>
-            )}
-          </div>
+            >
+              <span className="mr-1.5">{opt.flag}</span>
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
-          {/* Reason: Password field hidden for soft launch - accounts created manually after payment */}
-          {onPasswordChange && (
-            <div>
-              <label
-                htmlFor="checkout-password"
-                className="block text-sm font-medium text-[#2D2D2D] mb-1"
-              >
-                Password
-              </label>
-              <input
-                id="checkout-password"
-                type="password"
-                required
-                value={password}
-                onChange={onPasswordChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none transition-all"
-                placeholder="At least 6 characters"
-                minLength={6}
-              />
-              {password && password.length > 0 && password.length < 6 && (
-                <p className="mt-1 text-sm text-red-600">
-                  Password must be at least 6 characters
-                </p>
-              )}
-            </div>
-          )}
+      {/* CTA */}
+      <div className="pt-2 space-y-3">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onBack}
+            className="px-4 py-4 text-sm text-[#8A8780] hover:text-[#2D2D2D] transition-colors"
+          >
+            Back
+          </button>
+          <button
+            type="button"
+            onClick={handleCheckout}
+            disabled={!canPay || processing}
+            className={`flex-1 py-4 rounded-2xl text-base font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+              canPay && !processing
+                ? "bg-[#2D2D2D] text-white hover:bg-[#1a1a1a]"
+                : "bg-gray-200 text-gray-400"
+            }`}
+          >
+            {processing ? (
+              <span className="flex items-center justify-center">
+                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
+                One sec...
+              </span>
+            ) : (
+              "Continue to payment"
+            )}
+          </button>
         </div>
 
-        {/* Confidence Building Message */}
-        <div className="text-center text-sm text-[#2D2D2D]/50 font-light mb-6">
-          Secure checkout. Your information is protected.
+        <div className="flex items-center justify-center gap-1.5">
+          <svg className="w-3.5 h-3.5 text-[#8A8780]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <p className="text-xs text-[#8A8780] font-light">
+            Secure checkout powered by Stripe
+          </p>
         </div>
       </div>
     </div>

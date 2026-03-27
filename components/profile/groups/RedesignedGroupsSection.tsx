@@ -421,7 +421,7 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
             onClick={onCloseBookClick}
             className="text-sm font-medium text-[hsl(var(--brand-honey))] hover:underline whitespace-nowrap ml-4"
           >
-            Close the book &rarr;
+            Review and close the book &rarr;
           </button>
         </div>
       )}

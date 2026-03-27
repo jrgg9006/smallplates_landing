@@ -17,6 +17,33 @@ export interface SendNewRecipeNotificationParams {
   preferencesUrl: string;
 }
 
+export interface SendWelcomeLoginEmailParams {
+  to: string;
+  buyerName: string;
+  loginLink: string;
+}
+
+export async function sendWelcomeLoginEmail({ to, buyerName, loginLink }: SendWelcomeLoginEmailParams) {
+  try {
+    const result = await postmarkClient.sendEmailWithTemplate({
+      From: `Small Plates & Co. <${process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com'}>`,
+      To: to,
+      TemplateAlias: 'welcome-login',
+      TemplateModel: {
+        buyerName,
+        loginLink,
+        userEmail: to,
+      },
+      MessageStream: 'outbound',
+    });
+
+    return { success: true, messageId: result.MessageID };
+  } catch (error) {
+    console.error('Error sending welcome login email:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
 export interface SendGroupInvitationEmailParams {
   to: string;
   groupName: string;
