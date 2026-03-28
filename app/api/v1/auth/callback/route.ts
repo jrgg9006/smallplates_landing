@@ -28,21 +28,32 @@ export async function GET(request: Request) {
 
     // Reason: After successful auth, check if user has a paid order without completed setup.
     // If so, redirect them to complete-setup instead of the dashboard.
+    // But skip this for users who already have groups (they're existing users).
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       const supabaseAdmin = createSupabaseAdminClient();
-      const { data: incompleteOrder } = await supabaseAdmin
-        .from('orders')
-        .select('stripe_payment_intent, user_type')
-        .eq('user_id', user.id)
-        .eq('status', 'paid')
-        .is('couple_name', null)
-        .limit(1)
-        .single();
 
-      if (incompleteOrder?.stripe_payment_intent) {
-        const setupUrl = `/complete-setup?pi=${incompleteOrder.stripe_payment_intent}&type=${incompleteOrder.user_type || 'gift_giver'}`;
-        return NextResponse.redirect(`${origin}${setupUrl}`);
+      // Reason: Users with existing groups already completed setup — don't redirect them
+      const { count: groupCount } = await supabaseAdmin
+        .from('group_members')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('role', 'owner');
+
+      if (!groupCount || groupCount === 0) {
+        const { data: incompleteOrder } = await supabaseAdmin
+          .from('orders')
+          .select('stripe_payment_intent, user_type')
+          .eq('user_id', user.id)
+          .eq('status', 'paid')
+          .is('couple_name', null)
+          .limit(1)
+          .single();
+
+        if (incompleteOrder?.stripe_payment_intent) {
+          const setupUrl = `/complete-setup?pi=${incompleteOrder.stripe_payment_intent}&type=${incompleteOrder.user_type || 'gift_giver'}`;
+          return NextResponse.redirect(`${origin}${setupUrl}`);
+        }
       }
     }
   }
