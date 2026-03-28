@@ -12,13 +12,15 @@ interface ProfileNavigationProps {
   onNavigate?: () => void;
   onGroupSelect?: (group: GroupWithMembers) => void;
   currentGroupId?: string;
+  hasIncompleteOrder?: boolean;
 }
 
-export default function ProfileNavigation({ 
+export default function ProfileNavigation({
   variant = "desktop",
   onNavigate,
   onGroupSelect,
-  currentGroupId
+  currentGroupId,
+  hasIncompleteOrder = false,
 }: ProfileNavigationProps) {
   const pathname = usePathname();
   const [isGroupSheetOpen, setIsGroupSheetOpen] = useState(false);
@@ -87,6 +89,9 @@ export default function ProfileNavigation({
                 aria-current={item.isActive ? "page" : undefined}
               >
                 {item.label}
+                {hasIncompleteOrder && (
+                  <span className="w-2 h-2 rounded-full bg-[#D4A854] inline-block ml-1.5 align-middle" />
+                )}
               </button>
             );
           }

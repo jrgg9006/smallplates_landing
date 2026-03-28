@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
@@ -9,6 +9,7 @@ import Link from "next/link";
 import ProfileDropdown from "@/components/profile/ProfileDropdown";
 import ProfileNavigation from "@/components/profile/ProfileNavigation";
 import { GroupNavigationSheet } from "@/components/profile/groups/GroupNavigationSheet";
+import { getIncompleteOrders } from "@/lib/supabase/orders";
 import type { GroupWithMembers } from "@/lib/types/database";
 
 interface ProfileHeaderProps {
@@ -22,6 +23,13 @@ export function ProfileHeader({ onGroupSelect, currentGroupId }: ProfileHeaderPr
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isGroupSheetOpen, setIsGroupSheetOpen] = useState(false);
+  const [hasIncompleteOrder, setHasIncompleteOrder] = useState(false);
+
+  useEffect(() => {
+    getIncompleteOrders().then(({ data }) => {
+      setHasIncompleteOrder(data.length > 0);
+    });
+  }, []);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -65,10 +73,11 @@ export function ProfileHeader({ onGroupSelect, currentGroupId }: ProfileHeaderPr
           
           {/* Desktop: Navigation + Profile */}
           <div className="hidden lg:flex items-center gap-6">
-            <ProfileNavigation 
-              variant="desktop" 
+            <ProfileNavigation
+              variant="desktop"
               onGroupSelect={onGroupSelect}
               currentGroupId={currentGroupId}
+              hasIncompleteOrder={hasIncompleteOrder}
             />
             <ProfileDropdown />
           </div>
@@ -107,6 +116,9 @@ export function ProfileHeader({ onGroupSelect, currentGroupId }: ProfileHeaderPr
                 }`}
               >
                 My Books
+                {hasIncompleteOrder && (
+                  <span className="w-2 h-2 rounded-full bg-[#D4A854] inline-block ml-1.5 align-middle" />
+                )}
               </button>
               <button
                 onClick={handleAccount}

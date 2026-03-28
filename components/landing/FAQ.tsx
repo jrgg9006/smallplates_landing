@@ -20,16 +20,12 @@ export default function FAQ() {
     },
     {
       question: "What if guests don't send their recipes?",
-      answer: "We send up to 3 reminders per guest — so you don't have to. Most books end up with 30-50+ recipes. People want to be part of this."
+      answer: "Download your guest list from Zola or The Knot and send them a quick reminder. Most books end up with 30-50+ recipes. People want to be part of this."
     },
     {
-      question: "Is this just for the bride?",
-      answer: "It's for their kitchen. Their meals. Their life. If they eat, it's for both of them."
+      question: "Where do you ship?",
+      answer: "United States, all of the European Union, and Mexico. Your book gets there."
     },
-    {
-      question: "What makes this different from a regular cookbook?",
-      answer: "Every page has a name. Every recipe comes from someone who was there. It's not instructions — it's presence."
-    }
   ];
 
   return (

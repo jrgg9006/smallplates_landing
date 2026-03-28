@@ -23,6 +23,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [showSetupLink, setShowSetupLink] = useState(false);
+  const [resendingLink, setResendingLink] = useState(false);
   const router = useRouter();
 
   if (!isOpen) return null;
@@ -38,6 +40,22 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         const { user, error } = await signInWithEmail(email, password);
         if (error) {
           setError(error);
+          setShowSetupLink(false);
+          // Reason: Check if this email has a paid order without completed setup.
+          // If so, show a helpful link instead of just "invalid credentials".
+          try {
+            const res = await fetch('/api/stripe/check-user', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: email.trim().toLowerCase() }),
+            });
+            const data = await res.json();
+            if (data.hasIncompleteOrder) {
+              setShowSetupLink(true);
+            }
+          } catch {
+            // Reason: Non-critical — if the check fails, just show the normal error
+          }
         } else {
           onClose();
           router.push("/profile/groups");
@@ -71,6 +89,24 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       setLoading(false);
     }
     // Google OAuth will redirect, so no need to stop loading
+  };
+
+  const handleResendSetupLink = async () => {
+    setResendingLink(true);
+    try {
+      await fetch('/api/stripe/resend-setup-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+      });
+      setShowSetupLink(false);
+      setError(null);
+      setMessage("Setup link sent. Check your inbox.");
+    } catch {
+      setError("Could not send setup link. Try again.");
+    } finally {
+      setResendingLink(false);
+    }
   };
 
   return (
@@ -119,6 +155,21 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
               {error}
+            </div>
+          )}
+          {showSetupLink && (
+            <div className="mb-4 p-4 bg-[#FAF7F2] border border-[#D4A854]/30 rounded-lg">
+              <p className="text-sm text-[#2D2D2D]">
+                Looks like you bought a book but haven&apos;t finished setting up.
+              </p>
+              <button
+                type="button"
+                onClick={handleResendSetupLink}
+                disabled={resendingLink}
+                className="mt-2 text-sm font-semibold text-[#D4A854] hover:text-[#b8903e] transition-colors disabled:opacity-50"
+              >
+                {resendingLink ? "Sending..." : "Resend setup link \u2192"}
+              </button>
             </div>
           )}
           {message && (

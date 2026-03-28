@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseRoute } from "@/lib/supabase/route";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 /**
  * OAuth callback handler for Supabase authentication
@@ -23,6 +24,26 @@ export async function GET(request: Request) {
       console.error("Error exchanging code for session:", error.message);
       // Reason: Send to recovery page so expired magic link users can request a fresh one
       return NextResponse.redirect(`${origin}/recover-setup`);
+    }
+
+    // Reason: After successful auth, check if user has a paid order without completed setup.
+    // If so, redirect them to complete-setup instead of the dashboard.
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const supabaseAdmin = createSupabaseAdminClient();
+      const { data: incompleteOrder } = await supabaseAdmin
+        .from('orders')
+        .select('stripe_payment_intent, user_type')
+        .eq('user_id', user.id)
+        .eq('status', 'paid')
+        .is('couple_name', null)
+        .limit(1)
+        .single();
+
+      if (incompleteOrder?.stripe_payment_intent) {
+        const setupUrl = `/complete-setup?pi=${incompleteOrder.stripe_payment_intent}&type=${incompleteOrder.user_type || 'gift_giver'}`;
+        return NextResponse.redirect(`${origin}${setupUrl}`);
+      }
     }
   }
 

@@ -3,8 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { Plus } from "lucide-react";
 import { getMyGroups } from "@/lib/supabase/groups";
+import { getIncompleteOrders, type IncompleteOrder } from "@/lib/supabase/orders";
 import type { GroupWithMembers } from "@/lib/types/database";
 
 // Extend the interface locally to ensure image_group_dashboard is available
@@ -29,6 +31,7 @@ interface GroupNavigationSheetProps {
 export function GroupNavigationSheet({ isOpen, onClose, onGroupSelect, currentGroupId }: GroupNavigationSheetProps) {
   const router = useRouter();
   const [groups, setGroups] = useState<GroupWithDashboardImage[]>([]);
+  const [incompleteOrders, setIncompleteOrders] = useState<IncompleteOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -48,10 +51,14 @@ export function GroupNavigationSheet({ isOpen, onClose, onGroupSelect, currentGr
 
   const loadGroups = async () => {
     setLoading(true);
-    const { data, error } = await getMyGroups();
-    if (!error && data) {
-      setGroups(data as GroupWithDashboardImage[]);
+    const [groupsResult, ordersResult] = await Promise.all([
+      getMyGroups(),
+      getIncompleteOrders(),
+    ]);
+    if (!groupsResult.error && groupsResult.data) {
+      setGroups(groupsResult.data as GroupWithDashboardImage[]);
     }
+    setIncompleteOrders(ordersResult.data);
     setLoading(false);
   };
 
@@ -102,13 +109,37 @@ export function GroupNavigationSheet({ isOpen, onClose, onGroupSelect, currentGr
                   />
                 ))}
               </div>
-            ) : groups.length === 0 ? (
+            ) : groups.length === 0 && incompleteOrders.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-gray-500 text-sm">No books yet.</p>
                 <p className="text-gray-400 text-sm mt-1">Your collections will appear here.</p>
               </div>
             ) : (
               <div className="space-y-4">
+                {incompleteOrders.map((order) => (
+                  <Link
+                    key={order.stripe_payment_intent}
+                    href={`/complete-setup?pi=${order.stripe_payment_intent}&type=${order.user_type || 'gift_giver'}`}
+                    onClick={onClose}
+                    className="block w-full rounded-lg border-2 border-dashed border-[#D4A854] bg-[#FAF7F2] p-6 transition-all hover:shadow-md hover:border-[#D4A854]/80"
+                  >
+                    <div className="flex flex-col gap-3">
+                      <h3 className="font-serif text-lg font-medium text-[#2D2D2D]">
+                        Your new book is almost ready
+                      </h3>
+                      <div className="w-full h-1.5 bg-[#E8E0D5] rounded-full overflow-hidden">
+                        <div className="h-full w-3/4 bg-[#D4A854] rounded-full" />
+                      </div>
+                      <p className="text-sm text-[#2D2D2D]/70">
+                        Just a few details and you&apos;re done.
+                      </p>
+                      <span className="text-sm font-semibold text-[#D4A854]">
+                        Finish Setup &rarr;
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+
                 {groups.map((group) => (
                   <button
                     key={group.id}

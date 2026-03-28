@@ -207,8 +207,8 @@ export default function BooksPrinted() {
             <h2 className="type-heading mb-4">
               Real recipes. Real people. Real books.
             </h2>
-            <p className="type-body text-[#2D2D2D]/70 lg:text-2xl max-w-2xl">
-              They send the recipe. We make it look like this.
+            <p className="type-body text-[#2D2D2D]/70 max-w-3xl">
+              They send the recipe. We create an image for every single one.
             </p>
           </motion.div>
           

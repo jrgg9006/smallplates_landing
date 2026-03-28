@@ -29,10 +29,21 @@ export async function POST(request: NextRequest) {
       .eq('user_id', profile.id)
       .eq('role', 'owner');
 
+    // Reason: Check for paid orders where couple_name is NULL — user paid but didn't finish setup
+    const { data: incompleteOrder } = await supabaseAdmin
+      .from('orders')
+      .select('stripe_payment_intent, user_type')
+      .eq('user_id', profile.id)
+      .eq('status', 'paid')
+      .is('couple_name', null)
+      .limit(1)
+      .single();
+
     return NextResponse.json({
       exists: true,
       fullName: profile.full_name,
       hasGroups: (count ?? 0) > 0,
+      hasIncompleteOrder: !!incompleteOrder,
     });
   } catch {
     return NextResponse.json({ exists: false });
