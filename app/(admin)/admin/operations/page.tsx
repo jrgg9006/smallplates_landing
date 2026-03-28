@@ -106,6 +106,7 @@ interface Guest {
   first_name: string;
   last_name: string;
   printed_name: string | null;
+  group_name: string | null;
 }
 
 export default function OperationsPage() {
@@ -146,6 +147,7 @@ export default function OperationsPage() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showArchived, setShowArchived] = useState(false);
   const [notifyOptInFilter, setNotifyOptInFilter] = useState(false);
+  const [imageFilter, setImageFilter] = useState<'all' | 'yes' | 'no'>('all');
   
   const router = useRouter();
 
@@ -289,8 +291,13 @@ export default function OperationsPage() {
 
   // Memoized filtered recipes
   const filteredRecipes = useMemo(() => {
-    return filterRecipesBySearch(recipes, searchQuery);
-  }, [recipes, searchQuery]);
+    let result = filterRecipesBySearch(recipes, searchQuery);
+    if (imageFilter !== 'all') {
+      const hasImage = imageFilter === 'yes';
+      result = result.filter(r => (r.production_status?.image_generated || false) === hasImage);
+    }
+    return result;
+  }, [recipes, searchQuery, imageFilter]);
 
   // Unique guest count from filtered recipes
   const uniqueGuestCount = useMemo(() => {
@@ -393,6 +400,7 @@ export default function OperationsPage() {
             first_name: recipe.guests.first_name,
             last_name: recipe.guests.last_name,
             printed_name: recipe.guests.printed_name,
+            group_name: recipe.group?.name || null,
           });
         }
       });
@@ -1231,7 +1239,7 @@ ${instructions}`;
             <option value="all">All Guests</option>
             {guests.map((guest) => (
               <option key={guest.id} value={guest.id}>
-                {guest.printed_name || `${guest.first_name} ${guest.last_name}`.trim() || 'Unknown'}
+                {guest.printed_name || `${guest.first_name} ${guest.last_name}`.trim() || 'Unknown'}{guest.group_name ? ` (${guest.group_name})` : ''}
               </option>
             ))}
           </select>
@@ -1247,6 +1255,18 @@ ${instructions}`;
             <option value="no_action">No Action</option>
             <option value="in_progress">In Progress</option>
             <option value="ready_to_print">Ready to Print</option>
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">Image:</label>
+          <select
+            value={imageFilter}
+            onChange={(e) => setImageFilter(e.target.value as 'all' | 'yes' | 'no')}
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+          >
+            <option value="all">All</option>
+            <option value="yes">Has Image</option>
+            <option value="no">No Image</option>
           </select>
         </div>
         <div className="flex items-center gap-2">
