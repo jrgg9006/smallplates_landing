@@ -80,8 +80,8 @@ function CompleteSetupContent() {
         const supabase = createSupabaseClient();
         const { count } = await supabase
           .from('group_members')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', user.id)
+          .select('group_id', { count: 'exact', head: true })
+          .eq('profile_id', user.id)
           .eq('role', 'owner');
 
         if (count && count > 0) {

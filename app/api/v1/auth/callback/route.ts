@@ -36,8 +36,8 @@ export async function GET(request: Request) {
       // Reason: Users with existing groups already completed setup — don't redirect them
       const { count: groupCount } = await supabaseAdmin
         .from('group_members')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
+        .select('group_id', { count: 'exact', head: true })
+        .eq('profile_id', user.id)
         .eq('role', 'owner');
 
       if (!groupCount || groupCount === 0) {

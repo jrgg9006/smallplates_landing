@@ -25,8 +25,8 @@ export async function POST(request: NextRequest) {
     // Reason: Check if user already has groups — if so, they completed onboarding and should go to dashboard
     const { count } = await supabaseAdmin
       .from('group_members')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', profile.id)
+      .select('group_id', { count: 'exact', head: true })
+      .eq('profile_id', profile.id)
       .eq('role', 'owner');
 
     // Reason: Check for paid orders where couple_name is NULL — user paid but didn't finish setup
