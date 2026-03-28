@@ -39,6 +39,7 @@ function CompleteSetupContent() {
   const type = searchParams.get("type") === "couple" ? "couple" : "gift_giver";
   const [settingSession, setSettingSession] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
+  const [checkingGroups, setCheckingGroups] = useState(true);
 
   // Reason: generateLink (admin API) produces implicit flow links with #access_token in the hash.
   // But createBrowserClient from @supabase/ssr uses PKCE and ignores hash fragments.
@@ -70,27 +71,34 @@ function CompleteSetupContent() {
   }, [loading, user]);
 
   // Reason: If user already has groups, they completed onboarding before — send them to dashboard.
+  // Must complete BEFORE rendering the form to prevent flash of setup UI.
   useEffect(() => {
     if (!user?.id || loading || settingSession) return;
 
     const checkExistingGroups = async () => {
-      const supabase = createSupabaseClient();
-      const { count } = await supabase
-        .from('group_members')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .eq('role', 'owner');
+      try {
+        const supabase = createSupabaseClient();
+        const { count } = await supabase
+          .from('group_members')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('role', 'owner');
 
-      if (count && count > 0) {
-        setRedirecting(true);
-        router.push('/profile/groups');
+        if (count && count > 0) {
+          setRedirecting(true);
+          router.push('/profile/groups');
+          return;
+        }
+      } catch {
+        // Reason: On failure, allow form to render — better than blocking forever
       }
+      setCheckingGroups(false);
     };
 
     checkExistingGroups();
   }, [user?.id, loading, settingSession, router]);
 
-  if (loading || settingSession || redirecting) {
+  if (loading || settingSession || redirecting || checkingGroups) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#FAF8F4" }}>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4A854]" />
