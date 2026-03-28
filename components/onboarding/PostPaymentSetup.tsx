@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useOnboarding } from "@/lib/contexts/OnboardingContext";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 import { CustomDropdown } from "@/components/onboarding/CustomDropdown";
 import { createSupabaseClient } from "@/lib/supabase/client";
@@ -25,6 +26,7 @@ const inputClass = "w-full px-4 py-3.5 bg-white border border-[#E8E0D5] rounded-
  */
 export function PostPaymentSetup({ userType }: PostPaymentSetupProps) {
   const { state, completeOnboarding } = useOnboarding();
+  const { user } = useAuth();
   const router = useRouter();
 
   const savedData = state.answers.step4 as {
@@ -58,7 +60,8 @@ export function PostPaymentSetup({ userType }: PostPaymentSetupProps) {
   const calendarRef = useRef<HTMLDivElement>(null);
   const dateInputRef = useRef<HTMLDivElement>(null);
 
-  const emailFromStep3 = (state.answers.step3 as { email?: string } | undefined)?.email || "";
+  // Reason: Fallback to auth user email if OnboardingContext chain didn't propagate it
+  const emailFromStep3 = (state.answers.step3 as { email?: string } | undefined)?.email || user?.email || "";
 
   // Reason: Detect returning users so we skip password creation and pre-fill their name
   useEffect(() => {
@@ -74,11 +77,8 @@ export function PostPaymentSetup({ userType }: PostPaymentSetupProps) {
       .then(res => res.json())
       .then(data => {
         if (data.exists) {
-          // Reason: User already has groups — they completed onboarding before. Send them to dashboard.
-          if (data.hasGroups) {
-            router.push("/profile/groups");
-            return;
-          }
+          // Reason: Existing user — skip password creation and pre-fill name.
+          // Don't redirect even if they have groups — they may be setting up a new book.
           setIsExistingUser(true);
           if (data.fullName) setBuyerName(data.fullName);
         }
