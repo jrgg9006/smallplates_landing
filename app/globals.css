@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Reason: Google Maps Places Autocomplete injects global elements (pac-container,
+   separator divs) that can render visible lines when the dropdown is closed. */
+.pac-container {
+  z-index: 9999 !important;
+}
+body > div.pac-container ~ div:not([id]):not([class]) {
+  display: none !important;
+}
+
 /* Note: DM Sans and Inter are loaded via next/font/google in layout.tsx */
 /* Note: Minion Pro requires Adobe Fonts subscription - fallback to serif stack */
 

@@ -16,6 +16,7 @@ import { AddGuestModal } from "../guests/AddGuestModal";
 import { RecipeDetailsModal } from "../recipes/RecipeDetailsModal";
 import { getMyGroups, getUserRoleInGroup, deleteGroup, exitGroup } from "@/lib/supabase/groups";
 import { getGroupRecipes, searchGroupRecipes, removeRecipeFromGroup } from "@/lib/supabase/groupRecipes";
+import { BookClosedStatus } from "./BookClosedStatus";
 import type { GroupWithMembers, RecipeWithGuest } from "@/lib/types/database";
 
 interface GroupsSectionProps {
@@ -383,8 +384,8 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
 
   return (
     <div className="space-y-6">
-      {/* Search Bar */}
-      {selectedGroup && recipes.length > 0 && (
+      {/* Search Bar — hidden when book is closed */}
+      {selectedGroup && recipes.length > 0 && !bookClosed && (
         <div className="flex items-center justify-between">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[hsl(var(--brand-warm-gray))]" />
@@ -399,16 +400,9 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
         </div>
       )}
 
-      {/* Book Closed Banner */}
+      {/* Book Closed Status */}
       {selectedGroup && bookClosed && (
-        <div className="bg-[hsl(var(--brand-sand))]/50 rounded-xl px-5 py-4">
-          <p className="text-sm font-medium text-[hsl(var(--brand-charcoal))]">
-            This cookbook is being created and will be delivered soon.
-          </p>
-          <p className="text-xs text-[hsl(var(--brand-warm-gray))] mt-1">
-            Questions? Reach out to team@smallplatesandcompany.com
-          </p>
-        </div>
+        <BookClosedStatus group={selectedGroup} recipeCount={recipes.length} />
       )}
 
       {/* Close Book Banner */}
@@ -426,9 +420,9 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
         </div>
       )}
 
-      {/* Recipe Grid */}
-      {selectedGroup ? (
-        <div className={bookClosed ? 'opacity-60 pointer-events-none' : ''}>
+      {/* Recipe Grid — hidden when book is closed */}
+      {selectedGroup && !bookClosed && (
+        <div>
           <RecipeCardGrid
             recipes={recipes}
             onRecipeClick={handleRecipeClick}
@@ -438,7 +432,8 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
             onImportGuests={onImportGuests}
           />
         </div>
-      ) : (
+      )}
+      {!selectedGroup && !bookClosed && (
         <div className="flex items-center justify-center py-8">
           <div className="text-center">
             <p className="text-[hsl(var(--brand-warm-gray))]">Loading cookbook...</p>

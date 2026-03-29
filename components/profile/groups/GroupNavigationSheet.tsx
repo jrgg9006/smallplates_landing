@@ -177,11 +177,15 @@ export function GroupNavigationSheet({ isOpen, onClose, onGroupSelect, currentGr
                             {formatWeddingDate(group.wedding_date, group.wedding_timeline, group.wedding_date_undecided || false)}
                           </p>
                           
-                          {currentGroupId === group.id && (
+                          {group.book_closed_by_user ? (
+                            <span className="text-xs bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full text-white/90 border border-white/20">
+                              Closed
+                            </span>
+                          ) : currentGroupId === group.id ? (
                             <span className="text-xs bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-white border border-white/30">
                               Active
                             </span>
-                          )}
+                          ) : null}
                         </div>
                       </div>
                       

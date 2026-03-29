@@ -6,16 +6,13 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 
 interface CloseBookModalProps {
   isOpen: boolean;
   onClose: () => void;
   onReview: () => void;
-  onConfirmClose: () => void;
-  loading?: boolean;
+  onStartCloseFlow: () => void;
   reviewed: boolean;
   recipeCount: number;
   uniqueContributors: number;
@@ -25,8 +22,7 @@ export function CloseBookModal({
   isOpen,
   onClose,
   onReview,
-  onConfirmClose,
-  loading = false,
+  onStartCloseFlow,
   reviewed,
   recipeCount,
   uniqueContributors,
@@ -35,49 +31,44 @@ export function CloseBookModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl font-semibold">Close the Book</DialogTitle>
+          <DialogTitle className="font-serif text-2xl font-semibold">
+            {reviewed
+              ? "Looks good? This is final."
+              : "Ready to send it to print?"}
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="py-4">
-          <p className="text-sm text-[hsl(var(--brand-charcoal))]">
-            {recipeCount} recipes from {uniqueContributors} people.{recipeCount >= 25 && <> That&apos;s a real book.</>}
-          </p>
-          {recipeCount < 25 && (
-            <p className="text-sm text-[hsl(var(--brand-warm-gray))] mt-2">
-              We recommend at least 25 recipes for a book that really feels like something.
-            </p>
-          )}
-          <p className="text-sm text-[hsl(var(--brand-warm-gray))] mt-2">
-            Once you close it, no more recipes can be added and existing recipes can&apos;t be edited. Make sure everything looks right before closing.
+        <div className="py-3">
+          <p className="text-sm text-[#8A8780] leading-relaxed">
+            {reviewed
+              ? "Once you close the book, recipes can't be added or edited. We'll start designing right away."
+              : "Closing locks the recipes and sends everything to design. You'll confirm a couple of details before we print."}
           </p>
         </div>
 
-        <DialogFooter className="flex gap-2">
-          <Button
-            variant="outline"
+        <div className="flex gap-2 pt-2">
+          <button
             onClick={onClose}
-            disabled={loading}
-            className="flex-1"
+            className="flex-1 border border-[rgba(45,45,45,0.12)] text-[#2D2D2D] rounded-full py-3 text-[14px] font-medium hover:bg-gray-50 transition-colors"
           >
-            Not yet
-          </Button>
+            Not ready yet
+          </button>
           {reviewed ? (
-            <Button
-              onClick={onConfirmClose}
-              disabled={loading}
-              className="flex-1 bg-black text-white hover:bg-gray-800 rounded-lg"
+            <button
+              onClick={onStartCloseFlow}
+              className="flex-1 bg-[#2D2D2D] text-[#FAF7F2] rounded-full py-3 text-[14px] font-medium hover:bg-gray-800 transition-colors"
             >
-              {loading ? 'Closing...' : 'Close the book'}
-            </Button>
+              Close the book →
+            </button>
           ) : (
-            <Button
+            <button
               onClick={onReview}
-              className="flex-1 bg-black text-white hover:bg-gray-800 rounded-lg"
+              className="flex-1 bg-[#2D2D2D] text-[#FAF7F2] rounded-full py-3 text-[14px] font-medium hover:bg-gray-800 transition-colors"
             >
-              Review recipes
-            </Button>
+              Review recipes →
+            </button>
           )}
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

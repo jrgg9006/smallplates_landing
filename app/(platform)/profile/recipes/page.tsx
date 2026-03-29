@@ -182,7 +182,7 @@ export default function RecipesPage() {
                   My Small Plates
                 </h1>
                 <h3 className="text-lg font-light text-gray-600 mb-4 lg:mb-0">
-                  Your cookbook is cooking...
+                  This cookbook has been closed
                 </h3>
               </motion.div>
 

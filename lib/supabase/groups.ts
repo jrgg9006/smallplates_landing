@@ -270,11 +270,23 @@ export async function updateGroup(groupId: string, updates: GroupFormData) {
 /**
  * Close a book for new recipe submissions
  */
-export async function closeBook(groupId: string) {
+export async function closeBook(
+  groupId: string,
+  options?: { extraCopies?: number; extraCopiesPaymentIntentId?: string }
+) {
   const supabase = createSupabaseClient();
+  const updateData: Record<string, unknown> = {
+    book_closed_by_user: new Date().toISOString(),
+  };
+  if (options?.extraCopies !== undefined) {
+    updateData.extra_copies = options.extraCopies;
+  }
+  if (options?.extraCopiesPaymentIntentId) {
+    updateData.extra_copies_payment_intent_id = options.extraCopiesPaymentIntentId;
+  }
   const { data, error } = await supabase
     .from('groups')
-    .update({ book_closed_by_user: new Date().toISOString() })
+    .update(updateData)
     .eq('id', groupId)
     .select()
     .single();

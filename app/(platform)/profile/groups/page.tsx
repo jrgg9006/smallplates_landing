@@ -29,7 +29,8 @@ import { ImportGuestsModal } from "@/components/profile/guests/ImportGuestsModal
 import { SendInvitationsPage } from "@/components/profile/guests/SendInvitationsPage";
 import { CloseBookModal } from "@/components/profile/groups/CloseBookModal";
 import { ReviewRecipesPage } from "@/components/profile/groups/review/ReviewRecipesPage";
-import { closeBook } from "@/lib/supabase/groups";
+import { PostCloseFlow } from "@/components/profile/groups/PostCloseFlow";
+// Reason: closeBook is now called inside PostCloseFlow, not from page.tsx
 
 // Reason: Format book_close_date as "Month Dth" with ordinal suffix (no year)
 function getDeadlineText(dateString: string): string {
@@ -61,12 +62,11 @@ export default function GroupsPage() {
   const [showGuestSheet, setShowGuestSheet] = useState(false);
   const [showGuestDetailsModal, setShowGuestDetailsModal] = useState(false);
   const [importSource, setImportSource] = useState<"zola" | "the_knot" | null>(null);
-  const [activeView, setActiveView] = useState<'book' | 'send-invitations' | 'review-recipes'>('book');
+  const [activeView, setActiveView] = useState<'book' | 'send-invitations' | 'review-recipes' | 'post-close'>('book');
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [collectionToken, setCollectionToken] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [showCloseBookModal, setShowCloseBookModal] = useState(false);
-  const [isClosingBook, setIsClosingBook] = useState(false);
   const [bookReviewed, setBookReviewed] = useState(false);
   
   // Profile state
@@ -170,32 +170,26 @@ export default function GroupsPage() {
     setShowCloseBookModal(true);
   };
 
-  const handleConfirmCloseBook = async () => {
-    if (!selectedGroup) return;
-    setIsClosingBook(true);
-    try {
-      const { error } = await closeBook(selectedGroup.id);
-      if (error) {
-        console.error('Failed to close book:', error);
-        return;
-      }
-      setShowCloseBookModal(false);
-      setBookReviewed(false);
-      // Reason: Refresh group data so book_closed_by_user is updated in state
-      if (groupsSectionRef.current) {
-        await groupsSectionRef.current.loadGroups(true);
-        setTimeout(() => {
-          const updatedGroup = groupsSectionRef.current?.selectedGroup;
-          if (updatedGroup && updatedGroup.id === selectedGroup.id) {
-            setSelectedGroup(updatedGroup);
-          }
-        }, 100);
-      }
-    } catch (err) {
-      console.error('Error closing book:', err);
-    } finally {
-      setIsClosingBook(false);
+  // Reason: Book no longer closes from the modal. The PostCloseFlow handles
+  // closing after the full upsell → shipping → payment flow completes.
+  const handleStartCloseFlow = () => {
+    setShowCloseBookModal(false);
+    setBookReviewed(false);
+    setActiveView('post-close');
+  };
+
+  const handleCloseFlowDone = async () => {
+    // Reason: Refresh group data so book_closed_by_user is updated in state
+    if (groupsSectionRef.current) {
+      await groupsSectionRef.current.loadGroups(true);
+      setTimeout(() => {
+        const updatedGroup = groupsSectionRef.current?.selectedGroup;
+        if (updatedGroup && updatedGroup.id === selectedGroup?.id) {
+          setSelectedGroup(updatedGroup);
+        }
+      }, 100);
     }
+    setActiveView('book');
   };
 
   const handleGroupChange = (group: GroupWithMembers | null) => {
@@ -585,9 +579,21 @@ export default function GroupsPage() {
       {/* Review Recipes — full-screen view */}
       {activeView === 'review-recipes' && selectedGroup && (
         <ReviewRecipesPage
-          groupId={selectedGroup.id}
+          group={selectedGroup}
           onBack={() => setActiveView('book')}
           onMarkReviewed={handleMarkReviewed}
+          onStartCloseFlow={() => {
+            setActiveView('post-close');
+          }}
+        />
+      )}
+
+      {/* Post-Close Flow — full-screen upsell + shipping + payment */}
+      {activeView === 'post-close' && selectedGroup && (
+        <PostCloseFlow
+          groupId={selectedGroup.id}
+          onDone={handleCloseFlowDone}
+          onBack={handleCloseFlowDone}
         />
       )}
 
@@ -601,6 +607,8 @@ export default function GroupsPage() {
                 userEmail={user?.email}
               />
             )}
+            {/* Reason: Hide dashboard/buttons when book is closed — BookClosedStatus in GroupsSection handles the view */}
+            {selectedGroup?.book_closed_by_user ? null : (<>
             {/* Hero Image */}
             <div
               ref={repositionContainerRef}
@@ -862,6 +870,7 @@ export default function GroupsPage() {
                 </div>
               </div>
             </div>
+            </>)}
 
             {/* Recipe Grid */}
             <div className="mt-8 pb-16">
@@ -941,8 +950,7 @@ export default function GroupsPage() {
         isOpen={showCloseBookModal}
         onClose={() => { setShowCloseBookModal(false); setBookReviewed(false); }}
         onReview={handleReviewRecipes}
-        onConfirmClose={handleConfirmCloseBook}
-        loading={isClosingBook}
+        onStartCloseFlow={handleStartCloseFlow}
         reviewed={bookReviewed}
         recipeCount={recipeCount}
         uniqueContributors={uniqueContributors}

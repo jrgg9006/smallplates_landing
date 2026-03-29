@@ -262,6 +262,7 @@ export interface Database {
         Row: {
           id: string;
           user_id: string;
+          group_id: string | null;
           recipient_name: string;
           street_address: string;
           apartment_unit: string | null;
@@ -277,6 +278,7 @@ export interface Database {
         Insert: {
           id?: string;
           user_id: string;
+          group_id?: string | null;
           recipient_name: string;
           street_address: string;
           apartment_unit?: string | null;
@@ -288,6 +290,7 @@ export interface Database {
           is_default?: boolean;
         };
         Update: {
+          group_id?: string | null;
           recipient_name?: string;
           street_address?: string;
           apartment_unit?: string | null;
@@ -412,6 +415,11 @@ export interface Database {
           book_reviewed_at: string | null;
           book_closed_by_user: string | null;
           book_notes: string | null;
+          print_couple_name: string | null;
+          print_details_confirmed_at: string | null;
+          extra_copies: number;
+          extra_copies_payment_intent_id: string | null;
+
           created_at: string;
           updated_at: string;
         };
@@ -442,6 +450,11 @@ export interface Database {
           book_reviewed_at?: string | null;
           book_closed_by_user?: string | null;
           book_notes?: string | null;
+          print_couple_name?: string | null;
+          print_details_confirmed_at?: string | null;
+          extra_copies?: number;
+          extra_copies_payment_intent_id?: string | null;
+          shipping_address_id?: string | null;
         };
         Update: {
           name?: string;
@@ -469,6 +482,11 @@ export interface Database {
           book_reviewed_at?: string | null;
           book_closed_by_user?: string | null;
           book_notes?: string | null;
+          print_couple_name?: string | null;
+          print_details_confirmed_at?: string | null;
+          extra_copies?: number;
+          extra_copies_payment_intent_id?: string | null;
+          shipping_address_id?: string | null;
         };
       };
       group_members: {

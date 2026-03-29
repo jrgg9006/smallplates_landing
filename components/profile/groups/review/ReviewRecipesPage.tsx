@@ -5,19 +5,32 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 import { ReviewRecipeCard } from "./ReviewRecipeCard";
 import { ReviewRecipeSidebar } from "./ReviewRecipeSidebar";
-import type { RecipeForReview } from "@/lib/types/database";
+import { PrintDetailsWizard } from "./PrintDetailsWizard";
+import { PrintDetailsSidebar } from "./PrintDetailsSidebar";
+import { CloseBookModal } from "../CloseBookModal";
+import { closeBook } from "@/lib/supabase/groups";
+import type { RecipeForReview, GroupWithMembers } from "@/lib/types/database";
 
 interface ReviewRecipesPageProps {
-  groupId: string;
+  group: GroupWithMembers;
   onBack: () => void;
   onMarkReviewed: () => void;
+  onStartCloseFlow: () => void;
 }
 
-export function ReviewRecipesPage({ groupId, onBack, onMarkReviewed }: ReviewRecipesPageProps) {
+export function ReviewRecipesPage({ group, onBack, onMarkReviewed, onStartCloseFlow }: ReviewRecipesPageProps) {
+  const groupId = group.id;
+  const [showWizard, setShowWizard] = useState(!group.print_details_confirmed_at);
+  const [printCoupleName, setPrintCoupleName] = useState(
+    group.print_couple_name || group.couple_display_name || group.name
+  );
+  const [coupleImageUrl, setCoupleImageUrl] = useState(group.couple_image_url);
   const [recipes, setRecipes] = useState<RecipeForReview[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -78,6 +91,22 @@ export function ReviewRecipesPage({ groupId, onBack, onMarkReviewed }: ReviewRec
   const recipe = recipes[currentIndex];
   const isLast = currentIndex === recipes.length - 1;
 
+  if (showWizard) {
+    return (
+      <PrintDetailsWizard
+        groupId={groupId}
+        initialName={printCoupleName}
+        initialImageUrl={coupleImageUrl}
+        onBack={onBack}
+        onConfirmed={(data) => {
+          setPrintCoupleName(data.printCoupleName);
+          setCoupleImageUrl(data.coupleImageUrl);
+          setShowWizard(false);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen bg-[#F0EDE8]">
       {/* Compact header — back, nav, hint, approve all in one row */}
@@ -99,25 +128,25 @@ export function ReviewRecipesPage({ groupId, onBack, onMarkReviewed }: ReviewRec
 
         {/* Navigation — centered area */}
         {!loading && recipes.length > 0 && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <button
               onClick={goPrev}
               disabled={currentIndex === 0}
-              className="p-1.5 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               aria-label="Previous recipe"
             >
-              <ChevronLeft className="h-4 w-4 text-[#2D2D2D]" />
+              <ChevronLeft className="h-5 w-5 text-[#2D2D2D]" />
             </button>
-            <span className="text-xs text-gray-500 tabular-nums min-w-[50px] text-center">
+            <span className="text-sm text-gray-600 tabular-nums min-w-[50px] text-center font-medium">
               {currentIndex + 1} / {recipes.length}
             </span>
             <button
               onClick={goNext}
               disabled={isLast}
-              className="p-1.5 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               aria-label="Next recipe"
             >
-              <ChevronRight className="h-4 w-4 text-[#2D2D2D]" />
+              <ChevronRight className="h-5 w-5 text-[#2D2D2D]" />
             </button>
           </div>
         )}
@@ -127,7 +156,7 @@ export function ReviewRecipesPage({ groupId, onBack, onMarkReviewed }: ReviewRec
 
         {/* Approve button */}
         <Button
-          onClick={onMarkReviewed}
+          onClick={() => setShowConfirmModal(true)}
           className="bg-[#2D2D2D] text-white hover:bg-gray-800 rounded-full text-xs px-4 py-1.5 h-auto flex-shrink-0"
         >
           I&apos;ve reviewed everything
@@ -169,7 +198,41 @@ export function ReviewRecipesPage({ groupId, onBack, onMarkReviewed }: ReviewRec
             />
           ) : null}
         </div>
+
+        {/* Print details sidebar (desktop only) */}
+        {!loading && recipes.length > 0 && (
+          <PrintDetailsSidebar
+            groupId={groupId}
+            printCoupleName={printCoupleName}
+            coupleImageUrl={coupleImageUrl}
+            onUpdate={(data) => {
+              if (data.printCoupleName !== undefined) setPrintCoupleName(data.printCoupleName);
+              if (data.coupleImageUrl !== undefined) setCoupleImageUrl(data.coupleImageUrl);
+            }}
+          />
+        )}
       </div>
+
+      {/* Confirmation modal — appears over the review page */}
+      <CloseBookModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onReview={() => setShowConfirmModal(false)}
+        onStartCloseFlow={async () => {
+          setIsClosing(true);
+          const { error: closeError } = await closeBook(groupId);
+          if (closeError) {
+            console.error("Failed to close book:", closeError);
+            setIsClosing(false);
+            return;
+          }
+          setShowConfirmModal(false);
+          onStartCloseFlow();
+        }}
+        reviewed={true}
+        recipeCount={recipes.length}
+        uniqueContributors={0}
+      />
     </div>
   );
 }
