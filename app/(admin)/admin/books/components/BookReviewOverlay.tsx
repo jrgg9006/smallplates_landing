@@ -31,6 +31,7 @@ interface BookReviewOverlayProps {
   coupleName: string;
   recipes: ReviewRecipe[];
   imageCacheBuster?: number;
+  initialIndex?: number;
   onClose: () => void;
   onReviewComplete: () => void;
 }
@@ -40,12 +41,15 @@ export default function BookReviewOverlay({
   coupleName,
   recipes,
   imageCacheBuster,
+  initialIndex,
   onClose,
   onReviewComplete,
 }: BookReviewOverlayProps) {
   // Reason: local copy so we can update review status in-memory without refetching
   const [localRecipes, setLocalRecipes] = useState<ReviewRecipe[]>(recipes);
   const [currentIndex, setCurrentIndex] = useState(() => {
+    // Reason: if initialIndex provided, jump directly to that recipe
+    if (initialIndex !== undefined && initialIndex >= 0 && initialIndex < recipes.length) return initialIndex;
     // Reason: prioritize pending, then needs_revision, so the admin lands on the first recipe needing attention
     const firstPending = recipes.findIndex(r => r.book_review_status === 'pending');
     if (firstPending >= 0) return firstPending;
@@ -179,11 +183,12 @@ export default function BookReviewOverlay({
   };
 
   const handleStartEdit = useCallback(() => {
-    if (!recipe?.print_ready) return;
-    setEditName(recipe.print_ready.recipe_name_clean);
-    setEditIngredients(recipe.print_ready.ingredients_clean);
-    setEditInstructions(recipe.print_ready.instructions_clean);
-    setEditNote(recipe.print_ready.note_clean || '');
+    if (!recipe) return;
+    // Reason: use clean version if available, fall back to original so we can edit even without a clean version
+    setEditName(recipe.print_ready?.recipe_name_clean || recipe.recipe_name);
+    setEditIngredients(recipe.print_ready?.ingredients_clean || recipe.ingredients);
+    setEditInstructions(recipe.print_ready?.instructions_clean || recipe.instructions);
+    setEditNote(recipe.print_ready?.note_clean || recipe.comments || '');
     setShowOriginal(false);
     setIsEditing(true);
   }, [recipe]);
@@ -218,8 +223,8 @@ export default function BookReviewOverlay({
         r.id === recipe.id
           ? {
               ...r,
+              has_print_ready: true,
               print_ready: {
-                ...r.print_ready!,
                 recipe_name_clean: editName,
                 ingredients_clean: editIngredients,
                 instructions_clean: editInstructions,
@@ -271,7 +276,7 @@ export default function BookReviewOverlay({
       }
 
       if (e.key === 'e' || e.key === 'E') {
-        if (recipe?.has_print_ready) handleStartEdit();
+        handleStartEdit();
         return;
       }
 
@@ -300,19 +305,17 @@ export default function BookReviewOverlay({
 
   const progressPercent = total > 0 ? ((total - pendingCount) / total) * 100 : 0;
 
-  // Use clean/print-ready versions when available, toggle to original with showOriginal
-  const displayName = showOriginal
-    ? (recipe?.recipe_name || '')
-    : (recipe?.print_ready?.recipe_name_clean || recipe?.recipe_name || '');
-  const displayIngredients = showOriginal
-    ? (recipe?.ingredients || '')
-    : (recipe?.print_ready?.ingredients_clean || recipe?.ingredients || '');
-  const displayInstructions = showOriginal
-    ? (recipe?.instructions || '')
-    : (recipe?.print_ready?.instructions_clean || recipe?.instructions || '');
-  const displayNote = showOriginal
-    ? (recipe?.comments ?? null)
-    : (recipe?.print_ready?.note_clean ?? recipe?.comments ?? null);
+  // Reason: Left panel always shows clean version. When showOriginal is on, right panel shows original instead of image.
+  const displayName = recipe?.print_ready?.recipe_name_clean || recipe?.recipe_name || '';
+  const displayIngredients = recipe?.print_ready?.ingredients_clean || recipe?.ingredients || '';
+  const displayInstructions = recipe?.print_ready?.instructions_clean || recipe?.instructions || '';
+  const displayNote = recipe?.print_ready?.note_clean ?? recipe?.comments ?? null;
+
+  // Original versions for side-by-side comparison
+  const originalName = recipe?.recipe_name || '';
+  const originalIngredients = recipe?.ingredients || '';
+  const originalInstructions = recipe?.instructions || '';
+  const originalNote = recipe?.comments ?? null;
   const rawImage = recipe?.generated_image_url_print || recipe?.generated_image_url || null;
   // Reason: append cache buster so browser fetches fresh image after re-upload in operations
   const displayImage = rawImage && imageCacheBuster ? `${rawImage}?v=${imageCacheBuster}` : rawImage;
@@ -363,12 +366,12 @@ export default function BookReviewOverlay({
           <div className="flex-1 flex overflow-hidden">
             {/* Left page — recipe text */}
             <div className={`flex-1 overflow-y-auto p-8 lg:p-12 transition-colors duration-200 ${
-              isEditing ? 'bg-blue-50' : showOriginal ? 'bg-amber-50' : 'bg-[#FAF7F2]'
+              isEditing ? 'bg-blue-50' : 'bg-[#FAF7F2]'
             }`}>
               <div className="max-w-xl mx-auto">
                 {showOriginal && (
-                  <div className="mb-4 px-3 py-1.5 bg-amber-200/60 text-amber-800 text-xs font-medium rounded inline-block">
-                    Viewing Original
+                  <div className="mb-4 px-3 py-1.5 bg-green-200/60 text-green-800 text-xs font-medium rounded inline-block">
+                    Clean Version
                   </div>
                 )}
                 {isEditing && (
@@ -446,18 +449,58 @@ export default function BookReviewOverlay({
               </div>
             </div>
 
-            {/* Right page — recipe image */}
-            <div className="flex-1 bg-gray-100 flex items-center justify-center overflow-hidden">
-              {displayImage ? (
-                <img
-                  src={displayImage}
-                  alt={displayName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="text-gray-400 text-sm">No image available</div>
-              )}
-            </div>
+            {/* Right page — image or original text for comparison */}
+            {showOriginal ? (
+              <div className="flex-1 overflow-y-auto p-8 lg:p-12 bg-amber-50">
+                <div className="max-w-xl mx-auto">
+                  <div className="mb-4 px-3 py-1.5 bg-amber-200/60 text-amber-800 text-xs font-medium rounded inline-block">
+                    Original
+                  </div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-gray-400 font-serif mb-2">
+                    {recipe.guest_name}
+                  </p>
+                  <h1 className="text-3xl lg:text-4xl font-serif text-gray-900 mb-4 leading-tight">
+                    {originalName}
+                  </h1>
+                  {originalNote && (
+                    <p className="text-sm italic text-gray-500 font-serif mb-6">
+                      &ldquo;{originalNote}&rdquo;
+                    </p>
+                  )}
+                  <div className="border-t border-gray-200 my-6" />
+                  <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
+                    <div className="min-w-0">
+                      <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Ingredients</h3>
+                      <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed font-serif">
+                        {originalIngredients}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Instructions</h3>
+                      <div className="text-sm text-gray-700 font-serif leading-[1.6]">
+                        {originalInstructions?.split('\n').map((line, i) => (
+                          line.trim() === ''
+                            ? <div key={i} className="h-[2em]" />
+                            : <p key={i} className="m-0">{line}</p>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex-1 bg-gray-100 flex items-center justify-center overflow-hidden">
+                {displayImage ? (
+                  <img
+                    src={displayImage}
+                    alt={displayName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="text-gray-400 text-sm">No image available</div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Bottom action bar */}
@@ -505,31 +548,29 @@ export default function BookReviewOverlay({
                 {/* Center: status badge + original toggle + edit */}
                 <div className="flex items-center gap-2">
                   <ReviewBadge status={recipe.book_review_status} />
-                  {recipe.book_review_notes && recipe.book_review_status === 'needs_revision' && (
-                    <span className="text-xs text-amber-300 max-w-[200px] truncate">
-                      {recipe.book_review_notes}
+                  {recipe.has_print_ready && (
+                    <button
+                      onClick={() => setShowOriginal(v => !v)}
+                      className={`text-xs px-2 py-1 rounded transition-colors ${
+                        showOriginal
+                          ? 'bg-amber-500/30 text-amber-300'
+                          : 'bg-gray-700 text-gray-400 hover:text-gray-300'
+                      }`}
+                    >
+                      {showOriginal ? 'Show Clean Version' : 'Show Original'} <kbd className="text-[9px] opacity-40 ml-1.5 px-1 py-0.5 rounded border border-gray-600">O</kbd>
+                    </button>
+                  )}
+                  {!recipe.has_print_ready && (
+                    <span className="text-xs px-2 py-1 rounded bg-red-500/20 text-red-300">
+                      No clean version — showing original
                     </span>
                   )}
-                  {recipe.has_print_ready && (
-                    <>
-                      <button
-                        onClick={() => setShowOriginal(v => !v)}
-                        className={`text-xs px-2 py-1 rounded transition-colors ${
-                          showOriginal
-                            ? 'bg-amber-500/30 text-amber-300'
-                            : 'bg-gray-700 text-gray-400 hover:text-gray-300'
-                        }`}
-                      >
-                        {showOriginal ? 'Clean' : 'Original'} <span className="text-[10px] opacity-60 ml-1">O</span>
-                      </button>
-                      <button
-                        onClick={handleStartEdit}
-                        className="text-xs px-2 py-1 rounded bg-gray-700 text-gray-400 hover:text-gray-300 transition-colors flex items-center gap-1"
-                      >
-                        <Pencil className="w-3 h-3" /> Edit <span className="text-[10px] opacity-60 ml-0.5">E</span>
-                      </button>
-                    </>
-                  )}
+                  <button
+                    onClick={handleStartEdit}
+                    className="text-xs px-2 py-1 rounded bg-gray-700 text-gray-400 hover:text-gray-300 transition-colors flex items-center gap-1"
+                  >
+                    <Pencil className="w-3 h-3" /> Edit Recipe <kbd className="text-[9px] opacity-40 ml-1 px-1 py-0.5 rounded border border-gray-600">E</kbd>
+                  </button>
                 </div>
 
                 {/* Right: actions */}
@@ -550,33 +591,64 @@ export default function BookReviewOverlay({
                       }}
                     />
                   )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-amber-500 text-amber-400 hover:bg-amber-500/20 hover:text-amber-300"
-                    onClick={handleNeedsRevision}
-                    disabled={saving}
-                  >
-                    {saving && showNotesInput ? (
-                      <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                    ) : (
+                  {recipe.book_review_status === 'needs_revision' ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-amber-500 bg-amber-500/20 text-amber-300"
+                      onClick={() => handleApprove()}
+                      disabled={saving}
+                      title={recipe.book_review_notes || undefined}
+                    >
                       <AlertTriangle className="w-3 h-3 mr-1" />
-                    )}
-                    {showNotesInput ? 'Submit' : 'Needs Revision'}
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                    onClick={handleApprove}
-                    disabled={saving}
-                  >
-                    {saving && !showNotesInput ? (
-                      <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                    ) : (
+                      Flagged{recipe.book_review_notes ? `: ${recipe.book_review_notes}` : ''}
+                      <span className="ml-1.5 text-[9px] opacity-60">— click to clear</span>
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-amber-500 text-amber-400 hover:bg-amber-500/20 hover:text-amber-300"
+                      onClick={handleNeedsRevision}
+                      disabled={saving}
+                    >
+                      {saving && showNotesInput ? (
+                        <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                      ) : (
+                        <AlertTriangle className="w-3 h-3 mr-1" />
+                      )}
+                      {showNotesInput ? 'Submit' : 'Flag for Revision'}
+                    </Button>
+                  )}
+                  {recipe.book_review_status === 'approved' ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-green-500 bg-green-500/20 text-green-300 hover:bg-red-500/20 hover:text-red-300 hover:border-red-400"
+                      onClick={async () => {
+                        if (!recipe || saving) return;
+                        await saveReview(recipe.id, 'pending');
+                      }}
+                      disabled={saving}
+                    >
                       <Check className="w-3 h-3 mr-1" />
-                    )}
-                    Approve
-                  </Button>
+                      Approved — click to undo
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                      onClick={handleApprove}
+                      disabled={saving}
+                    >
+                      {saving && !showNotesInput ? (
+                        <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                      ) : (
+                        <Check className="w-3 h-3 mr-1" />
+                      )}
+                      Approve
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -621,7 +693,7 @@ function ReviewBadge({ status }: { status: string }) {
   }
   return (
     <span className="text-xs px-2 py-1 rounded bg-gray-600/20 text-gray-400 font-medium">
-      Pending
+      Pending Review
     </span>
   );
 }

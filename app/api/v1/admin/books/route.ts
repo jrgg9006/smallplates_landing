@@ -20,6 +20,7 @@ export async function GET() {
         book_status,
         book_notes,
         book_reviewed_at,
+        book_closed_by_user,
         created_at
       `)
       .order('created_at', { ascending: false });
@@ -148,6 +149,7 @@ export async function GET() {
       book_status: g.book_status || 'active',
       book_notes: g.book_notes,
       book_reviewed_at: g.book_reviewed_at,
+      book_closed_by_user: g.book_closed_by_user || null,
       contributor_count: contributorCountMap[g.id] || 0,
       recipe_count: recipeCountMap[g.id] || 0,
       print_ready_count: printReadyMap[g.id] || 0,

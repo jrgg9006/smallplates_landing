@@ -18,7 +18,8 @@ export async function GET(
       .select(`
         id, name, couple_display_name, couple_first_name, couple_last_name,
         partner_first_name, partner_last_name, wedding_date,
-        book_status, book_reviewed_by, book_reviewed_at, book_notes
+        book_status, book_reviewed_by, book_reviewed_at, book_notes, book_closed_by_user,
+        print_couple_name, couple_image_url, print_details_confirmed_at
       `)
       .eq('id', groupId)
       .single();
@@ -220,6 +221,10 @@ export async function GET(
         book_reviewed_by: group.book_reviewed_by,
         book_reviewed_at: group.book_reviewed_at,
         book_notes: group.book_notes,
+        book_closed_by_user: group.book_closed_by_user || null,
+        print_couple_name: group.print_couple_name || null,
+        couple_image_url: group.couple_image_url || null,
+        print_details_confirmed_at: group.print_details_confirmed_at || null,
       },
       contributors,
       owners,

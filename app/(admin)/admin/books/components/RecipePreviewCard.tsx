@@ -31,9 +31,10 @@ interface RecipeData {
 interface RecipePreviewCardProps {
   recipe: RecipeData;
   groupId: string;
+  onReview?: () => void;
 }
 
-export default function RecipePreviewCard({ recipe, groupId }: RecipePreviewCardProps) {
+export default function RecipePreviewCard({ recipe, groupId, onReview }: RecipePreviewCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   const hasBaseImage = !!recipe.generated_image_url;
@@ -59,24 +60,15 @@ export default function RecipePreviewCard({ recipe, groupId }: RecipePreviewCard
         <span className="text-sm font-medium text-gray-900 truncate flex-1">
           {displayName}
           <span className="ml-2 text-[10px] font-mono text-gray-400">{recipe.id.slice(0, 8)}</span>
-        </span>
-
-        <span className="text-xs text-gray-500 shrink-0">
-          by {recipe.guest_name}
-        </span>
-
-        <span className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 ${
-          recipe.has_print_ready ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-        }`}>
-          {recipe.has_print_ready ? 'Clean' : 'No clean'}
-        </span>
-
-        <span className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 ${
-          hasPrintImage ? 'bg-green-100 text-green-700' :
-          hasBaseImage ? 'bg-amber-100 text-amber-700' :
-          'bg-red-100 text-red-700'
-        }`}>
-          {hasPrintImage ? 'Print img' : hasBaseImage ? 'No print img' : 'No img'}
+          {onReview && (
+            <span
+              role="button"
+              onClick={(e) => { e.stopPropagation(); onReview(); }}
+              className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-gray-200 text-gray-600 hover:bg-blue-100 hover:text-blue-700 transition-colors cursor-pointer"
+            >
+              Review
+            </span>
+          )}
         </span>
 
         {recipe.needs_review && (
@@ -85,16 +77,38 @@ export default function RecipePreviewCard({ recipe, groupId }: RecipePreviewCard
           </span>
         )}
 
-        {recipe.book_review_status === 'approved' && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded shrink-0 bg-green-100 text-green-700">
-            Approved
-          </span>
-        )}
-        {recipe.book_review_status === 'needs_revision' && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded shrink-0 bg-red-100 text-red-700">
-            Needs Revision
-          </span>
-        )}
+        <span className="text-xs text-gray-500 shrink-0">
+          by {recipe.guest_name}
+        </span>
+
+        {/* Reason: Fixed-width badge columns so they align vertically across all recipe rows */}
+        <span className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 w-[62px] text-center ${
+          recipe.has_print_ready ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+        }`}>
+          {recipe.has_print_ready ? 'Clean' : 'No clean'}
+        </span>
+
+        <span className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 w-[72px] text-center ${
+          hasPrintImage ? 'bg-green-100 text-green-700' :
+          hasBaseImage ? 'bg-amber-100 text-amber-700' :
+          'bg-red-100 text-red-700'
+        }`}>
+          {hasPrintImage ? 'Print img' : hasBaseImage ? 'No print img' : 'No img'}
+        </span>
+
+        <span className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 w-[80px] text-center font-medium ${
+          recipe.book_review_status === 'approved'
+            ? 'bg-green-600 text-white'
+            : recipe.book_review_status === 'needs_revision'
+            ? 'bg-red-100 text-red-700'
+            : ''
+        }`}>
+          {recipe.book_review_status === 'approved'
+            ? 'Approved'
+            : recipe.book_review_status === 'needs_revision'
+            ? 'Needs Revision'
+            : ''}
+        </span>
       </button>
 
       {/* Expanded content */}

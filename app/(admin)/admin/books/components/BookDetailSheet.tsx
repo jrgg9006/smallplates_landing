@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import Image from 'next/image';
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Pencil, Check, X, Loader2, ChevronDown, ChevronRight } from 'lucide-react';
+import { Pencil, Check, X, Loader2, ChevronDown, ChevronRight, Download } from 'lucide-react';
 import type { BookStatus } from '@/lib/types/database';
 import type { BookSummary } from './BookCard';
 import RecipePreviewCard from './RecipePreviewCard';
@@ -74,6 +75,10 @@ interface BookDetail {
     book_reviewed_by: string | null;
     book_reviewed_at: string | null;
     book_notes: string | null;
+    book_closed_by_user: string | null;
+    print_couple_name: string | null;
+    couple_image_url: string | null;
+    print_details_confirmed_at: string | null;
   };
   contributors: Contributor[];
   owners: Member[];
@@ -137,6 +142,8 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
   const [editingNotes, setEditingNotes] = useState(false);
   const [notesValue, setNotesValue] = useState('');
   const [reviewOverlayOpen, setReviewOverlayOpen] = useState(false);
+  const [downloadingPackage, setDownloadingPackage] = useState(false);
+  const [reviewStartIndex, setReviewStartIndex] = useState<number | undefined>(undefined);
   // Reason: cache-busting for images — Supabase storage URLs stay the same after re-upload
   const [fetchTimestamp, setFetchTimestamp] = useState(Date.now());
 
@@ -160,7 +167,7 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
       fetchDetail(book.id);
       setEditingField(null);
       setEditingNotes(false);
-      setRecipesExpanded(false);
+      setRecipesExpanded(true);
     } else {
       setDetail(null);
     }
@@ -290,8 +297,65 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
               </div>
             </SheetHeader>
 
+            {/* Closed by user badge */}
+            {detail.group.book_closed_by_user && (
+              <div className="px-6 pt-3">
+                <span className="inline-flex items-center text-xs font-medium px-2 py-1 rounded bg-amber-100 text-amber-700">
+                  Closed by user on {new Date(detail.group.book_closed_by_user).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                </span>
+              </div>
+            )}
+
             {/* Scrollable body */}
             <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6 pb-28">
+              {/* Print Details — couple name & photo confirmed by user */}
+              <Section title="Print Details" collapsible expanded={true} onToggle={() => {}}>
+                <div className="space-y-3">
+                  {detail.group.print_details_confirmed_at ? (
+                    <p className="text-[10px] text-green-600 font-medium uppercase tracking-wide">
+                      Confirmed by user on {new Date(detail.group.print_details_confirmed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  ) : (
+                    <p className="text-[10px] text-amber-600 font-medium uppercase tracking-wide">
+                      Not yet confirmed by user
+                    </p>
+                  )}
+                  <div className="flex items-start gap-4">
+                    {/* Couple photo */}
+                    <div className="shrink-0">
+                      {detail.group.couple_image_url ? (
+                        <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
+                          <Image
+                            src={detail.group.couple_image_url}
+                            alt="Couple photo"
+                            fill
+                            className="object-cover"
+                            sizes="80px"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center">
+                          <span className="text-[10px] text-gray-400 text-center leading-tight">No<br />photo</span>
+                        </div>
+                      )}
+                    </div>
+                    {/* Name for print */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">Name on book</p>
+                      <p className="text-base font-serif text-gray-900">
+                        {detail.group.print_couple_name || <span className="text-gray-400 italic">Not set</span>}
+                      </p>
+                      {detail.group.print_couple_name && detail.group.couple_display_name &&
+                        detail.group.print_couple_name !== detail.group.couple_display_name && (
+                        <p className="text-[10px] text-gray-400 mt-1">
+                          Display name: {detail.group.couple_display_name}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Section>
+
               {/* Recipes */}
               <Section
                 title={`Recipes (${detail.recipes.length})`}
@@ -301,8 +365,16 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
               >
                 {recipesExpanded && (
                   <div className="space-y-2">
-                    {detail.recipes.map(r => (
-                      <RecipePreviewCard key={r.id} recipe={r} groupId={detail.group.id} />
+                    {detail.recipes.map((r, i) => (
+                      <RecipePreviewCard
+                        key={r.id}
+                        recipe={r}
+                        groupId={detail.group.id}
+                        onReview={() => {
+                          setReviewStartIndex(i);
+                          setReviewOverlayOpen(true);
+                        }}
+                      />
                     ))}
                     {detail.recipes.length === 0 && (
                       <p className="text-sm text-gray-400 italic py-2">No recipes yet</p>
@@ -503,7 +575,7 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                 )}
               </div>
               <div className="flex gap-2">
-                {currentStatus !== 'inactive' && (
+                {currentStatus !== 'inactive' && currentStatus !== 'printed' && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -531,16 +603,64 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                   >
                     Continue Review ({detail.recipes.length} recipes)
                   </Button>
-                ) : nextStatus ? (
-                  <Button
-                    size="sm"
-                    onClick={() => changeStatus(nextStatus)}
-                    disabled={saving}
-                  >
-                    {saving ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
-                    Move to {STATUS_LABELS[nextStatus]}
-                  </Button>
-                ) : null}
+                ) : (
+                  <>
+                    {currentStatus === 'ready_to_print' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-[#D4A854] text-[#D4A854] hover:bg-[#D4A854]/10"
+                        disabled={downloadingPackage}
+                        onClick={async () => {
+                          setDownloadingPackage(true);
+                          try {
+                            const res = await fetch(`/api/v1/admin/books/${detail.group.id}/package`);
+                            if (!res.ok) {
+                              const data = await res.json();
+                              throw new Error(data.error || 'Download failed');
+                            }
+                            const blob = await res.blob();
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = res.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || 'book-package.zip';
+                            a.click();
+                            URL.revokeObjectURL(url);
+                          } catch (err) {
+                            alert(err instanceof Error ? err.message : 'Download failed');
+                          } finally {
+                            setDownloadingPackage(false);
+                          }
+                        }}
+                      >
+                        {downloadingPackage ? (
+                          <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                        ) : (
+                          <Download className="w-3 h-3 mr-1" />
+                        )}
+                        {downloadingPackage ? 'Generating...' : 'Download Book Package'}
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setReviewOverlayOpen(true)}
+                      disabled={detail.recipes.length === 0}
+                    >
+                      Preview Book ({detail.recipes.length} recipes)
+                    </Button>
+                    {nextStatus && (
+                      <Button
+                        size="sm"
+                        onClick={() => changeStatus(nextStatus)}
+                        disabled={saving}
+                      >
+                        {saving ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                        Move to {STATUS_LABELS[nextStatus]}
+                      </Button>
+                    )}
+                  </>
+                )}
               </div>
             </div>
 
@@ -551,8 +671,10 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                 coupleName={detail.group.couple_display_name}
                 recipes={detail.recipes}
                 imageCacheBuster={fetchTimestamp}
+                initialIndex={reviewStartIndex}
                 onClose={() => {
                   setReviewOverlayOpen(false);
+                  setReviewStartIndex(undefined);
                   if (book) fetchDetail(book.id);
                 }}
                 onReviewComplete={onStatusChange}

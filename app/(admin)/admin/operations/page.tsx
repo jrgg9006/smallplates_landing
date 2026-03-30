@@ -120,6 +120,7 @@ export default function OperationsPage() {
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeWithProductionStatus | null>(null);
   const [updatingField, setUpdatingField] = useState<string | null>(null);
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
+  const [orphanCount, setOrphanCount] = useState(0);
   const [downloadingImages, setDownloadingImages] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   
@@ -203,6 +204,8 @@ export default function OperationsPage() {
     // console.log removed for production
     setIsAdmin(true);
     await loadGroups();
+    // Reason: Check for orphan recipes that are invisible in Book Production
+    fetch('/api/v1/admin/orphan-check').then(r => r.json()).then(d => setOrphanCount(d.count || 0)).catch(() => {});
     setLoading(false);
   };
 
@@ -1170,32 +1173,23 @@ ${instructions}`;
         </div>
       </div>
 
-      {/* Dashboard Stats */}
-      <div className="bg-white border-b px-6 py-2">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-            <div className="text-xs text-red-600 font-medium">
-              Recipes Needing Action: <span className="text-red-900 font-semibold">{stats.recipesNeedingAction}</span>
-            </div>
-          </div>
-          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-            <div className="text-xs text-green-600 font-medium">
-              Recipes Ready to Print: <span className="text-green-900 font-semibold">{stats.recipesReadyToPrint}</span>
-            </div>
-          </div>
+      {/* Orphan recipe alert */}
+      {orphanCount > 0 && (
+        <div className="bg-red-600 text-white px-6 py-2 text-sm font-medium">
+          {orphanCount} recipe{orphanCount !== 1 ? 's' : ''} found without a group — invisible in Book Production. Check debug_logs for details.
         </div>
-      </div>
+      )}
 
       {/* Filters */}
       <div className="bg-white border-b px-6 py-3 flex items-center gap-4 flex-wrap">
-        <div className="flex items-center gap-2 flex-1 min-w-[250px]">
+        <div className="flex items-center gap-2 flex-1 min-w-[180px] max-w-[350px]">
           <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Search:</label>
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search recipes, guests, or users..."
-            className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+            placeholder="Search..."
+            className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -1234,7 +1228,7 @@ ${instructions}`;
           <select
             value={guestFilter}
             onChange={(e) => setGuestFilter(e.target.value)}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent min-w-[200px]"
+            className="px-2 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent min-w-[120px] max-w-[200px]"
           >
             <option value="all">All Guests</option>
             {guests.map((guest) => (
@@ -1305,6 +1299,10 @@ ${instructions}`;
             <span>{uniqueGuestCount} guest{uniqueGuestCount !== 1 ? 's' : ''}</span>
           )}
           <span>{filteredRecipes.length} recipe{filteredRecipes.length !== 1 ? 's' : ''}</span>
+          <span className="text-gray-300">|</span>
+          <span className="text-red-600">{stats.recipesNeedingAction} needing action</span>
+          <span className="text-gray-300">|</span>
+          <span className="text-green-600">{stats.recipesReadyToPrint} ready to print</span>
         </div>
       </div>
 
