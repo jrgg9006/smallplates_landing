@@ -816,13 +816,18 @@ export function PostCloseFlow({ groupId, onDone, onBack }: PostCloseFlowProps) {
   const finalizeClose = async (paymentIntentId?: string) => {
     setClosing(true);
     try {
-      const { error } = await closeBook(groupId, {
-        extraCopies: qty,
-        extraCopiesPaymentIntentId: paymentIntentId,
-      });
+      const { error } = await closeBook(groupId);
       if (error) {
         console.error("Failed to close book:", error);
         return;
+      }
+      // Reason: Record extra copies as an order if purchased during close
+      if (qty > 0 && paymentIntentId) {
+        await fetch(`/api/v1/groups/${groupId}/extra-copies-payment`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ additionalCopies: qty, paymentIntentId }),
+        });
       }
       setStep("done");
       onDone();

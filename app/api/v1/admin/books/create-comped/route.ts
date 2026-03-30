@@ -100,11 +100,9 @@ export async function POST(request: NextRequest) {
     await supabaseAdmin.from('orders').insert({
       user_id: userId,
       email: targetEmail,
-      stripe_session_id: `comped_${group.id}`,
       stripe_payment_intent: `comped_by_${user.email}`,
       amount_total: 0,
       book_quantity: 1,
-      shipping_country: 'US',
       couple_name: coupleName,
       user_type: resolvedUserType,
       onboarding_data: { comped: true, created_by: user.email },

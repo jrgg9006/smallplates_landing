@@ -395,7 +395,6 @@ export interface Database {
           created_by: string;
           wedding_date: string | null;
           wedding_date_undecided: boolean;
-          wedding_timeline: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
           couple_first_name: string | null;
           couple_last_name: string | null;
           partner_first_name: string | null;
@@ -417,9 +416,6 @@ export interface Database {
           book_notes: string | null;
           print_couple_name: string | null;
           print_details_confirmed_at: string | null;
-          extra_copies: number;
-          extra_copies_payment_intent_id: string | null;
-
           created_at: string;
           updated_at: string;
         };
@@ -430,7 +426,6 @@ export interface Database {
           created_by?: string;
           wedding_date?: string | null;
           wedding_date_undecided?: boolean;
-          wedding_timeline?: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
           couple_first_name?: string | null;
           couple_last_name?: string | null;
           partner_first_name?: string | null;
@@ -452,8 +447,6 @@ export interface Database {
           book_notes?: string | null;
           print_couple_name?: string | null;
           print_details_confirmed_at?: string | null;
-          extra_copies?: number;
-          extra_copies_payment_intent_id?: string | null;
           shipping_address_id?: string | null;
         };
         Update: {
@@ -462,7 +455,6 @@ export interface Database {
           created_by?: string;
           wedding_date?: string | null;
           wedding_date_undecided?: boolean;
-          wedding_timeline?: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
           couple_first_name?: string | null;
           couple_last_name?: string | null;
           partner_first_name?: string | null;
@@ -484,8 +476,6 @@ export interface Database {
           book_notes?: string | null;
           print_couple_name?: string | null;
           print_details_confirmed_at?: string | null;
-          extra_copies?: number;
-          extra_copies_payment_intent_id?: string | null;
           shipping_address_id?: string | null;
         };
       };
@@ -711,17 +701,17 @@ export type RecipePrintReady = Database['public']['Tables']['recipe_print_ready'
 export type RecipePrintReadyUpdate = Database['public']['Tables']['recipe_print_ready']['Update'];
 
 // Order types
+export type OrderType = 'initial_purchase' | 'extra_copy' | 'copy_order';
+
 export interface Order {
   id: string;
   created_at: string;
   updated_at: string;
   user_id: string | null;
   email: string;
-  stripe_session_id: string;
   stripe_payment_intent: string | null;
   amount_total: number | null;
   book_quantity: number;
-  shipping_country: string;
   shipping_address: Record<string, unknown> | null;
   couple_name: string | null;
   user_type: string;
@@ -729,13 +719,15 @@ export interface Order {
   onboarding_data: Record<string, unknown> | null;
   status: OrderStatus;
   error_message: string | null;
+  order_type: OrderType;
+  group_id: string | null;
 }
 
 export interface OrderInsert {
   id?: string;
   user_id?: string | null;
   email: string;
-  stripe_session_id: string;
+  stripe_session_id?: string | null;
   stripe_payment_intent?: string | null;
   amount_total?: number | null;
   book_quantity?: number;
@@ -747,6 +739,8 @@ export interface OrderInsert {
   onboarding_data?: Record<string, unknown> | null;
   status?: OrderStatus;
   error_message?: string | null;
+  order_type?: OrderType;
+  group_id?: string | null;
 }
 
 // Extended types with relationships
@@ -877,7 +871,6 @@ export interface GroupFormData {
   description?: string;
   wedding_date?: string | null;
   wedding_date_undecided?: boolean;
-  wedding_timeline?: '6-plus-months' | '3-6-months' | '1-3-months' | 'less-than-month' | 'already-happened' | null;
   couple_first_name?: string | null;
   couple_last_name?: string | null;
   partner_first_name?: string | null;
@@ -946,6 +939,9 @@ export interface CollectionTokenInfo {
   book_closed_by_user: string | null;
   token: string;
   is_valid: boolean;
+  // Reason: Auto-resolved group when ?group= param is missing from URL — prevents orphan recipes
+  resolved_group_id: string | null;
+  available_groups: { id: string; name: string }[];
 }
 
 // API response types

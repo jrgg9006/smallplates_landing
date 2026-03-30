@@ -47,14 +47,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Reason: CRITICAL — auto-resolve groupId server-side if client sent null
+    let resolvedGroupId = groupId;
+    if (!resolvedGroupId && !cookbookId) {
+      const { data: userGroups } = await supabaseAdmin
+        .from('group_members')
+        .select('group_id, groups!inner(id, name, book_closed_by_user)')
+        .eq('profile_id', profile.id)
+        .eq('role', 'owner');
+
+      if (userGroups && userGroups.length > 0) {
+        const activeGroups = userGroups.filter((gm) => {
+          const group = gm.groups as unknown as { book_closed_by_user: string | null };
+          return !group.book_closed_by_user;
+        });
+        const candidates = activeGroups.length > 0 ? activeGroups : userGroups;
+        if (candidates.length === 1) {
+          resolvedGroupId = candidates[0].group_id;
+          console.log(`🛡️ SERVER FAIL-SAFE: Auto-resolved groupId ${resolvedGroupId} for recipe ${recipeId}`);
+        } else {
+          console.error(`🚨 CRITICAL: Cannot auto-resolve group for recipe ${recipeId} — user has ${candidates.length} groups`);
+        }
+      }
+    }
+
     let targetCookbookId: string | null = null;
 
-    if (groupId) {
+    if (resolvedGroupId) {
       // Verify user is a member of the group
       const { data: groupMember } = await supabaseAdmin
         .from('group_members')
         .select('profile_id')
-        .eq('group_id', groupId)
+        .eq('group_id', resolvedGroupId)
         .eq('profile_id', profile.id)
         .maybeSingle();
 
@@ -69,7 +93,7 @@ export async function POST(request: NextRequest) {
       const { data: cookbook } = await supabaseAdmin
         .from('cookbooks')
         .select('id')
-        .eq('group_id', groupId)
+        .eq('group_id', resolvedGroupId)
         .eq('is_group_cookbook', true)
         .maybeSingle();
 
@@ -165,22 +189,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If this was a group link, also add to group_recipes so it appears in the group view
-    if (groupId) {
-      // Check if already in group_recipes (active or removed)
+    // Reason: CRITICAL — ensure ALL 3 tables are updated when linking recipe to group
+    if (resolvedGroupId) {
+      // 1. group_recipes (join table — source of truth for Operations & Book Production)
       const { data: existingGroupRecipe } = await supabaseAdmin
         .from('group_recipes')
         .select('group_id, recipe_id, removed_at')
-        .eq('group_id', groupId)
+        .eq('group_id', resolvedGroupId)
         .eq('recipe_id', recipeId)
         .maybeSingle();
-      
+
       if (!existingGroupRecipe) {
-        // Doesn't exist, insert new
         const { error: groupRecipeError } = await supabaseAdmin
           .from('group_recipes')
           .insert({
-            group_id: groupId,
+            group_id: resolvedGroupId,
             recipe_id: recipeId,
             added_by: profile.id,
             note: null
@@ -188,10 +211,8 @@ export async function POST(request: NextRequest) {
 
         if (groupRecipeError) {
           console.error('Error adding to group_recipes:', groupRecipeError);
-          // Don't fail - recipe is already in cookbook, just log the error
         }
       } else if (existingGroupRecipe.removed_at) {
-        // Exists but was removed, reactivate it
         const { error: reactivateError } = await supabaseAdmin
           .from('group_recipes')
           .update({
@@ -200,7 +221,7 @@ export async function POST(request: NextRequest) {
             added_by: profile.id,
             added_at: new Date().toISOString()
           })
-          .eq('group_id', groupId)
+          .eq('group_id', resolvedGroupId)
           .eq('recipe_id', recipeId);
 
         if (reactivateError) {
@@ -208,8 +229,30 @@ export async function POST(request: NextRequest) {
         }
       }
       // If it exists and is active, do nothing (already in group)
+
+      // 2. guest_recipes.group_id — update if null
+      await supabaseAdmin
+        .from('guest_recipes')
+        .update({ group_id: resolvedGroupId })
+        .eq('id', recipeId)
+        .is('group_id', null);
+
+      // 3. guests.group_id — update if null
+      const { data: recipeRow } = await supabaseAdmin
+        .from('guest_recipes')
+        .select('guest_id')
+        .eq('id', recipeId)
+        .single();
+
+      if (recipeRow?.guest_id) {
+        await supabaseAdmin
+          .from('guests')
+          .update({ group_id: resolvedGroupId })
+          .eq('id', recipeRow.guest_id)
+          .is('group_id', null);
+      }
     }
-    
+
     return NextResponse.json(
       { success: true, message: 'Recipe added to cookbook', data: insertData },
       { status: 200 }

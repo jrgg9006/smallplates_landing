@@ -33,7 +33,8 @@
       "Bash(npm install react-day-picker date-fns 2>&1)",
       "Bash(npm install:*)",
       "Bash(ls -la /Users/macbook/Desktop/smallplates_landing/app/\\\\\\(auth\\\\\\)/onboarding/success/)",
-      "Bash(ls -la /Users/macbook/Desktop/smallplates_landing/app/\\\\\\(platform\\\\\\)/complete-setup/)"
+      "Bash(ls -la /Users/macbook/Desktop/smallplates_landing/app/\\\\\\(platform\\\\\\)/complete-setup/)",
+      "WebSearch"
     ],
     "deny": []
   }

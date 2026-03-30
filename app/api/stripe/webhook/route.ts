@@ -39,7 +39,6 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
 
   const email = metadata.email || '';
   const bookQuantity = parseInt(metadata.bookQuantity || '1', 10);
-  const shippingCountry = metadata.shippingCountry || 'US';
   const userType = metadata.userType || 'couple';
   const purchaseIntentId = metadata.purchaseIntentId;
   const existingUserId = metadata.existingUserId;
@@ -110,11 +109,9 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
     const { error: orderError } = await supabaseAdmin.from('orders').insert({
       user_id: userId,
       email: freshEmail || 'pending@checkout.local',
-      stripe_session_id: paymentIntent.id,
       stripe_payment_intent: paymentIntent.id,
       amount_total: paymentIntent.amount,
       book_quantity: bookQuantity,
-      shipping_country: shippingCountry,
       couple_name: null,
       user_type: userType,
       purchase_intent_id: null,
@@ -260,11 +257,9 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   const { error: orderError } = await supabaseAdmin.from('orders').insert({
     user_id: userId,
     email,
-    stripe_session_id: paymentIntent.id,
     stripe_payment_intent: paymentIntent.id,
     amount_total: paymentIntent.amount,
     book_quantity: bookQuantity,
-    shipping_country: shippingCountry,
     couple_name: purchaseIntentData
       ? `${(purchaseIntentData as Record<string, string>).couple_first_name || ''} & ${(purchaseIntentData as Record<string, string>).partner_first_name || ''}`
       : null,

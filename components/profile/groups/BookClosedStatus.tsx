@@ -5,25 +5,45 @@ import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLoadScript, Autocomplete } from "@react-google-maps/api";
-import { AlertCircle, Check, ArrowRight, Plus } from "lucide-react";
+import { AlertCircle, Check, ArrowRight, Plus, Link2 } from "lucide-react";
 import { ExtraCopyPurchase } from "./ExtraCopyPurchase";
 import type { GroupWithMembers, ShippingAddress } from "@/lib/types/database";
 
 const GOOGLE_MAPS_LIBRARIES: ("places")[] = ["places"];
 
-// Reason: Calculate business days from a given date (skip weekends)
-function addBusinessDays(date: Date, days: number): Date {
-  const result = new Date(date);
-  let added = 0;
-  while (added < days) {
-    result.setDate(result.getDate() + 1);
-    if (result.getDay() !== 0 && result.getDay() !== 6) added++;
-  }
-  return result;
-}
+function ShareCopyLink({ groupId }: { groupId: string }) {
+  const [copied, setCopied] = useState(false);
 
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  const handleCopy = async () => {
+    const url = `${window.location.origin}/copy/${groupId}`;
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div>
+      <button
+        onClick={handleCopy}
+        className="inline-flex items-center gap-1.5 px-4 py-2 border border-[#E8E0D5] text-[#2D2D2D] text-xs font-medium rounded-full hover:border-[#D4A854] hover:text-[#D4A854] transition-colors"
+      >
+        {copied ? (
+          <>
+            <Check className="w-3.5 h-3.5 text-[#D4A854]" />
+            Link copied
+          </>
+        ) : (
+          <>
+            <Link2 className="w-3.5 h-3.5" />
+            Share order link
+          </>
+        )}
+      </button>
+      <p className="text-[11px] text-[#8A8780] mt-1.5 pl-1">
+        Anyone with the link can order their own copy.
+      </p>
+    </div>
+  );
 }
 
 interface BookClosedStatusProps {
@@ -82,29 +102,22 @@ const SUPPORTED_COUNTRIES: { code: string; name: string; postalLabel: string; po
   { code: "CA", name: "Canada", postalLabel: "Postal Code", postalPlaceholder: "K1A 0B1", regionLabel: "Province", regionType: "text" },
 ];
 
-function TimelineSection({ closedDate }: { closedDate: Date }) {
-  const designDate = addBusinessDays(closedDate, 5);
-  const arrivalDate = new Date(closedDate);
-  arrivalDate.setDate(arrivalDate.getDate() + 21);
-
+function TimelineSection() {
   const steps = [
     {
       completed: true,
       title: "Book closed",
       description: "Recipes locked and ready for design.",
-      date: formatDate(closedDate),
     },
     {
       completed: false,
       title: "Design & layout",
       description: "We'll lay out every recipe and send you a preview.",
-      date: `Estimated: ${formatDate(designDate)}`,
     },
     {
       completed: false,
       title: "Printing & shipping",
       description: "Your book ships and arrives at your door.",
-      date: `Estimated arrival: ${formatDate(arrivalDate)}`,
     },
   ];
 
@@ -133,7 +146,6 @@ function TimelineSection({ closedDate }: { closedDate: Date }) {
           <div>
             <p className="text-sm font-medium text-[#2D2D2D]">{s.title}</p>
             <p className="text-[13px] text-[#8A8780]">{s.description}</p>
-            <p className="text-[13px] italic text-[#8A8780] mt-0.5">{s.date}</p>
           </div>
         </div>
       ))}
@@ -147,6 +159,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress | null>(null);
   const [loadingAddress, setLoadingAddress] = useState(true);
   const [showPurchase, setShowPurchase] = useState(false);
+  const [extraCopiesCount, setExtraCopiesCount] = useState(0);
 
   // Shipping form state
   const [country, setCountry] = useState("US");
@@ -186,7 +199,18 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
         setLoadingAddress(false);
       }
     };
+    // Reason: Count extra copies from orders table instead of groups.extra_copies
+    const fetchExtraCopies = async () => {
+      try {
+        const res = await fetch(`/api/v1/groups/${group.id}/orders?type=extra_copy`);
+        const json = await res.json();
+        if (json.totalCopies != null) setExtraCopiesCount(json.totalCopies);
+      } catch {
+        // Reason: Non-critical — falls back to 0
+      }
+    };
     fetchAddress();
+    fetchExtraCopies();
   }, [group.id]);
 
   // Reason: When country changes, clear region since state lists differ
@@ -306,7 +330,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
         groupId={group.id}
         bookStatus={group.book_status}
         existingAddress={shippingAddress}
-        existingExtraCopies={group.extra_copies || 0}
+        existingExtraCopies={extraCopiesCount}
         onDone={() => {
           setShowPurchase(false);
           window.location.reload();
@@ -367,17 +391,20 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-1">Copies</p>
               <p className="text-sm text-[#2D2D2D]">
-                {(group.extra_copies || 0) > 0
-                  ? `${1 + group.extra_copies} books`
+                {extraCopiesCount > 0
+                  ? `${1 + extraCopiesCount} books`
                   : "1 book"}
               </p>
-              <button
-                onClick={() => setShowPurchase(true)}
-                className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 bg-[#2D2D2D] text-white text-xs font-medium rounded-full hover:bg-gray-800 transition-colors"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Get another copy
-              </button>
+              <div className="flex flex-wrap items-start gap-2 mt-3">
+                <button
+                  onClick={() => setShowPurchase(true)}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2D2D2D] text-white text-xs font-medium rounded-full hover:bg-gray-800 transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Get more copies
+                </button>
+                <ShareCopyLink groupId={group.id} />
+              </div>
             </div>
           </div>
 
@@ -550,7 +577,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
           <p className="text-xs uppercase tracking-[0.25em] text-[#D4A854] font-medium mb-4">
             What happens next
           </p>
-          <TimelineSection closedDate={group.book_closed_by_user ? new Date(group.book_closed_by_user) : new Date()} />
+          <TimelineSection />
 
           {/* Footer */}
           <div className="border-t border-[#E8E0D5] my-6" />

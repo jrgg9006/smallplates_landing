@@ -96,7 +96,9 @@ export default function ReviewPage() {
         comments: submissionData.recipe.personalNote,
       };
 
-      const { data, error } = await submitGuestRecipe(token, guestSubmission);
+      // Reason: Pass groupId context to prevent orphan recipes — resolved from token or URL param
+      const resolvedGroupId = tokenInfo?.resolved_group_id || groupId || null;
+      const { data, error } = await submitGuestRecipe(token, guestSubmission, { cookbookId: null, groupId: resolvedGroupId });
 
       if (error) {
         setError(error);

@@ -34,7 +34,6 @@ export async function createGroupAdmin(formData: GroupFormData) {
     created_by: formData.created_by,
     wedding_date: formData.wedding_date || null,
     wedding_date_undecided: formData.wedding_date_undecided || false,
-    wedding_timeline: formData.wedding_timeline || null,
     couple_first_name: formData.couple_first_name || null,
     couple_last_name: formData.couple_last_name || null,
     partner_first_name: formData.partner_first_name || null,
@@ -94,7 +93,6 @@ export async function createGroup(formData: GroupFormData) {
     created_by: formData.created_by || user.id,
     wedding_date: formData.wedding_date || null,
     wedding_date_undecided: formData.wedding_date_undecided || false,
-    wedding_timeline: formData.wedding_timeline || null,
     couple_first_name: formData.couple_first_name || null,
     couple_last_name: formData.couple_last_name || null,
     partner_first_name: formData.partner_first_name || null,
@@ -246,7 +244,6 @@ export async function updateGroup(groupId: string, updates: GroupFormData) {
     description: updates.description,
     wedding_date: updates.wedding_date,
     wedding_date_undecided: updates.wedding_date_undecided,
-    wedding_timeline: updates.wedding_timeline,
     couple_first_name: updates.couple_first_name,
     couple_last_name: updates.couple_last_name,
     partner_first_name: updates.partner_first_name,
@@ -270,23 +267,11 @@ export async function updateGroup(groupId: string, updates: GroupFormData) {
 /**
  * Close a book for new recipe submissions
  */
-export async function closeBook(
-  groupId: string,
-  options?: { extraCopies?: number; extraCopiesPaymentIntentId?: string }
-) {
+export async function closeBook(groupId: string) {
   const supabase = createSupabaseClient();
-  const updateData: Record<string, unknown> = {
-    book_closed_by_user: new Date().toISOString(),
-  };
-  if (options?.extraCopies !== undefined) {
-    updateData.extra_copies = options.extraCopies;
-  }
-  if (options?.extraCopiesPaymentIntentId) {
-    updateData.extra_copies_payment_intent_id = options.extraCopiesPaymentIntentId;
-  }
   const { data, error } = await supabase
     .from('groups')
-    .update(updateData)
+    .update({ book_closed_by_user: new Date().toISOString() })
     .eq('id', groupId)
     .select()
     .single();

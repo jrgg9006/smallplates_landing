@@ -52,6 +52,7 @@ export async function POST(
       amount,
       currency: "usd",
       automatic_payment_methods: { enabled: true },
+      receipt_email: user.email || undefined,
       metadata: {
         groupId,
         type: "extra_copies",
@@ -75,7 +76,7 @@ export async function POST(
   }
 }
 
-// Reason: After successful payment, increment extra_copies in the group
+// Reason: After successful payment, record the extra copy order in the orders table
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ groupId: string }> }
@@ -103,36 +104,34 @@ export async function PATCH(
       return NextResponse.json({ error: "Not a member" }, { status: 403 });
     }
 
-    const { additionalCopies, paymentIntentId } = await request.json();
+    const { additionalCopies, paymentIntentId, amount, shippingAddress } = await request.json();
 
     if (!additionalCopies || additionalCopies < 1 || additionalCopies > 5) {
       return NextResponse.json({ error: "Invalid quantity" }, { status: 400 });
     }
 
-    // Reason: Get current extra_copies count and increment
-    const { data: group } = await supabase
-      .from("groups")
-      .select("extra_copies")
-      .eq("id", groupId)
-      .single();
+    // Reason: Insert a new order row instead of incrementing a counter on groups
+    const { error: insertError } = await supabase
+      .from("orders")
+      .insert({
+        user_id: user.id,
+        email: user.email || "",
+        stripe_payment_intent: paymentIntentId,
+        amount_total: amount || null,
+        book_quantity: additionalCopies,
+        shipping_address: shippingAddress || null,
+        status: "paid",
+        order_type: "extra_copy",
+        group_id: groupId,
+      });
 
-    const currentCopies = group?.extra_copies || 0;
-
-    const { error: updateError } = await supabase
-      .from("groups")
-      .update({
-        extra_copies: currentCopies + additionalCopies,
-        extra_copies_payment_intent_id: paymentIntentId,
-      })
-      .eq("id", groupId);
-
-    if (updateError) {
-      return NextResponse.json({ error: updateError.message }, { status: 500 });
+    if (insertError) {
+      return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, totalCopies: currentCopies + additionalCopies });
+    return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("Error updating extra copies:", err);
+    console.error("Error recording extra copy order:", err);
     return NextResponse.json({ error: "Failed to update" }, { status: 500 });
   }
 }

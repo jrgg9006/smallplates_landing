@@ -83,9 +83,14 @@ export default function RecipeFormPage() {
       }
       
       
+      // Reason: If groupId is still null after URL params and sessionStorage, use auto-resolved from token
+      if (!finalGroupId && data.resolved_group_id) {
+        finalGroupId = data.resolved_group_id;
+      }
+
       setCookbookId(finalCookbookId);
       setGroupId(finalGroupId);
-      
+
       setLoading(false);
     }
 

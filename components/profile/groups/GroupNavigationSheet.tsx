@@ -62,11 +62,8 @@ export function GroupNavigationSheet({ isOpen, onClose, onGroupSelect, currentGr
     setLoading(false);
   };
 
-  const formatWeddingDate = (date: string | null, timeline: string | null, undecided: boolean) => {
-    if (undecided && timeline) {
-      return timeline;
-    }
-    if (date) {
+  const formatWeddingDate = (date: string | null, undecided: boolean) => {
+    if (date && !undecided) {
       const weddingDate = new Date(date);
       return weddingDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     }
@@ -174,7 +171,7 @@ export function GroupNavigationSheet({ isOpen, onClose, onGroupSelect, currentGr
                         
                         <div className="flex justify-between items-end">
                           <p className="text-sm text-white/90">
-                            {formatWeddingDate(group.wedding_date, group.wedding_timeline, group.wedding_date_undecided || false)}
+                            {formatWeddingDate(group.wedding_date, group.wedding_date_undecided || false)}
                           </p>
                           
                           {group.book_closed_by_user ? (

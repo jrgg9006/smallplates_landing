@@ -99,6 +99,46 @@ export async function validateCollectionToken(token: string, groupId?: string | 
       }
     }
 
+    // Reason: Auto-resolve groupId when not provided — prevents orphan recipes
+    // If groupId was explicitly provided, use it. Otherwise, find active groups for this user.
+    let resolvedGroupId: string | null = groupId || null;
+    let availableGroups: { id: string; name: string }[] = [];
+
+    if (!groupId) {
+      const { data: userGroups } = await supabase
+        .from('group_members')
+        .select('group_id, groups!inner(id, name, book_closed_by_user)')
+        .eq('profile_id', profile.id)
+        .eq('role', 'owner');
+
+      if (userGroups && userGroups.length > 0) {
+        // Reason: Filter to groups still collecting recipes (not closed)
+        const activeGroups = userGroups
+          .filter((gm) => {
+            const group = gm.groups as unknown as { id: string; name: string; book_closed_by_user: string | null };
+            return !group.book_closed_by_user;
+          })
+          .map((gm) => {
+            const group = gm.groups as unknown as { id: string; name: string };
+            return { id: group.id, name: group.name };
+          });
+
+        // Reason: If no active groups, fall back to ALL groups (closed ones still accept recipes from the link)
+        const candidates = activeGroups.length > 0 ? activeGroups : userGroups.map((gm) => {
+          const group = gm.groups as unknown as { id: string; name: string };
+          return { id: group.id, name: group.name };
+        });
+
+        availableGroups = candidates;
+
+        if (candidates.length === 1) {
+          resolvedGroupId = candidates[0].id;
+        }
+        // Reason: If multiple groups, we can't auto-resolve — the UI should show a selector.
+        // But to prevent orphans, we still provide the list so the submit function can try.
+      }
+    }
+
     return {
       data: {
         user_id: profile.id,
@@ -114,6 +154,8 @@ export async function validateCollectionToken(token: string, groupId?: string | 
         book_closed_by_user: bookClosedByUser,
         token,
         is_valid: true,
+        resolved_group_id: resolvedGroupId,
+        available_groups: availableGroups,
       },
       error: null
     };
@@ -495,13 +537,26 @@ export async function submitGuestRecipeWithFiles(
       // For now, the files will work with the temp ID in the path
     }
 
-    // Step 8: Automatically add recipe to cookbook/group if context is provided
-    // Use API endpoint to bypass RLS (since we're in anonymous context)
-    // Check if we have at least one valid context value (cookbookId OR groupId)
-    const hasValidContext = context && (context.cookbookId || context.groupId);
-    
+    // Step 8: Automatically add recipe to cookbook/group
+    // Reason: CRITICAL — if groupId is missing, auto-resolve from token to prevent orphan recipes
+    let effectiveGroupId = context?.groupId || null;
+    let effectiveCookbookId = context?.cookbookId || null;
+
+    if (!effectiveGroupId && !effectiveCookbookId) {
+      // Reason: Fail-safe — resolve group from token when context is completely missing
+      const { data: resolvedToken } = await validateCollectionToken(collectionToken);
+      if (resolvedToken?.resolved_group_id) {
+        effectiveGroupId = resolvedToken.resolved_group_id;
+        console.log(`🛡️ FAIL-SAFE: Auto-resolved groupId ${effectiveGroupId} from token for recipe ${recipe.id}`);
+      } else {
+        console.error(`🚨 CRITICAL: Recipe ${recipe.id} created WITHOUT group — could not auto-resolve. Token: ${collectionToken}`);
+      }
+    }
+
+    const hasValidContext = effectiveGroupId || effectiveCookbookId;
+
     if (hasValidContext && recipe.id && tokenInfo) {
-      
+
       try {
         const response = await fetch('/api/v1/collection/link-recipe', {
           method: 'POST',
@@ -510,8 +565,8 @@ export async function submitGuestRecipeWithFiles(
           },
           body: JSON.stringify({
             recipeId: recipe.id,
-            cookbookId: context.cookbookId || null,
-            groupId: context.groupId || null,
+            cookbookId: effectiveCookbookId,
+            groupId: effectiveGroupId,
             collectionToken: collectionToken,
           }),
         });
@@ -649,10 +704,23 @@ export async function submitGuestRecipe(
       guestId = newGuest.id;
     }
 
-    // Now create the recipe
-    // Log to debug_logs table if creating a collection recipe without group_id
-    if (!context?.groupId) {
-      // Fire and forget - don't block recipe creation
+    // Reason: Pre-resolve groupId before recipe creation so guest_recipes.group_id is never null
+    let preResolvedGroupId = context?.groupId || null;
+    if (!preResolvedGroupId) {
+      if (tokenInfo.resolved_group_id) {
+        preResolvedGroupId = tokenInfo.resolved_group_id;
+      } else {
+        // Reason: tokenInfo might not have resolved_group_id if it was validated without our new logic
+        const { data: freshToken } = await validateCollectionToken(collectionToken);
+        if (freshToken?.resolved_group_id) {
+          preResolvedGroupId = freshToken.resolved_group_id;
+          console.log(`🛡️ PRE-RESOLVE: Got groupId ${preResolvedGroupId} for recipe by ${submission.first_name} ${submission.last_name}`);
+        }
+      }
+    }
+
+    // Log if still missing after all resolution attempts
+    if (!preResolvedGroupId) {
       (async () => {
         try {
           await supabase.from('debug_logs').insert({
@@ -669,9 +737,9 @@ export async function submitGuestRecipe(
               uploadMethod: submission.upload_method || 'text',
               url: typeof window !== 'undefined' ? window.location.href : null,
               userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
+              failsafe: 'all_resolution_failed',
             }
           });
-          console.log('📝 Debug log saved: recipe_missing_group_id');
         } catch (err) {
           console.error('Failed to save debug log:', err);
         }
@@ -692,7 +760,7 @@ export async function submitGuestRecipe(
       submission_status: 'submitted',
       submitted_at: new Date().toISOString(),
       source: 'collection',
-      group_id: context?.groupId || null,
+      group_id: preResolvedGroupId,
     };
 
     const { data: recipe, error: recipeError } = await supabase
@@ -734,13 +802,24 @@ export async function submitGuestRecipe(
       });
     }
 
-    // Automatically add recipe to cookbook/group if context is provided
-    // Use API endpoint to bypass RLS (since we're in anonymous context)
-    // Check if we have at least one valid context value (cookbookId OR groupId)
-    const hasValidContext = context && (context.cookbookId || context.groupId);
+    // Reason: CRITICAL — auto-resolve groupId if missing to prevent orphan recipes
+    let effectiveGroupId = context?.groupId || null;
+    let effectiveCookbookId = context?.cookbookId || null;
+
+    if (!effectiveGroupId && !effectiveCookbookId) {
+      const { data: resolvedToken } = await validateCollectionToken(collectionToken);
+      if (resolvedToken?.resolved_group_id) {
+        effectiveGroupId = resolvedToken.resolved_group_id;
+        console.log(`🛡️ FAIL-SAFE: Auto-resolved groupId ${effectiveGroupId} from token for recipe ${recipe.id}`);
+      } else {
+        console.error(`🚨 CRITICAL: Recipe ${recipe.id} created WITHOUT group — could not auto-resolve. Token: ${collectionToken}`);
+      }
+    }
+
+    const hasValidContext = effectiveGroupId || effectiveCookbookId;
 
     if (hasValidContext && recipe.id && tokenInfo) {
-      
+
       try {
         const response = await fetch('/api/v1/collection/link-recipe', {
           method: 'POST',
@@ -749,8 +828,8 @@ export async function submitGuestRecipe(
           },
           body: JSON.stringify({
             recipeId: recipe.id,
-            cookbookId: context.cookbookId || null,
-            groupId: context.groupId || null,
+            cookbookId: effectiveCookbookId,
+            groupId: effectiveGroupId,
             collectionToken: collectionToken,
           }),
         });
@@ -761,7 +840,6 @@ export async function submitGuestRecipe(
         }
       } catch (linkError) {
         console.error('Error linking recipe to cookbook/group:', linkError);
-        // Don't fail the submission - recipe is still created
       }
     }
 

@@ -667,6 +667,7 @@ export function ExtraCopyPurchase({
         body: JSON.stringify({
           additionalCopies: qty,
           paymentIntentId,
+          amount: (qty * ADDITIONAL_BOOK_PRICE + shippingCost) * 100,
         }),
       });
       if (!res.ok) throw new Error("Failed to update");

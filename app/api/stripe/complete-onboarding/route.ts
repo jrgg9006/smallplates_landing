@@ -209,11 +209,9 @@ export async function POST(request: NextRequest) {
       await supabaseAdmin.from('orders').insert({
         user_id: userId,
         email,
-        stripe_session_id: paymentIntentId,
         stripe_payment_intent: paymentIntentId,
         amount_total: paymentIntent.amount,
         book_quantity: bookQuantity,
-        shipping_country: paymentIntent.metadata.shippingCountry || 'US',
         couple_name: coupleName,
         user_type: resolvedUserType,
         purchase_intent_id: purchaseIntent?.id || null,

@@ -37,7 +37,9 @@ export default function PreviewPage() {
     couple_image_position_y: 50,
     couple_image_position_x: 50,
     book_close_date: null,
-    book_closed_by_user: null
+    book_closed_by_user: null,
+    resolved_group_id: null,
+    available_groups: [],
   };
 
   // Guest search state
