@@ -111,7 +111,7 @@ export function PrintDetailsWizard({
               <p className="text-sm text-gray-500 text-center mb-8">
                 This is exactly how it will be printed. Double-check spelling.
                 <br />
-                <span className="text-gray-400">Tip: use "&" — it looks best in print.</span>
+                <span className="text-gray-400">Tip: use &ldquo;&amp;&rdquo; — it looks best in print.</span>
               </p>
 
               <input
