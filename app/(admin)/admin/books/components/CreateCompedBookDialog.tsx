@@ -90,7 +90,7 @@ export default function CreateCompedBookDialog({ onCreated }: CreateCompedBookDi
           Free Book
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[440px]">
+      <DialogContent className="sm:max-w-[440px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create Free Book</DialogTitle>
           <p className="text-sm text-gray-500 mt-1">
