@@ -11,6 +11,7 @@ export interface BookSummary {
   book_status: BookStatus;
   book_notes: string | null;
   book_reviewed_at: string | null;
+  book_closed_by_user: string | null;
   contributor_count: number;
   recipe_count: number;
   print_ready_count: number;
@@ -77,7 +78,15 @@ export default function BookCard({ book, onClick, onStatusChange }: BookCardProp
         </div>
       </div>
 
-      <p className="text-xs text-gray-500 mb-3">{weddingDate}</p>
+      <p className="text-xs text-gray-500 mb-2">{weddingDate}</p>
+
+      {book.book_closed_by_user && (
+        <p className="mb-2">
+          <span className="inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">
+            Closed {new Date(book.book_closed_by_user).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+          </span>
+        </p>
+      )}
 
       <div className="flex items-center gap-3 text-xs text-gray-600">
         <span>{book.recipe_count} recipes</span>
