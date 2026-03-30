@@ -5,16 +5,40 @@ import { createSupabaseClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { isAdminEmail } from '@/lib/config/admin';
 import Link from 'next/link';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Eye, EyeOff, Info } from 'lucide-react';
 import type { BookStatus } from '@/lib/types/database';
 import BookCard, { type BookSummary } from './components/BookCard';
 import BookDetailSheet from './components/BookDetailSheet';
 
-const COLUMNS: { status: BookStatus; label: string; color: string; bgColor: string }[] = [
-  { status: 'active', label: 'Active', color: 'text-blue-700', bgColor: 'bg-blue-50 border-blue-200' },
-  { status: 'reviewed', label: 'In Review', color: 'text-amber-700', bgColor: 'bg-amber-50 border-amber-200' },
-  { status: 'ready_to_print', label: 'Ready to Print', color: 'text-green-700', bgColor: 'bg-green-50 border-green-200' },
-  { status: 'printed', label: 'Printed', color: 'text-gray-600', bgColor: 'bg-gray-50 border-gray-200' },
+const COLUMNS: { status: BookStatus; label: string; color: string; bgColor: string; info: string }[] = [
+  {
+    status: 'active',
+    label: 'Active',
+    color: 'text-blue-700',
+    bgColor: 'bg-blue-50 border-blue-200',
+    info: 'Books that are open and collecting recipes, OR books that were closed by the user but not yet reviewed by admin.\n\nLook for the "Closed" badge — those books are waiting for your review. Books without the badge are still collecting recipes from guests.\n\nExtra copies ordered here ship FREE with the original book (same address only).',
+  },
+  {
+    status: 'reviewed',
+    label: 'In Review',
+    color: 'text-amber-700',
+    bgColor: 'bg-amber-50 border-amber-200',
+    info: 'You are actively reviewing recipes in these books — checking that the AI-cleaned text is correct, images look good, and everything is ready for print.\n\nUse "Book Review" to go through each recipe one by one. Approve or flag for revision.\n\nWhen ALL recipes are approved, the book auto-moves to "Ready to Print".\n\nExtra copies ordered here still ship FREE with the original book (same address only).',
+  },
+  {
+    status: 'ready_to_print',
+    label: 'Ready to Print',
+    color: 'text-green-700',
+    bgColor: 'bg-green-50 border-green-200',
+    info: 'All recipes approved. The book is ready for final layout in InDesign and printing.\n\nDo NOT move to "Printed" until the book has been sent to the print supplier.\n\nExtra copies ordered here still ship FREE with the original book (same address only).',
+  },
+  {
+    status: 'printed',
+    label: 'Printed',
+    color: 'text-gray-600',
+    bgColor: 'bg-gray-50 border-gray-200',
+    info: 'The book has been sent to the print supplier. No turning back — the book is in production or already shipped.\n\nONLY move a book here AFTER it has been submitted to the supplier.\n\n⚠️ IMPORTANT: Once a book is in "Printed", extra copies ordered by the user will be charged shipping ($15+) because they can no longer be bundled with the original shipment.',
+  },
 ];
 
 export default function AdminBooksPage() {
@@ -89,8 +113,21 @@ export default function AdminBooksPage() {
 
   if (!isAdmin) return null;
 
-  const booksByStatus = (status: BookStatus) =>
-    books.filter(b => b.book_status === status);
+  const booksByStatus = (status: BookStatus) => {
+    const filtered = books.filter(b => b.book_status === status);
+    // Reason: In Active column, surface closed books at the top so admin sees them first
+    if (status === 'active') {
+      return filtered.sort((a, b) => {
+        if (a.book_closed_by_user && !b.book_closed_by_user) return -1;
+        if (!a.book_closed_by_user && b.book_closed_by_user) return 1;
+        if (a.book_closed_by_user && b.book_closed_by_user) {
+          return new Date(b.book_closed_by_user).getTime() - new Date(a.book_closed_by_user).getTime();
+        }
+        return 0;
+      });
+    }
+    return filtered;
+  };
 
   const inactiveBooks = booksByStatus('inactive');
 
@@ -137,9 +174,18 @@ export default function AdminBooksPage() {
                 {/* Column Header */}
                 <div className={`rounded-t-lg border px-4 py-3 ${col.bgColor}`}>
                   <div className="flex items-center justify-between">
-                    <h2 className={`font-semibold text-sm ${col.color}`}>
-                      {col.label}
-                    </h2>
+                    <div className="flex items-center gap-1.5">
+                      <h2 className={`font-semibold text-sm ${col.color}`}>
+                        {col.label}
+                      </h2>
+                      <div className="relative group/tip">
+                        <Info className={`w-3.5 h-3.5 ${col.color} opacity-40 hover:opacity-80 cursor-help transition-opacity`} />
+                        <div className="absolute left-0 top-full mt-2 w-72 p-3 bg-gray-900 text-white text-xs leading-relaxed rounded-lg shadow-xl opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible transition-all duration-150 z-50 pointer-events-none whitespace-pre-line">
+                          {col.info}
+                          <div className="absolute left-3 -top-1 w-2 h-2 bg-gray-900 rotate-45" />
+                        </div>
+                      </div>
+                    </div>
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${col.color} bg-white/60`}>
                       {columnBooks.length}
                     </span>

@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { createSupabaseClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { isAdminEmail } from '@/lib/config/admin';
+import { isAdminEmail, canCreateCompedBooks } from '@/lib/config/admin';
+import CreateCompedBookDialog from './books/components/CreateCompedBookDialog';
 import {
   Dialog,
   DialogContent,
@@ -115,18 +116,68 @@ export default function AdminHomePage() {
           </div>
         </div>
 
-        {/* Admin Sections Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          
-          {/* Prospects - Soft Launch Leads */}
-          <Link href="/admin/prospects" className="group">
+        {/* Primary — most used */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+          {/* Operations Management */}
+          <Link href="/admin/operations" className="group">
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-[#D4A854] cursor-pointer h-full">
+              <div className="text-5xl mb-4">🏭</div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Operations</h2>
+              <p className="text-gray-600 mb-4">
+                Track recipe production workflow and progress
+              </p>
+              <div className="flex items-center text-sm text-gray-500 group-hover:text-[#D4A854] transition-colors">
+                <span>View operations</span>
+                <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </Link>
+
+          {/* Book Production */}
+          <Link href="/admin/books" className="group">
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-[#D4A854] cursor-pointer h-full">
+              <div className="text-5xl mb-4">📖</div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Book Production</h2>
+              <p className="text-gray-600 mb-4">
+                Review and approve books before printing
+              </p>
+              <div className="flex items-center text-sm text-gray-500 group-hover:text-[#D4A854] transition-colors">
+                <span>Manage books</span>
+                <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </Link>
+
+          {/* Create Free Book — only visible to comped-emails */}
+          {canCreateCompedBooks(userName) && (
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-dashed border-[#D4A854]/40 hover:border-[#D4A854] h-full flex flex-col">
+              <div className="text-5xl mb-4">🎁</div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Free Book</h2>
+              <p className="text-gray-600 mb-4">
+                Create a comped book for friends and family
+              </p>
+              <div className="mt-auto">
+                <CreateCompedBookDialog onCreated={() => {}} />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Secondary — other tools */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Prospects */}
+          <Link href="/admin/prospects" className="group">
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-black cursor-pointer h-full">
               <div className="text-5xl mb-4">🎯</div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Prospects</h2>
               <p className="text-gray-600 mb-4">
                 View and manage soft launch purchase intents
               </p>
-              <div className="flex items-center text-sm text-gray-500 group-hover:text-[#D4A854] transition-colors">
+              <div className="flex items-center text-sm text-gray-500 group-hover:text-black transition-colors">
                 <span>View prospects</span>
                 <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -135,7 +186,7 @@ export default function AdminHomePage() {
             </div>
           </Link>
 
-          {/* Waitlist Management - Active */}
+          {/* Waitlist */}
           <Link href="/admin/waitlist" className="group">
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-black cursor-pointer h-full">
               <div className="text-5xl mb-4">📋</div>
@@ -152,7 +203,7 @@ export default function AdminHomePage() {
             </div>
           </Link>
 
-          {/* Activity Management - Active */}
+          {/* Activity */}
           <Link href="/admin/activity" className="group">
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-black cursor-pointer h-full">
               <div className="text-5xl mb-4">📈</div>
@@ -169,24 +220,7 @@ export default function AdminHomePage() {
             </div>
           </Link>
 
-          {/* Operations Management - Active */}
-          <Link href="/admin/operations" className="group">
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-black cursor-pointer h-full">
-              <div className="text-5xl mb-4">🏭</div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Operations</h2>
-              <p className="text-gray-600 mb-4">
-                Track recipe production workflow and progress
-              </p>
-              <div className="flex items-center text-sm text-gray-500 group-hover:text-black transition-colors">
-                <span>View operations</span>
-                <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </div>
-          </Link>
-
-          {/* Content Management - Active */}
+          {/* Content */}
           <Link href="/admin/content" className="group">
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-black cursor-pointer h-full">
               <div className="text-5xl mb-4">📝</div>
@@ -203,7 +237,7 @@ export default function AdminHomePage() {
             </div>
           </Link>
 
-          {/* Invitations Management - Active */}
+          {/* Invitations */}
           <Link href="/admin/invitations" className="group">
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-black cursor-pointer h-full">
               <div className="text-5xl mb-4">📨</div>
@@ -213,23 +247,6 @@ export default function AdminHomePage() {
               </p>
               <div className="flex items-center text-sm text-gray-500 group-hover:text-black transition-colors">
                 <span>View invitations</span>
-                <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </div>
-          </Link>
-
-          {/* Book Production - Active */}
-          <Link href="/admin/books" className="group">
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-black cursor-pointer h-full">
-              <div className="text-5xl mb-4">📖</div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Book Production</h2>
-              <p className="text-gray-600 mb-4">
-                Review and approve books before printing
-              </p>
-              <div className="flex items-center text-sm text-gray-500 group-hover:text-black transition-colors">
-                <span>Manage books</span>
                 <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
