@@ -233,13 +233,6 @@ export default function ProfilePage() {
       loadProgressData();
       loadGuestCounts(true); // Pass true to indicate initial load
       
-      // Check if user needs waitlist conversion (backup safety net)
-      fetch('/api/v1/auth/check-conversion', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      }).catch(error => {
-        // console.log removed for production
-      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);

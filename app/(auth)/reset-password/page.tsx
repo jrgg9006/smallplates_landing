@@ -203,30 +203,6 @@ export default function ResetPasswordPage() {
       // Wait a moment for session to be fully established
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Call completion endpoint to handle waitlist conversion
-      try {
-        // console.log removed for production
-        const completeResponse = await fetch('/api/v1/auth/complete-signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        
-        const completeResult = await completeResponse.json();
-        
-        if (completeResponse.ok) {
-          // console.log removed for production
-          if (completeResult.converted) {
-            // console.log removed for production
-          }
-        } else {
-          console.error("⚠️ Signup completion endpoint failed:", completeResult.error);
-          // Don't fail the flow - password was successfully updated
-        }
-      } catch (completeError) {
-        console.error("⚠️ Error calling signup completion:", completeError);
-        // Don't fail the flow - password was successfully updated
-      }
-      
       setSuccess(true);
       
       // Redirect to groups page after showing success message

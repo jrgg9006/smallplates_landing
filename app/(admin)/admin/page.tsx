@@ -169,23 +169,6 @@ export default function AdminHomePage() {
 
         {/* Secondary — other tools */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Waitlist */}
-          <Link href="/admin/waitlist" className="group">
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-black cursor-pointer h-full">
-              <div className="text-5xl mb-4">📋</div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Waitlist</h2>
-              <p className="text-gray-600 mb-4">
-                Manage and invite users from the waitlist
-              </p>
-              <div className="flex items-center text-sm text-gray-500 group-hover:text-black transition-colors">
-                <span>View waitlist</span>
-                <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </div>
-          </Link>
-
           {/* Activity */}
           <Link href="/admin/activity" className="group">
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-black cursor-pointer h-full">
@@ -331,10 +314,6 @@ export default function AdminHomePage() {
         <div className="mt-12 bg-white rounded-xl shadow-lg p-8">
           <h3 className="text-xl font-bold text-gray-900 mb-4">Quick Stats</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div>
-              <div className="text-sm text-gray-600 mb-1">Waitlist</div>
-              <div className="text-3xl font-bold text-gray-900">-</div>
-            </div>
             <div>
               <div className="text-sm text-gray-600 mb-1">Active Users</div>
               <div className="text-3xl font-bold text-gray-900">-</div>

@@ -127,18 +127,6 @@ export async function GET(
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId);
 
-    // Check if user has waitlist entry
-    const waitlistId = authUser?.user?.user_metadata?.waitlist_id;
-    let waitlistEntry = null;
-    if (waitlistId) {
-      const { data: waitlist } = await supabaseAdmin
-        .from('waitlist')
-        .select('*')
-        .eq('id', waitlistId)
-        .single();
-      waitlistEntry = waitlist;
-    }
-
     return NextResponse.json({
       success: true,
       data: {
@@ -178,7 +166,6 @@ export async function GET(
           membershipsCount: memberGroups?.length || 0,
           totalRecipesInMemberGroups,
         },
-        waitlist: waitlistEntry,
       }
     });
 

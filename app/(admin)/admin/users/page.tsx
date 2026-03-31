@@ -488,12 +488,6 @@ export default function AdminUsersPage() {
                         : '—'}
                     </span>
                   </div>
-                  {userDetails.waitlist && (
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">From Waitlist:</span>
-                      <span className="text-sm font-medium text-green-600">Yes</span>
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -608,7 +602,6 @@ export default function AdminUsersPage() {
                             <li><strong>{userDetails.counts.shippingAddresses}</strong> shipping address(es) (preserved)</li>
                             <li><strong>{userDetails.counts.communicationLogs}</strong> communication log(s) (preserved)</li>
                             <li>User account will be deactivated (cannot login)</li>
-                            {userDetails.waitlist && <li>Waitlist entry will be deleted</li>}
                           </ul>
                           <p className="text-xs text-yellow-700 font-medium mt-3">
                             Account will be marked as deleted but all data remains accessible.
@@ -624,7 +617,6 @@ export default function AdminUsersPage() {
                           </p>
                           <ul className="text-sm text-red-800 space-y-1 list-disc list-inside">
                             <li>User account and profile</li>
-                            {userDetails.waitlist && <li>Waitlist entry</li>}
                           </ul>
                           <p className="text-xs text-red-700 font-medium mt-3">
                             This action cannot be undone.

@@ -73,10 +73,6 @@ export async function DELETE(request: Request) {
       );
     }
 
-    // Get waitlist_id from user metadata before deleting
-    const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
-    const waitlistId = userData?.user?.user_metadata?.waitlist_id;
-
     console.log('🗑️ User deleting own account:', userId);
 
     // STEP 1: Check if user has any content
@@ -241,19 +237,6 @@ export async function DELETE(request: Request) {
 
       console.log('✅ User soft deleted successfully - all data preserved');
 
-      // Delete waitlist entry if exists
-      if (waitlistId) {
-        try {
-          await supabaseAdmin
-            .from('waitlist')
-            .delete()
-            .eq('id', waitlistId);
-          console.log('✅ Waitlist entry deleted:', waitlistId);
-        } catch (waitlistError) {
-          console.error('⚠️ Error deleting waitlist entry (non-critical):', waitlistError);
-        }
-      }
-
       // Sign out the user
       await supabase.auth.signOut();
 
@@ -363,19 +346,6 @@ export async function DELETE(request: Request) {
         }
       } else {
         console.log('✅ User deleted successfully via CASCADE');
-      }
-
-      // Delete waitlist entry if exists
-      if (waitlistId) {
-        try {
-          await supabaseAdmin
-            .from('waitlist')
-            .delete()
-            .eq('id', waitlistId);
-          console.log('✅ Waitlist entry deleted:', waitlistId);
-        } catch (waitlistError) {
-          console.error('⚠️ Error deleting waitlist entry (non-critical):', waitlistError);
-        }
       }
 
       // Sign out (though user will be deleted anyway)

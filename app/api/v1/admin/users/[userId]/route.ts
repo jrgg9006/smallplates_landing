@@ -30,7 +30,7 @@ export async function DELETE(
 
     const supabaseAdmin = createSupabaseAdminClient();
 
-    // First, verify user exists and get waitlist_id if exists
+    // First, verify user exists
     const { data: userData, error: getUserError } = await supabaseAdmin.auth.admin.getUserById(userId);
     
     if (getUserError || !userData) {
@@ -39,12 +39,6 @@ export async function DELETE(
         { error: 'User not found' },
         { status: 404 }
       );
-    }
-
-    // Get waitlist_id from user metadata before deleting
-    const waitlistId = userData.user?.user_metadata?.waitlist_id;
-    if (waitlistId) {
-      console.log('📋 Found waitlist_id:', waitlistId);
     }
 
     // Check if user already deleted (safety check)
@@ -225,19 +219,6 @@ export async function DELETE(
 
       console.log('✅ User soft deleted successfully - all data preserved');
 
-      // Delete waitlist entry if exists
-      if (waitlistId) {
-        try {
-          await supabaseAdmin
-            .from('waitlist')
-            .delete()
-            .eq('id', waitlistId);
-          console.log('✅ Waitlist entry deleted:', waitlistId);
-        } catch (waitlistError) {
-          console.error('⚠️ Error deleting waitlist entry (non-critical):', waitlistError);
-        }
-      }
-
       return NextResponse.json({
         success: true,
         message: 'User soft deleted successfully - all data preserved',
@@ -348,19 +329,6 @@ export async function DELETE(
       }
       } else {
         console.log('✅ User deleted successfully via CASCADE');
-    }
-
-    // Delete waitlist entry if exists
-    if (waitlistId) {
-      try {
-        await supabaseAdmin
-          .from('waitlist')
-          .delete()
-          .eq('id', waitlistId);
-        console.log('✅ Waitlist entry deleted:', waitlistId);
-      } catch (waitlistError) {
-        console.error('⚠️ Error deleting waitlist entry (non-critical):', waitlistError);
-        }
     }
 
     return NextResponse.json({
