@@ -225,7 +225,7 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
   }, []);
 
   /**
-   * Legacy completeOnboarding — payment is now handled inline by CheckoutSummary.
+   * Legacy completeOnboarding — payment is now handled inline.
    * Kept for interface compatibility.
    */
   const completeOnboarding = useCallback(
