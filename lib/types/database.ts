@@ -365,6 +365,7 @@ export interface Database {
           operations_notes: string | null;
           production_completed_at: string | null;
           needs_review: boolean;
+          manually_cleared: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -377,6 +378,7 @@ export interface Database {
           operations_notes?: string | null;
           production_completed_at?: string | null;
           needs_review?: boolean;
+          manually_cleared?: boolean;
         };
         Update: {
           text_finalized_in_indesign?: boolean;
@@ -385,6 +387,7 @@ export interface Database {
           operations_notes?: string | null;
           production_completed_at?: string | null;
           needs_review?: boolean;
+          manually_cleared?: boolean;
         };
       };
       groups: {

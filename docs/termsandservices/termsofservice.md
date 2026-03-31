@@ -61,9 +61,9 @@ We reserve the right, but have no obligation, to review, edit, or refuse to incl
 
 You retain ownership of your User Content. However, you acknowledge that once your content is printed in a physical book, that book becomes the property of the Customer who ordered it. We do not claim ownership of your recipes or personal messages.
 
-### 3.5 Use of AI Tools
+### 3.5 Use of AI Tools and Visual Imagery
 
-We may use artificial intelligence tools to assist with recipe formatting, editing for clarity, and generating complementary images for the book. AI-generated content will be used to enhance the visual presentation of the book and will not alter the substance of your submitted recipes or messages.
+We may use artificial intelligence tools and manual design processes to assist with recipe formatting, editing for clarity, and creating visual images to accompany recipes in the book. These images are artistic interpretations intended to complement the submitted recipe and do not purport to be exact representations of the contributor's dish as prepared. Variations between the generated image and the actual dish are inherent to the creative process and do not constitute a defect in the product. Such variations are not grounds for a refund, replacement, or credit.
 
 ## 4. Intellectual Property
 

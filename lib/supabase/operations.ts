@@ -141,7 +141,8 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
     // Opción C: cleaned text (recipe_print_ready) is required for ready_to_print status
     const imageGenerated = productionStatus?.image_generated || false;
     const needsReview = productionStatus?.needs_review || false;
-    
+    const manuallyCleaned = productionStatus?.manually_cleared || false;
+
     // Handle recipe_print_ready - could be array or single object depending on Supabase version
     const printReady = Array.isArray(recipe.recipe_print_ready)
       ? recipe.recipe_print_ready[0] || null
@@ -156,11 +157,11 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
     let status: 'no_action' | 'in_progress' | 'ready_to_print';
     if (!imageGenerated) {
       status = 'no_action';
-    } else if (imageGenerated && (!hasCleanedText || needsReview)) {
-      // In progress if: image generated but missing cleaned text OR needs review
+    } else if (imageGenerated && (!hasCleanedText || needsReview) && !manuallyCleaned) {
+      // In progress if: image generated but missing cleaned text OR needs review (unless manually cleared)
       status = 'in_progress';
     } else {
-      // Ready to print if: image generated AND has cleaned text AND doesn't need review
+      // Ready to print if: image generated AND (has cleaned text or manually cleared) AND doesn't need review
       status = 'ready_to_print';
     }
 
@@ -396,7 +397,8 @@ export async function getProductionStatsAdmin() {
       id,
       recipe_production_status (
         image_generated,
-        needs_review
+        needs_review,
+        manually_cleared
       ),
       recipe_print_ready (
         ingredients_clean,
@@ -434,7 +436,8 @@ export async function getProductionStatsAdmin() {
 
     const imageGenerated = status.image_generated || false;
     const needsReview = status.needs_review || false;
-    
+    const manuallyCleaned = status.manually_cleared || false;
+
     // Check if recipe has cleaned text
     const hasCleanedText = printReady && (
       (printReady.ingredients_clean && printReady.ingredients_clean.trim() !== '') ||
@@ -443,10 +446,10 @@ export async function getProductionStatsAdmin() {
 
     if (!imageGenerated) {
       recipesNeedingAction++;
-    } else if (imageGenerated && hasCleanedText && !needsReview) {
+    } else if (imageGenerated && (hasCleanedText || manuallyCleaned) && !needsReview) {
       recipesReadyToPrint++;
     } else {
-      // Image generated but missing cleaned text OR needs review = in progress = needs action
+      // Image generated but missing cleaned text (and not manually cleared) OR needs review = needs action
       recipesNeedingAction++;
     }
   });

@@ -48,6 +48,7 @@ interface RecipeWithProductionStatus {
     operations_notes: string | null;
     production_completed_at: string | null;
     needs_review: boolean;
+    manually_cleared: boolean;
   } | null;
   calculated_status: 'no_action' | 'in_progress' | 'ready_to_print';
   group: {
@@ -476,7 +477,7 @@ ${instructions}`;
 
   const handleProductionToggle = async (
     recipeId: string,
-    field: 'image_generated' | 'needs_review',
+    field: 'image_generated' | 'needs_review' | 'manually_cleared',
     value: boolean
   ) => {
     setUpdatingField(field);
@@ -493,6 +494,7 @@ ${instructions}`;
                 operations_notes: null,
                 production_completed_at: null,
                 needs_review: false,
+                manually_cleared: false,
               }),
               [field]: value,
             },
@@ -956,6 +958,7 @@ ${instructions}`;
             operations_notes: null,
             production_completed_at: null,
             needs_review: false,
+            manually_cleared: false,
           }),
           image_generated: true,
         }
@@ -1008,6 +1011,7 @@ ${instructions}`;
             operations_notes: null,
             production_completed_at: null,
             needs_review: false,
+            manually_cleared: false,
           }),
           image_generated: false,
         },
@@ -1117,6 +1121,7 @@ ${instructions}`;
             operations_notes: null,
             production_completed_at: null,
             needs_review: false,
+            manually_cleared: false,
           }),
           needs_review: true,
         },
@@ -1504,6 +1509,23 @@ ${instructions}`;
                       />
                       <span>Needs Review</span>
                     </label>
+                    {/* Reason: Show "Manually Cleared" only when recipe has no cleaned text,
+                        allowing admin to bypass the cleaning requirement */}
+                    {!selectedRecipe.recipe_print_ready?.ingredients_clean?.trim() &&
+                     !selectedRecipe.recipe_print_ready?.instructions_clean?.trim() && (
+                      <label className="flex items-center gap-1.5">
+                        <input
+                          type="checkbox"
+                          checked={selectedRecipe.production_status?.manually_cleared || false}
+                          onChange={(e) =>
+                            handleProductionToggle(selectedRecipe.id, 'manually_cleared', e.target.checked)
+                          }
+                          disabled={updatingField !== null}
+                          className="w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500"
+                        />
+                        <span className="text-amber-700">Manually Cleared</span>
+                      </label>
+                    )}
                   </div>
                 </div>
               </div>

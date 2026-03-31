@@ -190,6 +190,9 @@ export async function PATCH(
     if (body.needs_review !== undefined) {
       productionStatusUpdates.needs_review = body.needs_review;
     }
+    if (body.manually_cleared !== undefined) {
+      productionStatusUpdates.manually_cleared = body.manually_cleared;
+    }
 
     if (Object.keys(productionStatusUpdates).length > 0) {
       const { data, error } = await updateRecipeProductionStatusAdmin(recipeId, productionStatusUpdates);
