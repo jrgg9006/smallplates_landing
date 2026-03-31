@@ -18,7 +18,7 @@ export async function processRecipeImage(
   recipeName?: string
 ): Promise<{ data: ProcessedRecipeData | null; error: string | null }> {
   try {
-    const response = await fetch('/api/v1/midjourney/process-image', {
+    const response = await fetch('/api/v1/ai-engine/process-image', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

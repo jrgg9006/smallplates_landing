@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
 
     // Fire-and-forget: trigger Midjourney prompt generation
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-    fetch(`${siteUrl}/api/v1/midjourney/generate-prompt`, {
+    fetch(`${siteUrl}/api/v1/ai-engine/generate-prompt`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

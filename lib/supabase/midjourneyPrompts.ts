@@ -16,7 +16,7 @@ export async function generateAndSaveMidjourneyPrompt(
       : `Recipe Title: ${recipeName}\n\n${ingredients}`;
 
     // === DEBUG: Log qué se está enviando ===
-    console.log('🚀 Calling /api/v1/midjourney/generate-prompt with:', {
+    console.log('🚀 Calling /api/v1/ai-engine/generate-prompt with:', {
       recipeId,
       recipeName,
       ingredientsLength: ingredients.length,
@@ -25,7 +25,7 @@ export async function generateAndSaveMidjourneyPrompt(
       hasComments: !!comments,
     });
 
-    const response = await fetch('/api/v1/midjourney/generate-prompt', {
+    const response = await fetch('/api/v1/ai-engine/generate-prompt', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
