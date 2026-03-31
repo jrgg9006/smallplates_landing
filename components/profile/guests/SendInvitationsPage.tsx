@@ -409,9 +409,6 @@ export function SendInvitationsPage({
                     <p className="text-xs text-[#9A9590]">
                       This invitation was sent by {senderName} via Small Plates &amp; Co.
                     </p>
-                    <p className="text-xs text-[#C4BDB6]">
-                      If you don&apos;t know {senderName} or didn&apos;t expect this invitation, you can safely ignore this email.
-                    </p>
                   </div>
                 )}
               </div>
