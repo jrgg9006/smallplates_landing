@@ -40,7 +40,6 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   const email = metadata.email || '';
   const bookQuantity = parseInt(metadata.bookQuantity || '1', 10);
   const userType = metadata.userType || 'couple';
-  const purchaseIntentId = metadata.purchaseIntentId;
   const existingUserId = metadata.existingUserId;
 
   // Idempotency: check if order already exists for this payment intent
@@ -57,7 +56,7 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   // Reason: Embedded gift flow collects email at payment but couple names come later.
   // The complete-onboarding endpoint handles user/group/cookbook creation.
   // Webhook only creates a minimal order record as a receipt.
-  const isEmbeddedGiftFlow = userType === 'gift_giver' && !purchaseIntentId && !existingUserId;
+  const isEmbeddedGiftFlow = userType === 'gift_giver' && !existingUserId;
 
   // Reason: Embedded flow — create order + user account (safety net).
   // Group, cookbook, and welcome email happen in complete-onboarding (step 4).
@@ -114,7 +113,6 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
       book_quantity: bookQuantity,
       couple_name: null,
       user_type: userType,
-      purchase_intent_id: null,
       onboarding_data: metadata,
       status: 'paid',
     });
@@ -153,24 +151,12 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
     return;
   }
 
-  // --- Existing flow: couple or gift_giver with purchaseIntentId (hosted checkout) ---
-
-  // Fetch purchase_intent data for onboarding info
-  let purchaseIntentData: Record<string, unknown> | null = null;
-  if (purchaseIntentId) {
-    const { data } = await supabaseAdmin
-      .from('purchase_intents')
-      .select('*')
-      .eq('id', purchaseIntentId)
-      .single();
-    purchaseIntentData = data;
-  }
+  // --- Fallback: existing user adding a book, or legacy hosted checkout flow ---
 
   let userId = existingUserId || null;
 
   // Create user if not existing
   if (!userId) {
-    // Check if user already exists by email
     // Reason: Query profiles table (indexed on email) instead of listUsers() which loads all users
     const { data: existingProfile } = await supabaseAdmin
       .from('profiles')
@@ -195,77 +181,27 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
       } else {
         userId = newUser.user.id;
 
-        // Create profile for new user
         await supabaseAdmin.from('profiles').insert({
           id: userId,
           email,
           user_type: userType as 'couple' | 'gift_giver',
-          full_name: metadata.buyerName || (purchaseIntentData as Record<string, string> | null)?.gift_giver_name || null,
+          full_name: metadata.buyerName || null,
         });
       }
     }
   }
 
-  // Create group for the couple
-  if (userId && purchaseIntentData) {
-    const pid = purchaseIntentData as Record<string, unknown>;
-    const coupleName = pid.couple_first_name && pid.partner_first_name
-      ? `${pid.couple_first_name} & ${pid.partner_first_name}`
-      : 'New Book';
-
-    const { data: group, error: groupError } = await supabaseAdmin
-      .from('groups')
-      .insert({
-        name: coupleName,
-        description: `A wedding recipe book for ${coupleName}`,
-        created_by: userId,
-        couple_first_name: pid.couple_first_name as string || null,
-        couple_last_name: pid.couple_last_name as string || null,
-        partner_first_name: pid.partner_first_name as string || null,
-        partner_last_name: pid.partner_last_name as string || null,
-        wedding_date: pid.wedding_date as string || null,
-        wedding_date_undecided: (pid.wedding_date_undecided as boolean) || false,
-        relationship_to_couple: pid.relationship as string || null,
-        gift_date: pid.gift_date as string || null,
-        gift_date_undecided: (pid.gift_date_undecided as boolean) || false,
-        book_close_date: pid.book_close_date as string || null,
-      })
-      .select('id')
-      .single();
-
-    if (groupError) {
-      console.error('Error creating group:', groupError);
-    } else if (group) {
-      await supabaseAdmin.from('group_members').insert({
-        group_id: group.id,
-        profile_id: userId,
-        role: 'owner',
-        relationship_to_couple: pid.relationship as string || null,
-      });
-
-      await supabaseAdmin.from('cookbooks').insert({
-        user_id: userId,
-        name: coupleName as string,
-        description: `Recipe book for ${coupleName}`,
-        is_group_cookbook: true,
-        group_id: group.id,
-      });
-    }
-  }
-
-  // Insert order record
+  // Reason: Group and cookbook are created in complete-onboarding (step 4).
+  // Webhook only creates the order as a receipt of payment.
   const { error: orderError } = await supabaseAdmin.from('orders').insert({
     user_id: userId,
     email,
     stripe_payment_intent: paymentIntent.id,
     amount_total: paymentIntent.amount,
     book_quantity: bookQuantity,
-    couple_name: purchaseIntentData
-      ? `${(purchaseIntentData as Record<string, string>).couple_first_name || ''} & ${(purchaseIntentData as Record<string, string>).partner_first_name || ''}`
-      : null,
+    couple_name: null,
     user_type: userType,
-    purchase_intent_id: purchaseIntentId || null,
-    onboarding_data: purchaseIntentData || null,
+    onboarding_data: metadata,
     status: 'paid',
   });
 
@@ -288,8 +224,7 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
       if (linkError) {
         console.error('Error generating magic link:', linkError);
       } else if (linkData?.properties?.action_link) {
-        const buyerName = metadata.buyerName?.split(' ')[0] ||
-          (purchaseIntentData as Record<string, string> | null)?.gift_giver_name || '';
+        const buyerName = metadata.buyerName?.split(' ')[0] || '';
 
         await sendWelcomeLoginEmail({
           to: email,
@@ -300,13 +235,5 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
     } catch (err) {
       console.error('Error sending welcome email:', err);
     }
-  }
-
-  // Update purchase_intent status
-  if (purchaseIntentId) {
-    await supabaseAdmin
-      .from('purchase_intents')
-      .update({ status: 'paid' })
-      .eq('id', purchaseIntentId);
   }
 }

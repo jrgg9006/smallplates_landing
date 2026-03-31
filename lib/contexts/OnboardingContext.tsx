@@ -219,7 +219,7 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
       ...prev,
       bookQuantity: quantity,
       shippingCountry: country,
-      // Reason: Keep selectedProductTier in sync for backward compat with purchase_intents
+      // Reason: Keep selectedProductTier in sync with book selection
       selectedProductTier: 'the-book',
     }));
   }, []);

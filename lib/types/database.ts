@@ -715,7 +715,6 @@ export interface Order {
   shipping_address: Record<string, unknown> | null;
   couple_name: string | null;
   user_type: string;
-  purchase_intent_id: string | null;
   onboarding_data: Record<string, unknown> | null;
   status: OrderStatus;
   error_message: string | null;
@@ -735,7 +734,6 @@ export interface OrderInsert {
   shipping_address?: Record<string, unknown> | null;
   couple_name?: string | null;
   user_type?: string;
-  purchase_intent_id?: string | null;
   onboarding_data?: Record<string, unknown> | null;
   status?: OrderStatus;
   error_message?: string | null;

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe/client';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
-import { sendWelcomeLoginEmail } from '@/lib/postmark';
 
 export async function POST(request: NextRequest) {
   try {
@@ -128,30 +127,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // 4. Create purchase_intent record
-    const { data: purchaseIntent } = await supabaseAdmin
-      .from('purchase_intents')
-      .insert({
-        email,
-        selected_tier: 'the-book',
-        user_type: resolvedUserType,
-        couple_first_name: coupleFirstName,
-        couple_last_name: coupleLastName || null,
-        partner_first_name: partnerFirstName,
-        partner_last_name: partnerLastName || null,
-        relationship: relationship || null,
-        gift_giver_name: resolvedUserType === 'gift_giver' ? buyerName : null,
-        gift_date: giftDate || null,
-        gift_date_undecided: giftDateUndecided || false,
-        book_close_date: bookCloseDate || null,
-        wedding_date: weddingDate || null,
-        wedding_date_undecided: weddingDateUndecided || false,
-        status: 'paid',
-      })
-      .select('id')
-      .single();
-
-    // 5. Create group + member + cookbook
+    // 4. Create group + member + cookbook
     const coupleName = `${coupleFirstName} & ${partnerFirstName}`;
 
     const { data: group, error: groupError } = await supabaseAdmin
@@ -193,7 +169,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // 6. Update order record with user info
+    // 5. Update order record with user info
     if (existingOrder) {
       await supabaseAdmin
         .from('orders')
@@ -201,7 +177,7 @@ export async function POST(request: NextRequest) {
           user_id: userId,
           email,
           couple_name: coupleName,
-          purchase_intent_id: purchaseIntent?.id || null,
+          group_id: group?.id || null,
         })
         .eq('id', existingOrder.id);
     } else {
@@ -214,13 +190,13 @@ export async function POST(request: NextRequest) {
         book_quantity: bookQuantity,
         couple_name: coupleName,
         user_type: resolvedUserType,
-        purchase_intent_id: purchaseIntent?.id || null,
+        group_id: group?.id || null,
         onboarding_data: { coupleFirstName, partnerFirstName, relationship, buyerName },
         status: 'paid',
       });
     }
 
-    // 7. Generate magic link for auto-login
+    // 6. Generate magic link for auto-login
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
       email,

@@ -6,74 +6,23 @@ import {
   calculateShipping,
   ShippingCountry,
 } from '@/lib/stripe/client';
-import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 interface CreateCheckoutBody {
   email: string;
   bookQuantity: number;
   shippingCountry?: ShippingCountry;
   userType: 'couple' | 'gift_giver';
-  purchaseIntentId?: string;
   existingUserId?: string;
   buyerName?: string;
-  // Reason: Gift giver flow sends purchase intent data directly instead of a pre-created ID
-  purchaseIntentData?: {
-    coupleFirstName?: string;
-    partnerFirstName?: string;
-    relationship?: string;
-    giftDate?: string | null;
-    giftDateUndecided?: boolean;
-    bookCloseDate?: string | null;
-  };
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: CreateCheckoutBody = await request.json();
-    const { email, bookQuantity, shippingCountry, userType, existingUserId, buyerName, purchaseIntentData } = body;
-    let { purchaseIntentId } = body;
+    const { email, bookQuantity, shippingCountry, userType, existingUserId, buyerName } = body;
 
     if (!email || !bookQuantity) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-    }
-
-    // Reason: Create purchase intent server-side with admin client to bypass RLS
-    if (!purchaseIntentId && purchaseIntentData) {
-      const supabaseAdmin = createSupabaseAdminClient();
-      const { data: pi, error: piError } = await supabaseAdmin
-        .from('purchase_intents')
-        .insert({
-          email,
-          selected_tier: 'the-book',
-          user_type: userType,
-          couple_first_name: purchaseIntentData.coupleFirstName || null,
-          partner_first_name: purchaseIntentData.partnerFirstName || null,
-          gift_giver_name: buyerName || null,
-          relationship: purchaseIntentData.relationship || null,
-          gift_date: purchaseIntentData.giftDate || null,
-          gift_date_undecided: purchaseIntentData.giftDateUndecided || false,
-          book_close_date: purchaseIntentData.bookCloseDate || null,
-          shipping_destination: shippingCountry || 'US',
-          couple_last_name: null,
-          partner_last_name: null,
-          wedding_date: null,
-          wedding_date_undecided: false,
-          planning_stage: null,
-          guest_count: null,
-          timeline: null,
-        })
-        .select('id')
-        .single();
-
-      if (piError || !pi?.id) {
-        console.error('Error creating purchase intent:', piError);
-        return NextResponse.json({ error: 'Failed to save order details' }, { status: 500 });
-      }
-      purchaseIntentId = pi.id;
-    }
-
-    if (!purchaseIntentId) {
-      return NextResponse.json({ error: 'Missing purchase intent' }, { status: 400 });
     }
 
     if (bookQuantity < 1 || bookQuantity > 10) {
@@ -126,7 +75,6 @@ export async function POST(request: NextRequest) {
       bookQuantity: String(bookQuantity),
       shippingCountry: shippingCountry || '',
       userType,
-      purchaseIntentId,
       ...(existingUserId ? { existingUserId } : {}),
       ...(buyerName ? { buyerName } : {}),
     };
