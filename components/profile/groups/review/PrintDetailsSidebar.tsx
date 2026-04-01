@@ -2,12 +2,14 @@
 
 import React, { useState, useRef } from "react";
 import Image from "next/image";
-import { Pencil, Upload } from "lucide-react";
+import { Pencil, Upload, X } from "lucide-react";
 
 interface PrintDetailsSidebarProps {
   groupId: string;
   printCoupleName: string;
   coupleImageUrl: string | null;
+  isOpen: boolean;
+  onClose: () => void;
   onUpdate: (data: { printCoupleName?: string; coupleImageUrl?: string | null }) => void;
 }
 
@@ -15,6 +17,8 @@ export function PrintDetailsSidebar({
   groupId,
   printCoupleName,
   coupleImageUrl,
+  isOpen,
+  onClose,
   onUpdate,
 }: PrintDetailsSidebarProps) {
   const [editingName, setEditingName] = useState(false);
@@ -79,11 +83,34 @@ export function PrintDetailsSidebar({
   };
 
   return (
-    <div className="hidden md:flex flex-col w-[260px] flex-shrink-0 border-l border-gray-100 bg-white overflow-y-auto">
-      <div className="py-6 px-5">
-        <p className="text-xs uppercase tracking-[0.2em] text-gray-400 font-serif mb-5">
-          Book details
-        </p>
+    <>
+      {/* Backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/20 z-40 transition-opacity"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Slide-over panel */}
+      <div
+        className={`fixed top-0 right-0 h-full w-[300px] bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out overflow-y-auto ${
+          isOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="py-6 px-5">
+          <div className="flex items-center justify-between mb-5">
+            <p className="text-xs uppercase tracking-[0.2em] text-gray-400 font-serif">
+              Book details
+            </p>
+            <button
+              onClick={onClose}
+              className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label="Close panel"
+            >
+              <X className="h-4 w-4 text-gray-400" />
+            </button>
+          </div>
 
         {/* Couple name — prominent */}
         <div className="mb-6">
@@ -190,6 +217,7 @@ export function PrintDetailsSidebar({
           />
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

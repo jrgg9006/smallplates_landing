@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowLeft, BookOpen } from "lucide-react";
 import { ReviewRecipeCard } from "./ReviewRecipeCard";
 import { ReviewRecipeSidebar } from "./ReviewRecipeSidebar";
 import { PrintDetailsWizard } from "./PrintDetailsWizard";
@@ -31,6 +31,7 @@ export function ReviewRecipesPage({ group, onBack, onMarkReviewed, onStartCloseF
   const [error, setError] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [showBookDetails, setShowBookDetails] = useState(false);
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -154,7 +155,15 @@ export function ReviewRecipesPage({ group, onBack, onMarkReviewed, onStartCloseF
         {/* Spacer */}
         <div className="flex-1" />
 
-        {/* Approve button */}
+        {/* Book details toggle + Approve button */}
+        <button
+          onClick={() => setShowBookDetails(true)}
+          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#2D2D2D] transition-colors flex-shrink-0"
+        >
+          <BookOpen className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Book Details</span>
+        </button>
+
         <Button
           onClick={() => setShowConfirmModal(true)}
           className="bg-[#2D2D2D] text-white hover:bg-gray-800 rounded-full text-xs px-4 py-1.5 h-auto flex-shrink-0"
@@ -199,19 +208,20 @@ export function ReviewRecipesPage({ group, onBack, onMarkReviewed, onStartCloseF
           ) : null}
         </div>
 
-        {/* Print details sidebar (desktop only) */}
-        {!loading && recipes.length > 0 && (
-          <PrintDetailsSidebar
-            groupId={groupId}
-            printCoupleName={printCoupleName}
-            coupleImageUrl={coupleImageUrl}
-            onUpdate={(data) => {
-              if (data.printCoupleName !== undefined) setPrintCoupleName(data.printCoupleName);
-              if (data.coupleImageUrl !== undefined) setCoupleImageUrl(data.coupleImageUrl);
-            }}
-          />
-        )}
       </div>
+
+      {/* Book details slide-over panel */}
+      <PrintDetailsSidebar
+        groupId={groupId}
+        printCoupleName={printCoupleName}
+        coupleImageUrl={coupleImageUrl}
+        isOpen={showBookDetails}
+        onClose={() => setShowBookDetails(false)}
+        onUpdate={(data) => {
+          if (data.printCoupleName !== undefined) setPrintCoupleName(data.printCoupleName);
+          if (data.coupleImageUrl !== undefined) setCoupleImageUrl(data.coupleImageUrl);
+        }}
+      />
 
       {/* Confirmation modal — appears over the review page */}
       <CloseBookModal
