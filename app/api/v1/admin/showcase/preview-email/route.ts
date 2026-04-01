@@ -3,38 +3,41 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { buildShowcaseEmailHTML } from '@/lib/email/showcase-template';
 
 // Reason: no auth check — this is a read-only preview, doesn't modify data,
-// and requires knowing exact guest_id + recipe_id UUIDs to access.
+// and requires knowing exact guest_id UUID to access.
 export async function GET(request: NextRequest) {
   try {
     const supabase = createSupabaseAdminClient();
 
     const url = new URL(request.url);
-    const recipeId = url.searchParams.get('recipe_id');
     const guestId = url.searchParams.get('guest_id');
 
-    if (!recipeId || !guestId) {
+    if (!guestId) {
       return NextResponse.json(
-        { error: 'recipe_id and guest_id are required' },
+        { error: 'guest_id is required' },
         { status: 400 }
       );
     }
 
-    // Fetch guest info
+    // Fetch guest info with group
     const { data: guest } = await supabase
       .from('guests')
       .select('first_name, last_name, group_id, groups:group_id(couple_display_name)')
       .eq('id', guestId)
       .single();
 
-    // Fetch recipe info
-    const { data: recipe } = await supabase
-      .from('guest_recipes')
-      .select('recipe_name, showcase_image_url')
-      .eq('id', recipeId)
-      .single();
+    if (!guest) {
+      return NextResponse.json({ error: 'Guest not found' }, { status: 404 });
+    }
 
-    if (!guest || !recipe) {
-      return NextResponse.json({ error: 'Guest or recipe not found' }, { status: 404 });
+    // Fetch all non-deleted recipes for this guest
+    const { data: recipes } = await supabase
+      .from('guest_recipes')
+      .select('id, recipe_name, showcase_image_url')
+      .eq('guest_id', guestId)
+      .is('deleted_at', null);
+
+    if (!recipes?.length) {
+      return NextResponse.json({ error: 'No recipes found for this guest' }, { status: 404 });
     }
 
     const guestName = `${guest.first_name} ${guest.last_name}`;
@@ -42,25 +45,23 @@ export async function GET(request: NextRequest) {
     const coupleNamePlain = group?.couple_display_name || 'The couple';
     const coupleNameHtml = coupleNamePlain.replace(/&/g, '&amp;');
 
-    // Reason: for email preview, replace cid:recipe-spread with the actual showcase URL
-    // so it renders in the browser without needing a CID attachment
     let html = buildShowcaseEmailHTML({
       guestName,
       coupleName: coupleNameHtml,
       coupleNamePlain,
-      recipeName: recipe.recipe_name,
+      recipes: recipes.map((r, i) => ({
+        recipeName: r.recipe_name,
+        cid: `cid:recipe-spread-${i}`,
+      })),
     });
 
-    // Swap cid:recipe-spread with actual image URL for browser preview
-    if (recipe.showcase_image_url) {
-      html = html.replace('cid:recipe-spread', recipe.showcase_image_url);
-    } else {
-      // Reason: if no showcase image yet, use the generate endpoint as fallback
-      html = html.replace(
-        'cid:recipe-spread',
-        `/api/v1/admin/showcase/preview?recipe_id=${recipeId}`
-      );
-    }
+    // Swap each cid:recipe-spread-N with actual image URL for browser preview
+    recipes.forEach((recipe, i) => {
+      const cid = `cid:recipe-spread-${i}`;
+      const imageUrl = recipe.showcase_image_url
+        || `/api/v1/admin/showcase/preview?recipe_id=${recipe.id}`;
+      html = html.replace(cid, imageUrl);
+    });
 
     return new NextResponse(html, {
       headers: { 'Content-Type': 'text/html; charset=utf-8' },

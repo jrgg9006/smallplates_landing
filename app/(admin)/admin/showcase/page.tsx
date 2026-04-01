@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { createSupabaseClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -28,6 +28,21 @@ interface ShowcaseRecipe {
   sent_at: string | null;
 }
 
+interface GuestGroup {
+  guest_id: string;
+  guest_name: string;
+  guest_email: string;
+  group_id: string | null;
+  group_name: string | null;
+  couple_display_name: string | null;
+  recipes: Array<{
+    recipe_id: string;
+    recipe_name: string;
+    showcase_image_url: string | null;
+    sent_at: string | null;
+  }>;
+}
+
 interface GroupOption {
   id: string;
   name: string;
@@ -39,10 +54,12 @@ export default function ShowcasePage() {
   const [recipes, setRecipes] = useState<ShowcaseRecipe[]>([]);
   const [groups, setGroups] = useState<GroupOption[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sentFilter, setSentFilter] = useState<'all' | 'sent' | 'not_sent'>('all');
   const [uploadingRecipeId, setUploadingRecipeId] = useState<string | null>(null);
-  const [sendingRecipeId, setSendingRecipeId] = useState<string | null>(null);
-  const [resettingRecipeId, setResettingRecipeId] = useState<string | null>(null);
-  const [confirmSend, setConfirmSend] = useState<ShowcaseRecipe | null>(null);
+  const [sendingGuestId, setSendingGuestId] = useState<string | null>(null);
+  const [resettingGuestId, setResettingGuestId] = useState<string | null>(null);
+  const [confirmSend, setConfirmSend] = useState<GuestGroup | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [generatingRecipeId, setGeneratingRecipeId] = useState<string | null>(null);
   const [previewRecipe, setPreviewRecipe] = useState<ShowcaseRecipe | null>(null);
@@ -82,22 +99,70 @@ export default function ShowcasePage() {
     }
   };
 
-  const filtered = selectedGroup === 'all'
-    ? recipes
-    : recipes.filter(r => r.group_id === selectedGroup);
+  // Group flat recipes into GuestGroup[]
+  const guestGroups = useMemo(() => {
+    const map = new Map<string, GuestGroup>();
+    for (const r of recipes) {
+      let group = map.get(r.guest_id);
+      if (!group) {
+        group = {
+          guest_id: r.guest_id,
+          guest_name: r.guest_name,
+          guest_email: r.guest_email,
+          group_id: r.group_id,
+          group_name: r.group_name,
+          couple_display_name: r.couple_display_name,
+          recipes: [],
+        };
+        map.set(r.guest_id, group);
+      }
+      group.recipes.push({
+        recipe_id: r.recipe_id,
+        recipe_name: r.recipe_name,
+        showcase_image_url: r.showcase_image_url,
+        sent_at: r.sent_at,
+      });
+    }
+    return Array.from(map.values());
+  }, [recipes]);
+
+  const filtered = useMemo(() => {
+    return guestGroups.filter(g => {
+      if (selectedGroup !== 'all' && g.group_id !== selectedGroup) return false;
+
+      const allSent = g.recipes.every(r => r.sent_at);
+      if (sentFilter === 'sent' && !allSent) return false;
+      if (sentFilter === 'not_sent' && allSent) return false;
+
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const recipeNames = g.recipes.map(r => r.recipe_name).join(' ');
+        const haystack = `${g.guest_name} ${g.guest_email} ${recipeNames} ${g.group_name || ''}`.toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [guestGroups, selectedGroup, sentFilter, searchQuery]);
 
   const stats = {
-    optedIn: recipes.length,
-    uploaded: recipes.filter(r => r.showcase_image_url).length,
-    sent: recipes.filter(r => r.sent_at).length,
+    guests: guestGroups.length,
+    ready: guestGroups.filter(g => g.recipes.every(r => r.showcase_image_url)).length,
+    sent: guestGroups.filter(g => g.recipes.every(r => r.sent_at)).length,
   };
 
-  const handleGenerate = async (recipe: ShowcaseRecipe) => {
-    setGeneratingRecipeId(recipe.recipe_id);
+  // Reason: find the flat ShowcaseRecipe for per-recipe actions (generate, upload)
+  const findRecipe = (recipeId: string): ShowcaseRecipe | undefined =>
+    recipes.find(r => r.recipe_id === recipeId);
+
+  const handleGenerate = async (recipeId: string) => {
+    const recipe = findRecipe(recipeId);
+    if (!recipe) return;
+
+    setGeneratingRecipeId(recipeId);
     setError(null);
 
     try {
-      const res = await fetch(`/api/v1/admin/showcase/preview?recipe_id=${recipe.recipe_id}`);
+      const res = await fetch(`/api/v1/admin/showcase/preview?recipe_id=${recipeId}`);
       if (!res.ok) throw new Error('Failed to generate spread image');
 
       const blob = await res.blob();
@@ -154,7 +219,9 @@ export default function ShowcasePage() {
     setPreviewBlob(null);
   };
 
-  const handleUploadClick = (recipe: ShowcaseRecipe) => {
+  const handleUploadClick = (recipeId: string) => {
+    const recipe = findRecipe(recipeId);
+    if (!recipe) return;
     uploadTargetRef.current = recipe;
     fileInputRef.current?.click();
   };
@@ -164,9 +231,7 @@ export default function ShowcasePage() {
     const recipe = uploadTargetRef.current;
     if (!file || !recipe) return;
 
-    // Reset file input so same file can be re-selected
     e.target.value = '';
-
     setUploadingRecipeId(recipe.recipe_id);
     setError(null);
 
@@ -199,23 +264,27 @@ export default function ShowcasePage() {
     }
   };
 
-  const handleSend = async (recipe: ShowcaseRecipe) => {
+  const handleSend = async (guest: GuestGroup) => {
     setConfirmSend(null);
-    setSendingRecipeId(recipe.recipe_id);
+    setSendingGuestId(guest.guest_id);
     setError(null);
+
+    const readyRecipes = guest.recipes.filter(r => r.showcase_image_url);
 
     try {
       const res = await fetch('/api/v1/admin/showcase/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          guest_id: recipe.guest_id,
-          recipe_id: recipe.recipe_id,
-          guest_name: recipe.guest_name,
-          guest_email: recipe.guest_email,
-          recipe_name: recipe.recipe_name,
-          couple_name: recipe.couple_display_name,
-          showcase_image_url: recipe.showcase_image_url,
+          guest_id: guest.guest_id,
+          guest_name: guest.guest_name,
+          guest_email: guest.guest_email,
+          couple_name: guest.couple_display_name,
+          recipes: readyRecipes.map(r => ({
+            recipe_id: r.recipe_id,
+            recipe_name: r.recipe_name,
+            showcase_image_url: r.showcase_image_url,
+          })),
         }),
       });
 
@@ -225,29 +294,32 @@ export default function ShowcasePage() {
       }
 
       const { sent_at } = await res.json();
+      const sentRecipeIds = new Set(readyRecipes.map(r => r.recipe_id));
       setRecipes(prev =>
         prev.map(r =>
-          r.recipe_id === recipe.recipe_id ? { ...r, sent_at } : r
+          sentRecipeIds.has(r.recipe_id) ? { ...r, sent_at } : r
         )
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Send failed');
     } finally {
-      setSendingRecipeId(null);
+      setSendingGuestId(null);
     }
   };
 
-  const handleReset = async (recipe: ShowcaseRecipe) => {
-    setResettingRecipeId(recipe.recipe_id);
+  const handleReset = async (guest: GuestGroup) => {
+    setResettingGuestId(guest.guest_id);
     setError(null);
+
+    const recipeIds = guest.recipes.map(r => r.recipe_id);
 
     try {
       const res = await fetch('/api/v1/admin/showcase/send', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          guest_id: recipe.guest_id,
-          recipe_id: recipe.recipe_id,
+          guest_id: guest.guest_id,
+          recipe_ids: recipeIds,
         }),
       });
 
@@ -256,15 +328,16 @@ export default function ShowcasePage() {
         throw new Error(data.error || 'Reset failed');
       }
 
+      const idSet = new Set(recipeIds);
       setRecipes(prev =>
         prev.map(r =>
-          r.recipe_id === recipe.recipe_id ? { ...r, sent_at: null } : r
+          idSet.has(r.recipe_id) ? { ...r, sent_at: null } : r
         )
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Reset failed');
     } finally {
-      setResettingRecipeId(null);
+      setResettingGuestId(null);
     }
   };
 
@@ -310,6 +383,14 @@ export default function ShowcasePage() {
 
         {/* Filter bar + stats */}
         <div className="flex flex-wrap items-center gap-4 mb-6">
+          <input
+            type="text"
+            placeholder="Search guest, email, recipe..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white w-64"
+          />
+
           <select
             value={selectedGroup}
             onChange={e => setSelectedGroup(e.target.value)}
@@ -321,10 +402,20 @@ export default function ShowcasePage() {
             ))}
           </select>
 
+          <select
+            value={sentFilter}
+            onChange={e => setSentFilter(e.target.value as 'all' | 'sent' | 'not_sent')}
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"
+          >
+            <option value="all">All Status</option>
+            <option value="sent">Sent</option>
+            <option value="not_sent">Not Sent</option>
+          </select>
+
           <div className="flex gap-4 text-sm text-gray-600">
-            <span>{stats.optedIn} opted in</span>
+            <span>{stats.guests} guests</span>
             <span className="text-gray-300">|</span>
-            <span>{stats.uploaded} uploaded</span>
+            <span>{stats.ready} ready</span>
             <span className="text-gray-300">|</span>
             <span className="text-green-600">{stats.sent} sent</span>
           </div>
@@ -332,114 +423,134 @@ export default function ShowcasePage() {
 
         {/* Table */}
         <div className="bg-white rounded-xl shadow overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-fixed">
+            <colgroup>
+              <col className="w-[200px]" />
+              <col className="w-[140px]" />
+              <col />
+              <col className="w-[160px]" />
+            </colgroup>
             <thead>
               <tr className="border-b bg-gray-50">
                 <th className="text-left px-4 py-3 font-medium text-gray-700">Guest</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-700">Group</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-700">Recipe</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-700">Image</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-700">Recipes</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-700">Status</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-12 text-gray-400">
-                    No opted-in recipes found
+                  <td colSpan={4} className="text-center py-12 text-gray-400">
+                    No opted-in guests found
                   </td>
                 </tr>
               ) : (
-                filtered.map(recipe => (
-                  <tr key={recipe.recipe_id} className="border-b last:border-b-0 hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-gray-900">{recipe.guest_name}</div>
-                      <div className="text-gray-500 text-xs">{recipe.guest_email}</div>
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">
-                      {recipe.group_name || '—'}
-                    </td>
-                    <td className="px-4 py-3 text-gray-900">
-                      {recipe.recipe_name}
-                    </td>
-                    <td className="px-4 py-3">
-                      {recipe.showcase_image_url ? (
-                        <div className="flex items-center gap-2">
-                          <img
-                            src={recipe.showcase_image_url}
-                            alt={recipe.recipe_name}
-                            className="w-24 h-16 object-cover rounded border"
-                          />
-                          <button
-                            onClick={() => handleGenerate(recipe)}
-                            disabled={generatingRecipeId === recipe.recipe_id}
-                            className="text-gray-400 hover:text-gray-600 text-xs underline transition-colors"
-                          >
-                            {generatingRecipeId === recipe.recipe_id ? 'Regenerating...' : 'Regenerate'}
-                          </button>
+                filtered.map(guest => {
+                  const allHaveImages = guest.recipes.every(r => r.showcase_image_url);
+                  const allSent = guest.recipes.every(r => r.sent_at);
+                  const someSent = guest.recipes.some(r => r.sent_at);
+                  const latestSentAt = guest.recipes
+                    .filter(r => r.sent_at)
+                    .map(r => r.sent_at!)
+                    .sort()
+                    .pop();
+
+                  return (
+                    <tr key={guest.guest_id} className="border-b last:border-b-0 align-top hover:bg-gray-50">
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-gray-900">{guest.guest_name}</div>
+                        <div className="text-gray-500 text-xs">{guest.guest_email}</div>
+                      </td>
+                      <td className="px-4 py-3 text-gray-600">
+                        {guest.group_name || '—'}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="space-y-3">
+                          {guest.recipes.map(recipe => (
+                            <div key={recipe.recipe_id} className="flex items-center gap-3">
+                              {recipe.showcase_image_url ? (
+                                <img
+                                  src={recipe.showcase_image_url}
+                                  alt={recipe.recipe_name}
+                                  className="w-20 h-14 object-cover rounded border flex-shrink-0"
+                                />
+                              ) : (
+                                <div className="w-20 h-14 rounded border border-dashed border-gray-300 flex items-center justify-center flex-shrink-0">
+                                  <span className="text-gray-300 text-xs">No img</span>
+                                </div>
+                              )}
+                              <div className="min-w-0">
+                                <div className="text-gray-900 font-medium truncate">{recipe.recipe_name}</div>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <button
+                                    onClick={() => handleGenerate(recipe.recipe_id)}
+                                    disabled={generatingRecipeId === recipe.recipe_id}
+                                    className="text-gray-400 hover:text-gray-600 text-xs underline transition-colors"
+                                  >
+                                    {generatingRecipeId === recipe.recipe_id
+                                      ? 'Generating...'
+                                      : recipe.showcase_image_url ? 'Regenerate' : 'Generate'}
+                                  </button>
+                                  <button
+                                    onClick={() => handleUploadClick(recipe.recipe_id)}
+                                    disabled={uploadingRecipeId === recipe.recipe_id}
+                                    className="text-gray-400 hover:text-gray-600 text-xs underline transition-colors"
+                                  >
+                                    {uploadingRecipeId === recipe.recipe_id ? 'Uploading...' : 'Upload'}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={generatingRecipeId === recipe.recipe_id}
-                            onClick={() => handleGenerate(recipe)}
-                          >
-                            {generatingRecipeId === recipe.recipe_id ? 'Generating...' : 'Generate'}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            disabled={uploadingRecipeId === recipe.recipe_id}
-                            onClick={() => handleUploadClick(recipe)}
-                            className="text-gray-400 text-xs"
-                          >
-                            {uploadingRecipeId === recipe.recipe_id ? 'Uploading...' : 'Upload'}
-                          </Button>
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {recipe.sent_at ? (
-                        <div className="flex items-center gap-2">
-                          <span className="text-green-600 text-xs font-medium">
-                            Sent {new Date(recipe.sent_at).toLocaleDateString()}
-                          </span>
-                          <button
-                            onClick={() => handleReset(recipe)}
-                            disabled={resettingRecipeId === recipe.recipe_id}
-                            className="text-gray-400 hover:text-red-500 text-xs underline transition-colors"
-                          >
-                            {resettingRecipeId === recipe.recipe_id ? 'Resetting...' : 'Reset'}
-                          </button>
-                        </div>
-                      ) : recipe.showcase_image_url ? (
-                        <div className="flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            disabled={sendingRecipeId === recipe.recipe_id}
-                            onClick={() => setConfirmSend(recipe)}
-                            className="bg-black text-white hover:bg-gray-800"
-                          >
-                            {sendingRecipeId === recipe.recipe_id ? 'Sending...' : 'Send'}
-                          </Button>
-                          <button
-                            onClick={() => window.open(
-                              `/api/v1/admin/showcase/preview-email?recipe_id=${recipe.recipe_id}&guest_id=${recipe.guest_id}`,
-                              '_blank'
+                      </td>
+                      <td className="px-4 py-3">
+                        {allSent ? (
+                          <div className="flex flex-col gap-2">
+                            <span className="text-green-600 text-xs font-medium">
+                              Sent {new Date(latestSentAt!).toLocaleDateString()}
+                            </span>
+                            <button
+                              onClick={() => handleReset(guest)}
+                              disabled={resettingGuestId === guest.guest_id}
+                              className="text-gray-400 hover:text-red-500 text-xs underline transition-colors w-fit"
+                            >
+                              {resettingGuestId === guest.guest_id ? 'Resetting...' : 'Reset'}
+                            </button>
+                          </div>
+                        ) : allHaveImages ? (
+                          <div className="flex flex-col gap-2">
+                            {someSent && (
+                              <span className="text-amber-600 text-xs font-medium">Partially sent</span>
                             )}
-                            className="text-gray-400 hover:text-gray-600 text-xs underline transition-colors"
-                          >
-                            Preview
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="text-gray-400 text-xs">Generate first</span>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                            <Button
+                              size="sm"
+                              disabled={sendingGuestId === guest.guest_id}
+                              onClick={() => setConfirmSend(guest)}
+                              className="bg-black text-white hover:bg-gray-800"
+                            >
+                              {sendingGuestId === guest.guest_id ? 'Sending...' : `Send (${guest.recipes.length})`}
+                            </Button>
+                            <button
+                              onClick={() => window.open(
+                                `/api/v1/admin/showcase/preview-email?guest_id=${guest.guest_id}`,
+                                '_blank'
+                              )}
+                              className="text-gray-400 hover:text-gray-600 text-xs underline transition-colors w-fit"
+                            >
+                              Preview
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 text-xs">
+                            {guest.recipes.filter(r => r.showcase_image_url).length}/{guest.recipes.length} images ready
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -490,12 +601,19 @@ export default function ShowcasePage() {
       <Dialog open={!!confirmSend} onOpenChange={() => setConfirmSend(null)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Send Recipe Preview</DialogTitle>
+            <DialogTitle>Send Showcase Email</DialogTitle>
             <DialogDescription>
-              Send the spread preview to{' '}
+              Send {confirmSend?.recipes.length === 1 ? '1 recipe spread' : `${confirmSend?.recipes.length} recipe spreads`} to{' '}
               <strong>{confirmSend?.guest_name}</strong> ({confirmSend?.guest_email})?
             </DialogDescription>
           </DialogHeader>
+          {confirmSend && (
+            <ul className="text-sm text-gray-600 list-disc pl-5 space-y-1">
+              {confirmSend.recipes.map(r => (
+                <li key={r.recipe_id}>{r.recipe_name}</li>
+              ))}
+            </ul>
+          )}
           <div className="flex justify-end gap-3 pt-4">
             <Button variant="outline" onClick={() => setConfirmSend(null)}>
               Cancel

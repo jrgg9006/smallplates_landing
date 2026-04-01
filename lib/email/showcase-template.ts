@@ -1,29 +1,79 @@
 /**
  * Email HTML template for recipe showcase (spread preview).
  *
- * Changes from previous version:
- * — Copy: "for good" replaces "forever"
- * — Copy: "Here's your page." replaces "Here's how your page turned out."
- * — Copy: Identity close + seed replaces "Thanks for being a part of their story."
- * — Signature: "Small Plates & Co." replaces "The Small Plates team"
- * — Logo: dark mode invert via CSS filter
- * — Spread image: full-width, book-shadow treatment
- * — New: seed section after divider ("Know someone getting married?")
+ * Supports multiple recipes per guest — 1 email with all their spreads.
+ * Each recipe spread uses a unique CID (cid:recipe-spread-0, cid:recipe-spread-1, etc.)
  */
+
+interface ShowcaseRecipeItem {
+  recipeName: string;
+  cid: string; // e.g. "cid:recipe-spread-0"
+}
 
 interface ShowcaseEmailParams {
   guestName: string;
   coupleName: string;      // HTML-safe, e.g. "Sarah &amp; Mike"
   coupleNamePlain: string; // Plain text, e.g. "Sarah & Mike"
-  recipeName: string;
+  recipes: ShowcaseRecipeItem[];
+}
+
+function buildRecipeSpreadBlock(recipe: ShowcaseRecipeItem, guestName: string, coupleNamePlain: string): string {
+  return `
+                <!-- Spread image — ${recipe.recipeName} -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td align="center" style="padding-bottom: 16px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                          <td align="center"
+                            style="background-color: #EDE8E0; border-radius: 6px; padding: 20px 16px;"
+                            class="book-bg">
+                            <img
+                              src="${recipe.cid}"
+                              alt="${recipe.recipeName} — ${guestName}'s page in ${coupleNamePlain}'s cookbook"
+                              width="500"
+                              style="display: block; width: 100%; max-width: 500px; height: auto;
+                                border-radius: 3px;
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.10), 0 8px 28px rgba(0,0,0,0.14);"
+                              class="spread-img">
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Caption -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td align="center" style="padding-bottom: 32px;">
+                      <p style="margin: 0; font-family: Georgia, serif; font-size: 13px; color: #9A9590;
+                        line-height: 1.5; text-align: center; font-style: italic;" class="caption-text">
+                        ${recipe.recipeName} &mdash; by ${guestName}
+                      </p>
+                    </td>
+                  </tr>
+                </table>`;
 }
 
 export function buildShowcaseEmailHTML({
   guestName,
   coupleName,
   coupleNamePlain,
-  recipeName,
+  recipes,
 }: ShowcaseEmailParams): string {
+  const isSingle = recipes.length === 1;
+  const recipeListText = isSingle
+    ? `Your ${recipes[0].recipeName} is`
+    : `Your recipes are`;
+
+  // Reason: singular "Here's your page" vs plural "Here are your pages"
+  const pageText = isSingle ? "Here's your page." : "Here are your pages.";
+
+  const spreadBlocks = recipes
+    .map(r => buildRecipeSpreadBlock(r, guestName, coupleNamePlain))
+    .join('\n');
+
   return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml"
 xmlns:v="urn:schemas-microsoft-com:vml"
@@ -117,13 +167,13 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
                   </tr>
                 </table>
 
-                <!-- Body — three fragments -->
+                <!-- Body -->
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
                     <td align="center" style="padding-bottom: 6px;">
                       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
                         font-size: 16px; color: #666666; font-weight: 300; line-height: 1.65; text-align: center;" class="darkmode-body">
-                        Your ${recipeName} is in ${coupleName}'s cookbook now.
+                        ${recipeListText} in ${coupleName}'s cookbook now.
                       </p>
                     </td>
                   </tr>
@@ -131,7 +181,7 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
                     <td align="center" style="padding-bottom: 24px;">
                       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
                         font-size: 16px; color: #666666; font-weight: 300; line-height: 1.65; text-align: center;" class="darkmode-body">
-                        And their kitchen. <span style="color: #2D2D2D; font-weight: 500;" class="darkmode-heading">For good.</span>
+                        In their kitchen. <span style="color: #2D2D2D; font-weight: 500;" class="darkmode-heading">For good.</span>
                       </p>
                     </td>
                   </tr>
@@ -139,47 +189,13 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
                     <td align="center" style="padding-bottom: 28px;">
                       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
                         font-size: 16px; color: #666666; font-weight: 300; line-height: 1.65; text-align: center;" class="darkmode-body">
-                        Here's your page.
+                        ${pageText}
                       </p>
                     </td>
                   </tr>
                 </table>
 
-                <!-- Spread image — full-width, book shadow -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td align="center" style="padding-bottom: 16px;">
-                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                        <tr>
-                          <td align="center"
-                            style="background-color: #EDE8E0; border-radius: 6px; padding: 20px 16px;"
-                            class="book-bg">
-                            <img
-                              src="cid:recipe-spread"
-                              alt="${recipeName} — ${guestName}'s page in ${coupleNamePlain}'s cookbook"
-                              width="500"
-                              style="display: block; width: 100%; max-width: 500px; height: auto;
-                                border-radius: 3px;
-                                box-shadow: 0 2px 8px rgba(0,0,0,0.10), 0 8px 28px rgba(0,0,0,0.14);"
-                              class="spread-img">
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
-
-                <!-- Caption -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td align="center" style="padding-bottom: 32px;">
-                      <p style="margin: 0; font-family: Georgia, serif; font-size: 13px; color: #9A9590;
-                        line-height: 1.5; text-align: center; font-style: italic;" class="caption-text">
-                        ${recipeName} &mdash; by ${guestName}
-                      </p>
-                    </td>
-                  </tr>
-                </table>
+${spreadBlocks}
 
                 <!-- Emotional close -->
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
