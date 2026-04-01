@@ -44,6 +44,11 @@ export default function ShowcasePage() {
   const [resettingRecipeId, setResettingRecipeId] = useState<string | null>(null);
   const [confirmSend, setConfirmSend] = useState<ShowcaseRecipe | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [generatingRecipeId, setGeneratingRecipeId] = useState<string | null>(null);
+  const [previewRecipe, setPreviewRecipe] = useState<ShowcaseRecipe | null>(null);
+  const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
+  const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
+  const [savingPreview, setSavingPreview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTargetRef = useRef<ShowcaseRecipe | null>(null);
   const router = useRouter();
@@ -85,6 +90,68 @@ export default function ShowcasePage() {
     optedIn: recipes.length,
     uploaded: recipes.filter(r => r.showcase_image_url).length,
     sent: recipes.filter(r => r.sent_at).length,
+  };
+
+  const handleGenerate = async (recipe: ShowcaseRecipe) => {
+    setGeneratingRecipeId(recipe.recipe_id);
+    setError(null);
+
+    try {
+      const res = await fetch(`/api/v1/admin/showcase/preview?recipe_id=${recipe.recipe_id}`);
+      if (!res.ok) throw new Error('Failed to generate spread image');
+
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      setPreviewBlob(blob);
+      setPreviewBlobUrl(blobUrl);
+      setPreviewRecipe(recipe);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Generate failed');
+    } finally {
+      setGeneratingRecipeId(null);
+    }
+  };
+
+  const handleSavePreview = async () => {
+    if (!previewRecipe || !previewBlob) return;
+    setSavingPreview(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', previewBlob, 'recipe-spread.png');
+      formData.append('recipe_id', previewRecipe.recipe_id);
+      formData.append('group_id', previewRecipe.group_id || '');
+
+      const res = await fetch('/api/v1/admin/showcase/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Upload failed');
+      }
+
+      const { url } = await res.json();
+      setRecipes(prev =>
+        prev.map(r =>
+          r.recipe_id === previewRecipe.recipe_id ? { ...r, showcase_image_url: url } : r
+        )
+      );
+      handleClosePreview();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Save failed');
+    } finally {
+      setSavingPreview(false);
+    }
+  };
+
+  const handleClosePreview = () => {
+    if (previewBlobUrl) URL.revokeObjectURL(previewBlobUrl);
+    setPreviewRecipe(null);
+    setPreviewBlobUrl(null);
+    setPreviewBlob(null);
   };
 
   const handleUploadClick = (recipe: ShowcaseRecipe) => {
@@ -297,20 +364,40 @@ export default function ShowcasePage() {
                     </td>
                     <td className="px-4 py-3">
                       {recipe.showcase_image_url ? (
-                        <img
-                          src={recipe.showcase_image_url}
-                          alt={recipe.recipe_name}
-                          className="w-24 h-16 object-cover rounded border"
-                        />
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={recipe.showcase_image_url}
+                            alt={recipe.recipe_name}
+                            className="w-24 h-16 object-cover rounded border"
+                          />
+                          <button
+                            onClick={() => handleGenerate(recipe)}
+                            disabled={generatingRecipeId === recipe.recipe_id}
+                            className="text-gray-400 hover:text-gray-600 text-xs underline transition-colors"
+                          >
+                            {generatingRecipeId === recipe.recipe_id ? 'Regenerating...' : 'Regenerate'}
+                          </button>
+                        </div>
                       ) : (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={uploadingRecipeId === recipe.recipe_id}
-                          onClick={() => handleUploadClick(recipe)}
-                        >
-                          {uploadingRecipeId === recipe.recipe_id ? 'Uploading...' : 'Upload'}
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={generatingRecipeId === recipe.recipe_id}
+                            onClick={() => handleGenerate(recipe)}
+                          >
+                            {generatingRecipeId === recipe.recipe_id ? 'Generating...' : 'Generate'}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={uploadingRecipeId === recipe.recipe_id}
+                            onClick={() => handleUploadClick(recipe)}
+                            className="text-gray-400 text-xs"
+                          >
+                            {uploadingRecipeId === recipe.recipe_id ? 'Uploading...' : 'Upload'}
+                          </Button>
+                        </div>
                       )}
                     </td>
                     <td className="px-4 py-3">
@@ -328,16 +415,27 @@ export default function ShowcasePage() {
                           </button>
                         </div>
                       ) : recipe.showcase_image_url ? (
-                        <Button
-                          size="sm"
-                          disabled={sendingRecipeId === recipe.recipe_id}
-                          onClick={() => setConfirmSend(recipe)}
-                          className="bg-black text-white hover:bg-gray-800"
-                        >
-                          {sendingRecipeId === recipe.recipe_id ? 'Sending...' : 'Send'}
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            disabled={sendingRecipeId === recipe.recipe_id}
+                            onClick={() => setConfirmSend(recipe)}
+                            className="bg-black text-white hover:bg-gray-800"
+                          >
+                            {sendingRecipeId === recipe.recipe_id ? 'Sending...' : 'Send'}
+                          </Button>
+                          <button
+                            onClick={() => window.open(
+                              `/api/v1/admin/showcase/preview-email?recipe_id=${recipe.recipe_id}&guest_id=${recipe.guest_id}`,
+                              '_blank'
+                            )}
+                            className="text-gray-400 hover:text-gray-600 text-xs underline transition-colors"
+                          >
+                            Preview
+                          </button>
+                        </div>
                       ) : (
-                        <span className="text-gray-400 text-xs">Upload first</span>
+                        <span className="text-gray-400 text-xs">Generate first</span>
                       )}
                     </td>
                   </tr>
@@ -356,6 +454,37 @@ export default function ShowcasePage() {
         className="hidden"
         onChange={handleFileChange}
       />
+
+      {/* Preview dialog — shows generated spread before saving */}
+      <Dialog open={!!previewRecipe} onOpenChange={() => handleClosePreview()}>
+        <DialogContent className="sm:max-w-[900px]">
+          <DialogHeader>
+            <DialogTitle>Spread Preview</DialogTitle>
+            <DialogDescription>
+              {previewRecipe?.recipe_name} — {previewRecipe?.guest_name}
+            </DialogDescription>
+          </DialogHeader>
+          {previewBlobUrl && (
+            <img
+              src={previewBlobUrl}
+              alt="Spread preview"
+              className="w-full rounded-lg border shadow-sm"
+            />
+          )}
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="outline" onClick={handleClosePreview} disabled={savingPreview}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-black text-white hover:bg-gray-800"
+              onClick={handleSavePreview}
+              disabled={savingPreview}
+            >
+              {savingPreview ? 'Saving...' : 'Save'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Send confirmation dialog */}
       <Dialog open={!!confirmSend} onOpenChange={() => setConfirmSend(null)}>

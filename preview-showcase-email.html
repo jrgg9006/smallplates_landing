@@ -1,30 +1,4 @@
-/**
- * Email HTML template for recipe showcase (spread preview).
- *
- * Changes from previous version:
- * — Copy: "for good" replaces "forever"
- * — Copy: "Here's your page." replaces "Here's how your page turned out."
- * — Copy: Identity close + seed replaces "Thanks for being a part of their story."
- * — Signature: "Small Plates & Co." replaces "The Small Plates team"
- * — Logo: dark mode invert via CSS filter
- * — Spread image: full-width, book-shadow treatment
- * — New: seed section after divider ("Know someone getting married?")
- */
-
-interface ShowcaseEmailParams {
-  guestName: string;
-  coupleName: string;      // HTML-safe, e.g. "Sarah &amp; Mike"
-  coupleNamePlain: string; // Plain text, e.g. "Sarah & Mike"
-  recipeName: string;
-}
-
-export function buildShowcaseEmailHTML({
-  guestName,
-  coupleName,
-  coupleNamePlain,
-  recipeName,
-}: ShowcaseEmailParams): string {
-  return `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml"
 xmlns:v="urn:schemas-microsoft-com:vml"
 xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -35,7 +9,7 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
   <meta name="x-apple-disable-message-reformatting">
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
-  <title>You're in their cookbook, ${guestName}.</title>
+  <title>You're in their cookbook, Lola.</title>
   <style type="text/css">
     /* Reset */
     body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
@@ -64,7 +38,6 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
       .book-bg { background-color: #1e1e1e !important; }
       .seed-text { color: #666666 !important; }
       .seed-link { color: #888888 !important; border-bottom-color: #3a3a3a !important; }
-      /* Invert logo to white in dark mode — works in Apple Mail */
       .logo-img { filter: invert(1) !important; }
     }
   </style>
@@ -73,7 +46,7 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
 
   <!-- Preview text -->
   <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
-    Here's how your page looks in ${coupleNamePlain}'s cookbook.
+    Here's how your page looks in Albert &amp; B&aacute;rbara's cookbook.
     &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847;
   </div>
 
@@ -111,7 +84,7 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
                     <td align="center" style="padding-bottom: 20px;">
                       <h1 style="margin: 0; font-family: Georgia, serif; font-size: 26px; font-weight: 400;
                         color: #2D2D2D; line-height: 1.3; text-align: center;" class="darkmode-heading">
-                        You're in the book, ${guestName}.
+                        You're in the book, Lola.
                       </h1>
                     </td>
                   </tr>
@@ -122,30 +95,39 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
                   <tr>
                     <td align="center" style="padding-bottom: 6px;">
                       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-                        font-size: 16px; color: #666666; font-weight: 300; line-height: 1.65; text-align: center;" class="darkmode-body">
-                        Your ${recipeName} is in ${coupleName}'s cookbook now.
+                        font-size: 16px; color: #666666; line-height: 1.65; text-align: center;" class="darkmode-body">
+                        Your Tarta de chocolate y frambuesa is in Albert &amp; B&aacute;rbara's cookbook now.
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align="center" style="padding-bottom: 6px;">
+                      <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                        font-size: 16px; color: #666666; line-height: 1.65; text-align: center;" class="darkmode-body">
+                        And their kitchen.
                       </p>
                     </td>
                   </tr>
                   <tr>
                     <td align="center" style="padding-bottom: 24px;">
                       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-                        font-size: 16px; color: #666666; font-weight: 300; line-height: 1.65; text-align: center;" class="darkmode-body">
-                        And their kitchen. <span style="color: #2D2D2D; font-weight: 500;" class="darkmode-heading">For good.</span>
+                        font-size: 16px; color: #2D2D2D; font-weight: 500; line-height: 1.65; text-align: center;"
+                        class="darkmode-heading">
+                        For good.
                       </p>
                     </td>
                   </tr>
                   <tr>
                     <td align="center" style="padding-bottom: 28px;">
                       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-                        font-size: 16px; color: #666666; font-weight: 300; line-height: 1.65; text-align: center;" class="darkmode-body">
+                        font-size: 16px; color: #666666; line-height: 1.65; text-align: center;" class="darkmode-body">
                         Here's your page.
                       </p>
                     </td>
                   </tr>
                 </table>
 
-                <!-- Spread image — full-width, book shadow -->
+                <!-- Spread image — placeholder for preview -->
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
                     <td align="center" style="padding-bottom: 16px;">
@@ -154,14 +136,12 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
                           <td align="center"
                             style="background-color: #EDE8E0; border-radius: 6px; padding: 20px 16px;"
                             class="book-bg">
-                            <img
-                              src="cid:recipe-spread"
-                              alt="${recipeName} — ${guestName}'s page in ${coupleNamePlain}'s cookbook"
-                              width="500"
-                              style="display: block; width: 100%; max-width: 500px; height: auto;
-                                border-radius: 3px;
-                                box-shadow: 0 2px 8px rgba(0,0,0,0.10), 0 8px 28px rgba(0,0,0,0.14);"
-                              class="spread-img">
+                            <div style="width: 100%; max-width: 500px; height: 300px; border-radius: 3px;
+                              box-shadow: 0 2px 8px rgba(0,0,0,0.10), 0 8px 28px rgba(0,0,0,0.14);
+                              background-color: #E0D9CF; margin: 0 auto; display: flex; align-items: center;
+                              justify-content: center; font-family: Georgia, serif; font-size: 16px; color: #9A9590;">
+                              [Recipe Spread Image]
+                            </div>
                           </td>
                         </tr>
                       </table>
@@ -175,7 +155,7 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
                     <td align="center" style="padding-bottom: 32px;">
                       <p style="margin: 0; font-family: Georgia, serif; font-size: 13px; color: #9A9590;
                         line-height: 1.5; text-align: center; font-style: italic;" class="caption-text">
-                        ${recipeName} &mdash; by ${guestName}
+                        Tarta de chocolate y frambuesa &mdash; by Lola
                       </p>
                     </td>
                   </tr>
@@ -186,8 +166,8 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
                   <tr>
                     <td align="center" style="padding-bottom: 14px;">
                       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-                        font-size: 16px; color: #555555; font-weight: 300; line-height: 1.7; text-align: center;" class="darkmode-body">
-                        Every time they make this, you'll be right there with them.
+                        font-size: 16px; color: #555555; line-height: 1.7; text-align: center;" class="darkmode-body">
+                        Every time they make this, you're right there with them.
                       </p>
                     </td>
                   </tr>
@@ -195,6 +175,7 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
                     <td align="center" style="padding-bottom: 36px;">
                       <p style="margin: 0; font-family: Georgia, serif; font-size: 16px; color: #2D2D2D;
                         line-height: 1.7; text-align: center; font-style: italic;" class="darkmode-heading">
+                        
                       </p>
                     </td>
                   </tr>
@@ -260,5 +241,4 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
     </table>
   </div>
 </body>
-</html>`;
-}
+</html>
