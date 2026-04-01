@@ -73,8 +73,7 @@ export default function GroupInvitationPage() {
   }, [token]);
 
   const handleJoin = async (formData: {
-    firstName: string;
-    lastName: string;
+    fullName: string;
     email: string;
     password: string;
   }) => {
@@ -100,10 +99,8 @@ export default function GroupInvitationPage() {
     };
   };
 
-  // Reason: Split invitation name into firstName/lastName for GroupJoinForm preFilledData
   const preFilledData = invitationData ? {
-    firstName: invitationData.name?.split(' ')[0] || '',
-    lastName: invitationData.name?.split(' ').slice(1).join(' ') || '',
+    fullName: invitationData.name || '',
     email: invitationData.email || ''
   } : undefined;
 

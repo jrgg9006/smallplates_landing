@@ -141,7 +141,7 @@ export async function POST(
 ) {
   try {
     const { token } = await params;
-    const { password, firstName, lastName, email: providedEmail } = await request.json();
+    const { password, fullName, email: providedEmail } = await request.json();
 
     if (!token) {
       return NextResponse.json({ error: 'Token is required' }, { status: 400 });
@@ -245,11 +245,9 @@ export async function POST(
         );
       }
 
-      if (!firstName?.trim()) {
-        return NextResponse.json({ error: 'First name is required' }, { status: 400 });
+      if (!fullName?.trim()) {
+        return NextResponse.json({ error: 'Name is required' }, { status: 400 });
       }
-
-      const fullName = `${firstName.trim()} ${(lastName || '').trim()}`.trim();
 
       const { data: signUpData, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
         email,
@@ -259,9 +257,7 @@ export async function POST(
           invited_from_group: true,
           group_id: invitation.group_id,
           group_name: group.name,
-          firstName: firstName.trim(),
-          lastName: lastName?.trim() || '',
-          full_name: fullName
+          full_name: fullName.trim()
         }
       });
 

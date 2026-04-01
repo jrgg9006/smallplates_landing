@@ -27,7 +27,7 @@ export async function POST(
 ) {
   try {
     const { groupId } = await params;
-    const { password, firstName, lastName, email: providedEmail } = await request.json();
+    const { password, fullName, email: providedEmail } = await request.json();
 
     // Validate input
     if (!groupId) {
@@ -165,28 +165,24 @@ export async function POST(
         );
       }
 
-      if (!firstName?.trim()) {
+      if (!fullName?.trim()) {
         return NextResponse.json(
-          { error: 'First name is required' },
+          { error: 'Name is required' },
           { status: 400 }
         );
       }
-
-      const fullName = `${firstName.trim()} ${(lastName || '').trim()}`.trim();
 
       console.log('👤 Creating new user account for:', email);
 
       const { data: signUpData, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
         email: email,
         password: password,
-        email_confirm: true, // Auto-confirm email
+        email_confirm: true,
         user_metadata: {
           joined_from_direct_link: true,
           group_id: groupId,
           group_name: group.name,
-          firstName: firstName.trim(),
-          lastName: lastName?.trim() || '',
-          full_name: fullName
+          full_name: fullName.trim()
         }
       });
 

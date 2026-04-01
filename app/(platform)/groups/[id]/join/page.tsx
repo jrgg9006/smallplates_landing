@@ -62,8 +62,7 @@ export default function GroupJoinPage({ params }: GroupJoinPageProps) {
   };
 
   const handleJoin = async (formData: {
-    firstName: string;
-    lastName: string;
+    fullName: string;
     email: string;
     password: string;
   }) => {
