@@ -42,6 +42,30 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   const userType = metadata.userType || 'couple';
   const existingUserId = metadata.existingUserId;
 
+  // Reason: Discount info lives on the checkout session, not the payment intent.
+  // We retrieve the session to extract promotion code and discount amount for the order record.
+  let discountCode: string | null = null;
+  let discountAmount: number | null = null;
+  try {
+    const sessions = await stripe.checkout.sessions.list({
+      payment_intent: paymentIntent.id,
+      expand: ['data.total_details.breakdown'],
+    });
+    const session = sessions.data[0];
+    if (session?.total_details?.breakdown?.discounts?.length) {
+      const discount = session.total_details.breakdown.discounts[0];
+      discountAmount = discount.amount;
+      if (discount.discount.promotion_code) {
+        const promoCode = await stripe.promotionCodes.retrieve(
+          discount.discount.promotion_code as string
+        );
+        discountCode = promoCode.code;
+      }
+    }
+  } catch (err) {
+    console.error('Error retrieving discount info:', err);
+  }
+
   // Idempotency: check if order already exists for this payment intent
   const { data: existingOrder } = await supabaseAdmin
     .from('orders')
@@ -115,6 +139,8 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
       user_type: userType,
       onboarding_data: metadata,
       status: 'paid',
+      discount_code: discountCode,
+      discount_amount: discountAmount,
     });
 
     if (orderError) {
@@ -203,6 +229,8 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
     user_type: userType,
     onboarding_data: metadata,
     status: 'paid',
+    discount_code: discountCode,
+    discount_amount: discountAmount,
   });
 
   if (orderError) {

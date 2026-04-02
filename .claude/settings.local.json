@@ -34,7 +34,8 @@
       "Bash(npm install:*)",
       "Bash(ls -la /Users/macbook/Desktop/smallplates_landing/app/\\\\\\(auth\\\\\\)/onboarding/success/)",
       "Bash(ls -la /Users/macbook/Desktop/smallplates_landing/app/\\\\\\(platform\\\\\\)/complete-setup/)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(xxd)"
     ],
     "deny": []
   }

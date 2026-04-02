@@ -723,6 +723,8 @@ export interface Order {
   error_message: string | null;
   order_type: OrderType;
   group_id: string | null;
+  discount_code: string | null;
+  discount_amount: number | null;
 }
 
 export interface OrderInsert {
@@ -742,6 +744,8 @@ export interface OrderInsert {
   error_message?: string | null;
   order_type?: OrderType;
   group_id?: string | null;
+  discount_code?: string | null;
+  discount_amount?: number | null;
 }
 
 // Extended types with relationships

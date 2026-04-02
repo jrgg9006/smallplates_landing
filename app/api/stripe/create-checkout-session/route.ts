@@ -126,6 +126,7 @@ export async function POST(request: NextRequest) {
       payment_method_types: ['card'],
       customer_email: email,
       line_items: lineItems,
+      allow_promotion_codes: true,
       ...shippingConfig,
       metadata: sessionMetadata,
       // Reason: Webhook listens for payment_intent.succeeded and reads PI metadata,
