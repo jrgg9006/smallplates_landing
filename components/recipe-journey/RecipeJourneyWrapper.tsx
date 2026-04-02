@@ -929,6 +929,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
               guestOptInEmail={guestOptInEmailRef.current || undefined}
               onSavePrefs={handleSavePrefs}
               coupleImageUrl={tokenInfo.couple_image_url}
+              recipeName={recipeData.recipeName || undefined}
+              coupleNames={tokenInfo.couple_names}
             />
           </motion.div>
         )}
