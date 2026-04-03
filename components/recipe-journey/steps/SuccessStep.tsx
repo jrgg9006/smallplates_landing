@@ -69,7 +69,7 @@ export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn =
           ) : (
             <>
               <p className="text-sm text-gray-600">
-                Share with me how the plate turned out in the book.
+                Share with me how it turned out in the book.
               </p>
               <div className="flex items-center gap-2 mt-4 max-w-sm mx-auto">
                 <input
