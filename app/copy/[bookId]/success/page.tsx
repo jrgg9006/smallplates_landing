@@ -78,6 +78,12 @@ export default async function CopySuccessPage({
     ? JSON.parse(paymentIntent.metadata.shipping_address)
     : null;
 
+  const { data: book } = await supabase
+    .from("groups")
+    .select("name")
+    .eq("id", bookId)
+    .single();
+
   if (!existingOrder) {
     await supabase.from("orders").insert({
       email: email || "",
@@ -88,14 +94,10 @@ export default async function CopySuccessPage({
       status: "paid",
       order_type: "copy_order",
       group_id: bookId,
+      couple_name: book?.name || null,
+      user_type: "copy_buyer",
     });
   }
-
-  const { data: book } = await supabase
-    .from("groups")
-    .select("name")
-    .eq("id", bookId)
-    .single();
 
   const { data: order } = await supabase
     .from("orders")

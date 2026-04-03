@@ -34,37 +34,27 @@ export async function POST(request: NextRequest) {
 }
 
 async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-  const supabaseAdmin = createSupabaseAdminClient();
   const metadata = paymentIntent.metadata || {};
+
+  // Reason: Extra copies and copy orders have their own order-creation logic
+  // (PATCH /extra-copies-payment and /copy/[bookId]/success).
+  // Webhook must not create a duplicate order for these.
+  if (metadata.type === 'extra_copies' || metadata.type === 'copy_order') {
+    return;
+  }
+
+  const supabaseAdmin = createSupabaseAdminClient();
 
   const email = metadata.email || '';
   const bookQuantity = parseInt(metadata.bookQuantity || '1', 10);
   const userType = metadata.userType || 'couple';
   const existingUserId = metadata.existingUserId;
 
-  // Reason: Discount info lives on the checkout session, not the payment intent.
-  // We retrieve the session to extract promotion code and discount amount for the order record.
-  let discountCode: string | null = null;
-  let discountAmount: number | null = null;
-  try {
-    const sessions = await stripe.checkout.sessions.list({
-      payment_intent: paymentIntent.id,
-      expand: ['data.total_details.breakdown'],
-    });
-    const session = sessions.data[0];
-    if (session?.total_details?.breakdown?.discounts?.length) {
-      const discount = session.total_details.breakdown.discounts[0];
-      discountAmount = discount.amount;
-      if (discount.discount.promotion_code) {
-        const promoCode = await stripe.promotionCodes.retrieve(
-          discount.discount.promotion_code as string
-        );
-        discountCode = promoCode.code;
-      }
-    }
-  } catch (err) {
-    console.error('Error retrieving discount info:', err);
-  }
+  // Reason: Discount info is stored in PI metadata by the apply-promo-code endpoint
+  const discountCode: string | null = metadata.discount_code || null;
+  const discountAmount: number | null = metadata.discount_amount
+    ? parseInt(metadata.discount_amount, 10)
+    : null;
 
   // Idempotency: check if order already exists for this payment intent
   const { data: existingOrder } = await supabaseAdmin
@@ -145,6 +135,20 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
 
     if (orderError) {
       console.error('Error creating order for embedded flow:', orderError);
+    }
+
+    // Reason: Stripe doesn't auto-track redemptions for manual PI flows.
+    // Deactivate the promo code when it hits max_redemptions.
+    if (metadata.promotion_code_id) {
+      try {
+        const promoCode = await stripe.promotionCodes.retrieve(metadata.promotion_code_id);
+        if (promoCode.max_redemptions &&
+            promoCode.times_redeemed + 1 >= promoCode.max_redemptions) {
+          await stripe.promotionCodes.update(metadata.promotion_code_id, { active: false });
+        }
+      } catch (err) {
+        console.error('Error updating promotion code redemption:', err);
+      }
     }
 
     // Reason: Send welcome email so user can recover if they close browser before completing step 4.
@@ -235,6 +239,20 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
 
   if (orderError) {
     console.error('Error creating order:', orderError);
+  }
+
+  // Reason: Stripe doesn't auto-track redemptions for manual PI flows.
+  // Deactivate the promo code when it hits max_redemptions.
+  if (metadata.promotion_code_id) {
+    try {
+      const promoCode = await stripe.promotionCodes.retrieve(metadata.promotion_code_id);
+      if (promoCode.max_redemptions &&
+          promoCode.times_redeemed + 1 >= promoCode.max_redemptions) {
+        await stripe.promotionCodes.update(metadata.promotion_code_id, { active: false });
+      }
+    } catch (err) {
+      console.error('Error updating promotion code redemption:', err);
+    }
   }
 
   // Reason: Generate a magic link via Supabase, then send it through Postmark

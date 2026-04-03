@@ -104,10 +104,36 @@ export async function PATCH(
       return NextResponse.json({ error: "Not a member" }, { status: 403 });
     }
 
-    const { additionalCopies, paymentIntentId, amount, shippingAddress } = await request.json();
+    const { additionalCopies, paymentIntentId, shippingAddress } = await request.json();
 
     if (!additionalCopies || additionalCopies < 1 || additionalCopies > 5) {
       return NextResponse.json({ error: "Invalid quantity" }, { status: 400 });
+    }
+
+    // Reason: Calculate amount server-side instead of trusting the client
+    const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+    // Reason: Fetch group name for couple_name on the order record
+    const { data: group } = await supabase
+      .from("groups")
+      .select("name")
+      .eq("id", groupId)
+      .single();
+
+    // Reason: If client didn't send shipping address, fall back to the group's saved address
+    let resolvedShipping = shippingAddress || null;
+    if (!resolvedShipping) {
+      const { data: savedAddr } = await supabase
+        .from("shipping_addresses")
+        .select("recipient_name, street_address, apartment_unit, city, state, postal_code, country, phone_number")
+        .eq("group_id", groupId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (savedAddr) {
+        resolvedShipping = savedAddr;
+      }
     }
 
     // Reason: Insert a new order row instead of incrementing a counter on groups
@@ -117,9 +143,11 @@ export async function PATCH(
         user_id: user.id,
         email: user.email || "",
         stripe_payment_intent: paymentIntentId,
-        amount_total: amount || null,
+        amount_total: pi.amount,
         book_quantity: additionalCopies,
-        shipping_address: shippingAddress || null,
+        shipping_address: resolvedShipping,
+        couple_name: group?.name || null,
+        user_type: "extra_copy_buyer",
         status: "paid",
         order_type: "extra_copy",
         group_id: groupId,

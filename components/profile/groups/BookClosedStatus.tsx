@@ -46,6 +46,65 @@ function ShareCopyLink({ groupId }: { groupId: string }) {
   );
 }
 
+const REFERRAL_CODE = "REFERRAL2026";
+
+function ReferralBox() {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(REFERRAL_CODE);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="relative overflow-hidden rounded-[14px] bg-[radial-gradient(ellipse_at_top_left,#C4897A_0%,#B07261_40%,#96594B_100%)]">
+      {/* Reason: Subtle gold accent line at top for brand warmth */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#D4A854] to-transparent" />
+
+      <div className="px-5 py-5 sm:px-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {/* Left: Copy */}
+          <div className="flex-1 min-w-0">
+            <p className="font-serif text-[15px] text-white/90 leading-snug">
+              Know someone getting married?
+            </p>
+            <p className="text-[12px] text-white/50 mt-0.5">
+              Share your code. They get 15% off their book.
+            </p>
+          </div>
+
+          {/* Right: Code + button */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="px-3.5 py-2 bg-white/25 border border-white/20 rounded-lg">
+              <span className="text-[13px] font-mono font-medium text-white tracking-wider">
+                {REFERRAL_CODE}
+              </span>
+            </div>
+            <button
+              onClick={handleCopy}
+              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-medium transition-all duration-200 ${
+                copied
+                  ? "bg-[#D4A854] text-[#2D2D2D]"
+                  : "bg-white text-[#2D2D2D] hover:bg-[#D4A854] hover:text-[#2D2D2D]"
+              }`}
+            >
+              {copied ? (
+                <>
+                  <Check className="w-3.5 h-3.5" />
+                  Copied
+                </>
+              ) : (
+                "Copy"
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface BookClosedStatusProps {
   group: GroupWithMembers;
   recipeCount: number;
@@ -102,7 +161,11 @@ const SUPPORTED_COUNTRIES: { code: string; name: string; postalLabel: string; po
   { code: "CA", name: "Canada", postalLabel: "Postal Code", postalPlaceholder: "K1A 0B1", regionLabel: "Province", regionType: "text" },
 ];
 
-function TimelineSection() {
+function TimelineSection({ bookStatus }: { bookStatus: string }) {
+  // Reason: Map book_status from admin pipeline to timeline step completion
+  const designActive = ['reviewed', 'ready_to_print', 'printed'].includes(bookStatus);
+  const printedActive = bookStatus === 'printed';
+
   const steps = [
     {
       completed: true,
@@ -110,14 +173,18 @@ function TimelineSection() {
       description: "Recipes locked and ready for design.",
     },
     {
-      completed: false,
+      completed: designActive,
       title: "Design & layout",
-      description: "We'll lay out every recipe and send you a preview.",
+      description: designActive
+        ? (printedActive ? "Layout complete." : "We're working on your book right now.")
+        : "We'll lay out every recipe and send you a preview.",
     },
     {
-      completed: false,
+      completed: printedActive,
       title: "Printing & shipping",
-      description: "Your book ships and arrives at your door.",
+      description: printedActive
+        ? "Your book has been printed and is on its way."
+        : "Your book ships and arrives at your door.",
     },
   ];
 
@@ -572,12 +639,16 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
             </div>
           )}
 
+          {/* Referral */}
+          <div className="border-t border-[#E8E0D5] my-6" />
+          <ReferralBox />
+
           {/* What happens next */}
           <div className="border-t border-[#E8E0D5] my-6" />
           <p className="text-xs uppercase tracking-[0.25em] text-[#D4A854] font-medium mb-4">
             What happens next
           </p>
-          <TimelineSection />
+          <TimelineSection bookStatus={group.book_status} />
 
           {/* Footer */}
           <div className="border-t border-[#E8E0D5] my-6" />

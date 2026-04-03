@@ -661,17 +661,37 @@ export function ExtraCopyPurchase({
   const handlePaymentSuccess = async (paymentIntentId: string) => {
     setUpdatingDb(true);
     try {
+      // Reason: Pass shipping address so it's stored on the order record
+      console.log("handlePaymentSuccess — useSameAddress:", useSameAddress, "existingAddress:", !!existingAddress);
+      const shippingAddress = useSameAddress && existingAddress
+        ? {
+            recipient_name: existingAddress.recipient_name,
+            street_address: existingAddress.street_address,
+            apartment_unit: existingAddress.apartment_unit,
+            city: existingAddress.city,
+            region: existingAddress.state,
+            postal_code: existingAddress.postal_code,
+            country: existingAddress.country || "United States",
+            phone: existingAddress.phone_number,
+          }
+        : null;
+
       const res = await fetch(`/api/v1/groups/${groupId}/extra-copies-payment`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           additionalCopies: qty,
           paymentIntentId,
-          amount: (qty * ADDITIONAL_BOOK_PRICE + shippingCost) * 100,
+          shippingAddress,
         }),
       });
-      if (!res.ok) throw new Error("Failed to update");
-    } catch {
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        console.error("PATCH extra-copies failed:", errData);
+        throw new Error("Failed to update");
+      }
+    } catch (err) {
+      console.error("Error recording extra copy order:", err);
       // Reason: Payment succeeded, DB update is best-effort. User will see updated count on reload.
     } finally {
       setUpdatingDb(false);

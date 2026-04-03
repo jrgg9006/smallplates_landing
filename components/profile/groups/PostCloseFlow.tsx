@@ -163,9 +163,12 @@ function StepExtras({
       <p className="text-[11px] uppercase tracking-[0.08em] text-[#8A8780] mb-2">
         Each additional copy
       </p>
-      <div className="flex items-baseline justify-center mb-1">
-        <span className="font-serif text-2xl text-[#8A8780] mr-1">$</span>
-        <span className="font-serif text-[56px] text-[#2D2D2D] leading-none">119</span>
+      <div className="flex items-baseline justify-center gap-3 mb-1">
+        <span className="font-serif text-[22px] text-[#B0ADA8] line-through decoration-[1.5px]">${BASE_BOOK_PRICE}</span>
+        <span className="flex items-baseline">
+          <span className="font-serif text-2xl text-[#8A8780] mr-1">$</span>
+          <span className="font-serif text-[56px] text-[#2D2D2D] leading-none">119</span>
+        </span>
       </div>
       <div className="flex items-center gap-2 mb-10">
         <span className="text-sm text-[#8A8780]">same book, same quality</span>
@@ -197,10 +200,11 @@ function StepExtras({
         </button>
       </div>
 
-      {/* Dynamic message */}
-      <p className="text-sm italic text-[#D4A854] h-5 mb-8 text-center">
+      {/* Dynamic message — hidden for now */}
+      {/* <p className="text-sm italic text-[#D4A854] h-5 mb-8 text-center">
         {QTY_MESSAGES[qty] || ""}
-      </p>
+      </p> */}
+      <div className="mb-8" />
 
       {/* Totals — only when qty > 0 */}
       {qty > 0 && (
@@ -211,7 +215,10 @@ function StepExtras({
           </div>
           <div className="flex justify-between text-[#2D2D2D]">
             <span>{qty} extra {qty === 1 ? "copy" : "copies"}</span>
-            <span>${total}</span>
+            <span>
+              <span className="text-[#8A8780] line-through mr-1.5">${qty * BASE_BOOK_PRICE}</span>
+              ${total}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-[#8A8780]">Shipping</span>

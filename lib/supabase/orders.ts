@@ -19,12 +19,14 @@ export async function getIncompleteOrders(): Promise<{ data: IncompleteOrder[]; 
 
   // Reason: couple_name is NULL when the user paid but didn't finish PostPaymentSetup.
   // Same detection logic as app/api/stripe/resend-setup-link/route.ts:28-36
+  // Exclude extra_copy and copy_order since those don't need onboarding setup.
   const { data, error } = await supabase
     .from('orders')
     .select('stripe_payment_intent, user_type')
     .eq('user_id', user.id)
     .eq('status', 'paid')
-    .is('couple_name', null);
+    .is('couple_name', null)
+    .not('order_type', 'in', '("extra_copy","copy_order")');
 
   if (error) {
     return { data: [], error: error.message };

@@ -78,7 +78,43 @@ function Step3Payment() {
   const [email, setEmail] = useState(savedEmail);
   const [emailError, setEmailError] = useState("");
 
-  const total = calculateSubtotal(state.bookQuantity) + calculateShipping(state.bookQuantity, 'US');
+  const subtotal = calculateSubtotal(state.bookQuantity);
+  const shipping = calculateShipping(state.bookQuantity, 'US');
+
+  const [promoCode, setPromoCode] = useState("");
+  const [promoDiscount, setPromoDiscount] = useState<{
+    code: string;
+    discountAmount: number;
+    discountPercent: number | null;
+  } | null>(null);
+  const [promoError, setPromoError] = useState("");
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+
+  const discountAmount = promoDiscount?.discountAmount ?? 0;
+  const total = subtotal - discountAmount + shipping;
+
+  // Reason: If user went back to Step 2 and changed quantity, PI has stale amount.
+  // On remount with existing PI, reset promo and sync PI amount.
+  const hadExistingPI = useRef(!!state.clientSecret);
+  useEffect(() => {
+    if (!hadExistingPI.current || !paymentIntentId || !clientSecret) return;
+    hadExistingPI.current = false;
+    setPromoCode("");
+    setPromoDiscount(null);
+    setPromoError("");
+    fetch("/api/stripe/apply-promo-code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentIntentId,
+        clientSecret,
+        promoCode: "",
+        bookQuantity: state.bookQuantity,
+        userType: "couple",
+      }),
+    }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (clientSecret || piCreatedRef.current) return;
@@ -157,10 +193,20 @@ function Step3Payment() {
         paymentIntentId={paymentIntentId!}
         clientSecret={clientSecret!}
         total={total}
+        subtotal={subtotal}
+        shipping={shipping}
         bookQuantity={state.bookQuantity}
         previousStep={previousStep}
         nextStep={nextStep}
         updateStepData={updateStepData}
+        promoCode={promoCode}
+        setPromoCode={setPromoCode}
+        promoDiscount={promoDiscount}
+        setPromoDiscount={setPromoDiscount}
+        promoError={promoError}
+        setPromoError={setPromoError}
+        isApplyingPromo={isApplyingPromo}
+        setIsApplyingPromo={setIsApplyingPromo}
       />
     </Elements>
   );
@@ -168,21 +214,88 @@ function Step3Payment() {
 
 function CouplePaymentForm({
   email, setEmail, emailError, setEmailError,
-  paymentIntentId, clientSecret, total, bookQuantity,
+  paymentIntentId, clientSecret, total, subtotal, shipping, bookQuantity,
   previousStep, nextStep, updateStepData,
+  promoCode, setPromoCode, promoDiscount, setPromoDiscount,
+  promoError, setPromoError, isApplyingPromo, setIsApplyingPromo,
 }: {
   email: string; setEmail: (v: string) => void;
   emailError: string; setEmailError: (v: string) => void;
-  paymentIntentId: string; clientSecret: string; total: number; bookQuantity: number;
+  paymentIntentId: string; clientSecret: string; total: number; subtotal: number; shipping: number; bookQuantity: number;
   previousStep: () => void; nextStep: () => void;
   updateStepData: (step: number, data: Record<string, unknown>) => Promise<void>;
+  promoCode: string; setPromoCode: (v: string) => void;
+  promoDiscount: { code: string; discountAmount: number; discountPercent: number | null } | null;
+  setPromoDiscount: (v: { code: string; discountAmount: number; discountPercent: number | null } | null) => void;
+  promoError: string; setPromoError: (v: string) => void;
+  isApplyingPromo: boolean; setIsApplyingPromo: (v: boolean) => void;
 }) {
   const stripe = useStripe();
   const elements = useElements();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentError, setPaymentError] = useState("");
+  const [showPromoInput, setShowPromoInput] = useState(false);
 
   const validateEmail = (val: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return;
+    setIsApplyingPromo(true);
+    setPromoError("");
+    try {
+      const res = await fetch("/api/stripe/apply-promo-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paymentIntentId,
+          clientSecret,
+          promoCode: promoCode.trim().toUpperCase(),
+          bookQuantity,
+          userType: "couple",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setPromoError(data.error || "Invalid promotion code");
+        setPromoDiscount(null);
+      } else {
+        setPromoDiscount({
+          code: data.discountCode,
+          discountAmount: data.discountAmount,
+          discountPercent: data.discountPercent,
+        });
+        setPromoError("");
+      }
+    } catch {
+      setPromoError("Failed to apply promotion code");
+    } finally {
+      setIsApplyingPromo(false);
+    }
+  };
+
+  const handleRemovePromo = async () => {
+    setIsApplyingPromo(true);
+    try {
+      await fetch("/api/stripe/apply-promo-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paymentIntentId,
+          clientSecret,
+          promoCode: "",
+          bookQuantity,
+          userType: "couple",
+        }),
+      });
+    } catch {
+      // Reason: Non-fatal — worst case PI still has old amount, user can retry
+    } finally {
+      setPromoCode("");
+      setPromoDiscount(null);
+      setPromoError("");
+      setIsApplyingPromo(false);
+    }
+  };
 
   const handleEmailBlur = () => {
     if (email.trim() && !validateEmail(email.trim())) setEmailError("Please enter a valid email address");
@@ -228,7 +341,7 @@ function CouplePaymentForm({
   return (
     <OnboardingStep stepNumber={3} totalSteps={3} title="Let's finish your order" imageUrl="/images/onboarding/onboarding_lemon.png" imageAlt="Checkout">
       <div className="max-w-lg mx-auto mt-6">
-        <div className="mb-6 text-sm text-[#2D2D2D]/60">
+        <div className="mb-4 text-sm text-[#2D2D2D]/60">
           <div className="flex justify-between py-1"><span>The Book</span><span>${BASE_BOOK_PRICE}</span></div>
           {additionalCopies > 0 && (
             <div className="flex justify-between py-1">
@@ -236,7 +349,16 @@ function CouplePaymentForm({
               <span>${additionalCopies * ADDITIONAL_BOOK_PRICE}</span>
             </div>
           )}
-          <div className="flex justify-between py-1"><span>Shipping</span><span>${calculateShipping(bookQuantity, 'US')}</span></div>
+          <div className="flex justify-between py-1"><span>Shipping</span><span>${shipping}</span></div>
+          {promoDiscount && (
+            <div className="flex justify-between py-1 text-emerald-600">
+              <span className="flex items-center gap-1">
+                Discount ({promoDiscount.code})
+                <button type="button" onClick={handleRemovePromo} className="text-xs text-[#2D2D2D]/40 hover:text-[#2D2D2D]/70 ml-1" disabled={isApplyingPromo}>&times;</button>
+              </span>
+              <span>-${promoDiscount.discountAmount}</span>
+            </div>
+          )}
           <div className="border-t border-gray-200 mt-2 pt-2 flex justify-between text-[#2D2D2D] font-medium"><span>Total</span><span>${total}</span></div>
         </div>
 
@@ -251,7 +373,52 @@ function CouplePaymentForm({
           <p className="text-xs text-[#2D2D2D]/50 mt-1.5">Receipt and login link will be sent here.</p>
         </div>
 
-        <div className="mb-6"><PaymentElement options={{ layout: "tabs" }} /></div>
+        <div className="mb-4"><PaymentElement options={{ layout: "tabs" }} /></div>
+
+        {/* Promotion code — hidden behind toggle, below payment fields */}
+        <div className="mb-4">
+          {promoDiscount ? (
+            <div className="flex items-center justify-between text-sm text-emerald-600">
+              <span>Code {promoDiscount.code} applied ({promoDiscount.discountPercent ? `${promoDiscount.discountPercent}% off` : `-$${promoDiscount.discountAmount}`})</span>
+              <button type="button" onClick={handleRemovePromo} className="text-sm text-[#2D2D2D]/40 hover:text-[#2D2D2D]/70" disabled={isApplyingPromo}>&times;</button>
+            </div>
+          ) : !showPromoInput ? (
+            <button
+              type="button"
+              onClick={() => setShowPromoInput(true)}
+              className="text-sm text-[#2D2D2D]/50 hover:text-[#2D2D2D]/80 transition-colors"
+            >
+              Have a referral or promotion code?
+            </button>
+          ) : (
+            <div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={promoCode}
+                  onChange={(e) => { setPromoCode(e.target.value); if (promoError) setPromoError(""); }}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleApplyPromo(); } }}
+                  placeholder="Enter code"
+                  autoFocus
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={handleApplyPromo}
+                  disabled={!promoCode.trim() || isApplyingPromo}
+                  className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                    promoCode.trim() && !isApplyingPromo
+                      ? "bg-[#F5F5F5] text-[#2D2D2D] hover:bg-gray-200 border border-gray-300"
+                      : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+                  }`}
+                >
+                  {isApplyingPromo ? "..." : "Apply"}
+                </button>
+              </div>
+              {promoError && <p className="text-sm text-red-500 mt-1">{promoError}</p>}
+            </div>
+          )}
+        </div>
 
         {(paymentError || emailError) && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg"><p className="text-sm text-red-600">{emailError || paymentError}</p></div>
