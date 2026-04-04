@@ -130,26 +130,6 @@ Small Plates should feel like a high-end publication, not a wedding product.
 
 ---
 
-## 5. Tension Between Cool and Warm
-
-The brand personality is "cool on the outside, emotional on the inside."
-
-| Surface (Cool) | Core (Warm) |
-|----------------|-------------|
-| Minimal design | Rich content |
-| Editorial restraint | Emotional depth |
-| Sophisticated typography | Handwritten notes |
-| Clean layout | Personal stories |
-| Composed photography | Real human moments |
-
-Without the cool surface, we're sentimental.
-Without the warm core, we're cold.
-The magic is in holding both.
-
-**Test:** "Is there tension between the surface and the content? Does the cool exterior make the warm interior more powerful?"
-
----
-
 # The Emotional Sequence
 
 Smart funny. Not joke funny. Not sarcasm. Not snark.
@@ -190,21 +170,6 @@ The power is in the turn.
 
 ---
 
-# The Energy Shift
-
-What changed — and why.
-
-| Out | In |
-|-----|----|
-| Magazine kitchen, spotless | Real apartment kitchen, with mess |
-| Golden hour, soft | Kitchen light at night. The hour you actually cook. |
-| Soft hands gently turning pages | Hands with flour on them, reading the book |
-| The book as an object to admire | The book in the middle of cooking chaos |
-| Lifestyle staging | Captured moment, not constructed |
-| High production, low emotion | Minimum production, high emotion |
-
----
-
 # References
 
 ## In
@@ -216,18 +181,6 @@ What changed — and why.
 | **Billie** | Shows what the industry never showed. Not afraid of real. |
 | **Vice / i-D editorial** | Direct, urban, no pretense of "beautiful lifestyle." Cool comes from honesty, not production. |
 | **Documentary food** | Not food porn. Real food. Real kitchens. The actual chaos of cooking. |
-
-## Out
-
-| Out | Why |
-|-----|-----|
-| Kinfolk | Too soft. Too quiet. The aspirational version nobody aspires to anymore. |
-| Ottolenghi | Precious. Untouchable. The book you display, not the one you use. |
-| Cereal / Phaidon | Editorially correct but cold. No tension. No surprise. |
-| Golden hour as default | Predictable. Every wedding brand lives there. |
-| Beautiful wooden tables | The visual cliche of the premium gift. Makes us look like everyone else. |
-
----
 
 # The Three Image Types
 
@@ -355,68 +308,6 @@ Occasionally, reveal the organizer's hidden orchestration. The person who set th
 The invisible hand is the organizer who made it all happen without anyone knowing. When we reveal her, we validate every organizer watching.
 
 ---
-
-## No-Faces Methods
-
-When the full figure is in frame, obscure the face through:
-
-1. **Crop** — Chest and below, shoulders and below, hands only
-2. **Position** — Profile looking away, back to camera
-3. **Objects** — Holding something that naturally blocks the face
-4. **Motion blur** — Movement that softens facial features
-5. **Light** — Backlit silhouettes, rim lighting
-6. **Depth of field** — Face outside the focus plane
-
----
-
-## Production Philosophy
-
-High production is the enemy. High production screams "ad." Minimum production screams "truth."
-
-- iPhone camera is fine
-- Real kitchen, not a studio
-- Natural light or kitchen light
-- No ring lights. No studio backgrounds. No purchased props.
-- If the moment is real, the image works. If the moment is staged, no production fixes it.
-
----
-
-## Photography Don'ts
-
-| Never | Why |
-|-------|-----|
-| Stock photography feeling | Kills authenticity |
-| People looking at camera smiling | Feels staged, ad-like |
-| Isolated product shots on white | Cold, e-commerce, not us |
-| Perfectly styled food | Not real, not approachable |
-| Cool/blue color grading | Contradicts brand warmth |
-| Empty tables, empty kitchens | We're about people, not spaces |
-| Overly "wedding" imagery (veils, rings, cakes) | We're adjacent to weddings, not a wedding brand |
-| Golden hour as default style | Predictable. Every wedding brand lives there. |
-| Beautiful wooden table staging | The visual cliche of the premium gift |
-
----
-
-# The Tests
-
-Before approving any visual asset, in this order:
-
-**Test 1 — The Differentiation Test:**
-> **"Would any other wedding gift brand have made this?"**
-If yes — don't publish it.
-
-**Test 2 — The Surprise Test:**
-> **"Would someone stop and say: 'wait, that's a recipe book? Didn't expect that.'"**
-That surprise is the brand.
-
-**Test 3 — The Margot Test:**
-> **"Would our 28-year-old New York woman, champagne in hand on a rooftop, want this in her kitchen?"**
-If she'd roll her eyes — rewrite.
-If she'd say it with a knowing smile — ship it.
-
-**Test 4 — The Presence Test:**
-> **"Does this make the presence more vivid?"**
-This is the ultimate test. Everything else serves this.
 
 ---
 

@@ -101,7 +101,7 @@ She is:
 - secure  
 - emotional without being uncomfortable  
 - cool without being hollow  
-- free without being chaotic  
+- free without being chaotic
 
 ---
 
@@ -126,7 +126,7 @@ It is:
 - bold without being reckless  
 - modern without being disposable  
 - feminine without being cliché  
-- premium without being arrogant  
+- premium without being arrogant
 
 Small Plates doesn’t shout luxury.  
 It simply feels like it.
@@ -153,7 +153,7 @@ We never make anyone feel:
 - excessive  
 - cheesy  
 - uncomfortable  
-- out of place  
+- out of place
 
 Our presence should always lower stress — never raise it.
 
@@ -170,7 +170,7 @@ Small Plates knows how to be:
 - intimate without being invasive  
 - elegant without being distant  
 - vulnerable without being weak  
-- confident without being harsh  
+- confident without being harsh
 
 The brand can be:
 
@@ -178,7 +178,7 @@ The brand can be:
 - witty  
 - honest  
 - shy when needed  
-- brave when it matters  
+- brave when it matters
 
 Never artificial.
 
@@ -197,7 +197,7 @@ Small Plates is NOT:
 - a fake aspirational brand  
 - a Pinterest brand  
 - a quote-machine brand  
-- a performative brand  
+- a performative brand
 
 It is also not a wedding planner,  
 or a stationery company.
@@ -210,27 +210,31 @@ It is an emotional editorial brand.
 
 **For the bride**  
 Small Plates is:  
+
 > the friend she trusts with something precious —  
 > the one who brings incredible, thoughtful details.
 
 **For the bride’s mom**  
 Small Plates is:  
+
 > her daughter’s grown-up friend who truly cares about her,  
 > not a childish influence and not a threat.
 
 **For the groom**  
 Small Plates is:  
+
 > a way to honor the relationship without turning it into something corny —  
 > emotional, but not embarrassing.
 
 **For the organizer (MOH, bridesmaid, sister)**
 Small Plates is:
+
 > the COO who reports to her COO.
 > She delegates. We execute. She gets the credit.
 >
-> She doesn’t need to chase recipes, design pages, or send reminders.
-> She needs to set it up, invite the guests, and check the dashboard.
-> We handle everything else — the follow-ups, the design, the printing.
+> She doesn’t need to chase recipes, design pages, or send reminders.  
+> She needs to set it up, invite the guests, and check the dashboard.  
+> We help her handle everything else — the follow-ups, the design, the printing.
 >
 > When the bride opens that book, the organizer is the hero.
 > Not because she did all the work.
@@ -252,9 +256,11 @@ Smart.
 Light.
 
 More:  
+
 > “I know exactly what you’re feeling.”
 
 Less:  
+
 > “I’m trying to sell you something.”
 
 ---
@@ -280,8 +286,8 @@ Small Plates is:
 
 Or:
 
-> **The friend who does things right…  
-> with soul.**
+> **The friend who does things right…**  
+> **with soul.**
 
 ---
 
@@ -299,6 +305,3 @@ we don’t do it.
 If the answer is yes,  
 we do it —  
 beautifully.
-
-
-

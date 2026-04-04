@@ -78,7 +78,7 @@ It quietly says:
 Here’s what you DON’T do:
 - You don’t design anything.
 - You don’t chase anyone for their recipe.
-- You don’t send reminders (we do — up to 3 per guest).
+- You don’t send reminders.
 - You don’t follow up in group chats.
 - You don’t worry about whether it will look good.
 
