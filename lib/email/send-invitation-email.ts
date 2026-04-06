@@ -13,6 +13,7 @@ export interface SendGuestInvitationParams {
   coupleImageUrl?: string;
   captainName?: string;
   emailNumber: 1 | 2 | 3 | 4;
+  recipeCount?: number;
 }
 
 export async function sendGuestInvitationEmail({
@@ -24,11 +25,12 @@ export async function sendGuestInvitationEmail({
   coupleImageUrl,
   captainName,
   emailNumber,
+  recipeCount,
 }: SendGuestInvitationParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
     // Use coupleName if provided, otherwise use coupleDisplayName for backward compatibility
     const displayName = coupleName || coupleDisplayName || 'The Couple';
-    
+
     // Get the template
     const { subject, html, text } = getInvitationTemplate(emailNumber, {
       coupleDisplayName: displayName,
@@ -36,6 +38,7 @@ export async function sendGuestInvitationEmail({
       collectionLink,
       coupleImageUrl,
       captainName,
+      recipeCount,
     });
 
     // Send email via Postmark

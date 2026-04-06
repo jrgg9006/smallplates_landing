@@ -25,9 +25,16 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // ============================================
-// CONFIGURACIÓN - Cambiar el group_id aquí
+// CONFIGURACIÓN - Group ID desde argumento o hardcoded
+// Uso: node scripts/indesign/fetch-book.js <GROUP_ID>
 // ============================================
-const GROUP_ID = '79670c62-9aa9-4d75-ad9a-7a72478d6f39';
+const GROUP_ID = process.argv[2] || '79670c62-9aa9-4d75-ad9a-7a72478d6f39';
+
+if (!process.argv[2]) {
+  console.log('⚠️  No se pasó GROUP_ID como argumento, usando el hardcoded.');
+  console.log('   Uso: node scripts/indesign/fetch-book.js <GROUP_ID>');
+  console.log('');
+}
 // ============================================
 
 // ============================================
@@ -96,7 +103,7 @@ async function fetchBook() {
   
   const { data: group, error: groupError } = await supabase
     .from('groups')
-    .select('couple_first_name, partner_first_name, couple_display_name, wedding_date')
+    .select('couple_first_name, partner_first_name, couple_display_name, wedding_date, couple_image_url, print_couple_name')
     .eq('id', GROUP_ID)
     .single();
 
@@ -105,10 +112,15 @@ async function fetchBook() {
     process.exit(1);
   }
 
-  const coupleDisplayName = group.couple_display_name ||
+  const coupleDisplayName = group.print_couple_name || group.couple_display_name ||
     `${group.couple_first_name || ''} & ${group.partner_first_name || ''}`.trim();
 
   console.log(`   💑 ${coupleDisplayName}`);
+  if (group.couple_image_url) {
+    console.log(`   📷 Couple image: yes`);
+  } else {
+    console.log(`   ⚠️  Couple image: none`);
+  }
   console.log('');
 
   // ============================================
@@ -233,6 +245,29 @@ async function fetchBook() {
   }
 
   // ============================================
+  // PARTE 4b: DESCARGAR COUPLE IMAGE
+  // ============================================
+  let coupleImageLocalPath = null;
+
+  if (group.couple_image_url) {
+    console.log('── PASO 4b: Couple image ──');
+    try {
+      const urlParts = group.couple_image_url.split('.');
+      const extension = urlParts[urlParts.length - 1].split('?')[0] || 'jpg';
+      const coupleImageFileName = `couple_image.${extension}`;
+      const coupleImageDest = path.join(imagesDir, coupleImageFileName);
+
+      process.stdout.write(`   📷 Descargando couple image... `);
+      await downloadImage(group.couple_image_url, coupleImageDest);
+      coupleImageLocalPath = `image_assets/${GROUP_ID}/${coupleImageFileName}`;
+      console.log('✅');
+    } catch (err) {
+      console.log(`❌ Error: ${err.message}`);
+    }
+    console.log('');
+  }
+
+  // ============================================
   // PARTE 5: DESCARGAR IMÁGENES
   // ============================================
   console.log('');
@@ -338,7 +373,8 @@ async function fetchBook() {
       couple_first_name: group.couple_first_name || '',
       partner_first_name: group.partner_first_name || '',
       couple_display_name: coupleDisplayName,
-      wedding_date: group.wedding_date || null
+      wedding_date: group.wedding_date || null,
+      local_image_path: coupleImageLocalPath
     },
 
     // Contributors (para p. 8 count + p. 56 lista)

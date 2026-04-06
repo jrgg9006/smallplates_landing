@@ -575,7 +575,7 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                 )}
               </div>
               <div className="flex gap-2">
-                {currentStatus !== 'inactive' && currentStatus !== 'printed' && (
+                {currentStatus === 'active' && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -639,6 +639,20 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                           <Download className="w-3 h-3 mr-1" />
                         )}
                         {downloadingPackage ? 'Generating...' : 'Download Book Package'}
+                      </Button>
+                    )}
+                    {currentStatus === 'ready_to_print' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-gray-500"
+                        onClick={() => {
+                          const cmd = `node scripts/indesign/fetch-book.js ${detail.group.id}`;
+                          navigator.clipboard.writeText(cmd);
+                          alert('Copied to clipboard:\n' + cmd);
+                        }}
+                      >
+                        Copy Fetch Command
                       </Button>
                     )}
                     <Button

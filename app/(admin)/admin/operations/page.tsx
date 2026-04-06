@@ -54,6 +54,7 @@ interface RecipeWithProductionStatus {
   group: {
     id: string;
     name: string;
+    book_status: string | null;
   } | null;
   archived_from_group: {
     id: string;
@@ -94,6 +95,7 @@ interface Group {
   owner_id: string;
   owner_name: string | null;
   owner_email: string;
+  book_status: string | null;
 }
 
 interface User {
@@ -150,6 +152,7 @@ export default function OperationsPage() {
   const [showArchived, setShowArchived] = useState(false);
   const [notifyOptInFilter, setNotifyOptInFilter] = useState(false);
   const [imageFilter, setImageFilter] = useState<'all' | 'yes' | 'no'>('all');
+  const [hidePrinted, setHidePrinted] = useState(true);
   
   const router = useRouter();
 
@@ -241,6 +244,7 @@ export default function OperationsPage() {
             owner_id: recipe.profiles.id,
             owner_name: recipe.profiles.full_name,
             owner_email: recipe.profiles.email,
+            book_status: recipe.group.book_status,
           });
         }
       });
@@ -1206,12 +1210,23 @@ ${instructions}`;
           >
             <option value="all">All Groups</option>
             <option value="not_in_cookbook">Not in Group (Archived)</option>
-            {groups.map((group) => (
+            {groups
+              .filter((group) => !hidePrinted || group.book_status !== 'printed')
+              .map((group) => (
               <option key={group.id} value={group.id}>
                 {group.name}
               </option>
             ))}
           </select>
+          <label className="flex items-center gap-1 text-xs text-gray-500 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={hidePrinted}
+              onChange={(e) => setHidePrinted(e.target.checked)}
+              className="rounded border-gray-300"
+            />
+            Hide printed
+          </label>
         </div>
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium text-gray-700">User:</label>

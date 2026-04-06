@@ -7,7 +7,7 @@ import { PassThrough } from 'stream';
 export const maxDuration = 300;
 
 // Reason: Replicates the exact JSON structure from scripts/indesign/fetch-book.js
-// so the InDesign generate-book_v10.jsx script works without changes.
+// so the InDesign generate-book_v11.jsx script works without changes.
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ groupId: string }> }
@@ -20,7 +20,7 @@ export async function GET(
     // 1. Group data
     const { data: group, error: groupError } = await supabase
       .from('groups')
-      .select('couple_first_name, partner_first_name, couple_display_name, wedding_date, book_status, print_couple_name')
+      .select('couple_first_name, partner_first_name, couple_display_name, wedding_date, book_status, print_couple_name, couple_image_url')
       .eq('id', groupId)
       .single();
 
@@ -167,6 +167,7 @@ export async function GET(
         partner_first_name: group.partner_first_name || '',
         couple_display_name: coupleDisplayName,
         wedding_date: group.wedding_date || null,
+        local_image_path: null as string | null,
       },
       contributors: {
         count: contributorList.length,
@@ -183,25 +184,28 @@ export async function GET(
       recipes: transformedRecipes,
     };
 
-    // 7. Create ZIP with JSON + images
+    // 7. Download all images first, then build ZIP
     const coupleName = `${(group.couple_first_name || '').trim()}y${(group.partner_first_name || '').trim()}`
       .replace(/\s+/g, '');
     const jsonFileName = `data/book.${coupleName}.json`;
 
-    const passthrough = new PassThrough();
-    const archive = archiver('zip', { zlib: { level: 5 } });
-    archive.pipe(passthrough);
+    // 7b. Add couple image to download queue if available
+    if (group.couple_image_url) {
+      const ext = group.couple_image_url.split('.').pop()?.split('?')[0] || 'jpg';
+      const coupleImageZipPath = `image_assets/${groupId}/couple_image.${ext}`;
+      imageDownloads.push({ url: group.couple_image_url, zipPath: coupleImageZipPath });
+      bookData.couple.local_image_path = coupleImageZipPath;
+    }
 
-    // Add JSON
-    archive.append(JSON.stringify(bookData, null, 2), { name: jsonFileName });
-
-    // Reason: Download images in parallel batches of 10 to avoid serverless timeout
+    // Reason: download images to memory BEFORE creating the archive to avoid
+    // stream backpressure deadlocks between archiver and PassThrough in Next.js
     const BATCH_SIZE = 10;
+    const downloadedImages: { zipPath: string; buffer: Buffer }[] = [];
     for (let i = 0; i < imageDownloads.length; i += BATCH_SIZE) {
       const batch = imageDownloads.slice(i, i + BATCH_SIZE);
       const results = await Promise.allSettled(
         batch.map(async (img) => {
-          const res = await fetch(img.url);
+          const res = await fetch(img.url, { signal: AbortSignal.timeout(30_000) });
           if (!res.ok) return null;
           const buffer = Buffer.from(await res.arrayBuffer());
           return { zipPath: img.zipPath, buffer };
@@ -209,23 +213,35 @@ export async function GET(
       );
       for (const result of results) {
         if (result.status === 'fulfilled' && result.value) {
-          archive.append(result.value.buffer, { name: result.value.zipPath });
+          downloadedImages.push(result.value);
         }
       }
     }
 
-    await archive.finalize();
+    // Build ZIP in one shot — all data is in memory, no async work during archiving
+    const passthrough = new PassThrough();
+    const archive = archiver('zip', { zlib: { level: 5 } });
 
-    // Collect the ZIP buffer
-    const chunks: Buffer[] = [];
-    for await (const chunk of passthrough) {
-      chunks.push(chunk as Buffer);
+    const collectPromise = new Promise<Buffer>((resolve, reject) => {
+      const chunks: Buffer[] = [];
+      passthrough.on('data', (chunk: Buffer) => chunks.push(chunk));
+      passthrough.on('end', () => resolve(Buffer.concat(chunks)));
+      passthrough.on('error', reject);
+      archive.on('error', reject);
+    });
+
+    archive.pipe(passthrough);
+    archive.append(JSON.stringify(bookData, null, 2), { name: jsonFileName });
+    for (const img of downloadedImages) {
+      archive.append(img.buffer, { name: img.zipPath });
     }
-    const zipBuffer = Buffer.concat(chunks);
+    archive.finalize();
+
+    const zipBuffer = await collectPromise;
 
     const safeName = coupleDisplayName.replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ&\s]/g, '').replace(/\s+/g, '_');
 
-    return new NextResponse(zipBuffer, {
+    return new NextResponse(new Uint8Array(zipBuffer), {
       headers: {
         'Content-Type': 'application/zip',
         'Content-Disposition': `attachment; filename="SmallPlates_${safeName}.zip"`,

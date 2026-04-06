@@ -714,6 +714,9 @@ export function SendInvitationsPage({
                             {guest.invitation_started_at
                               ? formatDate(guest.invitation_started_at)
                               : ""}
+                            {guest.email && !guest.email.startsWith("NO_EMAIL_") && (
+                              <span className="ml-1 text-gray-400">· {guest.email}</span>
+                            )}
                           </p>
                         </div>
 

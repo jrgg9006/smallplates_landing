@@ -66,7 +66,8 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
         removed_by,
         groups (
           id,
-          name
+          name,
+          book_status
         )
       ),
       midjourney_prompts (
@@ -208,6 +209,7 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
       group: group ? {
         id: group.id,
         name: group.name,
+        book_status: group.book_status || null,
       } : null,
       archived_from_group: archivedFromGroup,
       midjourney_prompts: midjourneyPrompt,

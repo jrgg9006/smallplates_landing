@@ -4,7 +4,7 @@ import { sendGuestInvitationEmail } from '@/lib/email/send-invitation-email';
 
 // Reason: Prevent harassment and protect Postmark reputation
 const MAX_REMINDERS_PER_HOUR = 10;
-const MAX_EMAILS_PER_GUEST = 3;
+const MAX_EMAILS_PER_GUEST = 4;
 const MAX_EMAILS_PER_GROUP_MONTHLY = 500;
 
 export async function POST(request: NextRequest) {
@@ -132,6 +132,21 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
       .single();
 
+    // Reason: emails_sent_count tracks total emails sent (1 = initial invite).
+    // Next email number = current count + 1, clamped to max 4 (last template).
+    const nextEmailNumber = Math.min((guest.emails_sent_count || 1) + 1, 4) as 1 | 2 | 3 | 4;
+
+    // Reason: Template 3 uses recipe count for social proof ("X people already shared")
+    let recipeCount: number | undefined;
+    if (nextEmailNumber === 3) {
+      const { count } = await supabase
+        .from('guest_recipes')
+        .select('id', { count: 'exact', head: true })
+        .eq('group_id', groupId)
+        .is('deleted_at', null);
+      recipeCount = count || undefined;
+    }
+
     const result = await sendGuestInvitationEmail({
       to: guest.email,
       guestName: guest.first_name,
@@ -139,7 +154,8 @@ export async function POST(request: NextRequest) {
       collectionLink,
       coupleImageUrl: group.couple_image_url || undefined,
       captainName: senderProfile?.full_name || undefined,
-      emailNumber: 2,
+      emailNumber: nextEmailNumber,
+      recipeCount,
     });
 
     if (!result.success) {
