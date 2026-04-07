@@ -14,9 +14,9 @@ interface TipsLayoutProps {
 function getHeroContent(view: View): { title: string; subtitle: string } {
   if (view.type === 'home') {
     return {
-      title: 'How can we help?',
+      title: 'How to be the MVP',
       subtitle:
-        'Everything you need to get the most recipes, make it easy for your guests, and feel confident every step of the way.',
+        "Tips, tricks, and the stuff nobody tells you. From the people who've done this before.",
     }
   }
 

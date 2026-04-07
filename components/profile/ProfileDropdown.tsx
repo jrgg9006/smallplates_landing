@@ -10,7 +10,6 @@ import type { Profile } from "@/lib/types/database";
 
 export default function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, signOut } = useAuth();
@@ -140,13 +139,12 @@ export default function ProfileDropdown() {
           <button
             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
             onClick={() => {
-              navigator.clipboard.writeText("team@smallplatesandcompany.com");
-              setCopied(true);
-              setTimeout(() => setCopied(false), 2000);
+              router.push('/contact');
+              setIsOpen(false);
             }}
           >
             <HelpCircle className="h-4 w-4" />
-            {copied ? "Email copied!" : "Need help?"}
+            Need help?
           </button>
           <hr className="my-1 border-gray-200" />
           <button
