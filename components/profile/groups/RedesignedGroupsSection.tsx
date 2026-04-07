@@ -101,8 +101,11 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
         // OR refresh the selected group with fresh data if forceRefreshSelected is true
         setSelectedGroup(prev => {
           if (data.length > 0 && !prev) {
-            // First time load - select first group
-            const firstGroup = data[0];
+            // Reason: Prefer the user's still-open book over any closed book
+            // on first load. "Closed" is determined by book_closed_by_user
+            // being set (matches the same check used throughout this page).
+            // Only fall back to data[0] if every book is closed.
+            const firstGroup = data.find(g => !g.book_closed_by_user) ?? data[0];
             // Defer the callback to avoid setState during render
             setTimeout(() => onGroupChangeRef.current?.(firstGroup), 0);
             return firstGroup;

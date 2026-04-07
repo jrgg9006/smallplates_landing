@@ -23,18 +23,42 @@ export async function POST(request: NextRequest) {
       guest_email,
       couple_name,
       recipes,
+      override,
     } = await request.json() as {
       guest_id: string;
       guest_name: string;
       guest_email: string;
       couple_name: string;
       recipes: RecipePayload[];
+      override?: boolean;
     };
 
     if (!guest_id || !guest_email || !recipes?.length) {
       return NextResponse.json(
         { error: 'guest_id, guest_email, and at least one recipe are required' },
         { status: 400 }
+      );
+    }
+
+    // Reason: hard guard — never send a showcase email for a book that hasn't been
+    // printed yet, otherwise we could spoil the surprise for the couple. The UI
+    // already blocks this, but the backend must never trust the UI alone.
+    const { data: guestRow, error: guestErr } = await supabase
+      .from('guests')
+      .select('group_id, groups:group_id ( book_status )')
+      .eq('id', guest_id)
+      .single();
+
+    if (guestErr || !guestRow) {
+      return NextResponse.json({ error: 'Guest not found' }, { status: 404 });
+    }
+
+    const guestGroup = guestRow.groups as unknown as { book_status: string | null } | null;
+    // Reason: admin may pass override=true to bypass the printed check for tests/demos
+    if (guestGroup?.book_status !== 'printed' && !override) {
+      return NextResponse.json(
+        { error: 'Cannot send showcase: book is not printed yet' },
+        { status: 403 }
       );
     }
 

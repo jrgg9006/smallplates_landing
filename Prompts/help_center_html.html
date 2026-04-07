@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tips for Success — Small Plates & Co.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Lora', serif;
+  --h: #C9982A;
+  --h-bg: #FBF6EA;
+  --h-pill: #F3E8C8;
+  --ch: #1C1917;
+  --mid: #78716C;
+  --soft: #A8A29E;
+  --border: #E8E4DF;
+  --bg: #FAFAF9;
+  --white: #ffffff;
+  --terra: #B5715A;
+  --terra-bg: #FBF0EC;
+}
+body { font-family: var(--font-sans); background: #F4F1ED; min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 2rem 1rem; }
+.frame { background: var(--white); border-radius: 16px; box-shadow: 0 4px 40px rgba(0,0,0,0.08); width: 100%; max-width: 900px; overflow: hidden; }
+.w { font-family: var(--font-sans); background: var(--white); }
+
+/* HERO */
+.hero { background: var(--white); border-bottom: 1px solid var(--border); padding: 3rem 2.5rem 2.5rem; }
+.hero-eyebrow { display: flex; align-items: center; gap: 8px; margin-bottom: 1.75rem; }
+.hero-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--h); }
+.hero-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--soft); }
+.hero-title { font-family: var(--font-serif); font-size: 2rem; font-weight: 400; color: var(--ch); line-height: 1.2; margin-bottom: 0.4rem; }
+.hero-sub { font-size: 0.9rem; color: var(--mid); margin-bottom: 1.75rem; line-height: 1.6; }
+.search-box { position: relative; max-width: 500px; }
+.search-box input { width: 100%; padding: 0.85rem 1rem 0.85rem 2.8rem; border: 1.5px solid var(--border); border-radius: 999px; font-size: 0.875rem; font-family: var(--font-sans); color: var(--ch); background: var(--bg); outline: none; transition: border-color 0.15s, background 0.15s; }
+.search-box input:focus { border-color: var(--h); background: var(--white); }
+.search-box input::placeholder { color: var(--soft); }
+.search-box .si { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.search-box .si svg { width: 15px; height: 15px; stroke: var(--soft); fill: none; stroke-width: 2; stroke-linecap: round; }
+
+/* BREADCRUMB */
+.crumb { display: flex; align-items: center; gap: 6px; padding: 1rem 2.5rem; font-size: 0.75rem; color: var(--soft); border-bottom: 1px solid var(--border); }
+.crumb span.link { color: var(--h); cursor: pointer; }
+.crumb span.link:hover { text-decoration: underline; }
+.crumb-sep { color: var(--border); }
+
+/* HOME */
+.home-body { padding: 2.5rem 2.5rem; }
+.section-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--soft); margin-bottom: 1.25rem; }
+.cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 2.5rem; }
+.cat-tile { background: var(--white); padding: 1.6rem 1.5rem; cursor: pointer; transition: background 0.12s; display: flex; flex-direction: column; gap: 0.9rem; }
+.cat-tile:hover { background: var(--bg); }
+.cat-tile-icon { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 9px; }
+.ci-amber { background: var(--h-bg); }
+.ci-amber svg { stroke: var(--h); }
+.ci-terra { background: var(--terra-bg); }
+.ci-terra svg { stroke: var(--terra); }
+.ci-sage { background: #EEF2EC; }
+.ci-sage svg { stroke: #557A50; }
+.ci-blue { background: #EBF2FB; }
+.ci-blue svg { stroke: #3B70B5; }
+.ci-slate { background: #EEF0F2; }
+.ci-slate svg { stroke: #5A6472; }
+.cat-tile-icon svg { width: 16px; height: 16px; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.cat-tile-name { font-size: 0.875rem; font-weight: 600; color: var(--ch); line-height: 1.3; }
+.cat-tile-count { font-size: 0.72rem; color: var(--soft); }
+.cat-tile-arr { margin-top: auto; display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--h); font-weight: 500; }
+.cat-tile-arr svg { width: 11px; height: 11px; stroke: var(--h); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* QUICK LINKS */
+.quick-row { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.quick-link { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.25rem; background: var(--white); border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; gap: 1rem; }
+.quick-link:last-child { border-bottom: none; }
+.quick-link:hover { background: var(--bg); }
+.quick-link-left { display: flex; align-items: center; gap: 10px; }
+.quick-link-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+.quick-link-text { font-size: 0.84rem; color: var(--ch); font-weight: 400; }
+.quick-link-tag { font-size: 0.65rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; }
+.tg-key { background: var(--h-pill); color: #7A5818; }
+.tg-fast { background: #E8F2E8; color: #2E6B28; }
+.quick-link-arr { width: 14px; height: 14px; flex-shrink: 0; }
+.quick-link-arr svg { width: 14px; height: 14px; stroke: var(--soft); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* CATEGORY VIEW */
+.cat-view { max-width: 100%; }
+.cat-hero { padding: 2.5rem 2.5rem 2rem; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 1rem; }
+.cat-hero-icon { width: 44px; height: 44px; border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cat-hero-icon svg { width: 20px; height: 20px; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.cat-hero-name { font-family: var(--font-serif); font-size: 1.4rem; font-weight: 400; color: var(--ch); margin-bottom: 0.3rem; line-height: 1.2; }
+.cat-hero-desc { font-size: 0.84rem; color: var(--mid); line-height: 1.65; }
+.art-list { }
+.art-row { display: flex; align-items: center; justify-content: space-between; padding: 1.15rem 2.5rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; gap: 1rem; }
+.art-row:hover { background: var(--bg); }
+.art-row-left { flex: 1; }
+.art-row-title { font-size: 0.875rem; font-weight: 500; color: var(--ch); margin-bottom: 0.2rem; line-height: 1.4; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.art-row-desc { font-size: 0.78rem; color: var(--soft); line-height: 1.55; }
+.art-arr svg { width: 14px; height: 14px; stroke: var(--soft); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+/* ARTICLE */
+.art-wrap { display: grid; grid-template-columns: 1fr 220px; }
+.art-main { padding: 2.5rem 2.5rem; border-right: 1px solid var(--border); }
+.art-body { font-size: 0.9rem; color: #3C3835; line-height: 1.85; max-width: 540px; }
+.art-body p { margin-bottom: 1.1rem; }
+.art-body strong { font-weight: 600; color: var(--ch); }
+.callout { background: var(--h-bg); border-left: 2px solid var(--h); border-radius: 0 8px 8px 0; padding: 0.9rem 1.1rem; margin: 1.25rem 0; font-size: 0.83rem; color: #5A4018; line-height: 1.7; }
+.callout b { display: block; font-weight: 600; color: #3A2808; margin-bottom: 3px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.note { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem 1.1rem; margin: 1.1rem 0; font-size: 0.82rem; color: var(--mid); line-height: 1.7; }
+.steps { counter-reset: s; list-style: none; margin: 0.75rem 0 1rem; }
+.steps li { counter-increment: s; display: flex; gap: 12px; margin-bottom: 0.75rem; font-size: 0.855rem; line-height: 1.7; color: #3C3835; align-items: flex-start; }
+.steps li::before { content: counter(s); flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--ch); color: var(--white); font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 3px; }
+.iph { background: var(--bg); border: 1px dashed #D5CFCA; border-radius: 10px; padding: 1.75rem 1.5rem; margin: 1.5rem 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.iph-ic { width: 36px; height: 36px; background: var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.iph-ic svg { width: 15px; height: 15px; stroke: var(--soft); fill: none; stroke-width: 1.5; }
+.iph-t { font-size: 0.68rem; font-weight: 700; color: var(--soft); letter-spacing: 0.09em; text-transform: uppercase; }
+.iph-d { font-size: 0.72rem; color: #B5AFA9; text-align: center; line-height: 1.55; max-width: 260px; }
+.art-sidebar { padding: 2.5rem 1.5rem; }
+.sidebar-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--soft); margin-bottom: 1rem; }
+.sidebar-links { display: flex; flex-direction: column; gap: 0; }
+.sidebar-link { display: flex; align-items: flex-start; gap: 8px; padding: 0.6rem 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+.sidebar-link:last-child { border-bottom: none; }
+.sidebar-link svg { width: 12px; height: 12px; stroke: var(--soft); fill: none; stroke-width: 2; flex-shrink: 0; margin-top: 2px; }
+.sidebar-link span { font-size: 0.78rem; color: var(--h); line-height: 1.45; }
+.sidebar-link:hover span { text-decoration: underline; }
+
+@media(max-width:640px){
+  .cat-grid { grid-template-columns: 1fr 1fr; }
+  .art-wrap { grid-template-columns: 1fr; }
+  .art-sidebar { display: none; }
+  .home-body, .art-main, .cat-hero { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .art-row { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .hero { padding: 2rem 1.25rem 2rem; }
+  .crumb { padding-left: 1.25rem; }
+}
+</style>
+</head>
+<body>
+<div class="frame">
+<div class="w">
+
+<div class="hero" id="hero-area">
+  <div class="hero-eyebrow"><div class="hero-dot"></div><div class="hero-label">Small Plates & Co.</div></div>
+  <h1 class="hero-title" id="hero-title">How can we help?</h1>
+  <p class="hero-sub" id="hero-sub">Everything you need to get the most recipes, make it easy for your guests, and feel confident every step of the way.</p>
+  <div class="search-box">
+    <div class="si"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+    <input type="text" placeholder="Search — captains, reminders, Zola…" />
+  </div>
+</div>
+
+<div class="crumb" id="crumb-bar">
+  <span style="color:#A8A29E;font-weight:400;">Help Center</span>
+</div>
+
+<div id="view-home">
+  <div class="home-body">
+    <div class="section-label">Browse by topic</div>
+    <div class="cat-grid">
+      <div class="cat-tile" onclick="openCat('setup')">
+        <div class="cat-tile-icon ci-amber"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+        <div><div class="cat-tile-name">Getting started</div><div class="cat-tile-count">3 articles</div></div>
+        <div class="cat-tile-arr">Read <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="cat-tile" onclick="openCat('recipes')">
+        <div class="cat-tile-icon ci-terra"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div><div class="cat-tile-name">Getting more recipes</div><div class="cat-tile-count">4 articles</div></div>
+        <div class="cat-tile-arr">Read <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="cat-tile" onclick="openCat('captains')">
+        <div class="cat-tile-icon ci-sage"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div><div class="cat-tile-name">Your captains</div><div class="cat-tile-count">2 articles</div></div>
+        <div class="cat-tile-arr">Read <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="cat-tile" onclick="openCat('reminders')">
+        <div class="cat-tile-icon ci-blue"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <div><div class="cat-tile-name">Reminders</div><div class="cat-tile-count">3 articles</div></div>
+        <div class="cat-tile-arr">Read <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="cat-tile" onclick="openCat('closing')">
+        <div class="cat-tile-icon ci-slate"><svg viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+        <div><div class="cat-tile-name">Closing the book</div><div class="cat-tile-count">2 articles</div></div>
+        <div class="cat-tile-arr">Read <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+    </div>
+    <div class="section-label">Most helpful</div>
+    <div class="quick-row">
+      <div class="quick-link" onclick="openArt('setup-1')"><div class="quick-link-left"><div class="quick-link-dot"></div><div class="quick-link-text">Add the couple's photo to your invitation link</div><span class="quick-link-tag tg-key">Essential</span></div><div class="quick-link-arr"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div></div>
+      <div class="quick-link" onclick="openArt('setup-2')"><div class="quick-link-left"><div class="quick-link-dot"></div><div class="quick-link-text">Set your deadline two weeks earlier than you think</div><span class="quick-link-tag tg-key">Essential</span></div><div class="quick-link-arr"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div></div>
+      <div class="quick-link" onclick="openArt('rec-1')"><div class="quick-link-left"><div class="quick-link-dot"></div><div class="quick-link-text">Share the link on WhatsApp — not just by email</div><span class="quick-link-tag tg-key">Essential</span></div><div class="quick-link-arr"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div></div>
+      <div class="quick-link" onclick="openArt('rem-1')"><div class="quick-link-left"><div class="quick-link-dot"></div><div class="quick-link-text">The 3-reminder plan that actually works</div></div><div class="quick-link-arr"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div></div>
+      <div class="quick-link" onclick="openArt('cap-1')"><div class="quick-link-left"><div class="quick-link-dot"></div><div class="quick-link-text">What is a captain and why you need one</div></div><div class="quick-link-arr"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div></div>
+    </div>
+  </div>
+</div>
+
+<div id="view-cat" style="display:none"><div class="cat-view"><div class="cat-hero" id="cat-hero-content"></div><div class="art-list" id="cat-art-list"></div></div></div>
+<div id="view-art" style="display:none"><div class="art-wrap"><div class="art-main" id="art-main-content"></div><div class="art-sidebar" id="art-sidebar-content"></div></div></div>
+
+</div>
+</div>
+
+<script>
+const CATS = {
+  setup:{name:'Getting started',desc:'Three things to do before you invite anyone. They make everything easier.',icon:'ci-amber',iconSvg:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" stroke="#C9982A"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',arts:['setup-1','setup-2','setup-3']},
+  recipes:{name:'Getting more recipes',desc:"The difference between 20 recipes and 80 is method, not luck.",icon:'ci-terra',iconSvg:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" stroke="#B5715A"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',arts:['rec-1','rec-2','rec-3','rec-4']},
+  captains:{name:'Your captains',desc:"You can't follow up with 80 people alone. You don't have to.",icon:'ci-sage',iconSvg:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" stroke="#557A50"><circle cx="12" cy="8" r="4"/><path d="M2 20c0-4 4-7 10-7s10 3 10 7"/></svg>',arts:['cap-1','cap-2']},
+  reminders:{name:'Reminders',desc:"Most recipes arrive after the second or third reminder. One isn't enough.",icon:'ci-blue',iconSvg:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" stroke="#3B70B5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',arts:['rem-1','rem-2','rem-3']},
+  closing:{name:'Closing the book',desc:"What to check before you click that button — and what happens next.",icon:'ci-slate',iconSvg:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" stroke="#5A6472"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>',arts:['close-1','close-2']}
+};
+const ARTS = {
+  'setup-1':{cat:'setup',tag:'key',title:"Add the couple's photo to your invitation link",desc:"One photo makes the difference between a click and a skip.",body:`<p>When guests receive your invitation, the couple's photo tells them in one second what this is — and reminds them why it matters.</p><p>Without a photo, your link looks like a generic form. With a photo, it looks like someone put thought into it.</p><div class="callout"><b>How to do it</b>Go to Settings → Book cover → Couple's photo. Upload a high-quality image, ideally horizontal. It doesn't need to be a professional shot — any good photo of them together works.</div><div class="iph"><div class="iph-ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div><div class="iph-t">Screenshot</div><div class="iph-d">Settings panel showing the "Cover photo" field. Empty state on the left, filled state with couple's photo on the right.</div></div><p>Once uploaded, every link you share will automatically show that photo as the preview — in WhatsApp, email, anywhere.</p>`,rel:['setup-2','rec-1']},
+  'setup-2':{cat:'setup',tag:'key',title:"Set your deadline two weeks earlier than you think",desc:"People always submit late. Those two weeks are yours.",body:`<p>People always submit late. Not because they don't want to — because life gets in the way. If you need the book by the 15th, tell guests the deadline is the 1st.</p><p>Those two weeks are yours. For the final reminder. For chasing the stragglers. For not stressing out.</p><div class="callout"><b>The formula</b>Real print date → subtract 5 production days → that's your close date. Subtract two more weeks → that's the date you tell guests.</div><div class="iph"><div class="iph-ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div><div class="iph-t">Diagram — Timeline</div><div class="iph-d">Simple horizontal timeline: "Guest deadline" (honey), "Your close date" two weeks later (terracotta), "Book delivery" (charcoal). Clean white background.</div></div><div class="note">The date field in your settings is what guests see. Set it with the buffer already built in — no need to explain anything to them.</div>`,rel:['rem-1','close-1']},
+  'setup-3':{cat:'setup',tag:'fast',title:"Import your guest list from Zola or The Knot",desc:"If the couple has their list there, you can upload it in 30 seconds.",body:`<p>If the couple already has their guest list on Zola or The Knot, you don't have to type a single email address by hand. Export the file from their account and upload it here. Thirty seconds.</p><ol class="steps"><li>Ask the couple to download their guest list from Zola or The Knot as a CSV file.</li><li>In your dashboard, go to Guests → Import list.</li><li>Upload the file. The system reads names and emails automatically.</li><li>Review for accuracy and confirm.</li></ol><div class="iph"><div class="iph-ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="iph-t">Screenshot — Import screen</div><div class="iph-d">Import area with drag-and-drop zone. Zola and The Knot logos shown below as compatible sources.</div></div><div class="callout"><b>No Zola or The Knot?</b>No problem. You can add guests one by one, or share the list in any format and we'll help you get it in.</div>`,rel:['cap-1','rec-1']},
+  'rec-1':{cat:'recipes',tag:'key',title:"Share the link on WhatsApp — not just by email",desc:"Email gets lost. WhatsApp gets read.",body:`<p>Email gets lost. WhatsApp gets read. If you want people to respond, the link needs to be on their phones — not sitting in their inbox.</p><p>Copy your invitation link and paste it into every relevant group: the bridesmaids' chat, the family group, the work friends, the groom's crew. All of them.</p><div class="callout"><b>The message that works</b>"Hey everyone — I'm putting together a surprise recipe book for [Name] and [Name]. It takes 5 minutes and the result is going to be incredible. [link]"<br><br>Short, personal, link at the end.</div><div class="iph"><div class="iph-ic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="iph-t">Mockup — WhatsApp message</div><div class="iph-d">Chat bubble with sample message. Link preview shows couple's photo. Light gray WhatsApp-style background.</div></div><p>The couple's photo appears automatically in the link preview. That's why setting it up first matters.</p>`,rel:['setup-1','rec-2']},
+  'rec-2':{cat:'recipes',tag:'key',title:"Personalize the invitation message",desc:"Generic messages ask for recipes. Personal ones make people want to give them.",body:`<p>A generic message asks for recipes. A personal one makes people want to give them.</p><p>The difference is one sentence. Something specific about the couple — why this book matters for them, what kind of recipe would fit perfectly.</p><div class="note">"Sofia has cooked with her grandmothers since she was little. This book is so she never forgets."<br><br>"Marco loves his mom's pasta more than anything. Imagine if they had it printed forever."</div><p>Specific unlocks. People respond to real stories, not generic forms.</p><div class="callout"><b>Where to write it</b>Settings → Invitation message. One or two personal sentences at the top make all the difference.</div>`,rel:['rec-1','rec-3']},
+  'rec-3':{cat:'recipes',tag:'fast',title:'Tell them it takes 5 minutes',desc:"Because it does. And those two words change everything.",body:`<p>Because it's true. And those two words completely change how people perceive the task.</p><p>When someone receives an invitation with no sense of time, they assume it's complicated. They save it for later. Later never comes.</p><p>"5 minutes" removes that friction before it starts.</p><div class="callout"><b>Where to say it</b>In the WhatsApp message. In the email invite. In the reminder. Everywhere. Repeat it — it doesn't feel pushy, it feels reassuring.</div>`,rel:['rec-4','rem-1']},
+  'rec-4':{cat:'recipes',tag:'fast',title:'Give them recipe ideas',desc:"Most people don't know what to send. Give them permission.",body:`<p>Most guests don't know what to submit. Not because they don't have recipes — but because they're not sure if their recipe is good enough, special enough, appropriate enough.</p><p>The answer is always yes. They just need permission.</p><div class="note">Examples that work well:<br><br>— "The Sunday pasta"<br>— "My grandmother's soup"<br>— "What I'd cook for them if they came to dinner"<br>— "My favorite recipe right now"<br>— "Something I learned on a trip"</div><p>Adding two or three examples to your invitation message almost always increases responses.</p>`,rel:['rec-2','cap-1']},
+  'cap-1':{cat:'captains',title:'What is a captain and why you need one',desc:"You can't follow up with 80 people. You don't have to.",body:`<p>You can't follow up with 80 people alone. But you can ask 4 or 5 trusted people to do it within their own groups.</p><p>A captain is someone who takes responsibility for a specific group — his family, her work friends, their college crew. You give them the link and context; they move it from the inside.</p><div class="iph"><div class="iph-ic"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="iph-t">Diagram — Captain tree</div><div class="iph-d">You at the center (honey node). 4 captains around you. Each captain with arrows to their group. Minimal, no photos.</div></div><p>A captain inside a family group gets 3× more recipes than a mass email to the same group. The trust is already there — you just need to activate it.</p>`,rel:['cap-2','rec-1']},
+  'cap-2':{cat:'captains',title:'How to invite captains and what to ask them',desc:"Who to choose, what to say, and how to make sure they do it.",body:`<p>Choose people who are already at the center of their groups — the one who always organizes family dinners, the one who responds first in the work chat, the one who knows everyone.</p><ol class="steps"><li>From your dashboard, go to Captains → Invite captain.</li><li>Add their name and email. They'll receive a message explaining their role.</li><li>Tell them exactly which group is theirs: "You're in charge of her cousins."</li><li>Share the invitation link and a sample message they can copy and paste.</li></ol><div class="callout"><b>What to ask them — exactly</b>"Send the link to your group and remind them a week before the deadline. That's it."<br><br>Don't ask for more. Simple things get done. Complicated things get postponed.</div>`,rel:['cap-1','rem-3']},
+  'rem-1':{cat:'reminders',tag:'key',title:'The 3-reminder plan that actually works',desc:"Sending one and waiting doesn't work. Three does.",body:`<p>Sending one reminder and waiting doesn't work. Not because people don't care — but because life interrupts. The first reminder gets missed. The second comes at a bad time. The third is the one that lands.</p><div class="note"><strong>Week 1 — Soft launch.</strong><br>Remind them the book exists. Tone: warm, no pressure. "Just in case it slipped your mind, here's the link."<br><br><strong>3 days before — Countdown.</strong><br>Name the date. "We close on Thursday." Specificity activates. Most late recipes arrive after this one.<br><br><strong>Last day — Today's the day.</strong><br>"It only takes 5 minutes and today is the last day." Short, direct. No drama.</div><p>This isn't nagging. It's how you build the book you promised.</p>`,rel:['rem-2','rem-3']},
+  'rem-2':{cat:'reminders',tag:'fast',title:"Use the 'Remind' button — don't do it by hand",desc:"The system knows who responded. You don't have to check.",body:`<p>You don't have to figure out who responded and who didn't. The system already knows.</p><p>From your guest list, the "Remind" button sends a follow-up automatically — only to guests who haven't submitted yet. No duplicates. No manual tracking. No extra work.</p><div class="iph"><div class="iph-ic"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div class="iph-t">Screenshot — Remind button</div><div class="iph-d">Guest list view with "Pending" rows highlighted. "Send reminder" button in the top right, active in honey gold.</div></div><div class="callout"><b>When to use it</b>One week before. Three days before. And the day of close. Three clicks — that's all you need to do.</div>`,rel:['rem-1','rem-3']},
+  'rem-3':{cat:'reminders',title:'Message the key people directly',desc:"There are always 3 or 4 recipes you really want. Don't leave them to chance.",body:`<p>There are always 3 or 4 recipes you really want in the book. The grandmother. The best friend. The aunt who cooks like no one else.</p><p>Don't wait for them to respond to the mass email. A personal message has a different weight — and it works almost every time.</p><div class="note">Example:<br><br>"Hi Maria — I'm putting together a recipe book for Ana and Pablo's wedding. Your mole is legendary. Can you send it to me? It takes 5 minutes and it would be perfect in the book."</div><p>Specific. Personal. With context. That's all it needs.</p>`,rel:['rem-1','cap-2']},
+  'close-1':{cat:'closing',tag:'key',title:'Review your progress before closing',desc:"Two minutes now saves you from regret later.",body:`<p>Before you click "Close book," take two minutes to make sure everything is how you want it.</p><ol class="steps"><li>Check the total number of recipes. Are you happy with it?</li><li>Verify that names are spelled correctly — exactly as you want them to appear in print.</li><li>Read through at least one recipe from each group. If something important is missing, you still have time.</li><li>Confirm the delivery address and production details.</li></ol><div class="callout"><b>Once you close, it can't be edited.</b>There's no rush. If you need one more day to get the last few recipes, take it.</div>`,rel:['close-2','rem-1']},
+  'close-2':{cat:'closing',title:'What happens after you close the book',desc:"The production process, the timeline, and what to expect.",body:`<p>Once you close the book, production begins. Here's everything to expect:</p><ol class="steps"><li>You'll receive a confirmation email with your order summary.</li><li>Within 24–48 hours, you'll receive a digital proof for approval.</li><li>Once you approve, it goes to print. Production time varies by book size.</li><li>The book is shipped to the address you provided.</li></ol><div class="note">Estimated production times — before placing your order, confirm the exact timeline with your coordinator. Orders close to the wedding date require advance planning.</div>`,rel:['close-1','setup-2']}
+};
+
+function artMeta(id){const a=ARTS[id];return `<div class="art-row" onclick="openArt('${id}')"><div class="art-row-left"><div class="art-row-title">${a.title}${a.tag?`<span class="quick-link-tag tg-${a.tag}">${a.tag==='key'?'Essential':'Quick'}</span>`:''}</div><div class="art-row-desc">${a.desc}</div></div><div class="art-arr"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></div></div>`;}
+
+let state={v:'home',cat:null,art:null};
+function goHome(){state={v:'home',cat:null,art:null};render();}
+function openCat(c){state={v:'cat',cat:c,art:null};render();}
+function openArt(a){const art=ARTS[a];state={v:'art',cat:art.cat,art:a};render();}
+
+function render(){
+  const vHome=document.getElementById('view-home');
+  const vCat=document.getElementById('view-cat');
+  const vArt=document.getElementById('view-art');
+  const crumb=document.getElementById('crumb-bar');
+  const heroTitle=document.getElementById('hero-title');
+  const heroSub=document.getElementById('hero-sub');
+  [vHome,vCat,vArt].forEach(v=>v.style.display='none');
+  if(state.v==='home'){
+    vHome.style.display='block';
+    crumb.innerHTML='<span style="color:#A8A29E;font-weight:400;">Help Center</span>';
+    heroTitle.textContent='How can we help?';
+    heroSub.textContent='Everything you need to get the most recipes, make it easy for your guests, and feel confident every step of the way.';
+  } else if(state.v==='cat'){
+    vCat.style.display='block';
+    const c=CATS[state.cat];
+    crumb.innerHTML=`<span class="link" onclick="goHome()">Help Center</span><span class="crumb-sep"> › </span><span style="color:#1C1917">${c.name}</span>`;
+    heroTitle.textContent=c.name;
+    heroSub.textContent=c.desc;
+    document.getElementById('cat-hero-content').innerHTML=`<div class="cat-hero-icon ${c.icon}">${c.iconSvg}</div><div><div class="cat-hero-name">${c.name}</div><div class="cat-hero-desc">${c.desc}</div></div>`;
+    document.getElementById('cat-art-list').innerHTML=c.arts.map(artMeta).join('');
+  } else if(state.v==='art'){
+    vArt.style.display='block';
+    const a=ARTS[state.art];
+    const c=CATS[state.cat];
+    crumb.innerHTML=`<span class="link" onclick="goHome()">Help Center</span><span class="crumb-sep"> › </span><span class="link" onclick="openCat('${state.cat}')">${c.name}</span><span class="crumb-sep"> › </span><span style="color:#1C1917">${a.title}</span>`;
+    heroTitle.textContent=a.title;
+    heroSub.textContent=a.desc;
+    document.getElementById('art-main-content').innerHTML=`<div class="art-body">${a.body}</div>`;
+    const rel=a.rel?a.rel.map(id=>`<div class="sidebar-link" onclick="openArt('${id}')"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg><span>${ARTS[id].title}</span></div>`).join(''):'';
+    document.getElementById('art-sidebar-content').innerHTML=`<div class="sidebar-label">Related articles</div><div class="sidebar-links">${rel}</div>`;
+  }
+}
+render();
+</script>
+</body>
+</html>

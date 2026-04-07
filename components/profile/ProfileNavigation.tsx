@@ -29,9 +29,9 @@ export default function ProfileNavigation({
   const isCookbookActive = pathname === "/profile/cookbook" || pathname.startsWith("/profile/cookbook/");
   const isGroupsActive = pathname === "/profile/groups" || pathname.startsWith("/profile/groups/");
   const isRecipesActive = pathname === "/profile/recipes" || pathname.startsWith("/profile/recipes/");
-  const isGuestsActive = pathname === "/profile" && !pathname.startsWith("/profile/") || 
-                         (pathname !== "/profile/account" && pathname !== "/profile/orders" && 
-                          pathname !== "/profile/groups" && pathname !== "/profile/recipes" && 
+  const isGuestsActive = pathname === "/profile" && !pathname.startsWith("/profile/") ||
+                         (pathname !== "/profile/account" && pathname !== "/profile/orders" &&
+                          pathname !== "/profile/groups" && pathname !== "/profile/recipes" &&
                           pathname.startsWith("/profile/"));
 
   const navItems = [

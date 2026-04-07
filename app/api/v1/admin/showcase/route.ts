@@ -27,7 +27,9 @@ export async function GET() {
         groups:group_id (
           id,
           name,
-          couple_display_name
+          couple_display_name,
+          book_status,
+          book_close_date
         )
       `)
       .eq('notify_opt_in', true)
@@ -46,6 +48,9 @@ export async function GET() {
       group_id: string | null;
       group_name: string | null;
       couple_display_name: string | null;
+      book_status: string | null;
+      book_close_date: string | null;
+      is_sendable: boolean;
       recipe_id: string;
       recipe_name: string;
       showcase_image_url: string | null;
@@ -60,7 +65,18 @@ export async function GET() {
         showcase_image_url: string | null;
         group_id: string | null;
       }>;
-      const group = guest.groups as unknown as { id: string; name: string; couple_display_name: string | null } | null;
+      const group = guest.groups as unknown as {
+        id: string;
+        name: string;
+        couple_display_name: string | null;
+        book_status: string | null;
+        book_close_date: string | null;
+      } | null;
+
+      const bookStatus = group?.book_status ?? null;
+      // Reason: only 'printed' books are safe to send showcase emails — anything earlier
+      // could spoil the surprise for the couple before they receive the physical book
+      const isSendable = bookStatus === 'printed';
 
       for (const recipe of recipes) {
         rows.push({
@@ -71,6 +87,9 @@ export async function GET() {
           group_id: guest.group_id,
           group_name: group?.name ?? null,
           couple_display_name: group?.couple_display_name ?? null,
+          book_status: bookStatus,
+          book_close_date: group?.book_close_date ?? null,
+          is_sendable: isSendable,
           recipe_id: recipe.id,
           recipe_name: recipe.recipe_name,
           showcase_image_url: recipe.showcase_image_url,

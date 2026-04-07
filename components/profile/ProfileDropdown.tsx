@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useState, useRef, useEffect } from "react";
-import { User, LogOut, Package, BookOpen, Users, ChefHat, HelpCircle } from "lucide-react";
+import { User, LogOut, Package, BookOpen, Users, ChefHat, HelpCircle, Lightbulb } from "lucide-react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { getCurrentProfile } from "@/lib/supabase/profiles";
@@ -76,6 +76,16 @@ export default function ProfileDropdown() {
           >
             <User className="h-4 w-4" />
             Account
+          </button>
+          <button
+            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+            onClick={() => {
+              router.push('/profile/tips');
+              setIsOpen(false);
+            }}
+          >
+            <Lightbulb className="h-4 w-4" />
+            Tips
           </button>
           {/* <button
             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
