@@ -94,7 +94,7 @@ export default function ShowcasePage() {
   const [confirmSend, setConfirmSend] = useState<GuestGroup | null>(null);
   const [confirmOverride, setConfirmOverride] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [generatingRecipeId, setGeneratingRecipeId] = useState<string | null>(null);
+  const [generatingRecipeIds, setGeneratingRecipeIds] = useState<Set<string>>(new Set());
   const [previewRecipe, setPreviewRecipe] = useState<ShowcaseRecipe | null>(null);
   const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
   const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
@@ -225,7 +225,11 @@ export default function ShowcasePage() {
     const recipe = findRecipe(recipeId);
     if (!recipe) return;
 
-    setGeneratingRecipeId(recipeId);
+    setGeneratingRecipeIds(prev => {
+      const next = new Set(prev);
+      next.add(recipeId);
+      return next;
+    });
     setError(null);
 
     try {
@@ -261,7 +265,11 @@ export default function ShowcasePage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Generate failed');
     } finally {
-      setGeneratingRecipeId(null);
+      setGeneratingRecipeIds(prev => {
+        const next = new Set(prev);
+        next.delete(recipeId);
+        return next;
+      });
     }
   };
 
@@ -522,7 +530,7 @@ export default function ShowcasePage() {
             <GuestTable
               guests={readyToSend}
               variant="ready"
-              generatingRecipeId={generatingRecipeId}
+              generatingRecipeIds={generatingRecipeIds}
               uploadingRecipeId={uploadingRecipeId}
               sendingGuestId={sendingGuestId}
               resettingGuestId={resettingGuestId}
@@ -550,7 +558,7 @@ export default function ShowcasePage() {
               <GuestTable
                 guests={waitingForBook}
                 variant="locked"
-                generatingRecipeId={generatingRecipeId}
+                generatingRecipeIds={generatingRecipeIds}
                 uploadingRecipeId={uploadingRecipeId}
                 sendingGuestId={sendingGuestId}
                 resettingGuestId={resettingGuestId}
@@ -579,7 +587,7 @@ export default function ShowcasePage() {
               <GuestTable
                 guests={alreadySent}
                 variant="sent"
-                generatingRecipeId={generatingRecipeId}
+                generatingRecipeIds={generatingRecipeIds}
                 uploadingRecipeId={uploadingRecipeId}
                 sendingGuestId={sendingGuestId}
                 resettingGuestId={resettingGuestId}
@@ -730,7 +738,7 @@ function EmptyRow({ message }: { message: string }) {
 interface GuestTableProps {
   guests: GuestGroup[];
   variant: 'ready' | 'locked' | 'sent';
-  generatingRecipeId: string | null;
+  generatingRecipeIds: Set<string>;
   uploadingRecipeId: string | null;
   sendingGuestId: string | null;
   resettingGuestId: string | null;
@@ -743,7 +751,7 @@ interface GuestTableProps {
 function GuestTable({
   guests,
   variant,
-  generatingRecipeId,
+  generatingRecipeIds,
   uploadingRecipeId,
   sendingGuestId,
   resettingGuestId,
@@ -815,10 +823,10 @@ function GuestTable({
                         <div className="flex items-center gap-2 mt-1">
                           <button
                             onClick={() => onGenerate(recipe.recipe_id)}
-                            disabled={generatingRecipeId === recipe.recipe_id}
+                            disabled={generatingRecipeIds.has(recipe.recipe_id)}
                             className="text-gray-400 hover:text-gray-600 text-xs underline transition-colors"
                           >
-                            {generatingRecipeId === recipe.recipe_id
+                            {generatingRecipeIds.has(recipe.recipe_id)
                               ? 'Generating...'
                               : recipe.showcase_image_url ? 'Regenerate' : 'Generate'}
                           </button>
