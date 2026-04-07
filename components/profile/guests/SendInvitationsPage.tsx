@@ -55,6 +55,7 @@ export function SendInvitationsPage({
   const [newGuestPrintedName, setNewGuestPrintedName] = useState("");
   const [newGuestEmail, setNewGuestEmail] = useState("");
   const [isSavingGuest, setIsSavingGuest] = useState(false);
+  const [selectedSentGuestId, setSelectedSentGuestId] = useState<string | null>(null);
 
   const loadGuests = useCallback(async () => {
     setLoading(true);
@@ -238,7 +239,72 @@ export function SendInvitationsPage({
     });
   };
 
-  const emailSubject = `${coupleNames} need your recipe`;
+  const emailSubject = `We need your recipe`;
+
+  // Reason: When user selects a guest in the Sent tab, the preview updates
+  // to show the exact email that would be sent to that guest on the next remind.
+  const selectedSentGuest = useMemo(
+    () => invitedGuests.find((g) => g.id === selectedSentGuestId) || null,
+    [invitedGuests, selectedSentGuestId]
+  );
+
+  const selectedGuestName = selectedSentGuest?.first_name || "there";
+
+  const previewEmailNumber = useMemo((): 1 | 2 | 3 | 4 => {
+    if (activeTab !== "sent" || !selectedSentGuest) return 1;
+    return Math.min((selectedSentGuest.emails_sent_count || 1) + 1, 4) as 1 | 2 | 3 | 4;
+  }, [activeTab, selectedSentGuest]);
+
+  const emailContent = useMemo(() => {
+    const content: Record<1 | 2 | 3 | 4, { subject: string; headerLabel: string; headerColor: string; body: React.ReactNode }> = {
+      1: {
+        subject: `We need your recipe.`,
+        headerLabel: "New Email",
+        headerColor: "bg-[#2D2D2D]",
+        body: (
+          <>
+            <p>We&apos;re making them a cookbook. A real one. With recipes from the people who matter most to them.</p>
+            <p>Send a recipe and you&apos;re in their kitchen.</p>
+            <p className="text-[#2D2D2D] font-medium">Doesn&apos;t have to be fancy. Just has to be yours.</p>
+          </>
+        ),
+      },
+      2: {
+        subject: "Still thinking what recipe to send?",
+        headerLabel: "Reminder 1 of 3",
+        headerColor: "bg-[#D4A854]",
+        body: (
+          <>
+            <p>Hi {selectedGuestName}, {coupleNames}&apos;s cookbook is coming together and your page is still open.</p>
+            <p className="text-[#2D2D2D] font-medium">Doesn&apos;t have to be fancy. Just has to be yours.</p>
+          </>
+        ),
+      },
+      3: {
+        subject: "There's still time",
+        headerLabel: "Reminder 2 of 3",
+        headerColor: "bg-[#D4A854]",
+        body: (
+          <>
+            <p>Hi {selectedGuestName}, we know life gets busy. {coupleNames}&apos;s recipe book is still open, and there&apos;s still room for yours.</p>
+            <p className="text-[#2D2D2D] font-medium">Five minutes. One recipe. A page in their kitchen.</p>
+          </>
+        ),
+      },
+      4: {
+        subject: `Last call for ${coupleNames}'s book`,
+        headerLabel: "Reminder 3 of 3 · Final",
+        headerColor: "bg-[#9A9590]",
+        body: (
+          <>
+            <p>Hi {selectedGuestName}, this is our last reminder about {coupleNames}&apos;s recipe book.</p>
+            <p className="text-[#2D2D2D] font-medium">No hard feelings if not. But the door&apos;s still open.</p>
+          </>
+        ),
+      },
+    };
+    return content;
+  }, [coupleNames, selectedGuestName]);
 
   return (
     <div>
@@ -317,9 +383,11 @@ export function SendInvitationsPage({
 
           {/* Email card container */}
           <div className="w-full max-w-[560px] rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.08)] overflow-hidden">
-            {/* "New Email" header bar */}
-            <div className="bg-[#2D2D2D] text-center py-2.5">
-              <span className="text-sm font-medium text-white tracking-wide">New Email</span>
+            {/* Header bar — changes color for reminders */}
+            <div className={`${emailContent[previewEmailNumber].headerColor} text-center py-2.5`}>
+              <span className="text-sm font-medium text-white tracking-wide">
+                {emailContent[previewEmailNumber].headerLabel}
+              </span>
             </div>
 
             {/* From / Subject rows */}
@@ -333,7 +401,7 @@ export function SendInvitationsPage({
               <div className="px-6 py-2.5">
                 <p className="text-sm">
                   <span className="text-[#9A9590]">Subject:</span>{" "}
-                  <span className="text-[#2D2D2D]">{emailSubject}</span>
+                  <span className="text-[#2D2D2D]">{emailContent[previewEmailNumber].subject}</span>
                 </p>
               </div>
             </div>
@@ -362,18 +430,9 @@ export function SendInvitationsPage({
                 </div>
               )}
 
-              {/* Body copy */}
+              {/* Body copy — changes based on which email is being previewed */}
               <div className="text-[15px] text-[#666666] leading-relaxed max-w-[340px] mx-auto mb-10 space-y-4">
-                <p>
-                  We&apos;re making them a cookbook. A real one.
-                  With recipes from the people who matter most to them.
-                </p>
-                <p>
-                  Send a recipe and you&apos;re in their kitchen.
-                </p>
-                <p className="text-[#2D2D2D] font-medium">
-                  Doesn&apos;t have to be fancy. Just has to be yours.
-                </p>
+                {emailContent[previewEmailNumber].body}
               </div>
 
               {/* CTA button */}
@@ -476,17 +535,22 @@ export function SendInvitationsPage({
                       : "border-transparent text-[#9A9590] hover:text-[#2D2D2D]"
                   }`}
                 >
-                  Compose ({uninvitedGuests.length})
+                  Invite ({uninvitedGuests.length})
                 </button>
                 <button
-                  onClick={() => setActiveTab("sent")}
+                  onClick={() => {
+                    setActiveTab("sent");
+                    // Reason: auto-select first pending guest so the preview updates immediately
+                    const firstPending = invitedGuests.find((g) => (g.recipes_received || 0) === 0);
+                    if (firstPending) setSelectedSentGuestId(firstPending.id);
+                  }}
                   className={`pb-3.5 px-1 text-[15px] font-medium transition-colors border-b-2 ${
                     activeTab === "sent"
                       ? "border-[#2D2D2D] text-[#2D2D2D]"
                       : "border-transparent text-[#9A9590] hover:text-[#2D2D2D]"
                   }`}
                 >
-                  Sent ({invitedGuests.length})
+                  Sent &amp; Reminders ({invitedGuests.length})
                 </button>
               </div>
             </div>
@@ -699,11 +763,17 @@ export function SendInvitationsPage({
                     const hasRecipe = (guest.recipes_received || 0) > 0;
                     const isReminding = remindingId === guest.id;
                     const justReminded = remindedIds.has(guest.id);
+                    const remindersSent = Math.max((guest.emails_sent_count || 1) - 1, 0);
+                    const allRemindersSent = (guest.emails_sent_count || 1) >= 4;
+                    const isSelected = selectedSentGuestId === guest.id;
 
                     return (
                       <div
                         key={guest.id}
-                        className="flex items-center gap-3 py-3.5 border-b border-[#F5F5F4]"
+                        onClick={() => !hasRecipe && setSelectedSentGuestId(guest.id)}
+                        className={`flex items-center gap-3 py-3.5 border-b border-[#F5F5F4] transition-colors ${
+                          !hasRecipe ? "cursor-pointer hover:bg-[#FAF7F2]" : ""
+                        } ${isSelected ? "bg-[#FAF7F2] border-l-2 border-l-[#D4A854]" : ""}`}
                       >
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-[#2D2D2D] truncate">
@@ -714,10 +784,16 @@ export function SendInvitationsPage({
                             {guest.invitation_started_at
                               ? formatDate(guest.invitation_started_at)
                               : ""}
-                            {guest.email && !guest.email.startsWith("NO_EMAIL_") && (
-                              <span className="ml-1 text-gray-400">· {guest.email}</span>
+                            {remindersSent > 0 && (
+                              <span> · {remindersSent} reminder{remindersSent !== 1 ? "s" : ""} sent</span>
+                            )}
+                            {guest.last_email_sent_at && remindersSent > 0 && (
+                              <span> · Last: {formatDate(guest.last_email_sent_at)}</span>
                             )}
                           </p>
+                          {guest.email && !guest.email.startsWith("NO_EMAIL_") && (
+                            <p className="text-xs text-gray-400 truncate">{guest.email}</p>
+                          )}
                         </div>
 
                         {hasRecipe ? (
@@ -725,14 +801,14 @@ export function SendInvitationsPage({
                             <Check size={12} />
                             Recipe added
                           </span>
+                        ) : allRemindersSent ? (
+                          <span className="text-xs text-[#9A9590] px-2.5 py-1">
+                            3 of 3 sent
+                          </span>
                         ) : (
                           <div className="flex items-center gap-2">
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-[#9A9590]">
-                              <Clock size={12} />
-                              Awaiting recipe
-                            </span>
                             <button
-                              onClick={() => handleRemind(guest.id)}
+                              onClick={(e) => { e.stopPropagation(); handleRemind(guest.id); }}
                               disabled={isReminding || justReminded}
                               className="text-xs font-medium px-3 py-1.5 rounded-md border border-[#E8E0D5] text-[#2D2D2D] hover:border-[#2D2D2D] transition-colors disabled:opacity-50 disabled:cursor-default"
                             >
@@ -750,7 +826,7 @@ export function SendInvitationsPage({
                                   Sent
                                 </span>
                               ) : (
-                                "Remind"
+                                `Remind`
                               )}
                             </button>
                           </div>
