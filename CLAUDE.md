@@ -51,6 +51,29 @@ Brand essence: cool on the outside, emotional on the inside.
 - Don't make "improvements" I didn't ask for
 - Don't run `npm run build` for small changes
 
+## Typography System
+
+ALWAYS use the custom `type-*` utility classes defined in `app/globals.css` for any text in marketing/landing/public pages. NEVER use raw Tailwind font utilities (`font-serif`, `font-sans`, `text-xl`, `text-base`, etc.) for headings or body copy in user-facing pages — they break consistency with the rest of the site.
+
+| Class | Use for |
+|---|---|
+| `type-display` | Hero H1 (largest, page-defining) |
+| `type-heading` | Section H2 |
+| `type-subheading` | Sub-section H3, card titles |
+| `type-accent` | Italic quotes, taglines, poetic lines |
+| `type-body` | Main body paragraphs |
+| `type-body-small` | Secondary descriptions, card text, FAQ answers |
+| `type-eyebrow` | Uppercase labels (e.g. "THE BOOK") |
+| `type-caption` | Captions, attributions, metadata |
+
+Decision rule when writing new sections:
+1. Heading? → `type-display` / `type-heading` / `type-subheading`
+2. Body paragraph? → `type-body` or `type-body-small`
+3. Uppercase label? → `type-eyebrow`
+4. Small caption? → `type-caption`
+
+Exception: form inputs, admin/dashboard UI, and other purely functional UI may use raw Tailwind font utilities since the type system targets marketing copy. When in doubt, check `app/globals.css` for the full definitions before adding new font styles.
+
 ## Supabase Rules
 
 NEVER execute INSERT, UPDATE, DELETE, or DROP without explicit confirmation.

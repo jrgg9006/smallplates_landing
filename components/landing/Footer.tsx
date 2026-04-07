@@ -107,12 +107,12 @@ export default function Footer() {
                     </Link>
                   </li>
                   <li>
-                    <a 
-                      href="mailto:team@smallplatesandcompany.com" 
+                    <Link
+                      href="/contact"
                       className="font-sans font-light text-base text-white/70 hover:text-white transition-colors"
                     >
                       Contact
-                    </a>
+                    </Link>
                   </li>
                 </ul>
               </div>

@@ -107,6 +107,7 @@ export async function POST(request: NextRequest) {
 
     await postmarkClient.sendEmail({
       From: `${fromName} <${fromEmail}>`,
+      ReplyTo: 'team@smallplatesandcompany.com',
       To: guest_email,
       Subject: subject,
       HtmlBody: html,

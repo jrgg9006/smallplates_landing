@@ -22,6 +22,7 @@ export async function sendWelcomeLoginEmail({ to, buyerName, loginLink }: SendWe
   try {
     const result = await postmarkClient.sendEmailWithTemplate({
       From: `Small Plates & Co. <${process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com'}>`,
+      ReplyTo: 'team@smallplatesandcompany.com',
       To: to,
       TemplateAlias: 'welcome-login',
       TemplateModel: {
@@ -59,6 +60,7 @@ export async function sendNewRecipeNotification({
   try {
     const result = await postmarkClient.sendEmailWithTemplate({
       From: `Small Plates & Co. <${process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com'}>`,
+      ReplyTo: 'team@smallplatesandcompany.com',
       To: to,
       TemplateAlias: 'new-recipe-notification',
       TemplateModel: {
@@ -90,6 +92,7 @@ export async function sendGroupInvitationEmail({
   try {
     const result = await postmarkClient.sendEmailWithTemplate({
       From: `Small Plates & Co. <${process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com'}>`,
+      ReplyTo: 'team@smallplatesandcompany.com',
       To: to,
       TemplateAlias: 'invite-to-group',
       TemplateModel: {

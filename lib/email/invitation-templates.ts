@@ -92,6 +92,9 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
                            width="120"
                            height="auto"
                            style="display: block; margin: 0 auto 16px; max-width: 120px; height: auto; opacity: 0.4;" />
+                      <p style="margin: 0 0 12px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #9A9590; line-height: 1.5; text-align: center;" class="footer-text">
+                        Something off? Just reply to this email.
+                      </p>
                       ${captainName ? `
                       <p style="margin: 0 0 6px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #9A9590; line-height: 1.5; text-align: center;" class="footer-text">
                         This invitation was sent by ${captainName} via Small Plates &amp; Co.
@@ -246,7 +249,7 @@ Doesn't have to be fancy. Just has to be yours.
 
 Add your recipe: ${collectionLink}
 
-5 minutes. That's it.${params.captainName ? `\n\nThis invitation was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
+5 minutes. That's it.\n\nSomething off? Just reply to this email.${params.captainName ? `\n\nThis invitation was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
 
   return { subject, html: baseTemplate(content, subject, params.captainName), text };
 }
@@ -288,7 +291,7 @@ Send a recipe and you're in their kitchen.
 
 Add your recipe: ${collectionLink}
 
-5 minutes. That's it.${params.captainName ? `\n\nThis invitation was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
+5 minutes. That's it.\n\nSomething off? Just reply to this email.${params.captainName ? `\n\nThis invitation was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
 
   return { subject, html: baseTemplate(content, subject, params.captainName), text };
 }
@@ -339,7 +342,7 @@ export function invitationEmail3(params: InvitationTemplateParams): { subject: s
     ? `Hi ${guestName},\n\n${recipeCount} people have already shared their recipes.\n\nThere's still room for yours.`
     : `Hi ${guestName},\n\nWe know life gets busy. But if you've been meaning to add your recipe to ${coupleDisplayName}'s book, now's a good time.\n\nFive minutes. One recipe. A page in their kitchen.`;
 
-  const text = `${textBody}\n\nAdd your recipe: ${collectionLink}\n\n5 minutes. That's it.${params.captainName ? `\n\nThis invitation was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
+  const text = `${textBody}\n\nAdd your recipe: ${collectionLink}\n\n5 minutes. That's it.\n\nSomething off? Just reply to this email.${params.captainName ? `\n\nThis invitation was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
 
   return { subject, html: baseTemplate(content, subject, params.captainName), text };
 }
@@ -381,7 +384,7 @@ No hard feelings if not. But the door's still open.
 
 Add your recipe: ${collectionLink}
 
-5 minutes. That's it.${params.captainName ? `\n\nThis invitation was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
+5 minutes. That's it.\n\nSomething off? Just reply to this email.${params.captainName ? `\n\nThis invitation was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
 
   return { subject, html: baseTemplate(content, subject, params.captainName), text };
 }
