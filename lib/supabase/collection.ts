@@ -184,10 +184,12 @@ export async function searchGuestInCollection(
 
       // Search directly in guests table by group_id and name
       // Reason: also finds guests who exist but have no recipes yet (e.g. previous failed submission)
+      // Reason: do NOT filter by user_id here. The group is the unit of membership.
+      // A group can have multiple organizers, and guests imported by any of them
+      // belong to the group regardless of who created the group or whose token is in the link.
       const { data: guests, error } = await supabase
         .from('guests')
         .select('*')
-        .eq('user_id', userId)
         .eq('group_id', groupId)
         .eq('is_archived', false)
         .ilike('first_name', `${firstName.trim()}%`)

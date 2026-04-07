@@ -126,6 +126,16 @@ export async function POST(request: NextRequest) {
     }
 
     const appUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://smallplatesandcompany.com';
+
+    // Reason: Prevent the localhost-invitation incident from repeating. If someone runs
+    // this endpoint from a dev environment with a localhost URL, refuse to send.
+    if (appUrl.includes('localhost') || appUrl.includes('127.0.0.1')) {
+      return NextResponse.json(
+        { error: 'Refusing to send invitations: app URL points to localhost. Run this from production.' },
+        { status: 400 }
+      );
+    }
+
     const collectionLink = `${appUrl}/collect/${creatorProfile.collection_link_token}?group=${groupId}`;
 
     // Get captain name for email footer
