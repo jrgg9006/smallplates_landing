@@ -603,10 +603,89 @@ function PaymentForm({
           </button>
         </div>
 
-        <div className="flex items-center justify-center gap-2 text-xs text-[#2D2D2D]/40">
+        <div className="flex items-center justify-center gap-2 text-xs text-[#2D2D2D]/40 mb-6">
           <Lock className="w-3 h-3" />
           <span>Secure checkout powered by</span>
           <img src="/images/logo_svg/stripe_logo.png" alt="Stripe" className="h-4 opacity-40" />
+        </div>
+
+        {/* Trust details — native <details> accordions, zero state */}
+        <div className="mt-8 border-t border-gray-200">
+          {[
+            {
+              title: "Product Features",
+              body: (
+                <div className="space-y-3">
+                  <p>
+                    A premium hardcover book made to live on the kitchen counter — opened, stained,
+                    and actually used. Every detail is chosen for durability and the kind of finish
+                    that still looks good ten years in.
+                  </p>
+                  <ul className="space-y-1.5 list-disc pl-5 marker:text-[#D4A854]">
+                    <li><span className="text-[#2D2D2D]">Format:</span> Hardcover, Adhesive Casebound (PUR)</li>
+                    <li><span className="text-[#2D2D2D]">Size:</span> US Letter Tall (8&quot; × 10&quot;) — Portrait</li>
+                    <li><span className="text-[#2D2D2D]">Printing:</span> Full-color throughout</li>
+                    <li><span className="text-[#2D2D2D]">Paper:</span> 100 lb Satin Text interior pages</li>
+                    <li><span className="text-[#2D2D2D]">Finish:</span> Matte lamination on cover</li>
+                    <li><span className="text-[#2D2D2D]">Recipes:</span> 50 included, additional recipes available</li>
+                  </ul>
+                </div>
+              ),
+            },
+            {
+              title: "Shipping",
+              body: (
+                <>
+                  We ship to the United States, Mexico, and the European Union. To make sure the
+                  book arrives in time, close the book at least 3 weeks before you want to give it —
+                  that&apos;s the window we need to print, bind, and deliver.
+                </>
+              ),
+            },
+            {
+              title: "Pricing Details",
+              body: (
+                <ul className="space-y-1.5 list-disc pl-5">
+                  <li>The Book: ${BASE_BOOK_PRICE} USD</li>
+                  <li>Each additional copy: ${ADDITIONAL_BOOK_PRICE} USD</li>
+                  <li>Up to 50 recipes included</li>
+                  <li>Each extra recipe: $1 USD</li>
+                </ul>
+              ),
+            },
+            {
+              title: "Support",
+              body: (
+                <>
+                  Something off with your book? Email{" "}
+                  <a href="mailto:hello@smallplates.co" className="underline hover:text-[#2D2D2D]">
+                    hello@smallplates.co
+                  </a>{" "}
+                  and we&apos;ll fix it. No forms, no hoops.
+                </>
+              ),
+            },
+          ].map((item) => (
+            <details
+              key={item.title}
+              className="group border-b border-gray-200 [&_summary::-webkit-details-marker]:hidden"
+            >
+              <summary className="flex items-center justify-between py-4 cursor-pointer list-none text-sm font-medium text-[#2D2D2D] hover:text-[#2D2D2D]/70 transition-colors">
+                <span>{item.title}</span>
+                <svg
+                  className="w-4 h-4 text-[#2D2D2D]/50 transition-transform duration-200 group-open:rotate-180"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <div className="pb-4 pr-6 text-sm text-[#2D2D2D]/70 leading-relaxed">
+                {item.body}
+              </div>
+            </details>
+          ))}
         </div>
       </div>
     </OnboardingStep>
