@@ -56,7 +56,7 @@ Common doubts and objections from each audience, and how to respond.
 | **"How long does it take?"** | "Guests need about 5 minutes to submit. The whole process from start to printed book takes 4-6 weeks." |
 | **"Is it expensive?"** | "It's one gift from the group, not per person. Divided among bridesmaids or family, it's less than most registry items — and it actually stays in the kitchen." |
 | **"What if this becomes another thing I have to chase?"** | "You don't chase anyone. Reminders are automated. You check the dashboard when you want — or don't. We flag anything that actually needs your attention." |
-| **"What if the bride thinks it's cheesy?"** | "The book is professionally designed. Hardcover. Minimal. It looks like something from a design studio, not a craft project. The bride's taste filter will approve." |
+| **"What if the bride thinks it's cheesy?"** | "It won't. Hardcover. Professionally designed. Minimal. If anything, she'll want to know where you found it." |
 | **"I don't want to be the nag"** | "You won't be. We send the reminders — not you. Your name never appears on a follow-up. As far as the guests know, it's all coming from us." |
 
 ---
@@ -110,7 +110,7 @@ Quick reference tables for anyone on the team who needs to write something.
 
 | Audience | One-Line Message | Tone | Key Proof Point |
 |----------|------------------|------|-----------------|
-| **Organizer** | "Meaningful gift. Zero management overhead. Bride cries. You're the hero." | Operational respect, COO-to-COO | Dashboard, automated reminders, no chasing |
+| **Organizer** | "You found the thing nobody else found. You set it up. We handle the rest. Bride cries. You're the hero." | Operational respect, COO-to-COO | Dashboard, automated reminders, no chasing |
 | **Bride (receiver)** | "A cookbook that carries your people into the life you're about to build." | Cool, aspirational | It's personal, it's permanent |
 | **Bride (creator)** | "Turn your guests into contributors. Make your wedding something they're part of." | Empowering, exciting | It's collaborative, it lasts |
 | **Guests** | "5 minutes. One recipe. You'll be in their kitchen forever." | Light, no pressure | It's easy, doesn't have to be fancy |
@@ -123,7 +123,7 @@ Quick reference tables for anyone on the team who needs to write something.
 
 | Stage | Objective | Key Message | Tone |
 |-------|-----------|-------------|------|
-| **Awareness** | Capture attention | "Finally. A wedding gift that doesn't end up in a closet." | Punchy, intriguing |
+| **Awareness** | Capture attention | "Another registry. Another stand mixer nobody asked for. There's a better option." | Punchy, intriguing |
 | **Consideration** | Resolve doubts | "You invite. They send. We make the book. No design skills needed." | Clear, trustworthy |
 | **Decision** | Remove friction | "This is the gift they'll talk about." | Confident, reassuring |
 | **Onboarding** | Generate excitement | "It's happening. You just started something beautiful." | Energetic, warm |
@@ -142,6 +142,8 @@ Quick reference tables for anyone on the team who needs to write something.
 > "Finally. A wedding gift that doesn't end up in a closet."
 >
 > "Not a keepsake. A kitchen book."
+>
+> "The stand mixer is in the cabinet. This isn't."
 >
 > "You invite. They send. We make the book."
 >
