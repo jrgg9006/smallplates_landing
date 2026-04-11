@@ -23,6 +23,7 @@ import ShareBanner from '@/components/landing/ShareBanner'
 import FAQ from '@/components/landing/FAQ'
 // import Guarantee from '@/components/landing/Guarantee'
 import CTAButton from '@/components/landing/CTAButton'
+import NewsletterSignup from '@/components/landing/NewsletterSignup'
 import Footer from '@/components/landing/Footer'
 
 export default function Home() {
@@ -49,6 +50,7 @@ export default function Home() {
         {/* <ForGiftGivers /> */}
         <EmotionalClose />
         <FAQ />
+        <NewsletterSignup />
         {/* Hidden sections - not part of wedding flow */}
         {/* <FeatureGrid /> */}
         {/* <FoodPerfect /> */}

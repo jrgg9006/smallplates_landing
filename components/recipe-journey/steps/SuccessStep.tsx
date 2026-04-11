@@ -13,11 +13,49 @@ interface SuccessStepProps {
   coupleNames?: string | null;
 }
 
+type NewsletterStatus = 'idle' | 'submitting' | 'done' | 'error';
+
 export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn = false, guestOptInEmail, onSavePrefs, coupleImageUrl, recipeName, coupleNames }: SuccessStepProps) {
   const [email, setEmail] = useState<string>(defaultEmail || '');
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  const [newsletterOptIn, setNewsletterOptIn] = useState(false);
+  const [newsletterStatus, setNewsletterStatus] = useState<NewsletterStatus>('idle');
+
+  // Reason: The newsletter uses whichever email is already available — the guest's
+  // opted-in book notification email, or the email they typed into the input above.
+  const availableEmail = hasGuestOptIn && guestOptInEmail
+    ? guestOptInEmail
+    : (email.trim() || defaultEmail || '').trim();
+
+  const subscribeToNewsletter = async (emailToUse: string) => {
+    setNewsletterStatus('submitting');
+    try {
+      const res = await fetch('/api/v1/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailToUse, source: 'collection_flow' }),
+      });
+      if (!res.ok) {
+        setNewsletterStatus('error');
+        return;
+      }
+      setNewsletterStatus('done');
+    } catch {
+      setNewsletterStatus('error');
+    }
+  };
+
+  const handleNewsletterToggle = (checked: boolean) => {
+    setNewsletterOptIn(checked);
+    // Reason: Only fire on check. Unchecking just flips local state — we don't
+    // silently unsubscribe from a single UI toggle.
+    if (checked && availableEmail && newsletterStatus !== 'submitting' && newsletterStatus !== 'done') {
+      void subscribeToNewsletter(availableEmail);
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -93,8 +131,49 @@ export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn =
           )}
         </div>
 
-        {/* Bottom divider */}
-        <div className="w-full h-px bg-gray-200 mt-8" />
+        {/* Newsletter opt-in — sits tight below the email input, same width, feels like part of the same form group */}
+        <div className="mt-3 max-w-sm mx-auto">
+          <label
+            className={`flex items-start gap-3 select-none text-left ${availableEmail && newsletterStatus !== 'done' ? 'cursor-pointer' : 'cursor-default'}`}
+          >
+            <input
+              type="checkbox"
+              checked={newsletterOptIn}
+              onChange={(e) => handleNewsletterToggle(e.target.checked)}
+              disabled={newsletterStatus === 'submitting' || newsletterStatus === 'done' || !availableEmail}
+              className="peer sr-only"
+            />
+            <span className="relative mt-[3px] flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[4px] border border-gray-300 bg-white transition-all peer-checked:bg-[#D4A854] peer-checked:border-[#D4A854] peer-hover:border-[#D4A854] peer-disabled:opacity-40 peer-focus-visible:ring-2 peer-focus-visible:ring-[#D4A854]/30 peer-focus-visible:ring-offset-1">
+              {newsletterOptIn && (
+                <svg
+                  viewBox="0 0 12 12"
+                  className="h-3 w-3 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M2.5 6.5l2.5 2.5 4.5-5.5" />
+                </svg>
+              )}
+            </span>
+            <span className="text-[12px] leading-[1.5] flex-1">
+              {newsletterStatus === 'done' ? (
+                <span className="text-[#D4A854]">You&apos;re on the list. First one lands soon.</span>
+              ) : newsletterStatus === 'error' ? (
+                <span className="text-[#C4856C]">Try again later.</span>
+              ) : newsletterStatus === 'submitting' ? (
+                <span className="text-gray-500">Adding you...</span>
+              ) : (
+                <span className="text-gray-500">
+                  Add me to the newsletter and get our top 5 recipes people actually sent in.
+                </span>
+              )}
+            </span>
+          </label>
+        </div>
       </div>
     </div>
   );

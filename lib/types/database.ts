@@ -20,6 +20,10 @@ export type InvitationStatus = 'pending' | 'accepted' | 'declined' | 'expired';
 export type BookStatus = 'active' | 'reviewed' | 'ready_to_print' | 'printed' | 'inactive';
 export type BookReviewStatus = 'pending' | 'approved' | 'needs_revision';
 
+// Newsletter types
+export type NewsletterSource = 'landing_page' | 'collection_flow';
+export type NewsletterStatus = 'active' | 'unsubscribed';
+
 // Main database types
 export interface Database {
   public: {
@@ -600,6 +604,30 @@ export interface Database {
           agent_metadata?: Record<string, unknown> | null;
         };
       };
+      newsletter_subscribers: {
+        Row: {
+          id: string;
+          email: string;
+          source: NewsletterSource;
+          status: NewsletterStatus;
+          unsubscribed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          source: NewsletterSource;
+          status?: NewsletterStatus;
+          unsubscribed_at?: string | null;
+        };
+        Update: {
+          email?: string;
+          source?: NewsletterSource;
+          status?: NewsletterStatus;
+          unsubscribed_at?: string | null;
+        };
+      };
     };
     Functions: {
       get_guest_statistics: {
@@ -702,6 +730,11 @@ export type RecipeEditHistoryInsert = Database['public']['Tables']['recipe_edit_
 
 export type RecipePrintReady = Database['public']['Tables']['recipe_print_ready']['Row'];
 export type RecipePrintReadyUpdate = Database['public']['Tables']['recipe_print_ready']['Update'];
+
+// Newsletter convenience types
+export type NewsletterSubscriber = Database['public']['Tables']['newsletter_subscribers']['Row'];
+export type NewsletterSubscriberInsert = Database['public']['Tables']['newsletter_subscribers']['Insert'];
+export type NewsletterSubscriberUpdate = Database['public']['Tables']['newsletter_subscribers']['Update'];
 
 // Order types
 export type OrderType = 'initial_purchase' | 'extra_copy' | 'copy_order';
