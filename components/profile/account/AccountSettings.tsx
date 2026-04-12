@@ -4,6 +4,7 @@ import React from 'react';
 import { PersonalInfoForm } from './PersonalInfoForm';
 import { EmailChangeForm } from './EmailChangeForm';
 import { PasswordChangeForm } from './PasswordChangeForm';
+import { SetupGuidePreferences } from './SetupGuidePreferences';
 import { DangerZone } from './DangerZone';
 
 export function AccountSettings() {
@@ -32,6 +33,9 @@ export function AccountSettings() {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Password & Security</h3>
         <PasswordChangeForm />
       </div>
+
+      {/* Setup Guide preferences — restore hidden setup checklists */}
+      <SetupGuidePreferences />
 
       {/* Account Deletion */}
       <DangerZone />

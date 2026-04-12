@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createSupabaseClient } from '@/lib/supabase/client';
 import { isAdminEmail } from '@/lib/config/admin';
-import { Trash2, Sparkles, RotateCcw, Eye, X } from 'lucide-react';
+import { Trash2, Sparkles, RotateCcw, Eye, X, Flame, Search, FlaskConical } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -22,7 +22,19 @@ interface User {
   full_name: string | null;
   created_at: string;
   deleted_at?: string | null;
+  is_test_account?: boolean;
+  last_sign_in_at?: string | null;
+  guest_count?: number;
+  recipe_count?: number;
+  groups_owned_count?: number;
+  groups_member_count?: number;
+  has_paid?: boolean;
 }
+
+type FilterContent = 'all' | 'with' | 'without';
+type FilterStatus = 'all' | 'active' | 'deleted';
+type FilterTest = 'all' | 'test_only' | 'hide_test';
+type FilterPaid = 'all' | 'paid' | 'unpaid';
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -30,6 +42,7 @@ export default function AdminUsersPage() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [cleaning, setCleaning] = useState<string | null>(null);
   const [resettingOnboarding, setResettingOnboarding] = useState<string | null>(null);
+  const [togglingTest, setTogglingTest] = useState<string | null>(null);
   const [cleanModalOpen, setCleanModalOpen] = useState(false);
   const [userToClean, setUserToClean] = useState<User | null>(null);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
@@ -37,6 +50,18 @@ export default function AdminUsersPage() {
   const [userDetails, setUserDetails] = useState<any>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+
+  // Hard delete confirmation modal
+  const [hardDeleteModalOpen, setHardDeleteModalOpen] = useState(false);
+  const [userToHardDelete, setUserToHardDelete] = useState<User | null>(null);
+  const [hardDeleteConfirmText, setHardDeleteConfirmText] = useState('');
+
+  // Filters / search (Fase 2)
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterContent, setFilterContent] = useState<FilterContent>('all');
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>('active');
+  const [filterTest, setFilterTest] = useState<FilterTest>('all');
+  const [filterPaid, setFilterPaid] = useState<FilterPaid>('all');
   const router = useRouter();
 
   useEffect(() => {
@@ -101,77 +126,86 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleDelete = async (user: User) => {
-    if (!confirm(`Are you sure you want to delete user ${user.email}?\n\nIf the user has content (recipes, guests, groups), the account will be soft deleted (data preserved). If the user has no content, the account will be permanently deleted.\n\nThis action cannot be undone.`)) {
+  // Soft delete: always preserves data, marks deleted_at
+  const handleSoftDelete = async (user: User) => {
+    if (!confirm(`SOFT DELETE ${user.email}?\n\nThe account will be marked as deleted but ALL data (recipes, guests, groups) will be preserved. Reversible by clearing deleted_at.`)) {
       return;
     }
 
     setDeleting(user.id);
-
     try {
-      const response = await fetch(`/api/v1/admin/users/${user.id}`, {
-        method: 'DELETE',
-      });
-
+      const response = await fetch(`/api/v1/admin/users/${user.id}?mode=soft`, { method: 'DELETE' });
       const result = await response.json();
-
       if (response.ok) {
-        const deletionType = result.deletionType === 'soft' ? 'soft deleted (data preserved)' : 'permanently deleted';
-        alert(`✅ User ${user.email} ${deletionType} successfully`);
-        await loadUsers(); // Reload to update the list
-        setDetailsModalOpen(false); // Close modal if open
+        alert(`✅ User ${user.email} soft deleted (data preserved)`);
+        await loadUsers();
+        setDetailsModalOpen(false);
       } else {
         alert(`❌ Error: ${result.error}`);
       }
     } catch (err) {
-      alert(`❌ Error: ${err instanceof Error ? err.message : 'Failed to delete user'}`);
+      alert(`❌ Error: ${err instanceof Error ? err.message : 'Failed to soft delete user'}`);
     } finally {
       setDeleting(null);
     }
   };
 
-  const handleDeleteFromModal = async () => {
-    if (!selectedUser) return;
+  // Hard delete: opens confirmation modal that requires typing the email
+  const openHardDeleteModal = (user: User) => {
+    setUserToHardDelete(user);
+    setHardDeleteConfirmText('');
+    setHardDeleteModalOpen(true);
+  };
 
-    // Determine deletion type based on content
-    const hasContent = userDetails && (
-      (userDetails.counts.recipes > 0) ||
-      (userDetails.counts.guests > 0) ||
-      (userDetails.groups.ownedCount > 0) ||
-      (userDetails.groups.membershipsCount > 0)
-    );
-
-    const deletionMessage = hasContent
-      ? `Are you sure you want to delete user ${selectedUser.email}?\n\nThis user has content (recipes, guests, groups). The account will be SOFT DELETED - all data will be preserved but the account will be deactivated.\n\nThis action cannot be undone.`
-      : `Are you sure you want to delete user ${selectedUser.email}?\n\nThis user has no content. The account will be PERMANENTLY DELETED - all data will be removed.\n\nThis action cannot be undone.`;
-
-    if (!confirm(deletionMessage)) {
+  const handleHardDeleteConfirm = async () => {
+    if (!userToHardDelete) return;
+    if (hardDeleteConfirmText.trim().toLowerCase() !== userToHardDelete.email.toLowerCase()) {
+      alert('Email confirmation does not match.');
       return;
     }
 
-    setDeleting(selectedUser.id);
-
+    setDeleting(userToHardDelete.id);
     try {
-      const response = await fetch(`/api/v1/admin/users/${selectedUser.id}`, {
-        method: 'DELETE',
-      });
-
+      const response = await fetch(`/api/v1/admin/users/${userToHardDelete.id}?mode=hard`, { method: 'DELETE' });
       const result = await response.json();
-
       if (response.ok) {
-        const deletionType = result.deletionType === 'soft' ? 'soft deleted (data preserved)' : 'permanently deleted';
-        alert(`✅ User ${selectedUser.email} ${deletionType} successfully`);
-        await loadUsers(); // Reload to update the list
+        alert(`✅ User ${userToHardDelete.email} permanently deleted. The email is now reusable.`);
+        await loadUsers();
+        setHardDeleteModalOpen(false);
+        setUserToHardDelete(null);
+        setHardDeleteConfirmText('');
         setDetailsModalOpen(false);
-        setSelectedUser(null);
-        setUserDetails(null);
       } else {
         alert(`❌ Error: ${result.error}`);
       }
     } catch (err) {
-      alert(`❌ Error: ${err instanceof Error ? err.message : 'Failed to delete user'}`);
+      alert(`❌ Error: ${err instanceof Error ? err.message : 'Failed to hard delete user'}`);
     } finally {
       setDeleting(null);
+    }
+  };
+
+  // Toggle is_test_account flag
+  const handleToggleTest = async (user: User) => {
+    setTogglingTest(user.id);
+    const next = !user.is_test_account;
+    try {
+      const response = await fetch(`/api/v1/admin/users/${user.id}/test-flag`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_test_account: next }),
+      });
+      const result = await response.json();
+      if (response.ok) {
+        // Optimistic local update so we don't have to reload all users
+        setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, is_test_account: next } : u)));
+      } else {
+        alert(`❌ Error: ${result.error}`);
+      }
+    } catch (err) {
+      alert(`❌ Error: ${err instanceof Error ? err.message : 'Failed to toggle test flag'}`);
+    } finally {
+      setTogglingTest(null);
     }
   };
 
@@ -248,15 +282,63 @@ export default function AdminUsersPage() {
     return null; // Will redirect
   }
 
+  // Apply search + filters
+  const filteredUsers = users.filter((u) => {
+    // Status filter
+    if (filterStatus === 'active' && u.deleted_at) return false;
+    if (filterStatus === 'deleted' && !u.deleted_at) return false;
+
+    // Test filter
+    if (filterTest === 'test_only' && !u.is_test_account) return false;
+    if (filterTest === 'hide_test' && u.is_test_account) return false;
+
+    // Paid filter
+    if (filterPaid === 'paid' && !u.has_paid) return false;
+    if (filterPaid === 'unpaid' && u.has_paid) return false;
+
+    // Content filter
+    const hasContent =
+      (u.recipe_count || 0) > 0 ||
+      (u.guest_count || 0) > 0 ||
+      (u.groups_owned_count || 0) > 0 ||
+      (u.groups_member_count || 0) > 0;
+    if (filterContent === 'with' && !hasContent) return false;
+    if (filterContent === 'without' && hasContent) return false;
+
+    // Search
+    if (searchTerm.trim()) {
+      const q = searchTerm.toLowerCase().trim();
+      const inEmail = u.email?.toLowerCase().includes(q);
+      const inName = u.full_name?.toLowerCase().includes(q);
+      if (!inEmail && !inName) return false;
+    }
+
+    return true;
+  });
+
+  const formatLastSignIn = (iso?: string | null) => {
+    if (!iso) return 'Never';
+    const date = new Date(iso);
+    const diffMs = Date.now() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 30) return `${diffDays}d ago`;
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
+    return `${Math.floor(diffDays / 365)}y ago`;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1400px] mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">Delete Users</h1>
-              <p className="text-gray-600">Manage and delete user accounts</p>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">Manage Users</h1>
+              <p className="text-gray-600">
+                {filteredUsers.length} of {users.length} users shown
+              </p>
             </div>
             <Link
               href="/admin"
@@ -267,95 +349,220 @@ export default function AdminUsersPage() {
           </div>
         </div>
 
+        {/* Filters bar */}
+        <div className="bg-white rounded-lg shadow p-4 mb-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Search className="h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by email or name…"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300"
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            <div className="flex items-center gap-1">
+              <span className="text-gray-500">Status:</span>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
+                className="px-2 py-1 border border-gray-200 rounded text-sm"
+              >
+                <option value="active">Active only</option>
+                <option value="deleted">Deleted only</option>
+                <option value="all">All</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-gray-500">Test:</span>
+              <select
+                value={filterTest}
+                onChange={(e) => setFilterTest(e.target.value as FilterTest)}
+                className="px-2 py-1 border border-gray-200 rounded text-sm"
+              >
+                <option value="all">All</option>
+                <option value="test_only">Test only</option>
+                <option value="hide_test">Hide test</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-gray-500">Paid:</span>
+              <select
+                value={filterPaid}
+                onChange={(e) => setFilterPaid(e.target.value as FilterPaid)}
+                className="px-2 py-1 border border-gray-200 rounded text-sm"
+              >
+                <option value="all">All</option>
+                <option value="paid">Paid only</option>
+                <option value="unpaid">Unpaid only</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-gray-500">Content:</span>
+              <select
+                value={filterContent}
+                onChange={(e) => setFilterContent(e.target.value as FilterContent)}
+                className="px-2 py-1 border border-gray-200 rounded text-sm"
+              >
+                <option value="all">All</option>
+                <option value="with">With content</option>
+                <option value="without">Empty</option>
+              </select>
+            </div>
+            {(searchTerm || filterStatus !== 'active' || filterTest !== 'all' || filterPaid !== 'all' || filterContent !== 'all') && (
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setFilterStatus('active');
+                  setFilterTest('all');
+                  setFilterPaid('all');
+                  setFilterContent('all');
+                }}
+                className="ml-auto text-xs text-gray-500 hover:text-gray-700 underline"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Users Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Test</th>
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Paid</th>
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" title="Recipes">R</th>
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" title="Guests">G</th>
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" title="Groups owned">GR</th>
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" title="Groups member of (not owner)">MB</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last sign in</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {users.length === 0 ? (
+                {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
-                      No users found
+                    <td colSpan={10} className="px-6 py-4 text-center text-gray-500">
+                      No users match the current filters
                     </td>
                   </tr>
                 ) : (
-                  users.map((user) => (
-                    <tr 
-                      key={user.id} 
-                      className="hover:bg-gray-50 cursor-pointer"
-                      onClick={() => handleViewDetails(user)}
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        <div className="flex items-center gap-2">
-                          {user.email}
-                          {user.deleted_at && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                              Deleted
+                  filteredUsers.map((user) => {
+                    const busy = deleting === user.id || cleaning === user.id || resettingOnboarding === user.id || togglingTest === user.id;
+                    return (
+                      <tr
+                        key={user.id}
+                        className={`hover:bg-gray-50 cursor-pointer ${user.is_test_account ? 'bg-purple-50/30' : ''}`}
+                        onClick={() => handleViewDetails(user)}
+                      >
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="flex flex-col">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-gray-900">{user.email}</span>
+                              {user.deleted_at && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                  Deleted
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-xs text-gray-500">{user.full_name || '—'}</span>
+                          </div>
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap text-center" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            onClick={() => handleToggleTest(user)}
+                            disabled={busy}
+                            title={user.is_test_account ? 'Click to unmark as test' : 'Click to mark as test'}
+                            className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors disabled:opacity-50 ${
+                              user.is_test_account
+                                ? 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                                : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                            }`}
+                          >
+                            <FlaskConical className="h-3 w-3" />
+                            {user.is_test_account ? 'TEST' : '—'}
+                          </button>
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap text-center">
+                          {user.has_paid ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+                              ✓
                             </span>
+                          ) : (
+                            <span className="text-xs text-gray-300">—</span>
                           )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.full_name || '—'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(user.created_at).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => handleViewDetails(user)}
-                            disabled={deleting === user.id || cleaning === user.id || resettingOnboarding === user.id}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="View Details"
-                          >
-                            <Eye className="h-4 w-4" />
-                            View
-                          </button>
-                          <button
-                            onClick={() => handleResetOnboarding(user)}
-                            disabled={resettingOnboarding === user.id || cleaning === user.id || deleting === user.id}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <RotateCcw className="h-4 w-4" />
-                            {resettingOnboarding === user.id ? 'Resetting...' : 'Reset Onboarding'}
-                          </button>
-                          <button
-                            onClick={() => handleCleanClick(user)}
-                            disabled={cleaning === user.id || deleting === user.id || resettingOnboarding === user.id}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <Sparkles className="h-4 w-4" />
-                            {cleaning === user.id ? 'Cleaning...' : 'Clean'}
-                          </button>
-                          <button
-                            onClick={() => handleDelete(user)}
-                            disabled={deleting === user.id || cleaning === user.id || resettingOnboarding === user.id}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            {deleting === user.id ? 'Deleting...' : 'Delete'}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap text-center text-sm text-gray-600">
+                          {user.recipe_count || 0}
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap text-center text-sm text-gray-600">
+                          {user.guest_count || 0}
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap text-center text-sm text-gray-600">
+                          {user.groups_owned_count || 0}
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap text-center text-sm text-gray-600">
+                          {user.groups_member_count || 0}
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap text-xs text-gray-500">
+                          {formatLastSignIn(user.last_sign_in_at)}
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap text-xs text-gray-500">
+                          {new Date(user.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => handleViewDetails(user)}
+                              disabled={busy}
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
+                              title="View details"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleResetOnboarding(user)}
+                              disabled={busy}
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-green-600 hover:text-green-800 hover:bg-green-50 rounded transition-colors disabled:opacity-50"
+                              title="Reset onboarding"
+                            >
+                              <RotateCcw className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleCleanClick(user)}
+                              disabled={busy}
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors disabled:opacity-50"
+                              title="Clean (remove content, keep account)"
+                            >
+                              <Sparkles className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleSoftDelete(user)}
+                              disabled={busy || !!user.deleted_at}
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-orange-600 hover:text-orange-800 hover:bg-orange-50 rounded transition-colors disabled:opacity-50"
+                              title="Soft delete (preserve data)"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => openHardDeleteModal(user)}
+                              disabled={busy}
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                              title="HARD delete (permanent, email reusable)"
+                            >
+                              <Flame className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -524,7 +731,12 @@ export default function AdminUsersPage() {
                     {userDetails.groups.owned.map((group: any) => (
                       <div key={group.id} className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-medium text-gray-900">{group.name}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-900">{group.name}</span>
+                            <span className="text-xs px-2 py-0.5 bg-yellow-200 text-yellow-900 rounded-full font-semibold">
+                              OWNER
+                            </span>
+                          </div>
                           <span className="text-xs text-gray-500">
                             {new Date(group.created_at).toLocaleDateString()}
                           </span>
@@ -552,13 +764,26 @@ export default function AdminUsersPage() {
                     Group Memberships ({userDetails.groups.membershipsCount})
                   </h3>
                   <div className="space-y-2">
-                    {userDetails.groups.memberships.map((membership: any, idx: number) => (
+                    {userDetails.groups.memberships.map((membership: any, idx: number) => {
+                      // Reason: in this product, group_members.role='member' is what we call "Captain"
+                      // (someone who is not the group owner). Only 'owner' shows as Owner.
+                      const roleLabel =
+                        membership.role === 'owner' ? 'OWNER' :
+                        membership.role === 'admin' ? 'ADMIN' :
+                        'CAPTAIN';
+                      const roleClass =
+                        membership.role === 'owner' ? 'bg-yellow-200 text-yellow-900' :
+                        membership.role === 'admin' ? 'bg-indigo-100 text-indigo-800' :
+                        'bg-blue-100 text-blue-800';
+                      return (
                       <div key={idx} className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-medium text-gray-900">{membership.group.name}</span>
-                          <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full capitalize">
-                            {membership.role}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-900">{membership.group.name}</span>
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${roleClass}`}>
+                              {roleLabel}
+                            </span>
+                          </div>
                         </div>
                         {membership.group.cookbooks && membership.group.cookbooks.length > 0 && (
                           <div className="text-xs text-gray-600 mt-1">
@@ -566,7 +791,8 @@ export default function AdminUsersPage() {
                           </div>
                         )}
                       </div>
-                    ))}
+                      );
+                    })}
                     {userDetails.groups.totalRecipesInMemberGroups > 0 && (
                       <div className="text-xs text-gray-600 mt-2">
                         Total recipes in member groups: <strong>{userDetails.groups.totalRecipesInMemberGroups}</strong>
@@ -653,11 +879,23 @@ export default function AdminUsersPage() {
                   Clean User
                 </Button>
                 <Button
-                  onClick={handleDeleteFromModal}
+                  onClick={() => selectedUser && handleSoftDelete(selectedUser)}
+                  disabled={deleting === selectedUser?.id || !!selectedUser?.deleted_at}
+                  className="bg-orange-600 text-white hover:bg-orange-700"
+                >
+                  {deleting === selectedUser?.id ? 'Deleting...' : 'Soft Delete'}
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (selectedUser) {
+                      openHardDeleteModal(selectedUser);
+                      setDetailsModalOpen(false);
+                    }
+                  }}
                   disabled={deleting === selectedUser?.id}
                   className="bg-red-600 text-white hover:bg-red-700"
                 >
-                  {deleting === selectedUser?.id ? 'Deleting...' : 'Delete User'}
+                  Hard Delete
                 </Button>
               </DialogFooter>
             </div>
@@ -666,6 +904,73 @@ export default function AdminUsersPage() {
               <p className="text-gray-600">No details available</p>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Hard Delete Confirmation Modal */}
+      <Dialog open={hardDeleteModalOpen} onOpenChange={(open) => {
+        setHardDeleteModalOpen(open);
+        if (!open) {
+          setUserToHardDelete(null);
+          setHardDeleteConfirmText('');
+        }
+      }}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-2xl font-semibold text-red-700 flex items-center gap-2">
+              <Flame className="h-6 w-6" />
+              Hard Delete User
+            </DialogTitle>
+            <DialogDescription className="pt-2">
+              This will <strong>permanently delete</strong> the account and all associated data via CASCADE. The email will become reusable.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-3">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-800">
+              <p className="font-medium mb-1">This will delete from auth.users + cascade to:</p>
+              <ul className="list-disc list-inside space-y-0.5 text-xs">
+                <li>profiles</li>
+                <li>guests, guest_recipes</li>
+                <li>groups (if owned), group_members</li>
+                <li>cookbooks, shipping_addresses, communication_log</li>
+              </ul>
+            </div>
+            <p className="text-sm text-gray-700">
+              Type <strong className="text-red-700">{userToHardDelete?.email}</strong> to confirm:
+            </p>
+            <input
+              type="text"
+              value={hardDeleteConfirmText}
+              onChange={(e) => setHardDeleteConfirmText(e.target.value)}
+              placeholder={userToHardDelete?.email || ''}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+              autoComplete="off"
+            />
+            <p className="text-xs text-red-600 font-medium">This action cannot be undone.</p>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setHardDeleteModalOpen(false);
+                setUserToHardDelete(null);
+                setHardDeleteConfirmText('');
+              }}
+              disabled={deleting === userToHardDelete?.id}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleHardDeleteConfirm}
+              disabled={
+                deleting === userToHardDelete?.id ||
+                hardDeleteConfirmText.trim().toLowerCase() !== userToHardDelete?.email.toLowerCase()
+              }
+              className="bg-red-600 text-white hover:bg-red-700 disabled:bg-red-300"
+            >
+              {deleting === userToHardDelete?.id ? 'Deleting…' : 'Permanently Delete'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

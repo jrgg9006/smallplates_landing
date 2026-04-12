@@ -24,6 +24,12 @@ interface ShareCollectionModalProps {
   currentCoupleImage?: string | null;
   currentCoupleImagePositionY?: number;
   currentCoupleImagePositionX?: number;
+  // Reason: signal back to parent that the user copied the link, used by the
+  // SetupChecklist to mark the "Share in WhatsApp" step as done.
+  onLinkCopied?: () => void;
+  // Reason: when opened from the Setup wizard, start in the expanded customization
+  // state (photo + message editor visible) instead of the default collapsed state.
+  openExpanded?: boolean;
 }
 
 export function ShareCollectionModal({ 
@@ -37,7 +43,9 @@ export function ShareCollectionModal({
   coupleNames = null,
   currentCoupleImage = null,
   currentCoupleImagePositionY = 50,
-  currentCoupleImagePositionX = 50
+  currentCoupleImagePositionX = 50,
+  onLinkCopied,
+  openExpanded = false,
 }: ShareCollectionModalProps) {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,6 +77,18 @@ export function ShareCollectionModal({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, groupId]);
+
+  // Reason: when the Setup wizard opens this modal, jump straight to the expanded
+  // customization view (photo + message editor visible) instead of the collapsed
+  // default. Reset when the modal closes so a normal re-open is collapsed again.
+  useEffect(() => {
+    if (isOpen && openExpanded) {
+      setShowMessageCustomization(true);
+    }
+    if (!isOpen) {
+      setShowMessageCustomization(false);
+    }
+  }, [isOpen, openExpanded]);
 
   // Sync couple image state when modal opens or currentCoupleImage changes
   useEffect(() => {
@@ -112,6 +132,7 @@ export function ShareCollectionModal({
       await navigator.clipboard.writeText(collectionUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      onLinkCopied?.();
     } catch (err) {
       setError("Failed to copy link");
       setTimeout(() => setError(null), 3000);

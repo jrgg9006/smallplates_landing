@@ -627,6 +627,7 @@ function PaymentForm({
                     <li><span className="text-[#2D2D2D]">Printing:</span> Full-color throughout</li>
                     <li><span className="text-[#2D2D2D]">Paper:</span> 100 lb Satin Text interior pages</li>
                     <li><span className="text-[#2D2D2D]">Finish:</span> Matte lamination on cover</li>
+                    <li><span className="text-[#2D2D2D]">Photos:</span> A custom image is created for every recipe — included</li>
                     <li><span className="text-[#2D2D2D]">Recipes:</span> 50 included, additional recipes available</li>
                   </ul>
                 </div>

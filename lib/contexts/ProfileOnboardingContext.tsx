@@ -23,6 +23,16 @@ interface OnboardingState {
   last_onboarding_shown: string | null;
   dismissal_count: number;
   first_recipe_showcase_sent: boolean;
+  // Reason: new SetupChecklist tracking — both are KEYED BY GROUP_ID because
+  // a user can have multiple groups and each one needs its own checklist state.
+  // shared_to_whatsapp_at_by_group: marks "Share in WhatsApp" done per group when
+  // the user copies that group's link. checklist_dismissed_at_by_group: collapses
+  // the checklist per group when the user clicks "Hide for now" on that group.
+  // checklist_permanently_dismissed_at_by_group: user clicked "I've got it from here"
+  // — the pill and modal are fully hidden until restored from Account Settings.
+  shared_to_whatsapp_at_by_group?: Record<string, string>;
+  checklist_dismissed_at_by_group?: Record<string, string>;
+  checklist_permanently_dismissed_at_by_group?: Record<string, string>;
 }
 
 interface ProfileOnboardingContextType {
@@ -47,6 +57,20 @@ interface ProfileOnboardingContextType {
   // Helpers
   shouldShowOnboarding: boolean;
   getNextStep: () => OnboardingStep | null;
+
+  // SetupChecklist API (new) — per-group
+  getSharedToWhatsappAt: (groupId: string) => string | null;
+  markSharedToWhatsapp: (groupId: string) => void;
+  isChecklistDismissed: (groupId: string) => boolean;
+  dismissChecklist: (groupId: string) => void;
+  restoreChecklist: (groupId: string) => void;
+
+  // Permanent dismissal ("I've got it from here") — hides the pill/modal entirely
+  // for that group until restored from Account Settings.
+  isChecklistPermanentlyDismissed: (groupId: string) => boolean;
+  permanentlyDismissChecklist: (groupId: string) => void;
+  restoreAllDismissedChecklists: () => void;
+  permanentlyDismissedGroupIds: string[];
 }
 
 const ProfileOnboardingContext = createContext<ProfileOnboardingContextType | null>(null);
@@ -64,8 +88,11 @@ interface ProfileOnboardingProviderProps {
 }
 
 export function ProfileOnboardingProvider({ children }: ProfileOnboardingProviderProps) {
-  // 🚧 TEMPORARY: Pause onboarding experience (set to true to re-enable)
-  const ONBOARDING_PAUSED = true;
+  // Reason: legacy onboarding (cards / first-recipe / resume) is no longer used in
+  // /profile/groups. Keep the API surface alive for backward-compat (the deprecated
+  // /profile redirect page and tests still import the enum), but enable the welcome
+  // overlay so the new SetupChecklist flow can show the welcome screen on first visit.
+  const ONBOARDING_PAUSED = false;
   
   const { user } = useAuth();
   const [onboardingState, setOnboardingState] = useState<OnboardingState>({
@@ -74,7 +101,10 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
     completed_steps: [],
     last_onboarding_shown: null,
     dismissal_count: 0,
-    first_recipe_showcase_sent: false
+    first_recipe_showcase_sent: false,
+    shared_to_whatsapp_at_by_group: {},
+    checklist_dismissed_at_by_group: {},
+    checklist_permanently_dismissed_at_by_group: {},
   });
   const [guestCount, setGuestCount] = useState(0);
   const [showOnboardingCards, setShowOnboardingCards] = useState(false);
@@ -430,6 +460,60 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
   const currentStep = onboardingState.completed_steps.length;
   const completedSteps = onboardingState.completed_steps as OnboardingSteps[];
 
+  // SetupChecklist methods — all per-group
+  const getSharedToWhatsappAt = useCallback((groupId: string): string | null => {
+    return onboardingState.shared_to_whatsapp_at_by_group?.[groupId] ?? null;
+  }, [onboardingState.shared_to_whatsapp_at_by_group]);
+
+  const markSharedToWhatsapp = useCallback((groupId: string) => {
+    if (!groupId) return;
+    const current = onboardingState.shared_to_whatsapp_at_by_group ?? {};
+    if (current[groupId]) return;
+    updateOnboardingState({
+      shared_to_whatsapp_at_by_group: { ...current, [groupId]: new Date().toISOString() },
+    });
+  }, [onboardingState.shared_to_whatsapp_at_by_group, updateOnboardingState]);
+
+  const isChecklistDismissed = useCallback((groupId: string): boolean => {
+    return !!onboardingState.checklist_dismissed_at_by_group?.[groupId];
+  }, [onboardingState.checklist_dismissed_at_by_group]);
+
+  const dismissChecklist = useCallback((groupId: string) => {
+    if (!groupId) return;
+    const current = onboardingState.checklist_dismissed_at_by_group ?? {};
+    updateOnboardingState({
+      checklist_dismissed_at_by_group: { ...current, [groupId]: new Date().toISOString() },
+    });
+  }, [onboardingState.checklist_dismissed_at_by_group, updateOnboardingState]);
+
+  const restoreChecklist = useCallback((groupId: string) => {
+    if (!groupId) return;
+    const current = { ...(onboardingState.checklist_dismissed_at_by_group ?? {}) };
+    delete current[groupId];
+    updateOnboardingState({ checklist_dismissed_at_by_group: current });
+  }, [onboardingState.checklist_dismissed_at_by_group, updateOnboardingState]);
+
+  // Permanent dismissal — "I've got it from here"
+  const isChecklistPermanentlyDismissed = useCallback((groupId: string): boolean => {
+    return !!onboardingState.checklist_permanently_dismissed_at_by_group?.[groupId];
+  }, [onboardingState.checklist_permanently_dismissed_at_by_group]);
+
+  const permanentlyDismissChecklist = useCallback((groupId: string) => {
+    if (!groupId) return;
+    const current = onboardingState.checklist_permanently_dismissed_at_by_group ?? {};
+    updateOnboardingState({
+      checklist_permanently_dismissed_at_by_group: { ...current, [groupId]: new Date().toISOString() },
+    });
+  }, [onboardingState.checklist_permanently_dismissed_at_by_group, updateOnboardingState]);
+
+  const restoreAllDismissedChecklists = useCallback(() => {
+    updateOnboardingState({ checklist_permanently_dismissed_at_by_group: {} });
+  }, [updateOnboardingState]);
+
+  const permanentlyDismissedGroupIds = Object.keys(
+    onboardingState.checklist_permanently_dismissed_at_by_group ?? {}
+  );
+
   const value: ProfileOnboardingContextType = {
     isFirstTimeUser,
     // When onboarding is paused, hide all onboarding UI elements
@@ -447,7 +531,16 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
     resumeOnboarding,
     permanentlyDismissOnboarding,
     shouldShowOnboarding: ONBOARDING_PAUSED ? false : shouldShowOnboarding,
-    getNextStep
+    getNextStep,
+    getSharedToWhatsappAt,
+    markSharedToWhatsapp,
+    isChecklistDismissed,
+    dismissChecklist,
+    restoreChecklist,
+    isChecklistPermanentlyDismissed,
+    permanentlyDismissChecklist,
+    restoreAllDismissedChecklists,
+    permanentlyDismissedGroupIds,
   };
 
   return (

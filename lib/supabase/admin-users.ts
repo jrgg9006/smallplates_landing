@@ -3,10 +3,17 @@ import { createSupabaseAdminClient } from './admin';
 /**
  * Get all users with their activity stats (admin version)
  * Uses service role to bypass RLS - admin can see ALL users
+ *
+ * Returns each profile enriched with:
+ *   - guest_count, recipe_count, groups_owned_count
+ *   - last_activity (most recent recipe submitted)
+ *   - last_sign_in_at (from auth.users)
+ *   - is_test_account (from profiles)
+ *   - has_paid (from orders.status='paid')
  */
 export async function getAllUsersAdmin() {
   const supabase = createSupabaseAdminClient();
-  
+
   // Get all profiles
   const { data: profiles, error: profilesError } = await supabase
     .from('profiles')
@@ -15,6 +22,30 @@ export async function getAllUsersAdmin() {
 
   if (profilesError) {
     return { data: [], error: profilesError.message };
+  }
+
+  // Reason: fetch auth users once instead of N+1, then build a map for O(1) lookup of last_sign_in_at
+  const authMap = new Map<string, string | null>();
+  try {
+    const { data: authData } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    for (const u of authData?.users || []) {
+      authMap.set(u.id, u.last_sign_in_at || null);
+    }
+  } catch (e) {
+    // If auth listing fails we still return profiles without last_sign_in_at instead of erroring out
+    console.error('Failed to list auth users for admin panel:', e);
+  }
+
+  // Reason: fetch all paid orders once and group by user_id / email so we can flag has_paid in O(1)
+  const paidUserIds = new Set<string>();
+  const paidEmails = new Set<string>();
+  const { data: paidOrders } = await supabase
+    .from('orders')
+    .select('user_id, email')
+    .eq('status', 'paid');
+  for (const o of paidOrders || []) {
+    if (o.user_id) paidUserIds.add(o.user_id);
+    if (o.email) paidEmails.add(o.email.toLowerCase());
   }
 
   // For each user, get their activity stats
@@ -33,6 +64,19 @@ export async function getAllUsersAdmin() {
         .select('*', { count: 'exact', head: true })
         .eq('user_id', profile.id);
 
+      // Get groups owned count
+      const { count: groupsOwnedCount } = await supabase
+        .from('groups')
+        .select('*', { count: 'exact', head: true })
+        .eq('created_by', profile.id);
+
+      // Get groups where user is a member but NOT owner (captain/admin memberships)
+      const { count: groupsMemberCount } = await supabase
+        .from('group_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('profile_id', profile.id)
+        .neq('role', 'owner');
+
       // Get last activity
       const { data: lastRecipe } = await supabase
         .from('guest_recipes')
@@ -40,13 +84,21 @@ export async function getAllUsersAdmin() {
         .eq('user_id', profile.id)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
+
+      const hasPaid =
+        paidUserIds.has(profile.id) ||
+        (profile.email ? paidEmails.has(profile.email.toLowerCase()) : false);
 
       return {
         ...profile,
         guest_count: guestCount || 0,
         recipe_count: recipeCount || 0,
-        last_activity: lastRecipe?.created_at || null
+        groups_owned_count: groupsOwnedCount || 0,
+        groups_member_count: groupsMemberCount || 0,
+        last_activity: lastRecipe?.created_at || null,
+        last_sign_in_at: authMap.get(profile.id) ?? null,
+        has_paid: hasPaid,
       };
     })
   );

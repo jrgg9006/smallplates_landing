@@ -168,7 +168,7 @@ export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn =
                 <span className="text-gray-500">Adding you...</span>
               ) : (
                 <span className="text-gray-500">
-                  Add me to the newsletter and get our top 5 recipes people actually sent in. You don't want to miss it.
+                  Add me to the newsletter and get our top 5 recipes people actually sent in. You don&apos;t want to miss it.
                 </span>
               )}
             </span>

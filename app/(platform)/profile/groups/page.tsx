@@ -14,6 +14,7 @@ import type { GroupWithMembers } from "@/lib/types/database";
 import { useProfileOnboarding, OnboardingSteps } from "@/lib/contexts/ProfileOnboardingContext";
 import { WelcomeOverlay } from "@/components/onboarding/WelcomeOverlay";
 import { FirstRecipeExperience } from "@/components/onboarding/FirstRecipeExperience";
+import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
 import { FirstRecipeModal, RecipeData } from "@/components/profile/FirstRecipeModal";
 import { addUserRecipe, UserRecipeData } from "@/lib/supabase/recipes";
 import { getWeddingDisplayText, type WeddingTimeline } from "@/lib/utils/dateFormatting";
@@ -89,19 +90,30 @@ export default function GroupsPage() {
   const dragStartPositionRef = useRef(50);
   
   // Onboarding context
-  const { 
+  const {
     showWelcomeOverlay,
     showFirstRecipeExperience,
     dismissWelcome,
     skipAllOnboarding,
     startFirstRecipeExperience,
     skipFirstRecipeExperience,
-    completeStep
+    completeStep,
+    markSharedToWhatsapp,
   } = useProfileOnboarding();
+
+  // Reason: after dismissing the WelcomeOverlay, trigger SetupChecklist to auto-open
+  // the wizard at step 1 — the welcome is the entry, the wizard is the guided path.
+  const [shouldAutoOpenSetup, setShouldAutoOpenSetup] = useState(false);
+
+  // Reason: when the Setup wizard opens the share modal, we want the modal to land
+  // directly on the expanded customization view (photo + message editor). A normal
+  // click on "Collect Recipes" still opens it in the default collapsed view.
+  const [shareOpenExpanded, setShareOpenExpanded] = useState(false);
 
   // Handler functions
   const handleWelcomeStart = () => {
     skipAllOnboarding();
+    setShouldAutoOpenSetup(true);
   };
 
   const handleAddGroup = () => {
@@ -124,6 +136,20 @@ export default function GroupsPage() {
       return;
     }
     setCollectionToken(token);
+    setShareOpenExpanded(false);
+    setShowShareModal(true);
+  };
+
+  // Reason: variant used by the Setup wizard — opens the share modal directly in the
+  // expanded customization view (photo + message editor visible from the start).
+  const handleCollectRecipesExpanded = async () => {
+    const { data: token, error } = await getUserCollectionToken();
+    if (error || !token) {
+      console.error('Error getting collection token:', error);
+      return;
+    }
+    setCollectionToken(token);
+    setShareOpenExpanded(true);
     setShowShareModal(true);
   };
 
@@ -872,6 +898,20 @@ export default function GroupsPage() {
             </div>
             </>)}
 
+            {/* Setup Checklist — drives new users toward the 5 highest-leverage actions */}
+            {selectedGroup && !selectedGroup.book_closed_by_user && (
+              <SetupChecklist
+                group={selectedGroup}
+                onOpenEditGroup={handleEditProfile}
+                onOpenInviteCaptain={handleInviteCaptain}
+                onOpenShareLink={handleCollectRecipesExpanded}
+                onOpenImportGuests={(source) => setImportSource(source)}
+                onOpenCouplePhoto={handleCollectRecipesExpanded}
+                autoOpen={shouldAutoOpenSetup}
+                onAutoOpenConsumed={() => setShouldAutoOpenSetup(false)}
+              />
+            )}
+
             {/* Recipe Grid */}
             <div className="mt-8 pb-16">
               <GroupsSection
@@ -909,6 +949,8 @@ export default function GroupsPage() {
           currentCoupleImage={selectedGroup.couple_image_url}
           currentCoupleImagePositionY={selectedGroup.couple_image_position_y ?? 50}
           currentCoupleImagePositionX={selectedGroup.couple_image_position_x ?? 50}
+          onLinkCopied={() => markSharedToWhatsapp(selectedGroup.id)}
+          openExpanded={shareOpenExpanded}
         />
       )}
 

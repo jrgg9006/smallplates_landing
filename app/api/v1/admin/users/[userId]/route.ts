@@ -26,7 +26,15 @@ export async function DELETE(
       );
     }
 
-    console.log('🗑️ Admin deleting user:', userId);
+    // Reason: optional explicit override of smart deletion. Default keeps the legacy
+    // smart behavior so existing callers don't change. UI can pass ?mode=hard or ?mode=soft
+    // to force a specific path regardless of whether the user has content.
+    const url = new URL(request.url);
+    const mode = url.searchParams.get('mode'); // 'hard' | 'soft' | null
+    const forceHard = mode === 'hard';
+    const forceSoft = mode === 'soft';
+
+    console.log('🗑️ Admin deleting user:', userId, mode ? `(forced mode=${mode})` : '(smart)');
 
     const supabaseAdmin = createSupabaseAdminClient();
 
@@ -176,8 +184,10 @@ export async function DELETE(
       }
     }
 
-    // STEP 3: Perform deletion based on content
-    if (hasContent) {
+    // STEP 3: Perform deletion based on content (or forced mode)
+    // forceSoft → always soft, forceHard → always hard, otherwise smart based on hasContent
+    const shouldSoftDelete = forceSoft || (!forceHard && hasContent);
+    if (shouldSoftDelete) {
       // SOFT DELETE: User has content, preserve everything
       console.log('🛡️ User has content - performing SOFT DELETE (preserving data)');
       

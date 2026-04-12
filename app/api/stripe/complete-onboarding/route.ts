@@ -151,8 +151,19 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (groupError) {
+      // Reason: previously this only logged and continued, which left paid users
+      // stranded in an empty dashboard with couple_name written but no group.
+      // Now we surface the failure so the frontend can show a clear support message.
       console.error('Error creating group:', groupError);
-    } else if (group) {
+      return NextResponse.json(
+        {
+          error:
+            "We couldn't create your book. Please email us at team@smallplatesandcompany.com and we'll fix it right away — your payment is safe.",
+        },
+        { status: 500 }
+      );
+    }
+    if (group) {
       await supabaseAdmin.from('group_members').insert({
         group_id: group.id,
         profile_id: userId,
