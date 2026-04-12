@@ -42,30 +42,20 @@ export function WelcomeOverlay({ userName, onStart, onDismiss, isVisible }: Welc
               
               {/* Main message with editorial typography */}
               <h1 className="font-light text-4xl md:text-5xl mb-6 tracking-tight">
-                Welcome to Small Plates!
+                You&apos;re about to be the MVP of this wedding.
               </h1>
-              
-              <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-2">
-                Hello there! 👋
+
+              <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-10 max-w-xl mx-auto">
+                Here&apos;s your playbook. Five small things and the book starts filling itself.
               </p>
-              
-              <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-8 max-w-xl mx-auto">
-                You didn&apos;t come here just to collect small plates—you came here to connect through food.
-                This isn&apos;t just a book—it&apos;s a collection of your stories, 
-                memories, and the people you love.
-              </p>
-              
-              <p className="text-base text-gray-600 mb-12">
-                Ready to create something special?
-              </p>
-              
-              {/* Buttons with clear hierarchy */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+              {/* Single CTA */}
+              <div className="flex justify-center">
                 <Button
                   onClick={onStart}
                   className="bg-black text-white px-8 py-4 text-lg hover:bg-gray-800 transition-colors"
                 >
-                  Let&apos;s get started
+                  Show me
                 </Button>
               </div>
             </div>
