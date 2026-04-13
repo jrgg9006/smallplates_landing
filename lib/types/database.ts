@@ -24,6 +24,22 @@ export type BookReviewStatus = 'pending' | 'approved' | 'needs_revision';
 export type NewsletterSource = 'landing_page' | 'collection_flow';
 export type NewsletterStatus = 'active' | 'unsubscribed';
 
+// Debug logs types
+export type DebugLogStatus = 'active' | 'reviewed';
+
+export interface DebugLogRow {
+  id: string;
+  created_at: string;
+  event_type: string;
+  context: Record<string, unknown> | null;
+  recipe_id: string | null;
+  user_id: string | null;
+  status: DebugLogStatus;
+  admin_notes: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+}
+
 // Main database types
 export interface Database {
   public: {
