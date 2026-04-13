@@ -144,7 +144,8 @@ export async function GET(request: Request) {
         ].filter(Boolean).join(' & ') || 'The Couple';
 
         // Build collection link with group_id parameter
-        const collectionLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://smallplatesandcompany.com'}/collect/${collectionLinkToken}?group=${guest.group_id}`;
+        const inviterParam = guest.group.created_by ? `&inviter_id=${encodeURIComponent(guest.group.created_by)}` : '';
+        const collectionLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://smallplatesandcompany.com'}/collect/${collectionLinkToken}?group=${guest.group_id}${inviterParam}`;
 
         // Send the email
         console.log(`Sending email ${emailToSend} to ${guest.email}`);

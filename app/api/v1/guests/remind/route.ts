@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
     }
 
     const appUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://smallplatesandcompany.com';
-    const collectionLink = `${appUrl}/collect/${creatorProfile.collection_link_token}?group=${groupId}`;
+    const collectionLink = `${appUrl}/collect/${creatorProfile.collection_link_token}?group=${groupId}&inviter_id=${encodeURIComponent(user.id)}`;
 
     // Get captain name
     const { data: senderProfile } = await supabase

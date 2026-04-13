@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const collectionLink = `${appUrl}/collect/${creatorProfile.collection_link_token}?group=${groupId}`;
+    const collectionLink = `${appUrl}/collect/${creatorProfile.collection_link_token}?group=${groupId}&inviter_id=${encodeURIComponent(user.id)}`;
 
     // Get captain name for email footer
     const { data: senderProfile } = await supabase
