@@ -186,7 +186,8 @@ function buildEmailHTML(config) {
                 <tr>
                   <td style="padding: 28px 40px 12px 40px;" class="mobile-padding">
                     <p style="font-family: Georgia, 'Times New Roman', serif; font-size: 17px; line-height: 1.5; color: #2D2D2D; margin: 0; text-align: center;" class="darkmode-text">
-                      Know someone getting married?
+                      Want one of these for your own wedding?<br>
+                      Or someone you love?
                     </p>
                   </td>
                 </tr>
