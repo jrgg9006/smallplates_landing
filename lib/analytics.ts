@@ -11,6 +11,9 @@ type TrackParams = Record<string, string | number | undefined>;
 export function trackEvent(name: string, params: TrackParams = {}): void {
   try {
     if (typeof window === 'undefined') return;
+    // Reason: Prevent dev/preview traffic from polluting production GA4.
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local')) return;
     const gtag = (window as any).gtag;
     if (typeof gtag !== 'function') return;
 
