@@ -116,7 +116,6 @@ export default function OperationsPage() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [recipes, setRecipes] = useState<RecipeWithProductionStatus[]>([]);
-  const [stats, setStats] = useState<ProductionStats>({ recipesNeedingAction: 0, recipesReadyToPrint: 0 });
   const [groups, setGroups] = useState<Group[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [guests, setGuests] = useState<Guest[]>([]);
@@ -164,7 +163,6 @@ export default function OperationsPage() {
   useEffect(() => {
     if (isAdmin) {
       loadRecipes();
-      loadStats();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, groupFilter, userFilter, guestFilter, showArchived, notifyOptInFilter, isAdmin]);
@@ -304,8 +302,11 @@ export default function OperationsPage() {
       const hasImage = imageFilter === 'yes';
       result = result.filter(r => (r.production_status?.image_generated || false) === hasImage);
     }
+    if (hidePrinted) {
+      result = result.filter(r => r.group?.book_status !== 'printed' && r.group?.book_status !== 'inactive');
+    }
     return result;
-  }, [recipes, searchQuery, imageFilter]);
+  }, [recipes, searchQuery, imageFilter, hidePrinted]);
 
   // Unique guest count from filtered recipes
   const uniqueGuestCount = useMemo(() => {
@@ -314,6 +315,17 @@ export default function OperationsPage() {
       if (r.guests?.id) guestIds.add(r.guests.id);
     });
     return guestIds.size;
+  }, [filteredRecipes]);
+
+  // Stats computed from the filtered view so they respect active filters
+  const filteredStats = useMemo(() => {
+    let needingAction = 0;
+    let readyToPrint = 0;
+    filteredRecipes.forEach(r => {
+      if (r.calculated_status === 'ready_to_print') readyToPrint++;
+      else if (r.calculated_status === 'no_action') needingAction++;
+    });
+    return { needingAction, readyToPrint };
   }, [filteredRecipes]);
 
   const loadRecipes = async () => {
@@ -367,16 +379,19 @@ export default function OperationsPage() {
       
       const data = await response.json();
       
-      // Extract unique users from all recipes
+      // Extract unique users — only from recipes in an active group
+      // Reason: hide users whose books are already printed/inactive or whose
+      // recipes are archived/orphaned (they just add noise to the dropdown)
       const uniqueUsers = new Map<string, User>();
       data.forEach((recipe: RecipeWithProductionStatus) => {
-        if (recipe.profiles) {
-          uniqueUsers.set(recipe.profiles.id, {
-            id: recipe.profiles.id,
-            email: recipe.profiles.email,
-            full_name: recipe.profiles.full_name,
-          });
-        }
+        if (!recipe.profiles) return;
+        if (!recipe.group) return;
+        if (recipe.group.book_status === 'printed' || recipe.group.book_status === 'inactive') return;
+        uniqueUsers.set(recipe.profiles.id, {
+          id: recipe.profiles.id,
+          email: recipe.profiles.email,
+          full_name: recipe.profiles.full_name,
+        });
       });
       setUsers(Array.from(uniqueUsers.values()).sort((a, b) => {
         const nameA = a.full_name || a.email || '';
@@ -399,18 +414,21 @@ export default function OperationsPage() {
       
       const data = await response.json();
       
-      // Extract unique guests from all recipes
+      // Extract unique guests — only from recipes in an active group
+      // Reason: hide guests whose book is already printed/inactive or whose
+      // recipes are archived/orphaned (they just add noise to the dropdown)
       const uniqueGuests = new Map<string, Guest>();
       data.forEach((recipe: RecipeWithProductionStatus) => {
-        if (recipe.guests) {
-          uniqueGuests.set(recipe.guests.id, {
-            id: recipe.guests.id,
-            first_name: recipe.guests.first_name,
-            last_name: recipe.guests.last_name,
-            printed_name: recipe.guests.printed_name,
-            group_name: recipe.group?.name || null,
-          });
-        }
+        if (!recipe.guests) return;
+        if (!recipe.group) return;
+        if (recipe.group.book_status === 'printed' || recipe.group.book_status === 'inactive') return;
+        uniqueGuests.set(recipe.guests.id, {
+          id: recipe.guests.id,
+          first_name: recipe.guests.first_name,
+          last_name: recipe.guests.last_name,
+          printed_name: recipe.guests.printed_name,
+          group_name: recipe.group.name,
+        });
       });
       setGuests(Array.from(uniqueGuests.values()).sort((a, b) => {
         const nameA = a.printed_name || `${a.first_name} ${a.last_name}`.trim() || '';
@@ -422,24 +440,8 @@ export default function OperationsPage() {
     }
   };
 
-  const loadStats = async () => {
-    try {
-      const response = await fetch('/api/v1/admin/operations/stats');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch stats');
-      }
-      
-      const data = await response.json();
-      setStats(data);
-    } catch (error) {
-      console.error('Error loading stats:', error);
-    }
-  };
-
   const handleStatusUpdate = () => {
     loadRecipes();
-    loadStats();
   };
 
   const copyToClipboard = async (text: string, section: string) => {
@@ -1211,7 +1213,7 @@ ${instructions}`;
             <option value="all">All Groups</option>
             <option value="not_in_cookbook">Not in Group (Archived)</option>
             {groups
-              .filter((group) => !hidePrinted || group.book_status !== 'printed')
+              .filter((group) => !hidePrinted || (group.book_status !== 'printed' && group.book_status !== 'inactive'))
               .map((group) => (
               <option key={group.id} value={group.id}>
                 {group.name}
@@ -1225,7 +1227,7 @@ ${instructions}`;
               onChange={(e) => setHidePrinted(e.target.checked)}
               className="rounded border-gray-300"
             />
-            Hide printed
+            Hide printed & inactive
           </label>
         </div>
         <div className="flex items-center gap-2">
@@ -1320,9 +1322,9 @@ ${instructions}`;
           )}
           <span>{filteredRecipes.length} recipe{filteredRecipes.length !== 1 ? 's' : ''}</span>
           <span className="text-gray-300">|</span>
-          <span className="text-red-600">{stats.recipesNeedingAction} needing action</span>
+          <span className="text-red-600">{filteredStats.needingAction} needing action</span>
           <span className="text-gray-300">|</span>
-          <span className="text-green-600">{stats.recipesReadyToPrint} ready to print</span>
+          <span className="text-green-600">{filteredStats.readyToPrint} ready to print</span>
         </div>
       </div>
 
