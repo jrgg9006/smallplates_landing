@@ -10,6 +10,7 @@ import type { CollectionTokenInfo, Guest } from '@/lib/types/database';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { captureAttribution, trackEvent, getAttribution } from '@/lib/analytics';
 
 // Reason: Format book_close_date as "Month Dth" for the deadline line, returns null if date is in the past
 function formatDeadlineDate(dateString: string): string | null {
@@ -120,6 +121,11 @@ export default function CollectionForm() {
     validateToken();
   }, [token, groupId]);
 
+  // Capture attribution params (inviter_id, UTMs) from URL on mount
+  useEffect(() => {
+    captureAttribution(token);
+  }, [token]);
+
   // Handle guest search
   const handleSearch = async () => {
     if (!tokenInfo || !firstName.trim()) return;
@@ -150,6 +156,7 @@ export default function CollectionForm() {
 
   // Handle guest selection
   const handleGuestSelect = (guest: Guest) => {
+    trackEvent('start_recipe', { book_id: token, ...getAttribution(token) });
     setSelectedGuest(guest);
     const guestData = {
       id: guest.id,
@@ -179,6 +186,7 @@ export default function CollectionForm() {
   const handleContinueAsNew = () => {
     const name = fullName.trim();
     if (!name) return;
+    trackEvent('start_recipe', { book_id: token, ...getAttribution(token) });
     const parts = name.split(/\s+/);
     const derivedLast = parts.length > 1 ? parts.pop() as string : '';
     const derivedFirst = parts.length > 0 ? parts.join(' ') : name;

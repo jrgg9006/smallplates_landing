@@ -97,6 +97,20 @@ We don't know this number yet.
 
 ---
 
+## Experimento #001 — Showcase Email CTA
+
+Fecha: Abril 2026
+Cambio: Footer del showcase email
+Antes: "Know someone getting married? smallplatesandcompany.com"
+Despues: "Want one of these for your own wedding? 
+Or someone you love? smallplatesandcompany.com"
+Hipotesis: El momento emocional post-showcase es el mejor 
+momento para sembrar intencion de compra futura.
+Metrica a observar: Trafico directo a la homepage desde 
+el email en los proximos 30 dias.
+
+---
+
 ## North Star for Next 90 Days
 
 Convert the gifted book loop into a measurable, 

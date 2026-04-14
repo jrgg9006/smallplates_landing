@@ -18,6 +18,7 @@ import ImageUploadStep from './steps/ImageUploadStep';
 import RecipeTitleStep from './steps/RecipeTitleStep';
 import PersonalNoteStep from './steps/PersonalNoteStep';
 import { journeySteps } from '@/lib/recipe-journey/recipeJourneySteps';
+import { trackEvent, getAttribution } from '@/lib/analytics';
 
 interface GuestData {
   id?: string;
@@ -392,7 +393,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
       // Show success and navigate
       setSubmitSuccess(true);
       isDirtyRef.current = false;
-      
+
+      trackEvent('submit_recipe', { book_id: token, ...getAttribution(token) });
+
       // Small delay to show 100% completion
       setTimeout(() => {
         setUploadingImages(false);
@@ -486,7 +489,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
       lastGuestIdRef.current = data?.guest_id || null;
       guestOptInRef.current = !!data?.guest_notify_opt_in;
       guestOptInEmailRef.current = (data?.guest_notify_email as string | null) || null;
-      
+
+      trackEvent('submit_recipe', { book_id: token, ...getAttribution(token) });
+
       // Clean up localStorage
       localStorage.removeItem('recipeJourneyData');
 
@@ -558,7 +563,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
       lastGuestIdRef.current = data?.guest_id || null;
       guestOptInRef.current = !!data?.guest_notify_opt_in;
       guestOptInEmailRef.current = (data?.guest_notify_email as string | null) || null;
-      
+
+      trackEvent('submit_recipe', { book_id: token, ...getAttribution(token) });
+
       // Clean up localStorage
       localStorage.removeItem('recipeJourneyData');
 
