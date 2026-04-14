@@ -15,6 +15,7 @@ interface ShowcaseEmailParams {
   coupleName: string;      // HTML-safe, e.g. "Sarah &amp; Mike"
   coupleNamePlain: string; // Plain text, e.g. "Sarah & Mike"
   recipes: ShowcaseRecipeItem[];
+  guestId: string;         // Reason: used as inviter_id in the seed link for GA4 attribution
 }
 
 function buildRecipeSpreadBlock(recipe: ShowcaseRecipeItem, guestName: string, coupleNamePlain: string): string {
@@ -61,7 +62,19 @@ export function buildShowcaseEmailHTML({
   coupleName,
   coupleNamePlain,
   recipes,
+  guestId,
 }: ShowcaseEmailParams): string {
+  // Reason: UTMs + inviter_id let us see in GA4 which showcase emails actually drove
+  // traffic back to the site, and decode which specific guest clicked when needed.
+  const seedLinkBase = 'https://smallplatesandcompany.com/';
+  const seedLinkParams = new URLSearchParams({
+    utm_source: 'showcase_email',
+    utm_medium: 'email',
+    utm_campaign: 'showcase_seed',
+    utm_content: 'footer_link',
+    inviter_id: guestId,
+  });
+  const seedLinkHref = `${seedLinkBase}?${seedLinkParams.toString()}`;
   const isSingle = recipes.length === 1;
   const recipeListText = isSingle
     ? `Your ${recipes[0].recipeName} is`
@@ -233,7 +246,7 @@ ${spreadBlocks}
                         Want one of these for your own wedding?<br>
                         Or someone you love?
                       </p>
-                      <a href="https://smallplatesandcompany.com"
+                      <a href="${seedLinkHref}"
                         style="font-family: Georgia, serif; font-size: 13px; color: #9A9590; text-decoration: none;
                           border-bottom: 1px solid #E8E0D5; line-height: 1.6;" class="seed-link">
                         smallplatesandcompany.com

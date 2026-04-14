@@ -108,6 +108,10 @@ export function createShareURL(
       params.append('inviter_id', context.inviterId);
     }
 
+    params.append('utm_source', 'collection_link');
+    params.append('utm_medium', 'share');
+    params.append('utm_campaign', 'guest_invite');
+
     if (params.toString()) {
       url += `?${params.toString()}`;
     }

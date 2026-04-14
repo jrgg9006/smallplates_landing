@@ -49,6 +49,7 @@ export async function GET(request: NextRequest) {
       guestName,
       coupleName: coupleNameHtml,
       coupleNamePlain,
+      guestId,
       recipes: recipes.map((r, i) => ({
         recipeName: r.recipe_name,
         cid: `cid:recipe-spread-${i}`,

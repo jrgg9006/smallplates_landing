@@ -89,6 +89,7 @@ export async function POST(request: NextRequest) {
       guestName: guest_name || 'Friend',
       coupleName: coupleNameHtml,
       coupleNamePlain,
+      guestId: guest_id,
       recipes: recipes.map((r, i) => ({
         recipeName: r.recipe_name || 'Your recipe',
         cid: `cid:recipe-spread-${i}`,

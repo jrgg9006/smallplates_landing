@@ -145,7 +145,7 @@ export async function GET(request: Request) {
 
         // Build collection link with group_id parameter
         const inviterParam = guest.group.created_by ? `&inviter_id=${encodeURIComponent(guest.group.created_by)}` : '';
-        const collectionLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://smallplatesandcompany.com'}/collect/${collectionLinkToken}?group=${guest.group_id}${inviterParam}`;
+        const collectionLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://smallplatesandcompany.com'}/collect/${collectionLinkToken}?group=${guest.group_id}${inviterParam}&utm_source=collection_link&utm_medium=email&utm_campaign=guest_invite`;
 
         // Send the email
         console.log(`Sending email ${emailToSend} to ${guest.email}`);
