@@ -10,6 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import Book from "./Book";
 import BookDetailsModal from "../BookDetailsModal";
+import { trackEvent } from "@/lib/analytics";
 
 interface BookPreviewModalProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ export default function BookPreviewModal({
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   const handleCreateCookbook = () => {
+    trackEvent('start_book_click', { cta_location: 'book_preview_modal' });
     router.push("/onboarding-gift");
   };
 

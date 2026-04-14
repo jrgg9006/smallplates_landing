@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import BookDetailsModal from './BookDetailsModal';
 import RegistryHowToModal from './RegistryHowToModal';
+import { trackEvent } from '@/lib/analytics';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -58,8 +59,9 @@ export default function Footer() {
                     </span>
                   </li>
                   <li>
-                    <Link 
-                      href="/onboarding-gift" 
+                    <Link
+                      href="/onboarding-gift"
+                      onClick={() => trackEvent('start_book_click', { cta_location: 'footer_nav' })}
                       className="font-sans font-light text-base text-white/70 hover:text-white transition-colors"
                     >
                       Get Started
@@ -126,6 +128,7 @@ export default function Footer() {
             </h3>
             <Link
               href="/onboarding-gift"
+              onClick={() => trackEvent('start_book_click', { cta_location: 'footer_card' })}
               className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-6 py-3 text-base font-medium transition-colors"
             >
               Start the Book

@@ -13,6 +13,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { trackEvent } from "@/lib/analytics";
 
 export default function BooksPrinted() {
   const router = useRouter();
@@ -177,6 +178,7 @@ export default function BooksPrinted() {
   };
 
   const handleGetStarted = () => {
+    trackEvent('start_book_click', { cta_location: 'books_printed_proof' });
     router.push("/onboarding-gift");
   };
 

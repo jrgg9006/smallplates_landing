@@ -17,6 +17,7 @@ import {
   calculateSubtotal,
   calculateShipping,
 } from "@/lib/stripe/pricing";
+import { trackEvent } from "@/lib/analytics";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
@@ -29,6 +30,13 @@ function Step2Product({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
   const { nextStep, previousStep, updateBookSelection, state } = useOnboarding();
 
   const canContinue = state.bookQuantity >= 1;
+
+  const stepViewedRef = useRef(false);
+  useEffect(() => {
+    if (stepViewedRef.current) return;
+    stepViewedRef.current = true;
+    trackEvent('onboarding_step_view', { step_number: 2, flow: 'gift' });
+  }, []);
 
   return (
     <OnboardingStep
@@ -60,7 +68,14 @@ function Step2Product({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
         </button>
         <button
           type="button"
-          onClick={nextStep}
+          onClick={() => {
+            trackEvent('onboarding_step_complete', {
+              step_number: 2,
+              flow: 'gift',
+              book_quantity: state.bookQuantity,
+            });
+            nextStep();
+          }}
           disabled={!canContinue}
           className={`px-8 py-3 rounded-xl font-semibold transition-colors ${
             canContinue
@@ -88,6 +103,13 @@ function Step3Payment({ isAddBookMode = false }: { isAddBookMode?: boolean }) {
   const [isCreatingPI, setIsCreatingPI] = useState(false);
   const [piError, setPiError] = useState("");
   const piCreatedRef = useRef(false);
+  const stepViewedRef = useRef(false);
+
+  useEffect(() => {
+    if (!clientSecret || stepViewedRef.current) return;
+    stepViewedRef.current = true;
+    trackEvent('onboarding_step_view', { step_number: 3, flow: 'gift' });
+  }, [clientSecret]);
 
   const savedEmail = (state.answers.step3 as { email?: string } | undefined)?.email || "";
   const [email, setEmail] = useState(
@@ -435,6 +457,16 @@ function PaymentForm({
       }
 
       // Payment succeeded without redirect — move to step 4
+      trackEvent('onboarding_step_complete', {
+        step_number: 3,
+        flow: 'gift',
+      });
+      trackEvent('purchase_complete', {
+        payment_intent_id: paymentIntentId,
+        amount: total,
+        book_quantity: bookQuantity,
+        flow: 'gift',
+      });
       nextStep();
     } catch {
       setPaymentError("Something went wrong. Please try again.");

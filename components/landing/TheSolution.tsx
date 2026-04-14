@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { trackEvent } from "@/lib/analytics";
 
 /**
  * THE SOLUTION SECTION — Small Plates Wedding Landing Page
@@ -35,6 +36,7 @@ export default function TheSolution() {
   const router = useRouter();
 
   const handleStartBook = () => {
+    trackEvent('start_book_click', { cta_location: 'solution_primary' });
     router.push("/onboarding-gift");
   };
 

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import LoginModal from "@/components/auth/LoginModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { trackEvent } from "@/lib/analytics";
 
 export default function Banner() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -56,6 +57,7 @@ export default function Banner() {
                 </button>
                 <Link
                   href="/onboarding-gift"
+                  onClick={() => trackEvent('start_book_click', { cta_location: 'header_nav_desktop' })}
                   className="inline-flex items-center justify-center rounded-full bg-black text-white px-5 py-2 text-sm font-semibold hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black"
                 >
                   Start the Book
@@ -107,7 +109,10 @@ export default function Banner() {
                 <Link
                   href="/onboarding-gift"
                   className="block w-full text-center py-3 px-4 rounded-full bg-black text-white font-semibold hover:bg-gray-800 transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={() => {
+                    trackEvent('start_book_click', { cta_location: 'header_nav_mobile' });
+                    setIsMobileMenuOpen(false);
+                  }}
                 >
                   Start the Book
                 </Link>

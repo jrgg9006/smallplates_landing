@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 
 import { CustomDropdown } from "@/components/onboarding/CustomDropdown";
 import { createSupabaseClient } from "@/lib/supabase/client";
+import { trackEvent } from "@/lib/analytics";
 import { Calendar, Eye, EyeOff } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
@@ -59,6 +60,13 @@ export function PostPaymentSetup({ userType }: PostPaymentSetupProps) {
 
   const calendarRef = useRef<HTMLDivElement>(null);
   const dateInputRef = useRef<HTMLDivElement>(null);
+
+  const stepViewedRef = useRef(false);
+  useEffect(() => {
+    if (stepViewedRef.current) return;
+    stepViewedRef.current = true;
+    trackEvent('onboarding_step_view', { step_number: 4, flow: 'gift' });
+  }, []);
 
   // Reason: Fallback to auth user email if OnboardingContext chain didn't propagate it
   const emailFromStep3 = (state.answers.step3 as { email?: string } | undefined)?.email || user?.email || "";

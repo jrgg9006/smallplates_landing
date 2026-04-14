@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { BASE_BOOK_PRICE, ADDITIONAL_BOOK_PRICE } from "@/lib/stripe/pricing";
+import { trackEvent } from "@/lib/analytics";
 
 /**
  * PRICING PAGE — Single product, editorial layout.
@@ -17,6 +18,7 @@ export default function PricingPage() {
   const router = useRouter();
 
   const handleStartBook = () => {
+    trackEvent('start_book_click', { cta_location: 'pricing_card_primary' });
     router.push("/onboarding-gift");
   };
 

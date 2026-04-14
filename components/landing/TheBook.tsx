@@ -7,6 +7,7 @@ import Image from "next/image";
 import SpecsGrid from "@/components/landing/TheBook/SpecsGrid";
 import HandmadeCallout from "@/components/landing/TheBook/HandmadeCallout";
 import DetailStrip from "@/components/landing/TheBook/DetailStrip";
+import { trackEvent } from "@/lib/analytics";
 // TODO: Re-enable when full specifications page is built
 // import BookDetailsModal from "@/components/landing/BookDetailsModal";
 
@@ -37,6 +38,7 @@ export default function TheBook() {
   const [isBookHovered, setIsBookHovered] = useState(false);
 
   const handleCTA = () => {
+    trackEvent('start_book_click', { cta_location: 'the_book_primary' });
     router.push("/onboarding-gift");
   };
 

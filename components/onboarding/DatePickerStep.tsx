@@ -7,6 +7,7 @@ import "react-day-picker/style.css";
 import { addDays, addMonths, subDays, format } from "date-fns";
 import OnboardingStep from "@/components/onboarding/OnboardingStep";
 import { useOnboarding } from "@/lib/contexts/OnboardingContext";
+import { trackEvent } from "@/lib/analytics";
 
 function getOrdinalDay(day: number): string {
   if (day >= 11 && day <= 13) return `${day}th`;
@@ -64,6 +65,13 @@ export function DatePickerStep({
   const bookCloseDate = selectedDate ? subDays(selectedDate, 12) : null;
 
   const canContinue = !!selectedDate || isUndecided;
+
+  const stepViewedRef = useRef(false);
+  useEffect(() => {
+    if (stepViewedRef.current) return;
+    stepViewedRef.current = true;
+    trackEvent('onboarding_step_view', { step_number: 1, flow: 'gift' });
+  }, []);
 
   // Reason: Close popover on click outside or Escape key
   useEffect(() => {
@@ -143,6 +151,11 @@ export function DatePickerStep({
         book_close_date: null,
       });
     }
+    trackEvent('onboarding_step_complete', {
+      step_number: 1,
+      flow: 'gift',
+      gift_date_selected: selectedDate ? 'yes' : 'no',
+    });
     nextStep();
   };
 

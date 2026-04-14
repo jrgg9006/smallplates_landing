@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { trackEvent } from "@/lib/analytics";
 
 /**
  * FOR GIFT GIVERS SECTION — Small Plates Wedding Landing Page
@@ -37,6 +38,7 @@ export default function ForGiftGivers() {
   const router = useRouter();
 
   const handleStartGift = () => {
+    trackEvent('start_book_click', { cta_location: 'gift_givers_card' });
     router.push("/onboarding-gift");
   };
 

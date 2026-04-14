@@ -4,11 +4,13 @@ import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { trackEvent } from "@/lib/analytics";
 
 export default function Hero() {
   const router = useRouter();
 
   const handleGetStarted = () => {
+    trackEvent('start_book_click', { cta_location: 'hero_primary' });
     router.push("/onboarding-gift");
   };
 
