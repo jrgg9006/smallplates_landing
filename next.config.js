@@ -76,6 +76,17 @@ const nextConfig = {
         destination: '/?utm_source=facebook&utm_medium=story&utm_campaign=stories',
         permanent: false,
       },
+      // Wedding registries
+      {
+        source: '/zola',
+        destination: '/?utm_source=zola&utm_medium=registry&utm_campaign=wedding_registry',
+        permanent: false,
+      },
+      {
+        source: '/theknot',
+        destination: '/?utm_source=theknot&utm_medium=registry&utm_campaign=wedding_registry',
+        permanent: false,
+      },
     ]
   },
 }
