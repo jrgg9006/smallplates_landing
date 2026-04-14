@@ -469,8 +469,8 @@ function StepShipping({
           </p>
           <p className="text-xs text-[#8A8780]">
             {qty > 0
-              ? `Original + ${qty} extra · $${extraTotal} due · free shipping on extras`
-              : `Original book · $${BASE_BOOK_PRICE} already paid · $15 shipping`}
+              ? `Original + ${qty} extra · $${extraTotal} due · shipping included`
+              : `Original book · $${BASE_BOOK_PRICE} already paid · shipping included`}
           </p>
         </div>
         <span className="text-2xl opacity-50">📦</span>
@@ -647,7 +647,7 @@ function PaymentForm({
           </div>
         </div>
         <p className="text-xs italic text-[#8A8780] pt-1">
-          Your book (${BASE_BOOK_PRICE} + $15 shipping) was already paid.
+          Your book (${BASE_BOOK_PRICE}, shipping included) was already paid.
         </p>
       </div>
 

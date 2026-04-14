@@ -42,7 +42,7 @@ export async function POST(
 
     let amount = qty * ADDITIONAL_BOOK_PRICE * 100; // cents
 
-    // Reason: Add shipping cost when book is already printed (separate shipment)
+    // Reason: Shipping is included in the book price. calculateShipping returns 0.
     if (includeShipping) {
       const shippingUsd = calculateShipping(qty, "US");
       amount += shippingUsd * 100;
@@ -60,7 +60,7 @@ export async function POST(
         userId: user.id,
         includeShipping: includeShipping ? "true" : "false",
       },
-      description: `Small Plates — ${qty} extra ${qty === 1 ? "copy" : "copies"}${includeShipping ? " (incl. shipping)" : ""}`,
+      description: `Small Plates — ${qty} extra ${qty === 1 ? "copy" : "copies"}`,
     });
 
     return NextResponse.json({

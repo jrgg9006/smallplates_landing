@@ -37,7 +37,7 @@ const COLUMNS: { status: BookStatus; label: string; color: string; bgColor: stri
     label: 'Printed',
     color: 'text-gray-600',
     bgColor: 'bg-gray-50 border-gray-200',
-    info: 'The book has been sent to the print supplier. No turning back — the book is in production or already shipped.\n\nONLY move a book here AFTER it has been submitted to the supplier.\n\n⚠️ IMPORTANT: Once a book is in "Printed", extra copies ordered by the user will be charged shipping ($15+) because they can no longer be bundled with the original shipment.',
+    info: 'The book has been sent to the print supplier. No turning back — the book is in production or already shipped.\n\nONLY move a book here AFTER it has been submitted to the supplier.\n\nNote: extra copies ordered after a book is marked "Printed" ship separately from the original. Shipping is included in the price.',
   },
 ];
 

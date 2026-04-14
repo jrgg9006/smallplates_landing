@@ -349,7 +349,7 @@ function CouplePaymentForm({
               <span>${additionalCopies * ADDITIONAL_BOOK_PRICE}</span>
             </div>
           )}
-          <div className="flex justify-between py-1"><span>Shipping</span><span>${shipping}</span></div>
+          <div className="flex justify-between py-1"><span>Shipping</span><span>{shipping > 0 ? `$${shipping}` : "Included"}</span></div>
           {promoDiscount && (
             <div className="flex justify-between py-1 text-emerald-600">
               <span className="flex items-center gap-1">

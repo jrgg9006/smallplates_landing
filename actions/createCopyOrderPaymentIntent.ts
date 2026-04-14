@@ -21,9 +21,9 @@ interface CreateCopyOrderInput {
   shippingAddress: ShippingAddress;
 }
 
-// Reason: Flat pricing for copy orders — different from pricing.ts which uses tiered shipping + BASE_BOOK_PRICE
+// Reason: Shipping is included in the book price.
 const COPY_PRICE_CENTS = 11900; // $119 per copy
-const SHIPPING_CENTS = 1500; // $15 flat
+const SHIPPING_CENTS = 0;
 
 export async function createCopyOrderPaymentIntent(input: CreateCopyOrderInput): Promise<
   { clientSecret: string; paymentIntentId: string } | { error: string }

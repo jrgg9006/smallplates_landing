@@ -499,7 +499,7 @@ function PaymentForm({
           )}
           <div className="flex justify-between py-1">
             <span>Shipping</span>
-            <span>${shipping}</span>
+            <span>{shipping > 0 ? `$${shipping}` : "Included"}</span>
           </div>
           {promoDiscount && (
             <div className="flex justify-between py-1 text-emerald-600">

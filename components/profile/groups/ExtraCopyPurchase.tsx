@@ -122,7 +122,7 @@ function StepQty({
           {shippingCost > 0 ? (
             <span className="text-[#2D2D2D]">${shippingCost}</span>
           ) : (
-            <span className="text-[#14532D]">Free — ships with your book</span>
+            <span className="text-[#14532D]">Included</span>
           )}
         </div>
         <div className="flex justify-between font-medium text-[15px] text-[#2D2D2D] pt-2 border-t border-[rgba(45,45,45,0.12)]">

@@ -3,7 +3,6 @@ import {
   stripe,
   BASE_BOOK_PRICE,
   ADDITIONAL_BOOK_PRICE,
-  calculateShipping,
   ShippingCountry,
 } from '@/lib/stripe/client';
 
@@ -79,54 +78,11 @@ export async function POST(request: NextRequest) {
       ...(buyerName ? { buyerName } : {}),
     };
 
-    // Reason: When shippingCountry is provided (couple flow), use single fixed shipping option.
-    // When not provided (gift giver flow), let Stripe collect the address and show both options.
-    const shippingConfig = shippingCountry
-      ? {
-          shipping_options: [
-            {
-              shipping_rate_data: {
-                type: 'fixed_amount' as const,
-                fixed_amount: {
-                  amount: calculateShipping(bookQuantity, shippingCountry) * 100,
-                  currency: 'usd',
-                },
-                display_name: `Shipping to ${shippingCountry === 'US' ? 'United States' : 'Mexico'}`,
-              },
-            },
-          ],
-        }
-      : {
-          shipping_options: [
-            {
-              shipping_rate_data: {
-                type: 'fixed_amount' as const,
-                fixed_amount: {
-                  amount: calculateShipping(bookQuantity, 'US') * 100,
-                  currency: 'usd',
-                },
-                display_name: 'Ship to United States',
-              },
-            },
-            {
-              shipping_rate_data: {
-                type: 'fixed_amount' as const,
-                fixed_amount: {
-                  amount: calculateShipping(bookQuantity, 'MX') * 100,
-                  currency: 'usd',
-                },
-                display_name: 'Ship to Mexico',
-              },
-            },
-          ],
-        };
-
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       customer_email: email,
       line_items: lineItems,
       allow_promotion_codes: true,
-      ...shippingConfig,
       metadata: sessionMetadata,
       // Reason: Webhook listens for payment_intent.succeeded and reads PI metadata,
       // so we must forward session metadata to the underlying PaymentIntent

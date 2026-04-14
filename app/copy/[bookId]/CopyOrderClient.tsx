@@ -22,9 +22,9 @@ const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 );
 
-// Reason: Flat pricing for copy orders — different from pricing.ts tiered logic
+// Reason: Flat pricing for copy orders — shipping is included in the book price.
 const COPY_PRICE = 119;
-const SHIPPING_PRICE = 15;
+const SHIPPING_PRICE = 0;
 
 interface BookData {
   id: string;
@@ -157,7 +157,11 @@ function CopyPaymentForm({
         </div>
         <div className="flex justify-between">
           <span className="text-[#8A8780]">Shipping</span>
-          <span className="text-[#2D2D2D]">${SHIPPING_PRICE}</span>
+          {SHIPPING_PRICE > 0 ? (
+            <span className="text-[#2D2D2D]">${SHIPPING_PRICE}</span>
+          ) : (
+            <span className="text-[#14532D]">Included</span>
+          )}
         </div>
         <div className="border-t border-[rgba(45,45,45,0.12)] pt-2">
           <div className="flex justify-between font-medium text-[15px] text-[#2D2D2D]">
@@ -492,10 +496,14 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
               </div>
               <div className="flex justify-between text-[#8A8780]">
                 <span>Shipping</span>
-                <span>${SHIPPING_PRICE}</span>
+                {SHIPPING_PRICE > 0 ? (
+                  <span>${SHIPPING_PRICE}</span>
+                ) : (
+                  <span className="text-[#14532D]">Included</span>
+                )}
               </div>
               <p className="text-[11px] text-[#8A8780] pt-1">
-                Flat rate to US, Mexico &amp; Europe.
+                Free shipping to US, Mexico &amp; Europe.
               </p>
             </div>
 
@@ -523,7 +531,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
               </button>
             </div>
             <p className="text-sm text-[#8A8780] text-center mb-8">
-              Total: ${total} ({qty} {qty === 1 ? "copy" : "copies"} + shipping)
+              Total: ${total} ({qty} {qty === 1 ? "copy" : "copies"}, shipping included)
             </p>
 
             {/* Email */}
@@ -557,7 +565,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
 
             {/* Caption */}
             <p className="text-[11px] text-[#8A8780] text-center mt-4 leading-relaxed">
-              $15 flat shipping to US, Mexico &amp; Europe.<br />
+              Free shipping to US, Mexico &amp; Europe.<br />
               Questions?{" "}
               <a
                 href="mailto:team@smallplatesandcompany.com"

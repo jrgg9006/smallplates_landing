@@ -100,7 +100,7 @@ export default function PricingPage() {
                       {BASE_BOOK_PRICE}
                     </span>
                   </div>
-                  <p className="mt-2 text-sm text-[#9A9590]">+ shipping</p>
+                  <p className="mt-2 text-sm text-[#9A9590]">shipping included</p>
                 </div>
 
                 {/* Additional copies */}
@@ -195,7 +195,7 @@ export default function PricingPage() {
             <div className="space-y-6 text-[15px] text-[#9A9590] leading-relaxed font-light">
               <p>
                 <span className="font-medium text-[#2D2D2D] font-sans">Shipping</span> is
-                calculated at checkout and paid separately.
+                included in the price.
               </p>
               <div className="h-px bg-[#F0EDE8]" />
               <p>

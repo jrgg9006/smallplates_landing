@@ -18,8 +18,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid book quantity' }, { status: 400 });
     }
 
-    // Reason: Gift flow uses flat $15 shipping (no country selector).
-    // Couple flow still uses country-based shipping via calculateTotal.
+    // Reason: Shipping is included in the book price. calculateShipping returns 0.
     const total = shippingCountry
       ? calculateTotal(bookQuantity, shippingCountry as ShippingCountry)
       : calculateSubtotal(bookQuantity) + calculateShipping(bookQuantity, 'US');
