@@ -52,7 +52,7 @@ export async function DELETE(
     // Check if user already deleted (safety check)
     const { data: existingProfile } = await supabaseAdmin
       .from('profiles')
-      .select('deleted_at')
+      .select('deleted_at, is_test_account')
       .eq('id', userId)
       .single();
 
@@ -60,6 +60,15 @@ export async function DELETE(
       return NextResponse.json(
         { error: 'User is already deleted' },
         { status: 400 }
+      );
+    }
+
+    // Reason: hard delete is irreversible — only allowed on profiles explicitly flagged as test accounts.
+    // This prevents accidentally nuking a real user's data even if the admin clicks the wrong button.
+    if (forceHard && !existingProfile?.is_test_account) {
+      return NextResponse.json(
+        { error: 'Hard delete is only allowed on profiles with is_test_account = true. Mark the user as TEST first.' },
+        { status: 403 }
       );
     }
 

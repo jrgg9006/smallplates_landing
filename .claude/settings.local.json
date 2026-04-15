@@ -35,7 +35,8 @@
       "Bash(ls -la /Users/macbook/Desktop/smallplates_landing/app/\\\\\\(auth\\\\\\)/onboarding/success/)",
       "Bash(ls -la /Users/macbook/Desktop/smallplates_landing/app/\\\\\\(platform\\\\\\)/complete-setup/)",
       "WebSearch",
-      "Bash(xxd)"
+      "Bash(xxd)",
+      "WebFetch(domain:help.remento.co)"
     ],
     "deny": []
   }

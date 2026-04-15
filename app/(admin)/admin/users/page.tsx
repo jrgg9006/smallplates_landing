@@ -55,6 +55,8 @@ export default function AdminUsersPage() {
   const [hardDeleteModalOpen, setHardDeleteModalOpen] = useState(false);
   const [userToHardDelete, setUserToHardDelete] = useState<User | null>(null);
   const [hardDeleteConfirmText, setHardDeleteConfirmText] = useState('');
+  const [hardDeletePreview, setHardDeletePreview] = useState<any>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
 
   // Filters / search (Fase 2)
   const [searchTerm, setSearchTerm] = useState('');
@@ -150,11 +152,44 @@ export default function AdminUsersPage() {
     }
   };
 
-  // Hard delete: opens confirmation modal that requires typing the email
-  const openHardDeleteModal = (user: User) => {
+  // Hard delete: opens confirmation modal, fetches preview of what will be deleted
+  const openHardDeleteModal = async (user: User) => {
     setUserToHardDelete(user);
     setHardDeleteConfirmText('');
+    setHardDeletePreview(null);
     setHardDeleteModalOpen(true);
+    setLoadingPreview(true);
+    try {
+      const response = await fetch(`/api/v1/admin/users/${user.id}/hard-delete-preview`);
+      const result = await response.json();
+      if (response.ok && result.success) {
+        setHardDeletePreview(result.data);
+      } else {
+        alert(`❌ Preview failed: ${result.error}`);
+        setHardDeleteModalOpen(false);
+      }
+    } catch (err) {
+      alert(`❌ Preview error: ${err instanceof Error ? err.message : 'Failed to load preview'}`);
+      setHardDeleteModalOpen(false);
+    } finally {
+      setLoadingPreview(false);
+    }
+  };
+
+  // Download the preview payload as a JSON backup file before deletion
+  const downloadBackup = () => {
+    if (!hardDeletePreview || !userToHardDelete) return;
+    const blob = new Blob([JSON.stringify(hardDeletePreview, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const safeEmail = userToHardDelete.email.replace(/[^a-z0-9]/gi, '_');
+    const date = new Date().toISOString().split('T')[0];
+    a.download = `backup-${safeEmail}-${date}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const handleHardDeleteConfirm = async () => {
@@ -552,9 +587,9 @@ export default function AdminUsersPage() {
                             </button>
                             <button
                               onClick={() => openHardDeleteModal(user)}
-                              disabled={busy}
-                              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
-                              title="HARD delete (permanent, email reusable)"
+                              disabled={busy || !user.is_test_account}
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                              title={user.is_test_account ? 'HARD delete (permanent, email reusable)' : 'Hard delete disabled: mark as TEST first'}
                             >
                               <Flame className="h-3.5 w-3.5" />
                             </button>
@@ -892,8 +927,9 @@ export default function AdminUsersPage() {
                       setDetailsModalOpen(false);
                     }
                   }}
-                  disabled={deleting === selectedUser?.id}
-                  className="bg-red-600 text-white hover:bg-red-700"
+                  disabled={deleting === selectedUser?.id || !selectedUser?.is_test_account}
+                  className="bg-red-600 text-white hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed"
+                  title={selectedUser?.is_test_account ? '' : 'Mark as TEST first to enable hard delete'}
                 >
                   Hard Delete
                 </Button>
@@ -913,40 +949,77 @@ export default function AdminUsersPage() {
         if (!open) {
           setUserToHardDelete(null);
           setHardDeleteConfirmText('');
+          setHardDeletePreview(null);
         }
       }}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[640px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-serif text-2xl font-semibold text-red-700 flex items-center gap-2">
               <Flame className="h-6 w-6" />
               Hard Delete User
             </DialogTitle>
             <DialogDescription className="pt-2">
-              This will <strong>permanently delete</strong> the account and all associated data via CASCADE. The email will become reusable.
+              Review exactly what will be deleted below. Download a JSON backup before proceeding.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4 space-y-3">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-800">
-              <p className="font-medium mb-1">This will delete from auth.users + cascade to:</p>
-              <ul className="list-disc list-inside space-y-0.5 text-xs">
-                <li>profiles</li>
-                <li>guests, guest_recipes</li>
-                <li>groups (if owned), group_members</li>
-                <li>cookbooks, shipping_addresses, communication_log</li>
-              </ul>
-            </div>
-            <p className="text-sm text-gray-700">
-              Type <strong className="text-red-700">{userToHardDelete?.email}</strong> to confirm:
-            </p>
-            <input
-              type="text"
-              value={hardDeleteConfirmText}
-              onChange={(e) => setHardDeleteConfirmText(e.target.value)}
-              placeholder={userToHardDelete?.email || ''}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
-              autoComplete="off"
-            />
-            <p className="text-xs text-red-600 font-medium">This action cannot be undone.</p>
+          <div className="py-4 space-y-4">
+            {loadingPreview ? (
+              <div className="py-8 text-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600 mx-auto mb-3"></div>
+                <p className="text-sm text-gray-600">Loading preview…</p>
+              </div>
+            ) : hardDeletePreview ? (
+              <>
+                {/* Counts summary */}
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-xs font-semibold text-red-900 mb-2 uppercase tracking-wide">Rows that will be deleted</p>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-red-900">
+                    {Object.entries(hardDeletePreview.counts as Record<string, number>)
+                      .filter(([, n]) => n > 0)
+                      .map(([table, n]) => (
+                        <div key={table} className="flex justify-between">
+                          <span className="font-mono">{table}</span>
+                          <span className="font-bold">{n}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Expandable full detail */}
+                <details className="bg-gray-50 border border-gray-200 rounded-lg">
+                  <summary className="cursor-pointer px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded-lg">
+                    📋 See exact rows (IDs and key fields)
+                  </summary>
+                  <pre className="px-3 py-2 text-[10px] text-gray-700 max-h-64 overflow-auto font-mono">
+{JSON.stringify(hardDeletePreview.tables, null, 2)}
+                  </pre>
+                </details>
+
+                {/* Backup button */}
+                <button
+                  type="button"
+                  onClick={downloadBackup}
+                  className="w-full px-4 py-2 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg hover:bg-blue-100 text-sm font-medium transition-colors"
+                >
+                  💾 Download backup JSON (recommended)
+                </button>
+
+                <div className="border-t pt-3">
+                  <p className="text-sm text-gray-700">
+                    Type <strong className="text-red-700">{userToHardDelete?.email}</strong> to confirm:
+                  </p>
+                  <input
+                    type="text"
+                    value={hardDeleteConfirmText}
+                    onChange={(e) => setHardDeleteConfirmText(e.target.value)}
+                    placeholder={userToHardDelete?.email || ''}
+                    className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+                    autoComplete="off"
+                  />
+                  <p className="text-xs text-red-600 font-medium mt-2">This action cannot be undone.</p>
+                </div>
+              </>
+            ) : null}
           </div>
           <DialogFooter>
             <Button
