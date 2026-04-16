@@ -39,7 +39,7 @@ export default function TheBook() {
 
   const handleCTA = () => {
     trackEvent('start_book_click', { cta_location: 'the_book_primary' });
-    router.push("/onboarding-gift");
+    router.push("/onboarding");
   };
 
   return (

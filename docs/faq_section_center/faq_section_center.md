@@ -20,7 +20,7 @@ Las recetas pueden estar escritas en cualquier idioma. No hay restricción.
 ## 💰 Precios
 
 **¿Cuánto cuesta el libro?**
-El primer libro cuesta $169 USD. Cada copia adicional cuesta $119 USD.
+El primer libro cuesta $169 USD. Cada copia adicional cuesta $129 USD.
 
 **¿Hay un límite de copias adicionales?**
 Sí, se pueden ordenar hasta 6 libros en total (1 principal + 5 adicionales).

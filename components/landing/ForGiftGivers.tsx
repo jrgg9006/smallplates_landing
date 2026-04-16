@@ -39,7 +39,7 @@ export default function ForGiftGivers() {
 
   const handleStartGift = () => {
     trackEvent('start_book_click', { cta_location: 'gift_givers_card' });
-    router.push("/onboarding-gift");
+    router.push("/onboarding");
   };
 
   return (

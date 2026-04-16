@@ -11,7 +11,7 @@ export default function Hero() {
 
   const handleGetStarted = () => {
     trackEvent('start_book_click', { cta_location: 'hero_primary' });
-    router.push("/onboarding-gift");
+    router.push("/onboarding");
   };
 
   const scrollToHowItWorks = () => {

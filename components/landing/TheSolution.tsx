@@ -37,7 +37,7 @@ export default function TheSolution() {
 
   const handleStartBook = () => {
     trackEvent('start_book_click', { cta_location: 'solution_primary' });
-    router.push("/onboarding-gift");
+    router.push("/onboarding");
   };
 
   return (

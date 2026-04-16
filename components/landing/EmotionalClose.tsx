@@ -42,7 +42,7 @@ export default function EmotionalClose() {
 
   const handleStartBook = () => {
     trackEvent('start_book_click', { cta_location: 'emotional_close_primary' });
-    router.push("/onboarding-gift");
+    router.push("/onboarding");
   };
 
   return (

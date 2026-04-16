@@ -4,7 +4,7 @@
  */
 
 export const BASE_BOOK_PRICE = 169;
-export const ADDITIONAL_BOOK_PRICE = 119;
+export const ADDITIONAL_BOOK_PRICE = 129;
 
 export type ShippingCountry = 'US' | 'MX';
 
