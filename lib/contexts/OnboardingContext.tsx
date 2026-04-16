@@ -113,7 +113,6 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Load from localStorage after hydration (client-side only)
-  // Reason: Skip loading saved state for add-book mode (skipAuth) - always start fresh
   useEffect(() => {
     if (!skipAuth) {
       const saved = loadStateFromStorage(userType);
@@ -139,7 +138,6 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
   }, [userType, skipAuth]);
 
   // Save state to localStorage whenever it changes (only after hydration)
-  // Reason: Don't save add-book mode state to localStorage to avoid overwriting normal flow progress
   useEffect(() => {
     if (isHydrated && !state.isComplete && !skipAuth) {
       saveStateToStorage(userType, state);
