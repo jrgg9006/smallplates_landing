@@ -16,7 +16,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Reason: Allowlist metadata keys to prevent overwriting sensitive fields
-    const allowedKeys = ['email', 'existingUserId'];
+    const allowedKeys = ['email', 'buyerName'];
     const safeMetadata: Record<string, string> = {};
     for (const key of allowedKeys) {
       if (key in metadata && typeof metadata[key] === 'string') {

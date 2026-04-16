@@ -97,7 +97,6 @@ interface OnboardingProviderProps {
   children: ReactNode;
   userType?: 'couple' | 'gift_giver';
   skipAuth?: boolean;
-  existingUserId?: string;
 }
 
 /**
@@ -107,7 +106,7 @@ interface OnboardingProviderProps {
  *   children (ReactNode): Child components
  *   userType (string): Type of user - 'couple' or 'gift_giver'
  */
-export function OnboardingProvider({ children, userType = 'couple', skipAuth = false, existingUserId }: OnboardingProviderProps) {
+export function OnboardingProvider({ children, userType = 'couple', skipAuth = false }: OnboardingProviderProps) {
   // Initialize with default state first (to avoid hydration mismatch)
   const [state, setState] = useState<OnboardingState>(() => getInitialState(userType));
   const [isHydrated, setIsHydrated] = useState(false);
