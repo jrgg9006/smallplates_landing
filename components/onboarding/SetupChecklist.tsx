@@ -179,7 +179,7 @@ export function SetupChecklist({
       },
       {
         id: 'guests',
-        title: 'Bring your guest list in',
+        title: 'Bring the guest list in',
         why: 'Import from Zola or The Knot. Then invite the whole list in one click.',
         done: hasGuests,
         action: () => onOpenImportGuests('zola'),
