@@ -82,7 +82,7 @@ export default async function OrderConfirmationPage({
 function EmbeddedFlowRedirect({ paymentIntentId, userType }: { paymentIntentId: string; userType: "couple" | "gift_giver" }) {
   // Reason: Each flow stores state under its own localStorage key
   const storageKey = userType === "couple" ? "onboarding_state_couple" : "onboarding_state_gift_giver";
-  const resumeUrl = userType === "couple" ? "/onboarding" : "/onboarding-gift";
+  const resumeUrl = userType === "couple" ? "/onboarding" : "/onboarding";
 
   return (
     <div
@@ -147,12 +147,6 @@ function OrderError() {
           team@smallplatesandcompany.com
         </a>
       </p>
-      <a
-        href="/recover-setup"
-        className="text-[14px] text-[#D4A854] underline underline-offset-2 hover:text-[#c49b4a] transition-colors"
-      >
-        Already paid? Get a login link here
-      </a>
     </div>
   );
 }

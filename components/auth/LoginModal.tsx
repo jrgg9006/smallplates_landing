@@ -7,6 +7,7 @@ import {
   signInWithEmail,
   signInWithGoogle,
   resetPassword,
+  sendMagicLink,
 } from "@/lib/supabase/auth";
 
 interface LoginModalProps {
@@ -14,7 +15,7 @@ interface LoginModalProps {
   onClose: () => void;
 }
 
-type ModalMode = "login" | "forgot-password";
+type ModalMode = "login" | "forgot-password" | "magic-link";
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [email, setEmail] = useState("");
@@ -23,8 +24,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [showSetupLink, setShowSetupLink] = useState(false);
-  const [resendingLink, setResendingLink] = useState(false);
   const router = useRouter();
 
   if (!isOpen) return null;
@@ -37,25 +36,9 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
     try {
       if (mode === "login") {
-        const { user, error } = await signInWithEmail(email, password);
+        const { error } = await signInWithEmail(email, password);
         if (error) {
           setError(error);
-          setShowSetupLink(false);
-          // Reason: Check if this email has a paid order without completed setup.
-          // If so, show a helpful link instead of just "invalid credentials".
-          try {
-            const res = await fetch('/api/stripe/check-user', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: email.trim().toLowerCase() }),
-            });
-            const data = await res.json();
-            if (data.hasIncompleteOrder) {
-              setShowSetupLink(true);
-            }
-          } catch {
-            // Reason: Non-critical — if the check fails, just show the normal error
-          }
         } else {
           onClose();
           router.push("/profile/groups");
@@ -70,6 +53,19 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             setMode("login");
             setMessage(null);
           }, 2000);
+        }
+      } else if (mode === "magic-link") {
+        const { error } = await sendMagicLink(email.trim().toLowerCase());
+        if (error) {
+          setError(error);
+        } else {
+          setMessage(`Login link sent to ${email.trim()}. Check your inbox.`);
+          // Reason: Auto-dismiss after 4s and return to the default login view so the
+          // success banner doesn't linger forever once the user has seen it.
+          setTimeout(() => {
+            setMode("login");
+            setMessage(null);
+          }, 4000);
         }
       }
     } catch (err) {
@@ -91,24 +87,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     // Google OAuth will redirect, so no need to stop loading
   };
 
-  const handleResendSetupLink = async () => {
-    setResendingLink(true);
-    try {
-      await fetch('/api/stripe/resend-setup-link', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim().toLowerCase() }),
-      });
-      setShowSetupLink(false);
-      setError(null);
-      setMessage("Setup link sent. Check your inbox.");
-    } catch {
-      setError("Could not send setup link. Try again.");
-    } finally {
-      setResendingLink(false);
-    }
-  };
-
   return (
     <>
       {/* Modal Container with Backdrop */}
@@ -117,7 +95,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         onClick={onClose}
       >
         <div
-          className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 relative"
+          className="bg-white rounded-2xl shadow-xl max-w-md w-full p-10 md:p-12 relative"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close Button */}
@@ -140,13 +118,22 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           </button>
 
           {/* Modal Content */}
-          <div className="text-center mb-6">
+          <div className="text-center mb-10">
             <h2 className="text-4xl font-serif font-semibold text-gray-900">
-              {mode === "login" ? "Log in" : "Reset password"}
+              {mode === "login"
+                ? "Log in"
+                : mode === "forgot-password"
+                ? "Reset password"
+                : "Get a login link"}
             </h2>
             {mode === "forgot-password" && (
-              <p className="text-gray-600 mt-2">
+              <p className="text-gray-600 mt-3">
                 Enter your email to reset password
+              </p>
+            )}
+            {mode === "magic-link" && (
+              <p className="text-gray-600 mt-3">
+                Enter your email to get a magic link
               </p>
             )}
           </div>
@@ -157,21 +144,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               {error}
             </div>
           )}
-          {showSetupLink && (
-            <div className="mb-4 p-4 bg-[#FAF7F2] border border-[#D4A854]/30 rounded-lg">
-              <p className="text-sm text-[#2D2D2D]">
-                Looks like you bought a book but haven&apos;t finished setting up.
-              </p>
-              <button
-                type="button"
-                onClick={handleResendSetupLink}
-                disabled={resendingLink}
-                className="mt-2 text-sm font-semibold text-[#D4A854] hover:text-[#b8903e] transition-colors disabled:opacity-50"
-              >
-                {resendingLink ? "Sending..." : "Resend setup link \u2192"}
-              </button>
-            </div>
-          )}
           {message && (
             <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
               {message}
@@ -179,7 +151,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           )}
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label
                 htmlFor="email"
@@ -199,7 +171,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               />
             </div>
 
-            {mode !== "forgot-password" && (
+            {mode === "login" && (
               <div>
                 <label
                   htmlFor="password"
@@ -230,22 +202,32 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 >
                   Forgot password?
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setMode("magic-link")}
+                  className="text-sm text-gray-600 hover:text-black transition-colors"
+                  disabled={loading}
+                >
+                  Email me a login link
+                </button>
               </div>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-black text-white py-3 rounded-lg font -semibold hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading
                 ? "Loading..."
                 : mode === "login"
                 ? "Log in"
-                : "Send reset email"}
+                : mode === "forgot-password"
+                ? "Send reset email"
+                : "Send login link"}
             </button>
 
-            {mode === "forgot-password" && (
+            {mode !== "login" && (
               <button
                 type="button"
                 onClick={() => setMode("login")}
@@ -258,7 +240,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           </form>
 
           {/* Divider - only show for login/signup */}
-          {mode !== "forgot-password" && (
+          {mode === "login" && (
             <>
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">

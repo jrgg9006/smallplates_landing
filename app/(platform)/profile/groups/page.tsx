@@ -8,6 +8,7 @@ import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { CaptainsDropdown } from "@/components/profile/groups/CaptainsDropdown";
 import { MoreMenuDropdown } from "@/components/profile/groups/MoreMenuDropdown";
 import { AddFriendToGroupModal } from "@/components/profile/groups/AddFriendToGroupModal";
+import { CoupleNamesModal } from "@/components/profile/groups/CoupleNamesModal";
 import { ChevronDown, Image as ImageIcon, Upload, X, Move } from "lucide-react";
 import Image from "next/image";
 import type { GroupWithMembers } from "@/lib/types/database";
@@ -520,10 +521,6 @@ export default function GroupsPage() {
     }
   }, [user, loading, router]);
 
-  // Reason: Incomplete-order redirect to /complete-setup removed entirely.
-  // Users who need to complete setup arrive via email magic link, not through login.
-  // The dashboard must always be accessible for logged-in users.
-
   // Handle GroupsSection loading state changes
   const handleGroupsLoadingChange = useCallback((isLoading: boolean) => {
     setGroupsLoading(isLoading);
@@ -564,8 +561,33 @@ export default function GroupsPage() {
         </div>
       )}
 
-      {/* Onboarding overlays */}
-      {showWelcomeOverlay && (
+      {/* Post-payment setup modal — blocks the dashboard until the owner fills in couple details. */}
+      {selectedGroup?.status === "pending_setup" &&
+        selectedGroup.created_by === user.id && (
+          <CoupleNamesModal
+            open={true}
+            groupId={selectedGroup.id}
+            userEmail={user.email || ""}
+            // Reason: If the user already owns at least one active (non-pending) group they created,
+            // this new setup is for a second/third/Nth book — swap the headline copy accordingly.
+            isFirstBook={
+              (groupsSectionRef.current?.groups || []).filter(
+                (g) => g.created_by === user.id && g.status === "active"
+              ).length === 0
+            }
+            onComplete={async () => {
+              await groupsSectionRef.current?.loadGroups(true);
+              setTimeout(() => {
+                const refreshed = groupsSectionRef.current?.selectedGroup;
+                if (refreshed) setSelectedGroup(refreshed);
+              }, 100);
+            }}
+          />
+        )}
+
+      {/* Onboarding overlays — gated on group being fully set up (status='active').
+          While the group is `pending_setup`, only the CoupleNamesModal should be visible. */}
+      {selectedGroup?.status === "active" && showWelcomeOverlay && (
         <WelcomeOverlay
           userName={user.email?.split('@')[0] || 'there'}
           onStart={handleWelcomeStart}
@@ -574,7 +596,7 @@ export default function GroupsPage() {
         />
       )}
 
-      {showFirstRecipeExperience && (
+      {selectedGroup?.status === "active" && showFirstRecipeExperience && (
         <FirstRecipeExperience
           onSubmit={handleFirstRecipeSubmit}
           onSkip={skipFirstRecipeExperience}
