@@ -22,7 +22,7 @@ interface CreateCopyOrderInput {
 }
 
 // Reason: Shipping is included in the book price.
-const COPY_PRICE_CENTS = 11900; // $119 per copy
+const COPY_PRICE_CENTS = 12900; // $129 per copy
 const SHIPPING_CENTS = 0;
 
 export async function createCopyOrderPaymentIntent(input: CreateCopyOrderInput): Promise<

@@ -15,11 +15,11 @@ import {
 } from "@/lib/types/onboarding";
 
 // Reason: Bump this when the step order changes to invalidate stale localStorage
-const STATE_VERSION = 4;
+const STATE_VERSION = 6;
 
-const TOTAL_STEPS_COUPLE = 4;
-// Reason: Couple flow is now 1. Date → 2. Copies → 3. Payment → 4. Setup (same as gift)
-const TOTAL_STEPS_GIFT = 4;
+// Reason: Consolidated flow — 1. Date → 2. Copies → 3. Review + Pay (name/email inline)
+const TOTAL_STEPS_COUPLE = 3;
+const TOTAL_STEPS_GIFT = 3;
 
 const getInitialState = (userType: 'couple' | 'gift_giver'): OnboardingState => ({
   currentStep: 1,

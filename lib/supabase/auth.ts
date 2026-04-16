@@ -88,26 +88,57 @@ export async function signInWithGoogle(options?: { loginHint?: string; redirectT
 }
 
 /**
- * Send password reset email
+ * Send a one-time magic link to the user's email.
  *
- * Args:
- *   email (string): User's email address
+ * Proxies to `/api/auth/send-login-link` which uses `supabaseAdmin.auth.admin.generateLink`
+ * on the server. The resulting link uses implicit flow (`#access_token` in hash) so it
+ * works across browsers/devices without requiring a PKCE code verifier in localStorage.
  *
- * Returns:
- *   Promise<{error: string | null}>
+ * The endpoint always returns success (even for unknown emails) to avoid account enumeration.
+ */
+export async function sendMagicLink(email: string) {
+  try {
+    const res = await fetch("/api/auth/send-login-link", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!res.ok) {
+      const body = (await res.json().catch(() => ({}))) as { error?: string };
+      return { error: body.error || "Could not send login link" };
+    }
+    return { error: null };
+  } catch {
+    return { error: "Could not send login link. Try again." };
+  }
+}
+
+/**
+ * Send password reset email.
+ *
+ * Proxies to `/api/auth/send-reset-link` which uses `supabaseAdmin.auth.admin.generateLink`
+ * on the server. The resulting link uses implicit flow (`#access_token` in hash) so it
+ * works across browsers/devices without requiring a PKCE code verifier in localStorage.
+ *
+ * The endpoint always returns success (even for unknown emails) to avoid account enumeration.
  */
 export async function resetPassword(email: string) {
-  const supabase = createSupabaseClient();
+  try {
+    const res = await fetch("/api/auth/send-reset-link", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/reset-password`,
-  });
-
-  if (error) {
-    return { error: error.message };
+    if (!res.ok) {
+      const body = (await res.json().catch(() => ({}))) as { error?: string };
+      return { error: body.error || "Could not send reset link" };
+    }
+    return { error: null };
+  } catch {
+    return { error: "Could not send reset link. Try again." };
   }
-
-  return { error: null };
 }
 
 /**

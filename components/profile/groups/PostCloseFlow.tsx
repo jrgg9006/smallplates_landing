@@ -167,7 +167,7 @@ function StepExtras({
         <span className="font-serif text-[22px] text-[#B0ADA8] line-through decoration-[1.5px]">${BASE_BOOK_PRICE}</span>
         <span className="flex items-baseline">
           <span className="font-serif text-2xl text-[#8A8780] mr-1">$</span>
-          <span className="font-serif text-[56px] text-[#2D2D2D] leading-none">119</span>
+          <span className="font-serif text-[56px] text-[#2D2D2D] leading-none">129</span>
         </span>
       </div>
       <div className="flex items-center gap-2 mb-10">

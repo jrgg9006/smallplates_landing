@@ -23,7 +23,7 @@ const stripePromise = loadStripe(
 );
 
 // Reason: Flat pricing for copy orders — shipping is included in the book price.
-const COPY_PRICE = 119;
+const COPY_PRICE = 129;
 const SHIPPING_PRICE = 0;
 
 interface BookData {
