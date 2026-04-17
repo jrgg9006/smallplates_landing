@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { OrganizerRelationship } from "@/lib/types/database";
+import { createSupabaseClient } from "@/lib/supabase/client";
 
 interface CoupleNamesModalProps {
   open: boolean;
@@ -109,18 +110,27 @@ export function CoupleNamesModal({ open, groupId, userEmail, isFirstBook = true,
   const [partnerFirstName, setPartnerFirstName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+
+  const hasPassword = password.length > 0;
+  const isPasswordValid = !hasPassword || password.length >= 8;
 
   const canSubmit =
     relationship !== "" &&
     coupleFirstName.trim() !== "" &&
-    partnerFirstName.trim() !== "";
+    partnerFirstName.trim() !== "" &&
+    isPasswordValid;
 
   const handleSubmit = async () => {
     if (!canSubmit || submitting) return;
     setError(null);
+    setPasswordError(null);
     setSubmitting(true);
 
     try {
+      // 1. Persist names + relationship (the critical work — blocks the flow if it fails).
       const res = await fetch(`/api/v1/groups/${groupId}/complete-setup`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -136,6 +146,36 @@ export function CoupleNamesModal({ open, groupId, userEmail, isFirstBook = true,
         throw new Error(body?.error || "Could not save. Try again.");
       }
 
+      // 2. Optional password — if the user typed one, try to set it on their Supabase
+      //    auth user. Failure here is non-blocking: names are already saved, and they
+      //    can always set a password later from account settings.
+      let passwordSetFailed = false;
+      if (hasPassword) {
+        try {
+          const supabase = createSupabaseClient();
+          const { error: passwordErr } = await supabase.auth.updateUser({
+            password,
+          });
+          if (passwordErr) {
+            console.error("CoupleNamesModal: password update failed", passwordErr);
+            passwordSetFailed = true;
+          }
+        } catch (err) {
+          console.error("CoupleNamesModal: password update threw", err);
+          passwordSetFailed = true;
+        }
+      }
+
+      // 3. If the password set failed, surface a non-blocking banner before the modal
+      //    unmounts. Give the user ~2.5s to read it. The main flow still proceeds.
+      if (passwordSetFailed) {
+        setPasswordError(
+          "Password couldn't be set. You can try again from your account settings."
+        );
+        await new Promise((resolve) => setTimeout(resolve, 2500));
+      }
+
+      // 4. Complete flow — parent will re-fetch, group becomes 'active', modal unmounts.
       await onComplete();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -212,6 +252,78 @@ export function CoupleNamesModal({ open, groupId, userEmail, isFirstBook = true,
 
           {/* Relationship dropdown — matches input styling */}
           <RelationshipDropdown value={relationship} onChange={setRelationship} />
+
+          {/* Password field — optional. For future email+password logins; the user
+              can always request a magic link if they forget it. */}
+          <div className="w-full">
+            <label
+              className={LABEL_CLASS}
+              style={{ fontFamily: SANS_FONT }}
+              htmlFor="password-input"
+            >
+              Create a password
+            </label>
+            <p
+              className="text-[13px] text-[#9A9590] mb-2"
+              style={{ fontFamily: SANS_FONT }}
+            >
+              So you can log in later without waiting for an email.
+            </p>
+
+            <div className="relative">
+              <input
+                id="password-input"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (passwordError) setPasswordError(null);
+                }}
+                className={`${INPUT_CLASS} pr-12`}
+                style={{ fontFamily: SANS_FONT }}
+                placeholder="8+ characters"
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A9590] hover:text-[#2D2D2D] transition-colors p-1"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
+            </div>
+
+            {hasPassword && !isPasswordValid && (
+              <p
+                className="text-[12px] text-red-500 mt-1.5"
+                style={{ fontFamily: SANS_FONT }}
+              >
+                Password must be at least 8 characters.
+              </p>
+            )}
+          </div>
+
+          {passwordError && (
+            <div className="w-full rounded-lg border border-blue-200 bg-blue-50 p-3">
+              <p
+                className="text-[13px] text-blue-700"
+                style={{ fontFamily: SANS_FONT }}
+              >
+                {passwordError}
+              </p>
+            </div>
+          )}
 
           {error && (
             <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3">
