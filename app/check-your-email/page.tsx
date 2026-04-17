@@ -52,15 +52,15 @@ export default async function CheckYourEmailPage({
           />
         </div>
 
-        <h1 className="font-serif text-[32px] text-[#2D2D2D] mb-4">
+        <h1 className="type-heading mb-4">
           Your book is ready.
         </h1>
 
-        <p className="text-[15px] text-[#5A5550] leading-relaxed mb-2">
+        <p className="type-body-small mb-4">
           We sent a login link to{" "}
           <span className="text-[#2D2D2D] font-medium">{email}</span>.
         </p>
-        <p className="text-[15px] text-[#5A5550] leading-relaxed mb-8">
+        <p className="type-body-small mb-8">
           Open it when you&apos;re ready to set things up.
         </p>
 
@@ -74,10 +74,10 @@ function ErrorState() {
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-6">
       <div className="max-w-md w-full text-center">
-        <h1 className="font-serif text-[32px] text-[#2D2D2D] mb-4">
+        <h1 className="type-heading mb-4">
           Something went wrong.
         </h1>
-        <p className="text-[15px] text-[#5A5550] leading-relaxed mb-8">
+        <p className="type-body-small mb-8">
           We couldn&apos;t find your order. If you just completed a payment, check your email — the login link is on its way.
         </p>
       </div>
