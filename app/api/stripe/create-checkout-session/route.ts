@@ -78,21 +78,29 @@ export async function POST(request: NextRequest) {
     });
   }
 
+  // Reason: Stripe does NOT automatically propagate Checkout Session metadata to the
+  // underlying PaymentIntent. We copy the same metadata to `payment_intent_data.metadata`
+  // so the payment_intent.succeeded webhook handler can early-return on
+  // `metadata.type === 'initial_purchase'` and let checkout.session.completed own
+  // this flow.
+  const sharedMetadata = {
+    type: 'initial_purchase',
+    email: email.trim().toLowerCase(),
+    bookQuantity: String(bookQuantity),
+    userType,
+    giftDate: giftDate ?? '',
+    giftDateUndecided: String(giftDateUndecided),
+    bookCloseDate,
+  };
+
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: lineItems,
       customer_email: email.trim(),
       allow_promotion_codes: true,
-      metadata: {
-        type: 'initial_purchase',
-        email: email.trim().toLowerCase(),
-        bookQuantity: String(bookQuantity),
-        userType,
-        giftDate: giftDate ?? '',
-        giftDateUndecided: String(giftDateUndecided),
-        bookCloseDate,
-      },
+      metadata: sharedMetadata,
+      payment_intent_data: { metadata: sharedMetadata },
       success_url: `${siteUrl}/check-your-email?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/onboarding?cancelled=true`,
     });
