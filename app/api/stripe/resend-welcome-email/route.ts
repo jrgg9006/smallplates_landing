@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe/client";
 import { emitPostPaymentAutoLogin } from "@/lib/stripe/post-payment-setup";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,15 +41,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Reason: Determine wasExisting based on order history, not profile existence.
+    // After the webhook processes the current purchase, profiles always exist —
+    // but that doesn't mean the user was "returning" before this purchase.
+    // Counting orders is the accurate semantic: 1 order = new user, 2+ = returning.
+    const supabaseAdmin = createSupabaseAdminClient();
+    const { count, error: countError } = await supabaseAdmin
+      .from("orders")
+      .select("*", { count: "exact", head: true })
+      .eq("email", normalizedEmail);
+
+    if (countError) {
+      console.error("resend-welcome-email: order count query failed", countError);
+      // Reason: Fall back to wasExisting=false (treat as new user) on query failure.
+      // Better to show "Welcome" to a returning user than "Welcome back" to a new one.
+    }
+
+    const wasExisting = (count ?? 0) > 1;
+
     // Reason: emitPostPaymentAutoLogin handles the magic link + Postmark send
     // for both new and returning users. Safe to call from the resend path.
     await emitPostPaymentAutoLogin({
-      email: email.trim().toLowerCase(),
+      email: normalizedEmail,
       buyerName: buyerName.trim(),
-      // Reason: At resend time, the user already exists in the DB (either the
-      // webhook processed OR they were a returning customer). Treating as
-      // existing skips the onboarding welcome copy that new users get.
-      wasExisting: true,
+      wasExisting,
     });
 
     return NextResponse.json({ success: true });
