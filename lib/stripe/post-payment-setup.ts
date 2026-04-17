@@ -70,20 +70,7 @@ export async function runPostPaymentSetup(
 
   // 2. Upsert profile — guarantees full_name + user_type='gift_giver' win the race with
   //    the auth trigger that auto-creates a blank profile row.
-  const { error: profileError } = await supabaseAdmin
-    .from("profiles")
-    .upsert(
-      {
-        id: userId,
-        email,
-        user_type: "gift_giver" as const,
-        full_name: buyerName || null,
-      },
-      { onConflict: "id" }
-    );
-  if (profileError) {
-    console.error("runPostPaymentSetup: upsert profile failed", profileError);
-  }
+  await upsertBuyerProfile(supabaseAdmin, userId, email, buyerName);
 
   // 3. Order idempotency. SELECT-then-INSERT is not atomic across concurrent callers
   //    (post-payment-login + webhook race). We rely on DB UNIQUE constraint on
@@ -138,70 +125,17 @@ export async function runPostPaymentSetup(
 
   // 4. Group idempotency. Same race — rely on a partial UNIQUE index on
   //    `groups(created_by) WHERE status='pending_setup'` to prevent duplicates.
-  let groupId: string | null = existingOrder?.group_id ?? null;
-  if (!groupId) {
-    const { data: existingGroup } = await supabaseAdmin
-      .from("groups")
-      .select("id")
-      .eq("created_by", userId)
-      .eq("status", "pending_setup")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (existingGroup) groupId = existingGroup.id;
-  }
-
-  let groupCreated = false;
-  if (!groupId) {
-    const { data: newGroup, error: groupError } = await supabaseAdmin
-      .from("groups")
-      .insert({
-        created_by: userId,
-        name: "pending",
-        description: "",
-        status: "pending_setup",
-        gift_date: giftDate,
-        gift_date_undecided: giftDateUndecided,
-        book_close_date: bookCloseDate,
-      })
-      .select("id")
-      .single();
-
-    if (groupError || !newGroup) {
-      if (groupError?.code === "23505") {
-        // Reason: Concurrent caller inserted the pending_setup group first. Re-query.
-        console.warn("runPostPaymentSetup: group already inserted by concurrent caller (race)");
-        const { data: recoveredGroup } = await supabaseAdmin
-          .from("groups")
-          .select("id")
-          .eq("created_by", userId)
-          .eq("status", "pending_setup")
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        if (recoveredGroup) groupId = recoveredGroup.id;
-      } else {
-        console.error("runPostPaymentSetup: group insert failed", groupError);
-      }
-    } else {
-      groupId = newGroup.id;
-      groupCreated = true;
-      // Reason: The `add_group_creator_as_owner_trigger` migration automatically
-      // inserts the owner row in group_members AFTER INSERT on groups.
-    }
-  }
+  const { groupId, groupCreated } = await findOrCreatePendingGroup(
+    supabaseAdmin,
+    userId,
+    existingOrder?.group_id ?? null,
+    giftDate,
+    giftDateUndecided,
+    bookCloseDate
+  );
 
   // 5. Back-fill order.group_id if needed.
-  if (groupId) {
-    const { error: backfillError } = await supabaseAdmin
-      .from("orders")
-      .update({ group_id: groupId })
-      .eq("stripe_payment_intent", paymentIntent.id)
-      .is("group_id", null);
-    if (backfillError) {
-      console.error("runPostPaymentSetup: order back-fill failed", backfillError);
-    }
-  }
+  await backfillOrderGroupId(supabaseAdmin, paymentIntent.id, groupId);
 
   return {
     userId,
@@ -389,4 +323,272 @@ async function findOrCreateUser(
 
   console.error("findOrCreateUser: could not resolve user id", createError);
   return { userId: null, wasExisting: false };
+}
+
+/**
+ * Upsert the buyer's profile row with full_name + user_type.
+ * Called after the Supabase Auth user exists; handle_new_user may have already
+ * created a blank profile row via trigger, so we upsert to win the race.
+ */
+async function upsertBuyerProfile(
+  supabaseAdmin: SupabaseAdmin,
+  userId: string,
+  email: string,
+  buyerName: string
+): Promise<void> {
+  const { error: profileError } = await supabaseAdmin
+    .from("profiles")
+    .upsert(
+      {
+        id: userId,
+        email,
+        user_type: "gift_giver" as const,
+        full_name: buyerName || null,
+      },
+      { onConflict: "id" }
+    );
+  if (profileError) {
+    console.error("upsertBuyerProfile: failed", profileError);
+  }
+}
+
+/**
+ * Find-or-create a `pending_setup` group for the user, racing against concurrent
+ * callers via a partial UNIQUE index on `groups(created_by) WHERE status='pending_setup'`.
+ *
+ * If `initialGroupId` is provided (from a pre-existing order row), skip the lookup
+ * and use it directly. Otherwise search by `created_by + status=pending_setup`,
+ * then INSERT if still not found, handling 23505 with a recovery re-query.
+ *
+ * Returns `{ groupId, groupCreated }`. `groupCreated` is true only when THIS call
+ * wrote the row. The `add_group_creator_as_owner_trigger` migration auto-inserts
+ * the owner row in group_members AFTER INSERT.
+ */
+async function findOrCreatePendingGroup(
+  supabaseAdmin: SupabaseAdmin,
+  userId: string,
+  initialGroupId: string | null,
+  giftDate: string | null,
+  giftDateUndecided: boolean,
+  bookCloseDate: string | null
+): Promise<{ groupId: string | null; groupCreated: boolean }> {
+  let groupId: string | null = initialGroupId;
+  if (!groupId) {
+    const { data: existingGroup } = await supabaseAdmin
+      .from("groups")
+      .select("id")
+      .eq("created_by", userId)
+      .eq("status", "pending_setup")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (existingGroup) groupId = existingGroup.id;
+  }
+
+  let groupCreated = false;
+  if (!groupId) {
+    const { data: newGroup, error: groupError } = await supabaseAdmin
+      .from("groups")
+      .insert({
+        created_by: userId,
+        name: "pending",
+        description: "",
+        status: "pending_setup",
+        gift_date: giftDate,
+        gift_date_undecided: giftDateUndecided,
+        book_close_date: bookCloseDate,
+      })
+      .select("id")
+      .single();
+
+    if (groupError || !newGroup) {
+      if (groupError?.code === "23505") {
+        // Reason: Concurrent caller inserted the pending_setup group first. Re-query.
+        console.warn("findOrCreatePendingGroup: group already inserted by concurrent caller (race)");
+        const { data: recoveredGroup } = await supabaseAdmin
+          .from("groups")
+          .select("id")
+          .eq("created_by", userId)
+          .eq("status", "pending_setup")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (recoveredGroup) groupId = recoveredGroup.id;
+      } else {
+        console.error("findOrCreatePendingGroup: group insert failed", groupError);
+      }
+    } else {
+      groupId = newGroup.id;
+      groupCreated = true;
+      // Reason: The `add_group_creator_as_owner_trigger` migration automatically
+      // inserts the owner row in group_members AFTER INSERT on groups.
+    }
+  }
+
+  return { groupId, groupCreated };
+}
+
+/**
+ * Back-fill `orders.group_id` for the given payment intent if the column is still null.
+ * No-op when `groupId` is null.
+ */
+async function backfillOrderGroupId(
+  supabaseAdmin: SupabaseAdmin,
+  stripePaymentIntentId: string,
+  groupId: string | null
+): Promise<void> {
+  if (!groupId) return;
+  const { error: backfillError } = await supabaseAdmin
+    .from("orders")
+    .update({ group_id: groupId })
+    .eq("stripe_payment_intent", stripePaymentIntentId)
+    .is("group_id", null);
+  if (backfillError) {
+    console.error("backfillOrderGroupId: failed", backfillError);
+  }
+}
+
+export interface PostPaymentSetupFromSessionInput {
+  session: Stripe.Checkout.Session;
+}
+
+export interface PostPaymentSetupFromSessionResult {
+  userId: string | null;
+  wasExisting: boolean;
+  orderCreated: boolean;
+  groupId: string | null;
+}
+
+/**
+ * Session-aware variant of `runPostPaymentSetup`, fed by the Stripe Checkout
+ * hosted flow via the `checkout.session.completed` webhook event.
+ *
+ * Extracts email/name/payment-intent from the Checkout Session, then runs the
+ * same idempotent setup (user + profile + order + group) using the shared
+ * private helpers. `onboarding_data` gets the session metadata (same shape as
+ * the PaymentIntent-metadata-based variant).
+ *
+ * Throws on missing email, missing payment_intent, or metadata.type mismatch
+ * — all three are programmer errors that should never happen in production.
+ * Returns `orderCreated: true` when this call wrote the order row.
+ */
+export async function runPostPaymentSetupFromSession(
+  input: PostPaymentSetupFromSessionInput
+): Promise<PostPaymentSetupFromSessionResult> {
+  const { session } = input;
+  const metadata = session.metadata || {};
+
+  const rawEmail = session.customer_details?.email || session.customer_email || "";
+  const email = rawEmail.trim().toLowerCase();
+  const buyerName = session.customer_details?.name?.trim() || "";
+
+  const paymentIntentId =
+    typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : session.payment_intent?.id ?? null;
+
+  if (!email) {
+    throw new Error(
+      `runPostPaymentSetupFromSession: no email in session ${session.id}`
+    );
+  }
+  if (!paymentIntentId) {
+    throw new Error(
+      `runPostPaymentSetupFromSession: no payment_intent in session ${session.id}`
+    );
+  }
+  if (metadata.type !== "initial_purchase") {
+    throw new Error(
+      `runPostPaymentSetupFromSession: session ${session.id} metadata.type is '${metadata.type}', expected 'initial_purchase'`
+    );
+  }
+
+  const supabaseAdmin = createSupabaseAdminClient();
+  const bookQuantity = parseInt(metadata.bookQuantity || "1", 10);
+  const giftDate: string | null = metadata.giftDate || null;
+  const giftDateUndecided: boolean = metadata.giftDateUndecided === "true";
+  const bookCloseDate: string | null = metadata.bookCloseDate || null;
+  const userType: "couple" | "gift_giver" =
+    metadata.userType === "couple" ? "couple" : "gift_giver";
+
+  // 1. Find or create user.
+  const { userId, wasExisting } = await findOrCreateUser(supabaseAdmin, email, buyerName);
+  if (!userId) {
+    return {
+      userId: null,
+      wasExisting: false,
+      orderCreated: false,
+      groupId: null,
+    };
+  }
+
+  // 2. Upsert profile.
+  await upsertBuyerProfile(supabaseAdmin, userId, email, buyerName);
+
+  // 3. Order idempotency. Relies on DB UNIQUE constraint on `orders.stripe_payment_intent`.
+  const { data: preCheckOrder } = await supabaseAdmin
+    .from("orders")
+    .select("id, group_id")
+    .eq("stripe_payment_intent", paymentIntentId)
+    .maybeSingle();
+
+  let existingOrder = preCheckOrder;
+  let orderCreated = false;
+  if (!existingOrder) {
+    const { data: inserted, error: orderError } = await supabaseAdmin
+      .from("orders")
+      .insert({
+        user_id: userId,
+        email,
+        stripe_payment_intent: paymentIntentId,
+        amount_total: session.amount_total,
+        book_quantity: bookQuantity,
+        couple_name: null,
+        user_type: userType,
+        onboarding_data: metadata,
+        order_type: "initial_purchase",
+        status: "paid",
+      })
+      .select("id, group_id")
+      .maybeSingle();
+
+    if (orderError) {
+      if (orderError.code === "23505") {
+        console.warn(
+          "runPostPaymentSetupFromSession: order already inserted by concurrent caller (race)"
+        );
+        const { data: recovered } = await supabaseAdmin
+          .from("orders")
+          .select("id, group_id")
+          .eq("stripe_payment_intent", paymentIntentId)
+          .maybeSingle();
+        existingOrder = recovered;
+      } else {
+        console.error("runPostPaymentSetupFromSession: order insert failed", orderError);
+      }
+    } else if (inserted) {
+      existingOrder = inserted;
+      orderCreated = true;
+    }
+  }
+
+  // 4. Group idempotency.
+  const { groupId } = await findOrCreatePendingGroup(
+    supabaseAdmin,
+    userId,
+    existingOrder?.group_id ?? null,
+    giftDate,
+    giftDateUndecided,
+    bookCloseDate
+  );
+
+  // 5. Back-fill order.group_id if needed.
+  await backfillOrderGroupId(supabaseAdmin, paymentIntentId, groupId);
+
+  return {
+    userId,
+    wasExisting,
+    orderCreated,
+    groupId,
+  };
 }
