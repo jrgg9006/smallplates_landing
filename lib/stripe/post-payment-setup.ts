@@ -192,7 +192,7 @@ export async function emitPostPaymentAutoLogin(
       type: "magiclink",
       email,
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/welcome`,
+        redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`,
       },
     });
     if (linkError) {
