@@ -6,6 +6,14 @@
 export const BASE_BOOK_PRICE = 169;
 export const ADDITIONAL_BOOK_PRICE = 129;
 
+/**
+ * Flat shipping cost applied to every extra_copy order placed from
+ * the dashboard (post-close "Get more copies" flow). Different from
+ * the upsell-during-close flow where shipping is included in the
+ * main book's package.
+ */
+export const EXTRA_COPIES_SHIPPING_COST = 14;
+
 export type ShippingCountry = 'US' | 'MX';
 
 /**

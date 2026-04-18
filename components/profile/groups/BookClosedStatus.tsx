@@ -390,18 +390,14 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
     );
   };
 
-  // Reason: Show purchase flow as full-page overlay when user clicks "Get another copy"
+  // Reason: Show purchase flow as full-page overlay when user clicks "Get another copy".
+  // Successful flow redirects to Stripe then returns to /profile/groups?from=dashboard-extras-purchase,
+  // which the parent page.tsx detects and refreshes the groups list. onBack handles the cancel path.
   if (showPurchase) {
     return (
       <ExtraCopyPurchase
         groupId={group.id}
-        bookStatus={group.book_status}
         existingAddress={shippingAddress}
-        existingExtraCopies={extraCopiesCount}
-        onDone={() => {
-          setShowPurchase(false);
-          window.location.reload();
-        }}
         onBack={() => setShowPurchase(false)}
       />
     );

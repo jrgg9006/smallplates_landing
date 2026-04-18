@@ -4,6 +4,7 @@ import {
   runPostPaymentSetup,
   runPostPaymentSetupFromSession,
   runExtraCopiesSetupFromSession,
+  runDashboardExtrasSetupFromSession,
   emitPostPaymentAutoLogin,
 } from '@/lib/stripe/post-payment-setup';
 import Stripe from 'stripe';
@@ -40,6 +41,8 @@ export async function POST(request: NextRequest) {
       await handleCheckoutSessionCompleted(session);
     } else if (metadataType === 'extra_copies_purchase') {
       await handleExtraCopiesPurchase(session);
+    } else if (metadataType === 'dashboard_extras_purchase') {
+      await handleDashboardExtrasPurchase(session);
     }
     // Reason: Ignore unknown types silently — future flows may add their own.
   }
@@ -50,10 +53,14 @@ export async function POST(request: NextRequest) {
 async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   const metadata = paymentIntent.metadata || {};
 
-  // Reason: Checkout-hosted flows (initial_purchase, extra_copies_purchase) are
-  // processed via their checkout.session.completed handlers. We must not
-  // double-process them here.
-  if (metadata.type === 'initial_purchase' || metadata.type === 'extra_copies_purchase') {
+  // Reason: Checkout-hosted flows (initial_purchase, extra_copies_purchase,
+  // dashboard_extras_purchase) are processed via their checkout.session.completed
+  // handlers. We must not double-process them here.
+  if (
+    metadata.type === 'initial_purchase' ||
+    metadata.type === 'extra_copies_purchase' ||
+    metadata.type === 'dashboard_extras_purchase'
+  ) {
     return;
   }
 
@@ -140,6 +147,19 @@ async function handleExtraCopiesPurchase(session: Stripe.Checkout.Session) {
   if (!result.orderCreated) {
     console.warn(
       'handleExtraCopiesPurchase: order was not created (likely idempotency hit)',
+      { sessionId: session.id }
+    );
+  }
+}
+
+async function handleDashboardExtrasPurchase(session: Stripe.Checkout.Session) {
+  // Reason: Dashboard "Get more copies" flow — the user provides shipping
+  // inline in our UI, it's persisted only as a JSONB snapshot in the order.
+  // No email sent; the dashboard reflects the new order on refresh.
+  const result = await runDashboardExtrasSetupFromSession({ session });
+  if (!result.orderCreated) {
+    console.warn(
+      'handleDashboardExtrasPurchase: order was not created (likely idempotency hit)',
       { sessionId: session.id }
     );
   }

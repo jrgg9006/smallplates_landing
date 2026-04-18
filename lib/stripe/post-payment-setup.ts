@@ -729,3 +729,122 @@ export async function runExtraCopiesSetupFromSession(
 
   return { orderCreated: !!inserted };
 }
+
+export interface DashboardExtrasSetupFromSessionInput {
+  session: Stripe.Checkout.Session;
+}
+
+export interface DashboardExtrasSetupFromSessionResult {
+  orderCreated: boolean;
+}
+
+/**
+ * Records an `extra_copy` order from a Stripe Checkout Session fired by the
+ * dashboard "Get more copies" flow (Phase 7B). Reads the shipping address
+ * from `session.metadata` (stored there at session creation) and persists
+ * it as a JSONB snapshot in `orders.shipping_address`.
+ *
+ * Critically: does NOT touch `public.shipping_addresses`. The main book's
+ * shipping address is preserved — each dashboard extras order carries its
+ * own address snapshot, independent of the primary delivery.
+ *
+ * Idempotent via UNIQUE `orders.stripe_payment_intent` (23505 → skip + log warn).
+ */
+export async function runDashboardExtrasSetupFromSession(
+  input: DashboardExtrasSetupFromSessionInput
+): Promise<DashboardExtrasSetupFromSessionResult> {
+  const { session } = input;
+  const metadata = session.metadata || {};
+
+  const groupId = metadata.groupId;
+  const userId = metadata.userId;
+  const qty = parseInt(metadata.qty || "0", 10);
+
+  if (!groupId || !userId || !qty) {
+    throw new Error(
+      `runDashboardExtrasSetupFromSession: missing metadata in session ${session.id}`
+    );
+  }
+  if (metadata.type !== "dashboard_extras_purchase") {
+    throw new Error(
+      `runDashboardExtrasSetupFromSession: session ${session.id} metadata.type is '${metadata.type}', expected 'dashboard_extras_purchase'`
+    );
+  }
+
+  const paymentIntentId =
+    typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : session.payment_intent?.id ?? null;
+
+  if (!paymentIntentId) {
+    throw new Error(
+      `runDashboardExtrasSetupFromSession: no payment_intent in session ${session.id}`
+    );
+  }
+
+  const email = (
+    session.customer_details?.email ||
+    session.customer_email ||
+    ""
+  )
+    .trim()
+    .toLowerCase();
+
+  // Reason: Reconstruct the shipping snapshot from session metadata. The UI
+  // collected and validated these fields before creating the session, so
+  // required pieces are guaranteed present — we treat empty strings on
+  // optional fields as absent.
+  const shippingAddress = {
+    recipient_name: metadata.shipping_recipient_name || "",
+    street_address: metadata.shipping_street_address || "",
+    apartment_unit: metadata.shipping_apartment_unit || null,
+    city: metadata.shipping_city || "",
+    state: metadata.shipping_state || "",
+    postal_code: metadata.shipping_postal_code || "",
+    country: metadata.shipping_country || "",
+    phone_number: metadata.shipping_phone_number || null,
+  };
+
+  const supabaseAdmin = createSupabaseAdminClient();
+
+  const { data: group } = await supabaseAdmin
+    .from("groups")
+    .select("name")
+    .eq("id", groupId)
+    .maybeSingle();
+
+  const { data: inserted, error: insertError } = await supabaseAdmin
+    .from("orders")
+    .insert({
+      user_id: userId,
+      email,
+      stripe_payment_intent: paymentIntentId,
+      amount_total: session.amount_total,
+      book_quantity: qty,
+      shipping_address: shippingAddress,
+      couple_name: group?.name || null,
+      user_type: "extra_copy_buyer",
+      status: "paid",
+      order_type: "extra_copy",
+      group_id: groupId,
+    })
+    .select("id")
+    .maybeSingle();
+
+  if (insertError) {
+    if (insertError.code === "23505") {
+      console.warn(
+        "runDashboardExtrasSetupFromSession: order already exists (race), skipping",
+        { paymentIntentId }
+      );
+      return { orderCreated: false };
+    }
+    console.error(
+      "runDashboardExtrasSetupFromSession: order insert failed",
+      { paymentIntentId, err: insertError }
+    );
+    throw insertError;
+  }
+
+  return { orderCreated: !!inserted };
+}
