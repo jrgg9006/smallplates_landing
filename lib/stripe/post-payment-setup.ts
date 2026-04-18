@@ -336,6 +336,13 @@ async function upsertBuyerProfile(
   email: string,
   buyerName: string
 ): Promise<void> {
+  // Reason: The user just completed a Stripe Checkout purchase with this email
+  // and will receive a magic link to access the platform. Supabase Auth confirms
+  // the email automatically on magic link click. We sync the custom verification
+  // flag to prevent false-positive "Please verify your email" banner.
+  // TODO(phase-9-cleanup): the custom email verification system (profiles.email_verified,
+  // EmailVerificationBanner, /api/v1/verify-email endpoints, AddFriendToGroupModal gate)
+  // is redundant with Supabase Auth. Consider removing in Phase 9 or post-launch.
   const { error: profileError } = await supabaseAdmin
     .from("profiles")
     .upsert(
@@ -344,6 +351,7 @@ async function upsertBuyerProfile(
         email,
         user_type: "gift_giver" as const,
         full_name: buyerName || null,
+        email_verified: true,
       },
       { onConflict: "id" }
     );
