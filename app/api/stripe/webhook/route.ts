@@ -3,6 +3,7 @@ import { stripe } from '@/lib/stripe/client';
 import {
   runPostPaymentSetup,
   runPostPaymentSetupFromSession,
+  runExtraCopiesSetupFromSession,
   emitPostPaymentAutoLogin,
 } from '@/lib/stripe/post-payment-setup';
 import Stripe from 'stripe';
@@ -33,7 +34,14 @@ export async function POST(request: NextRequest) {
     await handlePaymentSucceeded(paymentIntent);
   } else if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
-    await handleCheckoutSessionCompleted(session);
+    const metadataType = session.metadata?.type;
+
+    if (metadataType === 'initial_purchase') {
+      await handleCheckoutSessionCompleted(session);
+    } else if (metadataType === 'extra_copies_purchase') {
+      await handleExtraCopiesPurchase(session);
+    }
+    // Reason: Ignore unknown types silently — future flows may add their own.
   }
 
   return NextResponse.json({ received: true });
@@ -42,10 +50,10 @@ export async function POST(request: NextRequest) {
 async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   const metadata = paymentIntent.metadata || {};
 
-  // Reason: initial_purchase payments from Stripe Checkout hosted are processed
-  // by handleCheckoutSessionCompleted via the checkout.session.completed event.
-  // We must not double-process them here.
-  if (metadata.type === 'initial_purchase') {
+  // Reason: Checkout-hosted flows (initial_purchase, extra_copies_purchase) are
+  // processed via their checkout.session.completed handlers. We must not
+  // double-process them here.
+  if (metadata.type === 'initial_purchase' || metadata.type === 'extra_copies_purchase') {
     return;
   }
 
@@ -121,5 +129,18 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       buyerName,
       wasExisting: setup.wasExisting,
     });
+  }
+}
+
+async function handleExtraCopiesPurchase(session: Stripe.Checkout.Session) {
+  // Reason: Records the extra_copy order. No email is sent from this flow —
+  // the buyer already has a session and the dashboard's BookClosedStatus view
+  // reflects the new order once the dashboard refreshes after return.
+  const result = await runExtraCopiesSetupFromSession({ session });
+  if (!result.orderCreated) {
+    console.warn(
+      'handleExtraCopiesPurchase: order was not created (likely idempotency hit)',
+      { sessionId: session.id }
+    );
   }
 }

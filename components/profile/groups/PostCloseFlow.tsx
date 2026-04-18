@@ -1,20 +1,13 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { ArrowLeft, Minus, Plus, AlertCircle, Check, ArrowRight } from "lucide-react";
+import { ArrowLeft, Minus, Plus, AlertCircle, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { useLoadScript, Autocomplete } from "@react-google-maps/api";
 import { ADDITIONAL_BOOK_PRICE, BASE_BOOK_PRICE } from "@/lib/stripe/pricing";
-import { closeBook } from "@/lib/supabase/groups";
 
 const GOOGLE_MAPS_LIBRARIES: ("places")[] = ["places"];
-
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-);
 
 interface PostCloseFlowProps {
   groupId: string;
@@ -22,7 +15,10 @@ interface PostCloseFlowProps {
   onBack: () => void;
 }
 
-type CloseStep = "extras" | "shipping" | "payment" | "done";
+// Reason: The "payment" step is external now — Stripe Checkout hosted takes
+// the user off-site after they finish shipping. Our local state machine only
+// needs extras → shipping → done.
+type CloseStep = "extras" | "shipping" | "done";
 
 const US_STATES = [
   "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware",
@@ -582,223 +578,15 @@ function StepShipping({
   );
 }
 
-// --- Screen C: Payment (inner form, inside Elements) ---
-function PaymentForm({
-  qty,
-  paymentIntentId,
-  onSuccess,
-  onBack,
-}: {
-  qty: number;
-  paymentIntentId: string;
-  onSuccess: (piId: string) => void;
-  onBack: () => void;
-}) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [paymentError, setPaymentError] = useState("");
-
-  const total = qty * ADDITIONAL_BOOK_PRICE;
-
-  const handleSubmit = async () => {
-    if (!stripe || !elements) return;
-    setIsSubmitting(true);
-    setPaymentError("");
-
-    try {
-      const { error } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/profile/groups`,
-        },
-        redirect: "if_required",
-      });
-
-      if (error) {
-        setPaymentError(error.message || "Payment failed. Please try again.");
-        setIsSubmitting(false);
-        return;
-      }
-
-      onSuccess(paymentIntentId);
-    } catch {
-      setPaymentError("Something went wrong. Please try again.");
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <div className="w-full">
-      {/* Order recap */}
-      <div className="bg-[#F5F3EF] border border-[rgba(45,45,45,0.12)] rounded-[10px] px-[18px] py-[14px] mb-6 text-[13px] space-y-2">
-        <div className="flex justify-between text-[#2D2D2D]">
-          <span>{qty} extra {qty === 1 ? "copy" : "copies"}</span>
-          <span>${total}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-[#8A8780]">Shipping on extras</span>
-          <span className="text-[#14532D]">Free</span>
-        </div>
-        <div className="border-t border-[rgba(45,45,45,0.12)] pt-2">
-          <div className="flex justify-between font-medium text-[15px] text-[#2D2D2D]">
-            <span>Total due today</span>
-            <span>${total}</span>
-          </div>
-        </div>
-        <p className="text-xs italic text-[#8A8780] pt-1">
-          Your book (${BASE_BOOK_PRICE}, shipping included) was already paid.
-        </p>
-      </div>
-
-      {/* Stripe element */}
-      <div className="mb-6">
-        <PaymentElement options={{ layout: "tabs" }} />
-      </div>
-
-      {paymentError && (
-        <div className="flex items-center gap-2 p-2.5 bg-red-50 rounded-lg mb-4">
-          <AlertCircle className="h-3.5 w-3.5 text-red-500 flex-shrink-0" />
-          <p className="text-xs text-red-600">{paymentError}</p>
-        </div>
-      )}
-
-      <button
-        onClick={handleSubmit}
-        disabled={isSubmitting || !stripe || !elements}
-        className="w-full bg-[#2D2D2D] text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
-      >
-        {isSubmitting ? "Processing..." : `Purchase for $${total} →`}
-      </button>
-
-      <button
-        onClick={onBack}
-        disabled={isSubmitting}
-        className="w-full mt-3 text-sm text-[#8A8780] hover:underline text-center"
-      >
-        ← Back to shipping
-      </button>
-
-      <p className="text-xs text-[#8A8780] text-center mt-4">
-        🔒 Secure checkout powered by <span className="text-[#635BFF] font-medium">Stripe</span>
-      </p>
-    </div>
-  );
-}
-
-// --- Screen C wrapper: handles PaymentIntent creation + Elements provider ---
-function StepPayment({
-  qty,
-  groupId,
-  onSuccess,
-  onBack,
-  totalSteps,
-}: {
-  qty: number;
-  groupId: string;
-  onSuccess: (piId: string) => void;
-  onBack: () => void;
-  totalSteps: number;
-}) {
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const createPI = async () => {
-      try {
-        const res = await fetch(`/api/v1/groups/${groupId}/extra-copies-payment`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ qty }),
-        });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.error || "Failed to create payment");
-        setClientSecret(json.clientSecret);
-        setPaymentIntentId(json.paymentIntentId);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
-      }
-    };
-    createPI();
-  }, [groupId, qty]);
-
-  if (error) {
-    return (
-      <div className="text-center py-20">
-        <p className="text-red-600 text-sm mb-4">{error}</p>
-        <button onClick={onBack} className="text-sm text-[#8A8780] hover:underline">
-          ← Go back
-        </button>
-      </div>
-    );
-  }
-
-  if (!clientSecret || !paymentIntentId) {
-    return (
-      <div className="flex justify-center py-20">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#D4A854]" />
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col items-center w-full">
-      <StepIndicator current={3} total={totalSteps} />
-
-      <h1 className="font-serif text-[30px] font-normal text-[#2D2D2D] text-center leading-tight mb-2">
-        One last thing.
-      </h1>
-      <p className="text-sm text-[#8A8780] text-center mb-8">
-        Payment for your extra {qty === 1 ? "copy" : "copies"}.
-      </p>
-
-      <Elements
-        stripe={stripePromise}
-        options={{
-          clientSecret,
-          appearance: {
-            theme: "stripe",
-            variables: {
-              colorPrimary: "#2D2D2D",
-              colorBackground: "#F5F5F5",
-              colorText: "#2D2D2D",
-              borderRadius: "10px",
-              fontFamily: "system-ui, -apple-system, sans-serif",
-            },
-            rules: {
-              ".Input": {
-                border: "1px solid rgba(45,45,45,0.12)",
-                boxShadow: "none",
-                padding: "13px 16px",
-              },
-              ".Input:focus": {
-                border: "1px solid #D4A854",
-                boxShadow: "0 0 0 2px rgba(212, 168, 84, 0.2)",
-              },
-            },
-          },
-        }}
-      >
-        <PaymentForm
-          qty={qty}
-          paymentIntentId={paymentIntentId}
-          onSuccess={onSuccess}
-          onBack={onBack}
-        />
-      </Elements>
-    </div>
-  );
-}
-
 // --- Main Orchestrator ---
 export function PostCloseFlow({ groupId, onDone, onBack }: PostCloseFlowProps) {
   const [step, setStep] = useState<CloseStep>("extras");
   const [qty, setQty] = useState(0);
-  const [closing, setClosing] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
-  // Reason: Total steps depends on whether user selected extras (adds payment step)
-  const totalSteps = qty > 0 ? 3 : 2;
+  // Reason: Payment is external (Stripe Checkout hosted). The user only sees
+  // extras + shipping on our side — always 2 steps from their perspective.
+  const totalSteps = 2;
 
   const handleExtrasNext = () => setStep("shipping");
 
@@ -809,53 +597,46 @@ export function PostCloseFlow({ groupId, onDone, onBack }: PostCloseFlowProps) {
 
   const handleShippingDone = async () => {
     if (qty > 0) {
-      setStep("payment");
-    } else {
-      // Reason: No extras — close book immediately after shipping
-      await finalizeClose();
-    }
-  };
-
-  const handlePaymentSuccess = async (paymentIntentId: string) => {
-    await finalizeClose(paymentIntentId);
-  };
-
-  const finalizeClose = async (paymentIntentId?: string) => {
-    setClosing(true);
-    try {
-      const { error } = await closeBook(groupId);
-      if (error) {
-        console.error("Failed to close book:", error);
-        return;
-      }
-      // Reason: Record extra copies as an order if purchased during close
-      if (qty > 0 && paymentIntentId) {
-        await fetch(`/api/v1/groups/${groupId}/extra-copies-payment`, {
-          method: "PATCH",
+      // Reason: Redirect to Stripe Checkout hosted. The webhook creates the
+      // extra_copy order when payment completes (see handleExtraCopiesPurchase).
+      // On return (success or cancel), the user lands on /profile/groups, which
+      // re-renders as BookClosedStatus because the book is already closed.
+      setRedirecting(true);
+      try {
+        const response = await fetch("/api/stripe/create-checkout-extras-session", {
+          method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ additionalCopies: qty, paymentIntentId }),
+          body: JSON.stringify({ groupId, qty }),
         });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.url) {
+          console.error("Failed to create extras checkout session:", data);
+          setRedirecting(false);
+          return;
+        }
+        window.location.href = data.url;
+      } catch (err) {
+        console.error("handleShippingDone error:", err);
+        setRedirecting(false);
       }
+    } else {
+      // Reason: qty=0 path — book is already closed from ReviewRecipesPage.
+      // Nothing to persist here; just hand off to the dashboard refresh.
       setStep("done");
       onDone();
-    } catch (err) {
-      console.error("Error closing book:", err);
-    } finally {
-      setClosing(false);
     }
   };
 
   const handleBackPress = () => {
     if (step === "shipping") setStep("extras");
-    else if (step === "payment") setStep("shipping");
     else onBack();
   };
 
-  if (closing) {
+  if (redirecting) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-[#F5F3EF]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4A854] mb-4" />
-        <p className="text-sm text-[#8A8780]">Closing the book...</p>
+        <p className="text-sm text-[#8A8780]">Redirecting to checkout…</p>
       </div>
     );
   }
@@ -894,16 +675,6 @@ export function PostCloseFlow({ groupId, onDone, onBack }: PostCloseFlowProps) {
                 groupId={groupId}
                 onContinue={handleShippingDone}
                 onBack={() => setStep("extras")}
-                totalSteps={totalSteps}
-              />
-            )}
-
-            {step === "payment" && (
-              <StepPayment
-                qty={qty}
-                groupId={groupId}
-                onSuccess={handlePaymentSuccess}
-                onBack={() => setStep("shipping")}
                 totalSteps={totalSteps}
               />
             )}

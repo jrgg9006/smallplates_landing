@@ -521,6 +521,18 @@ export default function GroupsPage() {
     }
   }, [user, loading, router]);
 
+  // Reason: After returning from Stripe Checkout (extras upsell), refresh group
+  // data so BookClosedStatus reflects the new extra_copy order, then strip the
+  // query param so a browser refresh doesn't re-trigger this.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("from") === "extras-purchase") {
+      groupsSectionRef.current?.loadGroups(true);
+      router.replace("/profile/groups");
+    }
+  }, [router]);
+
   // Handle GroupsSection loading state changes
   const handleGroupsLoadingChange = useCallback((isLoading: boolean) => {
     setGroupsLoading(isLoading);

@@ -592,3 +592,132 @@ export async function runPostPaymentSetupFromSession(
     groupId,
   };
 }
+
+export interface ExtraCopiesSetupFromSessionInput {
+  session: Stripe.Checkout.Session;
+}
+
+export interface ExtraCopiesSetupFromSessionResult {
+  orderCreated: boolean;
+}
+
+/**
+ * Records an `extra_copy` order from a Stripe Checkout Session fired by the
+ * post-close upsell flow (Phase 7A). Parallel to `runPostPaymentSetupFromSession`
+ * but scoped to orders only — does NOT create users, profiles, or groups. The
+ * captain already exists and the group is already active.
+ *
+ * Shipping address snapshot is pulled from `shipping_addresses.group_id` —
+ * StepShipping in PostCloseFlow persists it before the user redirects to Stripe.
+ * If the address is missing (shouldn't happen), logs loudly but still creates
+ * the order — missing address is recoverable via support; a missing order is not.
+ *
+ * Idempotent via UNIQUE `orders.stripe_payment_intent` (23505 → skip + log warn).
+ */
+export async function runExtraCopiesSetupFromSession(
+  input: ExtraCopiesSetupFromSessionInput
+): Promise<ExtraCopiesSetupFromSessionResult> {
+  const { session } = input;
+  const metadata = session.metadata || {};
+
+  const groupId = metadata.groupId;
+  const userId = metadata.userId;
+  const qty = parseInt(metadata.qty || "0", 10);
+
+  if (!groupId || !userId || !qty) {
+    throw new Error(
+      `runExtraCopiesSetupFromSession: missing metadata in session ${session.id}`
+    );
+  }
+  if (metadata.type !== "extra_copies_purchase") {
+    throw new Error(
+      `runExtraCopiesSetupFromSession: session ${session.id} metadata.type is '${metadata.type}', expected 'extra_copies_purchase'`
+    );
+  }
+
+  const paymentIntentId =
+    typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : session.payment_intent?.id ?? null;
+
+  if (!paymentIntentId) {
+    throw new Error(
+      `runExtraCopiesSetupFromSession: no payment_intent in session ${session.id}`
+    );
+  }
+
+  const email = (
+    session.customer_details?.email ||
+    session.customer_email ||
+    ""
+  )
+    .trim()
+    .toLowerCase();
+
+  const supabaseAdmin = createSupabaseAdminClient();
+
+  // 1. Lookup shipping address captured during StepShipping.
+  const { data: shippingAddress, error: shippingError } = await supabaseAdmin
+    .from("shipping_addresses")
+    .select("*")
+    .eq("group_id", groupId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (shippingError) {
+    console.error(
+      "runExtraCopiesSetupFromSession: shipping lookup failed",
+      { groupId, err: shippingError }
+    );
+  }
+  if (!shippingAddress) {
+    console.error(
+      `runExtraCopiesSetupFromSession: NO shipping address for group ${groupId} — order will be created without one`
+    );
+  }
+
+  // 2. Lookup group.name for couple_name on the order record.
+  const { data: group } = await supabaseAdmin
+    .from("groups")
+    .select("name")
+    .eq("id", groupId)
+    .maybeSingle();
+
+  // 3. Idempotent INSERT. Race with webhook retries is broken by UNIQUE on
+  //    orders.stripe_payment_intent — the losing caller gets 23505, logs, returns.
+  const { data: inserted, error: insertError } = await supabaseAdmin
+    .from("orders")
+    .insert({
+      user_id: userId,
+      email,
+      stripe_payment_intent: paymentIntentId,
+      amount_total: session.amount_total,
+      book_quantity: qty,
+      shipping_address: shippingAddress ?? null,
+      couple_name: group?.name || null,
+      user_type: "extra_copy_buyer",
+      status: "paid",
+      order_type: "extra_copy",
+      group_id: groupId,
+    })
+    .select("id")
+    .maybeSingle();
+
+  if (insertError) {
+    if (insertError.code === "23505") {
+      console.warn(
+        "runExtraCopiesSetupFromSession: order already exists (race), skipping",
+        { paymentIntentId }
+      );
+      return { orderCreated: false };
+    }
+    console.error(
+      "runExtraCopiesSetupFromSession: order insert failed",
+      { paymentIntentId, err: insertError }
+    );
+    throw insertError;
+  }
+
+  return { orderCreated: !!inserted };
+}
