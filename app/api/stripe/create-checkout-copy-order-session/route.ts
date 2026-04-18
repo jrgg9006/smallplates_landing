@@ -146,7 +146,13 @@ export async function POST(request: NextRequest) {
         },
       ],
       metadata: sharedMetadata,
-      payment_intent_data: { metadata: sharedMetadata },
+      // Reason: receipt_email guarantees Stripe sends the automatic receipt in
+      // test and live modes regardless of the Dashboard toggle. The Dashboard
+      // docs state this parameter overrides the global setting.
+      payment_intent_data: {
+        receipt_email: trimmedEmail,
+        metadata: sharedMetadata,
+      },
       allow_promotion_codes: true,
       success_url: `${baseUrl}/copy/${bookId}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/copy/${bookId}`,
