@@ -848,3 +848,110 @@ export async function runDashboardExtrasSetupFromSession(
 
   return { orderCreated: !!inserted };
 }
+
+export interface CopyOrderSetupFromSessionInput {
+  session: Stripe.Checkout.Session;
+}
+
+export interface CopyOrderSetupFromSessionResult {
+  orderCreated: boolean;
+}
+
+/**
+ * Records a `copy_order` from a Stripe Checkout Session fired by the public
+ * copy-order flow (Phase 8). The buyer is a third party without an account;
+ * `user_id` remains NULL on the order row. Shipping address is persisted as
+ * a JSONB snapshot in `orders.shipping_address`. Does NOT touch
+ * `public.shipping_addresses`.
+ *
+ * Idempotent via UNIQUE `orders.stripe_payment_intent` (23505 → skip + log warn).
+ */
+export async function runCopyOrderSetupFromSession(
+  input: CopyOrderSetupFromSessionInput
+): Promise<CopyOrderSetupFromSessionResult> {
+  const { session } = input;
+  const metadata = session.metadata || {};
+
+  const bookId = metadata.bookId;
+  const qty = parseInt(metadata.qty || "0", 10);
+  const email = (metadata.email || "").trim().toLowerCase();
+
+  if (!bookId || !qty || !email) {
+    throw new Error(
+      `runCopyOrderSetupFromSession: missing metadata in session ${session.id}`
+    );
+  }
+  if (metadata.type !== "copy_order_purchase") {
+    throw new Error(
+      `runCopyOrderSetupFromSession: session ${session.id} metadata.type is '${metadata.type}', expected 'copy_order_purchase'`
+    );
+  }
+
+  const paymentIntentId =
+    typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : session.payment_intent?.id ?? null;
+
+  if (!paymentIntentId) {
+    throw new Error(
+      `runCopyOrderSetupFromSession: no payment_intent in session ${session.id}`
+    );
+  }
+
+  // Reason: Reconstruct shipping snapshot from session metadata. Validated
+  // client-side and by the endpoint before session creation.
+  const shippingAddress = {
+    recipient_name: metadata.shipping_recipient_name || "",
+    street_address: metadata.shipping_street_address || "",
+    apartment_unit: metadata.shipping_apartment_unit || null,
+    city: metadata.shipping_city || "",
+    state: metadata.shipping_state || "",
+    postal_code: metadata.shipping_postal_code || "",
+    country: metadata.shipping_country || "",
+    phone_number: metadata.shipping_phone_number || null,
+  };
+
+  const supabaseAdmin = createSupabaseAdminClient();
+
+  const { data: book } = await supabaseAdmin
+    .from("groups")
+    .select("name")
+    .eq("id", bookId)
+    .maybeSingle();
+
+  const { data: inserted, error: insertError } = await supabaseAdmin
+    .from("orders")
+    .insert({
+      // Reason: Copy-order buyer is a third party without a Supabase account.
+      user_id: null,
+      email,
+      stripe_payment_intent: paymentIntentId,
+      amount_total: session.amount_total,
+      book_quantity: qty,
+      shipping_address: shippingAddress,
+      couple_name: book?.name || null,
+      user_type: "copy_buyer",
+      status: "paid",
+      order_type: "copy_order",
+      group_id: bookId,
+    })
+    .select("id")
+    .maybeSingle();
+
+  if (insertError) {
+    if (insertError.code === "23505") {
+      console.warn(
+        "runCopyOrderSetupFromSession: order already exists (race), skipping",
+        { paymentIntentId }
+      );
+      return { orderCreated: false };
+    }
+    console.error(
+      "runCopyOrderSetupFromSession: order insert failed",
+      { paymentIntentId, err: insertError }
+    );
+    throw insertError;
+  }
+
+  return { orderCreated: !!inserted };
+}

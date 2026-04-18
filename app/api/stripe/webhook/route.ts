@@ -5,6 +5,7 @@ import {
   runPostPaymentSetupFromSession,
   runExtraCopiesSetupFromSession,
   runDashboardExtrasSetupFromSession,
+  runCopyOrderSetupFromSession,
   emitPostPaymentAutoLogin,
 } from '@/lib/stripe/post-payment-setup';
 import Stripe from 'stripe';
@@ -43,6 +44,8 @@ export async function POST(request: NextRequest) {
       await handleExtraCopiesPurchase(session);
     } else if (metadataType === 'dashboard_extras_purchase') {
       await handleDashboardExtrasPurchase(session);
+    } else if (metadataType === 'copy_order_purchase') {
+      await handleCopyOrderPurchase(session);
     }
     // Reason: Ignore unknown types silently — future flows may add their own.
   }
@@ -54,20 +57,21 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   const metadata = paymentIntent.metadata || {};
 
   // Reason: Checkout-hosted flows (initial_purchase, extra_copies_purchase,
-  // dashboard_extras_purchase) are processed via their checkout.session.completed
-  // handlers. We must not double-process them here.
+  // dashboard_extras_purchase, copy_order_purchase) are processed via their
+  // checkout.session.completed handlers. We must not double-process them here.
   if (
     metadata.type === 'initial_purchase' ||
     metadata.type === 'extra_copies_purchase' ||
-    metadata.type === 'dashboard_extras_purchase'
+    metadata.type === 'dashboard_extras_purchase' ||
+    metadata.type === 'copy_order_purchase'
   ) {
     return;
   }
 
-  // Reason: Extra copies and copy orders have their own order-creation logic
-  // (PATCH /extra-copies-payment and /copy/[bookId]/success).
-  // Webhook must not create a duplicate order for these.
-  if (metadata.type === 'extra_copies' || metadata.type === 'copy_order') {
+  // Reason: Legacy Flow B extra_copies path still uses a client-side PATCH to
+  // /extra-copies-payment to record the order; the webhook must stay out of its way
+  // until that endpoint is retired in Phase 9 cleanup.
+  if (metadata.type === 'extra_copies') {
     return;
   }
 
@@ -160,6 +164,18 @@ async function handleDashboardExtrasPurchase(session: Stripe.Checkout.Session) {
   if (!result.orderCreated) {
     console.warn(
       'handleDashboardExtrasPurchase: order was not created (likely idempotency hit)',
+      { sessionId: session.id }
+    );
+  }
+}
+
+async function handleCopyOrderPurchase(session: Stripe.Checkout.Session) {
+  // Reason: Public copy-order flow — third-party buyer without account.
+  // Order is created with user_id=NULL. Shipping is a JSONB snapshot only.
+  const result = await runCopyOrderSetupFromSession({ session });
+  if (!result.orderCreated) {
+    console.warn(
+      'handleCopyOrderPurchase: order was not created (likely idempotency hit)',
       { sessionId: session.id }
     );
   }
