@@ -643,15 +643,20 @@ export function PostCloseFlow({ groupId, onDone, onBack }: PostCloseFlowProps) {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F5F3EF]">
-      {/* Header with back button */}
-      <div className="flex items-center px-4 py-3 flex-shrink-0">
-        <button
-          onClick={handleBackPress}
-          className="p-2 rounded-full hover:bg-white/60 transition-colors"
-          aria-label="Back"
-        >
-          <ArrowLeft className="h-5 w-5 text-[#2D2D2D]" />
-        </button>
+      {/* Header with back button — only rendered in Step 2 (shipping).
+          Reason: Step 1 (extras) has no back exit because the book is already closed
+          upstream in ReviewRecipesPage. Letting the user bail here would leave the
+          book closed without a shipping address captured. */}
+      <div className="flex items-center px-4 py-3 flex-shrink-0 min-h-[52px]">
+        {step === "shipping" && (
+          <button
+            onClick={handleBackPress}
+            className="p-2 rounded-full hover:bg-white/60 transition-colors"
+            aria-label="Back"
+          >
+            <ArrowLeft className="h-5 w-5 text-[#2D2D2D]" />
+          </button>
+        )}
       </div>
 
       {/* Content */}
