@@ -4,148 +4,6 @@ import { sendWelcomeLoginEmail, sendReturningCustomerEmail } from "@/lib/postmar
 
 type SupabaseAdmin = ReturnType<typeof createSupabaseAdminClient>;
 
-export interface PostPaymentSetupInput {
-  paymentIntent: Stripe.PaymentIntent;
-  email: string;
-  buyerName: string;
-}
-
-export interface PostPaymentSetupResult {
-  userId: string | null;
-  groupId: string | null;
-  orderCreated: boolean;
-  groupCreated: boolean;
-  wasExisting: boolean;
-}
-
-/**
- * Phase A — idempotent DB work only. Safe to call from multiple endpoints concurrently.
- *
- * Does NOT generate magic link tokens and does NOT send emails. That's phase B
- * (`emitPostPaymentAutoLogin`) — it must be called exactly ONCE per payment to avoid
- * token invalidation (Supabase invalidates prior magic-link tokens when a new one is
- * generated for the same email).
- *
- * Side effects:
- *   - Find-or-create Supabase Auth user + profile (user_type='gift_giver', full_name)
- *   - Placeholder group (name='pending', status='pending_setup') + owner row (via trigger)
- *   - Order row (status='paid', group_id back-filled)
- *
- * Returns `orderCreated: true` when this call was the one that wrote the order row.
- * The caller that gets `orderCreated: true` owns the responsibility to call phase B.
- */
-export async function runPostPaymentSetup(
-  input: PostPaymentSetupInput
-): Promise<PostPaymentSetupResult> {
-  const { paymentIntent } = input;
-  const email = input.email.trim().toLowerCase();
-  const buyerName = input.buyerName?.trim() || "";
-
-  const supabaseAdmin = createSupabaseAdminClient();
-  const metadata = paymentIntent.metadata || {};
-  const bookQuantity = parseInt(metadata.bookQuantity || "1", 10);
-  const discountCode: string | null = metadata.discount_code || null;
-  const discountAmount: number | null = metadata.discount_amount
-    ? parseInt(metadata.discount_amount, 10)
-    : null;
-
-  // Reason: These come from Step 1 (DatePickerStep) and travel through PI metadata.
-  // Persist them on the placeholder group so the dashboard doesn't re-prompt the user.
-  const giftDate: string | null = metadata.giftDate || null;
-  const giftDateUndecided: boolean = metadata.giftDateUndecided === "true";
-  const bookCloseDate: string | null = metadata.bookCloseDate || null;
-
-  // 1. Find or create user. Pass full_name in user_metadata so the handle_new_user trigger
-  //    picks it up even though we'll also upsert profile below to be safe.
-  const { userId, wasExisting } = await findOrCreateUser(supabaseAdmin, email, buyerName);
-  if (!userId) {
-    return {
-      userId: null,
-      groupId: null,
-      orderCreated: false,
-      groupCreated: false,
-      wasExisting: false,
-    };
-  }
-
-  // 2. Upsert profile — guarantees full_name + user_type='gift_giver' win the race with
-  //    the auth trigger that auto-creates a blank profile row.
-  await upsertBuyerProfile(supabaseAdmin, userId, email, buyerName);
-
-  // 3. Order idempotency. SELECT-then-INSERT is not atomic across concurrent callers
-  //    (post-payment-login + webhook race). We rely on DB UNIQUE constraint on
-  //    `orders.stripe_payment_intent` to break ties — the losing caller gets 23505,
-  //    catches it, and re-fetches the winner's row.
-  const { data: preCheckOrder } = await supabaseAdmin
-    .from("orders")
-    .select("id, group_id")
-    .eq("stripe_payment_intent", paymentIntent.id)
-    .maybeSingle();
-
-  let existingOrder = preCheckOrder;
-  let orderCreated = false;
-  if (!existingOrder) {
-    const { data: inserted, error: orderError } = await supabaseAdmin
-      .from("orders")
-      .insert({
-        user_id: userId,
-        email,
-        stripe_payment_intent: paymentIntent.id,
-        amount_total: paymentIntent.amount,
-        book_quantity: bookQuantity,
-        couple_name: null,
-        user_type: "gift_giver",
-        onboarding_data: metadata,
-        order_type: "initial_purchase",
-        status: "paid",
-        discount_code: discountCode,
-        discount_amount: discountAmount,
-      })
-      .select("id, group_id")
-      .maybeSingle();
-
-    if (orderError) {
-      if (orderError.code === "23505") {
-        // Reason: Concurrent caller inserted the order first. Re-query to fetch it.
-        console.warn("runPostPaymentSetup: order already inserted by concurrent caller (race)");
-        const { data: recovered } = await supabaseAdmin
-          .from("orders")
-          .select("id, group_id")
-          .eq("stripe_payment_intent", paymentIntent.id)
-          .maybeSingle();
-        existingOrder = recovered;
-      } else {
-        console.error("runPostPaymentSetup: order insert failed", orderError);
-      }
-    } else if (inserted) {
-      existingOrder = inserted;
-      orderCreated = true;
-    }
-  }
-
-  // 4. Group idempotency. Same race — rely on a partial UNIQUE index on
-  //    `groups(created_by) WHERE status='pending_setup'` to prevent duplicates.
-  const { groupId, groupCreated } = await findOrCreatePendingGroup(
-    supabaseAdmin,
-    userId,
-    existingOrder?.group_id ?? null,
-    giftDate,
-    giftDateUndecided,
-    bookCloseDate
-  );
-
-  // 5. Back-fill order.group_id if needed.
-  await backfillOrderGroupId(supabaseAdmin, paymentIntent.id, groupId);
-
-  return {
-    userId,
-    groupId,
-    orderCreated,
-    groupCreated,
-    wasExisting,
-  };
-}
-
 export interface EmitAutoLoginInput {
   email: string;
   buyerName: string;
@@ -468,17 +326,21 @@ export interface PostPaymentSetupFromSessionResult {
 }
 
 /**
- * Session-aware variant of `runPostPaymentSetup`, fed by the Stripe Checkout
- * hosted flow via the `checkout.session.completed` webhook event.
+ * Idempotent post-payment DB setup driven by a Stripe Checkout Session from
+ * the `checkout.session.completed` webhook event for `initial_purchase`.
  *
- * Extracts email/name/payment-intent from the Checkout Session, then runs the
- * same idempotent setup (user + profile + order + group) using the shared
- * private helpers. `onboarding_data` gets the session metadata (same shape as
- * the PaymentIntent-metadata-based variant).
+ * Extracts email, name, and payment-intent from the Checkout Session and:
+ *   - Finds or creates a Supabase Auth user + profile (user_type='gift_giver')
+ *   - Creates a placeholder group (name='pending', status='pending_setup') with
+ *     the owner row populated via DB trigger
+ *   - Writes the order row (status='paid') and back-fills group_id
+ *
+ * `onboarding_data` captures the full session metadata for downstream use.
  *
  * Throws on missing email, missing payment_intent, or metadata.type mismatch
  * — all three are programmer errors that should never happen in production.
- * Returns `orderCreated: true` when this call wrote the order row.
+ * Returns `orderCreated: true` when this call wrote the order row; the caller
+ * may then emit the magic-link email via `emitPostPaymentAutoLogin`.
  */
 export async function runPostPaymentSetupFromSession(
   input: PostPaymentSetupFromSessionInput

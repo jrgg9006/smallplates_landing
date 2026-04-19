@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe/client';
 import {
-  runPostPaymentSetup,
   runPostPaymentSetupFromSession,
   runExtraCopiesSetupFromSession,
   runDashboardExtrasSetupFromSession,
@@ -31,10 +30,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
-  if (event.type === 'payment_intent.succeeded') {
-    const paymentIntent = event.data.object as Stripe.PaymentIntent;
-    await handlePaymentSucceeded(paymentIntent);
-  } else if (event.type === 'checkout.session.completed') {
+  if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
     const metadataType = session.metadata?.type;
 
@@ -51,68 +47,6 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ received: true });
-}
-
-async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-  const metadata = paymentIntent.metadata || {};
-
-  // Reason: Checkout-hosted flows (initial_purchase, extra_copies_purchase,
-  // dashboard_extras_purchase, copy_order_purchase) are processed via their
-  // checkout.session.completed handlers. We must not double-process them here.
-  if (
-    metadata.type === 'initial_purchase' ||
-    metadata.type === 'extra_copies_purchase' ||
-    metadata.type === 'dashboard_extras_purchase' ||
-    metadata.type === 'copy_order_purchase'
-  ) {
-    return;
-  }
-
-  // Reason: Legacy Flow B extra_copies path still uses a client-side PATCH to
-  // /extra-copies-payment to record the order; the webhook must stay out of its way
-  // until that endpoint is retired in Phase 9 cleanup.
-  if (metadata.type === 'extra_copies') {
-    return;
-  }
-
-  const email = metadata.email?.trim().toLowerCase() || '';
-  const buyerName = metadata.buyerName?.trim() || '';
-
-  if (!email) {
-    console.error('webhook: payment_intent.succeeded has no email in metadata', paymentIntent.id);
-    return;
-  }
-
-  // Reason: Run the idempotent DB setup. If post-payment-login ran first, this is a
-  // no-op (every mutation is gated by existence checks).
-  const setup = await runPostPaymentSetup({ paymentIntent, email, buyerName });
-
-  // Reason: Only emit the magic-link email when WE created the order. Otherwise
-  // post-payment-login already handled it and generating another token here would
-  // invalidate the one it already returned to the browser.
-  if (setup.orderCreated) {
-    await emitPostPaymentAutoLogin({
-      email,
-      buyerName,
-      wasExisting: setup.wasExisting,
-    });
-  }
-
-  // Reason: Promo code redemption tracking — Stripe doesn't auto-track redemptions for
-  // manual PI flows. Deactivate the promo code if it hit max_redemptions.
-  if (metadata.promotion_code_id) {
-    try {
-      const promoCode = await stripe.promotionCodes.retrieve(metadata.promotion_code_id);
-      if (
-        promoCode.max_redemptions &&
-        promoCode.times_redeemed + 1 >= promoCode.max_redemptions
-      ) {
-        await stripe.promotionCodes.update(metadata.promotion_code_id, { active: false });
-      }
-    } catch (err) {
-      console.error('webhook: promo code redemption update failed', err);
-    }
-  }
 }
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
