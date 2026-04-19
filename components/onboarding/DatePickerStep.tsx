@@ -25,8 +25,8 @@ interface DatePickerStepProps {
   title: string;
   question: string;
   hint: React.ReactNode;
-  switchFlowText: string;
-  switchFlowHref: string;
+  switchFlowText?: string;
+  switchFlowHref?: string;
   isAddBookMode?: boolean;
 }
 
@@ -362,15 +362,17 @@ export function DatePickerStep({
         </button>
       </div>
 
-      {/* Switch flow link */}
-      <div className="text-center mt-6">
-        <a
-          href={switchFlowHref}
-          className="text-xs text-[#2D2D2D]/50 hover:text-[#D4A854] hover:underline underline-offset-2 transition-colors font-light"
-        >
-          {switchFlowText}
-        </a>
-      </div>
+      {/* Switch flow link — rendered only when both props are provided */}
+      {switchFlowHref && switchFlowText && (
+        <div className="text-center mt-6">
+          <a
+            href={switchFlowHref}
+            className="text-xs text-[#2D2D2D]/50 hover:text-[#D4A854] hover:underline underline-offset-2 transition-colors font-light"
+          >
+            {switchFlowText}
+          </a>
+        </div>
+      )}
 
       <style jsx>{`
         @keyframes cardIn {

@@ -31,8 +31,6 @@ export function EditGroupModal({
   const [name, setName] = useState('');
   const [giftDate, setGiftDate] = useState('');
   const [giftDateUndecided, setGiftDateUndecided] = useState(false);
-  const [weddingDate, setWeddingDate] = useState('');
-  const [weddingDateUndecided, setWeddingDateUndecided] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,8 +39,6 @@ export function EditGroupModal({
       setName(group.name || '');
       setGiftDate(group.gift_date || '');
       setGiftDateUndecided(group.gift_date_undecided || false);
-      setWeddingDate(group.wedding_date || '');
-      setWeddingDateUndecided(group.wedding_date_undecided || false);
     }
   }, [group, isOpen]);
 
@@ -75,9 +71,7 @@ export function EditGroupModal({
     const hasChanges =
       trimmedName !== group.name ||
       giftDate !== (group.gift_date || '') ||
-      giftDateUndecided !== (group.gift_date_undecided || false) ||
-      weddingDate !== (group.wedding_date || '') ||
-      weddingDateUndecided !== (group.wedding_date_undecided || false);
+      giftDateUndecided !== (group.gift_date_undecided || false);
 
     if (!hasChanges) {
       onClose();
@@ -101,16 +95,11 @@ export function EditGroupModal({
         gift_date: giftDate || null,
         gift_date_undecided: giftDateUndecided,
         book_close_date: bookCloseDate,
-        wedding_date: weddingDate || null,
-        wedding_date_undecided: weddingDateUndecided
       };
 
       // If they set a specific date, mark as not undecided
       if (giftDate) {
         updateData.gift_date_undecided = false;
-      }
-      if (weddingDate) {
-        updateData.wedding_date_undecided = false;
       }
 
       const { data, error: updateError } = await updateGroup(group.id, updateData);
@@ -204,7 +193,7 @@ export function EditGroupModal({
           {/* Delivery Date Section */}
           <div>
             <Label className="text-sm font-medium text-gray-600 mb-3 block">
-              Delivery Date
+              When do you want this book delivered?
             </Label>
 
             <div className="mb-3">
@@ -239,48 +228,6 @@ export function EditGroupModal({
             {giftDateUndecided && (
               <p className="text-xs text-gray-500 italic mt-2">
                 No recipe deadline will be shown until you set a date
-              </p>
-            )}
-          </div>
-
-          {/* Wedding Date Section */}
-          <div>
-            <Label className="text-sm font-medium text-gray-600 mb-3 block">
-              Wedding Date
-            </Label>
-
-            <div className="mb-3">
-              <Input
-                type="date"
-                value={weddingDate}
-                onChange={(e) => setWeddingDate(e.target.value)}
-                disabled={weddingDateUndecided}
-                className={weddingDateUndecided ? 'opacity-50' : ''}
-                placeholder="Select wedding date"
-              />
-            </div>
-
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="wedding-undecided"
-                checked={weddingDateUndecided}
-                onChange={(e) => {
-                  setWeddingDateUndecided(e.target.checked);
-                  if (e.target.checked) {
-                    setWeddingDate('');
-                  }
-                }}
-                className="mr-3 h-4 w-4 text-[hsl(var(--brand-honey))] border-gray-300 rounded focus:ring-[hsl(var(--brand-honey))]"
-              />
-              <label htmlFor="wedding-undecided" className="text-sm text-gray-700">
-                Wedding date is still undecided
-              </label>
-            </div>
-
-            {weddingDateUndecided && (
-              <p className="text-xs text-gray-500 italic mt-2">
-                Your cookbook will show &ldquo;Celebrations planned&rdquo; until you set a date
               </p>
             )}
           </div>

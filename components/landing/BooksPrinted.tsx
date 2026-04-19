@@ -179,7 +179,7 @@ export default function BooksPrinted() {
 
   const handleGetStarted = () => {
     trackEvent('start_book_click', { cta_location: 'books_printed_proof' });
-    router.push("/onboarding-gift");
+    router.push("/onboarding");
   };
 
   // Autoplay plugin for carousel

@@ -12,8 +12,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { UserPlus, Copy, Check } from "lucide-react";
 import type { GroupWithMembers } from "@/lib/types/database";
-import { useAuth } from "@/lib/contexts/AuthContext";
-import { getCurrentProfile } from "@/lib/supabase/profiles";
 
 interface AddFriendToGroupModalProps {
   isOpen: boolean;
@@ -23,8 +21,6 @@ interface AddFriendToGroupModalProps {
 }
 
 export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: AddFriendToGroupModalProps) {
-  const { user } = useAuth();
-
   // Form state
   const [formData, setFormData] = useState({
     name: '',
@@ -34,9 +30,8 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
-  const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
 
-  // Reset form when modal opens and check email verification
+  // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
       setFormData({
@@ -46,23 +41,8 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
       });
       setError(null);
       setLinkCopied(false);
-      
-      // Check email verification status
-      const checkEmailVerification = async () => {
-        if (user?.id) {
-          try {
-            const { data: profile } = await getCurrentProfile();
-            setEmailVerified(profile?.email_verified || false);
-          } catch (error) {
-            console.error('Error checking email verification:', error);
-            setEmailVerified(false);
-          }
-        }
-      };
-      
-      checkEmailVerification();
     }
-  }, [isOpen, user]);
+  }, [isOpen]);
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData(prev => ({
@@ -77,13 +57,7 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
 
   const handleSendInvite = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Check email verification first
-    if (emailVerified === false) {
-      setError('Please verify your email address before inviting others. Check your inbox for the verification link.');
-      return;
-    }
-    
+
     // Validate required fields
     if (!formData.name.trim()) {
       setError('Name is required');

@@ -19,7 +19,7 @@ export default function PricingPage() {
 
   const handleStartBook = () => {
     trackEvent('start_book_click', { cta_location: 'pricing_card_primary' });
-    router.push("/onboarding-gift");
+    router.push("/onboarding");
   };
 
   const handleContact = () => {

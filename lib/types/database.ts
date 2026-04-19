@@ -19,6 +19,10 @@ export type MemberRole = 'owner' | 'admin' | 'member';
 export type InvitationStatus = 'pending' | 'accepted' | 'declined' | 'expired';
 export type BookStatus = 'active' | 'reviewed' | 'ready_to_print' | 'printed' | 'inactive';
 export type BookReviewStatus = 'pending' | 'approved' | 'needs_revision';
+export type GroupStatus = 'pending_setup' | 'active';
+// Reason: Reuses the existing `groups.relationship_to_couple` column instead of a new one.
+// Values match the hyphenated form ("wedding-planner") already used by legacy data.
+export type OrganizerRelationship = 'couple' | 'family' | 'friend' | 'wedding-planner';
 
 // Newsletter types
 export type NewsletterSource = 'landing_page' | 'collection_flow';
@@ -55,9 +59,6 @@ export interface Database {
           user_type: 'couple' | 'gift_giver';
           onboarding_state: any;
           pending_email: string | null;
-          email_verification_token: string | null;
-          email_verification_expires_at: string | null;
-          email_verified: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -71,9 +72,6 @@ export interface Database {
           user_type?: 'couple' | 'gift_giver';
           onboarding_state?: any;
           pending_email?: string | null;
-          email_verification_token?: string | null;
-          email_verification_expires_at?: string | null;
-          email_verified?: boolean;
         };
         Update: {
           email?: string;
@@ -84,9 +82,6 @@ export interface Database {
           user_type?: 'couple' | 'gift_giver';
           onboarding_state?: any;
           pending_email?: string | null;
-          email_verification_token?: string | null;
-          email_verification_expires_at?: string | null;
-          email_verified?: boolean;
         };
       };
       guests: {
@@ -422,7 +417,7 @@ export interface Database {
           couple_last_name: string | null;
           partner_first_name: string | null;
           partner_last_name: string | null;
-          relationship_to_couple: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
+          relationship_to_couple: 'couple' | 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
           couple_image_url: string | null;
           image_group_dashboard: string | null;
           dashboard_image_position_y: number;
@@ -439,6 +434,7 @@ export interface Database {
           book_notes: string | null;
           print_couple_name: string | null;
           print_details_confirmed_at: string | null;
+          status: GroupStatus;
           created_at: string;
           updated_at: string;
         };
@@ -453,7 +449,7 @@ export interface Database {
           couple_last_name?: string | null;
           partner_first_name?: string | null;
           partner_last_name?: string | null;
-          relationship_to_couple?: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
+          relationship_to_couple?: 'couple' | 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
           couple_image_url?: string | null;
           image_group_dashboard?: string | null;
           dashboard_image_position_y?: number;
@@ -471,6 +467,7 @@ export interface Database {
           print_couple_name?: string | null;
           print_details_confirmed_at?: string | null;
           shipping_address_id?: string | null;
+          status?: GroupStatus;
         };
         Update: {
           name?: string;
@@ -482,7 +479,7 @@ export interface Database {
           couple_last_name?: string | null;
           partner_first_name?: string | null;
           partner_last_name?: string | null;
-          relationship_to_couple?: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
+          relationship_to_couple?: 'couple' | 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
           couple_image_url?: string | null;
           image_group_dashboard?: string | null;
           dashboard_image_position_y?: number;
@@ -500,6 +497,7 @@ export interface Database {
           print_couple_name?: string | null;
           print_details_confirmed_at?: string | null;
           shipping_address_id?: string | null;
+          status?: GroupStatus;
         };
       };
       group_members: {

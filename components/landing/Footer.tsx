@@ -60,7 +60,7 @@ export default function Footer() {
                   </li>
                   <li>
                     <Link
-                      href="/onboarding-gift"
+                      href="/onboarding"
                       onClick={() => trackEvent('start_book_click', { cta_location: 'footer_nav' })}
                       className="font-sans font-light text-base text-white/70 hover:text-white transition-colors"
                     >
@@ -127,7 +127,7 @@ export default function Footer() {
               Ready?
             </h3>
             <Link
-              href="/onboarding-gift"
+              href="/onboarding"
               onClick={() => trackEvent('start_book_click', { cta_location: 'footer_card' })}
               className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-6 py-3 text-base font-medium transition-colors"
             >

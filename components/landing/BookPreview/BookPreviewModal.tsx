@@ -26,7 +26,7 @@ export default function BookPreviewModal({
 
   const handleCreateCookbook = () => {
     trackEvent('start_book_click', { cta_location: 'book_preview_modal' });
-    router.push("/onboarding-gift");
+    router.push("/onboarding");
   };
 
   const handleViewProductDetails = () => {

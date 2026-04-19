@@ -47,7 +47,7 @@ export function ProductSelectionStep({
       {/* Book quantity selector */}
       <div className="mb-6">
         <p className="text-base font-medium text-[#2D2D2D] mb-6 text-center">
-          First book $169. Each additional copy $119.
+          First book $169. Each additional copy $129.
         </p>
 
         {/* Custom dropdown */}

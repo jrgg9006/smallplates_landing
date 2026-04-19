@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe/client';
-import { createSupabaseAdminClient } from '@/lib/supabase/admin';
-import { sendWelcomeLoginEmail } from '@/lib/postmark';
+import {
+  runPostPaymentSetupFromSession,
+  runExtraCopiesSetupFromSession,
+  runDashboardExtrasSetupFromSession,
+  runCopyOrderSetupFromSession,
+  emitPostPaymentAutoLogin,
+} from '@/lib/stripe/post-payment-setup';
 import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -25,263 +30,87 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
-  if (event.type === 'payment_intent.succeeded') {
-    const paymentIntent = event.data.object as Stripe.PaymentIntent;
-    await handlePaymentSucceeded(paymentIntent);
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const metadataType = session.metadata?.type;
+
+    if (metadataType === 'initial_purchase') {
+      await handleCheckoutSessionCompleted(session);
+    } else if (metadataType === 'extra_copies_purchase') {
+      await handleExtraCopiesPurchase(session);
+    } else if (metadataType === 'dashboard_extras_purchase') {
+      await handleDashboardExtrasPurchase(session);
+    } else if (metadataType === 'copy_order_purchase') {
+      await handleCopyOrderPurchase(session);
+    }
+    // Reason: Ignore unknown types silently — future flows may add their own.
   }
 
   return NextResponse.json({ received: true });
 }
 
-async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-  const metadata = paymentIntent.metadata || {};
+async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+  const metadata = session.metadata || {};
 
-  // Reason: Extra copies and copy orders have their own order-creation logic
-  // (PATCH /extra-copies-payment and /copy/[bookId]/success).
-  // Webhook must not create a duplicate order for these.
-  if (metadata.type === 'extra_copies' || metadata.type === 'copy_order') {
+  // Reason: Only process initial_purchase sessions. Future flow types
+  // (extra_copies, copy_order via Checkout) will have their own handlers.
+  if (metadata.type !== 'initial_purchase') {
     return;
   }
 
-  const supabaseAdmin = createSupabaseAdminClient();
+  const setup = await runPostPaymentSetupFromSession({ session });
 
-  const email = metadata.email || '';
-  const bookQuantity = parseInt(metadata.bookQuantity || '1', 10);
-  const userType = metadata.userType || 'couple';
-  const existingUserId = metadata.existingUserId;
+  // Reason: Send welcome email with magic link only if WE created the order row.
+  // On retries where the row already exists, skip to avoid re-sending.
+  if (setup.orderCreated) {
+    const email =
+      (session.customer_details?.email ?? session.customer_email ?? '')
+        .trim()
+        .toLowerCase();
+    const buyerName = session.customer_details?.name?.trim() || '';
 
-  // Reason: Discount info is stored in PI metadata by the apply-promo-code endpoint
-  const discountCode: string | null = metadata.discount_code || null;
-  const discountAmount: number | null = metadata.discount_amount
-    ? parseInt(metadata.discount_amount, 10)
-    : null;
-
-  // Idempotency: check if order already exists for this payment intent
-  const { data: existingOrder } = await supabaseAdmin
-    .from('orders')
-    .select('id')
-    .eq('stripe_payment_intent', paymentIntent.id)
-    .single();
-
-  if (existingOrder) {
-    return;
-  }
-
-  // Reason: Embedded gift flow collects email at payment but couple names come later.
-  // The complete-onboarding endpoint handles user/group/cookbook creation.
-  // Webhook only creates a minimal order record as a receipt.
-  const isEmbeddedGiftFlow = userType === 'gift_giver' && !existingUserId;
-
-  // Reason: Embedded flow — create order + user account (safety net).
-  // Group, cookbook, and welcome email happen in complete-onboarding (step 4).
-  if (isEmbeddedGiftFlow) {
-    // Reason: Try to get email from metadata. If missing (race condition), re-fetch PI.
-    let freshEmail = email;
-    if (!freshEmail) {
-      try {
-        const freshPI = await stripe.paymentIntents.retrieve(paymentIntent.id);
-        freshEmail = freshPI.metadata?.email || '';
-      } catch {
-        // Reason: If re-fetch fails, proceed without email. complete-onboarding will handle it.
-      }
-    }
-
-    // Create user account if we have an email — so they can always log in
-    let userId: string | null = null;
-    if (freshEmail) {
-      try {
-        // Reason: Query profiles table (indexed on email) instead of listUsers() which loads all users
-        const { data: existingProfile } = await supabaseAdmin
-          .from('profiles')
-          .select('id')
-          .eq('email', freshEmail)
-          .single();
-
-        if (existingProfile) {
-          userId = existingProfile.id;
-        } else {
-          const { data: newUser } = await supabaseAdmin.auth.admin.createUser({
-            email: freshEmail,
-            email_confirm: true,
-            user_metadata: { user_type: userType, source: 'embedded_checkout' },
-          });
-          if (newUser?.user) {
-            userId = newUser.user.id;
-            await supabaseAdmin.from('profiles').insert({
-              id: userId,
-              email: freshEmail,
-              user_type: userType as 'couple' | 'gift_giver',
-            });
-          }
-        }
-      } catch (err) {
-        console.error('Error creating user in webhook:', err);
-      }
-    }
-
-    const { error: orderError } = await supabaseAdmin.from('orders').insert({
-      user_id: userId,
-      email: freshEmail || 'pending@checkout.local',
-      stripe_payment_intent: paymentIntent.id,
-      amount_total: paymentIntent.amount,
-      book_quantity: bookQuantity,
-      couple_name: null,
-      user_type: userType,
-      onboarding_data: metadata,
-      order_type: 'initial_purchase',
-      status: 'paid',
-      discount_code: discountCode,
-      discount_amount: discountAmount,
+    await emitPostPaymentAutoLogin({
+      email,
+      buyerName,
+      wasExisting: setup.wasExisting,
     });
-
-    if (orderError) {
-      console.error('Error creating order for embedded flow:', orderError);
-    }
-
-    // Reason: Stripe doesn't auto-track redemptions for manual PI flows.
-    // Deactivate the promo code when it hits max_redemptions.
-    if (metadata.promotion_code_id) {
-      try {
-        const promoCode = await stripe.promotionCodes.retrieve(metadata.promotion_code_id);
-        if (promoCode.max_redemptions &&
-            promoCode.times_redeemed + 1 >= promoCode.max_redemptions) {
-          await stripe.promotionCodes.update(metadata.promotion_code_id, { active: false });
-        }
-      } catch (err) {
-        console.error('Error updating promotion code redemption:', err);
-      }
-    }
-
-    // Reason: Send welcome email so user can recover if they close browser before completing step 4.
-    // Magic link redirects to /complete-setup where they finish group/cookbook creation.
-    if (userId && freshEmail) {
-      try {
-        // Reason: Redirect directly (skip callback). generateLink uses implicit flow (#access_token),
-        // which the callback can't handle. The complete-setup page extracts tokens via setSession().
-        const redirectTo = `${process.env.NEXT_PUBLIC_BASE_URL}/complete-setup?pi=${paymentIntent.id}&type=${userType}`;
-
-        const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-          type: 'magiclink',
-          email: freshEmail,
-          options: { redirectTo },
-        });
-
-        if (!linkError && linkData?.properties?.action_link) {
-          const buyerName = metadata.buyerName?.split(' ')[0] || '';
-          await sendWelcomeLoginEmail({
-            to: freshEmail,
-            buyerName,
-            loginLink: linkData.properties.action_link,
-          });
-        }
-      } catch (err) {
-        console.error('Error sending welcome email for embedded flow:', err);
-      }
-    }
-
-    return;
   }
+}
 
-  // --- Fallback: existing user adding a book, or legacy hosted checkout flow ---
-
-  let userId = existingUserId || null;
-
-  // Create user if not existing
-  if (!userId) {
-    // Reason: Query profiles table (indexed on email) instead of listUsers() which loads all users
-    const { data: existingProfile } = await supabaseAdmin
-      .from('profiles')
-      .select('id')
-      .eq('email', email)
-      .single();
-
-    if (existingProfile) {
-      userId = existingProfile.id;
-    } else {
-      const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        email_confirm: true,
-        user_metadata: {
-          user_type: userType,
-          source: 'stripe_checkout',
-        },
-      });
-
-      if (createError) {
-        console.error('Error creating user:', createError);
-      } else {
-        userId = newUser.user.id;
-
-        await supabaseAdmin.from('profiles').insert({
-          id: userId,
-          email,
-          user_type: userType as 'couple' | 'gift_giver',
-          full_name: metadata.buyerName || null,
-        });
-      }
-    }
+async function handleExtraCopiesPurchase(session: Stripe.Checkout.Session) {
+  // Reason: Records the extra_copy order. No email is sent from this flow —
+  // the buyer already has a session and the dashboard's BookClosedStatus view
+  // reflects the new order once the dashboard refreshes after return.
+  const result = await runExtraCopiesSetupFromSession({ session });
+  if (!result.orderCreated) {
+    console.warn(
+      'handleExtraCopiesPurchase: order was not created (likely idempotency hit)',
+      { sessionId: session.id }
+    );
   }
+}
 
-  // Reason: Group and cookbook are created in complete-onboarding (step 4).
-  // Webhook only creates the order as a receipt of payment.
-  const { error: orderError } = await supabaseAdmin.from('orders').insert({
-    user_id: userId,
-    email,
-    stripe_payment_intent: paymentIntent.id,
-    amount_total: paymentIntent.amount,
-    book_quantity: bookQuantity,
-    couple_name: null,
-    user_type: userType,
-    onboarding_data: metadata,
-    order_type: 'initial_purchase',
-    status: 'paid',
-    discount_code: discountCode,
-    discount_amount: discountAmount,
-  });
-
-  if (orderError) {
-    console.error('Error creating order:', orderError);
+async function handleDashboardExtrasPurchase(session: Stripe.Checkout.Session) {
+  // Reason: Dashboard "Get more copies" flow — the user provides shipping
+  // inline in our UI, it's persisted only as a JSONB snapshot in the order.
+  // No email sent; the dashboard reflects the new order on refresh.
+  const result = await runDashboardExtrasSetupFromSession({ session });
+  if (!result.orderCreated) {
+    console.warn(
+      'handleDashboardExtrasPurchase: order was not created (likely idempotency hit)',
+      { sessionId: session.id }
+    );
   }
+}
 
-  // Reason: Stripe doesn't auto-track redemptions for manual PI flows.
-  // Deactivate the promo code when it hits max_redemptions.
-  if (metadata.promotion_code_id) {
-    try {
-      const promoCode = await stripe.promotionCodes.retrieve(metadata.promotion_code_id);
-      if (promoCode.max_redemptions &&
-          promoCode.times_redeemed + 1 >= promoCode.max_redemptions) {
-        await stripe.promotionCodes.update(metadata.promotion_code_id, { active: false });
-      }
-    } catch (err) {
-      console.error('Error updating promotion code redemption:', err);
-    }
-  }
-
-  // Reason: Generate a magic link via Supabase, then send it through Postmark
-  // so the email comes from our domain with our branded template
-  if (userId && !existingUserId) {
-    try {
-      const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-        type: 'magiclink',
-        email,
-        options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/auth/callback?next=/profile/groups`,
-        },
-      });
-
-      if (linkError) {
-        console.error('Error generating magic link:', linkError);
-      } else if (linkData?.properties?.action_link) {
-        const buyerName = metadata.buyerName?.split(' ')[0] || '';
-
-        await sendWelcomeLoginEmail({
-          to: email,
-          buyerName,
-          loginLink: linkData.properties.action_link,
-        });
-      }
-    } catch (err) {
-      console.error('Error sending welcome email:', err);
-    }
+async function handleCopyOrderPurchase(session: Stripe.Checkout.Session) {
+  // Reason: Public copy-order flow — third-party buyer without account.
+  // Order is created with user_id=NULL. Shipping is a JSONB snapshot only.
+  const result = await runCopyOrderSetupFromSession({ session });
+  if (!result.orderCreated) {
+    console.warn(
+      'handleCopyOrderPurchase: order was not created (likely idempotency hit)',
+      { sessionId: session.id }
+    );
   }
 }

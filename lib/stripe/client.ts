@@ -13,8 +13,5 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 export {
   BASE_BOOK_PRICE,
   ADDITIONAL_BOOK_PRICE,
-  calculateShipping,
   calculateSubtotal,
-  calculateTotal,
 } from './pricing';
-export type { ShippingCountry } from './pricing';

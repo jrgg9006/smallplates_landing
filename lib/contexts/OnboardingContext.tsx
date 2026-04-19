@@ -15,11 +15,11 @@ import {
 } from "@/lib/types/onboarding";
 
 // Reason: Bump this when the step order changes to invalidate stale localStorage
-const STATE_VERSION = 4;
+const STATE_VERSION = 6;
 
-const TOTAL_STEPS_COUPLE = 4;
-// Reason: Couple flow is now 1. Date → 2. Copies → 3. Payment → 4. Setup (same as gift)
-const TOTAL_STEPS_GIFT = 4;
+// Reason: Consolidated flow — 1. Date → 2. Copies → 3. Review + Pay (name/email inline)
+const TOTAL_STEPS_COUPLE = 3;
+const TOTAL_STEPS_GIFT = 3;
 
 const getInitialState = (userType: 'couple' | 'gift_giver'): OnboardingState => ({
   currentStep: 1,
@@ -97,7 +97,6 @@ interface OnboardingProviderProps {
   children: ReactNode;
   userType?: 'couple' | 'gift_giver';
   skipAuth?: boolean;
-  existingUserId?: string;
 }
 
 /**
@@ -107,13 +106,12 @@ interface OnboardingProviderProps {
  *   children (ReactNode): Child components
  *   userType (string): Type of user - 'couple' or 'gift_giver'
  */
-export function OnboardingProvider({ children, userType = 'couple', skipAuth = false, existingUserId }: OnboardingProviderProps) {
+export function OnboardingProvider({ children, userType = 'couple', skipAuth = false }: OnboardingProviderProps) {
   // Initialize with default state first (to avoid hydration mismatch)
   const [state, setState] = useState<OnboardingState>(() => getInitialState(userType));
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Load from localStorage after hydration (client-side only)
-  // Reason: Skip loading saved state for add-book mode (skipAuth) - always start fresh
   useEffect(() => {
     if (!skipAuth) {
       const saved = loadStateFromStorage(userType);
@@ -139,7 +137,6 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
   }, [userType, skipAuth]);
 
   // Save state to localStorage whenever it changes (only after hydration)
-  // Reason: Don't save add-book mode state to localStorage to avoid overwriting normal flow progress
   useEffect(() => {
     if (isHydrated && !state.isComplete && !skipAuth) {
       saveStateToStorage(userType, state);

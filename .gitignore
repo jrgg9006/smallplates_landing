@@ -38,5 +38,7 @@ yarn-error.log*
 coverage/
 .nyc_output/
 
-# Email previews
-email-previews/
+# Email previews (keep tracked — these are templates, not generated output)
+
+# TypeScript build cache (auto-generated)
+tsconfig.tsbuildinfo

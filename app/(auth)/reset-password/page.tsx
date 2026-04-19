@@ -477,6 +477,17 @@ export default function ResetPasswordPage() {
             Back to Home
           </button>
         </div>
+
+        {/* Support contact */}
+        <p className="text-center text-xs text-gray-400 mt-6">
+          If you have any problem, please contact{" "}
+          <a
+            href="mailto:team@smallplatesandcompany.com"
+            className="underline hover:text-gray-700"
+          >
+            team@smallplatesandcompany.com
+          </a>
+        </p>
       </div>
     </div>
   );

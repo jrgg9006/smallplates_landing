@@ -6,7 +6,7 @@ import PricingPage from "@/components/pricing/PricingPage";
 export const metadata: Metadata = {
   title: "Pricing — Small Plates & Co.",
   description:
-    "One book. Everything included. First book $169, additional copies $119 each.",
+    "One book. Everything included. First book $169, additional copies $129 each.",
 };
 
 export default function Pricing() {

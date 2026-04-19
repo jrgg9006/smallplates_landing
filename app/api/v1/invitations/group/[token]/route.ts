@@ -286,16 +286,6 @@ export async function POST(
       isNewUser = true;
     }
 
-    // Reason: Invitation email serves as email verification
-    await supabaseAdmin
-      .from('profiles')
-      .update({
-        email_verified: true,
-        email_verification_token: null,
-        email_verification_expires_at: null
-      })
-      .eq('id', userId);
-
     const { error: memberError } = await supabaseAdmin
       .from('group_members')
       .upsert({

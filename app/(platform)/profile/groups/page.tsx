@@ -8,6 +8,7 @@ import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { CaptainsDropdown } from "@/components/profile/groups/CaptainsDropdown";
 import { MoreMenuDropdown } from "@/components/profile/groups/MoreMenuDropdown";
 import { AddFriendToGroupModal } from "@/components/profile/groups/AddFriendToGroupModal";
+import { CoupleNamesModal } from "@/components/profile/groups/CoupleNamesModal";
 import { ChevronDown, Image as ImageIcon, Upload, X, Move } from "lucide-react";
 import Image from "next/image";
 import type { GroupWithMembers } from "@/lib/types/database";
@@ -18,7 +19,6 @@ import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
 import { FirstRecipeModal, RecipeData } from "@/components/profile/FirstRecipeModal";
 import { addUserRecipe, UserRecipeData } from "@/lib/supabase/recipes";
 import { getWeddingDisplayText, type WeddingTimeline } from "@/lib/utils/dateFormatting";
-import { EmailVerificationBanner } from "@/components/profile/EmailVerificationBanner";
 import { getCurrentProfile } from "@/lib/supabase/profiles";
 import { ShareCollectionModal } from "@/components/profile/guests/ShareCollectionModal";
 import { GuestNavigationSheet } from "@/components/profile/guests/GuestNavigationSheet";
@@ -72,8 +72,6 @@ export default function GroupsPage() {
   
   // Profile state
   const [senderName, setSenderName] = useState<string | null>(null);
-  const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
-  const [showEmailBanner, setShowEmailBanner] = useState(false);
   
   // Dashboard image state
   const [selectedDashboardFile, setSelectedDashboardFile] = useState<File | null>(null);
@@ -476,41 +474,20 @@ export default function GroupsPage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Check email verification status and URL params
+  // Fetch senderName (full_name) for invitation signatures.
   useEffect(() => {
-    const checkEmailVerification = async () => {
+    const loadProfile = async () => {
       if (!user?.id) return;
-
       try {
         const { data: profile } = await getCurrentProfile();
         if (profile) {
           setSenderName(profile.full_name || null);
-          setEmailVerified(profile.email_verified);
-          setShowEmailBanner(!profile.email_verified);
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
       }
     };
-
-    // Check URL params for verification messages
-    const params = new URLSearchParams(window.location.search);
-    const message = params.get('message');
-    const error = params.get('error');
-
-    if (message === 'email-verified') {
-      setEmailVerified(true);
-      setShowEmailBanner(false);
-      // Clear URL params
-      window.history.replaceState({}, '', window.location.pathname);
-    } else if (error) {
-      // Handle verification errors if needed
-      console.error('Email verification error:', error);
-      // Clear URL params
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-
-    checkEmailVerification();
+    loadProfile();
   }, [user]);
 
   // Redirect to login if not authenticated
@@ -520,9 +497,19 @@ export default function GroupsPage() {
     }
   }, [user, loading, router]);
 
-  // Reason: Incomplete-order redirect to /complete-setup removed entirely.
-  // Users who need to complete setup arrive via email magic link, not through login.
-  // The dashboard must always be accessible for logged-in users.
+  // Reason: After returning from Stripe Checkout (extras upsell during close in
+  // Phase 7A, or dashboard "Get more copies" in Phase 7B), refresh group data so
+  // BookClosedStatus reflects the new extra_copy order, then strip the query
+  // param so a browser refresh doesn't re-trigger this.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const from = params.get("from");
+    if (from === "extras-purchase" || from === "dashboard-extras-purchase") {
+      groupsSectionRef.current?.loadGroups(true);
+      router.replace("/profile/groups");
+    }
+  }, [router]);
 
   // Handle GroupsSection loading state changes
   const handleGroupsLoadingChange = useCallback((isLoading: boolean) => {
@@ -564,8 +551,33 @@ export default function GroupsPage() {
         </div>
       )}
 
-      {/* Onboarding overlays */}
-      {showWelcomeOverlay && (
+      {/* Post-payment setup modal — blocks the dashboard until the owner fills in couple details. */}
+      {selectedGroup?.status === "pending_setup" &&
+        selectedGroup.created_by === user.id && (
+          <CoupleNamesModal
+            open={true}
+            groupId={selectedGroup.id}
+            userEmail={user.email || ""}
+            // Reason: If the user already owns at least one active (non-pending) group they created,
+            // this new setup is for a second/third/Nth book — swap the headline copy accordingly.
+            isFirstBook={
+              (groupsSectionRef.current?.groups || []).filter(
+                (g) => g.created_by === user.id && g.status === "active"
+              ).length === 0
+            }
+            onComplete={async () => {
+              await groupsSectionRef.current?.loadGroups(true);
+              setTimeout(() => {
+                const refreshed = groupsSectionRef.current?.selectedGroup;
+                if (refreshed) setSelectedGroup(refreshed);
+              }, 100);
+            }}
+          />
+        )}
+
+      {/* Onboarding overlays — gated on group being fully set up (status='active').
+          While the group is `pending_setup`, only the CoupleNamesModal should be visible. */}
+      {selectedGroup?.status === "active" && showWelcomeOverlay && (
         <WelcomeOverlay
           userName={user.email?.split('@')[0] || 'there'}
           onStart={handleWelcomeStart}
@@ -574,7 +586,7 @@ export default function GroupsPage() {
         />
       )}
 
-      {showFirstRecipeExperience && (
+      {selectedGroup?.status === "active" && showFirstRecipeExperience && (
         <FirstRecipeExperience
           onSubmit={handleFirstRecipeSubmit}
           onSkip={skipFirstRecipeExperience}
@@ -625,14 +637,6 @@ export default function GroupsPage() {
 
       {/* Main Content — book view (hidden but not unmounted during send-invitations) */}
       <main className={`max-w-[1000px] mx-auto px-10 ${activeView !== 'book' ? 'hidden' : ''}`}>
-            {/* Email Verification Banner */}
-            {showEmailBanner && (
-              <EmailVerificationBanner
-                isVisible={showEmailBanner}
-                onDismiss={() => setShowEmailBanner(false)}
-                userEmail={user?.email}
-              />
-            )}
             {/* Reason: Hide dashboard/buttons when book is closed — BookClosedStatus in GroupsSection handles the view */}
             {selectedGroup?.book_closed_by_user ? null : (<>
             {/* Hero Image */}

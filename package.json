@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "stripe:listen": "stripe listen --forward-to localhost:3000/api/stripe/webhook"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
