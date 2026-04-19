@@ -13,7 +13,6 @@ import {
   BASE_BOOK_PRICE,
   ADDITIONAL_BOOK_PRICE,
   calculateSubtotal,
-  calculateShipping,
 } from "@/lib/stripe/pricing";
 
 const TOTAL_STEPS = 3;
@@ -103,8 +102,7 @@ function ReviewAndPaymentStep() {
   const [redirectError, setRedirectError] = useState("");
 
   const subtotal = calculateSubtotal(state.bookQuantity);
-  const shipping = calculateShipping(state.bookQuantity, "US");
-  const total = subtotal + shipping;
+  const total = subtotal;
 
   const validateEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
   // Reason: If returning customer has no name in profile, let them type one.
@@ -181,7 +179,6 @@ function ReviewAndPaymentStep() {
       buyerName={buyerName}
       email={email}
       bookQuantity={state.bookQuantity}
-      shipping={shipping}
       total={total}
     />
   );
@@ -393,12 +390,11 @@ interface OrderSummaryPanelProps {
   buyerName: string;
   email: string;
   bookQuantity: number;
-  shipping: number;
   total: number;
 }
 
 function OrderSummaryPanel({
-  buyerName, email, bookQuantity, shipping, total,
+  buyerName, email, bookQuantity, total,
 }: OrderSummaryPanelProps) {
   const additionalCopies = bookQuantity - 1;
 
@@ -446,9 +442,7 @@ function OrderSummaryPanel({
         )}
         <div className="flex justify-between items-center">
           <span className="text-[#9A9590]">Shipping</span>
-          <span className={shipping > 0 ? "text-[#2D2D2D] tabular-nums" : "text-[#9A9590]"}>
-            {shipping > 0 ? `$${shipping}` : "Included"}
-          </span>
+          <span className="text-[#9A9590]">Included</span>
         </div>
       </div>
 
