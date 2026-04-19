@@ -6,9 +6,7 @@ import {
   EXTRA_COPIES_SHIPPING_COST,
 } from "@/lib/stripe/pricing";
 
-// TODO(phase-9): supersedes actions/createCopyOrderPaymentIntent.ts (now orphan).
-// Delete the legacy server action after this endpoint has been in production
-// long enough to confirm no stale clients still call it.
+// Replaces legacy actions/createCopyOrderPaymentIntent.ts (removed in Phase 9).
 // TODO(phase-9-security): no rate limit on this public endpoint. A loop could
 // create thousands of Stripe sessions (noise in dashboard + potential promo
 // code abuse). Add IP-based throttling or Stripe idempotency-key gating.
