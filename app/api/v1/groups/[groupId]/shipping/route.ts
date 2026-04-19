@@ -53,31 +53,37 @@ export async function POST(
       );
     }
 
-    // Reason: Remove any existing shipping address for this group before inserting new one
-    await supabase
+    // Reason: Single shipping address per group, enforced by
+    // shipping_addresses_group_id_unique partial UNIQUE index.
+    // UPSERT is idempotent: repeated calls for the same group
+    // update the existing row instead of accumulating duplicates
+    // or destructively replacing with DELETE-then-INSERT.
+    const { data, error: upsertError } = await supabase
       .from('shipping_addresses')
-      .delete()
-      .eq('group_id', groupId);
-
-    const { data, error: insertError } = await supabase
-      .from('shipping_addresses')
-      .insert({
-        user_id: user.id,
-        group_id: groupId,
-        recipient_name: recipient_name.trim(),
-        street_address: street_address.trim(),
-        apartment_unit: apartment_unit?.trim() || null,
-        city: city.trim(),
-        state: state.trim(),
-        postal_code: postal_code.trim(),
-        country: 'United States',
-        phone_number: phone_number?.trim() || null,
-        is_default: false,
-      })
+      .upsert(
+        {
+          user_id: user.id,
+          group_id: groupId,
+          recipient_name: recipient_name.trim(),
+          street_address: street_address.trim(),
+          apartment_unit: apartment_unit?.trim() || null,
+          city: city.trim(),
+          state: state.trim(),
+          postal_code: postal_code.trim(),
+          // TODO(phase-9-followup): country is hardcoded but the DB CHECK
+          // constraint on postal_code accepts both US and Canadian formats.
+          // Open support for multi-country shipping when international
+          // expansion is on the roadmap.
+          country: 'United States',
+          phone_number: phone_number?.trim() || null,
+          is_default: false,
+        },
+        { onConflict: 'group_id' }
+      )
       .select()
       .single();
 
-    if (insertError || !data) {
+    if (upsertError || !data) {
       return NextResponse.json(
         { error: 'Failed to save shipping address' },
         { status: 500 }
