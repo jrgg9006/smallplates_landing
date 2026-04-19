@@ -19,7 +19,6 @@ import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
 import { FirstRecipeModal, RecipeData } from "@/components/profile/FirstRecipeModal";
 import { addUserRecipe, UserRecipeData } from "@/lib/supabase/recipes";
 import { getWeddingDisplayText, type WeddingTimeline } from "@/lib/utils/dateFormatting";
-import { EmailVerificationBanner } from "@/components/profile/EmailVerificationBanner";
 import { getCurrentProfile } from "@/lib/supabase/profiles";
 import { ShareCollectionModal } from "@/components/profile/guests/ShareCollectionModal";
 import { GuestNavigationSheet } from "@/components/profile/guests/GuestNavigationSheet";
@@ -73,8 +72,6 @@ export default function GroupsPage() {
   
   // Profile state
   const [senderName, setSenderName] = useState<string | null>(null);
-  const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
-  const [showEmailBanner, setShowEmailBanner] = useState(false);
   
   // Dashboard image state
   const [selectedDashboardFile, setSelectedDashboardFile] = useState<File | null>(null);
@@ -477,41 +474,20 @@ export default function GroupsPage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Check email verification status and URL params
+  // Fetch senderName (full_name) for invitation signatures.
   useEffect(() => {
-    const checkEmailVerification = async () => {
+    const loadProfile = async () => {
       if (!user?.id) return;
-
       try {
         const { data: profile } = await getCurrentProfile();
         if (profile) {
           setSenderName(profile.full_name || null);
-          setEmailVerified(profile.email_verified);
-          setShowEmailBanner(!profile.email_verified);
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
       }
     };
-
-    // Check URL params for verification messages
-    const params = new URLSearchParams(window.location.search);
-    const message = params.get('message');
-    const error = params.get('error');
-
-    if (message === 'email-verified') {
-      setEmailVerified(true);
-      setShowEmailBanner(false);
-      // Clear URL params
-      window.history.replaceState({}, '', window.location.pathname);
-    } else if (error) {
-      // Handle verification errors if needed
-      console.error('Email verification error:', error);
-      // Clear URL params
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-
-    checkEmailVerification();
+    loadProfile();
   }, [user]);
 
   // Redirect to login if not authenticated
@@ -661,14 +637,6 @@ export default function GroupsPage() {
 
       {/* Main Content — book view (hidden but not unmounted during send-invitations) */}
       <main className={`max-w-[1000px] mx-auto px-10 ${activeView !== 'book' ? 'hidden' : ''}`}>
-            {/* Email Verification Banner */}
-            {showEmailBanner && (
-              <EmailVerificationBanner
-                isVisible={showEmailBanner}
-                onDismiss={() => setShowEmailBanner(false)}
-                userEmail={user?.email}
-              />
-            )}
             {/* Reason: Hide dashboard/buttons when book is closed — BookClosedStatus in GroupsSection handles the view */}
             {selectedGroup?.book_closed_by_user ? null : (<>
             {/* Hero Image */}

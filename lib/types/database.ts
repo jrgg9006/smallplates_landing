@@ -59,9 +59,6 @@ export interface Database {
           user_type: 'couple' | 'gift_giver';
           onboarding_state: any;
           pending_email: string | null;
-          email_verification_token: string | null;
-          email_verification_expires_at: string | null;
-          email_verified: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -75,9 +72,6 @@ export interface Database {
           user_type?: 'couple' | 'gift_giver';
           onboarding_state?: any;
           pending_email?: string | null;
-          email_verification_token?: string | null;
-          email_verification_expires_at?: string | null;
-          email_verified?: boolean;
         };
         Update: {
           email?: string;
@@ -88,9 +82,6 @@ export interface Database {
           user_type?: 'couple' | 'gift_giver';
           onboarding_state?: any;
           pending_email?: string | null;
-          email_verification_token?: string | null;
-          email_verification_expires_at?: string | null;
-          email_verified?: boolean;
         };
       };
       guests: {
