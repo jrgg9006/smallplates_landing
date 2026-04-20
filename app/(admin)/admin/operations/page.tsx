@@ -24,7 +24,7 @@ interface RecipeWithProductionStatus {
   updated_at: string;
   generated_image_url: string | null;
   generated_image_url_print: string | null;
-  image_upscale_status: 'processing' | 'ready' | 'error' | null;
+  image_upscale_status: 'pending' | 'processing' | 'ready' | 'error' | 'not_needed' | null;
   image_dimensions: { width: number; height: number } | null;
   guests: {
     id: string;
@@ -125,7 +125,8 @@ export default function OperationsPage() {
   const [orphanCount, setOrphanCount] = useState(0);
   const [downloadingImages, setDownloadingImages] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  
+  const [upscalePollingTimedOut, setUpscalePollingTimedOut] = useState(false);
+
   // Toggle states for showing original vs clean versions
   const [showOriginalName, setShowOriginalName] = useState(false);
   const [showOriginalIngredients, setShowOriginalIngredients] = useState(false);
@@ -192,6 +193,60 @@ export default function OperationsPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
+
+  // Reason: the upscale Edge Function runs async via a DB trigger. There is no realtime
+  // or webhook back to the client, so the drawer polls /recipes/:id every 2s (max 90s)
+  // while image_upscale_status is non-terminal, so the Delete cooldown can lift when
+  // the server reaches 'ready' | 'error' | 'not_needed'.
+  useEffect(() => {
+    if (!selectedRecipe?.id) return;
+    if (!selectedRecipe.generated_image_url) return;
+
+    const status = selectedRecipe.image_upscale_status;
+    const isTerminal = status === 'ready' || status === 'error' || status === 'not_needed';
+    if (isTerminal) return;
+
+    const recipeId = selectedRecipe.id;
+    const startedAt = Date.now();
+    const TIMEOUT_MS = 90_000;
+    const INTERVAL_MS = 2_000;
+
+    setUpscalePollingTimedOut(false);
+
+    const intervalId = setInterval(async () => {
+      if (Date.now() - startedAt >= TIMEOUT_MS) {
+        setUpscalePollingTimedOut(true);
+        clearInterval(intervalId);
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/v1/admin/operations/recipes/${recipeId}`);
+        if (!res.ok) return;
+        const fresh = await res.json();
+
+        // Only update if this poll is still for the currently-selected recipe
+        setSelectedRecipe(prev => {
+          if (!prev || prev.id !== recipeId) return prev;
+          return {
+            ...prev,
+            image_upscale_status: fresh.image_upscale_status ?? null,
+            generated_image_url_print: fresh.generated_image_url_print ?? null,
+            image_dimensions: fresh.image_dimensions ?? null,
+          };
+        });
+
+        const freshStatus = fresh.image_upscale_status;
+        if (freshStatus === 'ready' || freshStatus === 'error' || freshStatus === 'not_needed') {
+          clearInterval(intervalId);
+        }
+      } catch {
+        // Swallow transient errors; next tick will retry.
+      }
+    }, INTERVAL_MS);
+
+    return () => clearInterval(intervalId);
+  }, [selectedRecipe?.id, selectedRecipe?.generated_image_url, selectedRecipe?.image_upscale_status]);
 
   const checkAdminAndLoadData = async () => {
     const supabase = createSupabaseClient();
@@ -949,6 +1004,7 @@ ${instructions}`;
       // Update local state
       // Clear generated_image_url_print and reset upscale status since we're uploading a new image.
       // The Edge Function will detect the generated_image_url change and handle upscaling.
+      setUpscalePollingTimedOut(false);
       setSelectedRecipe(prev => prev ? {
         ...prev,
         generated_image_url: result.url,
@@ -1002,6 +1058,7 @@ ${instructions}`;
       }
 
       // Safely clear only image-related fields in local state
+      setUpscalePollingTimedOut(false);
       setSelectedRecipe(prev => prev ? {
         ...prev,
         generated_image_url: null,
@@ -1150,6 +1207,19 @@ ${instructions}`;
       setSavingEdits(false);
     }
   };
+
+  // Reason: the upscale Edge Function is async (DB trigger → HTTP). While it's running
+  // for the currently-selected recipe, Delete must be blocked to avoid a race where a
+  // stale print-ready is written back after a re-upload. NULL status + non-null image
+  // means upload just happened and the trigger hasn't yet moved status to pending/processing.
+  const isUpscaleInFlight =
+    !!selectedRecipe?.generated_image_url &&
+    !upscalePollingTimedOut &&
+    (selectedRecipe.image_upscale_status === null ||
+      selectedRecipe.image_upscale_status === 'pending' ||
+      selectedRecipe.image_upscale_status === 'processing');
+
+  const imageActionsDisabled = uploadingImage || isUpscaleInFlight;
 
   if (loading) {
     return (
@@ -1716,10 +1786,14 @@ ${instructions}`;
                           <button
                             type="button"
                             onClick={() => handleDeleteGeneratedImage(selectedRecipe.id)}
-                            disabled={uploadingImage}
+                            disabled={imageActionsDisabled}
                             className="text-sm text-red-600 hover:text-red-800 underline disabled:text-gray-400 disabled:cursor-not-allowed"
                           >
-                            {uploadingImage ? 'Deleting…' : 'Delete image'}
+                            {uploadingImage
+                              ? 'Deleting…'
+                              : isUpscaleInFlight
+                              ? 'Processing upscale…'
+                              : 'Delete image'}
                           </button>
                           <div className="flex items-center gap-3">
                             <button
@@ -1791,6 +1865,11 @@ ${instructions}`;
                             )}
                           </div>
                         )}
+                        {upscalePollingTimedOut && (
+                          <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-2">
+                            Upscale status hasn&apos;t updated in 90s. You can proceed, but verify the print-ready image before closing the book.
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div className="text-center py-8">
@@ -1800,6 +1879,9 @@ ${instructions}`;
                           </svg>
                         </div>
                         <p className="text-gray-500 mb-4">No generated image yet</p>
+                        {/* Note: Upload is only rendered when generated_image_url is null, so an
+                            in-flight upscale (which requires a non-null generated_image_url) cannot block
+                            an upload here. The cooldown only matters for the Delete path above. */}
                         <label className="cursor-pointer">
                           <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                             uploadingImage 
