@@ -13,7 +13,7 @@ export function LegalMarkdown({ content }: { content: string }) {
         prose-p:text-brand-charcoal/80 prose-p:leading-[1.8] prose-p:font-sans prose-p:text-[15px]
         prose-li:text-brand-charcoal/80 prose-li:leading-[1.8] prose-li:font-sans prose-li:text-[15px]
         prose-strong:text-brand-charcoal prose-strong:font-semibold
-        prose-a:text-[#D4A854] prose-a:underline prose-a:underline-offset-2 hover:prose-a:text-[#c49b4a]
+        prose-a:text-brand-honey prose-a:underline prose-a:underline-offset-2 hover:prose-a:text-[#c49b4a]
         prose-table:text-sm
         prose-th:text-left prose-th:font-semibold prose-th:text-brand-charcoal
         prose-td:text-brand-charcoal/80

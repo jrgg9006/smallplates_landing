@@ -120,13 +120,13 @@ export default function AdminHomePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
           {/* Operations Management */}
           <Link href="/admin/operations" className="group">
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-[#D4A854] cursor-pointer h-full">
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-brand-honey cursor-pointer h-full">
               <div className="text-5xl mb-4">🏭</div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Operations</h2>
               <p className="text-gray-600 mb-4">
                 Track recipe production workflow and progress
               </p>
-              <div className="flex items-center text-sm text-gray-500 group-hover:text-[#D4A854] transition-colors">
+              <div className="flex items-center text-sm text-gray-500 group-hover:text-brand-honey transition-colors">
                 <span>View operations</span>
                 <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -137,13 +137,13 @@ export default function AdminHomePage() {
 
           {/* Book Production */}
           <Link href="/admin/books" className="group">
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-[#D4A854] cursor-pointer h-full">
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-brand-honey cursor-pointer h-full">
               <div className="text-5xl mb-4">📖</div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Book Production</h2>
               <p className="text-gray-600 mb-4">
                 Review and approve books before printing
               </p>
-              <div className="flex items-center text-sm text-gray-500 group-hover:text-[#D4A854] transition-colors">
+              <div className="flex items-center text-sm text-gray-500 group-hover:text-brand-honey transition-colors">
                 <span>Manage books</span>
                 <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -154,7 +154,7 @@ export default function AdminHomePage() {
 
           {/* Create Free Book — only visible to comped-emails */}
           {canCreateCompedBooks(userName) && (
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-dashed border-[#D4A854]/40 hover:border-[#D4A854] h-full flex flex-col">
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-dashed border-brand-honey/40 hover:border-brand-honey h-full flex flex-col">
               <div className="text-5xl mb-4">🎁</div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Free Book</h2>
               <p className="text-gray-600 mb-4">
@@ -239,13 +239,13 @@ export default function AdminHomePage() {
 
           {/* TikTok Content Generator - Active */}
           <Link href="/admin/tiktok" className="group">
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-[#D4A854] cursor-pointer h-full">
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-brand-honey cursor-pointer h-full">
               <div className="text-5xl mb-4">🎬</div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">TikTok Content</h2>
               <p className="text-gray-600 mb-4">
                 Generate video production briefs for TikTok
               </p>
-              <div className="flex items-center text-sm text-gray-500 group-hover:text-[#D4A854] transition-colors">
+              <div className="flex items-center text-sm text-gray-500 group-hover:text-brand-honey transition-colors">
                 <span>Create brief</span>
                 <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

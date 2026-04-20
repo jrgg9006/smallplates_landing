@@ -55,32 +55,32 @@ export default function PricingPage() {
       <section className="pb-16 md:pb-20">
         <div className="mx-auto max-w-2xl px-6">
           <motion.div
-            className="relative bg-white rounded-2xl shadow-xl border border-[#D4A854]/20 overflow-hidden"
+            className="relative bg-white rounded-2xl shadow-xl border border-brand-honey/20 overflow-hidden"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
           >
             {/* Decorative corner flourishes */}
             <div className="absolute top-4 left-4 w-10 h-10 opacity-[0.08]">
-              <svg viewBox="0 0 48 48" className="w-full h-full text-[#D4A854]">
+              <svg viewBox="0 0 48 48" className="w-full h-full text-brand-honey">
                 <path d="M6 6C6 6 24 2 42 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
                 <path d="M6 6C6 6 2 24 6 42" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
               </svg>
             </div>
             <div className="absolute top-4 right-4 w-10 h-10 opacity-[0.08] -scale-x-100">
-              <svg viewBox="0 0 48 48" className="w-full h-full text-[#D4A854]">
+              <svg viewBox="0 0 48 48" className="w-full h-full text-brand-honey">
                 <path d="M6 6C6 6 24 2 42 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
                 <path d="M6 6C6 6 2 24 6 42" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
               </svg>
             </div>
             <div className="absolute bottom-4 left-4 w-10 h-10 opacity-[0.08] -scale-y-100">
-              <svg viewBox="0 0 48 48" className="w-full h-full text-[#D4A854]">
+              <svg viewBox="0 0 48 48" className="w-full h-full text-brand-honey">
                 <path d="M6 6C6 6 24 2 42 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
                 <path d="M6 6C6 6 2 24 6 42" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
               </svg>
             </div>
             <div className="absolute bottom-4 right-4 w-10 h-10 opacity-[0.08] scale-[-1]">
-              <svg viewBox="0 0 48 48" className="w-full h-full text-[#D4A854]">
+              <svg viewBox="0 0 48 48" className="w-full h-full text-brand-honey">
                 <path d="M6 6C6 6 24 2 42 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
                 <path d="M6 6C6 6 2 24 6 42" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
               </svg>
@@ -126,7 +126,7 @@ export default function PricingPage() {
               {/* Honey rule */}
               <div className="flex items-center gap-4 mb-10">
                 <div className="flex-1 h-px bg-[#F0EDE8]" />
-                <div className="w-1.5 h-1.5 rounded-full bg-[#D4A854]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-brand-honey" />
                 <div className="flex-1 h-px bg-[#F0EDE8]" />
               </div>
 
@@ -144,14 +144,14 @@ export default function PricingPage() {
                   "Full platform access",
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-2.5">
-                    <span className="mt-2 w-1.5 h-1.5 rounded-full bg-[#D4A854] flex-shrink-0" />
+                    <span className="mt-2 w-1.5 h-1.5 rounded-full bg-brand-honey flex-shrink-0" />
                     <span className="text-[15px] text-[#6B6966] font-light leading-relaxed">
                       {item}
                     </span>
                   </div>
                 ))}
               </div>
-              <p className="text-center text-sm text-[#D4A854] mt-5">
+              <p className="text-center text-sm text-brand-honey mt-5">
                 Need more than 50 recipes? Additional available.
               </p>
             </div>
@@ -163,14 +163,14 @@ export default function PricingPage() {
               </p>
               <button
                 onClick={handleStartBook}
-                className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-10 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#D4A854]"
+                className="inline-flex items-center justify-center rounded-full bg-brand-honey hover:bg-[#c49b4a] text-white px-10 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-honey"
               >
                 Start the Book
               </button>
               <div className="mt-5">
                 <button
                   onClick={handleContact}
-                  className="text-[#9A9590] text-sm hover:text-[#D4A854] transition-colors duration-200"
+                  className="text-[#9A9590] text-sm hover:text-brand-honey transition-colors duration-200"
                 >
                   Need something different? Let&apos;s figure it out →
                 </button>

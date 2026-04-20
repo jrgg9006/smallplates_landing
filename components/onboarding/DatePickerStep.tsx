@@ -207,7 +207,7 @@ export function DatePickerStep({
             className="w-full h-12 px-4 flex items-center rounded-lg cursor-pointer transition-all duration-200"
             style={{
               background: "#FAF7F2",
-              border: `1px solid ${selectedDate ? "#D4A854" : popoverOpen ? "#D4A854" : "#E8E0D5"}`,
+              border: `1px solid ${selectedDate ? "hsl(var(--brand-honey))" : popoverOpen ? "hsl(var(--brand-honey))" : "#E8E0D5"}`,
               boxShadow: popoverOpen ? "0 0 0 2px rgba(212, 168, 84, 0.15)" : "none",
             }}
           >
@@ -256,9 +256,9 @@ export function DatePickerStep({
                 disabled={{ before: fromDate, after: toDate }}
                 defaultMonth={selectedDate || fromDate}
                 style={{
-                  ["--rdp-accent-color" as string]: "#D4A854",
-                  ["--rdp-accent-background-color" as string]: "#D4A854",
-                  ["--rdp-today-color" as string]: "#D4A854",
+                  ["--rdp-accent-color" as string]: "hsl(var(--brand-honey))",
+                  ["--rdp-accent-background-color" as string]: "hsl(var(--brand-honey))",
+                  ["--rdp-today-color" as string]: "hsl(var(--brand-honey))",
                   ["--rdp-selected-font" as string]: "bold",
                   ["--rdp-day-height" as string]: "44px",
                   ["--rdp-day-width" as string]: "44px",
@@ -286,7 +286,7 @@ export function DatePickerStep({
               <p className="text-[16px] font-serif font-normal uppercase tracking-[0.05em] text-[#9A9590] mb-2.5">
                 RECIPES MUST BE SUBMITTED BY
               </p>
-              <div className="w-10 h-px bg-[#D4A854] mx-auto mb-2.5" />
+              <div className="w-10 h-px bg-brand-honey mx-auto mb-2.5" />
               <p className="text-2xl sm:text-2xl font-semibold text-brand-charcoal leading-snug">
                 {format(bookCloseDate, "EEEE")}, {format(bookCloseDate, "MMMM")} {getOrdinalDay(bookCloseDate.getDate())}
               </p>
@@ -316,7 +316,7 @@ export function DatePickerStep({
             <button
               type="button"
               onClick={handleIDontKnow}
-              className="text-sm text-brand-charcoal/50 hover:text-[#D4A854] transition-colors font-light underline underline-offset-2"
+              className="text-sm text-brand-charcoal/50 hover:text-brand-honey transition-colors font-light underline underline-offset-2"
             >
               I don&apos;t know yet
             </button>
@@ -354,7 +354,7 @@ export function DatePickerStep({
           disabled={!canContinue}
           className={`px-8 py-3 rounded-xl font-semibold transition-colors ${
             canContinue
-              ? "bg-[#D4A854] text-white hover:bg-[#c49b4a]"
+              ? "bg-brand-honey text-white hover:bg-[#c49b4a]"
               : "bg-gray-300 text-gray-500 cursor-not-allowed"
           }`}
         >
@@ -367,7 +367,7 @@ export function DatePickerStep({
         <div className="text-center mt-6">
           <a
             href={switchFlowHref}
-            className="text-xs text-brand-charcoal/50 hover:text-[#D4A854] hover:underline underline-offset-2 transition-colors font-light"
+            className="text-xs text-brand-charcoal/50 hover:text-brand-honey hover:underline underline-offset-2 transition-colors font-light"
           >
             {switchFlowText}
           </a>

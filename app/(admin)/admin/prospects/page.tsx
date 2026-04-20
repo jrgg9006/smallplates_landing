@@ -190,7 +190,7 @@ export default function AdminProspectsPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4A854] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-honey mx-auto mb-4"></div>
           <p className="text-gray-600">{isAdmin ? 'Loading prospects...' : 'Checking access...'}</p>
         </div>
       </div>
@@ -304,7 +304,7 @@ export default function AdminProspectsPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm text-gray-900 capitalize">{prospect.user_type.replace('_', ' ')}</div>
-                          <div className="text-xs text-[#D4A854] font-medium">{getTierBadge(prospect.selected_tier)}</div>
+                          <div className="text-xs text-brand-honey font-medium">{getTierBadge(prospect.selected_tier)}</div>
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm text-gray-900">
@@ -347,7 +347,7 @@ export default function AdminProspectsPage() {
                             {prospect.status === 'paid' && (
                               <button
                                 onClick={() => handleGenerateActivationLink(prospect)}
-                                className="text-xs px-3 py-1.5 bg-[#D4A854] text-white rounded hover:bg-[#c49b4a] transition-colors font-medium mt-1"
+                                className="text-xs px-3 py-1.5 bg-brand-honey text-white rounded hover:bg-[#c49b4a] transition-colors font-medium mt-1"
                               >
                                 Generate Activation Link
                               </button>
@@ -422,7 +422,7 @@ export default function AdminProspectsPage() {
                   value={activationEmail}
                   onChange={(e) => setActivationEmail(e.target.value)}
                   placeholder={selectedProspect.email}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-honey focus:border-transparent outline-none"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Default: {selectedProspect.email}. Change if needed (e.g., for multiple accounts).
@@ -449,7 +449,7 @@ export default function AdminProspectsPage() {
                     />
                     <button
                       onClick={() => copyToClipboard(activationLink)}
-                      className="px-4 py-2 bg-[#D4A854] text-white rounded hover:bg-[#c49b4a] transition-colors text-sm font-medium"
+                      className="px-4 py-2 bg-brand-honey text-white rounded hover:bg-[#c49b4a] transition-colors text-sm font-medium"
                     >
                       Copy
                     </button>
@@ -475,7 +475,7 @@ export default function AdminProspectsPage() {
                     className={`px-6 py-2 rounded-lg font-medium transition-colors ${
                       generatingToken || !activationEmail.trim()
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-[#D4A854] text-white hover:bg-[#c49b4a]'
+                        : 'bg-brand-honey text-white hover:bg-[#c49b4a]'
                     }`}
                   >
                     {generatingToken ? (

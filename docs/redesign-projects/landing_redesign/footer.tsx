@@ -41,7 +41,7 @@ export default function Footer() {
             </Link>
             
             {/* Brand Line */}
-            <p className="mt-6 font-serif text-xl text-[#D4A854] italic">
+            <p className="mt-6 font-serif text-xl text-brand-honey italic">
               Still at the table.
             </p>
             
@@ -122,7 +122,7 @@ export default function Footer() {
             </h3>
             <Link
               href="/onboarding"
-              className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-6 py-3 text-base font-medium transition-colors"
+              className="inline-flex items-center justify-center rounded-full bg-brand-honey hover:bg-[#c49b4a] text-white px-6 py-3 text-base font-medium transition-colors"
             >
               Give this Gift
             </Link>

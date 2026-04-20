@@ -62,7 +62,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
           onChange={(e) => onChange('ingredients', e.target.value)}
           placeholder={"• The last box of pasta\n• A suspicious amount of garlic\n• Good olive oil\n• Chili flakes\n• Cheese of questionable origin\n• Hunger"}
           rows={8}
-          className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:border-transparent resize-vertical"
+          className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent resize-vertical"
           aria-describedby="ingredients-help"
         />
       </section>
@@ -78,7 +78,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
           onChange={(e) => onChange('instructions', e.target.value)}
           placeholder={"Cook the pasta until it smells right\nAdd more garlic than the recipe would admit\nStir, sip wine (or whatever you're drinking)\nServe immediately or five minutes too late\nDoesn't matter, you'll eat it anyway"}
           rows={10}
-          className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:border-transparent resize-vertical"
+          className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent resize-vertical"
           aria-describedby="instructions-help"
         />
         <p id="instructions-help" className="text-xs text-gray-500">Explain it like to a friend.</p>
@@ -97,7 +97,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
               value={pastedText}
               onChange={(e) => setPastedText(e.target.value)}
               rows={14}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:border-transparent resize-vertical"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent resize-vertical"
               placeholder={"Paste your entire recipe text here"}
             />
             <p className="text-xs text-gray-500">
@@ -128,7 +128,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
                 }
                 setShowPasteModal(false);
               }}
-              className="px-6 py-2 rounded-full bg-[#D4A854] text-white hover:bg-[#c49b4a]"
+              className="px-6 py-2 rounded-full bg-brand-honey text-white hover:bg-[#c49b4a]"
             >
               Continue
             </button>

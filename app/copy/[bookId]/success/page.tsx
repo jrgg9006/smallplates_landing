@@ -143,7 +143,7 @@ export default async function CopySuccessPage({
             />
           </div>
 
-          <p className="text-xs text-[#D4A854] uppercase tracking-[0.08em] text-center mb-2 font-medium">
+          <p className="text-xs text-brand-honey uppercase tracking-[0.08em] text-center mb-2 font-medium">
             Order confirmed
           </p>
 

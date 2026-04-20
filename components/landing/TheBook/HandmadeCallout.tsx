@@ -19,12 +19,12 @@ export default function HandmadeCallout() {
             <div key={i} className="flex flex-col items-center">
               {/* Horizontal stitch line */}
               <div className="relative flex items-center">
-                <div className="w-20 h-px bg-[#D4A854]/40" />
-                <div className="absolute left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#D4A854]/50" />
+                <div className="w-20 h-px bg-brand-honey/40" />
+                <div className="absolute left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-brand-honey/50" />
               </div>
               {/* Vertical connector (except last) */}
               {i < 6 && (
-                <div className="w-px h-2.5 bg-[#D4A854]/25" />
+                <div className="w-px h-2.5 bg-brand-honey/25" />
               )}
             </div>
           ))}
@@ -63,7 +63,7 @@ export default function HandmadeCallout() {
         </div>
 
         {/* Pull quote */}
-        <blockquote className="mt-8 border-l-2 border-[#D4A854] pl-5">
+        <blockquote className="mt-8 border-l-2 border-brand-honey pl-5">
           <p className="type-accent text-base md:text-lg text-brand-charcoal/70 leading-relaxed">
             &ldquo;No two books are the same &mdash; because no two couples&apos; people are the same. That&apos;s the whole point.&rdquo;
           </p>

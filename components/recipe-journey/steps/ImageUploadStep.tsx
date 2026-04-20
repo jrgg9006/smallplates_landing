@@ -149,10 +149,10 @@ export default function ImageUploadStep({ onImagesReady, onFilesSelected }: Imag
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full group p-8 rounded-2xl border-2 border-gray-200 hover:border-[#D4A854] hover:shadow-lg cursor-pointer transition-all duration-200"
+                  className="w-full group p-8 rounded-2xl border-2 border-gray-200 hover:border-brand-honey hover:shadow-lg cursor-pointer transition-all duration-200"
                 >
                   <div className="flex flex-col items-center space-y-4">
-                    <div className="p-4 rounded-full bg-gray-50 group-hover:bg-[#D4A854] transition-colors duration-200">
+                    <div className="p-4 rounded-full bg-gray-50 group-hover:bg-brand-honey transition-colors duration-200">
                       <UploadIcon className="w-8 h-8 text-brand-charcoal group-hover:text-white transition-colors duration-200" />
                     </div>
                     <div className="text-center">
@@ -170,10 +170,10 @@ export default function ImageUploadStep({ onImagesReady, onFilesSelected }: Imag
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="group p-8 rounded-2xl border-2 border-gray-200 hover:border-[#D4A854] hover:shadow-lg cursor-pointer transition-all duration-200"
+                  className="group p-8 rounded-2xl border-2 border-gray-200 hover:border-brand-honey hover:shadow-lg cursor-pointer transition-all duration-200"
                 >
                   <div className="flex flex-col items-center space-y-4">
-                    <div className="p-4 rounded-full bg-gray-50 group-hover:bg-[#D4A854] transition-colors duration-200">
+                    <div className="p-4 rounded-full bg-gray-50 group-hover:bg-brand-honey transition-colors duration-200">
                       <UploadIcon className="w-8 h-8 text-brand-charcoal group-hover:text-white transition-colors duration-200" />
                     </div>
                     <div className="text-center">

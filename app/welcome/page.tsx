@@ -132,7 +132,7 @@ function WelcomeContent() {
   if (loadingSession) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#FAF8F4" }}>
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4A854]" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-honey" />
       </div>
     );
   }
@@ -142,7 +142,7 @@ function WelcomeContent() {
   const sansFont = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
   const labelClass = "block text-[13px] font-medium text-brand-charcoal mb-1.5";
   const inputClass =
-    "w-full px-4 h-[52px] border border-[#E8E0D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:border-transparent text-[15px] bg-white transition-all";
+    "w-full px-4 h-[52px] border border-[#E8E0D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent text-[15px] bg-white transition-all";
 
   return (
     <div className="min-h-screen" style={{ background: "#FAF8F4" }}>
@@ -217,7 +217,7 @@ function WelcomeContent() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="w-full h-[56px] bg-[#D4A854] hover:bg-[#c49b4a] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors text-[15px]"
+            className="w-full h-[56px] bg-brand-honey hover:bg-[#c49b4a] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors text-[15px]"
             style={{ fontFamily: sansFont }}
           >
             {saving ? "Saving..." : "Save password and continue"}
@@ -256,7 +256,7 @@ export default function WelcomePage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center" style={{ background: "#FAF8F4" }}>
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4A854]" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-honey" />
         </div>
       }
     >

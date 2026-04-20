@@ -60,10 +60,10 @@ const SUPPORTED_COUNTRIES: {
 ];
 
 const inputClasses =
-  "bg-white border-[#E8E0D5] focus:border-[#D4A854] focus:ring-[#D4A854]/20";
+  "bg-white border-[#E8E0D5] focus:border-brand-honey focus:ring-brand-honey/20";
 
 const selectClasses =
-  "w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat";
+  "w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-brand-honey focus:ring-2 focus:ring-brand-honey/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat";
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
@@ -228,7 +228,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
   if (redirecting) {
     return (
       <div className="min-h-screen bg-[#F5F3EF] flex flex-col items-center justify-center">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#D4A854] mb-4" />
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-honey mb-4" />
         <p className="text-sm text-[#8A8780]">Redirecting to checkout…</p>
       </div>
     );

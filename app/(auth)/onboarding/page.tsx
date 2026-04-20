@@ -48,7 +48,7 @@ function ProductStep() {
           onClick={nextStep}
           disabled={!canContinue}
           className={`px-8 py-3 rounded-xl font-semibold transition-colors ${
-            canContinue ? "bg-[#D4A854] text-white hover:bg-[#c49b4a]" : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            canContinue ? "bg-brand-honey text-white hover:bg-[#c49b4a]" : "bg-gray-300 text-gray-500 cursor-not-allowed"
           }`}
         >
           Continue
@@ -225,7 +225,7 @@ function ReviewAndPaymentStep() {
             className={`w-full px-4 py-3 border border-[#E8E0D5] rounded-xl outline-none ${
               isNameLocked
                 ? "bg-[#F5F1EA] text-[#5A5550] cursor-not-allowed"
-                : "bg-white focus:ring-2 focus:ring-[#D4A854] focus:border-transparent"
+                : "bg-white focus:ring-2 focus:ring-brand-honey focus:border-transparent"
             }`}
             placeholder="Your name"
             autoComplete="name"
@@ -250,7 +250,7 @@ function ReviewAndPaymentStep() {
             className={`w-full px-4 py-3 border rounded-xl outline-none ${
               isEmailLocked
                 ? "bg-[#F5F1EA] text-[#5A5550] cursor-not-allowed border-[#E8E0D5]"
-                : `bg-white focus:ring-2 focus:ring-[#D4A854] focus:border-transparent ${
+                : `bg-white focus:ring-2 focus:ring-brand-honey focus:border-transparent ${
                     emailError ? "border-red-400" : "border-[#E8E0D5]"
                   }`
             }`}
@@ -363,9 +363,9 @@ function ProgressBar({ step, total }: { step: number; total: number }) {
             <div
               className={`w-6 h-6 lg:w-8 lg:h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
                 isActive
-                  ? "bg-white text-[#9A9590] border-2 border-[#D4A854]"
+                  ? "bg-white text-[#9A9590] border-2 border-brand-honey"
                   : isDone
-                  ? "bg-[#D4A854] text-white"
+                  ? "bg-brand-honey text-white"
                   : "bg-white text-gray-400 border border-gray-200"
               }`}
               aria-current={isActive ? "step" : undefined}

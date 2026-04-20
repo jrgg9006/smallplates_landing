@@ -25,11 +25,11 @@ function ShareCopyLink({ groupId }: { groupId: string }) {
     <div>
       <button
         onClick={handleCopy}
-        className="inline-flex items-center gap-1.5 px-4 py-2 border border-[#E8E0D5] text-brand-charcoal text-xs font-medium rounded-full hover:border-[#D4A854] hover:text-[#D4A854] transition-colors"
+        className="inline-flex items-center gap-1.5 px-4 py-2 border border-[#E8E0D5] text-brand-charcoal text-xs font-medium rounded-full hover:border-brand-honey hover:text-brand-honey transition-colors"
       >
         {copied ? (
           <>
-            <Check className="w-3.5 h-3.5 text-[#D4A854]" />
+            <Check className="w-3.5 h-3.5 text-brand-honey" />
             Link copied
           </>
         ) : (
@@ -60,7 +60,7 @@ function ReferralBox() {
   return (
     <div className="relative overflow-hidden rounded-[14px] bg-[radial-gradient(ellipse_at_top_left,#C4897A_0%,#B07261_40%,#96594B_100%)]">
       {/* Reason: Subtle gold accent line at top for brand warmth */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#D4A854] to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-brand-honey to-transparent" />
 
       <div className="px-5 py-5 sm:px-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -85,8 +85,8 @@ function ReferralBox() {
               onClick={handleCopy}
               className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-medium transition-all duration-200 ${
                 copied
-                  ? "bg-[#D4A854] text-brand-charcoal"
-                  : "bg-white text-brand-charcoal hover:bg-[#D4A854] hover:text-brand-charcoal"
+                  ? "bg-brand-honey text-brand-charcoal"
+                  : "bg-white text-brand-charcoal hover:bg-brand-honey hover:text-brand-charcoal"
               }`}
             >
               {copied ? (
@@ -200,7 +200,7 @@ function TimelineSection({ bookStatus }: { bookStatus: string }) {
           {/* Icon */}
           <div
             className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
-              s.completed ? "bg-[#D4A854]" : "border border-gray-300"
+              s.completed ? "bg-brand-honey" : "border border-gray-300"
             }`}
           >
             {s.completed ? (
@@ -220,7 +220,7 @@ function TimelineSection({ bookStatus }: { bookStatus: string }) {
   );
 }
 
-const inputClasses = "bg-white border-[#E8E0D5] focus:border-[#D4A854] focus:ring-[#D4A854]/20";
+const inputClasses = "bg-white border-[#E8E0D5] focus:border-brand-honey focus:ring-brand-honey/20";
 
 export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) {
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress | null>(null);
@@ -355,7 +355,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
           value={region}
           onChange={(e) => setRegion(e.target.value)}
           disabled={saving}
-          className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none"
+          className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-brand-honey focus:ring-2 focus:ring-brand-honey/20 focus:outline-none"
         >
           <option value="">{countryConfig.regionLabel}</option>
           {US_STATES.map((s) => (
@@ -370,7 +370,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
           value={region}
           onChange={(e) => setRegion(e.target.value)}
           disabled={saving}
-          className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none"
+          className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-brand-honey focus:ring-2 focus:ring-brand-honey/20 focus:outline-none"
         >
           <option value="">{countryConfig.regionLabel}</option>
           {MX_STATES.map((s) => (
@@ -408,7 +408,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
       <div className="max-w-2xl mx-auto">
 
           {/* Header */}
-          <p className="text-xs uppercase tracking-[0.25em] text-[#D4A854] font-medium mb-2">
+          <p className="text-xs uppercase tracking-[0.25em] text-brand-honey font-medium mb-2">
             Your book is closed.
           </p>
           <h1 className="font-serif text-3xl text-brand-charcoal leading-tight mb-1">
@@ -477,7 +477,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
           {/* Shipping section */}
           {loadingAddress ? (
             <div className="flex justify-center py-4">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#D4A854]" />
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-brand-honey" />
             </div>
           ) : shippingAddress ? (
             <div>
@@ -519,7 +519,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
                     value={country}
                     onChange={(e) => handleCountryChange(e.target.value)}
                     disabled={saving}
-                    className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat"
+                    className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-brand-honey focus:ring-2 focus:ring-brand-honey/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat"
                   >
                     {SUPPORTED_COUNTRIES.map((c) => (
                       <option key={c.code} value={c.code}>{c.name}</option>
@@ -641,7 +641,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
 
           {/* What happens next */}
           <div className="border-t border-[#E8E0D5] my-6" />
-          <p className="text-xs uppercase tracking-[0.25em] text-[#D4A854] font-medium mb-4">
+          <p className="text-xs uppercase tracking-[0.25em] text-brand-honey font-medium mb-4">
             What happens next
           </p>
           <TimelineSection bookStatus={group.book_status} />
@@ -652,7 +652,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
             We&apos;ll email you updates as we design and print your book.
           </p>
           <p className="text-center text-xs text-gray-400 mt-2">
-            Questions? <a href="mailto:team@smallplatesandcompany.com" className="text-[#D4A854] hover:underline">team@smallplatesandcompany.com</a>
+            Questions? <a href="mailto:team@smallplatesandcompany.com" className="text-brand-honey hover:underline">team@smallplatesandcompany.com</a>
           </p>
       </div>
     </div>

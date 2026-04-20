@@ -214,7 +214,7 @@ export default function CollectionForm() {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4A854] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-honey mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -475,7 +475,7 @@ export default function CollectionForm() {
                   className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[80px] transition-colors ${
                     !firstName.trim() || searching
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-[#D4A854] text-white hover:bg-[#c49b4a]'
+                      : 'bg-brand-honey text-white hover:bg-[#c49b4a]'
                   }`}
                 >
                   {searching ? (
@@ -512,7 +512,7 @@ export default function CollectionForm() {
                     <Button
                       onClick={handleContinueAsNew}
                       disabled={!fullName.trim()}
-                      className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!fullName.trim() ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[#D4A854] text-white hover:bg-[#c49b4a]'}`}
+                      className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!fullName.trim() ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-brand-honey text-white hover:bg-[#c49b4a]'}`}
                     >
                       Continue
                     </Button>
@@ -523,7 +523,7 @@ export default function CollectionForm() {
 
               {/* Search Results */}
               {searchCompleted && !showNameEntry && (
-                <div className="border-t border-[#D4A854]/20 pt-6">
+                <div className="border-t border-brand-honey/20 pt-6">
                   {searchResults.length > 0 ? (
                     <div className="space-y-4">
                       <h3 className="text-xl font-medium text-brand-charcoal font-serif">
@@ -534,13 +534,13 @@ export default function CollectionForm() {
                           <button
                             key={guest.id}
                             onClick={() => handleGuestSelect(guest)}
-                            className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-[#D4A854]/50 hover:bg-[#FAF7F2] transition-colors text-left bg-white"
+                            className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-brand-honey/50 hover:bg-[#FAF7F2] transition-colors text-left bg-white"
                           >
                             <span className="text-brand-charcoal font-medium">
                               {guest.first_name} {guest.last_name}
                             </span>
                             <svg
-                              className="w-5 h-5 text-[#D4A854]"
+                              className="w-5 h-5 text-brand-honey"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -556,13 +556,13 @@ export default function CollectionForm() {
                             setFullName('');
                             setTimeout(() => document.getElementById('fullName')?.focus(), 100);
                           }}
-                          className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-[#D4A854]/50 hover:bg-[#FAF7F2] transition-colors text-left bg-white"
+                          className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-brand-honey/50 hover:bg-[#FAF7F2] transition-colors text-left bg-white"
                         >
                           <span className="text-brand-charcoal font-medium">
                             I don&apos;t see my name
                           </span>
                           <svg
-                            className="w-5 h-5 text-[#D4A854]"
+                            className="w-5 h-5 text-brand-honey"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -600,7 +600,7 @@ export default function CollectionForm() {
                           <Button
                             onClick={handleContinueAsNew}
                             disabled={!((fullName || firstName).trim())}
-                            className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!((fullName || firstName).trim()) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[#D4A854] text-white hover:bg-[#c49b4a]'}`}
+                            className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!((fullName || firstName).trim()) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-brand-honey text-white hover:bg-[#c49b4a]'}`}
                           >
                             Continue
                           </Button>

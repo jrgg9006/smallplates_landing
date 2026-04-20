@@ -22,7 +22,7 @@ const RELATIONSHIP_OPTIONS = [
 const SANS_FONT = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 const LABEL_CLASS = "block text-[13px] font-medium text-brand-charcoal mb-1.5";
 const INPUT_CLASS =
-  "w-full px-4 h-[52px] border border-[#E8E0D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:border-transparent text-[15px] bg-white transition-all";
+  "w-full px-4 h-[52px] border border-[#E8E0D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent text-[15px] bg-white transition-all";
 
 /**
  * Inline dropdown styled identically to the text inputs (same height, border, font size).
@@ -342,7 +342,7 @@ export function CoupleNamesModal({ open, groupId, userEmail, isFirstBook = true,
             type="button"
             onClick={handleSubmit}
             disabled={!canSubmit || submitting}
-            className="w-full h-[56px] bg-[#D4A854] hover:bg-[#c49b4a] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors text-[15px] mt-2"
+            className="w-full h-[56px] bg-brand-honey hover:bg-[#c49b4a] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors text-[15px] mt-2"
             style={{ fontFamily: SANS_FONT }}
           >
             {submitting ? "Saving..." : "Open your dashboard →"}

@@ -54,7 +54,7 @@ export default function PersonalNoteStep({ personalNote, onChange, userName, cou
               onChange={(e) => onChange(e.target.value)}
               placeholder="A note for the couple. A story about this recipe. When to make it. Why it's special. Whatever you want to share."
               rows={6}
-              className={`w-full px-4 py-3 border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:border-transparent resize-none ${
+              className={`w-full px-4 py-3 border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent resize-none ${
                 isOverLimit ? 'border-red-300' : 'border-gray-300'
               }`}
             />

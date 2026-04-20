@@ -58,7 +58,7 @@ export default function Frame({ title, children, bottomNav, showHeaderLogo = tru
 
           {/* Sticky Bottom Nav */}
           {bottomNav && (
-            <footer className="lg:sticky lg:bottom-0 fixed bottom-0 inset-x-0 lg:inset-x-auto z-40 lg:z-30 w-full border-t border-[#D4A854]/20 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+            <footer className="lg:sticky lg:bottom-0 fixed bottom-0 inset-x-0 lg:inset-x-auto z-40 lg:z-30 w-full border-t border-brand-honey/20 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
               <div
                 className="mx-auto w-full max-w-3xl px-4 py-4 lg:py-4"
                 style={{

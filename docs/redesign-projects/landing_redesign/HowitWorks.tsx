@@ -99,7 +99,7 @@ export default function HowItWorks() {
               transition={{ duration: 0.6, delay: index * 0.15, ease: "easeOut" }}
             >
               {/* Step Number */}
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#FAF7F2] text-[#D4A854] font-serif text-lg font-medium mb-6">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#FAF7F2] text-brand-honey font-serif text-lg font-medium mb-6">
                 {step.number}
               </div>
 

@@ -54,7 +54,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
             className={`
               relative group p-4 md:p-8 rounded-xl md:rounded-2xl border-2 transition-all duration-200 bg-white
               ${method.available 
-                ? 'border-gray-200 hover:border-[#D4A854] hover:shadow-lg cursor-pointer' 
+                ? 'border-gray-200 hover:border-brand-honey hover:shadow-lg cursor-pointer' 
                 : 'border-gray-100 opacity-50 cursor-not-allowed'
               }
             `}
@@ -63,7 +63,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
               <div className={`
                 p-3 md:p-4 rounded-full transition-colors duration-200 flex-shrink-0
                 ${method.available 
-                  ? 'bg-gray-50 group-hover:bg-[#D4A854]' 
+                  ? 'bg-gray-50 group-hover:bg-brand-honey' 
                   : 'bg-gray-50'
                 }
               `}>

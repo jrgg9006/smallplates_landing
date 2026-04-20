@@ -118,7 +118,7 @@ export function PrintDetailsWizard({
                 type="text"
                 value={coupleName}
                 onChange={(e) => setCoupleName(e.target.value)}
-                className="w-full text-center text-2xl font-serif text-brand-charcoal bg-white border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:border-[#D4A854] focus:ring-1 focus:ring-[#D4A854]/30 transition-colors"
+                className="w-full text-center text-2xl font-serif text-brand-charcoal bg-white border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey/30 transition-colors"
                 placeholder="e.g. Rocío & Víctor"
                 autoFocus
               />
@@ -159,7 +159,7 @@ export function PrintDetailsWizard({
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploading}
-                      className="text-sm text-[#D4A854] hover:text-[#c49a4a] font-medium transition-colors"
+                      className="text-sm text-brand-honey hover:text-[#c49a4a] font-medium transition-colors"
                     >
                       Change photo
                     </button>
@@ -176,10 +176,10 @@ export function PrintDetailsWizard({
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
-                  className="w-48 h-48 rounded-2xl border-2 border-dashed border-gray-300 hover:border-[#D4A854] flex flex-col items-center justify-center gap-2 transition-colors bg-white/50"
+                  className="w-48 h-48 rounded-2xl border-2 border-dashed border-gray-300 hover:border-brand-honey flex flex-col items-center justify-center gap-2 transition-colors bg-white/50"
                 >
                   {uploading ? (
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#D4A854]" />
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-honey" />
                   ) : (
                     <>
                       <Upload className="h-6 w-6 text-gray-400" />

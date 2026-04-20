@@ -83,7 +83,7 @@ export default function RecipeTipsModal({ isOpen, onClose }: RecipeTipsModalProp
               {activeCategory !== 'main' ? (
                 <button 
                   onClick={() => setActiveCategory('main')}
-                  className="flex items-center text-[#9A9590] hover:text-brand-charcoal transition-colors focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:ring-offset-2 rounded-md p-1 -ml-1 w-fit"
+                  className="flex items-center text-[#9A9590] hover:text-brand-charcoal transition-colors focus:outline-none focus:ring-2 focus:ring-brand-honey focus:ring-offset-2 rounded-md p-1 -ml-1 w-fit"
                   aria-label="Back to categories"
                 >
                   <ChevronLeft className="w-5 h-5 mr-1" />
@@ -116,7 +116,7 @@ export default function RecipeTipsModal({ isOpen, onClose }: RecipeTipsModalProp
           {activeCategory !== 'main' ? (
             <button 
               onClick={() => setActiveCategory('main')}
-              className="flex items-center text-[#9A9590] hover:text-brand-charcoal transition-colors focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:ring-offset-2 rounded-md p-1 -ml-1 w-fit"
+              className="flex items-center text-[#9A9590] hover:text-brand-charcoal transition-colors focus:outline-none focus:ring-2 focus:ring-brand-honey focus:ring-offset-2 rounded-md p-1 -ml-1 w-fit"
               aria-label="Back to categories"
             >
               <ChevronLeft className="w-5 h-5 mr-1" />
@@ -201,12 +201,12 @@ function CategoryCard({ title, description, icon, onClick }: {
   return (
     <button
       onClick={onClick}
-      className="w-full p-4 min-h-[56px] bg-[#FAF7F2] hover:bg-[#E8E0D5] active:bg-[#E8E0D5] rounded-xl transition-colors group focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:ring-offset-2 touch-manipulation flex items-center gap-3"
+      className="w-full p-4 min-h-[56px] bg-[#FAF7F2] hover:bg-[#E8E0D5] active:bg-[#E8E0D5] rounded-xl transition-colors group focus:outline-none focus:ring-2 focus:ring-brand-honey focus:ring-offset-2 touch-manipulation flex items-center gap-3"
       role="button"
       tabIndex={0}
     >
       {icon && (
-        <span className="text-[#D4A854] flex-shrink-0 opacity-70">
+        <span className="text-brand-honey flex-shrink-0 opacity-70">
           {icon}
         </span>
       )}

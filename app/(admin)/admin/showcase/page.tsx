@@ -481,9 +481,9 @@ export default function ShowcasePage() {
 
         {/* Stats bar — maps 1:1 to the three sections below */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-xl border border-[#D4A854] p-4">
+          <div className="bg-white rounded-xl border border-brand-honey p-4">
             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Pending today</div>
-            <div className="text-3xl font-bold text-[#D4A854] mt-1">{stats.pending}</div>
+            <div className="text-3xl font-bold text-brand-honey mt-1">{stats.pending}</div>
           </div>
           <div className="bg-white rounded-xl border border-gray-200 p-4">
             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Waiting for book</div>
@@ -709,7 +709,7 @@ function SectionCard({ title, subtitle, count, tone, defaultOpen, open, onToggle
   };
 
   const headerBg = tone === 'primary' ? 'bg-[#FAF7F2]' : 'bg-gray-50';
-  const countColor = tone === 'primary' ? 'text-[#D4A854]' : 'text-gray-500';
+  const countColor = tone === 'primary' ? 'text-brand-honey' : 'text-gray-500';
 
   return (
     <div className="bg-white rounded-xl shadow overflow-hidden">

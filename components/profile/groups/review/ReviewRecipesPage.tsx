@@ -187,7 +187,7 @@ export function ReviewRecipesPage({ group, onBack, onMarkReviewed, onStartCloseF
         <div className="flex-1 overflow-hidden px-4 md:px-8 py-4 flex flex-col">
           {loading ? (
             <div className="flex items-center justify-center h-full">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4A854]" />
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-honey" />
             </div>
           ) : error ? (
             <div className="flex items-center justify-center h-full">

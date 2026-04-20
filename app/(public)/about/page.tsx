@@ -42,7 +42,7 @@ export default function AboutUs() {
               <h1 className="type-display mb-8">
                 We believe
               </h1>
-              <div className="w-24 h-px bg-[#D4A854] mx-auto mb-8"></div>
+              <div className="w-24 h-px bg-brand-honey mx-auto mb-8"></div>
               <h2 className="type-accent text-2xl md:text-3xl text-brand-charcoal/70 font-light">
                 wedding gifts should matter.
               </h2>
@@ -83,8 +83,8 @@ export default function AboutUs() {
               transition={{ duration: 1, delay: 0.6 }}
               className="mt-16 text-center"
             >
-              <div className="w-16 h-px bg-[#D4A854] mx-auto mb-8"></div>
-              <p className="type-accent text-2xl md:text-3xl text-[#D4A854]">
+              <div className="w-16 h-px bg-brand-honey mx-auto mb-8"></div>
+              <p className="type-accent text-2xl md:text-3xl text-brand-honey">
                 Still at the table.
               </p>
             </motion.div>

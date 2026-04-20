@@ -316,7 +316,7 @@ export function ImportGuestsModal({
               <button
                 onClick={() => { setSource("zola"); setStep("upload-file"); }}
                 className={`flex-1 rounded-xl border-[1.5px] p-6 flex items-center justify-center cursor-pointer transition-all
-                  border-[#E8E0D5] bg-white hover:border-[#D4A854] hover:bg-[#FFF8EC]`}
+                  border-[#E8E0D5] bg-white hover:border-brand-honey hover:bg-[#FFF8EC]`}
               >
                 <img src="/images/guest_modal/Zola_Logo.png" alt="Zola" className="h-5 object-contain" />
               </button>
@@ -325,7 +325,7 @@ export function ImportGuestsModal({
               <button
                 onClick={() => { setSource("the_knot"); setStep("upload-file"); }}
                 className={`flex-1 rounded-xl border-[1.5px] p-6 flex items-center justify-center cursor-pointer transition-all
-                  border-[#E8E0D5] bg-white hover:border-[#D4A854] hover:bg-[#FFF8EC]`}
+                  border-[#E8E0D5] bg-white hover:border-brand-honey hover:bg-[#FFF8EC]`}
               >
                 <img src="/images/guest_modal/knot_logo.png" alt="The Knot" className="h-5 object-contain" />
               </button>
@@ -351,7 +351,7 @@ export function ImportGuestsModal({
             {/* How to export helper */}
             <button
               onClick={() => setShowHelp(!showHelp)}
-              className="flex items-center gap-1 text-sm text-[#D4A854] mb-4 hover:opacity-80 transition-opacity"
+              className="flex items-center gap-1 text-sm text-brand-honey mb-4 hover:opacity-80 transition-opacity"
             >
               How do I export my list?
               {showHelp ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -387,19 +387,19 @@ export function ImportGuestsModal({
                 ${
                   isDragOver
                     ? "bg-[#FFF8EC] border-[#C4856C]"
-                    : "bg-[#FDFBF8] border-[#D4A854] hover:bg-[#FFF8EC]"
+                    : "bg-[#FDFBF8] border-brand-honey hover:bg-[#FFF8EC]"
                 }`}
             >
               {isLoading ? (
                 <div className="flex flex-col items-center gap-2">
-                  <div className="w-8 h-8 border-2 border-[#D4A854] border-t-transparent rounded-full animate-spin" />
+                  <div className="w-8 h-8 border-2 border-brand-honey border-t-transparent rounded-full animate-spin" />
                   <p className="text-sm text-[#999]">Reading your file...</p>
                 </div>
               ) : (
                 <>
                   <Upload
                     size={32}
-                    className="mx-auto mb-3 text-[#D4A854]"
+                    className="mx-auto mb-3 text-brand-honey"
                   />
                   <p className="text-sm text-brand-charcoal font-medium">
                     Drop your file here
@@ -456,7 +456,7 @@ export function ImportGuestsModal({
                     selectedCount === selectableGuests.length
                   }
                   onChange={toggleSelectAll}
-                  className="w-4 h-4 rounded accent-[#D4A854] cursor-pointer"
+                  className="w-4 h-4 rounded accent-brand-honey cursor-pointer"
                 />
                 <span className="text-xs text-brand-charcoal">
                   {selectedCount === selectableGuests.length
@@ -487,7 +487,7 @@ export function ImportGuestsModal({
                       checked={isSelected && !isDisabled}
                       disabled={isDisabled}
                       onChange={() => !isDisabled && toggleGuest(guest.id)}
-                      className="w-4 h-4 flex-shrink-0 rounded accent-[#D4A854] cursor-pointer disabled:cursor-not-allowed"
+                      className="w-4 h-4 flex-shrink-0 rounded accent-brand-honey cursor-pointer disabled:cursor-not-allowed"
                     />
 
                     <div className="flex-1 min-w-0 flex items-center gap-1">
@@ -498,7 +498,7 @@ export function ImportGuestsModal({
                         <span title="No email or phone">
                           <AlertTriangle
                             size={12}
-                            className="text-[#D4A854] flex-shrink-0"
+                            className="text-brand-honey flex-shrink-0"
                           />
                         </span>
                       )}
@@ -545,7 +545,7 @@ export function ImportGuestsModal({
               <button
                 onClick={handleImport}
                 disabled={selectedCount === 0 || isLoading}
-                className="px-4 py-2 rounded-lg bg-[#D4A854] text-white text-xs font-medium transition-opacity
+                className="px-4 py-2 rounded-lg bg-brand-honey text-white text-xs font-medium transition-opacity
                            disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 flex items-center gap-1.5"
               >
                 {isLoading ? (

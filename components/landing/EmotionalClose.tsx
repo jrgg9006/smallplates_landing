@@ -101,7 +101,7 @@ export default function EmotionalClose() {
 
         {/* The Brand Line */}
         <motion.p
-          className="mt-16 md:mt-20 type-heading text-[#D4A854] italic"
+          className="mt-16 md:mt-20 type-heading text-brand-honey italic"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -121,7 +121,7 @@ export default function EmotionalClose() {
           <button
             type="button"
             onClick={handleStartBook}
-            className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-10 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-charcoal focus-visible:ring-[#D4A854]"
+            className="inline-flex items-center justify-center rounded-full bg-brand-honey hover:bg-[#c49b4a] text-white px-10 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-charcoal focus-visible:ring-brand-honey"
             data-cta="emotional-close-primary"
           >
             Start Their Book

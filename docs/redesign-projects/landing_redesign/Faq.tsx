@@ -72,7 +72,7 @@ function FAQItemComponent({ faq, isOpen, onClick }: { faq: FAQItem; isOpen: bool
       <button
         type="button"
         onClick={onClick}
-        className="w-full py-6 flex items-center justify-between text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A854] focus-visible:ring-offset-2 rounded-lg"
+        className="w-full py-6 flex items-center justify-between text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-honey focus-visible:ring-offset-2 rounded-lg"
         aria-expanded={isOpen}
       >
         <h3 className="font-serif text-lg md:text-xl font-medium text-brand-charcoal pr-8">
@@ -169,7 +169,7 @@ export default function FAQ() {
           Still have questions?{" "}
           <a 
             href="mailto:hello@smallplates.co" 
-            className="text-[#D4A854] hover:text-[#c49b4a] underline underline-offset-2 transition-colors"
+            className="text-brand-honey hover:text-[#c49b4a] underline underline-offset-2 transition-colors"
           >
             We're here.
           </a>

@@ -68,7 +68,7 @@ export default function ContactForm() {
     return (
       <div className="text-center py-12">
         <h2 className="type-heading mb-4">Got it.</h2>
-        <div className="w-12 h-px bg-[#D4A854] mx-auto mb-6"></div>
+        <div className="w-12 h-px bg-brand-honey mx-auto mb-6"></div>
         <p className="type-body-small max-w-sm mx-auto">
           We&rsquo;ll get back to you within 24 hours. Usually faster.
         </p>
@@ -93,7 +93,7 @@ export default function ContactForm() {
           disabled={submitting}
           required
           maxLength={200}
-          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-brand-charcoal focus:outline-none focus:border-[#D4A854] transition-colors"
+          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-brand-charcoal focus:outline-none focus:border-brand-honey transition-colors"
         />
       </div>
 
@@ -112,7 +112,7 @@ export default function ContactForm() {
           disabled={submitting}
           required
           maxLength={320}
-          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-brand-charcoal focus:outline-none focus:border-[#D4A854] transition-colors"
+          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-brand-charcoal focus:outline-none focus:border-brand-honey transition-colors"
         />
       </div>
 
@@ -132,7 +132,7 @@ export default function ContactForm() {
           disabled={submitting}
           maxLength={200}
           placeholder="e.g. Jill and Juan"
-          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-brand-charcoal placeholder:text-brand-charcoal/30 focus:outline-none focus:border-[#D4A854] transition-colors"
+          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-brand-charcoal placeholder:text-brand-charcoal/30 focus:outline-none focus:border-brand-honey transition-colors"
         />
       </div>
 
@@ -151,7 +151,7 @@ export default function ContactForm() {
           required
           rows={6}
           maxLength={5000}
-          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-brand-charcoal focus:outline-none focus:border-[#D4A854] transition-colors resize-none"
+          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-brand-charcoal focus:outline-none focus:border-brand-honey transition-colors resize-none"
         />
       </div>
 
@@ -162,7 +162,7 @@ export default function ContactForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="w-full bg-[#D4A854] hover:bg-[#c49b4a] disabled:bg-[#D4A854]/50 disabled:cursor-not-allowed text-white font-sans font-medium text-base px-6 py-4 rounded-full transition-colors"
+        className="w-full bg-brand-honey hover:bg-[#c49b4a] disabled:bg-brand-honey/50 disabled:cursor-not-allowed text-white font-sans font-medium text-base px-6 py-4 rounded-full transition-colors"
       >
         {submitting ? "Sending..." : "Send"}
       </button>

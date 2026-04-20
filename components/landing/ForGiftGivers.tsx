@@ -50,7 +50,7 @@ export default function ForGiftGivers() {
       <div className="mx-auto max-w-4xl px-6 md:px-8">
         
         <motion.div
-          className="bg-white rounded-2xl shadow-xl p-8 md:p-12 lg:p-16 relative overflow-hidden border border-[#D4A854]/20"
+          className="bg-white rounded-2xl shadow-xl p-8 md:p-12 lg:p-16 relative overflow-hidden border border-brand-honey/20"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
@@ -61,28 +61,28 @@ export default function ForGiftGivers() {
         >
           {/* Decorative corner flourishes */}
           <div className="absolute top-4 left-4 w-12 h-12 opacity-10">
-            <svg viewBox="0 0 48 48" className="w-full h-full text-[#D4A854]">
+            <svg viewBox="0 0 48 48" className="w-full h-full text-brand-honey">
               <path d="M12 12C18 6 30 6 36 12M12 36C18 42 30 42 36 36" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
               <circle cx="24" cy="24" r="2" fill="currentColor"/>
             </svg>
           </div>
           
           <div className="absolute top-4 right-4 w-12 h-12 opacity-10 transform rotate-90">
-            <svg viewBox="0 0 48 48" className="w-full h-full text-[#D4A854]">
+            <svg viewBox="0 0 48 48" className="w-full h-full text-brand-honey">
               <path d="M12 12C18 6 30 6 36 12M12 36C18 42 30 42 36 36" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
               <circle cx="24" cy="24" r="2" fill="currentColor"/>
             </svg>
           </div>
           
           <div className="absolute bottom-4 left-4 w-12 h-12 opacity-10 transform rotate-180">
-            <svg viewBox="0 0 48 48" className="w-full h-full text-[#D4A854]">
+            <svg viewBox="0 0 48 48" className="w-full h-full text-brand-honey">
               <path d="M12 12C18 6 30 6 36 12M12 36C18 42 30 42 36 36" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
               <circle cx="24" cy="24" r="2" fill="currentColor"/>
             </svg>
           </div>
           
           <div className="absolute bottom-4 right-4 w-12 h-12 opacity-10 transform rotate-270">
-            <svg viewBox="0 0 48 48" className="w-full h-full text-[#D4A854]">
+            <svg viewBox="0 0 48 48" className="w-full h-full text-brand-honey">
               <path d="M12 12C18 6 30 6 36 12M12 36C18 42 30 42 36 36" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
               <circle cx="24" cy="24" r="2" fill="currentColor"/>
             </svg>
@@ -102,9 +102,9 @@ export default function ForGiftGivers() {
           {/* Headline with elegant styling */}
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-4 mb-4">
-              <div className="h-px bg-gradient-to-r from-transparent via-[#D4A854] to-transparent w-16"></div>
-              <div className="w-2 h-2 rounded-full bg-[#D4A854]"></div>
-              <div className="h-px bg-gradient-to-r from-transparent via-[#D4A854] to-transparent w-16"></div>
+              <div className="h-px bg-gradient-to-r from-transparent via-brand-honey to-transparent w-16"></div>
+              <div className="w-2 h-2 rounded-full bg-brand-honey"></div>
+              <div className="h-px bg-gradient-to-r from-transparent via-brand-honey to-transparent w-16"></div>
             </div>
             
             <h2
@@ -114,7 +114,7 @@ export default function ForGiftGivers() {
               We&apos;ve got {' '}
               <span className="relative inline-block">
                 <span 
-                  className="text-[#D4A854] italic font-light"
+                  className="text-brand-honey italic font-light"
                 >
                   you.
                 </span>
@@ -156,7 +156,7 @@ export default function ForGiftGivers() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: index * 0.1 }}
                 >
-                  <span className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-[#D4A854]/20 to-[#D4A854]/30 text-[#D4A854] font-serif font-medium flex items-center justify-center text-base border border-[#D4A854]/30 shadow-sm">
+                  <span className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-brand-honey/20 to-brand-honey/30 text-brand-honey font-serif font-medium flex items-center justify-center text-base border border-brand-honey/30 shadow-sm">
                     {index + 1}
                   </span>
                   <span className="font-sans font-light text-lg text-brand-charcoal/80 pt-2">

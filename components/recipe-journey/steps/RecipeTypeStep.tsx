@@ -81,8 +81,8 @@ export default function RecipeTypeStep({ onSelectType, selectedType }: RecipeTyp
                 w-full p-4 rounded-xl border-2 transition-all duration-200 bg-white text-left
                 flex items-center gap-4
                 ${selectedType?.id === option.id
-                  ? 'border-[#D4A854] bg-[#FAF7F2]'
-                  : 'border-gray-200 hover:border-[#D4A854] hover:bg-[#FAF7F2]'
+                  ? 'border-brand-honey bg-[#FAF7F2]'
+                  : 'border-gray-200 hover:border-brand-honey hover:bg-[#FAF7F2]'
                 }
               `}
             >

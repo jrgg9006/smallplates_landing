@@ -93,7 +93,7 @@ export default function SummaryStep({ recipeName, ingredients, instructions, per
         </div>
       </div>
 
-      <div className="border-t border-[#D4A854]/20 mt-8"></div>
+      <div className="border-t border-brand-honey/20 mt-8"></div>
     </div>
   );
 }

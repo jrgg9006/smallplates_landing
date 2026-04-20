@@ -267,7 +267,7 @@ body > div.pac-container ~ div:not([id]):not([class]) {
 
   /* type-eyebrow: Uppercase labels ("THE BOOK", "THIS IS SMALL PLATES") */
   .type-eyebrow {
-    @apply font-sans text-[11px] font-medium tracking-[0.15em] text-[#D4A854] uppercase;
+    @apply font-sans text-[11px] font-medium tracking-[0.15em] text-brand-honey uppercase;
   }
 
   /* type-caption: Small text, attributions, metadata */

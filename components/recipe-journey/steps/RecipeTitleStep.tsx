@@ -53,14 +53,14 @@ export default function RecipeTitleStep({ recipeName, onChange, recipeTypeHint }
             }}
             maxLength={MAX_TITLE_LENGTH}
             placeholder={placeholder}
-            className="w-full text-center font-serif text-3xl font-semibold text-brand-charcoal leading-tight border-0 border-b border-gray-300 px-0 py-2 focus:outline-none focus:border-[#D4A854] bg-transparent placeholder:text-gray-400"
+            className="w-full text-center font-serif text-3xl font-semibold text-brand-charcoal leading-tight border-0 border-b border-gray-300 px-0 py-2 focus:outline-none focus:border-brand-honey bg-transparent placeholder:text-gray-400"
             autoFocus
           />
           <p className="text-gray-400 text-sm font-light text-center mt-3">
             In any language. However you&apos;d say it at the table.
           </p>
           {pasteWarning ? (
-            <p className="text-sm text-center mt-3 text-[#D4A854]">
+            <p className="text-sm text-center mt-3 text-brand-honey">
               Just the title here — you&apos;ll add the full recipe in the next steps
             </p>
           ) : showCounter && (

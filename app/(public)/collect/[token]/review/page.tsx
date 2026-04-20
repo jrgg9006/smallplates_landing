@@ -132,7 +132,7 @@ export default function ReviewPage() {
     return (
       <div className="min-h-screen bg-white lg:bg-[#FAF7F2] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4A854] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-honey mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -165,8 +165,8 @@ export default function ReviewPage() {
         <Card className="max-w-md mx-auto">
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-[#D4A854]/20 mb-4">
-                <Check className="h-6 w-6 text-[#D4A854]" />
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-brand-honey/20 mb-4">
+                <Check className="h-6 w-6 text-brand-honey" />
               </div>
               <h2 className="text-xl font-semibold text-brand-charcoal mb-2 font-serif">You&apos;re in the book.</h2>
               <p className="text-gray-600 mb-6">
@@ -176,7 +176,7 @@ export default function ReviewPage() {
               <div className="space-y-3">
                 <Button 
                   onClick={handleSubmitAnother}
-                  className="w-full bg-[#D4A854] text-white hover:bg-[#c49b4a]"
+                  className="w-full bg-brand-honey text-white hover:bg-[#c49b4a]"
                 >
                   Add another recipe
                 </Button>
@@ -272,7 +272,7 @@ export default function ReviewPage() {
               {submissionData?.recipe.personalNote && (
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2">Personal Note</h3>
-                  <div className="bg-[#D4A854]/10 border border-[#D4A854]/20 rounded-lg p-4">
+                  <div className="bg-brand-honey/10 border border-brand-honey/20 rounded-lg p-4">
                     <pre className="text-sm text-brand-charcoal whitespace-pre-wrap font-sans">
                       {submissionData.recipe.personalNote}
                     </pre>
@@ -302,7 +302,7 @@ export default function ReviewPage() {
             </Button>
             <Button
               onClick={handleSubmit}
-              className="flex-1 bg-[#D4A854] text-white hover:bg-[#c49b4a]"
+              className="flex-1 bg-brand-honey text-white hover:bg-[#c49b4a]"
               disabled={submitting}
             >
               {submitting ? (

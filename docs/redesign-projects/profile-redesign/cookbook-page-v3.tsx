@@ -269,7 +269,7 @@ export default function SmallPlatesCookbookV3() {
           {/* PRIMARY - Collect Recipes (HONEY, ROUNDED) */}
           <button style={{
             padding: '12px 24px',
-            background: '#D4A854',
+            background: 'hsl(var(--brand-honey))',
             border: 'none',
             borderRadius: '50px',
             fontSize: '14px',

@@ -210,7 +210,7 @@ export default function BooksPrinted() {
                   <button
                     type="button"
                     onClick={() => handleBookClick(book)}
-                    className="group w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A854] focus-visible:ring-offset-2 rounded-xl"
+                    className="group w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-honey focus-visible:ring-offset-2 rounded-xl"
                   >
                     {/* Recipe Image */}
                     <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-white shadow-sm group-hover:shadow-md transition-shadow duration-300">
@@ -225,7 +225,7 @@ export default function BooksPrinted() {
                     
                     {/* Recipe Info */}
                     <div className="mt-4">
-                      <h3 className="font-serif text-lg font-medium text-brand-charcoal group-hover:text-[#D4A854] transition-colors">
+                      <h3 className="font-serif text-lg font-medium text-brand-charcoal group-hover:text-brand-honey transition-colors">
                         {book.title}
                       </h3>
                       <p className="mt-1 font-sans text-sm text-[#9A9590]">
@@ -256,7 +256,7 @@ export default function BooksPrinted() {
           <button
             type="button"
             onClick={() => {/* Open book preview modal */}}
-            className="font-sans text-[#D4A854] hover:text-[#c49b4a] text-base underline underline-offset-4 transition-colors"
+            className="font-sans text-brand-honey hover:text-[#c49b4a] text-base underline underline-offset-4 transition-colors"
           >
             Preview a full book →
           </button>

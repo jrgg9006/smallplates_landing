@@ -35,7 +35,7 @@ export default function RegistryInterlude() {
           {/* CTA Button - Outline style */}
           <button
             onClick={() => setIsModalOpen(true)}
-            className="inline-block font-sans text-sm font-medium text-[#D4A854] border border-[#D4A854] rounded-full px-6 py-2.5 hover:bg-[#D4A854] hover:text-white transition-all duration-200"
+            className="inline-block font-sans text-sm font-medium text-brand-honey border border-brand-honey rounded-full px-6 py-2.5 hover:bg-brand-honey hover:text-white transition-all duration-200"
           >
             Add to Registry
           </button>

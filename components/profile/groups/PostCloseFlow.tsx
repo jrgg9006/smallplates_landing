@@ -92,14 +92,14 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
         return (
           <React.Fragment key={stepNum}>
             {i > 0 && (
-              <div className={`w-8 h-px ${completed ? "bg-[#D4A854]" : "bg-[rgba(45,45,45,0.12)]"}`} />
+              <div className={`w-8 h-px ${completed ? "bg-brand-honey" : "bg-[rgba(45,45,45,0.12)]"}`} />
             )}
             <div
               className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
                 completed
-                  ? "bg-[#D4A854] text-white"
+                  ? "bg-brand-honey text-white"
                   : active
-                  ? "border-2 border-[#D4A854] text-[#D4A854]"
+                  ? "border-2 border-brand-honey text-brand-honey"
                   : "border border-[rgba(45,45,45,0.12)] text-[#8A8780]"
               }`}
             >
@@ -189,7 +189,7 @@ function StepExtras({
         <button
           onClick={() => setQty(Math.min(5, qty + 1))}
           disabled={qty >= 5}
-          className="w-[50px] h-[50px] rounded-full bg-[#D4A854] flex items-center justify-center text-white disabled:opacity-50 transition-opacity"
+          className="w-[50px] h-[50px] rounded-full bg-brand-honey flex items-center justify-center text-white disabled:opacity-50 transition-opacity"
           aria-label="Add copy"
         >
           <Plus className="w-5 h-5" />
@@ -197,7 +197,7 @@ function StepExtras({
       </div>
 
       {/* Dynamic message — hidden for now */}
-      {/* <p className="text-sm italic text-[#D4A854] h-5 mb-8 text-center">
+      {/* <p className="text-sm italic text-brand-honey h-5 mb-8 text-center">
         {QTY_MESSAGES[qty] || ""}
       </p> */}
       <div className="mb-8" />
@@ -392,12 +392,12 @@ function StepShipping({
   const totalCopies = 1 + qty;
   const extraTotal = qty * ADDITIONAL_BOOK_PRICE;
 
-  const inputClasses = "bg-white border-[rgba(45,45,45,0.12)] rounded-[10px] px-4 py-3 text-[15px] focus:border-[#D4A854] focus:ring-[#D4A854]/20";
+  const inputClasses = "bg-white border-[rgba(45,45,45,0.12)] rounded-[10px] px-4 py-3 text-[15px] focus:border-brand-honey focus:ring-brand-honey/20";
 
   if (!loaded) {
     return (
       <div className="flex justify-center py-20">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#D4A854]" />
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-honey" />
       </div>
     );
   }
@@ -411,7 +411,7 @@ function StepShipping({
           value={region}
           onChange={(e) => setRegion(e.target.value)}
           disabled={saving}
-          className="w-full h-[46px] bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-3 text-[14px] text-brand-charcoal focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none"
+          className="w-full h-[46px] bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-3 text-[14px] text-brand-charcoal focus:border-brand-honey focus:ring-2 focus:ring-brand-honey/20 focus:outline-none"
         >
           <option value="">{countryConfig.regionLabel}</option>
           {US_STATES.map((s) => (
@@ -426,7 +426,7 @@ function StepShipping({
           value={region}
           onChange={(e) => setRegion(e.target.value)}
           disabled={saving}
-          className="w-full h-[46px] bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-3 text-[14px] text-brand-charcoal focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none"
+          className="w-full h-[46px] bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-3 text-[14px] text-brand-charcoal focus:border-brand-honey focus:ring-2 focus:ring-brand-honey/20 focus:outline-none"
         >
           <option value="">{countryConfig.regionLabel}</option>
           {MX_STATES.map((s) => (
@@ -481,7 +481,7 @@ function StepShipping({
             value={country}
             onChange={(e) => handleCountryChange(e.target.value)}
             disabled={saving}
-            className="w-full h-[46px] bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-4 text-[15px] text-brand-charcoal focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_16px_center] bg-no-repeat"
+            className="w-full h-[46px] bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-4 text-[15px] text-brand-charcoal focus:border-brand-honey focus:ring-2 focus:ring-brand-honey/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_16px_center] bg-no-repeat"
           >
             {SUPPORTED_COUNTRIES.map((c) => (
               <option key={c.code} value={c.code}>{c.name}</option>
@@ -567,7 +567,7 @@ function StepShipping({
 
         <p className="text-[13px] text-[#8A8780] text-center mt-4 leading-[1.5]">
           Need to ship copies to different addresses?{" "}
-          <a href="mailto:team@smallplatesandcompany.com" className="text-[#D4A854] hover:opacity-80 transition-opacity">Email us</a> and we&apos;ll sort it out.
+          <a href="mailto:team@smallplatesandcompany.com" className="text-brand-honey hover:opacity-80 transition-opacity">Email us</a> and we&apos;ll sort it out.
         </p>
 
         <p className="text-xs text-[#8A8780] text-center mt-3">
@@ -635,7 +635,7 @@ export function PostCloseFlow({ groupId, onDone, onBack }: PostCloseFlowProps) {
   if (redirecting) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-[#F5F3EF]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4A854] mb-4" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-honey mb-4" />
         <p className="text-sm text-[#8A8780]">Redirecting to checkout…</p>
       </div>
     );

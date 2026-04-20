@@ -152,7 +152,7 @@ export default function SpecsGrid() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.5, delay: index * 0.05 }}
           >
-            <div className="text-[#D4A854] mb-5">{spec.icon}</div>
+            <div className="text-brand-honey mb-5">{spec.icon}</div>
             <h3 className="type-subheading text-lg md:text-xl mb-3">
               {spec.heading}
             </h3>

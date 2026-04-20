@@ -88,7 +88,7 @@ export default function ForGiftGivers() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: index * 0.1 }}
                 >
-                  <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#D4A854]/20 text-[#D4A854] font-medium flex items-center justify-center text-sm">
+                  <span className="flex-shrink-0 w-8 h-8 rounded-full bg-brand-honey/20 text-brand-honey font-medium flex items-center justify-center text-sm">
                     {index + 1}
                   </span>
                   <span className="font-sans text-lg text-brand-charcoal/80 pt-1">

@@ -55,7 +55,7 @@ export function ProductSelectionStep({
           <button
             type="button"
             onClick={() => setIsOpen(!isOpen)}
-            className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl border border-gray-300 bg-white text-left transition-all hover:border-[#D4A854] focus:outline-none focus:ring-2 focus:ring-[#D4A854]/20 focus:border-[#D4A854]"
+            className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl border border-gray-300 bg-white text-left transition-all hover:border-brand-honey focus:outline-none focus:ring-2 focus:ring-brand-honey/20 focus:border-brand-honey"
           >
             <span className="text-[15px] text-brand-charcoal">
               {bookQuantity === 1
@@ -115,7 +115,7 @@ export function ProductSelectionStep({
         </div>
 
         <div className="mt-5 px-5 py-4 rounded-xl bg-[#F5F3F0] text-center">
-          <span className="text-[#D4A854] text-base mr-1.5" style={{ fontFamily: "'Georgia', serif", fontStyle: "italic" }}>
+          <span className="text-brand-honey text-base mr-1.5" style={{ fontFamily: "'Georgia', serif", fontStyle: "italic" }}>
             Tip
           </span>
           <span className="text-[13px] text-[#6B6560]">

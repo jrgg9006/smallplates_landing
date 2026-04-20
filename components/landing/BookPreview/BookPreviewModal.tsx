@@ -68,7 +68,7 @@ export default function BookPreviewModal({
             </button>
             <button
                 onClick={handleCreateCookbook}
-              className="px-6 py-3 bg-[#D4A854] text-white rounded-xl hover:bg-[#c49b4a] transition-colors font-medium font-sans"
+              className="px-6 py-3 bg-brand-honey text-white rounded-xl hover:bg-[#c49b4a] transition-colors font-medium font-sans"
             >
               Give this Gift
             </button>

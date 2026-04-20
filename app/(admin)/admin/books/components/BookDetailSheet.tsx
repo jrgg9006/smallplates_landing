@@ -609,7 +609,7 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                       <Button
                         variant="outline"
                         size="sm"
-                        className="border-[#D4A854] text-[#D4A854] hover:bg-[#D4A854]/10"
+                        className="border-brand-honey text-brand-honey hover:bg-brand-honey/10"
                         disabled={downloadingPackage}
                         onClick={async () => {
                           setDownloadingPackage(true);
