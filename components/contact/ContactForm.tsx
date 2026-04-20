@@ -162,7 +162,7 @@ export default function ContactForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="w-full bg-brand-honey hover:bg-[#c49b4a] disabled:bg-brand-honey/50 disabled:cursor-not-allowed text-white font-sans font-medium text-base px-6 py-4 rounded-full transition-colors"
+        className="w-full bg-brand-honey hover:bg-brand-honey-dark disabled:bg-brand-honey/50 disabled:cursor-not-allowed text-white font-sans font-medium text-base px-6 py-4 rounded-full transition-colors"
       >
         {submitting ? "Sending..." : "Send"}
       </button>

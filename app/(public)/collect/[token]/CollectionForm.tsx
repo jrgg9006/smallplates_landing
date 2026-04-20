@@ -475,7 +475,7 @@ export default function CollectionForm() {
                   className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[80px] transition-colors ${
                     !firstName.trim() || searching
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-brand-honey text-white hover:bg-[#c49b4a]'
+                      : 'bg-brand-honey text-white hover:bg-brand-honey-dark'
                   }`}
                 >
                   {searching ? (
@@ -512,7 +512,7 @@ export default function CollectionForm() {
                     <Button
                       onClick={handleContinueAsNew}
                       disabled={!fullName.trim()}
-                      className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!fullName.trim() ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-brand-honey text-white hover:bg-[#c49b4a]'}`}
+                      className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!fullName.trim() ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-brand-honey text-white hover:bg-brand-honey-dark'}`}
                     >
                       Continue
                     </Button>
@@ -600,7 +600,7 @@ export default function CollectionForm() {
                           <Button
                             onClick={handleContinueAsNew}
                             disabled={!((fullName || firstName).trim())}
-                            className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!((fullName || firstName).trim()) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-brand-honey text-white hover:bg-[#c49b4a]'}`}
+                            className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!((fullName || firstName).trim()) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-brand-honey text-white hover:bg-brand-honey-dark'}`}
                           >
                             Continue
                           </Button>

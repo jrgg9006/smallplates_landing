@@ -334,7 +334,7 @@ export default function ActivateAccountPage({ params }: { params: Promise<{ toke
             disabled={!isFormValid || loading}
             className={`w-full py-3 rounded-xl font-semibold transition-colors ${
               isFormValid && !loading
-                ? "bg-brand-honey text-white hover:bg-[#c49b4a]"
+                ? "bg-brand-honey text-white hover:bg-brand-honey-dark"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >

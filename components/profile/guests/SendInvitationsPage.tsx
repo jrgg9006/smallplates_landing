@@ -851,7 +851,7 @@ export function SendInvitationsPage({
               <button
                 onClick={handleSaveGuest}
                 disabled={isSavingGuest || !newGuestFirst.trim()}
-                className="flex-1 py-3 text-sm font-medium text-white bg-brand-honey rounded-full hover:bg-[#C19940] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                className="flex-1 py-3 text-sm font-medium text-white bg-brand-honey rounded-full hover:bg-brand-honey-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
               >
                 {isSavingGuest ? (
                   <>
@@ -882,7 +882,7 @@ export function SendInvitationsPage({
                     (e) => e.trim() && e.includes("@")
                   )
                 }
-                className="flex-1 py-3 text-sm font-medium text-white bg-brand-honey rounded-full hover:bg-[#C19940] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                className="flex-1 py-3 text-sm font-medium text-white bg-brand-honey rounded-full hover:bg-brand-honey-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
               >
                 {isSavingEmails ? (
                   <>
@@ -900,7 +900,7 @@ export function SendInvitationsPage({
                 onClick={handleSendInvitations}
                 disabled={selectedIds.size === 0 || isSending}
                 className="w-full py-3.5 rounded-full bg-brand-honey text-white font-medium text-[15px]
-                           hover:bg-[#C19940] transition-colors disabled:opacity-40 disabled:cursor-not-allowed
+                           hover:bg-brand-honey-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed
                            flex items-center justify-center gap-2"
               >
                 {isSending ? (

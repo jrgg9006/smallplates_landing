@@ -169,7 +169,7 @@ export default function FAQ() {
           Still have questions?{" "}
           <a 
             href="mailto:hello@smallplates.co" 
-            className="text-brand-honey hover:text-[#c49b4a] underline underline-offset-2 transition-colors"
+            className="text-brand-honey hover:text-brand-honey-dark underline underline-offset-2 transition-colors"
           >
             We're here.
           </a>

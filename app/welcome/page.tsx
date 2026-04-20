@@ -217,7 +217,7 @@ function WelcomeContent() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="w-full h-[56px] bg-brand-honey hover:bg-[#c49b4a] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors text-[15px]"
+            className="w-full h-[56px] bg-brand-honey hover:bg-brand-honey-dark disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors text-[15px]"
             style={{ fontFamily: sansFont }}
           >
             {saving ? "Saving..." : "Save password and continue"}

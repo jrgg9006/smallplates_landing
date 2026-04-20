@@ -128,7 +128,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
                 }
                 setShowPasteModal(false);
               }}
-              className="px-6 py-2 rounded-full bg-brand-honey text-white hover:bg-[#c49b4a]"
+              className="px-6 py-2 rounded-full bg-brand-honey text-white hover:bg-brand-honey-dark"
             >
               Continue
             </button>

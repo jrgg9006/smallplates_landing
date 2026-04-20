@@ -93,7 +93,7 @@ export function ReviewRecipeCard({ recipe, index, total, onSave }: ReviewRecipeC
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="text-xs text-brand-honey hover:text-[#c49a4a] font-medium transition-colors"
+                  className="text-xs text-brand-honey hover:text-brand-honey-dark font-medium transition-colors"
                 >
                   {saving ? "Saving..." : "Save"}
                 </button>

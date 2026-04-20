@@ -176,7 +176,7 @@ export default function ReviewPage() {
               <div className="space-y-3">
                 <Button 
                   onClick={handleSubmitAnother}
-                  className="w-full bg-brand-honey text-white hover:bg-[#c49b4a]"
+                  className="w-full bg-brand-honey text-white hover:bg-brand-honey-dark"
                 >
                   Add another recipe
                 </Button>
@@ -302,7 +302,7 @@ export default function ReviewPage() {
             </Button>
             <Button
               onClick={handleSubmit}
-              className="flex-1 bg-brand-honey text-white hover:bg-[#c49b4a]"
+              className="flex-1 bg-brand-honey text-white hover:bg-brand-honey-dark"
               disabled={submitting}
             >
               {submitting ? (

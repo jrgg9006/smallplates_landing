@@ -137,7 +137,7 @@ export function PrintDetailsSidebar({
                 <button
                   onClick={handleSaveName}
                   disabled={savingName || !nameValue.trim()}
-                  className="text-xs text-brand-honey hover:text-[#c49a4a] font-medium transition-colors"
+                  className="text-xs text-brand-honey hover:text-brand-honey-dark font-medium transition-colors"
                 >
                   {savingName ? "Saving..." : "Save"}
                 </button>
@@ -175,7 +175,7 @@ export function PrintDetailsSidebar({
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingImage}
-                  className="text-xs text-brand-honey hover:text-[#c49a4a] transition-colors"
+                  className="text-xs text-brand-honey hover:text-brand-honey-dark transition-colors"
                 >
                   Change
                 </button>

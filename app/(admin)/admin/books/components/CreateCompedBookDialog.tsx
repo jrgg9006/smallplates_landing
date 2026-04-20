@@ -85,7 +85,7 @@ export default function CreateCompedBookDialog({ onCreated }: CreateCompedBookDi
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
       <DialogTrigger asChild>
-        <button className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg bg-brand-honey text-white hover:bg-[#c49b4a] transition-colors">
+        <button className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg bg-brand-honey text-white hover:bg-brand-honey-dark transition-colors">
           <Plus className="w-4 h-4" />
           Free Book
         </button>
@@ -231,7 +231,7 @@ export default function CreateCompedBookDialog({ onCreated }: CreateCompedBookDi
           <button
             onClick={handleSubmit}
             disabled={!isValid || submitting}
-            className="w-full py-2.5 rounded-lg text-sm font-medium text-white bg-brand-honey hover:bg-[#c49b4a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+            className="w-full py-2.5 rounded-lg text-sm font-medium text-white bg-brand-honey hover:bg-brand-honey-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
           >
             {submitting ? (
               <>

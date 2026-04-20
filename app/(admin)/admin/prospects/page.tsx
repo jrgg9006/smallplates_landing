@@ -347,7 +347,7 @@ export default function AdminProspectsPage() {
                             {prospect.status === 'paid' && (
                               <button
                                 onClick={() => handleGenerateActivationLink(prospect)}
-                                className="text-xs px-3 py-1.5 bg-brand-honey text-white rounded hover:bg-[#c49b4a] transition-colors font-medium mt-1"
+                                className="text-xs px-3 py-1.5 bg-brand-honey text-white rounded hover:bg-brand-honey-dark transition-colors font-medium mt-1"
                               >
                                 Generate Activation Link
                               </button>
@@ -449,7 +449,7 @@ export default function AdminProspectsPage() {
                     />
                     <button
                       onClick={() => copyToClipboard(activationLink)}
-                      className="px-4 py-2 bg-brand-honey text-white rounded hover:bg-[#c49b4a] transition-colors text-sm font-medium"
+                      className="px-4 py-2 bg-brand-honey text-white rounded hover:bg-brand-honey-dark transition-colors text-sm font-medium"
                     >
                       Copy
                     </button>
@@ -475,7 +475,7 @@ export default function AdminProspectsPage() {
                     className={`px-6 py-2 rounded-lg font-medium transition-colors ${
                       generatingToken || !activationEmail.trim()
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-brand-honey text-white hover:bg-[#c49b4a]'
+                        : 'bg-brand-honey text-white hover:bg-brand-honey-dark'
                     }`}
                   >
                     {generatingToken ? (

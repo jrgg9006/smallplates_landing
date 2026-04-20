@@ -159,7 +159,7 @@ export function PrintDetailsWizard({
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploading}
-                      className="text-sm text-brand-honey hover:text-[#c49a4a] font-medium transition-colors"
+                      className="text-sm text-brand-honey hover:text-brand-honey-dark font-medium transition-colors"
                     >
                       Change photo
                     </button>

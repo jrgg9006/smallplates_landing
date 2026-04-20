@@ -256,7 +256,7 @@ export default function BooksPrinted() {
           <button
             type="button"
             onClick={() => {/* Open book preview modal */}}
-            className="font-sans text-brand-honey hover:text-[#c49b4a] text-base underline underline-offset-4 transition-colors"
+            className="font-sans text-brand-honey hover:text-brand-honey-dark text-base underline underline-offset-4 transition-colors"
           >
             Preview a full book →
           </button>
