@@ -38,11 +38,11 @@ function SuccessContent() {
       >
         <div className="max-w-sm mx-auto text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4A854] mx-auto mb-8"></div>
-          <p className="text-[#2D2D2D]/60 font-light">
+          <p className="text-brand-charcoal/60 font-light">
             If this takes too long, reach out at{" "}
             <a
               href="mailto:team@smallplatesandcompany.com"
-              className="text-[#2D2D2D]/50 hover:text-[#D4A854] transition-colors"
+              className="text-brand-charcoal/50 hover:text-[#D4A854] transition-colors"
             >
               team@smallplatesandcompany.com
             </a>
@@ -68,7 +68,7 @@ function SuccessContent() {
         </div>
 
         {/* Email notification */}
-        <p className="text-[#2D2D2D]/60 font-light mb-4">
+        <p className="text-brand-charcoal/60 font-light mb-4">
           Check your email for a link to access your dashboard.
         </p>
 
@@ -78,11 +78,11 @@ function SuccessContent() {
         </p>
 
         {/* Contact */}
-        <p className="text-sm text-[#2D2D2D]/40 font-light">
+        <p className="text-sm text-brand-charcoal/40 font-light">
           Questions?{" "}
           <a
             href="mailto:team@smallplatesandcompany.com"
-            className="text-[#2D2D2D]/50 hover:text-[#D4A854] transition-colors"
+            className="text-brand-charcoal/50 hover:text-[#D4A854] transition-colors"
           >
             team@smallplatesandcompany.com
           </a>

@@ -63,7 +63,7 @@ const inputClasses =
   "bg-white border-[#E8E0D5] focus:border-[#D4A854] focus:ring-[#D4A854]/20";
 
 const selectClasses =
-  "w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-[#2D2D2D] focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat";
+  "w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat";
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
@@ -254,7 +254,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
               A copy is available
             </p>
 
-            <h1 className="font-serif text-[30px] text-[#2D2D2D] text-center leading-tight mb-2">
+            <h1 className="font-serif text-[30px] text-brand-charcoal text-center leading-tight mb-2">
               {book.title}
             </h1>
 
@@ -265,11 +265,11 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
             </p>
 
             <div className="bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-[18px] py-[14px] mb-6 text-[13px] space-y-2">
-              <div className="flex justify-between text-[#2D2D2D]">
+              <div className="flex justify-between text-brand-charcoal">
                 <span>One copy</span>
                 <span>${ADDITIONAL_BOOK_PRICE}</span>
               </div>
-              <div className="flex justify-between text-[#2D2D2D]">
+              <div className="flex justify-between text-brand-charcoal">
                 <span className="text-[#8A8780]">Shipping</span>
                 <span>${EXTRA_COPIES_SHIPPING_COST}</span>
               </div>
@@ -287,9 +287,9 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
                 className="w-10 h-10 rounded-full border border-[#E8E0D5] flex items-center justify-center hover:bg-white transition-colors disabled:opacity-30"
                 disabled={qty <= 1}
               >
-                <Minus className="w-4 h-4 text-[#2D2D2D]" />
+                <Minus className="w-4 h-4 text-brand-charcoal" />
               </button>
-              <span className="text-4xl font-serif text-[#2D2D2D] w-12 text-center tabular-nums">
+              <span className="text-4xl font-serif text-brand-charcoal w-12 text-center tabular-nums">
                 {qty}
               </span>
               <button
@@ -297,7 +297,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
                 className="w-10 h-10 rounded-full border border-[#E8E0D5] flex items-center justify-center hover:bg-white transition-colors disabled:opacity-30"
                 disabled={qty >= 5}
               >
-                <Plus className="w-4 h-4 text-[#2D2D2D]" />
+                <Plus className="w-4 h-4 text-brand-charcoal" />
               </button>
             </div>
             <p className="text-sm text-[#8A8780] text-center mb-8">
@@ -326,7 +326,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
 
             <button
               onClick={handleOrderContinue}
-              className="w-full bg-[#2D2D2D] text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 transition-colors"
+              className="w-full bg-brand-charcoal text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 transition-colors"
             >
               Order &mdash; ${total} &rarr;
             </button>
@@ -335,7 +335,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
               Questions?{" "}
               <a
                 href="mailto:team@smallplatesandcompany.com"
-                className="underline hover:text-[#2D2D2D] transition-colors"
+                className="underline hover:text-brand-charcoal transition-colors"
               >
                 team@smallplatesandcompany.com
               </a>
@@ -360,7 +360,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
             />
           </div>
 
-          <h1 className="font-serif text-[28px] text-[#2D2D2D] text-center leading-tight mb-2">
+          <h1 className="font-serif text-[28px] text-brand-charcoal text-center leading-tight mb-2">
             Where should we send it?
           </h1>
           <p className="text-sm text-[#8A8780] text-center mb-6">
@@ -368,15 +368,15 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
           </p>
 
           <div className="bg-white border border-[#E8E0D5] rounded-[10px] px-[18px] py-[14px] mb-6 text-[13px] space-y-1.5">
-            <div className="flex justify-between text-[#2D2D2D]">
+            <div className="flex justify-between text-brand-charcoal">
               <span>{qty} {qty === 1 ? "copy" : "copies"}</span>
               <span>${subtotal}</span>
             </div>
-            <div className="flex justify-between text-[#2D2D2D]">
+            <div className="flex justify-between text-brand-charcoal">
               <span className="text-[#8A8780]">Shipping</span>
               <span>${EXTRA_COPIES_SHIPPING_COST}</span>
             </div>
-            <div className="flex justify-between font-medium text-[15px] text-[#2D2D2D] pt-2 border-t border-[rgba(45,45,45,0.12)]">
+            <div className="flex justify-between font-medium text-[15px] text-brand-charcoal pt-2 border-t border-[rgba(45,45,45,0.12)]">
               <span>Total</span>
               <span>${total}</span>
             </div>
@@ -495,7 +495,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
           <button
             onClick={handleShippingContinue}
             disabled={redirecting}
-            className="w-full bg-[#2D2D2D] text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors mt-5"
+            className="w-full bg-brand-charcoal text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors mt-5"
           >
             Continue to payment &rarr;
           </button>

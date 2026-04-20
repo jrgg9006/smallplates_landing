@@ -83,14 +83,14 @@ export default function RecipeTipsModal({ isOpen, onClose }: RecipeTipsModalProp
               {activeCategory !== 'main' ? (
                 <button 
                   onClick={() => setActiveCategory('main')}
-                  className="flex items-center text-[#9A9590] hover:text-[#2D2D2D] transition-colors focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:ring-offset-2 rounded-md p-1 -ml-1 w-fit"
+                  className="flex items-center text-[#9A9590] hover:text-brand-charcoal transition-colors focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:ring-offset-2 rounded-md p-1 -ml-1 w-fit"
                   aria-label="Back to categories"
                 >
                   <ChevronLeft className="w-5 h-5 mr-1" />
                   <span className="sr-only sm:not-sr-only">Back</span>
                 </button>
               ) : (
-                <SheetTitle className="font-medium text-base text-[#2D2D2D] mb-2">
+                <SheetTitle className="font-medium text-base text-brand-charcoal mb-2">
                   Tips
                 </SheetTitle>
               )}
@@ -116,14 +116,14 @@ export default function RecipeTipsModal({ isOpen, onClose }: RecipeTipsModalProp
           {activeCategory !== 'main' ? (
             <button 
               onClick={() => setActiveCategory('main')}
-              className="flex items-center text-[#9A9590] hover:text-[#2D2D2D] transition-colors focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:ring-offset-2 rounded-md p-1 -ml-1 w-fit"
+              className="flex items-center text-[#9A9590] hover:text-brand-charcoal transition-colors focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:ring-offset-2 rounded-md p-1 -ml-1 w-fit"
               aria-label="Back to categories"
             >
               <ChevronLeft className="w-5 h-5 mr-1" />
               <span className="sr-only sm:not-sr-only">Back</span>
             </button>
           ) : (
-            <DialogTitle className="font-medium text-base text-[#2D2D2D] mb-4">
+            <DialogTitle className="font-medium text-base text-brand-charcoal mb-4">
               Tips
             </DialogTitle>
           )}
@@ -161,7 +161,7 @@ function MainView({ onSelectCategory }: { onSelectCategory: (cat: TipCategory) =
 
       {/* Title and Subheader */}
       <div className="text-center space-y-2">
-        <h2 id="tips-modal-title" className="font-serif text-2xl font-medium text-[#2D2D2D]">
+        <h2 id="tips-modal-title" className="font-serif text-2xl font-medium text-brand-charcoal">
           What should I put?
         </h2>
         <p className="text-[#9A9590] text-sm">
@@ -210,7 +210,7 @@ function CategoryCard({ title, description, icon, onClick }: {
           {icon}
         </span>
       )}
-      <h3 className="font-normal text-[#2D2D2D] text-center flex-1">
+      <h3 className="font-normal text-brand-charcoal text-center flex-1">
         {title}
       </h3>
       {description && (
@@ -225,7 +225,7 @@ function CategoryCard({ title, description, icon, onClick }: {
 function TipItem({ title, description }: { title: string; description: string }) {
   return (
     <div className="pb-4 border-b border-[#E8E0D5] last:border-0">
-      <p className="font-medium text-[#2D2D2D]">{title}</p>
+      <p className="font-medium text-brand-charcoal">{title}</p>
       <p className="text-[#9A9590] text-sm mt-1">{description}</p>
     </div>
   );
@@ -261,7 +261,7 @@ function EasyStuffView() {
       </div>
 
       <div>
-        <h2 className="font-serif text-2xl font-medium text-[#2D2D2D]">
+        <h2 className="font-serif text-2xl font-medium text-brand-charcoal">
           The easy stuff
         </h2>
         <p className="text-[#9A9590] mt-2">
@@ -308,7 +308,7 @@ function BorrowedRecipesView() {
       </div>
 
       <div>
-        <h2 className="font-serif text-2xl font-medium text-[#2D2D2D]">
+        <h2 className="font-serif text-2xl font-medium text-brand-charcoal">
           Borrowed recipes
         </h2>
         <p className="text-[#9A9590] mt-2">
@@ -359,7 +359,7 @@ function FunStuffView() {
       </div>
 
       <div>
-        <h2 className="font-serif text-2xl font-medium text-[#2D2D2D]">
+        <h2 className="font-serif text-2xl font-medium text-brand-charcoal">
           The fun stuff
         </h2>
         <p className="text-[#9A9590] mt-2">

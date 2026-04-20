@@ -177,7 +177,7 @@ export function DatePickerStep({
           className="text-center transition-all duration-200 ease-in-out"
           style={{ marginBottom: showHint ? "16px" : "24px" }}
         >
-          <h2 className="text-base font-medium text-[#2D2D2D]">
+          <h2 className="text-base font-medium text-brand-charcoal">
             {question}
           </h2>
         </div>
@@ -191,7 +191,7 @@ export function DatePickerStep({
             marginBottom: showHint ? "16px" : "0px",
           }}
         >
-          <div className="text-sm text-[#2D2D2D]/60 font-light text-center">
+          <div className="text-sm text-brand-charcoal/60 font-light text-center">
             {hint}
           </div>
         </div>
@@ -213,7 +213,7 @@ export function DatePickerStep({
           >
             <Calendar className="w-[18px] h-[18px] text-[#9A9590] mr-2.5 flex-shrink-0" strokeWidth={1.5} />
             {selectedDate ? (
-              <span className="text-[15px] font-medium text-[#2D2D2D] flex-1 text-left">
+              <span className="text-[15px] font-medium text-brand-charcoal flex-1 text-left">
                 {format(selectedDate, "MMMM d, yyyy")}
               </span>
             ) : isUndecided ? (
@@ -232,7 +232,7 @@ export function DatePickerStep({
                 className="p-1 rounded-full hover:bg-[#E8E0D5] transition-colors ml-1"
                 aria-label="Clear date"
               >
-                <X className="w-4 h-4 text-[#9A9590] hover:text-[#2D2D2D]" strokeWidth={1.5} />
+                <X className="w-4 h-4 text-[#9A9590] hover:text-brand-charcoal" strokeWidth={1.5} />
               </button>
             )}
           </div>
@@ -264,7 +264,7 @@ export function DatePickerStep({
                   ["--rdp-day-width" as string]: "44px",
                   ["--rdp-selected-border" as string]: "none",
                   fontFamily: "inherit",
-                  color: "#2D2D2D",
+                  color: "hsl(var(--brand-charcoal))",
                 }}
               />
             </div>
@@ -287,7 +287,7 @@ export function DatePickerStep({
                 RECIPES MUST BE SUBMITTED BY
               </p>
               <div className="w-10 h-px bg-[#D4A854] mx-auto mb-2.5" />
-              <p className="text-2xl sm:text-2xl font-semibold text-[#2D2D2D] leading-snug">
+              <p className="text-2xl sm:text-2xl font-semibold text-brand-charcoal leading-snug">
                 {format(bookCloseDate, "EEEE")}, {format(bookCloseDate, "MMMM")} {getOrdinalDay(bookCloseDate.getDate())}
               </p>
             </div>
@@ -316,7 +316,7 @@ export function DatePickerStep({
             <button
               type="button"
               onClick={handleIDontKnow}
-              className="text-sm text-[#2D2D2D]/50 hover:text-[#D4A854] transition-colors font-light underline underline-offset-2"
+              className="text-sm text-brand-charcoal/50 hover:text-[#D4A854] transition-colors font-light underline underline-offset-2"
             >
               I don&apos;t know yet
             </button>
@@ -367,7 +367,7 @@ export function DatePickerStep({
         <div className="text-center mt-6">
           <a
             href={switchFlowHref}
-            className="text-xs text-[#2D2D2D]/50 hover:text-[#D4A854] hover:underline underline-offset-2 transition-colors font-light"
+            className="text-xs text-brand-charcoal/50 hover:text-[#D4A854] hover:underline underline-offset-2 transition-colors font-light"
           >
             {switchFlowText}
           </a>

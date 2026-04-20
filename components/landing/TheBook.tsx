@@ -190,7 +190,7 @@ export default function TheBook() {
                 {specTags.map((tag) => (
                   <span
                     key={tag}
-                    className="font-sans text-xs bg-[#F5F1EB] border border-[#E8E0D5] text-[#2D2D2D]/60 px-3.5 py-1.5 rounded-sm"
+                    className="font-sans text-xs bg-[#F5F1EB] border border-[#E8E0D5] text-brand-charcoal/60 px-3.5 py-1.5 rounded-sm"
                   >
                     {tag}
                   </span>
@@ -217,10 +217,10 @@ export default function TheBook() {
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
-          <p className="font-serif text-2xl md:text-3xl font-medium text-[#2D2D2D] leading-snug">
+          <p className="font-serif text-2xl md:text-3xl font-medium text-brand-charcoal leading-snug">
             Designed by us. Printed for them.
           </p>
-          <p className="mt-3 font-serif text-2xl md:text-3xl font-medium text-[#2D2D2D] leading-snug">
+          <p className="mt-3 font-serif text-2xl md:text-3xl font-medium text-brand-charcoal leading-snug">
             Made to be{" "}
             <span className="italic text-[#D4A854]">used.</span>
           </p>

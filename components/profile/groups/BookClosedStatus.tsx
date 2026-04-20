@@ -25,7 +25,7 @@ function ShareCopyLink({ groupId }: { groupId: string }) {
     <div>
       <button
         onClick={handleCopy}
-        className="inline-flex items-center gap-1.5 px-4 py-2 border border-[#E8E0D5] text-[#2D2D2D] text-xs font-medium rounded-full hover:border-[#D4A854] hover:text-[#D4A854] transition-colors"
+        className="inline-flex items-center gap-1.5 px-4 py-2 border border-[#E8E0D5] text-brand-charcoal text-xs font-medium rounded-full hover:border-[#D4A854] hover:text-[#D4A854] transition-colors"
       >
         {copied ? (
           <>
@@ -85,8 +85,8 @@ function ReferralBox() {
               onClick={handleCopy}
               className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-medium transition-all duration-200 ${
                 copied
-                  ? "bg-[#D4A854] text-[#2D2D2D]"
-                  : "bg-white text-[#2D2D2D] hover:bg-[#D4A854] hover:text-[#2D2D2D]"
+                  ? "bg-[#D4A854] text-brand-charcoal"
+                  : "bg-white text-brand-charcoal hover:bg-[#D4A854] hover:text-brand-charcoal"
               }`}
             >
               {copied ? (
@@ -211,7 +211,7 @@ function TimelineSection({ bookStatus }: { bookStatus: string }) {
           </div>
           {/* Content */}
           <div>
-            <p className="text-sm font-medium text-[#2D2D2D]">{s.title}</p>
+            <p className="text-sm font-medium text-brand-charcoal">{s.title}</p>
             <p className="text-[13px] text-[#8A8780]">{s.description}</p>
           </div>
         </div>
@@ -355,7 +355,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
           value={region}
           onChange={(e) => setRegion(e.target.value)}
           disabled={saving}
-          className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-[#2D2D2D] focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none"
+          className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none"
         >
           <option value="">{countryConfig.regionLabel}</option>
           {US_STATES.map((s) => (
@@ -370,7 +370,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
           value={region}
           onChange={(e) => setRegion(e.target.value)}
           disabled={saving}
-          className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-[#2D2D2D] focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none"
+          className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none"
         >
           <option value="">{countryConfig.regionLabel}</option>
           {MX_STATES.map((s) => (
@@ -411,7 +411,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
           <p className="text-xs uppercase tracking-[0.25em] text-[#D4A854] font-medium mb-2">
             Your book is closed.
           </p>
-          <h1 className="font-serif text-3xl text-[#2D2D2D] leading-tight mb-1">
+          <h1 className="font-serif text-3xl text-brand-charcoal leading-tight mb-1">
             {coupleName}
           </h1>
           {closedDate && (
@@ -425,13 +425,13 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
             {/* Printed as */}
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-1">Printed as</p>
-              <p className="text-sm text-[#2D2D2D]">{coupleName}</p>
+              <p className="text-sm text-brand-charcoal">{coupleName}</p>
             </div>
 
             {/* Recipes */}
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-1">Recipes</p>
-              <p className="text-sm text-[#2D2D2D]">{recipeCount} recipes</p>
+              <p className="text-sm text-brand-charcoal">{recipeCount} recipes</p>
             </div>
 
             {/* Book photo */}
@@ -453,7 +453,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
             {/* Copies */}
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-1">Copies</p>
-              <p className="text-sm text-[#2D2D2D]">
+              <p className="text-sm text-brand-charcoal">
                 {extraCopiesCount > 0
                   ? `${1 + extraCopiesCount} books`
                   : "1 book"}
@@ -461,7 +461,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
               <div className="flex flex-wrap items-start gap-2 mt-3">
                 <button
                   onClick={() => setShowPurchase(true)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2D2D2D] text-white text-xs font-medium rounded-full hover:bg-gray-800 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-charcoal text-white text-xs font-medium rounded-full hover:bg-gray-800 transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Get more copies
@@ -482,7 +482,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
           ) : shippingAddress ? (
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-2">Ships to</p>
-              <p className="text-sm text-[#2D2D2D] font-medium">{shippingAddress.recipient_name}</p>
+              <p className="text-sm text-brand-charcoal font-medium">{shippingAddress.recipient_name}</p>
               <p className="text-sm text-gray-500">
                 {shippingAddress.street_address}
                 {shippingAddress.apartment_unit && `, ${shippingAddress.apartment_unit}`}
@@ -507,7 +507,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
               </div>
 
               <p className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-1">Ships to</p>
-              <p className="font-serif text-lg text-[#2D2D2D] mb-4">
+              <p className="font-serif text-lg text-brand-charcoal mb-4">
                 Where should we send the book?
               </p>
 
@@ -519,7 +519,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
                     value={country}
                     onChange={(e) => handleCountryChange(e.target.value)}
                     disabled={saving}
-                    className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-[#2D2D2D] focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat"
+                    className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat"
                   >
                     {SUPPORTED_COUNTRIES.map((c) => (
                       <option key={c.code} value={c.code}>{c.name}</option>
@@ -627,7 +627,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
                 <button
                   onClick={validateAndSave}
                   disabled={saving}
-                  className="w-full bg-[#2D2D2D] text-white rounded-full py-3 text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors mt-2"
+                  className="w-full bg-brand-charcoal text-white rounded-full py-3 text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors mt-2"
                 >
                   {saving ? "Saving..." : "Save shipping address"}
                 </button>

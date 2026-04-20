@@ -44,7 +44,7 @@ const RecipeCard = ({ recipe }: { recipe: any }) => {
         fontSize: '18px',
         fontWeight: '400',
         fontStyle: 'italic',
-        color: '#2D2D2D',
+        color: 'hsl(var(--brand-charcoal))',
         margin: '0',
         lineHeight: '1.4',
       }}>
@@ -132,7 +132,7 @@ const CaptainsDropdown = ({ isOpen }: { isOpen: boolean }) => {
             width: '32px',
             height: '32px',
             borderRadius: '50%',
-            background: captain.role === 'Creator' ? '#2D2D2D' : '#E8E6E1',
+            background: captain.role === 'Creator' ? 'hsl(var(--brand-charcoal))' : '#E8E6E1',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -142,7 +142,7 @@ const CaptainsDropdown = ({ isOpen }: { isOpen: boolean }) => {
             {captain.name.charAt(0)}
           </div>
           <div>
-            <p style={{ margin: '0', fontSize: '14px', color: '#2D2D2D' }}>{captain.name}</p>
+            <p style={{ margin: '0', fontSize: '14px', color: 'hsl(var(--brand-charcoal))' }}>{captain.name}</p>
             <p style={{ margin: '0', fontSize: '12px', color: '#8A8780' }}>{captain.role}</p>
           </div>
         </div>
@@ -188,7 +188,7 @@ export default function SmallPlatesCookbookV3() {
         zIndex: 50,
       }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-          <span style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: '#2D2D2D' }}>
+          <span style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: 'hsl(var(--brand-charcoal))' }}>
             Small Plates
           </span>
           <span style={{ fontSize: '13px', color: '#8A8780' }}>& Co.</span>
@@ -200,7 +200,7 @@ export default function SmallPlatesCookbookV3() {
             width: '32px',
             height: '32px',
             borderRadius: '50%',
-            background: '#2D2D2D',
+            background: 'hsl(var(--brand-charcoal))',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -247,7 +247,7 @@ export default function SmallPlatesCookbookV3() {
             fontFamily: 'Georgia, serif',
             fontSize: '28px',
             fontWeight: '400',
-            color: '#2D2D2D',
+            color: 'hsl(var(--brand-charcoal))',
             margin: '0 0 6px 0',
           }}>
             Ana & Ric
@@ -288,7 +288,7 @@ export default function SmallPlatesCookbookV3() {
             borderRadius: '50px',
             fontSize: '14px',
             fontWeight: '500',
-            color: '#2D2D2D',
+            color: 'hsl(var(--brand-charcoal))',
             cursor: 'pointer',
           }}>
             Add Your Own

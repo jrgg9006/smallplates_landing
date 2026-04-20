@@ -95,8 +95,8 @@ export default function PricingPage() {
                     Your first book
                   </p>
                   <div className="flex items-baseline justify-center">
-                    <span className="font-serif text-3xl md:text-4xl text-[#2D2D2D]/50">$</span>
-                    <span className="font-serif text-6xl md:text-7xl text-[#2D2D2D] leading-none">
+                    <span className="font-serif text-3xl md:text-4xl text-brand-charcoal/50">$</span>
+                    <span className="font-serif text-6xl md:text-7xl text-brand-charcoal leading-none">
                       {BASE_BOOK_PRICE}
                     </span>
                   </div>
@@ -109,8 +109,8 @@ export default function PricingPage() {
                     Each additional copy
                   </p>
                   <div className="flex items-baseline justify-center">
-                    <span className="font-serif text-3xl md:text-4xl text-[#2D2D2D]/50">$</span>
-                    <span className="font-serif text-6xl md:text-7xl text-[#2D2D2D] leading-none">
+                    <span className="font-serif text-3xl md:text-4xl text-brand-charcoal/50">$</span>
+                    <span className="font-serif text-6xl md:text-7xl text-brand-charcoal leading-none">
                       {ADDITIONAL_BOOK_PRICE}
                     </span>
                   </div>
@@ -131,7 +131,7 @@ export default function PricingPage() {
               </div>
 
               {/* What's included */}
-              <h2 className="text-center font-serif text-lg text-[#2D2D2D] mb-6">
+              <h2 className="text-center font-serif text-lg text-brand-charcoal mb-6">
                 Every book includes
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 max-w-lg mx-auto mb-3">
@@ -158,7 +158,7 @@ export default function PricingPage() {
 
             {/* CTA strip at bottom of card */}
             <div className="bg-[#FDFCFA] border-t border-[#F0EDE8] px-8 py-8 md:px-12 text-center">
-              <p className="font-serif italic text-[#2D2D2D] text-lg mb-5">
+              <p className="font-serif italic text-brand-charcoal text-lg mb-5">
                 Bride cries. You win.
               </p>
               <button
@@ -188,29 +188,29 @@ export default function PricingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.5 }}
           >
-            <h3 className="font-serif text-xl text-[#2D2D2D] mb-8">
+            <h3 className="font-serif text-xl text-brand-charcoal mb-8">
               A few things to know
             </h3>
 
             <div className="space-y-6 text-[15px] text-[#9A9590] leading-relaxed font-light">
               <p>
-                <span className="font-medium text-[#2D2D2D] font-sans">Shipping</span> is
+                <span className="font-medium text-brand-charcoal font-sans">Shipping</span> is
                 included in the price.
               </p>
               <div className="h-px bg-[#F0EDE8]" />
               <p>
-                <span className="font-medium text-[#2D2D2D]">Timeline:</span> Most
+                <span className="font-medium text-brand-charcoal">Timeline:</span> Most
                 books are ready 3–4 weeks after recipe collection closes.
               </p>
               <div className="h-px bg-[#F0EDE8]" />
               <p>
-                <span className="font-medium text-[#2D2D2D]">What&apos;s included:</span> 50
+                <span className="font-medium text-brand-charcoal">What&apos;s included:</span> 50
                 recipes, professional design, recipe images, quality printing, and full
                 access to the platform.
               </p>
               <div className="h-px bg-[#F0EDE8]" />
               <p>
-                <span className="font-medium text-[#2D2D2D]">What&apos;s not included:</span> Stress.
+                <span className="font-medium text-brand-charcoal">What&apos;s not included:</span> Stress.
                 We handle the reminders, the design, the production. You just invite people.
               </p>
             </div>

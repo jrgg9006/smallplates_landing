@@ -23,7 +23,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#2D2D2D]">
+    <footer className="bg-brand-charcoal">
       {/* Main Footer Content */}
       <div className="mx-auto max-w-7xl px-6 py-12 md:px-8 lg:py-16">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-8">

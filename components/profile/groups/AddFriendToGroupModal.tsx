@@ -148,7 +148,7 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
         </DialogHeader>
         
         {/* Explanation text */}
-        <p className="text-xs sm:text-sm text-[#2D2D2D] leading-relaxed font-light mt-2">
+        <p className="text-xs sm:text-sm text-brand-charcoal leading-relaxed font-light mt-2">
           Captains have full access to this book and can help you collect recipes together.
         </p>
         

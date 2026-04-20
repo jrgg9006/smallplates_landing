@@ -83,7 +83,7 @@ export default function BookDetailsModal({ isOpen, onClose }: BookDetailsModalPr
             {/* Header */}
             <div className="pt-4 md:pt-6 mb-8">
               <p className="type-eyebrow text-center mb-4">The Book</p>
-              <h1 id="modal-title" className="font-serif text-2xl md:text-3xl font-normal text-[#2D2D2D] text-center mb-4">
+              <h1 id="modal-title" className="font-serif text-2xl md:text-3xl font-normal text-brand-charcoal text-center mb-4">
                 Your Kitchen. Their Love.
               </h1>
               <p className="type-body-small text-center max-w-lg mx-auto">
@@ -103,7 +103,7 @@ export default function BookDetailsModal({ isOpen, onClose }: BookDetailsModalPr
                   <dt className="type-eyebrow mb-1">
                     {spec.label}
                   </dt>
-                  <dd className="font-sans text-sm text-[#2D2D2D]">
+                  <dd className="font-sans text-sm text-brand-charcoal">
                     {spec.value}
                   </dd>
                 </div>

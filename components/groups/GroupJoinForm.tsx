@@ -236,7 +236,7 @@ export function GroupJoinForm({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-serif font-semibold text-[#2D2D2D] mb-4">
+          <h1 className="text-2xl font-serif font-semibold text-brand-charcoal mb-4">
             {errorTitle}
           </h1>
           <p className="text-[#9A9590] mb-6">
@@ -244,7 +244,7 @@ export function GroupJoinForm({
           </p>
           <Button 
             onClick={() => router.push('/')}
-            className="bg-[#2D2D2D] text-white hover:bg-[#1A1A1A]"
+            className="bg-brand-charcoal text-white hover:bg-[#1A1A1A]"
           >
             Go to Home Page
           </Button>
@@ -259,7 +259,7 @@ export function GroupJoinForm({
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-6">
           <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-serif font-semibold text-[#2D2D2D] mb-4">
+          <h1 className="text-2xl font-serif font-semibold text-brand-charcoal mb-4">
             Welcome to the Cookbook!
           </h1>
           <p className="text-[#9A9590] mb-6">
@@ -310,7 +310,7 @@ export function GroupJoinForm({
                     onError={() => setImageError(true)}
                   />
                   {/* Subtle gradient overlay for editorial feel */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#2D2D2D]/5 via-transparent to-transparent lg:bg-gradient-to-r lg:from-[#2D2D2D]/3 lg:via-transparent lg:to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-brand-charcoal/5 via-transparent to-transparent lg:bg-gradient-to-r lg:from-brand-charcoal/3 lg:via-transparent lg:to-transparent" />
                 </div>
               </div>
             </div>
@@ -322,7 +322,7 @@ export function GroupJoinForm({
               
               {/* Title Section */}
               <div className="text-center mb-8">
-                <h2 className="text-2xl sm:text-3xl font-serif font-semibold text-[#2D2D2D] mb-1">
+                <h2 className="text-2xl sm:text-3xl font-serif font-semibold text-brand-charcoal mb-1">
                   {title}
                 </h2>
                 {subtitle && (
@@ -332,14 +332,14 @@ export function GroupJoinForm({
                   <div className="mt-3">
                     {inviterName ? (
                       <p className="text-[#9A9590] text-sm">
-                        <span className="font-medium text-[#2D2D2D]">{inviterName}</span> invited you to join:
+                        <span className="font-medium text-brand-charcoal">{inviterName}</span> invited you to join:
                       </p>
                     ) : (
                       <p className="text-[#9A9590] text-sm">
                         You&apos;ve been invited to join:
                       </p>
                     )}
-                    <h3 className="text-lg sm:text-xl font-serif font-semibold text-[#2D2D2D] mt-1">
+                    <h3 className="text-lg sm:text-xl font-serif font-semibold text-brand-charcoal mt-1">
                       {groupData.name}
                     </h3>
                   </div>
@@ -433,7 +433,7 @@ export function GroupJoinForm({
           {/* Submit Button */}
           <Button
             type="submit"
-            className="w-full bg-[#2D2D2D] text-white hover:bg-[#1A1A1A] py-3 text-sm font-semibold mt-2"
+            className="w-full bg-brand-charcoal text-white hover:bg-[#1A1A1A] py-3 text-sm font-semibold mt-2"
             disabled={loading}
           >
             {loading
@@ -454,7 +454,7 @@ export function GroupJoinForm({
                       setFormData(prev => ({ ...prev, confirmPassword: '' }));
                     }
                   }}
-                  className="w-full text-center text-sm text-[#9A9590] hover:text-[#2D2D2D] transition-colors"
+                  className="w-full text-center text-sm text-[#9A9590] hover:text-brand-charcoal transition-colors"
                 >
                   {hasAccount ? "Don't have an account? Create one" : 'Already have an account? Sign in'}
                 </button>

@@ -39,7 +39,7 @@ export default function SocialProofBanner({ count }: SocialProofBannerProps) {
         <div className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg">
           <div className="flex items-center gap-2.5">
             <span className="text-lg" aria-hidden="true"></span>
-            <span className="text-[#2D2D2D] text-sm font-medium">
+            <span className="text-brand-charcoal text-sm font-medium">
               {message}
             </span>
           </div>

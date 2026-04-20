@@ -96,7 +96,7 @@ export function PrintDetailsWizard({
           className="p-2 rounded-full hover:bg-white/60 transition-colors"
           aria-label="Back"
         >
-          <ArrowLeft className="h-5 w-5 text-[#2D2D2D]" />
+          <ArrowLeft className="h-5 w-5 text-brand-charcoal" />
         </button>
       </div>
 
@@ -105,7 +105,7 @@ export function PrintDetailsWizard({
         <div className="w-full max-w-md">
           {step === 1 ? (
             <div className="flex flex-col items-center">
-              <h1 className="text-2xl md:text-3xl font-serif text-[#2D2D2D] text-center mb-3 leading-snug">
+              <h1 className="text-2xl md:text-3xl font-serif text-brand-charcoal text-center mb-3 leading-snug">
                 Confirm how the names will appear in the book.
               </h1>
               <p className="text-sm text-gray-500 text-center mb-8">
@@ -118,7 +118,7 @@ export function PrintDetailsWizard({
                 type="text"
                 value={coupleName}
                 onChange={(e) => setCoupleName(e.target.value)}
-                className="w-full text-center text-2xl font-serif text-[#2D2D2D] bg-white border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:border-[#D4A854] focus:ring-1 focus:ring-[#D4A854]/30 transition-colors"
+                className="w-full text-center text-2xl font-serif text-brand-charcoal bg-white border border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:border-[#D4A854] focus:ring-1 focus:ring-[#D4A854]/30 transition-colors"
                 placeholder="e.g. Rocío & Víctor"
                 autoFocus
               />
@@ -130,14 +130,14 @@ export function PrintDetailsWizard({
               <button
                 onClick={handleContinueToImage}
                 disabled={!coupleName.trim()}
-                className="mt-8 w-full bg-[#2D2D2D] text-white rounded-full py-4 text-base font-medium hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="mt-8 w-full bg-brand-charcoal text-white rounded-full py-4 text-base font-medium hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 Looks good, continue
               </button>
             </div>
           ) : (
             <div className="flex flex-col items-center">
-              <h1 className="text-2xl md:text-3xl font-serif text-[#2D2D2D] text-center mb-3 leading-snug">
+              <h1 className="text-2xl md:text-3xl font-serif text-brand-charcoal text-center mb-3 leading-snug">
                 Confirm the photo of the couple
               </h1>
               <p className="text-sm text-gray-500 text-center mb-8">
@@ -208,7 +208,7 @@ export function PrintDetailsWizard({
               <button
                 onClick={handleFinish}
                 disabled={saving}
-                className="mt-8 w-full bg-[#2D2D2D] text-white rounded-full py-4 text-base font-medium hover:bg-gray-800 disabled:opacity-40 transition-colors"
+                className="mt-8 w-full bg-brand-charcoal text-white rounded-full py-4 text-base font-medium hover:bg-gray-800 disabled:opacity-40 transition-colors"
               >
                 {saving ? "Saving..." : "Continue"}
               </button>

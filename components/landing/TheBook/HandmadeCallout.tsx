@@ -12,7 +12,7 @@ export default function HandmadeCallout() {
       transition={{ duration: 0.7, ease: "easeOut" }}
     >
       {/* Left Panel — Stitch Pattern Visual */}
-      <div className="relative bg-[#2D2D2D] min-h-[280px] lg:min-h-[400px] flex items-center justify-center overflow-hidden">
+      <div className="relative bg-brand-charcoal min-h-[280px] lg:min-h-[400px] flex items-center justify-center overflow-hidden">
         {/* Decorative stitch pattern */}
         <div className="flex flex-col items-center gap-0">
           {Array.from({ length: 7 }).map((_, i) => (
@@ -53,18 +53,18 @@ export default function HandmadeCallout() {
         </h3>
 
         <div className="space-y-4">
-          <p className="type-body-small text-[#2D2D2D]/80">
+          <p className="type-body-small text-brand-charcoal/80">
             Different recipes. Different people. Different stories. Every book we produce exists exactly once &mdash; because the people inside it are never the same twice.
           </p>
 
-          <p className="type-body-small text-[#2D2D2D]/80">
+          <p className="type-body-small text-brand-charcoal/80">
             No templates. No stock content. Your book is designed, laid out, and printed from scratch &mdash; built around the real recipes your people actually sent in.
           </p>
         </div>
 
         {/* Pull quote */}
         <blockquote className="mt-8 border-l-2 border-[#D4A854] pl-5">
-          <p className="type-accent text-base md:text-lg text-[#2D2D2D]/70 leading-relaxed">
+          <p className="type-accent text-base md:text-lg text-brand-charcoal/70 leading-relaxed">
             &ldquo;No two books are the same &mdash; because no two couples&apos; people are the same. That&apos;s the whole point.&rdquo;
           </p>
         </blockquote>

@@ -292,7 +292,7 @@ export function ImportGuestsModal({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute right-6 top-6 text-[#2D2D2D] hover:text-[#C4856C] transition-colors"
+          className="absolute right-6 top-6 text-brand-charcoal hover:text-[#C4856C] transition-colors"
         >
           <X size={24} />
         </button>
@@ -307,7 +307,7 @@ export function ImportGuestsModal({
         {/* ==================== STEP 1: Select Source ==================== */}
         {step === "select-source" && (
           <div>
-            <p className="text-sm text-[#2D2D2D] mb-5">
+            <p className="text-sm text-brand-charcoal mb-5">
               Where is your guest list from?
             </p>
 
@@ -342,7 +342,7 @@ export function ImportGuestsModal({
         {/* ==================== STEP 2: Upload File ==================== */}
         {step === "upload-file" && (
           <div>
-            <p className="text-sm text-[#2D2D2D] mb-4">
+            <p className="text-sm text-brand-charcoal mb-4">
               Upload your{" "}
               {source === "zola" ? "Zola" : "The Knot"} guest list (CSV or
               Excel)
@@ -401,7 +401,7 @@ export function ImportGuestsModal({
                     size={32}
                     className="mx-auto mb-3 text-[#D4A854]"
                   />
-                  <p className="text-sm text-[#2D2D2D] font-medium">
+                  <p className="text-sm text-brand-charcoal font-medium">
                     Drop your file here
                   </p>
                   <p className="text-sm text-[#999] mt-1">
@@ -432,7 +432,7 @@ export function ImportGuestsModal({
 
             <button
               onClick={() => setStep("select-source")}
-              className="w-full text-center text-sm text-[#999] hover:text-[#2D2D2D] mt-6 transition-colors"
+              className="w-full text-center text-sm text-[#999] hover:text-brand-charcoal mt-6 transition-colors"
             >
               &larr; Back
             </button>
@@ -442,7 +442,7 @@ export function ImportGuestsModal({
         {/* ==================== STEP 3: Select Guests ==================== */}
         {step === "select-guests" && (
           <div>
-            <p className="text-xs text-[#2D2D2D] mb-3">
+            <p className="text-xs text-brand-charcoal mb-3">
               Select who to add to your book
             </p>
 
@@ -458,7 +458,7 @@ export function ImportGuestsModal({
                   onChange={toggleSelectAll}
                   className="w-4 h-4 rounded accent-[#D4A854] cursor-pointer"
                 />
-                <span className="text-xs text-[#2D2D2D]">
+                <span className="text-xs text-brand-charcoal">
                   {selectedCount === selectableGuests.length
                     ? "Deselect All"
                     : "Select All"}
@@ -491,7 +491,7 @@ export function ImportGuestsModal({
                     />
 
                     <div className="flex-1 min-w-0 flex items-center gap-1">
-                      <span className="text-xs font-medium text-[#2D2D2D] truncate">
+                      <span className="text-xs font-medium text-brand-charcoal truncate">
                         {guest.first_name} {guest.last_name}
                       </span>
                       {!hasContact && (
@@ -538,7 +538,7 @@ export function ImportGuestsModal({
                   setStep("upload-file");
                   setError(null);
                 }}
-                className="text-xs text-[#999] hover:text-[#2D2D2D] transition-colors"
+                className="text-xs text-[#999] hover:text-brand-charcoal transition-colors"
               >
                 &larr; Back
               </button>

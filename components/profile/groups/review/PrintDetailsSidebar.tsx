@@ -120,7 +120,7 @@ export function PrintDetailsSidebar({
                 type="text"
                 value={nameValue}
                 onChange={(e) => setNameValue(e.target.value)}
-                className="w-full text-lg font-serif text-[#2D2D2D] bg-white border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#D4A854]"
+                className="w-full text-lg font-serif text-brand-charcoal bg-white border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#D4A854]"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleSaveName();
@@ -145,7 +145,7 @@ export function PrintDetailsSidebar({
             </div>
           ) : (
             <div className="group">
-              <p className="text-xl font-serif text-[#2D2D2D] leading-snug">
+              <p className="text-xl font-serif text-brand-charcoal leading-snug">
                 {printCoupleName}
               </p>
               <button

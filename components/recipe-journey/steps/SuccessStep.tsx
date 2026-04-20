@@ -78,7 +78,7 @@ export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn =
         <div className="text-[#D4A854] text-2xl mb-6 mt-8">{'\u2713'}</div>
 
         {/* Main heading */}
-        <h2 id="thanks-heading" className="font-serif text-4xl md:text-[2.5rem] font-semibold text-[#2D2D2D] tracking-tight">
+        <h2 id="thanks-heading" className="font-serif text-4xl md:text-[2.5rem] font-semibold text-brand-charcoal tracking-tight">
           {recipeName ? (
             <>Your <em className="text-[#4a4a4a]">{recipeName}</em> is in the book.</>
           ) : (
@@ -93,7 +93,7 @@ export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn =
         )}
 
         {/* Divider */}
-        <div className="w-8 h-[2px] bg-[#2D2D2D] mx-auto my-8" />
+        <div className="w-8 h-[2px] bg-brand-charcoal mx-auto my-8" />
 
         {/* Divider */}
         <div className="w-full h-px bg-gray-200 my-8" />

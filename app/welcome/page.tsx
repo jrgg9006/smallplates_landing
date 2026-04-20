@@ -140,7 +140,7 @@ function WelcomeContent() {
   if (!sessionUser) return null;
 
   const sansFont = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-  const labelClass = "block text-[13px] font-medium text-[#2D2D2D] mb-1.5";
+  const labelClass = "block text-[13px] font-medium text-brand-charcoal mb-1.5";
   const inputClass =
     "w-full px-4 h-[52px] border border-[#E8E0D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:border-transparent text-[15px] bg-white transition-all";
 
@@ -155,11 +155,11 @@ function WelcomeContent() {
         />
 
         {/* Headline */}
-        <h1 className="text-center mb-3 font-serif text-[38px] font-light leading-[1.15] text-[#2D2D2D]">
+        <h1 className="text-center mb-3 font-serif text-[38px] font-light leading-[1.15] text-brand-charcoal">
           One quick <em>thing.</em>
         </h1>
         <p
-          className="text-center text-[15px] text-[#2D2D2D]/70 mb-10 max-w-[380px]"
+          className="text-center text-[15px] text-brand-charcoal/70 mb-10 max-w-[380px]"
           style={{ fontFamily: sansFont }}
         >
           Want to set a password so you can log in faster next time?
@@ -226,7 +226,7 @@ function WelcomeContent() {
           <button
             type="button"
             onClick={handleSkip}
-            className="w-full text-center text-[14px] text-[#9A9590] hover:text-[#2D2D2D] transition-colors py-2"
+            className="w-full text-center text-[14px] text-[#9A9590] hover:text-brand-charcoal transition-colors py-2"
             style={{ fontFamily: sansFont }}
           >
             Skip — I&apos;ll log in by email next time →
@@ -241,7 +241,7 @@ function WelcomeContent() {
           Need help?{" "}
           <a
             href="mailto:team@smallplatesandcompany.com"
-            className="underline hover:text-[#2D2D2D]"
+            className="underline hover:text-brand-charcoal"
           >
             team@smallplatesandcompany.com
           </a>

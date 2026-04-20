@@ -146,7 +146,7 @@ export default function ReviewPage() {
         <Card className="max-w-md mx-auto">
           <CardContent className="pt-6">
             <div className="text-center">
-              <h2 className="text-xl font-semibold text-[#2D2D2D] mb-2 font-serif">Error</h2>
+              <h2 className="text-xl font-semibold text-brand-charcoal mb-2 font-serif">Error</h2>
               <p className="text-gray-600 mb-4">{error}</p>
               <Button onClick={() => router.push(`/collect/${token}`)} variant="outline">
                 Start Over
@@ -168,7 +168,7 @@ export default function ReviewPage() {
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-[#D4A854]/20 mb-4">
                 <Check className="h-6 w-6 text-[#D4A854]" />
               </div>
-              <h2 className="text-xl font-semibold text-[#2D2D2D] mb-2 font-serif">You&apos;re in the book.</h2>
+              <h2 className="text-xl font-semibold text-brand-charcoal mb-2 font-serif">You&apos;re in the book.</h2>
               <p className="text-gray-600 mb-6">
                 Your recipe <strong>{submissionData?.recipe.recipeName}</strong> will be a beautiful addition 
                 to {tokenInfo?.user_name}&apos;s kitchen.
@@ -207,7 +207,7 @@ export default function ReviewPage() {
               <ChevronLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-[#2D2D2D] font-serif text-xl font-semibold">
+              <h1 className="text-brand-charcoal font-serif text-xl font-semibold">
                 Review your recipe
               </h1>
               <p className="text-gray-600">
@@ -273,7 +273,7 @@ export default function ReviewPage() {
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2">Personal Note</h3>
                   <div className="bg-[#D4A854]/10 border border-[#D4A854]/20 rounded-lg p-4">
-                    <pre className="text-sm text-[#2D2D2D] whitespace-pre-wrap font-sans">
+                    <pre className="text-sm text-brand-charcoal whitespace-pre-wrap font-sans">
                       {submissionData.recipe.personalNote}
                     </pre>
                   </div>

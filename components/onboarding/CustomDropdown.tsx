@@ -68,7 +68,7 @@ export function CustomDropdown({ options, value, onChange, placeholder, label }:
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <label className="block text-sm font-medium text-[#2D2D2D] mb-1">
+      <label className="block text-sm font-medium text-brand-charcoal mb-1">
         {label}
       </label>
       
@@ -112,7 +112,7 @@ export function CustomDropdown({ options, value, onChange, placeholder, label }:
               type="button"
               onClick={() => handleSelect(option.value)}
               className={`w-full p-4 text-left hover:bg-[#FAF7F2] transition-colors duration-200 first:rounded-t-xl last:rounded-b-xl ${
-                value === option.value ? "bg-[#E8E0D5]/40 text-[#2D2D2D]" : "text-gray-900"
+                value === option.value ? "bg-[#E8E0D5]/40 text-brand-charcoal" : "text-gray-900"
               }`}
             >
               <span className="text-base font-medium">{option.label}</span>

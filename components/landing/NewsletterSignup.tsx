@@ -66,12 +66,12 @@ export default function NewsletterSignup() {
 
           <h2
             id="newsletter-heading"
-            className="type-heading text-[#2D2D2D]"
+            className="type-heading text-brand-charcoal"
           >
             One email a month. Real recipes from real kitchens.
           </h2>
 
-          <p className="type-body text-[#2D2D2D]/70 mt-6 max-w-xl mx-auto">
+          <p className="type-body text-brand-charcoal/70 mt-6 max-w-xl mx-auto">
             Every month we pick the 5 most unexpected, ridiculous, and honest
             recipes people actually sent in for their books. Just real food
             from real people. No fluff.
@@ -82,7 +82,7 @@ export default function NewsletterSignup() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="type-body text-[#2D2D2D] mt-10"
+              className="type-body text-brand-charcoal mt-10"
             >
               You&apos;re in. First one lands soon.
             </motion.p>
@@ -107,7 +107,7 @@ export default function NewsletterSignup() {
                 required
                 maxLength={320}
                 disabled={status === "loading"}
-                className="flex-1 px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-[#2D2D2D] placeholder:text-[#2D2D2D]/30 focus:outline-none focus:border-[#D4A854] transition-colors disabled:opacity-60"
+                className="flex-1 px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-brand-charcoal placeholder:text-brand-charcoal/30 focus:outline-none focus:border-[#D4A854] transition-colors disabled:opacity-60"
               />
               <button
                 type="submit"
@@ -126,7 +126,7 @@ export default function NewsletterSignup() {
           )}
 
           {status !== "success" && (
-            <p className="type-caption text-[#2D2D2D]/50 mt-4">
+            <p className="type-caption text-brand-charcoal/50 mt-4">
               One email a month. Unsubscribe anytime.
             </p>
           )}

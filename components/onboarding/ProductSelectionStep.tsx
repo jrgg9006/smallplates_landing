@@ -46,7 +46,7 @@ export function ProductSelectionStep({
     <div className="max-w-lg mx-auto">
       {/* Book quantity selector */}
       <div className="mb-6">
-        <p className="text-base font-medium text-[#2D2D2D] mb-6 text-center">
+        <p className="text-base font-medium text-brand-charcoal mb-6 text-center">
           First book $169. Each additional copy $129.
         </p>
 
@@ -57,7 +57,7 @@ export function ProductSelectionStep({
             onClick={() => setIsOpen(!isOpen)}
             className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl border border-gray-300 bg-white text-left transition-all hover:border-[#D4A854] focus:outline-none focus:ring-2 focus:ring-[#D4A854]/20 focus:border-[#D4A854]"
           >
-            <span className="text-[15px] text-[#2D2D2D]">
+            <span className="text-[15px] text-brand-charcoal">
               {bookQuantity === 1
                 ? `1 copy — $${BASE_BOOK_PRICE}`
                 : `${bookQuantity} copies — $${subtotal}`}
@@ -92,8 +92,8 @@ export function ProductSelectionStep({
                     onClick={() => handleSelect(qty)}
                     className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${
                       bookQuantity === qty
-                        ? "bg-[#FAF7F2] text-[#2D2D2D]"
-                        : "hover:bg-[#FAF7F2]/60 text-[#2D2D2D]"
+                        ? "bg-[#FAF7F2] text-brand-charcoal"
+                        : "hover:bg-[#FAF7F2]/60 text-brand-charcoal"
                     }`}
                   >
                     <span className="text-[14px]">
@@ -104,7 +104,7 @@ export function ProductSelectionStep({
                         </span>
                       )}
                     </span>
-                    <span className="text-[14px] text-[#2D2D2D]/70">
+                    <span className="text-[14px] text-brand-charcoal/70">
                       ${total}
                     </span>
                   </button>

@@ -78,11 +78,11 @@ export default function HowItWorks() {
         >
           <h2
             id="how-it-works-heading"
-            className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#2D2D2D]"
+            className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-brand-charcoal"
           >
             Here's how it happens.
           </h2>
-          <p className="mt-4 font-sans text-lg md:text-xl text-[#2D2D2D]/60">
+          <p className="mt-4 font-sans text-lg md:text-xl text-brand-charcoal/60">
             Simpler than you think.
           </p>
         </motion.div>
@@ -115,12 +115,12 @@ export default function HowItWorks() {
               </div>
 
               {/* Title */}
-              <h3 className="font-serif text-2xl md:text-3xl font-medium text-[#2D2D2D] mb-3">
+              <h3 className="font-serif text-2xl md:text-3xl font-medium text-brand-charcoal mb-3">
                 {step.title}
               </h3>
 
               {/* Description */}
-              <p className="font-sans text-base md:text-lg text-[#2D2D2D]/70 max-w-xs mx-auto">
+              <p className="font-sans text-base md:text-lg text-brand-charcoal/70 max-w-xs mx-auto">
                 {step.description}
               </p>
             </motion.div>

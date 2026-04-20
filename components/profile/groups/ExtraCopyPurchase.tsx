@@ -77,7 +77,7 @@ function StepQty({
 
   return (
     <div className="flex flex-col items-center w-full">
-      <h1 className="font-serif text-[28px] text-[#2D2D2D] text-center leading-tight mb-2">
+      <h1 className="font-serif text-[28px] text-brand-charcoal text-center leading-tight mb-2">
         Get another copy.
       </h1>
       <p className="text-sm text-[#8A8780] text-center mb-8">
@@ -90,28 +90,28 @@ function StepQty({
           className="w-10 h-10 rounded-full border border-[#E8E0D5] flex items-center justify-center hover:bg-white transition-colors disabled:opacity-30"
           disabled={qty <= 1}
         >
-          <Minus className="w-4 h-4 text-[#2D2D2D]" />
+          <Minus className="w-4 h-4 text-brand-charcoal" />
         </button>
-        <span className="text-4xl font-serif text-[#2D2D2D] w-12 text-center">{qty}</span>
+        <span className="text-4xl font-serif text-brand-charcoal w-12 text-center">{qty}</span>
         <button
           onClick={() => setQty(Math.min(5, qty + 1))}
           className="w-10 h-10 rounded-full border border-[#E8E0D5] flex items-center justify-center hover:bg-white transition-colors disabled:opacity-30"
           disabled={qty >= 5}
         >
-          <Plus className="w-4 h-4 text-[#2D2D2D]" />
+          <Plus className="w-4 h-4 text-brand-charcoal" />
         </button>
       </div>
 
       <div className="w-full border-t border-[rgba(45,45,45,0.12)] pt-4 mb-6 space-y-2 text-[13px]">
-        <div className="flex justify-between text-[#2D2D2D]">
+        <div className="flex justify-between text-brand-charcoal">
           <span>{qty} extra {qty === 1 ? "copy" : "copies"}</span>
           <span>${booksTotal}</span>
         </div>
-        <div className="flex justify-between text-[#2D2D2D]">
+        <div className="flex justify-between text-brand-charcoal">
           <span className="text-[#8A8780]">Shipping</span>
           <span>${EXTRA_COPIES_SHIPPING_COST}</span>
         </div>
-        <div className="flex justify-between font-medium text-[15px] text-[#2D2D2D] pt-2 border-t border-[rgba(45,45,45,0.12)]">
+        <div className="flex justify-between font-medium text-[15px] text-brand-charcoal pt-2 border-t border-[rgba(45,45,45,0.12)]">
           <span>Due today</span>
           <span>${grandTotal}</span>
         </div>
@@ -119,7 +119,7 @@ function StepQty({
 
       <button
         onClick={onContinue}
-        className="w-full bg-[#2D2D2D] text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 transition-colors"
+        className="w-full bg-brand-charcoal text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 transition-colors"
       >
         Continue — ${grandTotal}
       </button>
@@ -254,7 +254,7 @@ function StepShipping({
           value={region}
           onChange={(e) => setRegion(e.target.value)}
           disabled={redirecting}
-          className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-[#2D2D2D] focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none"
+          className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none"
         >
           <option value="">{countryConfig.regionLabel}</option>
           {US_STATES.map((s) => (
@@ -269,7 +269,7 @@ function StepShipping({
           value={region}
           onChange={(e) => setRegion(e.target.value)}
           disabled={redirecting}
-          className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-[#2D2D2D] focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none"
+          className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none"
         >
           <option value="">{countryConfig.regionLabel}</option>
           {MX_STATES.map((s) => (
@@ -300,7 +300,7 @@ function StepShipping({
 
   return (
     <div className="flex flex-col items-center w-full">
-      <h1 className="font-serif text-[28px] text-[#2D2D2D] text-center leading-tight mb-2">
+      <h1 className="font-serif text-[28px] text-brand-charcoal text-center leading-tight mb-2">
         Where should we send it?
       </h1>
       <p className="text-sm text-[#8A8780] text-center mb-6">
@@ -314,7 +314,7 @@ function StepShipping({
             value={country}
             onChange={(e) => handleCountryChange(e.target.value)}
             disabled={redirecting}
-            className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-[#2D2D2D] focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat"
+            className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat"
           >
             {SUPPORTED_COUNTRIES.map((c) => (
               <option key={c.code} value={c.code}>{c.name}</option>
@@ -373,7 +373,7 @@ function StepShipping({
       <button
         onClick={handleSubmit}
         disabled={redirecting}
-        className="w-full bg-[#2D2D2D] text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors mt-5"
+        className="w-full bg-brand-charcoal text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors mt-5"
       >
         Continue to payment →
       </button>

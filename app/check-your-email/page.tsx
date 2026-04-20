@@ -58,7 +58,7 @@ export default async function CheckYourEmailPage({
 
         <p className="type-body-small mb-4">
           We sent a login link to{" "}
-          <span className="text-[#2D2D2D] font-medium">{email}</span>.
+          <span className="text-brand-charcoal font-medium">{email}</span>.
         </p>
         <p className="type-body-small mb-8">
           Open it when you&apos;re ready to set things up.

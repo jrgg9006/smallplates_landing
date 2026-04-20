@@ -139,7 +139,7 @@ export default function RecipeFormPage() {
           <Card className="max-w-md mx-auto">
             <CardContent className="pt-6">
               <div className="text-center">
-                <h2 className="text-xl font-semibold text-[#2D2D2D] mb-2 font-serif">Oops!</h2>
+                <h2 className="text-xl font-semibold text-brand-charcoal mb-2 font-serif">Oops!</h2>
                 <p className="text-gray-600 mb-4">
                   {error || 'Something went wrong loading your recipe form.'}
                 </p>

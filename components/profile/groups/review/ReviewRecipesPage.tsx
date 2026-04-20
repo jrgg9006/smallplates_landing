@@ -117,7 +117,7 @@ export function ReviewRecipesPage({ group, onBack, onMarkReviewed, onStartCloseF
           className="p-1.5 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0"
           aria-label="Back"
         >
-          <ArrowLeft className="h-4 w-4 text-[#2D2D2D]" />
+          <ArrowLeft className="h-4 w-4 text-brand-charcoal" />
         </button>
 
         <p className="text-xs text-gray-400 hidden md:block flex-shrink-0">
@@ -136,7 +136,7 @@ export function ReviewRecipesPage({ group, onBack, onMarkReviewed, onStartCloseF
               className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               aria-label="Previous recipe"
             >
-              <ChevronLeft className="h-5 w-5 text-[#2D2D2D]" />
+              <ChevronLeft className="h-5 w-5 text-brand-charcoal" />
             </button>
             <span className="text-sm text-gray-600 tabular-nums min-w-[50px] text-center font-medium">
               {currentIndex + 1} / {recipes.length}
@@ -147,7 +147,7 @@ export function ReviewRecipesPage({ group, onBack, onMarkReviewed, onStartCloseF
               className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               aria-label="Next recipe"
             >
-              <ChevronRight className="h-5 w-5 text-[#2D2D2D]" />
+              <ChevronRight className="h-5 w-5 text-brand-charcoal" />
             </button>
           </div>
         )}
@@ -158,7 +158,7 @@ export function ReviewRecipesPage({ group, onBack, onMarkReviewed, onStartCloseF
         {/* Book details toggle + Approve button */}
         <button
           onClick={() => setShowBookDetails(true)}
-          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#2D2D2D] transition-colors flex-shrink-0"
+          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-brand-charcoal transition-colors flex-shrink-0"
         >
           <BookOpen className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Book Details</span>
@@ -166,7 +166,7 @@ export function ReviewRecipesPage({ group, onBack, onMarkReviewed, onStartCloseF
 
         <Button
           onClick={() => setShowConfirmModal(true)}
-          className="bg-[#2D2D2D] text-white hover:bg-gray-800 rounded-full text-xs px-4 py-1.5 h-auto flex-shrink-0"
+          className="bg-brand-charcoal text-white hover:bg-gray-800 rounded-full text-xs px-4 py-1.5 h-auto flex-shrink-0"
         >
           I&apos;ve reviewed everything
         </Button>

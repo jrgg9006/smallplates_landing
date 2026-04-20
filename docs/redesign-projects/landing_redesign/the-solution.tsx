@@ -62,20 +62,20 @@ export default function TheSolution() {
             {/* Headline */}
             <h2
               id="solution-heading"
-              className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#2D2D2D] leading-tight"
+              className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-brand-charcoal leading-tight"
             >
               A cookbook made by everyone who showed up.
             </h2>
 
             {/* Body copy */}
             <div className="mt-8 space-y-6">
-              <p className="font-sans text-lg md:text-xl text-[#2D2D2D]/80 leading-relaxed">
+              <p className="font-sans text-lg md:text-xl text-brand-charcoal/80 leading-relaxed">
                 Every guest owns a page.
                 <span className="block">Every page holds a recipe, a note, a name.</span>
                 <span className="block">Every name stays in their kitchen — forever.</span>
               </p>
 
-              <p className="font-sans text-lg md:text-xl text-[#2D2D2D]/80 leading-relaxed">
+              <p className="font-sans text-lg md:text-xl text-brand-charcoal/80 leading-relaxed">
                 It's not a gift you display.
                 <span className="block">It's a gift you use—stained,</span>
                 <span className="block">and opened on random Tuesday nights for years.</span>

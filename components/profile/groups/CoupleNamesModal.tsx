@@ -20,7 +20,7 @@ const RELATIONSHIP_OPTIONS = [
 ];
 
 const SANS_FONT = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const LABEL_CLASS = "block text-[13px] font-medium text-[#2D2D2D] mb-1.5";
+const LABEL_CLASS = "block text-[13px] font-medium text-brand-charcoal mb-1.5";
 const INPUT_CLASS =
   "w-full px-4 h-[52px] border border-[#E8E0D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:border-transparent text-[15px] bg-white transition-all";
 
@@ -61,7 +61,7 @@ function RelationshipDropdown({
         className={`${INPUT_CLASS} flex items-center justify-between text-left`}
         style={{ fontFamily: SANS_FONT }}
       >
-        <span className={selected ? "text-[#2D2D2D]" : "text-[#9A9590]"}>
+        <span className={selected ? "text-brand-charcoal" : "text-[#9A9590]"}>
           {selected ? selected.label : "Select your relationship"}
         </span>
         <svg
@@ -88,7 +88,7 @@ function RelationshipDropdown({
                 setIsOpen(false);
               }}
               className={`w-full px-4 py-3 text-left text-[15px] hover:bg-[#FAF7F2] transition-colors ${
-                value === opt.value ? "bg-[#FDF9F0] text-[#2D2D2D]" : "text-[#2D2D2D]"
+                value === opt.value ? "bg-[#FDF9F0] text-brand-charcoal" : "text-brand-charcoal"
               }`}
             >
               {opt.label}
@@ -199,7 +199,7 @@ export function CoupleNamesModal({ open, groupId, userEmail, isFirstBook = true,
         />
 
         {/* Headline — swaps copy for returning customers buying their Nth book. */}
-        <h1 className="text-center mb-3 font-serif text-[38px] font-light leading-[1.15] text-[#2D2D2D]">
+        <h1 className="text-center mb-3 font-serif text-[38px] font-light leading-[1.15] text-brand-charcoal">
           {isFirstBook ? (
             <>
               Your book<br />
@@ -290,7 +290,7 @@ export function CoupleNamesModal({ open, groupId, userEmail, isFirstBook = true,
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A9590] hover:text-[#2D2D2D] transition-colors p-1"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A9590] hover:text-brand-charcoal transition-colors p-1"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -354,7 +354,7 @@ export function CoupleNamesModal({ open, groupId, userEmail, isFirstBook = true,
             style={{ fontFamily: SANS_FONT }}
           >
             We&apos;ll also email a login link to{" "}
-            <span className="text-[#2D2D2D]">{userEmail}</span>.
+            <span className="text-brand-charcoal">{userEmail}</span>.
           </p>
           <p
             className="text-center text-[12px] text-[#C8C3BC]"
@@ -363,7 +363,7 @@ export function CoupleNamesModal({ open, groupId, userEmail, isFirstBook = true,
             Need help?{" "}
             <a
               href="mailto:team@smallplatesandcompany.com"
-              className="underline hover:text-[#2D2D2D]"
+              className="underline hover:text-brand-charcoal"
             >
               team@smallplatesandcompany.com
             </a>

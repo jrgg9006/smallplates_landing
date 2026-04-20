@@ -54,7 +54,7 @@ export default function GuestListStrip() {
         </p>
 
         {/* Subtext */}
-        <p className="type-body-small text-[#2D2D2D]/50 max-w-md">
+        <p className="type-body-small text-brand-charcoal/50 max-w-md">
           The guest list is already built. Get it from the couple, import it, and invite everyone, even the people you&apos;ve never met.
         </p>
       </motion.div>

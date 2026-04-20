@@ -121,7 +121,7 @@ export default function CreateCompedBookDialog({ onCreated }: CreateCompedBookDi
                 onClick={() => setUserType('gift_giver')}
                 className={`flex-1 py-2.5 text-sm rounded-lg border transition-colors ${
                   userType === 'gift_giver'
-                    ? 'border-[#D4A854] bg-[#FBF7F0] text-[#2D2D2D] font-medium'
+                    ? 'border-[#D4A854] bg-[#FBF7F0] text-brand-charcoal font-medium'
                     : 'border-gray-200 text-gray-500 hover:border-gray-300'
                 }`}
               >
@@ -194,7 +194,7 @@ export default function CreateCompedBookDialog({ onCreated }: CreateCompedBookDi
                 type="button"
                 onClick={() => setCalendarOpen(!calendarOpen)}
                 className={`w-full px-3 py-2.5 border rounded-lg text-sm text-left flex items-center gap-2 transition-colors ${
-                  weddingDate ? 'border-[#D4A854] text-[#2D2D2D]' : 'border-gray-200 text-gray-400'
+                  weddingDate ? 'border-[#D4A854] text-brand-charcoal' : 'border-gray-200 text-gray-400'
                 } ${dateUndecided ? 'opacity-50' : ''}`}
                 disabled={dateUndecided}
               >

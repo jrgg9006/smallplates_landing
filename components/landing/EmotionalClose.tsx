@@ -47,7 +47,7 @@ export default function EmotionalClose() {
 
   return (
     <section 
-      className="bg-[#2D2D2D] py-24 md:py-32 lg:py-40"
+      className="bg-brand-charcoal py-24 md:py-32 lg:py-40"
       aria-labelledby="emotional-close-heading"
     >
       <div className="mx-auto max-w-3xl px-6 md:px-8 text-center">
@@ -121,7 +121,7 @@ export default function EmotionalClose() {
           <button
             type="button"
             onClick={handleStartBook}
-            className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-10 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#2D2D2D] focus-visible:ring-[#D4A854]"
+            className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-10 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-charcoal focus-visible:ring-[#D4A854]"
             data-cta="emotional-close-primary"
           >
             Start Their Book

@@ -73,7 +73,7 @@ export default function TheProblem() {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <div className="w-16 h-px bg-[#2D2D2D]/20"></div>
+          <div className="w-16 h-px bg-brand-charcoal/20"></div>
         </motion.div>
 
         {/* The pivot — the question that opens the door */}

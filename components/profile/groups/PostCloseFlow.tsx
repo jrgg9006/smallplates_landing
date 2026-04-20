@@ -135,7 +135,7 @@ function StepExtras({
       <StepIndicator current={1} total={totalSteps} />
 
       {/* Headline */}
-      <h1 className="font-serif text-[34px] font-normal text-[#2D2D2D] text-center leading-tight mb-3">
+      <h1 className="font-serif text-[34px] font-normal text-brand-charcoal text-center leading-tight mb-3">
         Before we print, <br />who else gets one?
       </h1>
       <p className="text-[15px] text-[#8A8780] text-center leading-relaxed mb-6 max-w-sm">
@@ -163,7 +163,7 @@ function StepExtras({
         <span className="font-serif text-[22px] text-[#B0ADA8] line-through decoration-[1.5px]">${BASE_BOOK_PRICE}</span>
         <span className="flex items-baseline">
           <span className="font-serif text-2xl text-[#8A8780] mr-1">$</span>
-          <span className="font-serif text-[56px] text-[#2D2D2D] leading-none">129</span>
+          <span className="font-serif text-[56px] text-brand-charcoal leading-none">129</span>
         </span>
       </div>
       <div className="flex items-center gap-2 mb-10">
@@ -178,12 +178,12 @@ function StepExtras({
         <button
           onClick={() => setQty(Math.max(0, qty - 1))}
           disabled={qty === 0}
-          className="w-[50px] h-[50px] rounded-full border-[1.5px] border-[rgba(45,45,45,0.12)] flex items-center justify-center text-[#2D2D2D] text-2xl disabled:opacity-25 transition-opacity"
+          className="w-[50px] h-[50px] rounded-full border-[1.5px] border-[rgba(45,45,45,0.12)] flex items-center justify-center text-brand-charcoal text-2xl disabled:opacity-25 transition-opacity"
           aria-label="Remove copy"
         >
           <Minus className="w-5 h-5" />
         </button>
-        <span className="font-serif text-[40px] text-[#2D2D2D] min-w-[52px] text-center tabular-nums">
+        <span className="font-serif text-[40px] text-brand-charcoal min-w-[52px] text-center tabular-nums">
           {qty}
         </span>
         <button
@@ -209,7 +209,7 @@ function StepExtras({
             <span>Original book</span>
             <span>Already paid · ${BASE_BOOK_PRICE}</span>
           </div>
-          <div className="flex justify-between text-[#2D2D2D]">
+          <div className="flex justify-between text-brand-charcoal">
             <span>{qty} extra {qty === 1 ? "copy" : "copies"}</span>
             <span>
               <span className="text-[#8A8780] line-through mr-1.5">${qty * BASE_BOOK_PRICE}</span>
@@ -220,7 +220,7 @@ function StepExtras({
             <span className="text-[#8A8780]">Shipping</span>
             <span className="text-[#14532D]">Free — ships with your book</span>
           </div>
-          <div className="flex justify-between font-medium text-[15px] text-[#2D2D2D] pt-2 border-t border-[rgba(45,45,45,0.12)]">
+          <div className="flex justify-between font-medium text-[15px] text-brand-charcoal pt-2 border-t border-[rgba(45,45,45,0.12)]">
             <span>Due today</span>
             <span>${total}</span>
           </div>
@@ -230,7 +230,7 @@ function StepExtras({
       {/* CTA */}
       <button
         onClick={onContinue}
-        className="w-full bg-[#2D2D2D] text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 transition-colors"
+        className="w-full bg-brand-charcoal text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 transition-colors"
       >
         {qty > 0
           ? `Add ${qty} ${qty === 1 ? "copy" : "copies"} — $${total} →`
@@ -411,7 +411,7 @@ function StepShipping({
           value={region}
           onChange={(e) => setRegion(e.target.value)}
           disabled={saving}
-          className="w-full h-[46px] bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-3 text-[14px] text-[#2D2D2D] focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none"
+          className="w-full h-[46px] bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-3 text-[14px] text-brand-charcoal focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none"
         >
           <option value="">{countryConfig.regionLabel}</option>
           {US_STATES.map((s) => (
@@ -426,7 +426,7 @@ function StepShipping({
           value={region}
           onChange={(e) => setRegion(e.target.value)}
           disabled={saving}
-          className="w-full h-[46px] bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-3 text-[14px] text-[#2D2D2D] focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none"
+          className="w-full h-[46px] bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-3 text-[14px] text-brand-charcoal focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none"
         >
           <option value="">{countryConfig.regionLabel}</option>
           {MX_STATES.map((s) => (
@@ -450,7 +450,7 @@ function StepShipping({
     <div className="flex flex-col items-center w-full">
       <StepIndicator current={2} total={totalSteps} />
 
-      <h1 className="font-serif text-[34px] font-normal text-[#2D2D2D] text-center leading-tight mb-3">
+      <h1 className="font-serif text-[34px] font-normal text-brand-charcoal text-center leading-tight mb-3">
         {qty > 0 ? "Where should we send them?" : "Where should we send it?"}
       </h1>
       <p className="text-[15px] text-[#8A8780] text-center mb-8">
@@ -460,7 +460,7 @@ function StepShipping({
       {/* Context bar */}
       <div className="w-full bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-[18px] py-[14px] flex items-center justify-between mb-8">
         <div>
-          <p className="text-sm font-medium text-[#2D2D2D]">
+          <p className="text-sm font-medium text-brand-charcoal">
             {totalCopies} {totalCopies === 1 ? "copy" : "copies"}
           </p>
           <p className="text-xs text-[#8A8780]">
@@ -481,7 +481,7 @@ function StepShipping({
             value={country}
             onChange={(e) => handleCountryChange(e.target.value)}
             disabled={saving}
-            className="w-full h-[46px] bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-4 text-[15px] text-[#2D2D2D] focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_16px_center] bg-no-repeat"
+            className="w-full h-[46px] bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-4 text-[15px] text-brand-charcoal focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_16px_center] bg-no-repeat"
           >
             {SUPPORTED_COUNTRIES.map((c) => (
               <option key={c.code} value={c.code}>{c.name}</option>
@@ -560,7 +560,7 @@ function StepShipping({
         <button
           onClick={handleSubmit}
           disabled={saving}
-          className="w-full bg-[#2D2D2D] text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors mt-2"
+          className="w-full bg-brand-charcoal text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors mt-2"
         >
           {saving ? "Saving..." : "Send it to print →"}
         </button>
@@ -654,7 +654,7 @@ export function PostCloseFlow({ groupId, onDone, onBack }: PostCloseFlowProps) {
             className="p-2 rounded-full hover:bg-white/60 transition-colors"
             aria-label="Back"
           >
-            <ArrowLeft className="h-5 w-5 text-[#2D2D2D]" />
+            <ArrowLeft className="h-5 w-5 text-brand-charcoal" />
           </button>
         )}
       </div>

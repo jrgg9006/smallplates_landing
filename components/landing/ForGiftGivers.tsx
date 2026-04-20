@@ -159,9 +159,9 @@ export default function ForGiftGivers() {
                   <span className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-[#D4A854]/20 to-[#D4A854]/30 text-[#D4A854] font-serif font-medium flex items-center justify-center text-base border border-[#D4A854]/30 shadow-sm">
                     {index + 1}
                   </span>
-                  <span className="font-sans font-light text-lg text-[#2D2D2D]/80 pt-2">
-                    <span className="font-normal text-[#2D2D2D]">{step.title}</span>{" "}
-                    <span className="text-[#2D2D2D]/50">{step.subtitle}</span>
+                  <span className="font-sans font-light text-lg text-brand-charcoal/80 pt-2">
+                    <span className="font-normal text-brand-charcoal">{step.title}</span>{" "}
+                    <span className="text-brand-charcoal/50">{step.subtitle}</span>
                   </span>
                 </motion.li>
               ))}
@@ -176,10 +176,10 @@ export default function ForGiftGivers() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.5 }}
           >
-            <p className="font-sans font-light text-center text-[#2D2D2D]/70">
+            <p className="font-sans font-light text-center text-brand-charcoal/70">
               <span className="block text-lg">Bride cries. You win.</span>
             </p>
-            <p className="mt-4 font-serif text-xl text-[#2D2D2D] text-center">
+            <p className="mt-4 font-serif text-xl text-brand-charcoal text-center">
               Books start at $169 <span className="text-[#8A8780]">— most groups split it 3-4 ways.</span>
             </p>
           </motion.div>
@@ -195,7 +195,7 @@ export default function ForGiftGivers() {
             <button
               type="button"
               onClick={handleStartGift}
-              className="inline-flex items-center justify-center rounded-full bg-[#2D2D2D] hover:bg-[#1a1a1a] text-white px-10 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#2D2D2D]"
+              className="inline-flex items-center justify-center rounded-full bg-brand-charcoal hover:bg-[#1a1a1a] text-white px-10 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-charcoal"
               data-cta="gift-givers-primary"
             >
               Start the Book

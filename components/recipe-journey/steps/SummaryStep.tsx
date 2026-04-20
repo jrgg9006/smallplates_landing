@@ -17,7 +17,7 @@ export default function SummaryStep({ recipeName, ingredients, instructions, per
     <div className="max-w-4xl mx-auto" role="region" aria-labelledby="summary-heading">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 id="summary-heading" className="text-[#2D2D2D] text-lg md:text-xl leading-relaxed font-light font-serif">Review your recipe</h2>
+        <h2 id="summary-heading" className="text-brand-charcoal text-lg md:text-xl leading-relaxed font-light font-serif">Review your recipe</h2>
         {onEditSection && (
           <button
             type="button"
@@ -38,7 +38,7 @@ export default function SummaryStep({ recipeName, ingredients, instructions, per
       )}
 
       {/* Recipe title */}
-      <h1 className="font-serif text-3xl md:text-4xl font-semibold text-[#2D2D2D] leading-tight mb-4">
+      <h1 className="font-serif text-3xl md:text-4xl font-semibold text-brand-charcoal leading-tight mb-4">
         {recipeName || 'Untitled Recipe'}
       </h1>
 

@@ -177,11 +177,11 @@ export default function BooksPrinted() {
         >
           <h2
             id="proof-heading"
-            className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#2D2D2D]"
+            className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-brand-charcoal"
           >
             Real recipes. Real people. Real books.
           </h2>
-          <p className="mt-4 font-sans text-lg md:text-xl text-[#2D2D2D]/60">
+          <p className="mt-4 font-sans text-lg md:text-xl text-brand-charcoal/60">
             Every page has a name. Every name has a story.
           </p>
         </motion.div>
@@ -225,7 +225,7 @@ export default function BooksPrinted() {
                     
                     {/* Recipe Info */}
                     <div className="mt-4">
-                      <h3 className="font-serif text-lg font-medium text-[#2D2D2D] group-hover:text-[#D4A854] transition-colors">
+                      <h3 className="font-serif text-lg font-medium text-brand-charcoal group-hover:text-[#D4A854] transition-colors">
                         {book.title}
                       </h3>
                       <p className="mt-1 font-sans text-sm text-[#9A9590]">

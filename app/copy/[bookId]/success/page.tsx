@@ -19,7 +19,7 @@ function NotAvailable() {
         Questions?{" "}
         <a
           href="mailto:team@smallplatesandcompany.com"
-          className="underline hover:text-[#2D2D2D] transition-colors"
+          className="underline hover:text-brand-charcoal transition-colors"
         >
           team@smallplatesandcompany.com
         </a>
@@ -46,7 +46,7 @@ function OrderProcessing() {
         height={40}
         priority
       />
-      <p className="text-[15px] text-[#2D2D2D] mt-8 text-center">
+      <p className="text-[15px] text-brand-charcoal mt-8 text-center">
         Your payment was successful.
       </p>
       <p className="text-[13px] text-[#8A8780] mt-3 text-center max-w-sm">
@@ -147,7 +147,7 @@ export default async function CopySuccessPage({
             Order confirmed
           </p>
 
-          <h1 className="font-serif text-[34px] text-[#2D2D2D] text-center leading-tight mb-3">
+          <h1 className="font-serif text-[34px] text-brand-charcoal text-center leading-tight mb-3">
             Your {order.book_quantity === 1 ? "copy is" : "copies are"} on the way.
           </h1>
 
@@ -158,22 +158,22 @@ export default async function CopySuccessPage({
           <div className="bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-[18px] py-[16px] space-y-4 mb-8">
             <div>
               <p className="text-[11px] text-[#8A8780] uppercase tracking-[0.08em] mb-0.5">Book</p>
-              <p className="text-[15px] text-[#2D2D2D]">{order.couple_name || "—"}</p>
+              <p className="text-[15px] text-brand-charcoal">{order.couple_name || "—"}</p>
             </div>
             <div>
               <p className="text-[11px] text-[#8A8780] uppercase tracking-[0.08em] mb-0.5">Copies</p>
-              <p className="text-[15px] text-[#2D2D2D]">
+              <p className="text-[15px] text-brand-charcoal">
                 {order.book_quantity} {order.book_quantity === 1 ? "copy" : "copies"}
               </p>
             </div>
             <div>
               <p className="text-[11px] text-[#8A8780] uppercase tracking-[0.08em] mb-0.5">Total paid</p>
-              <p className="text-[15px] text-[#2D2D2D]">${totalDollars}</p>
+              <p className="text-[15px] text-brand-charcoal">${totalDollars}</p>
             </div>
             {addressLine && (
               <div>
                 <p className="text-[11px] text-[#8A8780] uppercase tracking-[0.08em] mb-0.5">Ships to</p>
-                <p className="text-[15px] text-[#2D2D2D]">
+                <p className="text-[15px] text-brand-charcoal">
                   {address?.recipient_name && <>{address.recipient_name}<br /></>}
                   {addressLine}
                 </p>
@@ -186,7 +186,7 @@ export default async function CopySuccessPage({
             Questions?{" "}
             <a
               href="mailto:team@smallplatesandcompany.com"
-              className="underline hover:text-[#2D2D2D] transition-colors"
+              className="underline hover:text-brand-charcoal transition-colors"
             >
               team@smallplatesandcompany.com
             </a>

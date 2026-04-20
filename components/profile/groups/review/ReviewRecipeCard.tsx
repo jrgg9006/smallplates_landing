@@ -138,7 +138,7 @@ export function ReviewRecipeCard({ recipe, index, total, onSave }: ReviewRecipeC
               <div className="flex items-start gap-3">
                 <ImageIcon className="h-5 w-5 text-[#D4A854] mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-[#2D2D2D]">
+                  <p className="text-sm font-medium text-brand-charcoal">
                     This recipe was uploaded as an image.
                   </p>
                   <p className="text-sm text-gray-500 mt-1">

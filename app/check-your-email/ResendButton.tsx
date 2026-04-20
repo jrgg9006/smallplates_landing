@@ -76,7 +76,7 @@ export default function ResendButton({ sessionId }: ResendButtonProps) {
       className={`type-caption underline decoration-dotted underline-offset-4 transition-colors ${
         disabled
           ? "text-[#9A9590] cursor-not-allowed"
-          : "text-[#5A5550] hover:text-[#2D2D2D]"
+          : "text-[#5A5550] hover:text-brand-charcoal"
       }`}
     >
       {buttonText}

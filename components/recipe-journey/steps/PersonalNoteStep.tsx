@@ -42,7 +42,7 @@ export default function PersonalNoteStep({ personalNote, onChange, userName, cou
         )}
         
         <div className="space-y-2 text-center">
-          <h2 className="font-serif text-3xl md:text-4xl font-semibold text-[#2D2D2D]">
+          <h2 className="font-serif text-3xl md:text-4xl font-semibold text-brand-charcoal">
             Add a note for the couple
           </h2>
         </div>

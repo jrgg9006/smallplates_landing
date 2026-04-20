@@ -81,7 +81,7 @@ export default function ContactForm() {
       <div>
         <label
           htmlFor="contact-name"
-          className="block font-sans text-sm font-medium text-[#2D2D2D] mb-2"
+          className="block font-sans text-sm font-medium text-brand-charcoal mb-2"
         >
           Your name
         </label>
@@ -93,14 +93,14 @@ export default function ContactForm() {
           disabled={submitting}
           required
           maxLength={200}
-          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-[#2D2D2D] focus:outline-none focus:border-[#D4A854] transition-colors"
+          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-brand-charcoal focus:outline-none focus:border-[#D4A854] transition-colors"
         />
       </div>
 
       <div>
         <label
           htmlFor="contact-email"
-          className="block font-sans text-sm font-medium text-[#2D2D2D] mb-2"
+          className="block font-sans text-sm font-medium text-brand-charcoal mb-2"
         >
           Your email
         </label>
@@ -112,17 +112,17 @@ export default function ContactForm() {
           disabled={submitting}
           required
           maxLength={320}
-          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-[#2D2D2D] focus:outline-none focus:border-[#D4A854] transition-colors"
+          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-brand-charcoal focus:outline-none focus:border-[#D4A854] transition-colors"
         />
       </div>
 
       <div>
         <label
           htmlFor="contact-couple"
-          className="block font-sans text-sm font-medium text-[#2D2D2D] mb-2"
+          className="block font-sans text-sm font-medium text-brand-charcoal mb-2"
         >
           Who&rsquo;s getting married?{" "}
-          <span className="text-[#2D2D2D]/40 font-normal">(optional)</span>
+          <span className="text-brand-charcoal/40 font-normal">(optional)</span>
         </label>
         <input
           id="contact-couple"
@@ -132,14 +132,14 @@ export default function ContactForm() {
           disabled={submitting}
           maxLength={200}
           placeholder="e.g. Jill and Juan"
-          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-[#2D2D2D] placeholder:text-[#2D2D2D]/30 focus:outline-none focus:border-[#D4A854] transition-colors"
+          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-brand-charcoal placeholder:text-brand-charcoal/30 focus:outline-none focus:border-[#D4A854] transition-colors"
         />
       </div>
 
       <div>
         <label
           htmlFor="contact-message"
-          className="block font-sans text-sm font-medium text-[#2D2D2D] mb-2"
+          className="block font-sans text-sm font-medium text-brand-charcoal mb-2"
         >
           Message
         </label>
@@ -151,7 +151,7 @@ export default function ContactForm() {
           required
           rows={6}
           maxLength={5000}
-          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-[#2D2D2D] focus:outline-none focus:border-[#D4A854] transition-colors resize-none"
+          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-brand-charcoal focus:outline-none focus:border-[#D4A854] transition-colors resize-none"
         />
       </div>
 

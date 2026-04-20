@@ -36,7 +36,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
     <div className="min-h-[calc(100vh-180px)] flex items-center justify-center">
       <div className="w-full space-y-8 px-4 md:px-6">
         <div className="space-y-2 text-center">
-          <h2 className="font-serif text-3xl md:text-4xl font-semibold text-[#2D2D2D]">
+          <h2 className="font-serif text-3xl md:text-4xl font-semibold text-brand-charcoal">
             How would you like to share your Recipe?
           </h2>
           <p className="mt-3 text-base text-gray-600">
@@ -71,7 +71,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
                   className={`
                     w-6 h-6 md:w-8 md:h-8 transition-colors duration-200
                     ${method.available 
-                      ? 'text-[#2D2D2D] group-hover:text-white' 
+                      ? 'text-brand-charcoal group-hover:text-white' 
                       : 'text-gray-400'
                     }
                   `} 
@@ -96,7 +96,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
         </div>
 
         <div className="mt-12 text-center space-y-0">
-          <p className="text-base font-medium text-[#2D2D2D]">
+          <p className="text-base font-medium text-brand-charcoal">
             No photo of the dish needed.
           </p>
           <p className="text-base text-gray-400">

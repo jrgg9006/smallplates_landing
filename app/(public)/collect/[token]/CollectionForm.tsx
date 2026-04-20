@@ -273,7 +273,7 @@ export default function CollectionForm() {
                 />
               </div>
             )}
-            <h1 className="text-2xl lg:text-3xl font-semibold text-[#2D2D2D] font-serif mb-4">
+            <h1 className="text-2xl lg:text-3xl font-semibold text-brand-charcoal font-serif mb-4">
               This book has been closed.
             </h1>
             <p className="text-gray-600 text-base lg:text-lg leading-relaxed mb-2">
@@ -362,7 +362,7 @@ export default function CollectionForm() {
                       </div>
                     )}
 
-                    <h1 className="text-2xl lg:text-3xl font-semibold text-[#2D2D2D] mb-4 font-serif">
+                    <h1 className="text-2xl lg:text-3xl font-semibold text-brand-charcoal mb-4 font-serif">
                       {personalizedMessage.beforeName}
                       {personalizedMessage.name && (
                         <span className="font-semibold text-gray-900 mx-1">
@@ -526,7 +526,7 @@ export default function CollectionForm() {
                 <div className="border-t border-[#D4A854]/20 pt-6">
                   {searchResults.length > 0 ? (
                     <div className="space-y-4">
-                      <h3 className="text-xl font-medium text-[#2D2D2D] font-serif">
+                      <h3 className="text-xl font-medium text-brand-charcoal font-serif">
                         That&apos;s you, right?
                       </h3>
                       <div className="space-y-3">
@@ -536,7 +536,7 @@ export default function CollectionForm() {
                             onClick={() => handleGuestSelect(guest)}
                             className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-[#D4A854]/50 hover:bg-[#FAF7F2] transition-colors text-left bg-white"
                           >
-                            <span className="text-[#2D2D2D] font-medium">
+                            <span className="text-brand-charcoal font-medium">
                               {guest.first_name} {guest.last_name}
                             </span>
                             <svg
@@ -558,7 +558,7 @@ export default function CollectionForm() {
                           }}
                           className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-[#D4A854]/50 hover:bg-[#FAF7F2] transition-colors text-left bg-white"
                         >
-                          <span className="text-[#2D2D2D] font-medium">
+                          <span className="text-brand-charcoal font-medium">
                             I don&apos;t see my name
                           </span>
                           <svg
@@ -574,7 +574,7 @@ export default function CollectionForm() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      <h3 className="text-xl font-medium text-[#2D2D2D] font-serif">
+                      <h3 className="text-xl font-medium text-brand-charcoal font-serif">
                         Not on the list yet? No problem.
                       </h3>
                       <p className="text-gray-600 mb-4 text-sm">

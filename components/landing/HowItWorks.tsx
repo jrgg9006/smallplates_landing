@@ -49,7 +49,7 @@ export default function HowItWorks() {
           >
             Here&apos;s how it happens.
           </h2>
-          <p className="mt-4 type-body text-[#2D2D2D]/60">
+          <p className="mt-4 type-body text-brand-charcoal/60">
             Three steps. Easier than you think.
           </p>
         </motion.div>
