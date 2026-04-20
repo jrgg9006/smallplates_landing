@@ -33,7 +33,7 @@ body > div.pac-container ~ div:not([id]):not([class]) {
     
     /* Legacy colors for backward compatibility */
     --brand-warm-white: var(--brand-background);
-    --brand-honey-dark: 41 66% 47%;     /* #B8923E */
+    --brand-honey-dark: 40 51% 53%;     /* ≈ #C49B4A (renders #C49C4A) */
     --brand-cream: 36 25% 93%;          /* #F5F1EB */
     --brand-sand: var(--brand-border);
     --brand-olive: 91 20% 43%;          /* #6B7B5E */
