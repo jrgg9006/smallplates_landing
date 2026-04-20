@@ -92,9 +92,6 @@ const config: Config = {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			},
-  			smallplates_green: '#00676F',
-  			smallplates_red: '#E33D26',
-  			smallplates_darkblue: '#444459',
   			// Small Plates Brand Colors
   			brand: {
   				'warm-white': 'hsl(var(--brand-warm-white))',
@@ -106,7 +103,9 @@ const config: Config = {
   				'sand': 'hsl(var(--brand-sand))',
   				'white': 'hsl(var(--brand-white))',
   				'olive': 'hsl(var(--brand-olive))',
-  				'terracotta': 'hsl(var(--brand-terracotta))'
+  				'terracotta': 'hsl(var(--brand-terracotta))',
+  				'light-gray': 'hsl(var(--brand-light-gray))',
+  				'warm-gray-light': 'hsl(var(--brand-warm-gray-light))'
   			}
   		}
   	}
