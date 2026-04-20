@@ -149,7 +149,7 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
         
         {/* Explanation text */}
         <p className="text-xs sm:text-sm text-[#2D2D2D] leading-relaxed font-light mt-2">
-          1have full access to this book and can help you collect recipes together.
+          Captains have full access to this book and can help you collect recipes together.
         </p>
         
         <div className="space-y-4 pt-4 pb-2">
