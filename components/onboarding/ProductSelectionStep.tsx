@@ -118,7 +118,7 @@ export function ProductSelectionStep({
           <span className="text-brand-honey text-base mr-1.5" style={{ fontFamily: "'Georgia', serif", fontStyle: "italic" }}>
             Tip
           </span>
-          <span className="text-[13px] text-[#6B6560]">
+          <span className="text-[13px] text-[hsl(var(--brand-warm-gray-dark))]">
             Many people want extra copies for family and close friends.
           </span>
         </div>

@@ -145,7 +145,7 @@ export default function PricingPage() {
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-2.5">
                     <span className="mt-2 w-1.5 h-1.5 rounded-full bg-brand-honey flex-shrink-0" />
-                    <span className="text-[15px] text-[#6B6966] font-light leading-relaxed">
+                    <span className="text-[15px] text-[hsl(var(--brand-warm-gray-dark))] font-light leading-relaxed">
                       {item}
                     </span>
                   </div>
