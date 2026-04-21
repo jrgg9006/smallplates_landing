@@ -18,7 +18,7 @@ body > div.pac-container ~ div:not([id]):not([class]) {
 @layer base {
   :root {
     /* Small Plates Brand Colors - Updated per Implementation Guide */
-    --brand-background: 36 30% 98%;     /* #FAF9F7 */
+    --brand-background: 36 38% 96%;     /* ≈ #FAF7F2 (renders #F9F6F1) */
     --brand-white: 0 0% 100%;           /* #FFFFFF */
     --brand-honey: 41 66% 58%;          /* #D4A854 */
     --brand-charcoal: 0 0% 18%;         /* #2D2D2D */
