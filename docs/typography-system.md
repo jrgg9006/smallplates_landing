@@ -67,10 +67,10 @@ Tokens are named by what they communicate, not by their size. `text-body` is "th
 |-------|------|-------------------------|----------------|-------------|----------------|--------|
 | `text-display` | Hero titulars, landing covers | 38px → 56px | medium | tight (1.1) | tight (-0.02em) | serif (Minion Pro) |
 | `text-heading` | Section titles | 28px → 36px | medium | tight (1.15) | default | serif |
-| `text-subheading` | Card / modal titles, subsection headers | 20px → 24px | medium | tight (1.2) | default | serif |
+| `text-subheading` | Card / modal titles, subsection headers | 24px → 28px | medium | tight (1.2) | default | serif |
 | `text-body` | Primary body copy (paragraphs, descriptions) | 16px | light | relaxed (1.65) | default | sans (Inter) |
 | `text-body-small` | Secondary body copy (helper text, info boxes) | 14px | light | relaxed (1.6) | default | sans |
-| `text-caption` | Metadata, timestamps, small labels | 13px | normal | normal (1.5) | default | sans |
+| `text-caption` | Metadata, timestamps, small labels | 12px | normal | normal (1.5) | default | sans |
 | `text-eyebrow` | Kickers above headings, ALL CAPS labels | 11px | medium | normal (1.4) | wide (0.15em) | sans, uppercase |
 | `text-action` | Button labels, CTAs, navigation | 15px | medium | none (1.0) | default | sans |
 
@@ -198,6 +198,19 @@ Interactive text. The text inside buttons, links that behave as buttons, CTAs, a
 
 ---
 
+## Calibration notes
+
+The values in the tokens table above reflect calibration against codebase state as of April 2026, verified via a pre-flight typography recon before Phase 1.3.1 implementation.
+
+Two values differ from the initial design draft:
+
+- `text-subheading` mobile was originally proposed at 20px. Recon revealed that modal titles in 6+ L1 files (`AddRecipeModal`, `AddGuestModal`, `CreateCookbookModal`, `CloseBookModal`, `ShareCollectionModal`, `ReviewRecipesModal`) universally use `text-2xl = 24px`. Lowering to 20px would have shrunk all modal titles by 4px, a visible regression in surfaces Ricardo flagged as high-sensitivity. Calibrated up to 24px mobile / 28px desktop.
+- `text-caption` was originally proposed at 13px. Recon showed helper/error patterns in L1 dominantly use `text-xs = 12px` (10+ hits of `text-xs text-gray-500`). Calibrated down to 12px to preserve those surfaces.
+
+These calibrations are intentional and reflect the principle that the system should encode the codebase's intentional patterns, not impose externally-derived ideals. Where L1 already has a coherent pattern, the token conforms to it.
+
+---
+
 ## Modifiers and their use
 
 ### Weight override
@@ -263,7 +276,7 @@ The following are explicitly outside the system. Any instance in code is a bug.
 // ✅ Correct
 ...           // 15px
 ...         // 38px → 56px responsive
-...    // ≈ 0.8125rem = 13px
+...    // 0.75rem = 12px
 ```
 
 ### Arbitrary line-heights
