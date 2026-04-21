@@ -93,7 +93,7 @@ export default function ContactForm() {
           disabled={submitting}
           required
           maxLength={200}
-          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-brand-charcoal focus:outline-none focus:border-brand-honey transition-colors"
+          className="w-full px-4 py-3 bg-white border border-brand-sand rounded-md font-sans text-base text-brand-charcoal focus:outline-none focus:border-brand-honey transition-colors"
         />
       </div>
 
@@ -112,7 +112,7 @@ export default function ContactForm() {
           disabled={submitting}
           required
           maxLength={320}
-          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-brand-charcoal focus:outline-none focus:border-brand-honey transition-colors"
+          className="w-full px-4 py-3 bg-white border border-brand-sand rounded-md font-sans text-base text-brand-charcoal focus:outline-none focus:border-brand-honey transition-colors"
         />
       </div>
 
@@ -132,7 +132,7 @@ export default function ContactForm() {
           disabled={submitting}
           maxLength={200}
           placeholder="e.g. Jill and Juan"
-          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-brand-charcoal placeholder:text-brand-charcoal/30 focus:outline-none focus:border-brand-honey transition-colors"
+          className="w-full px-4 py-3 bg-white border border-brand-sand rounded-md font-sans text-base text-brand-charcoal placeholder:text-brand-charcoal/30 focus:outline-none focus:border-brand-honey transition-colors"
         />
       </div>
 
@@ -151,7 +151,7 @@ export default function ContactForm() {
           required
           rows={6}
           maxLength={5000}
-          className="w-full px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-brand-charcoal focus:outline-none focus:border-brand-honey transition-colors resize-none"
+          className="w-full px-4 py-3 bg-white border border-brand-sand rounded-md font-sans text-base text-brand-charcoal focus:outline-none focus:border-brand-honey transition-colors resize-none"
         />
       </div>
 

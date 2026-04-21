@@ -66,7 +66,7 @@ const faqs: FAQItem[] = [
 function FAQItemComponent({ faq, isOpen, onClick }: { faq: FAQItem; isOpen: boolean; onClick: () => void }) {
   return (
     <motion.div
-      className="border-b border-[#E8E0D5] last:border-b-0"
+      className="border-b border-brand-sand last:border-b-0"
       initial={false}
     >
       <button

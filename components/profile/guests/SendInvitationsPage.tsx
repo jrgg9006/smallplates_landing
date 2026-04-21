@@ -309,7 +309,7 @@ export function SendInvitationsPage({
   return (
     <div>
       {/* Top bar — Back on left, Add Recipients title on right */}
-      <div className="border-b border-[#E8E0D5] flex">
+      <div className="border-b border-brand-sand flex">
         {/* Left side of top bar (aligned with email preview column) */}
         <div className="flex-1 lg:w-[68%] lg:flex-none px-6 lg:px-10 py-4">
           <button
@@ -321,7 +321,7 @@ export function SendInvitationsPage({
           </button>
         </div>
         {/* Right side of top bar (aligned with recipients column) */}
-        <div className="hidden lg:flex items-center justify-between lg:w-[32%] lg:flex-none px-8 border-l border-[#E8E0D5]">
+        <div className="hidden lg:flex items-center justify-between lg:w-[32%] lg:flex-none px-8 border-l border-brand-sand">
           {showAddEmails ? (
             <>
               <h2 className="font-serif text-xl font-semibold text-brand-charcoal">
@@ -391,8 +391,8 @@ export function SendInvitationsPage({
             </div>
 
             {/* From / Subject rows */}
-            <div className="bg-white border-b border-[#E8E0D5]">
-              <div className="px-6 py-2.5 border-b border-[#F0EDE8]">
+            <div className="bg-white border-b border-brand-sand">
+              <div className="px-6 py-2.5 border-b border-brand-sand">
                 <p className="text-sm">
                   <span className="text-[#9A9590]">From:</span>{" "}
                   <span className="text-brand-charcoal">{coupleNames}</span>
@@ -457,7 +457,7 @@ export function SendInvitationsPage({
               </p>
 
               {/* Divider + logo footer */}
-              <div className="mt-12 pt-6 border-t border-[#F0EDE8] space-y-4">
+              <div className="mt-12 pt-6 border-t border-brand-sand space-y-4">
                 <img
                   src="/images/logo_svg/SmallPlates_logo_horizontal.svg"
                   alt="Small Plates & Co."
@@ -477,7 +477,7 @@ export function SendInvitationsPage({
         </div>
 
         {/* ── Right column: Recipients (fixed height, internal scroll) ── */}
-        <div className="lg:w-[32%] bg-white border-t lg:border-t-0 lg:border-l border-[#E8E0D5] flex flex-col lg:h-full lg:overflow-hidden">
+        <div className="lg:w-[32%] bg-white border-t lg:border-t-0 lg:border-l border-brand-sand flex flex-col lg:h-full lg:overflow-hidden">
           {/* Mobile-only title (on desktop it's in the top bar) */}
           <div className="lg:hidden px-6 pt-6 flex items-center justify-between mb-4">
             {showAddEmails ? (
@@ -526,7 +526,7 @@ export function SendInvitationsPage({
           {/* Tabs (hidden when adding emails or guests) */}
           {!showAddEmails && !showAddGuest && (
             <div className="px-6 lg:px-8 pt-3 lg:pt-5">
-              <div className="flex border-b border-[#E8E0D5]">
+              <div className="flex border-b border-brand-sand">
                 <button
                   onClick={() => setActiveTab("compose")}
                   className={`pb-3.5 px-1 mr-6 text-[15px] font-medium transition-colors border-b-2 ${
@@ -593,7 +593,7 @@ export function SendInvitationsPage({
                         placeholder="First Name"
                         value={newGuestFirst}
                         onChange={(e) => setNewGuestFirst(e.target.value)}
-                        className="w-full px-4 py-2.5 text-sm border border-[#E8E0D5] rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
+                        className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                       />
                     </div>
                     <div className="flex-1">
@@ -605,7 +605,7 @@ export function SendInvitationsPage({
                         placeholder="Last Name"
                         value={newGuestLast}
                         onChange={(e) => setNewGuestLast(e.target.value)}
-                        className="w-full px-4 py-2.5 text-sm border border-[#E8E0D5] rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
+                        className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                       />
                     </div>
                   </div>
@@ -621,7 +621,7 @@ export function SendInvitationsPage({
                     placeholder="How this person's name should appear in the book"
                     value={newGuestPrintedName}
                     onChange={(e) => setNewGuestPrintedName(e.target.value)}
-                    className="w-full px-4 py-2.5 text-sm border border-[#E8E0D5] rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
+                    className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                   />
                   <p className="text-xs text-[#9A9590] mt-2">
                     Leave empty to use first and last name. This is how the name will appear in the printed cookbook.
@@ -638,7 +638,7 @@ export function SendInvitationsPage({
                     placeholder="Email address"
                     value={newGuestEmail}
                     onChange={(e) => setNewGuestEmail(e.target.value)}
-                    className="w-full px-4 py-2.5 text-sm border border-[#E8E0D5] rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
+                    className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                   />
                 </div>
               </div>
@@ -663,7 +663,7 @@ export function SendInvitationsPage({
                           [guest.id]: e.target.value,
                         }))
                       }
-                      className="w-full px-4 py-2.5 text-sm border border-[#E8E0D5] rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
+                      className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                     />
                   </div>
                 ))}
@@ -695,7 +695,7 @@ export function SendInvitationsPage({
 
                   {/* Select all */}
                   {uninvitedGuests.length > 0 && (
-                    <label className="flex items-center gap-4 cursor-pointer py-4 border-b border-[#E8E0D5]">
+                    <label className="flex items-center gap-4 cursor-pointer py-4 border-b border-brand-sand">
                       <input
                         type="checkbox"
                         checked={
@@ -810,7 +810,7 @@ export function SendInvitationsPage({
                             <button
                               onClick={(e) => { e.stopPropagation(); handleRemind(guest.id); }}
                               disabled={isReminding || justReminded}
-                              className="text-xs font-medium px-3 py-1.5 rounded-md border border-[#E8E0D5] text-brand-charcoal hover:border-brand-charcoal transition-colors disabled:opacity-50 disabled:cursor-default"
+                              className="text-xs font-medium px-3 py-1.5 rounded-md border border-brand-sand text-brand-charcoal hover:border-brand-charcoal transition-colors disabled:opacity-50 disabled:cursor-default"
                             >
                               {isReminding ? (
                                 <span className="flex items-center gap-1">
@@ -841,10 +841,10 @@ export function SendInvitationsPage({
 
           {/* Fixed footer */}
           {showAddGuest ? (
-            <div className="px-6 lg:px-8 py-5 border-t border-[#E8E0D5] bg-white flex gap-3">
+            <div className="px-6 lg:px-8 py-5 border-t border-brand-sand bg-white flex gap-3">
               <button
                 onClick={resetAddGuest}
-                className="flex-1 py-3 text-sm font-medium text-brand-charcoal border border-[#E8E0D5] rounded-full hover:bg-[#FAF7F2] transition-colors"
+                className="flex-1 py-3 text-sm font-medium text-brand-charcoal border border-brand-sand rounded-full hover:bg-[#FAF7F2] transition-colors"
               >
                 Cancel
               </button>
@@ -864,13 +864,13 @@ export function SendInvitationsPage({
               </button>
             </div>
           ) : showAddEmails ? (
-            <div className="px-6 lg:px-8 py-5 border-t border-[#E8E0D5] bg-white flex gap-3">
+            <div className="px-6 lg:px-8 py-5 border-t border-brand-sand bg-white flex gap-3">
               <button
                 onClick={() => {
                   setShowAddEmails(false);
                   setEmailDrafts({});
                 }}
-                className="flex-1 py-3 text-sm font-medium text-brand-charcoal border border-[#E8E0D5] rounded-full hover:bg-[#FAF7F2] transition-colors"
+                className="flex-1 py-3 text-sm font-medium text-brand-charcoal border border-brand-sand rounded-full hover:bg-[#FAF7F2] transition-colors"
               >
                 Cancel
               </button>
@@ -895,7 +895,7 @@ export function SendInvitationsPage({
               </button>
             </div>
           ) : activeTab === "compose" && uninvitedGuests.length > 0 ? (
-            <div className="px-6 lg:px-8 py-6 border-t border-[#E8E0D5] bg-white">
+            <div className="px-6 lg:px-8 py-6 border-t border-brand-sand bg-white">
               <button
                 onClick={handleSendInvitations}
                 disabled={selectedIds.size === 0 || isSending}

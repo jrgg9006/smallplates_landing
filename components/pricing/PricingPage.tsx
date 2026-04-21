@@ -88,7 +88,7 @@ export default function PricingPage() {
 
             <div className="px-8 py-10 md:px-12 md:py-14">
               {/* Two prices side by side */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-0 sm:divide-x sm:divide-[#F0EDE8] mb-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-0 sm:divide-x sm:divide-brand-sand mb-10">
                 {/* First book */}
                 <div className="text-center sm:pr-8">
                   <p className="font-sans text-xs font-medium tracking-[0.15em] text-[#9A9590] uppercase mb-3">
@@ -125,9 +125,9 @@ export default function PricingPage() {
 
               {/* Honey rule */}
               <div className="flex items-center gap-4 mb-10">
-                <div className="flex-1 h-px bg-[#F0EDE8]" />
+                <div className="flex-1 h-px bg-brand-sand" />
                 <div className="w-1.5 h-1.5 rounded-full bg-brand-honey" />
-                <div className="flex-1 h-px bg-[#F0EDE8]" />
+                <div className="flex-1 h-px bg-brand-sand" />
               </div>
 
               {/* What's included */}
@@ -157,7 +157,7 @@ export default function PricingPage() {
             </div>
 
             {/* CTA strip at bottom of card */}
-            <div className="bg-[#FDFCFA] border-t border-[#F0EDE8] px-8 py-8 md:px-12 text-center">
+            <div className="bg-[#FDFCFA] border-t border-brand-sand px-8 py-8 md:px-12 text-center">
               <p className="font-serif italic text-brand-charcoal text-lg mb-5">
                 Bride cries. You win.
               </p>
@@ -197,18 +197,18 @@ export default function PricingPage() {
                 <span className="font-medium text-brand-charcoal font-sans">Shipping</span> is
                 included in the price.
               </p>
-              <div className="h-px bg-[#F0EDE8]" />
+              <div className="h-px bg-brand-sand" />
               <p>
                 <span className="font-medium text-brand-charcoal">Timeline:</span> Most
                 books are ready 3–4 weeks after recipe collection closes.
               </p>
-              <div className="h-px bg-[#F0EDE8]" />
+              <div className="h-px bg-brand-sand" />
               <p>
                 <span className="font-medium text-brand-charcoal">What&apos;s included:</span> 50
                 recipes, professional design, recipe images, quality printing, and full
                 access to the platform.
               </p>
-              <div className="h-px bg-[#F0EDE8]" />
+              <div className="h-px bg-brand-sand" />
               <p>
                 <span className="font-medium text-brand-charcoal">What&apos;s not included:</span> Stress.
                 We handle the reminders, the design, the production. You just invite people.

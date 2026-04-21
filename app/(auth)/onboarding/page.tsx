@@ -192,7 +192,7 @@ function ReviewAndPaymentStep() {
           email they must log out first. */}
       <div className="space-y-3 mb-6">
         {isReturningCustomer && (
-          <div className="rounded-xl bg-[#FAF7F2] border border-[#E8E0D5] px-4 py-3">
+          <div className="rounded-xl bg-[#FAF7F2] border border-brand-sand px-4 py-3">
             <p className="text-[13px] text-[#5A5550] leading-relaxed">
               This book will be added to your account —{" "}
               <span className="text-brand-charcoal font-medium">{email}</span>. To buy with a different email,{" "}
@@ -222,7 +222,7 @@ function ReviewAndPaymentStep() {
             onChange={(e) => !isNameLocked && setBuyerName(e.target.value)}
             readOnly={isNameLocked}
             style={{ fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontSize: "15px" }}
-            className={`w-full px-4 py-3 border border-[#E8E0D5] rounded-xl outline-none ${
+            className={`w-full px-4 py-3 border border-brand-sand rounded-xl outline-none ${
               isNameLocked
                 ? "bg-[#F5F1EA] text-[#5A5550] cursor-not-allowed"
                 : "bg-white focus:ring-2 focus:ring-brand-honey focus:border-transparent"
@@ -249,9 +249,9 @@ function ReviewAndPaymentStep() {
             style={{ fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontSize: "15px" }}
             className={`w-full px-4 py-3 border rounded-xl outline-none ${
               isEmailLocked
-                ? "bg-[#F5F1EA] text-[#5A5550] cursor-not-allowed border-[#E8E0D5]"
+                ? "bg-[#F5F1EA] text-[#5A5550] cursor-not-allowed border-brand-sand"
                 : `bg-white focus:ring-2 focus:ring-brand-honey focus:border-transparent ${
-                    emailError ? "border-red-400" : "border-[#E8E0D5]"
+                    emailError ? "border-red-400" : "border-brand-sand"
                   }`
             }`}
             placeholder="your@email.com"
@@ -316,7 +316,7 @@ function Step4Shell({ summary, total, children }: { summary: React.ReactNode; to
       </button>
 
       {/* Mobile: summary collapsible above payment */}
-      <details className="lg:hidden group border-b border-[#E8E0D5] bg-[#FAF7F2] [&_summary::-webkit-details-marker]:hidden">
+      <details className="lg:hidden group border-b border-brand-sand bg-[#FAF7F2] [&_summary::-webkit-details-marker]:hidden">
         <summary className="px-6 py-4 flex justify-between items-center cursor-pointer list-none">
           <span className="flex items-center gap-2 text-sm font-medium text-brand-charcoal">
             Order summary
@@ -404,7 +404,7 @@ function OrderSummaryPanel({
 
       {/* Buyer info */}
       {(buyerName || email) && (
-        <div className="text-[15px] space-y-2.5 mb-8 pb-8 border-b border-[#E8E0D5]/80">
+        <div className="text-[15px] space-y-2.5 mb-8 pb-8 border-b border-brand-sand/80">
           {buyerName && (
             <div className="flex justify-between gap-3">
               <span className="text-[#9A9590]">Name</span>
@@ -421,7 +421,7 @@ function OrderSummaryPanel({
       )}
 
       {/* Line items */}
-      <div className="text-[15px] space-y-4 mb-8 pb-8 border-b border-[#E8E0D5]/80">
+      <div className="text-[15px] space-y-4 mb-8 pb-8 border-b border-brand-sand/80">
         <div className="flex justify-between items-start gap-3">
           <div className="min-w-0">
             <div className="text-brand-charcoal leading-tight">The Book</div>

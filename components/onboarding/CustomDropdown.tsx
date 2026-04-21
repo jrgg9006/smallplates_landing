@@ -77,11 +77,11 @@ export function CustomDropdown({ options, value, onChange, placeholder, label }:
         ref={triggerRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full p-4 text-left rounded-xl border-2 transition-all duration-200 hover:border-[#E8E0D5] hover:shadow-md ${
+        className={`w-full p-4 text-left rounded-xl border-2 transition-all duration-200 hover:border-brand-sand hover:shadow-md ${
           isOpen
-            ? "border-[#E8E0D5] bg-[#E8E0D5]/40"
+            ? "border-brand-sand bg-brand-sand/40"
             : selectedOption
-            ? "border-[#E8E0D5] bg-[#E8E0D5]/40"
+            ? "border-brand-sand bg-brand-sand/40"
             : "border-gray-200 bg-white"
         }`}
       >
@@ -112,7 +112,7 @@ export function CustomDropdown({ options, value, onChange, placeholder, label }:
               type="button"
               onClick={() => handleSelect(option.value)}
               className={`w-full p-4 text-left hover:bg-[#FAF7F2] transition-colors duration-200 first:rounded-t-xl last:rounded-b-xl ${
-                value === option.value ? "bg-[#E8E0D5]/40 text-brand-charcoal" : "text-gray-900"
+                value === option.value ? "bg-brand-sand/40 text-brand-charcoal" : "text-gray-900"
               }`}
             >
               <span className="text-base font-medium">{option.label}</span>

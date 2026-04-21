@@ -25,7 +25,7 @@ function ShareCopyLink({ groupId }: { groupId: string }) {
     <div>
       <button
         onClick={handleCopy}
-        className="inline-flex items-center gap-1.5 px-4 py-2 border border-[#E8E0D5] text-brand-charcoal text-xs font-medium rounded-full hover:border-brand-honey hover:text-brand-honey transition-colors"
+        className="inline-flex items-center gap-1.5 px-4 py-2 border border-brand-sand text-brand-charcoal text-xs font-medium rounded-full hover:border-brand-honey hover:text-brand-honey transition-colors"
       >
         {copied ? (
           <>
@@ -220,7 +220,7 @@ function TimelineSection({ bookStatus }: { bookStatus: string }) {
   );
 }
 
-const inputClasses = "bg-white border-[#E8E0D5] focus:border-brand-honey focus:ring-brand-honey/20";
+const inputClasses = "bg-white border-brand-sand focus:border-brand-honey focus:ring-brand-honey/20";
 
 export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) {
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress | null>(null);
@@ -355,7 +355,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
           value={region}
           onChange={(e) => setRegion(e.target.value)}
           disabled={saving}
-          className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-brand-honey focus:ring-2 focus:ring-brand-honey/20 focus:outline-none"
+          className="w-full h-10 bg-white border border-brand-sand rounded-md px-3 text-sm text-brand-charcoal focus:border-brand-honey focus:ring-2 focus:ring-brand-honey/20 focus:outline-none"
         >
           <option value="">{countryConfig.regionLabel}</option>
           {US_STATES.map((s) => (
@@ -370,7 +370,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
           value={region}
           onChange={(e) => setRegion(e.target.value)}
           disabled={saving}
-          className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-brand-honey focus:ring-2 focus:ring-brand-honey/20 focus:outline-none"
+          className="w-full h-10 bg-white border border-brand-sand rounded-md px-3 text-sm text-brand-charcoal focus:border-brand-honey focus:ring-2 focus:ring-brand-honey/20 focus:outline-none"
         >
           <option value="">{countryConfig.regionLabel}</option>
           {MX_STATES.map((s) => (
@@ -438,7 +438,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
             {group.couple_image_url && (
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-1">Book photo</p>
-                <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-[#E8E0D5]">
+                <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-brand-sand">
                   <Image
                     src={group.couple_image_url}
                     alt={coupleName}
@@ -472,7 +472,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
           </div>
 
           {/* Divider */}
-          <div className="border-t border-[#E8E0D5] my-6" />
+          <div className="border-t border-brand-sand my-6" />
 
           {/* Shipping section */}
           {loadingAddress ? (
@@ -519,7 +519,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
                     value={country}
                     onChange={(e) => handleCountryChange(e.target.value)}
                     disabled={saving}
-                    className="w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-brand-honey focus:ring-2 focus:ring-brand-honey/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat"
+                    className="w-full h-10 bg-white border border-brand-sand rounded-md px-3 text-sm text-brand-charcoal focus:border-brand-honey focus:ring-2 focus:ring-brand-honey/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat"
                   >
                     {SUPPORTED_COUNTRIES.map((c) => (
                       <option key={c.code} value={c.code}>{c.name}</option>
@@ -636,18 +636,18 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
           )}
 
           {/* Referral */}
-          <div className="border-t border-[#E8E0D5] my-6" />
+          <div className="border-t border-brand-sand my-6" />
           <ReferralBox />
 
           {/* What happens next */}
-          <div className="border-t border-[#E8E0D5] my-6" />
+          <div className="border-t border-brand-sand my-6" />
           <p className="text-xs uppercase tracking-[0.25em] text-brand-honey font-medium mb-4">
             What happens next
           </p>
           <TimelineSection bookStatus={group.book_status} />
 
           {/* Footer */}
-          <div className="border-t border-[#E8E0D5] my-6" />
+          <div className="border-t border-brand-sand my-6" />
           <p className="text-center text-sm text-gray-400">
             We&apos;ll email you updates as we design and print your book.
           </p>

@@ -15,7 +15,7 @@ export default function RegistryInterlude() {
       <div className="mx-auto max-w-2xl px-6 md:px-8">
 
         <motion.div
-          className="text-center border border-[#E8E0D5] rounded-2xl py-8 px-6 md:py-10 md:px-10"
+          className="text-center border border-brand-sand rounded-2xl py-8 px-6 md:py-10 md:px-10"
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}

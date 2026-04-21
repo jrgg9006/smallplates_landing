@@ -42,7 +42,7 @@ export default function ForGiftGivers() {
 
   return (
     <section 
-      className="bg-[#E8E0D5] py-16 md:py-24"
+      className="bg-brand-sand py-16 md:py-24"
       aria-labelledby="gift-givers-heading"
     >
       <div className="mx-auto max-w-4xl px-6 md:px-8">
@@ -112,7 +112,7 @@ export default function ForGiftGivers() {
 
           {/* Pricing Context */}
           <motion.div
-            className="mt-8 pt-8 border-t border-[#E8E0D5]"
+            className="mt-8 pt-8 border-t border-brand-sand"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}

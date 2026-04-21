@@ -22,7 +22,7 @@ const RELATIONSHIP_OPTIONS = [
 const SANS_FONT = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 const LABEL_CLASS = "block text-[13px] font-medium text-brand-charcoal mb-1.5";
 const INPUT_CLASS =
-  "w-full px-4 h-[52px] border border-[#E8E0D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent text-[15px] bg-white transition-all";
+  "w-full px-4 h-[52px] border border-brand-sand rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent text-[15px] bg-white transition-all";
 
 /**
  * Inline dropdown styled identically to the text inputs (same height, border, font size).
@@ -76,7 +76,7 @@ function RelationshipDropdown({
 
       {isOpen && (
         <div
-          className="absolute z-[60] w-full mt-2 bg-white border border-[#E8E0D5] rounded-xl shadow-lg overflow-hidden"
+          className="absolute z-[60] w-full mt-2 bg-white border border-brand-sand rounded-xl shadow-lg overflow-hidden"
           style={{ fontFamily: SANS_FONT }}
         >
           {RELATIONSHIP_OPTIONS.map((opt) => (

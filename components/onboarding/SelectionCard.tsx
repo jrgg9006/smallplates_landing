@@ -21,9 +21,9 @@ export function SelectionCard({ value, label, isSelected, onClick }: SelectionCa
     <button
       type="button"
       onClick={() => onClick(value)}
-      className={`w-full p-4 text-left rounded-xl border-2 transition-all duration-200 hover:border-[#E8E0D5] hover:shadow-md ${
+      className={`w-full p-4 text-left rounded-xl border-2 transition-all duration-200 hover:border-brand-sand hover:shadow-md ${
         isSelected
-          ? "border-[#E8E0D5] bg-[#E8E0D5]/40"
+          ? "border-brand-sand bg-brand-sand/40"
           : "border-gray-200 bg-white hover:bg-[#FAF7F2]"
       }`}
     >

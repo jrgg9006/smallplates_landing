@@ -128,7 +128,7 @@ export default function HowItWorks() {
         </div>
 
         {/* Optional: Connector line on desktop */}
-        <div className="hidden md:block absolute top-1/2 left-0 right-0 h-px bg-[#E8E0D5] -z-10" />
+        <div className="hidden md:block absolute top-1/2 left-0 right-0 h-px bg-brand-sand -z-10" />
 
       </div>
     </section>

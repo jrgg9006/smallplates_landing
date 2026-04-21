@@ -58,7 +58,7 @@ export default function YourTools() {
           {cards.map((card, i) => (
             <motion.div
               key={card.title}
-              className="bg-white rounded-2xl border border-[#E8E0D5] overflow-hidden flex flex-col"
+              className="bg-white rounded-2xl border border-brand-sand overflow-hidden flex flex-col"
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}

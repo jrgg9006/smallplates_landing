@@ -107,7 +107,7 @@ export default function NewsletterSignup() {
                 required
                 maxLength={320}
                 disabled={status === "loading"}
-                className="flex-1 px-4 py-3 bg-white border border-[#E8E0D5] rounded-md font-sans text-base text-brand-charcoal placeholder:text-brand-charcoal/30 focus:outline-none focus:border-brand-honey transition-colors disabled:opacity-60"
+                className="flex-1 px-4 py-3 bg-white border border-brand-sand rounded-md font-sans text-base text-brand-charcoal placeholder:text-brand-charcoal/30 focus:outline-none focus:border-brand-honey transition-colors disabled:opacity-60"
               />
               <button
                 type="submit"

@@ -316,7 +316,7 @@ export function ImportGuestsModal({
               <button
                 onClick={() => { setSource("zola"); setStep("upload-file"); }}
                 className={`flex-1 rounded-xl border-[1.5px] p-6 flex items-center justify-center cursor-pointer transition-all
-                  border-[#E8E0D5] bg-white hover:border-brand-honey hover:bg-[#FFF8EC]`}
+                  border-brand-sand bg-white hover:border-brand-honey hover:bg-[#FFF8EC]`}
               >
                 <img src="/images/guest_modal/Zola_Logo.png" alt="Zola" className="h-5 object-contain" />
               </button>
@@ -325,7 +325,7 @@ export function ImportGuestsModal({
               <button
                 onClick={() => { setSource("the_knot"); setStep("upload-file"); }}
                 className={`flex-1 rounded-xl border-[1.5px] p-6 flex items-center justify-center cursor-pointer transition-all
-                  border-[#E8E0D5] bg-white hover:border-brand-honey hover:bg-[#FFF8EC]`}
+                  border-brand-sand bg-white hover:border-brand-honey hover:bg-[#FFF8EC]`}
               >
                 <img src="/images/guest_modal/knot_logo.png" alt="The Knot" className="h-5 object-contain" />
               </button>
@@ -358,7 +358,7 @@ export function ImportGuestsModal({
             </button>
 
             {showHelp && (
-              <div className="text-xs text-[#999] bg-white rounded-lg p-3 mb-4 border border-[#E8E0D5]">
+              <div className="text-xs text-[#999] bg-white rounded-lg p-3 mb-4 border border-brand-sand">
                 {source === "zola" ? (
                   <p>
                     Go to <strong>Guest List</strong> &rarr; click{" "}
@@ -470,7 +470,7 @@ export function ImportGuestsModal({
             </div>
 
             {/* Guest list */}
-            <div className="max-h-[340px] overflow-y-auto rounded-lg border border-[#E8E0D5] bg-white">
+            <div className="max-h-[340px] overflow-y-auto rounded-lg border border-brand-sand bg-white">
               {parsedGuests.map((guest) => {
                 const isDisabled = guest.alreadyExists;
                 const isSelected = selectedIds.has(guest.id);
@@ -479,7 +479,7 @@ export function ImportGuestsModal({
                 return (
                   <div
                     key={guest.id}
-                    className={`flex items-center gap-2 px-3 py-2 border-b border-[#E8E0D5] last:border-b-0
+                    className={`flex items-center gap-2 px-3 py-2 border-b border-brand-sand last:border-b-0
                       ${isDisabled ? "opacity-60" : ""}`}
                   >
                     <input
@@ -518,7 +518,7 @@ export function ImportGuestsModal({
                     )}
 
                     {isDisabled && (
-                      <span className="text-[10px] bg-[#E8E0D5] text-[#999] px-2 py-0.5 rounded-full flex-shrink-0">
+                      <span className="text-[10px] bg-brand-sand text-[#999] px-2 py-0.5 rounded-full flex-shrink-0">
                         Already added
                       </span>
                     )}

@@ -299,7 +299,7 @@ export function GroupJoinForm({
           {displayImage && (
             <div className="flex items-center justify-center lg:justify-start mb-6 lg:mb-0">
               <div className="w-full lg:max-w-sm lg:mx-auto">
-                <div className="relative w-full h-40 sm:h-44 lg:h-[450px] lg:max-h-[60vh] overflow-hidden rounded-lg lg:rounded-xl shadow-sm border border-[#E8E0D5]">
+                <div className="relative w-full h-40 sm:h-44 lg:h-[450px] lg:max-h-[60vh] overflow-hidden rounded-lg lg:rounded-xl shadow-sm border border-brand-sand">
                   <Image
                     src={displayImage}
                     alt={groupData?.name || "Wedding cookbook"}
@@ -444,7 +444,7 @@ export function GroupJoinForm({
               </form>
 
               {/* Account Toggle - Below form, less prominent */}
-              <div className="mt-6 pt-5 border-t border-[#E8E0D5]">
+              <div className="mt-6 pt-5 border-t border-brand-sand">
                 <button
                   type="button"
                   onClick={() => {

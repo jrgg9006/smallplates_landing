@@ -142,7 +142,7 @@ function WelcomeContent() {
   const sansFont = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
   const labelClass = "block text-[13px] font-medium text-brand-charcoal mb-1.5";
   const inputClass =
-    "w-full px-4 h-[52px] border border-[#E8E0D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent text-[15px] bg-white transition-all";
+    "w-full px-4 h-[52px] border border-brand-sand rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent text-[15px] bg-white transition-all";
 
   return (
     <div className="min-h-screen" style={{ background: "#FAF8F4" }}>

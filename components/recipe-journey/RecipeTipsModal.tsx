@@ -201,7 +201,7 @@ function CategoryCard({ title, description, icon, onClick }: {
   return (
     <button
       onClick={onClick}
-      className="w-full p-4 min-h-[56px] bg-[#FAF7F2] hover:bg-[#E8E0D5] active:bg-[#E8E0D5] rounded-xl transition-colors group focus:outline-none focus:ring-2 focus:ring-brand-honey focus:ring-offset-2 touch-manipulation flex items-center gap-3"
+      className="w-full p-4 min-h-[56px] bg-[#FAF7F2] hover:bg-brand-sand active:bg-brand-sand rounded-xl transition-colors group focus:outline-none focus:ring-2 focus:ring-brand-honey focus:ring-offset-2 touch-manipulation flex items-center gap-3"
       role="button"
       tabIndex={0}
     >
@@ -224,7 +224,7 @@ function CategoryCard({ title, description, icon, onClick }: {
 
 function TipItem({ title, description }: { title: string; description: string }) {
   return (
-    <div className="pb-4 border-b border-[#E8E0D5] last:border-0">
+    <div className="pb-4 border-b border-brand-sand last:border-0">
       <p className="font-medium text-brand-charcoal">{title}</p>
       <p className="text-[#9A9590] text-sm mt-1">{description}</p>
     </div>

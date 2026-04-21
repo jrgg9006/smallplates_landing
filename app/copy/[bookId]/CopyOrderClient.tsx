@@ -60,10 +60,10 @@ const SUPPORTED_COUNTRIES: {
 ];
 
 const inputClasses =
-  "bg-white border-[#E8E0D5] focus:border-brand-honey focus:ring-brand-honey/20";
+  "bg-white border-brand-sand focus:border-brand-honey focus:ring-brand-honey/20";
 
 const selectClasses =
-  "w-full h-10 bg-white border border-[#E8E0D5] rounded-md px-3 text-sm text-brand-charcoal focus:border-brand-honey focus:ring-2 focus:ring-brand-honey/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat";
+  "w-full h-10 bg-white border border-brand-sand rounded-md px-3 text-sm text-brand-charcoal focus:border-brand-honey focus:ring-2 focus:ring-brand-honey/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat";
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
@@ -284,7 +284,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
             <div className="flex items-center justify-center gap-6 mb-3">
               <button
                 onClick={() => setQty(Math.max(1, qty - 1))}
-                className="w-10 h-10 rounded-full border border-[#E8E0D5] flex items-center justify-center hover:bg-white transition-colors disabled:opacity-30"
+                className="w-10 h-10 rounded-full border border-brand-sand flex items-center justify-center hover:bg-white transition-colors disabled:opacity-30"
                 disabled={qty <= 1}
               >
                 <Minus className="w-4 h-4 text-brand-charcoal" />
@@ -294,7 +294,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
               </span>
               <button
                 onClick={() => setQty(Math.min(5, qty + 1))}
-                className="w-10 h-10 rounded-full border border-[#E8E0D5] flex items-center justify-center hover:bg-white transition-colors disabled:opacity-30"
+                className="w-10 h-10 rounded-full border border-brand-sand flex items-center justify-center hover:bg-white transition-colors disabled:opacity-30"
                 disabled={qty >= 5}
               >
                 <Plus className="w-4 h-4 text-brand-charcoal" />
@@ -367,7 +367,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
             Enter the shipping address for your {qty === 1 ? "copy" : "copies"}.
           </p>
 
-          <div className="bg-white border border-[#E8E0D5] rounded-[10px] px-[18px] py-[14px] mb-6 text-[13px] space-y-1.5">
+          <div className="bg-white border border-brand-sand rounded-[10px] px-[18px] py-[14px] mb-6 text-[13px] space-y-1.5">
             <div className="flex justify-between text-brand-charcoal">
               <span>{qty} {qty === 1 ? "copy" : "copies"}</span>
               <span>${subtotal}</span>

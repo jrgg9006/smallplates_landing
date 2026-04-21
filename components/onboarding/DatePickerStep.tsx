@@ -207,7 +207,7 @@ export function DatePickerStep({
             className="w-full h-12 px-4 flex items-center rounded-lg cursor-pointer transition-all duration-200"
             style={{
               background: "#FAF7F2",
-              border: `1px solid ${selectedDate ? "hsl(var(--brand-honey))" : popoverOpen ? "hsl(var(--brand-honey))" : "#E8E0D5"}`,
+              border: `1px solid ${selectedDate ? "hsl(var(--brand-honey))" : popoverOpen ? "hsl(var(--brand-honey))" : "hsl(var(--brand-sand))"}`,
               boxShadow: popoverOpen ? "0 0 0 2px rgba(212, 168, 84, 0.15)" : "none",
             }}
           >
@@ -229,7 +229,7 @@ export function DatePickerStep({
               <button
                 type="button"
                 onClick={handleClearDate}
-                className="p-1 rounded-full hover:bg-[#E8E0D5] transition-colors ml-1"
+                className="p-1 rounded-full hover:bg-brand-sand transition-colors ml-1"
                 aria-label="Clear date"
               >
                 <X className="w-4 h-4 text-[#9A9590] hover:text-brand-charcoal" strokeWidth={1.5} />
@@ -275,7 +275,7 @@ export function DatePickerStep({
         {selectedDate && bookCloseDate && (
           <div ref={timelineRef}>
             <div
-              className="bg-white border border-[#E8E0D5] rounded-2xl text-center mt-5 mb-4 py-8 px-10 sm:py-8 sm:px-10"
+              className="bg-white border border-brand-sand rounded-2xl text-center mt-5 mb-4 py-8 px-10 sm:py-8 sm:px-10"
               style={{
                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
                 maxWidth: "420px",

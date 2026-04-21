@@ -239,8 +239,8 @@ export default function BooksPrinted() {
             
             {/* Navigation */}
             <div className="hidden md:block">
-              <CarouselPrevious className="left-0 -translate-x-1/2 bg-white hover:bg-[#FAF7F2] border-[#E8E0D5]" />
-              <CarouselNext className="right-0 translate-x-1/2 bg-white hover:bg-[#FAF7F2] border-[#E8E0D5]" />
+              <CarouselPrevious className="left-0 -translate-x-1/2 bg-white hover:bg-[#FAF7F2] border-brand-sand" />
+              <CarouselNext className="right-0 translate-x-1/2 bg-white hover:bg-[#FAF7F2] border-brand-sand" />
             </div>
           </Carousel>
         </motion.div>

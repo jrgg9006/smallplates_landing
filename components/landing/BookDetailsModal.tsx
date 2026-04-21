@@ -93,7 +93,7 @@ export default function BookDetailsModal({ isOpen, onClose }: BookDetailsModalPr
 
             {/* Divider */}
             <div className="flex justify-center mb-8">
-              <div className="w-12 h-px bg-[#E8E0D5]"></div>
+              <div className="w-12 h-px bg-brand-sand"></div>
             </div>
 
             {/* Specifications */}
@@ -111,7 +111,7 @@ export default function BookDetailsModal({ isOpen, onClose }: BookDetailsModalPr
             </dl>
 
             {/* Footer */}
-            <div className="border-t border-[#E8E0D5] pt-6">
+            <div className="border-t border-brand-sand pt-6">
               <p className="type-caption italic text-center">
                 Built to live in your kitchen for decades. Not a shelf.
               </p>

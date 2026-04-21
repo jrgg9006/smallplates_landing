@@ -9,7 +9,7 @@ const details = [
       "Smooth matte hardcover. Elegant, durable, designed to age beautifully.",
     visual: (
       // Reason: Subtle gradient simulating matte surface with light reflection
-      <div className="relative w-full aspect-square rounded-md overflow-hidden bg-gradient-to-br from-[#F5F1EB] via-[#EDE8E0] to-[#E8E0D5]">
+      <div className="relative w-full aspect-square rounded-md overflow-hidden bg-gradient-to-br from-[#F5F1EB] via-[#EDE8E0] to-brand-sand">
         <div
           className="absolute inset-0"
           style={{
@@ -31,7 +31,7 @@ const details = [
       // Reason: Abstract page representation with text-like lines
       <div className="relative w-full aspect-square rounded-md overflow-hidden bg-[#F5F1EB] flex items-center justify-center">
         <div className="w-3/5 space-y-2">
-          <div className="w-10 h-12 bg-white border border-[#E8E0D5] rounded-sm mx-auto shadow-sm" />
+          <div className="w-10 h-12 bg-white border border-brand-sand rounded-sm mx-auto shadow-sm" />
           <div className="space-y-1.5 mt-3">
             <div className="h-px bg-brand-charcoal/15 w-full" />
             <div className="h-px bg-brand-charcoal/15 w-4/5" />

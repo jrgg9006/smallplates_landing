@@ -257,7 +257,7 @@ export function GuestNavigationSheet({
               onClick={() => setShowImportModal(true)}
               className="w-full py-3 px-4 rounded-lg bg-[#FAF7F2] border-[1.5px] border-dashed border-brand-honey
                          flex items-center justify-center gap-2 text-brand-charcoal text-sm font-medium
-                         hover:bg-[#E8E0D5] hover:border-solid transition-all"
+                         hover:bg-brand-sand hover:border-solid transition-all"
             >
               <Upload size={16} className="text-brand-honey" />
               <span>Import guests from</span>
