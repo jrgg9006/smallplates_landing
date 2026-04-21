@@ -18,7 +18,7 @@ The wedding industry is drowning in blush pink, sage green, rose gold, and safe 
 | Role | Name | Hex | RGB | Usage |
 |------|------|-----|-----|-------|
 | **Primary Accent** | Honey | #D4A854 | 212, 168, 84 | CTAs, buttons, highlights, moments of energy |
-| **Primary Neutral** | Warm White | #FAF7F2 | 250, 247, 242 | Backgrounds, canvas, breathing room |
+| **Primary Neutral** | Warm White (two-tone, see below) | #FAF9F7 / #FAF7F2 | 250, 249, 247 / 250, 247, 242 | Body + canvas; two deliberate tones |
 | **Primary Dark** | Soft Charcoal | #2D2D2D | 45, 45, 45 | Primary text, logo |
 
 ## Secondary Palette
@@ -28,6 +28,22 @@ The wedding industry is drowning in blush pink, sage green, rose gold, and safe 
 | **Warm Accent** | Terracotta | #C4856C | 196, 133, 108 | Secondary accent, warmth |
 | **Cool Accent** | Olive | #6B7B5E | 107, 123, 94 | Organic feel, secondary moments |
 | **Soft Neutral** | Sand | #E8E0D5 | 232, 224, 213 | Subtle backgrounds, cards |
+
+## Warm-White (Two-Tone System)
+
+Small Plates uses two warm-whites deliberately — the contrast between them is the intended editorial rhythm.
+
+| Role | Value | Where it lives |
+|------|-------|----------------|
+| Body / default surfaces | `#FAF9F7` (airy, L~98%) | Token `--brand-warm-white` (aliases `--brand-background`). Also powers shadcn `--background`, `--popover`, default `Card`, body of every page. |
+| Accent / large cozy sections | `#FAF7F2` (warm, L~96%) | Literal hex in ~59 components: landing large sections, `/collect/[token]` funnel pages (desktop), onboarding sidebar, text on dark CTA buttons. |
+
+**Why not a single token:** we tried collapsing to one value during Phase 1.2 (commit 8a6a126, reverted). The single-tone app lost the airy-vs-warm rhythm and felt beige/heavy. The contrast is doing real work visually — airy body frames cozy accent sections.
+
+**If re-evaluating in the future:**
+- To converge on airy: migrate the ~59 `#FAF7F2` hardcodes to `brand.warm-white` and accept the lighter-accent look.
+- To converge on warm: realign `--brand-background` to `#FAF7F2` (see reverted commit 8a6a126 for precedent).
+- To tokenize cleanly: add a second token like `--brand-warm-accent: #FAF7F2` and migrate the 59 hardcodes to it.
 
 ## Extended Neutrals
 
