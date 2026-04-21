@@ -50,7 +50,7 @@ const details = [
       // Reason: 2x2 color swatches showing palette range
       <div className="relative w-full aspect-square rounded-md overflow-hidden bg-[#F5F1EB] flex items-center justify-center">
         <div className="grid grid-cols-2 gap-2 w-3/5">
-          <div className="aspect-square rounded-sm bg-[#C4856C]" />
+          <div className="aspect-square rounded-sm bg-brand-terracotta" />
           <div className="aspect-square rounded-sm bg-brand-honey" />
           <div className="aspect-square rounded-sm bg-[#6B7B5E]" />
           <div className="aspect-square rounded-sm bg-brand-charcoal" />

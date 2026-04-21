@@ -120,7 +120,7 @@ export default function NewsletterSignup() {
           )}
 
           {status === "error" && errorMessage && (
-            <p className="type-caption text-[#C4856C] mt-3" role="alert">
+            <p className="type-caption text-brand-terracotta mt-3" role="alert">
               {errorMessage}
             </p>
           )}

@@ -292,7 +292,7 @@ export function ImportGuestsModal({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute right-6 top-6 text-brand-charcoal hover:text-[#C4856C] transition-colors"
+          className="absolute right-6 top-6 text-brand-charcoal hover:text-brand-terracotta transition-colors"
         >
           <X size={24} />
         </button>
@@ -386,7 +386,7 @@ export function ImportGuestsModal({
               className={`rounded-xl border-2 border-dashed p-10 text-center cursor-pointer transition-all
                 ${
                   isDragOver
-                    ? "bg-[#FFF8EC] border-[#C4856C]"
+                    ? "bg-[#FFF8EC] border-brand-terracotta"
                     : "bg-[#FDFBF8] border-brand-honey hover:bg-[#FFF8EC]"
                 }`}
             >

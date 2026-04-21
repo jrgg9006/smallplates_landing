@@ -163,7 +163,7 @@ export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn =
               {newsletterStatus === 'done' ? (
                 <span className="text-brand-honey">You&apos;re on the list. First one lands soon.</span>
               ) : newsletterStatus === 'error' ? (
-                <span className="text-[#C4856C]">Try again later.</span>
+                <span className="text-brand-terracotta">Try again later.</span>
               ) : newsletterStatus === 'submitting' ? (
                 <span className="text-gray-500">Adding you...</span>
               ) : (
