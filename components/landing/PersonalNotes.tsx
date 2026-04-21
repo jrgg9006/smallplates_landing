@@ -153,7 +153,7 @@ export default function PersonalNotes() {
                     <p className="type-caption text-[15px] md:text-base font-medium">
                       — {currentNote.recipe}
                     </p>
-                    <p className="type-caption text-[#8A8780]/70">
+                    <p className="type-caption text-[hsl(var(--brand-warm-gray))]/70">
                       from {currentNote.from}
                     </p>
                   </div>

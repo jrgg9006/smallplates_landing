@@ -39,7 +39,7 @@ export function CloseBookModal({
         </DialogHeader>
 
         <div className="py-3">
-          <p className="text-sm text-[#8A8780] leading-relaxed">
+          <p className="text-sm text-[hsl(var(--brand-warm-gray))] leading-relaxed">
             {reviewed
               ? "Once you close the book, recipes can't be added or edited. We'll start designing right away."
               : "Closing locks the recipes and sends everything to design. You'll confirm a couple of details before we print."}

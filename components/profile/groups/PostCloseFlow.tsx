@@ -100,7 +100,7 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
                   ? "bg-brand-honey text-white"
                   : active
                   ? "border-2 border-brand-honey text-brand-honey"
-                  : "border border-[rgba(45,45,45,0.12)] text-[#8A8780]"
+                  : "border border-[rgba(45,45,45,0.12)] text-[hsl(var(--brand-warm-gray))]"
               }`}
             >
               {completed ? <Check className="w-3.5 h-3.5" /> : stepNum}
@@ -138,7 +138,7 @@ function StepExtras({
       <h1 className="font-serif text-[34px] font-normal text-brand-charcoal text-center leading-tight mb-3">
         Before we print, <br />who else gets one?
       </h1>
-      <p className="text-[15px] text-[#8A8780] text-center leading-relaxed mb-6 max-w-sm">
+      <p className="text-[15px] text-[hsl(var(--brand-warm-gray))] text-center leading-relaxed mb-6 max-w-sm">
         This book is going to live in a kitchen for years.<br />
         Some people should have their own.
       </p>
@@ -156,18 +156,18 @@ function StepExtras({
       </div> */}
 
       {/* Price block */}
-      <p className="text-[11px] uppercase tracking-[0.08em] text-[#8A8780] mb-2">
+      <p className="text-[11px] uppercase tracking-[0.08em] text-[hsl(var(--brand-warm-gray))] mb-2">
         Each additional copy
       </p>
       <div className="flex items-baseline justify-center gap-3 mb-1">
         <span className="font-serif text-[22px] text-[#B0ADA8] line-through decoration-[1.5px]">${BASE_BOOK_PRICE}</span>
         <span className="flex items-baseline">
-          <span className="font-serif text-2xl text-[#8A8780] mr-1">$</span>
+          <span className="font-serif text-2xl text-[hsl(var(--brand-warm-gray))] mr-1">$</span>
           <span className="font-serif text-[56px] text-brand-charcoal leading-none">129</span>
         </span>
       </div>
       <div className="flex items-center gap-2 mb-10">
-        <span className="text-sm text-[#8A8780]">same book, same quality</span>
+        <span className="text-sm text-[hsl(var(--brand-warm-gray))]">same book, same quality</span>
         <span className="bg-[#F5EDD8] text-[#7A5C10] text-[11px] rounded-[10px] px-2.5 py-0.5 font-medium">
           ships free
         </span>
@@ -205,19 +205,19 @@ function StepExtras({
       {/* Totals — only when qty > 0 */}
       {qty > 0 && (
         <div className="w-full border-t border-[rgba(45,45,45,0.12)] pt-4 mb-6 space-y-2 text-[13px]">
-          <div className="flex justify-between text-[#8A8780]">
+          <div className="flex justify-between text-[hsl(var(--brand-warm-gray))]">
             <span>Original book</span>
             <span>Already paid · ${BASE_BOOK_PRICE}</span>
           </div>
           <div className="flex justify-between text-brand-charcoal">
             <span>{qty} extra {qty === 1 ? "copy" : "copies"}</span>
             <span>
-              <span className="text-[#8A8780] line-through mr-1.5">${qty * BASE_BOOK_PRICE}</span>
+              <span className="text-[hsl(var(--brand-warm-gray))] line-through mr-1.5">${qty * BASE_BOOK_PRICE}</span>
               ${total}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-[#8A8780]">Shipping</span>
+            <span className="text-[hsl(var(--brand-warm-gray))]">Shipping</span>
             <span className="text-[#14532D]">Free — ships with your book</span>
           </div>
           <div className="flex justify-between font-medium text-[15px] text-brand-charcoal pt-2 border-t border-[rgba(45,45,45,0.12)]">
@@ -241,14 +241,14 @@ function StepExtras({
       {qty > 0 && (
         <button
           onClick={onSkip}
-          className="mt-4 text-sm text-[#8A8780] hover:underline transition-colors"
+          className="mt-4 text-sm text-[hsl(var(--brand-warm-gray))] hover:underline transition-colors"
         >
           Continue without extra copies
         </button>
       )}
 
       {/* Caption */}
-      <p className="text-xs text-[#8A8780] text-center mt-4">
+      <p className="text-xs text-[hsl(var(--brand-warm-gray))] text-center mt-4">
         {qty > 0
           ? `All ${qty + 1} copies ship to the same address. Shipping is free on extras.`
           : ""}
@@ -453,7 +453,7 @@ function StepShipping({
       <h1 className="font-serif text-[34px] font-normal text-brand-charcoal text-center leading-tight mb-3">
         {qty > 0 ? "Where should we send them?" : "Where should we send it?"}
       </h1>
-      <p className="text-[15px] text-[#8A8780] text-center mb-8">
+      <p className="text-[15px] text-[hsl(var(--brand-warm-gray))] text-center mb-8">
         We&apos;ll email you tracking details when it ships.
       </p>
 
@@ -463,7 +463,7 @@ function StepShipping({
           <p className="text-sm font-medium text-brand-charcoal">
             {totalCopies} {totalCopies === 1 ? "copy" : "copies"}
           </p>
-          <p className="text-xs text-[#8A8780]">
+          <p className="text-xs text-[hsl(var(--brand-warm-gray))]">
             {qty > 0
               ? `Original + ${qty} extra · $${extraTotal} due · shipping included`
               : `Original book · $${BASE_BOOK_PRICE} already paid · shipping included`}
@@ -476,7 +476,7 @@ function StepShipping({
       <div className="w-full space-y-4">
         {/* Country — native select to avoid Radix/Google Maps portal conflicts */}
         <div>
-          <Label className="text-xs text-[#8A8780] mb-1 block">Country</Label>
+          <Label className="text-xs text-[hsl(var(--brand-warm-gray))] mb-1 block">Country</Label>
           <select
             value={country}
             onChange={(e) => handleCountryChange(e.target.value)}
@@ -490,13 +490,13 @@ function StepShipping({
         </div>
 
         <div>
-          <Label className="text-xs text-[#8A8780] mb-1 block">Recipient name</Label>
+          <Label className="text-xs text-[hsl(var(--brand-warm-gray))] mb-1 block">Recipient name</Label>
           <Input value={recipientName} onChange={(e) => setRecipientName(e.target.value)} placeholder="Who should receive the book?" disabled={saving} className={inputClasses} />
         </div>
 
         {/* Street address with Google Places Autocomplete */}
         <div>
-          <Label className="text-xs text-[#8A8780] mb-1 block">Street address</Label>
+          <Label className="text-xs text-[hsl(var(--brand-warm-gray))] mb-1 block">Street address</Label>
           {mapsLoaded ? (
             <Autocomplete
               onLoad={(ac) => { autocompleteRef.current = ac; }}
@@ -526,27 +526,27 @@ function StepShipping({
         </div>
 
         <div>
-          <Label className="text-xs text-[#8A8780] mb-1 block">Apt / Suite <span className="text-[#8A8780]/60">(optional)</span></Label>
+          <Label className="text-xs text-[hsl(var(--brand-warm-gray))] mb-1 block">Apt / Suite <span className="text-[hsl(var(--brand-warm-gray))]/60">(optional)</span></Label>
           <Input value={apartmentUnit} onChange={(e) => setApartmentUnit(e.target.value)} placeholder="Optional" disabled={saving} className={inputClasses} />
         </div>
 
         <div className="grid grid-cols-[1fr_88px_100px] gap-3">
           <div>
-            <Label className="text-xs text-[#8A8780] mb-1 block">City</Label>
+            <Label className="text-xs text-[hsl(var(--brand-warm-gray))] mb-1 block">City</Label>
             <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" disabled={saving} className={inputClasses} />
           </div>
           <div>
-            <Label className="text-xs text-[#8A8780] mb-1 block">{countryConfig.regionLabel}</Label>
+            <Label className="text-xs text-[hsl(var(--brand-warm-gray))] mb-1 block">{countryConfig.regionLabel}</Label>
             {renderRegionField()}
           </div>
           <div>
-            <Label className="text-xs text-[#8A8780] mb-1 block">{countryConfig.postalLabel}</Label>
+            <Label className="text-xs text-[hsl(var(--brand-warm-gray))] mb-1 block">{countryConfig.postalLabel}</Label>
             <Input value={postalCode} onChange={(e) => setPostalCode(e.target.value)} placeholder={countryConfig.postalPlaceholder} disabled={saving} className={inputClasses} />
           </div>
         </div>
 
         <div>
-          <Label className="text-xs text-[#8A8780] mb-1 block">Phone <span className="text-[#8A8780]/60">(optional)</span></Label>
+          <Label className="text-xs text-[hsl(var(--brand-warm-gray))] mb-1 block">Phone <span className="text-[hsl(var(--brand-warm-gray))]/60">(optional)</span></Label>
           <Input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="+1 (555) 123-4567" disabled={saving} className={inputClasses} />
         </div>
 
@@ -565,12 +565,12 @@ function StepShipping({
           {saving ? "Saving..." : "Send it to print →"}
         </button>
 
-        <p className="text-[13px] text-[#8A8780] text-center mt-4 leading-[1.5]">
+        <p className="text-[13px] text-[hsl(var(--brand-warm-gray))] text-center mt-4 leading-[1.5]">
           Need to ship copies to different addresses?{" "}
           <a href="mailto:team@smallplatesandcompany.com" className="text-brand-honey hover:opacity-80 transition-opacity">Email us</a> and we&apos;ll sort it out.
         </p>
 
-        <p className="text-xs text-[#8A8780] text-center mt-3">
+        <p className="text-xs text-[hsl(var(--brand-warm-gray))] text-center mt-3">
           We&apos;ll email you tracking details when it ships.
         </p>
       </div>
@@ -636,7 +636,7 @@ export function PostCloseFlow({ groupId, onDone, onBack }: PostCloseFlowProps) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-[#F5F3EF]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-honey mb-4" />
-        <p className="text-sm text-[#8A8780]">Redirecting to checkout…</p>
+        <p className="text-sm text-[hsl(var(--brand-warm-gray))]">Redirecting to checkout…</p>
       </div>
     );
   }

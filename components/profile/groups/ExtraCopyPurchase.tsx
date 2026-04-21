@@ -80,7 +80,7 @@ function StepQty({
       <h1 className="font-serif text-[28px] text-brand-charcoal text-center leading-tight mb-2">
         Get another copy.
       </h1>
-      <p className="text-sm text-[#8A8780] text-center mb-8">
+      <p className="text-sm text-[hsl(var(--brand-warm-gray))] text-center mb-8">
         Same book. Same recipes. Ships in its own box.
       </p>
 
@@ -108,7 +108,7 @@ function StepQty({
           <span>${booksTotal}</span>
         </div>
         <div className="flex justify-between text-brand-charcoal">
-          <span className="text-[#8A8780]">Shipping</span>
+          <span className="text-[hsl(var(--brand-warm-gray))]">Shipping</span>
           <span>${EXTRA_COPIES_SHIPPING_COST}</span>
         </div>
         <div className="flex justify-between font-medium text-[15px] text-brand-charcoal pt-2 border-t border-[rgba(45,45,45,0.12)]">
@@ -126,7 +126,7 @@ function StepQty({
 
       <button
         onClick={onBack}
-        className="mt-4 text-sm text-[#8A8780] hover:underline transition-colors"
+        className="mt-4 text-sm text-[hsl(var(--brand-warm-gray))] hover:underline transition-colors"
       >
         ← Back
       </button>
@@ -293,7 +293,7 @@ function StepShipping({
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-honey mb-4" />
-        <p className="text-sm text-[#8A8780]">Redirecting to checkout…</p>
+        <p className="text-sm text-[hsl(var(--brand-warm-gray))]">Redirecting to checkout…</p>
       </div>
     );
   }
@@ -303,7 +303,7 @@ function StepShipping({
       <h1 className="font-serif text-[28px] text-brand-charcoal text-center leading-tight mb-2">
         Where should we send it?
       </h1>
-      <p className="text-sm text-[#8A8780] text-center mb-6">
+      <p className="text-sm text-[hsl(var(--brand-warm-gray))] text-center mb-6">
         Each extra order ships in its own box, so a different address is OK.
       </p>
 
@@ -378,7 +378,7 @@ function StepShipping({
         Continue to payment →
       </button>
 
-      <button onClick={onBack} disabled={redirecting} className="mt-4 text-sm text-[#8A8780] hover:underline transition-colors disabled:opacity-50">
+      <button onClick={onBack} disabled={redirecting} className="mt-4 text-sm text-[hsl(var(--brand-warm-gray))] hover:underline transition-colors disabled:opacity-50">
         ← Back
       </button>
     </div>

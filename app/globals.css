@@ -282,7 +282,7 @@ body > div.pac-container ~ div:not([id]):not([class]) {
 
   /* type-caption: Small text, attributions, metadata */
   .type-caption {
-    @apply font-sans text-sm text-[#8A8780];
+    @apply font-sans text-sm text-[hsl(var(--brand-warm-gray))];
   }
 
   /* ============================================

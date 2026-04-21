@@ -229,7 +229,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
     return (
       <div className="min-h-screen bg-[#F5F3EF] flex flex-col items-center justify-center">
         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-honey mb-4" />
-        <p className="text-sm text-[#8A8780]">Redirecting to checkout…</p>
+        <p className="text-sm text-[hsl(var(--brand-warm-gray))]">Redirecting to checkout…</p>
       </div>
     );
   }
@@ -250,7 +250,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
               />
             </div>
 
-            <p className="text-xs text-[#8A8780] uppercase tracking-[0.08em] text-center mb-2">
+            <p className="text-xs text-[hsl(var(--brand-warm-gray))] uppercase tracking-[0.08em] text-center mb-2">
               A copy is available
             </p>
 
@@ -258,7 +258,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
               {book.title}
             </h1>
 
-            <p className="text-sm text-[#8A8780] text-center mb-8">
+            <p className="text-sm text-[hsl(var(--brand-warm-gray))] text-center mb-8">
               {book.recipeCount} recipes
               {book.contributorCount > 0 && ` from ${book.contributorCount} people`}
               {book.closeDate && ` \u00B7 Closed ${formatDate(book.closeDate)}`}
@@ -270,15 +270,15 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
                 <span>${ADDITIONAL_BOOK_PRICE}</span>
               </div>
               <div className="flex justify-between text-brand-charcoal">
-                <span className="text-[#8A8780]">Shipping</span>
+                <span className="text-[hsl(var(--brand-warm-gray))]">Shipping</span>
                 <span>${EXTRA_COPIES_SHIPPING_COST}</span>
               </div>
-              <p className="text-[11px] text-[#8A8780] pt-1">
+              <p className="text-[11px] text-[hsl(var(--brand-warm-gray))] pt-1">
                 ${ADDITIONAL_BOOK_PRICE} per copy. ${EXTRA_COPIES_SHIPPING_COST} shipping. That&apos;s it.
               </p>
             </div>
 
-            <p className="text-xs text-[#8A8780] uppercase tracking-[0.08em] text-center mb-3">
+            <p className="text-xs text-[hsl(var(--brand-warm-gray))] uppercase tracking-[0.08em] text-center mb-3">
               How many copies?
             </p>
             <div className="flex items-center justify-center gap-6 mb-3">
@@ -300,7 +300,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
                 <Plus className="w-4 h-4 text-brand-charcoal" />
               </button>
             </div>
-            <p className="text-sm text-[#8A8780] text-center mb-8">
+            <p className="text-sm text-[hsl(var(--brand-warm-gray))] text-center mb-8">
               Total: ${total} ({qty} {qty === 1 ? "copy" : "copies"} + ${EXTRA_COPIES_SHIPPING_COST} shipping)
             </p>
 
@@ -319,7 +319,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
                   <p className="text-xs text-red-600">{emailError}</p>
                 </div>
               )}
-              <p className="text-[11px] text-[#8A8780] mt-1.5">
+              <p className="text-[11px] text-[hsl(var(--brand-warm-gray))] mt-1.5">
                 Receipt and tracking details will be sent here.
               </p>
             </div>
@@ -331,7 +331,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
               Order &mdash; ${total} &rarr;
             </button>
 
-            <p className="text-[11px] text-[#8A8780] text-center mt-4 leading-relaxed">
+            <p className="text-[11px] text-[hsl(var(--brand-warm-gray))] text-center mt-4 leading-relaxed">
               Questions?{" "}
               <a
                 href="mailto:team@smallplatesandcompany.com"
@@ -363,7 +363,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
           <h1 className="font-serif text-[28px] text-brand-charcoal text-center leading-tight mb-2">
             Where should we send it?
           </h1>
-          <p className="text-sm text-[#8A8780] text-center mb-6">
+          <p className="text-sm text-[hsl(var(--brand-warm-gray))] text-center mb-6">
             Enter the shipping address for your {qty === 1 ? "copy" : "copies"}.
           </p>
 
@@ -373,7 +373,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
               <span>${subtotal}</span>
             </div>
             <div className="flex justify-between text-brand-charcoal">
-              <span className="text-[#8A8780]">Shipping</span>
+              <span className="text-[hsl(var(--brand-warm-gray))]">Shipping</span>
               <span>${EXTRA_COPIES_SHIPPING_COST}</span>
             </div>
             <div className="flex justify-between font-medium text-[15px] text-brand-charcoal pt-2 border-t border-[rgba(45,45,45,0.12)]">
@@ -503,7 +503,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
           <button
             onClick={() => setStep("order")}
             disabled={redirecting}
-            className="w-full mt-4 text-sm text-[#8A8780] hover:underline text-center disabled:opacity-50"
+            className="w-full mt-4 text-sm text-[hsl(var(--brand-warm-gray))] hover:underline text-center disabled:opacity-50"
           >
             &larr; Back
           </button>

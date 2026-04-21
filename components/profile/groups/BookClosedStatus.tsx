@@ -39,7 +39,7 @@ function ShareCopyLink({ groupId }: { groupId: string }) {
           </>
         )}
       </button>
-      <p className="text-[11px] text-[#8A8780] mt-1.5 pl-1">
+      <p className="text-[11px] text-[hsl(var(--brand-warm-gray))] mt-1.5 pl-1">
         Anyone with the link can order their own copy.
       </p>
     </div>
@@ -212,7 +212,7 @@ function TimelineSection({ bookStatus }: { bookStatus: string }) {
           {/* Content */}
           <div>
             <p className="text-sm font-medium text-brand-charcoal">{s.title}</p>
-            <p className="text-[13px] text-[#8A8780]">{s.description}</p>
+            <p className="text-[13px] text-[hsl(var(--brand-warm-gray))]">{s.description}</p>
           </div>
         </div>
       ))}

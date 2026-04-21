@@ -27,7 +27,7 @@ export default function RegistryInterlude() {
           </h2>
 
           {/* Body text */}
-          <p className="type-body-small text-[15px] md:text-base text-[#8A8780] mb-6">
+          <p className="type-body-small text-[15px] md:text-base text-[hsl(var(--brand-warm-gray))] mb-6">
             You can put this on your registry.<br className="hidden sm:inline" />
             Your people fund it. They fill it. You keep it.
           </p>

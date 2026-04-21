@@ -63,7 +63,7 @@ export function ProductSelectionStep({
                 : `${bookQuantity} copies — $${subtotal}`}
             </span>
             <svg
-              className={`w-4 h-4 text-[#8A8780] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+              className={`w-4 h-4 text-[hsl(var(--brand-warm-gray))] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
