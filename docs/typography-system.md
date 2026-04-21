@@ -61,7 +61,7 @@ Tokens are named by what they communicate, not by their size. `text-body` is "th
 
 ---
 
-## The 8 tokens
+## The 9 tokens
 
 | Token | Role | Size (mobile → desktop) | Weight default | Line-height | Letter-spacing | Family |
 |-------|------|-------------------------|----------------|-------------|----------------|--------|
@@ -69,6 +69,7 @@ Tokens are named by what they communicate, not by their size. `text-body` is "th
 | `text-heading` | Section titles | 28px → 36px | medium | tight (1.15) | default | serif |
 | `text-subheading` | Card / modal titles, subsection headers | 24px → 28px | medium | tight (1.2) | default | serif |
 | `text-body` | Primary body copy (paragraphs, descriptions) | 16px | light | relaxed (1.65) | default | sans (Inter) |
+| `text-body-lead` | Lead prose editorial (follows a heading) | 18px → 24px | light | relaxed (1.65) | default | sans |
 | `text-body-small` | Secondary body copy (helper text, info boxes) | 14px | light | relaxed (1.6) | default | sans |
 | `text-caption` | Metadata, timestamps, small labels | 12px | normal | normal (1.5) | default | sans |
 | `text-eyebrow` | Kickers above headings, ALL CAPS labels | 11px | medium | normal (1.4) | wide (0.15em) | sans, uppercase |
@@ -137,6 +138,25 @@ The primary unit of prose in the product. Paragraphs, descriptions, explanatory 
 - Helper text under inputs (use `text-body-small`)
 - Dates, counts, metadata (use `text-caption`)
 
+#### `text-body-lead`
+
+**Role:** Lead prose that immediately follows a heading. The paragraph that carries the reader from "what this is" (heading) to "what it means" (body). Editorially weightier than `text-body` — still light weight, but larger and more prominent.
+
+**Use for:**
+- Hero subtitles immediately below a heading
+- Section intro prose that sets the emotional or narrative tone
+- Pull-quotes and editorial asides where size signals importance
+- Italic accent prose when used as a lead-in (combined with `.italic` modifier)
+
+**Do not use for:**
+- UI body copy inside modals or forms (use `text-body`)
+- Body copy in long paragraphs of content (use `text-body`)
+- Captions or helper text (use `text-caption` or `text-body-small`)
+
+**Why it exists:** The original 8-token system routed `.type-body` and `.type-accent` utilities to `text-body` (16px). In practice, these utilities are consumed by landing editorial prose that needs a larger base (18px mobile, up to 24px desktop). `text-body-lead` names this role explicitly rather than treating editorial prose as a `text-body` override.
+
+**Fluid behavior:** Uses `clamp(1.125rem, 0.9rem + 1.125vw, 1.5rem)` — 18px on narrow mobile, scales to 24px on desktop ≥ ~1200px viewport.
+
 #### `text-body-small`
 
 Secondary prose. Supporting copy that the user reads but that isn't the primary content.
@@ -198,6 +218,40 @@ Interactive text. The text inside buttons, links that behave as buttons, CTAs, a
 
 ---
 
+## Documented exceptions
+
+The following elements are classified pixel-perfect — they define the editorial character of the landing page and must not be migrated or modified without explicit Ricardo review. They may use `.type-*` utilities with hand-authored responsive size overrides; this is deliberate, not a system violation.
+
+Any Phase 1.3+ migration that touches `components/landing/**` must consult this table first and skip listed lines.
+
+| # | File | Line | Element | Current treatment | Role |
+|---|------|------|---------|-------------------|------|
+| 1 | `components/landing/Hero.tsx` | 46 | `<motion.h1>` "Recipes from the people who love you." | `type-display text-white leading-[1.1]` | Primary hero headline |
+| 2 | `components/landing/Hero.tsx` | 55 | `<motion.p>` "A wedding cookbook made by everyone who showed up..." | `type-body mt-6 sm:text-xl md:text-2xl text-white/90 max-w-2xl` | Hero subtitle prose |
+| 3 | `components/landing/TheProblem.tsx` | 38 | `<motion.h2>` "Wedding gifts have a problem." | `type-heading` | Problem section headline |
+| 4 | `components/landing/TheProblem.tsx` | 80 | `<motion.p>` "You know her. The gift should too." | `type-accent text-2xl sm:text-3xl md:text-4xl leading-snug` | Problem conclusion accent |
+| 5 | `components/landing/TheSolution.tsx` | 65 | `<h2>` "A cookbook made by everyone who showed up." | `type-heading` | Product section headline |
+
+**Rule for agents:**
+
+Before modifying any file in `components/landing/**`, check this table. If the line you're about to modify matches one listed here, skip it. Report that you skipped an exception rather than silently leaving it unchanged.
+
+**Rule for ongoing development:**
+
+New code in `components/landing/**` should still use the 9 tokens. This exceptions table is for the 5 elements listed above, not a license to author new responsive size overrides.
+
+**Not pixel-perfect (L2 — deltas acceptable):**
+
+- `components/landing/EmotionalClose.tsx` — editorial paragraphs. Tolerable if sizes shift by small amounts during migration.
+- `components/landing/HandmadeCallout.tsx` — pull-quote. Tolerable.
+- `components/landing/RegistryInterlude.tsx` — accent + prose. Tolerable.
+- `components/landing/PersonalNotes.tsx` — rotating blockquote. Tolerable.
+- `components/landing/BookDetailsModal.tsx` — modal prose. Tolerable.
+- `app/(public)/about/page.tsx` — editorial accents. Tolerable.
+- All other landing components not in the exceptions table.
+
+---
+
 ## Calibration notes
 
 The values in the tokens table above reflect calibration against codebase state as of April 2026, verified via a pre-flight typography recon before Phase 1.3.1 implementation.
@@ -208,6 +262,16 @@ Two values differ from the initial design draft:
 - `text-caption` was originally proposed at 13px. Recon showed helper/error patterns in L1 dominantly use `text-xs = 12px` (10+ hits of `text-xs text-gray-500`). Calibrated down to 12px to preserve those surfaces.
 
 These calibrations are intentional and reflect the principle that the system should encode the codebase's intentional patterns, not impose externally-derived ideals. Where L1 already has a coherent pattern, the token conforms to it.
+
+### The 9th token — `text-body-lead`
+
+Phase 1.3.1.b (commit `1af24f9`) refactored the 8 `.type-*` utilities to consume the initially-planned 8 tokens. Visual smoke on landing revealed a regression: the `.type-body` and `.type-accent` utilities were routed to `text-body` (16px), which is correct for UI compact prose but shrunk landing hero subtitles from 18→20px to 16px — a visible disruption of editorial character. Commit `8582955` reverted the refactor.
+
+Root cause: the 8-token system had no tier for "editorial lead prose" in the 18-24px range. The doc assumed `text-body` would serve both UI body and editorial lead prose. In practice, these are separate roles with different size requirements.
+
+Resolution: added `text-body-lead` as the 9th token. `.type-body` and `.type-accent` base now route to `text-body-lead`, preserving landing editorial weight. Components that need compact UI body (modals, forms, dashboards) consume `text-body` (16px) directly.
+
+The 5 landing hero elements that drove the regression are additionally captured in the "Documented exceptions" section above — not because they need `text-body-lead`, but because their current responsive overrides are pixel-perfect calibrated to the editorial character of the landing, and any token migration should not touch them.
 
 ---
 
@@ -458,6 +522,7 @@ When generating typography-related code:
 3. **Apply modifiers (weight, italic, color) only when the default doesn't carry the intent.** Don't override gratuitously.
 4. **When in doubt between two tokens, choose the smaller one.** Editorial systems err small; Small Plates is editorial.
 5. **Respect the layer of the surface being modified.** L1 surfaces don't accept "close enough." L2 surfaces do.
+6. **Respect Documented exceptions.** Before modifying any file in `components/landing/**`, check the Documented exceptions table. If the line matches an entry, skip it and report the skip. Do not attempt to migrate hero elements without explicit Ricardo review.
 
 When generating component code:
 
