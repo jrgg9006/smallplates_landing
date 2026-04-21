@@ -61,11 +61,11 @@ function RelationshipDropdown({
         className={`${INPUT_CLASS} flex items-center justify-between text-left`}
         style={{ fontFamily: SANS_FONT }}
       >
-        <span className={selected ? "text-brand-charcoal" : "text-[#9A9590]"}>
+        <span className={selected ? "text-brand-charcoal" : "text-[hsl(var(--brand-warm-gray-light))]"}>
           {selected ? selected.label : "Select your relationship"}
         </span>
         <svg
-          className={`w-4 h-4 text-[#9A9590] transition-transform ${isOpen ? "rotate-180" : ""}`}
+          className={`w-4 h-4 text-[hsl(var(--brand-warm-gray-light))] transition-transform ${isOpen ? "rotate-180" : ""}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -267,7 +267,7 @@ export function CoupleNamesModal({ open, groupId, userEmail, isFirstBook = true,
                 Create a password
               </label>
               <p
-                className="text-[13px] text-[#9A9590] mb-2"
+                className="text-[13px] text-[hsl(var(--brand-warm-gray-light))] mb-2"
                 style={{ fontFamily: SANS_FONT }}
               >
                 So you can log in later without waiting for an email.
@@ -290,7 +290,7 @@ export function CoupleNamesModal({ open, groupId, userEmail, isFirstBook = true,
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A9590] hover:text-brand-charcoal transition-colors p-1"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors p-1"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -350,7 +350,7 @@ export function CoupleNamesModal({ open, groupId, userEmail, isFirstBook = true,
 
           {/* Footer copy under CTA */}
           <p
-            className="text-center text-[13px] text-[#9A9590] leading-relaxed"
+            className="text-center text-[13px] text-[hsl(var(--brand-warm-gray-light))] leading-relaxed"
             style={{ fontFamily: SANS_FONT }}
           >
             We&apos;ll also email a login link to{" "}

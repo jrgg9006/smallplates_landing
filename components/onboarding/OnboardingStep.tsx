@@ -66,7 +66,7 @@ export default function OnboardingStep({
                 <div
                   className={`w-6 h-6 lg:w-8 lg:h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
                     isActive
-                      ? "bg-white text-[#9A9590] border-2 border-brand-honey"
+                      ? "bg-white text-[hsl(var(--brand-warm-gray-light))] border-2 border-brand-honey"
                       : isCompleted
                       ? "bg-brand-honey text-white"
                       : "bg-white text-gray-400 border border-gray-200"

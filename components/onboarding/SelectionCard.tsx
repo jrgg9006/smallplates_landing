@@ -32,7 +32,7 @@ export function SelectionCard({ value, label, isSelected, onClick }: SelectionCa
         <div
           className={`w-5 h-5 rounded-full border-2 transition-all duration-200 ${
             isSelected
-              ? "border-[#9A9590] bg-[#9A9590]"
+              ? "border-[hsl(var(--brand-warm-gray-light))] bg-[hsl(var(--brand-warm-gray-light))]"
               : "border-gray-300"
           }`}
         >

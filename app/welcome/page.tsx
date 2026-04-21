@@ -207,7 +207,7 @@ function WelcomeContent() {
           )}
 
           <p
-            className="text-[12px] text-[#9A9590] text-center -mt-2"
+            className="text-[12px] text-[hsl(var(--brand-warm-gray-light))] text-center -mt-2"
             style={{ fontFamily: sansFont }}
           >
             If you already had a password, this will replace it.
@@ -226,7 +226,7 @@ function WelcomeContent() {
           <button
             type="button"
             onClick={handleSkip}
-            className="w-full text-center text-[14px] text-[#9A9590] hover:text-brand-charcoal transition-colors py-2"
+            className="w-full text-center text-[14px] text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors py-2"
             style={{ fontFamily: sansFont }}
           >
             Skip — I&apos;ll log in by email next time →

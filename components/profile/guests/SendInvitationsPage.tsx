@@ -294,7 +294,7 @@ export function SendInvitationsPage({
       4: {
         subject: `Last call for ${coupleNames}'s book`,
         headerLabel: "Reminder 3 of 3 · Final",
-        headerColor: "bg-[#9A9590]",
+        headerColor: "bg-[hsl(var(--brand-warm-gray-light))]",
         body: (
           <>
             <p>Hi {selectedGuestName}, this is our last reminder about {coupleNames}&apos;s recipe book.</p>
@@ -314,7 +314,7 @@ export function SendInvitationsPage({
         <div className="flex-1 lg:w-[68%] lg:flex-none px-6 lg:px-10 py-4">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-base font-medium text-brand-charcoal hover:text-[#9A9590] transition-colors"
+            className="flex items-center gap-2 text-base font-medium text-brand-charcoal hover:text-[hsl(var(--brand-warm-gray-light))] transition-colors"
           >
             <ChevronLeft size={20} strokeWidth={2} />
             Back
@@ -332,7 +332,7 @@ export function SendInvitationsPage({
                   setShowAddEmails(false);
                   setEmailDrafts({});
                 }}
-                className="text-[#9A9590] hover:text-brand-charcoal transition-colors"
+                className="text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors"
               >
                 <X size={18} />
               </button>
@@ -344,7 +344,7 @@ export function SendInvitationsPage({
               </h2>
               <button
                 onClick={resetAddGuest}
-                className="text-[#9A9590] hover:text-brand-charcoal transition-colors"
+                className="text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors"
               >
                 <X size={18} />
               </button>
@@ -356,7 +356,7 @@ export function SendInvitationsPage({
               </h2>
               <button
                 onClick={() => setShowAddGuest(true)}
-                className="flex items-center gap-1.5 text-[15px] text-[#9A9590] hover:text-brand-charcoal transition-colors"
+                className="flex items-center gap-1.5 text-[15px] text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors"
               >
                 <Plus size={15} />
                 Add guests
@@ -373,7 +373,7 @@ export function SendInvitationsPage({
           <div className="w-full max-w-[560px]">
           {/* Hint: upload couple image */}
           {!coupleImageUrl && (
-            <p className="text-xs text-[#9A9590] mb-4 text-center">
+            <p className="text-xs text-[hsl(var(--brand-warm-gray-light))] mb-4 text-center">
               Want to add a photo to the email? Upload one in your{" "}
               <button onClick={onBack} className="underline hover:text-brand-charcoal transition-colors">
                 Collect Recipes settings
@@ -394,13 +394,13 @@ export function SendInvitationsPage({
             <div className="bg-white border-b border-brand-sand">
               <div className="px-6 py-2.5 border-b border-brand-sand">
                 <p className="text-sm">
-                  <span className="text-[#9A9590]">From:</span>{" "}
+                  <span className="text-[hsl(var(--brand-warm-gray-light))]">From:</span>{" "}
                   <span className="text-brand-charcoal">{coupleNames}</span>
                 </p>
               </div>
               <div className="px-6 py-2.5">
                 <p className="text-sm">
-                  <span className="text-[#9A9590]">Subject:</span>{" "}
+                  <span className="text-[hsl(var(--brand-warm-gray-light))]">Subject:</span>{" "}
                   <span className="text-brand-charcoal">{emailContent[previewEmailNumber].subject}</span>
                 </p>
               </div>
@@ -409,7 +409,7 @@ export function SendInvitationsPage({
             {/* Email body */}
             <div className="bg-white px-8 lg:px-14 py-12 lg:py-16 text-center">
               {/* Couple names — the hero */}
-              <p className="text-xs tracking-[0.25em] uppercase text-[#9A9590] mb-3">
+              <p className="text-xs tracking-[0.25em] uppercase text-[hsl(var(--brand-warm-gray-light))] mb-3">
                 A wedding cookbook gift for
               </p>
               <h2 className="font-serif text-3xl lg:text-4xl text-brand-charcoal leading-tight mb-3">
@@ -452,7 +452,7 @@ export function SendInvitationsPage({
               )}
 
               {/* Sub-text */}
-              <p className="text-xs text-[#9A9590] mt-5">
+              <p className="text-xs text-[hsl(var(--brand-warm-gray-light))] mt-5">
                 5 minutes. That&apos;s it.
               </p>
 
@@ -465,7 +465,7 @@ export function SendInvitationsPage({
                 />
                 {senderName && (
                   <div className="space-y-1.5">
-                    <p className="text-xs text-[#9A9590]">
+                    <p className="text-xs text-[hsl(var(--brand-warm-gray-light))]">
                       This invitation was sent by {senderName} via Small Plates &amp; Co.
                     </p>
                   </div>
@@ -490,7 +490,7 @@ export function SendInvitationsPage({
                     setShowAddEmails(false);
                     setEmailDrafts({});
                   }}
-                  className="text-[#9A9590] hover:text-brand-charcoal transition-colors"
+                  className="text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors"
                 >
                   <X size={18} />
                 </button>
@@ -502,7 +502,7 @@ export function SendInvitationsPage({
                 </h2>
                 <button
                   onClick={resetAddGuest}
-                  className="text-[#9A9590] hover:text-brand-charcoal transition-colors"
+                  className="text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors"
                 >
                   <X size={18} />
                 </button>
@@ -514,7 +514,7 @@ export function SendInvitationsPage({
                 </h2>
                 <button
                   onClick={() => setShowAddGuest(true)}
-                  className="flex items-center gap-1 text-sm text-[#9A9590] hover:text-brand-charcoal transition-colors"
+                  className="flex items-center gap-1 text-sm text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors"
                 >
                   <Plus size={14} />
                   Add guests
@@ -532,7 +532,7 @@ export function SendInvitationsPage({
                   className={`pb-3.5 px-1 mr-6 text-[15px] font-medium transition-colors border-b-2 ${
                     activeTab === "compose"
                       ? "border-brand-charcoal text-brand-charcoal"
-                      : "border-transparent text-[#9A9590] hover:text-brand-charcoal"
+                      : "border-transparent text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal"
                   }`}
                 >
                   Invite ({uninvitedGuests.length})
@@ -547,7 +547,7 @@ export function SendInvitationsPage({
                   className={`pb-3.5 px-1 text-[15px] font-medium transition-colors border-b-2 ${
                     activeTab === "sent"
                       ? "border-brand-charcoal text-brand-charcoal"
-                      : "border-transparent text-[#9A9590] hover:text-brand-charcoal"
+                      : "border-transparent text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal"
                   }`}
                 >
                   Sent &amp; Reminders ({invitedGuests.length})
@@ -593,7 +593,7 @@ export function SendInvitationsPage({
                         placeholder="First Name"
                         value={newGuestFirst}
                         onChange={(e) => setNewGuestFirst(e.target.value)}
-                        className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
+                        className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                       />
                     </div>
                     <div className="flex-1">
@@ -605,7 +605,7 @@ export function SendInvitationsPage({
                         placeholder="Last Name"
                         value={newGuestLast}
                         onChange={(e) => setNewGuestLast(e.target.value)}
-                        className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
+                        className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                       />
                     </div>
                   </div>
@@ -621,9 +621,9 @@ export function SendInvitationsPage({
                     placeholder="How this person's name should appear in the book"
                     value={newGuestPrintedName}
                     onChange={(e) => setNewGuestPrintedName(e.target.value)}
-                    className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
+                    className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                   />
-                  <p className="text-xs text-[#9A9590] mt-2">
+                  <p className="text-xs text-[hsl(var(--brand-warm-gray-light))] mt-2">
                     Leave empty to use first and last name. This is how the name will appear in the printed cookbook.
                   </p>
                 </div>
@@ -638,14 +638,14 @@ export function SendInvitationsPage({
                     placeholder="Email address"
                     value={newGuestEmail}
                     onChange={(e) => setNewGuestEmail(e.target.value)}
-                    className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
+                    className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                   />
                 </div>
               </div>
             ) : showAddEmails ? (
               /* ── Add Email Addresses view ── */
               <div>
-                <p className="text-sm text-[#9A9590] pb-5 border-b border-[#F5F5F4]">
+                <p className="text-sm text-[hsl(var(--brand-warm-gray-light))] pb-5 border-b border-[#F5F5F4]">
                   Please add email addresses for the following guests.
                 </p>
                 {guestsWithoutEmail.map((guest) => (
@@ -663,7 +663,7 @@ export function SendInvitationsPage({
                           [guest.id]: e.target.value,
                         }))
                       }
-                      className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
+                      className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                     />
                   </div>
                 ))}
@@ -675,7 +675,7 @@ export function SendInvitationsPage({
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                     <Check className="w-8 h-8 text-brand-honey" />
                   </div>
-                  <p className="text-[#9A9590] text-sm">
+                  <p className="text-[hsl(var(--brand-warm-gray-light))] text-sm">
                     All guests have been invited.
                   </p>
                 </div>
@@ -737,7 +737,7 @@ export function SendInvitationsPage({
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-[#9A9590] truncate mt-0.5">
+                          <p className="text-sm text-[hsl(var(--brand-warm-gray-light))] truncate mt-0.5">
                             {guest.email}
                           </p>
                         </div>
@@ -753,7 +753,7 @@ export function SendInvitationsPage({
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                     <Send className="w-8 h-8 text-gray-400" />
                   </div>
-                  <p className="text-[#9A9590] text-sm">
+                  <p className="text-[hsl(var(--brand-warm-gray-light))] text-sm">
                     No invitations sent yet.
                   </p>
                 </div>
@@ -779,7 +779,7 @@ export function SendInvitationsPage({
                           <p className="text-sm font-medium text-brand-charcoal truncate">
                             {guest.first_name} {guest.last_name || ""}
                           </p>
-                          <p className="text-xs text-[#9A9590]">
+                          <p className="text-xs text-[hsl(var(--brand-warm-gray-light))]">
                             Invited{" "}
                             {guest.invitation_started_at
                               ? formatDate(guest.invitation_started_at)
@@ -802,7 +802,7 @@ export function SendInvitationsPage({
                             Recipe added
                           </span>
                         ) : allRemindersSent ? (
-                          <span className="text-xs text-[#9A9590] px-2.5 py-1">
+                          <span className="text-xs text-[hsl(var(--brand-warm-gray-light))] px-2.5 py-1">
                             3 of 3 sent
                           </span>
                         ) : (

@@ -239,7 +239,7 @@ export function GroupJoinForm({
           <h1 className="text-2xl font-serif font-semibold text-brand-charcoal mb-4">
             {errorTitle}
           </h1>
-          <p className="text-[#9A9590] mb-6">
+          <p className="text-[hsl(var(--brand-warm-gray-light))] mb-6">
             {verifyError}
           </p>
           <Button 
@@ -262,7 +262,7 @@ export function GroupJoinForm({
           <h1 className="text-2xl font-serif font-semibold text-brand-charcoal mb-4">
             Welcome to the Cookbook!
           </h1>
-          <p className="text-[#9A9590] mb-6">
+          <p className="text-[hsl(var(--brand-warm-gray-light))] mb-6">
             You&apos;ve successfully joined <span className="font-medium">{groupName}</span> and can now help create this special gift.
             Redirecting to your cookbooks...
           </p>
@@ -326,16 +326,16 @@ export function GroupJoinForm({
                   {title}
                 </h2>
                 {subtitle && (
-                  <p className="text-[#9A9590] mb-2 text-sm">{subtitle}</p>
+                  <p className="text-[hsl(var(--brand-warm-gray-light))] mb-2 text-sm">{subtitle}</p>
                 )}
                 {groupData && (
                   <div className="mt-3">
                     {inviterName ? (
-                      <p className="text-[#9A9590] text-sm">
+                      <p className="text-[hsl(var(--brand-warm-gray-light))] text-sm">
                         <span className="font-medium text-brand-charcoal">{inviterName}</span> invited you to join:
                       </p>
                     ) : (
-                      <p className="text-[#9A9590] text-sm">
+                      <p className="text-[hsl(var(--brand-warm-gray-light))] text-sm">
                         You&apos;ve been invited to join:
                       </p>
                     )}
@@ -351,7 +351,7 @@ export function GroupJoinForm({
           {/* Name Field - Only show for new accounts */}
           {!hasAccount && (
             <div>
-              <Label htmlFor="fullName" className="text-xs font-medium text-[#9A9590] uppercase tracking-wide">
+              <Label htmlFor="fullName" className="text-xs font-medium text-[hsl(var(--brand-warm-gray-light))] uppercase tracking-wide">
                 Name
               </Label>
               <Input
@@ -370,7 +370,7 @@ export function GroupJoinForm({
 
           {/* Email Field */}
           <div>
-            <Label htmlFor="email" className="text-xs font-medium text-[#9A9590] uppercase tracking-wide">
+            <Label htmlFor="email" className="text-xs font-medium text-[hsl(var(--brand-warm-gray-light))] uppercase tracking-wide">
               Email
             </Label>
             <Input
@@ -387,7 +387,7 @@ export function GroupJoinForm({
 
           {/* Password Fields */}
           <div>
-            <Label htmlFor="password" className="text-xs font-medium text-[#9A9590] uppercase tracking-wide">
+            <Label htmlFor="password" className="text-xs font-medium text-[hsl(var(--brand-warm-gray-light))] uppercase tracking-wide">
               Password
             </Label>
             <Input
@@ -407,7 +407,7 @@ export function GroupJoinForm({
           {/* Confirm Password - Only show for new accounts */}
           {!hasAccount && (
             <div>
-              <Label htmlFor="confirmPassword" className="text-xs font-medium text-[#9A9590] uppercase tracking-wide">
+              <Label htmlFor="confirmPassword" className="text-xs font-medium text-[hsl(var(--brand-warm-gray-light))] uppercase tracking-wide">
                 Confirm Password
               </Label>
               <Input
@@ -454,14 +454,14 @@ export function GroupJoinForm({
                       setFormData(prev => ({ ...prev, confirmPassword: '' }));
                     }
                   }}
-                  className="w-full text-center text-sm text-[#9A9590] hover:text-brand-charcoal transition-colors"
+                  className="w-full text-center text-sm text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors"
                 >
                   {hasAccount ? "Don't have an account? Create one" : 'Already have an account? Sign in'}
                 </button>
               </div>
 
               <div className="mt-4 text-center">
-                <p className="text-xs text-[#9A9590]">
+                <p className="text-xs text-[hsl(var(--brand-warm-gray-light))]">
                   {footerText}
                 </p>
               </div>

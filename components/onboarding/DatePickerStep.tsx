@@ -211,17 +211,17 @@ export function DatePickerStep({
               boxShadow: popoverOpen ? "0 0 0 2px rgba(212, 168, 84, 0.15)" : "none",
             }}
           >
-            <Calendar className="w-[18px] h-[18px] text-[#9A9590] mr-2.5 flex-shrink-0" strokeWidth={1.5} />
+            <Calendar className="w-[18px] h-[18px] text-[hsl(var(--brand-warm-gray-light))] mr-2.5 flex-shrink-0" strokeWidth={1.5} />
             {selectedDate ? (
               <span className="text-[15px] font-medium text-brand-charcoal flex-1 text-left">
                 {format(selectedDate, "MMMM d, yyyy")}
               </span>
             ) : isUndecided ? (
-              <span className="text-[15px] italic text-[#9A9590] flex-1 text-left">
+              <span className="text-[15px] italic text-[hsl(var(--brand-warm-gray-light))] flex-1 text-left">
                 I&apos;ll decide later
               </span>
             ) : (
-              <span className="text-[15px] text-[#9A9590] flex-1 text-left">
+              <span className="text-[15px] text-[hsl(var(--brand-warm-gray-light))] flex-1 text-left">
                 Pick a date
               </span>
             )}
@@ -232,7 +232,7 @@ export function DatePickerStep({
                 className="p-1 rounded-full hover:bg-brand-sand transition-colors ml-1"
                 aria-label="Clear date"
               >
-                <X className="w-4 h-4 text-[#9A9590] hover:text-brand-charcoal" strokeWidth={1.5} />
+                <X className="w-4 h-4 text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal" strokeWidth={1.5} />
               </button>
             )}
           </div>
@@ -283,7 +283,7 @@ export function DatePickerStep({
                 animation: hasAnimated ? "none" : "cardIn 400ms ease-out forwards",
               }}
             >
-              <p className="text-[16px] font-serif font-normal uppercase tracking-[0.05em] text-[#9A9590] mb-2.5">
+              <p className="text-[16px] font-serif font-normal uppercase tracking-[0.05em] text-[hsl(var(--brand-warm-gray-light))] mb-2.5">
                 RECIPES MUST BE SUBMITTED BY
               </p>
               <div className="w-10 h-px bg-brand-honey mx-auto mb-2.5" />
@@ -292,7 +292,7 @@ export function DatePickerStep({
               </p>
             </div>
             <p
-              className="text-center text-[13px] italic text-[#9A9590] mb-6"
+              className="text-center text-[13px] italic text-[hsl(var(--brand-warm-gray-light))] mb-6"
               style={{
                 animation: hasAnimated ? "none" : "fadeIn 300ms ease 150ms both",
               }}
@@ -332,7 +332,7 @@ export function DatePickerStep({
             marginBottom: isUndecided ? "24px" : "0px",
           }}
         >
-          <p className="text-center text-sm text-[#9A9590]">
+          <p className="text-center text-sm text-[hsl(var(--brand-warm-gray-light))]">
             No problem. You can set this from your dashboard anytime.
           </p>
         </div>

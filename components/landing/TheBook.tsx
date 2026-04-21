@@ -63,7 +63,7 @@ export default function TheBook() {
           >
             What shows up at her door.
           </h2>
-          <p className="mt-5 type-body-small text-[#9A9590] max-w-[520px] mx-auto">
+          <p className="mt-5 type-body-small text-[hsl(var(--brand-warm-gray-light))] max-w-[520px] mx-auto">
             Every book is hardcover and full color. Because what&apos;s
             inside deserves to be held in something real.
           </p>
@@ -175,12 +175,12 @@ export default function TheBook() {
               </h3>
 
               <div className="space-y-4">
-                <p className="type-body-small text-[#9A9590]">
+                <p className="type-body-small text-[hsl(var(--brand-warm-gray-light))]">
                   Every Small Plates book is a hardcover cookbook &mdash; professionally
                   designed and printed in full color.
                   No templates. No shortcuts.
                 </p>
-                <p className="type-body-small text-[#9A9590]">
+                <p className="type-body-small text-[hsl(var(--brand-warm-gray-light))]">
                   Each book is different, because every couple&apos;s people are different.
                 </p>
               </div>

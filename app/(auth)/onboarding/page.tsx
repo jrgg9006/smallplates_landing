@@ -363,7 +363,7 @@ function ProgressBar({ step, total }: { step: number; total: number }) {
             <div
               className={`w-6 h-6 lg:w-8 lg:h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
                 isActive
-                  ? "bg-white text-[#9A9590] border-2 border-brand-honey"
+                  ? "bg-white text-[hsl(var(--brand-warm-gray-light))] border-2 border-brand-honey"
                   : isDone
                   ? "bg-brand-honey text-white"
                   : "bg-white text-gray-400 border border-gray-200"
@@ -400,20 +400,20 @@ function OrderSummaryPanel({
 
   return (
     <div>
-      <p className="type-eyebrow mb-8 text-[#9A9590] tracking-widest text-[12px]">Order summary</p>
+      <p className="type-eyebrow mb-8 text-[hsl(var(--brand-warm-gray-light))] tracking-widest text-[12px]">Order summary</p>
 
       {/* Buyer info */}
       {(buyerName || email) && (
         <div className="text-[15px] space-y-2.5 mb-8 pb-8 border-b border-brand-sand/80">
           {buyerName && (
             <div className="flex justify-between gap-3">
-              <span className="text-[#9A9590]">Name</span>
+              <span className="text-[hsl(var(--brand-warm-gray-light))]">Name</span>
               <span className="text-brand-charcoal text-right">{buyerName}</span>
             </div>
           )}
           {email && (
             <div className="flex justify-between gap-3">
-              <span className="text-[#9A9590]">Email</span>
+              <span className="text-[hsl(var(--brand-warm-gray-light))]">Email</span>
               <span className="text-brand-charcoal text-right truncate min-w-0">{email}</span>
             </div>
           )}
@@ -425,7 +425,7 @@ function OrderSummaryPanel({
         <div className="flex justify-between items-start gap-3">
           <div className="min-w-0">
             <div className="text-brand-charcoal leading-tight">The Book</div>
-            <div className="text-xs text-[#9A9590] mt-0.5">Hardcover, 50 recipes</div>
+            <div className="text-xs text-[hsl(var(--brand-warm-gray-light))] mt-0.5">Hardcover, 50 recipes</div>
           </div>
           <div className="text-brand-charcoal tabular-nums">${BASE_BOOK_PRICE}</div>
         </div>
@@ -435,14 +435,14 @@ function OrderSummaryPanel({
               <div className="text-brand-charcoal leading-tight">
                 {additionalCopies} extra {additionalCopies === 1 ? "copy" : "copies"}
               </div>
-              <div className="text-xs text-[#9A9590] mt-0.5">${ADDITIONAL_BOOK_PRICE} each</div>
+              <div className="text-xs text-[hsl(var(--brand-warm-gray-light))] mt-0.5">${ADDITIONAL_BOOK_PRICE} each</div>
             </div>
             <div className="text-brand-charcoal tabular-nums">${additionalCopies * ADDITIONAL_BOOK_PRICE}</div>
           </div>
         )}
         <div className="flex justify-between items-center">
-          <span className="text-[#9A9590]">Shipping</span>
-          <span className="text-[#9A9590]">Included</span>
+          <span className="text-[hsl(var(--brand-warm-gray-light))]">Shipping</span>
+          <span className="text-[hsl(var(--brand-warm-gray-light))]">Included</span>
         </div>
       </div>
 

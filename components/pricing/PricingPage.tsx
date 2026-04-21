@@ -41,7 +41,7 @@ export default function PricingPage() {
             One book. Everything included.
           </motion.h1>
           <motion.p
-            className="mt-4 type-body-small text-[#9A9590]"
+            className="mt-4 type-body-small text-[hsl(var(--brand-warm-gray-light))]"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
@@ -91,7 +91,7 @@ export default function PricingPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-0 sm:divide-x sm:divide-brand-sand mb-10">
                 {/* First book */}
                 <div className="text-center sm:pr-8">
-                  <p className="font-sans text-xs font-medium tracking-[0.15em] text-[#9A9590] uppercase mb-3">
+                  <p className="font-sans text-xs font-medium tracking-[0.15em] text-[hsl(var(--brand-warm-gray-light))] uppercase mb-3">
                     Your first book
                   </p>
                   <div className="flex items-baseline justify-center">
@@ -100,12 +100,12 @@ export default function PricingPage() {
                       {BASE_BOOK_PRICE}
                     </span>
                   </div>
-                  <p className="mt-2 text-sm text-[#9A9590]">shipping included</p>
+                  <p className="mt-2 text-sm text-[hsl(var(--brand-warm-gray-light))]">shipping included</p>
                 </div>
 
                 {/* Additional copies */}
                 <div className="text-center sm:pl-8">
-                  <p className="font-sans text-xs font-medium tracking-[0.15em] text-[#9A9590] uppercase mb-3">
+                  <p className="font-sans text-xs font-medium tracking-[0.15em] text-[hsl(var(--brand-warm-gray-light))] uppercase mb-3">
                     Each additional copy
                   </p>
                   <div className="flex items-baseline justify-center">
@@ -114,12 +114,12 @@ export default function PricingPage() {
                       {ADDITIONAL_BOOK_PRICE}
                     </span>
                   </div>
-                  <p className="mt-2 text-sm text-[#9A9590]">same book, same quality</p>
+                  <p className="mt-2 text-sm text-[hsl(var(--brand-warm-gray-light))]">same book, same quality</p>
                 </div>
               </div>
 
               {/* Context note */}
-              <p className="text-center font-serif italic text-[#9A9590] text-base mb-10">
+              <p className="text-center font-serif italic text-[hsl(var(--brand-warm-gray-light))] text-base mb-10">
                 Most people order 2–3. One for the couple, one for each family.
               </p>
 
@@ -170,7 +170,7 @@ export default function PricingPage() {
               <div className="mt-5">
                 <button
                   onClick={handleContact}
-                  className="text-[#9A9590] text-sm hover:text-brand-honey transition-colors duration-200"
+                  className="text-[hsl(var(--brand-warm-gray-light))] text-sm hover:text-brand-honey transition-colors duration-200"
                 >
                   Need something different? Let&apos;s figure it out →
                 </button>
@@ -192,7 +192,7 @@ export default function PricingPage() {
               A few things to know
             </h3>
 
-            <div className="space-y-6 text-[15px] text-[#9A9590] leading-relaxed font-light">
+            <div className="space-y-6 text-[15px] text-[hsl(var(--brand-warm-gray-light))] leading-relaxed font-light">
               <p>
                 <span className="font-medium text-brand-charcoal font-sans">Shipping</span> is
                 included in the price.

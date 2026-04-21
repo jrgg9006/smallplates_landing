@@ -99,7 +99,7 @@ export function ProductSelectionStep({
                     <span className="text-[14px]">
                       {qty === 1 ? "1 copy" : `${qty} copies`}
                       {qty > 1 && (
-                        <span className="text-[12px] text-[#9A9590] ml-1.5">
+                        <span className="text-[12px] text-[hsl(var(--brand-warm-gray-light))] ml-1.5">
                           +${ADDITIONAL_BOOK_PRICE * (qty - 1)}
                         </span>
                       )}
