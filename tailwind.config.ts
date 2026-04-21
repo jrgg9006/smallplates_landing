@@ -46,6 +46,63 @@ const config: Config = {
   				'sans-serif'
   			]
   		},
+  		fontSize: {
+  			// Display — hero titulars, landing covers
+  			// Fluid from 38px (mobile <400px) to 56px (desktop >1440px)
+  			'display': ['clamp(2.375rem, 1.875rem + 2.5vw, 3.5rem)', {
+  				lineHeight: '1.1',
+  				letterSpacing: '-0.02em',
+  			}],
+
+  			// Heading — section titles
+  			// Fluid from 28px mobile to 36px desktop
+  			'heading': ['clamp(1.75rem, 1.375rem + 1.875vw, 2.25rem)', {
+  				lineHeight: '1.15',
+  				letterSpacing: '-0.01em',
+  			}],
+
+  			// Subheading — card/modal titles, subsection headers
+  			// Fluid from 24px mobile to 28px desktop
+  			'subheading': ['clamp(1.5rem, 1.375rem + 0.625vw, 1.75rem)', {
+  				lineHeight: '1.2',
+  				letterSpacing: '0',
+  			}],
+
+  			// Body — primary prose (paragraphs, descriptions)
+  			// Fixed 16px
+  			'body': ['1rem', {
+  				lineHeight: '1.65',
+  				letterSpacing: '0',
+  			}],
+
+  			// Body-small — secondary prose (helper text, info boxes)
+  			// Fixed 14px
+  			'body-small': ['0.875rem', {
+  				lineHeight: '1.6',
+  				letterSpacing: '0',
+  			}],
+
+  			// Caption — metadata, timestamps, small labels
+  			// Fixed 12px
+  			'caption': ['0.75rem', {
+  				lineHeight: '1.5',
+  				letterSpacing: '0',
+  			}],
+
+  			// Eyebrow — ALL CAPS kickers above headings
+  			// Fixed 11px
+  			'eyebrow': ['0.6875rem', {
+  				lineHeight: '1.4',
+  				letterSpacing: '0.15em',
+  			}],
+
+  			// Action — buttons, CTAs, navigation
+  			// Fixed 15px
+  			'action': ['0.9375rem', {
+  				lineHeight: '1.0',
+  				letterSpacing: '0',
+  			}],
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
