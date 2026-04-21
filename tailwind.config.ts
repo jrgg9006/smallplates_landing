@@ -104,7 +104,7 @@ const config: Config = {
   				'white': 'hsl(var(--brand-white))',
   				'olive': 'hsl(var(--brand-olive))',
   				'terracotta': 'hsl(var(--brand-terracotta))',
-  				'light-gray': 'hsl(var(--brand-light-gray))',
+  				'warm-gray-dark': 'hsl(var(--brand-warm-gray-dark))',
   				'warm-gray-light': 'hsl(var(--brand-warm-gray-light))'
   			}
   		}
