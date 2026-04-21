@@ -27,7 +27,7 @@ export default function PricingPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#FAF9F7]">
+    <main className="min-h-screen bg-[hsl(var(--brand-warm-white))]">
       {/* Header */}
       <section className="pt-24 pb-6 md:pt-32 md:pb-10">
         <div className="mx-auto max-w-3xl px-6 text-center">

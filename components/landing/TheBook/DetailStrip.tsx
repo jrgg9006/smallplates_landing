@@ -52,7 +52,7 @@ const details = [
         <div className="grid grid-cols-2 gap-2 w-3/5">
           <div className="aspect-square rounded-sm bg-brand-terracotta" />
           <div className="aspect-square rounded-sm bg-brand-honey" />
-          <div className="aspect-square rounded-sm bg-[#6B7B5E]" />
+          <div className="aspect-square rounded-sm bg-[hsl(var(--brand-olive))]" />
           <div className="aspect-square rounded-sm bg-brand-charcoal" />
         </div>
       </div>
