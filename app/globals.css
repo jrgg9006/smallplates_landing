@@ -25,7 +25,7 @@ body > div.pac-container ~ div:not([id]):not([class]) {
     --brand-warm-gray: 30 11% 54%;      /* #8A8780 */
     --brand-light-gray: 30 7% 42%;      /* #6B6966 */
     --brand-warm-gray-light: 30 5% 58%; /* #9A9590 */
-    --brand-border: 36 19% 91%;         /* #F0EDE8 */
+    --brand-border: 35 30% 87%;         /* ≈ #E8E0D5 (renders #E8E0D4) */
     --brand-border-button: 36 17% 80%;  /* #D4D0C8 */
     --brand-decorative-line: 36 17% 80%; /* #D4D0C8 */
     --brand-hero-gradient-start: 36 25% 89%; /* #E8E4DC */
