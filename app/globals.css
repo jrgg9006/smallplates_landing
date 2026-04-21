@@ -245,44 +245,44 @@ body > div.pac-container ~ div:not([id]):not([class]) {
 
   /* type-display: Hero headlines only */
   .type-display {
-    @apply font-serif font-medium text-display text-brand-charcoal;
+    @apply font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight text-brand-charcoal leading-tight;
   }
 
   /* type-heading: Section h2s */
   .type-heading {
-    @apply font-serif font-medium text-heading text-brand-charcoal;
+    @apply font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-brand-charcoal leading-tight;
   }
 
   /* type-subheading: Sub-section h3s, card titles */
   .type-subheading {
-    @apply font-serif font-medium text-subheading text-brand-charcoal;
+    @apply font-serif text-2xl md:text-3xl font-medium text-brand-charcoal leading-tight;
   }
 
   /* type-accent: Italic quotes, taglines, poetic lines */
   .type-accent {
-    @apply font-serif italic text-body text-brand-charcoal;
+    @apply font-serif text-lg md:text-xl italic text-brand-charcoal;
   }
 
   /* --- SANS (Body & UI) --- */
 
   /* type-body: Main paragraph text */
   .type-body {
-    @apply font-sans font-light text-body text-brand-charcoal/80;
+    @apply font-sans font-light text-lg md:text-xl text-brand-charcoal/80 leading-relaxed;
   }
 
   /* type-body-small: Secondary descriptions, card text, FAQ answers */
   .type-body-small {
-    @apply font-sans font-light text-body-small text-brand-charcoal/70;
+    @apply font-sans font-light text-base md:text-lg text-brand-charcoal/70 leading-relaxed;
   }
 
   /* type-eyebrow: Uppercase labels ("THE BOOK", "THIS IS SMALL PLATES") */
   .type-eyebrow {
-    @apply font-sans font-medium text-eyebrow text-brand-honey uppercase;
+    @apply font-sans text-[11px] font-medium tracking-[0.15em] text-brand-honey uppercase;
   }
 
   /* type-caption: Small text, attributions, metadata */
   .type-caption {
-    @apply font-sans text-caption text-[hsl(var(--brand-warm-gray))];
+    @apply font-sans text-sm text-[hsl(var(--brand-warm-gray))];
   }
 
   /* ============================================
