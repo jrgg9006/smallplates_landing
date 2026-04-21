@@ -1,7 +1,7 @@
 # Visual Identity
 ## Small Plates & Co. — The Tactical Toolkit
 
-For the creative philosophy behind these choices, see `creative-direction.md`.
+For the full brand system — belief, enemy, audience, voice — see `essence.md` and `foundation.md`.
 
 ---
 
@@ -67,14 +67,9 @@ Small Plates uses two warm-whites deliberately — the contrast between them is 
 - Don't introduce pinks, blues, or purples — they break the warmth
 - Don't use Honey for large background areas — overwhelming
 
-## Color Ratios by Application
+## The Ratio Rule
 
-| Application | Warm White | Soft Charcoal | Honey | Secondary |
-|-------------|------------|---------------|-------|-----------|
-| Website | 70% | 20% | 8% | 2% |
-| Packaging | 60% | 25% | 12% | 3% |
-| Social Media | 50% | 25% | 20% | 5% |
-| Book Interior | 80% | 15% | 3% | 2% |
+Warmth dominates. Honey is the spice, not the dish. Secondary colors (Terracotta, Olive) appear rarely, in small doses. Measure by gut, not by pixel.
 
 ---
 
@@ -179,6 +174,30 @@ Minimum clear space around logo = height of "S" in "Small." No other elements sh
 
 ---
 
+# What we don't show
+
+The visual system is defined as much by what it rejects as by what it uses. These prohibitions are canonical — no exceptions without founder approval.
+
+## Never in our imagery
+
+- **No faces of couples, guests, or family.** The presence of people comes through their handwriting, recipes, and contributions — not their portraits. This is the hardest rule because it's the easiest to break. Hold it.
+- **No stock wedding imagery.** No bride-and-groom embraces, no confetti throws, no ring close-ups, no champagne toasts, no bouquet tosses, no first-dance silhouettes. The wedding industry exhausted these. We don't renew them.
+- **No styled-keepsake book photography.** The book is not a precious object on a pristine shelf. It's a used object on a kitchen counter. If a photo makes the book look like it should be wrapped in tissue paper, rewrite the photo.
+- **No cheesy emotional setups.** No hand-holding through lace. No candles dramatically lit. No tears in soft focus. Our emotion is earned through specificity, not staging.
+
+## Always in our imagery
+
+- **The book in use, not on display.** Open. Stained. On a counter. Next to flour. Next to a cutting board. Next to last night's half-finished glass of wine.
+- **Kitchens that look real.** Not designer kitchens. Not magazine kitchens. Someone's kitchen on a Wednesday.
+- **After the wedding, not during it.** Our visual territory is the afterward — Tuesday breakfast, Saturday dinner, a Sunday someone reaches for a recipe from an aunt they haven't seen in two years.
+- **The traces of people, not the people.** Handwriting. A note. A page dog-eared. A recipe splattered with the ingredient it describes. Presence through evidence.
+
+## The quiet test
+
+Before any image ships, ask: *if this image could have been used by any wedding brand, we failed.* Every visual should only make sense because Small Plates exists.
+
+---
+
 # Applications
 
 ## Website
@@ -196,10 +215,17 @@ Minimum clear space around logo = height of "S" in "Small." No other elements sh
 
 ## Social Media
 
-**Instagram Feed:**
-- Mix of: pure text + real documentary photo + screenshot
-- No uniform warm filter — each image in its most honest version
-- The feed rule: every three posts, one makes someone think *"that's exactly me"*
+### Instagram Feed
+
+Three categories of content, rotating:
+
+- **The afterward.** The book in use, days/weeks/months after the wedding. Kitchen counters, stained pages, a recipe from someone you haven't talked to in six months. This is the territory the industry doesn't show.
+- **Traces of people.** Handwritten recipes, guest notes, a page dog-eared by someone. Presence through evidence. No faces.
+- **Honest texts.** Quotes, observations, lines that name what the wedding industry avoids saying. Text-as-image. Minion Pro on Warm White. Single line, breathing room.
+
+**The feed rule:** Every three posts, one must make an organizer stop scrolling and think *"that's exactly me."* The rest supports that one.
+
+**Never:** uniform warm filter, overly-produced styling, wedding-day content, generic couple shots.
 
 **Instagram Stories / TikTok:**
 - Rawest, most real, most unedited content
@@ -279,5 +305,19 @@ Minimum clear space around logo = height of "S" in "Small." No other elements sh
 
 ---
 
-*Visual Identity — Small Plates & Co.*
-*Tactical Toolkit*
+# What this doc covers — and what it doesn't
+
+This doc is the tactical toolkit for what is canonical today: color, typography, logo, book mechanics, photography prohibitions, and application rules. It is complete for those categories.
+
+What it doesn't yet cover:
+
+- **The hero shot.** The single recurring composition of the book that becomes Small Plates' visual signature. Still in discovery.
+- **The world kit.** The three recurring visual framings that, repeated, become unmistakable. Still in discovery.
+- **The aspirational visual references.** The 3–5 concrete references that define the visual territory we live in. Previous references (Kinfolk, Phaidon, Ottolenghi, Artifact Uprising) have been deprecated as no longer aligned with the brand. New references are being discovered through an ongoing process.
+- **The aesthetic reference phrase.** The short phrase (e.g., "X with the dry humor of Y") that synthesizes the visual world in under 10 words.
+
+These additions will come in v1.2+ after a structured reference-mining and pattern-recognition process led by the founders.
+
+---
+
+*v1.1 · April 2026 · Changes from v1.0: (1) fixed broken cross-reference to archived `creative-direction.md` — now points to `essence.md` and `foundation.md`; (2) removed "Color Ratios by Application" table (prescription without operational use) — replaced with a brief ratio rule; (3) added new "What we don't show" section canonizing visual prohibitions (no faces, no stock wedding imagery, no styled-keepsake shots, no cheesy setups) and positive mandates (the book in use, real kitchens, the afterward, traces of people); (4) rewrote "Instagram Feed" section to align with canonical enemy "Everyone leaves"; (5) added "What this doc covers — and what it doesn't" section documenting the pending pieces (hero shot, world kit, aspirational references, aesthetic reference phrase) and the deprecation of previous aspirational references (Kinfolk, Phaidon, Ottolenghi, Artifact Uprising). Operational identity remains canonical; aspirational visual world is in discovery.*
