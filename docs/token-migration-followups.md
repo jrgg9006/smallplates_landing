@@ -309,6 +309,32 @@ Decorative theme-identifier color pairs in a data array:
 
 ---
 
+## Section F — Adjacent tech debt discovered during recons
+
+These are non-token issues surfaced during typography and color recons. Not in scope of any Lote, but documented here so they don't get lost.
+
+### F.1 — `generatePersonalizedMessage` in Collect is dead personalization
+
+**File:** `app/(public)/collect/[token]/CollectionForm.tsx` (lines 37–59, called at line 365)
+
+**Discovered:** April 2026, during Phase 1.3.1 pre-flight recon of Collect flow headings.
+
+**Issue:** The function `generatePersonalizedMessage(fullName, rawFullName)` has three conditional branches that all return the same object: `{ beforeName: 'A Personal Note:', name: '', afterName: '' }`. Because `name` is always empty, the `<span>` rendering it never renders. The `<h1>` that consumes the output displays the static string `"A Personal Note:"` regardless of the guest's name.
+
+**Original intent (inferred):** The function was designed to personalize the hero greeting with the guest's name, producing something like `"Share a recipe for Ana & Richi"` or similar. Looking at the branching structure (checking `rawFullName` presence, checking if `fullName` contains `' and '`), the author clearly intended different outputs per case but collapsed all three to the same fallback — possibly during a refactor or A/B test rollback that was never completed.
+
+**Impact:** Low visible impact (the hero still renders cleanly), but the Collect hero is less personalized than intended. Guests receiving a collection link see a generic `"A Personal Note:"` instead of a name-personalized greeting.
+
+**Resolution path (when addressed):**
+1. Decide what the personalized greeting should say in each case — with a single guest name, with "and" in the name, with no `rawFullName`.
+2. Implement each branch to return the correct `{ beforeName, name, afterName }` decomposition.
+3. Smoke test with all three input shapes.
+4. Consider whether the `<span className="font-semibold text-gray-900 mx-1">` treatment around the name still aligns with Phase 1.3 typography rules (should probably consume a typography token post-1.3, not hardcode font-semibold).
+
+**Not scope for:** any current Lote. Standalone tech debt item, belongs in a product polish pass.
+
+---
+
 ## Closing notes
 
 ### Durable rules learned during Phase 1.2
