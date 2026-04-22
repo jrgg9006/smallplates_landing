@@ -31,7 +31,7 @@ export function CloseBookModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl font-semibold">
+          <DialogTitle className="font-serif text-modal-title font-semibold">
             {reviewed
               ? "Looks good? This is final."
               : "Ready to send it to print?"}

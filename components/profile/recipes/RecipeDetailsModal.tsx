@@ -575,7 +575,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           
           <div className="px-6 pt-4 pb-6 flex flex-col h-full overflow-hidden">
             <SheetHeader className="px-0 flex-shrink-0 mb-4">
-              <SheetTitle className="font-serif text-2xl font-semibold">Recipe Details</SheetTitle>
+              <SheetTitle className="font-serif text-modal-title font-semibold">Recipe Details</SheetTitle>
             </SheetHeader>
             
             <div className="flex-1 overflow-hidden flex flex-col overflow-y-auto">
@@ -613,7 +613,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl w-[95vw] h-[90vh] max-h-[90vh] flex flex-col overflow-hidden p-0 gap-0 bg-white">
         <DialogHeader className="flex-shrink-0 px-8 pt-6 pb-2">
-          <DialogTitle className="font-serif text-2xl font-semibold text-gray-900">Recipe Details</DialogTitle>
+          <DialogTitle className="font-serif text-modal-title font-semibold text-gray-900">Recipe Details</DialogTitle>
         </DialogHeader>
         
         <div className="flex-1 flex flex-col pl-8 pr-8 pt-8 pb-6 min-w-0 overflow-y-auto">

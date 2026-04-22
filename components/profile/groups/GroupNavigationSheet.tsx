@@ -83,7 +83,7 @@ export function GroupNavigationSheet({ isOpen, onClose, onGroupSelect, currentGr
         <div className={`h-full flex flex-col ${isMobile ? 'pt-2' : ''}`}>
           {/* Header */}
           <SheetHeader className={`${isMobile ? 'px-6 py-4' : 'px-8 py-6'} border-b border-gray-100`}>
-            <SheetTitle className="font-serif text-2xl font-semibold text-[hsl(var(--brand-charcoal))]">
+            <SheetTitle className="font-serif text-modal-title font-semibold text-[hsl(var(--brand-charcoal))]">
               Your Books
             </SheetTitle>
           </SheetHeader>

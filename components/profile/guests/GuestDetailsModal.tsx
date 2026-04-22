@@ -142,7 +142,7 @@ export function GuestDetailsModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl font-semibold text-[hsl(var(--brand-charcoal))]">
+          <DialogTitle className="font-serif text-modal-title font-semibold text-[hsl(var(--brand-charcoal))]">
             {isSelf ? 'Your Profile' : 'Guest Details'}
           </DialogTitle>
         </DialogHeader>

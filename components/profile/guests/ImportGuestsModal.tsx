@@ -299,7 +299,7 @@ export function ImportGuestsModal({
 
         {/* Header */}
         <div className="mb-6">
-          <h2 className="font-serif text-2xl font-semibold">
+          <h2 className="font-serif text-modal-title font-semibold">
             Import Guests
           </h2>
         </div>

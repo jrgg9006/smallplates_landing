@@ -609,7 +609,7 @@ export default function AdminUsersPage() {
       <Dialog open={cleanModalOpen} onOpenChange={setCleanModalOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="font-serif text-2xl font-semibold">
+            <DialogTitle className="font-serif text-modal-title font-semibold">
               Clean User Data
             </DialogTitle>
             <DialogDescription className="pt-2">
@@ -662,7 +662,7 @@ export default function AdminUsersPage() {
         <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center justify-between mb-2">
-              <DialogTitle className="font-serif text-2xl font-semibold">
+              <DialogTitle className="font-serif text-modal-title font-semibold">
                 User Details
               </DialogTitle>
               <button
@@ -954,7 +954,7 @@ export default function AdminUsersPage() {
       }}>
         <DialogContent className="sm:max-w-[640px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-serif text-2xl font-semibold text-red-700 flex items-center gap-2">
+            <DialogTitle className="font-serif text-modal-title font-semibold text-red-700 flex items-center gap-2">
               <Flame className="h-6 w-6" />
               Hard Delete User
             </DialogTitle>
