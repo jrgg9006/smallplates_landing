@@ -1,3 +1,21 @@
+> **⚠️ Scope note — read this first.**
+>
+> This document only covers the **color** layer of the token system. 
+> It was drafted on April 22, 2026 before a recon revealed that radius, 
+> shadows, spacing, and shadcn integration still have unintentional 
+> drift (see `docs/token-migration-followups.md`, section 
+> "Phase 2 scope — Design system cleanup").
+>
+> **Do not treat this as the complete design system doctrine.** 
+> The full `token-philosophy.md` will be written after Phase 2 closes 
+> and will incorporate this file's content as its color section.
+>
+> If you are Claude Design onboarding against this repo: this file 
+> is incomplete. Do not use it as authoritative. The brief pack 
+> as a whole is paused (see `design-system-brief/PAUSED.md`).
+
+---
+
 # Token Philosophy
 
 This document explains *why* the Small Plates token system looks the way
@@ -102,7 +120,7 @@ coherence.* Every value in it earns its place. When a hex literal persists
 outside the token system, either:
 
 - it is a permanent exclusion (listed above), or
-- it is an intentnal speed bump (the warm-white accent), or
+- it is an intentional speed bump (the warm-white accent), or
 - it is a gap waiting to be closed (tracked in `token-migration-followups.md`).
 
 There is no fourth category. If you encounter a literal hex that fits

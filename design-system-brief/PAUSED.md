@@ -16,9 +16,11 @@ replicate inconsistencies the team already knows are wrong.
 - Folder scaffolding for the full brief pack.
 - `01-brand-core/` — all 10 brand docs copied from `brand_wedding/`.
 - `README.md` — master doc for Claude Design onboarding.
-- (Incomplete) `02-design-philosophy/token-philosophy.md` — planned 
-  but not written, because the philosophy it would document is 
-  still in flux.
+- `02-design-philosophy/token-philosophy-color-only.md` — partial 
+  doc covering only the color layer (two warm whites, permanent 
+  exclusions). Contains a scope-note header explaining its limitations. 
+  Will become the color section of the full `token-philosophy.md` 
+  when Phase 2 closes.
 
 ## What needs to happen before resuming
 
