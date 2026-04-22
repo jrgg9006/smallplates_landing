@@ -40,7 +40,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
             How would you like to share your Recipe?
           </h2>
           <p className="mt-3 text-base text-gray-600">
-            Choose the format that works best for you
+            
           </p>
         </div>
 
