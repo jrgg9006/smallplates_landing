@@ -75,6 +75,13 @@ const config: Config = {
   				letterSpacing: '0',
   			}],
 
+  			// Body-lead — lead prose editorial (follows a heading)
+  			// Fluid from 18px mobile to 24px desktop
+  			'body-lead': ['clamp(1.125rem, 0.9rem + 1.125vw, 1.5rem)', {
+  				lineHeight: '1.65',
+  				letterSpacing: '0',
+  			}],
+
   			// Body-small — secondary prose (helper text, info boxes)
   			// Fixed 14px
   			'body-small': ['0.875rem', {
