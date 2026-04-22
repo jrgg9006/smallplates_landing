@@ -148,8 +148,8 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
         </DialogHeader>
         
         {/* Explanation text */}
-        <p className="text-xs sm:text-sm text-[#2D2D2D] leading-relaxed font-light mt-2">
-          1have full access to this book and can help you collect recipes together.
+        <p className="text-xs sm:text-sm text-brand-charcoal leading-relaxed font-light mt-2">
+          Captains have full access to this book and can help you collect recipes together.
         </p>
         
         <div className="space-y-4 pt-4 pb-2">
@@ -186,7 +186,7 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
               disabled={loading}
               className="mt-1"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-secondary-sm text-gray-500 mt-1">
               An invitation to join will be sent to this email
             </p>
           </div>

@@ -265,10 +265,10 @@ export default function ActivityPage() {
               </div>
               <div className="text-xs text-gray-600 mt-0.5">{user.email}</div>
               <div className="flex items-center gap-3 mt-1.5">
-                <span className="text-xs text-gray-500">
+                <span className="text-secondary-sm text-gray-500">
                   {user.guest_count} guests
                 </span>
-                <span className="text-xs text-gray-500">
+                <span className="text-secondary-sm text-gray-500">
                   {user.recipe_count} recipes
                 </span>
               </div>
@@ -311,7 +311,7 @@ export default function ActivityPage() {
                       }`}>
                         {guest.status}
                       </span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-secondary-sm text-gray-500">
                         {guest.recipes_received} {guest.recipes_received === 1 ? 'recipe' : 'recipes'}
                       </span>
                     </div>
@@ -338,7 +338,7 @@ export default function ActivityPage() {
             {loadingRecipes ? (
               <div className="p-4 text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto"></div>
-                <div className="text-xs text-gray-500 mt-2">Loading recipes...</div>
+                <div className="text-secondary-sm text-gray-500 mt-2">Loading recipes...</div>
               </div>
             ) : (
               <>
@@ -386,7 +386,7 @@ export default function ActivityPage() {
                             {recipe.submission_status}
                           </span>
                           {recipe.image_url && (
-                            <span className="text-xs text-gray-500">📷</span>
+                            <span className="text-secondary-sm text-gray-500">📷</span>
                           )}
                         </div>
                       </div>
@@ -459,7 +459,7 @@ export default function ActivityPage() {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                                 <span className="text-sm font-medium">PDF</span>
-                                <span className="text-xs text-gray-500 mt-1">Click to view</span>
+                                <span className="text-secondary-sm text-gray-500 mt-1">Click to view</span>
                               </a>
                             ) : (
                               <Image

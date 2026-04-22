@@ -242,7 +242,7 @@ export default function InvitationsPage() {
               <div>
                 <p className="text-sm text-gray-600">Recent Activity</p>
                 <p className="text-3xl font-bold text-blue-600">{data.recentActivity.invitations}</p>
-                <p className="text-xs text-gray-500">Last 7 days</p>
+                <p className="text-secondary-sm text-gray-500">Last 7 days</p>
               </div>
               <div className="text-3xl">🔥</div>
             </div>

@@ -55,27 +55,27 @@ export default function TheSolution() {
             transition={{ duration: 0.7, ease: "easeOut" }}
           >
             {/* Eyebrow */}
-            <p className="font-sans text-sm font-medium tracking-widest text-[#D4A854] uppercase mb-4">
+            <p className="font-sans text-sm font-medium tracking-widest text-brand-honey uppercase mb-4">
               This is Small Plates
             </p>
 
             {/* Headline */}
             <h2
               id="solution-heading"
-              className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#2D2D2D] leading-tight"
+              className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-brand-charcoal leading-tight"
             >
               A cookbook made by everyone who showed up.
             </h2>
 
             {/* Body copy */}
             <div className="mt-8 space-y-6">
-              <p className="font-sans text-lg md:text-xl text-[#2D2D2D]/80 leading-relaxed">
+              <p className="font-sans text-lg md:text-xl text-brand-charcoal/80 leading-relaxed">
                 Every guest owns a page.
                 <span className="block">Every page holds a recipe, a note, a name.</span>
                 <span className="block">Every name stays in their kitchen — forever.</span>
               </p>
 
-              <p className="font-sans text-lg md:text-xl text-[#2D2D2D]/80 leading-relaxed">
+              <p className="font-sans text-lg md:text-xl text-brand-charcoal/80 leading-relaxed">
                 It's not a gift you display.
                 <span className="block">It's a gift you use—stained,</span>
                 <span className="block">and opened on random Tuesday nights for years.</span>
@@ -93,7 +93,7 @@ export default function TheSolution() {
               <button
                 type="button"
                 onClick={handleStartBook}
-                className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-8 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#D4A854]"
+                className="inline-flex items-center justify-center rounded-full bg-brand-honey hover:bg-brand-honey-dark text-white px-8 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-honey"
                 data-cta="solution-primary"
               >
                 Start a Book for Them

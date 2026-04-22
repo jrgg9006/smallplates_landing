@@ -42,7 +42,7 @@ export default function ForGiftGivers() {
 
   return (
     <section 
-      className="bg-[#E8E0D5] py-16 md:py-24"
+      className="bg-brand-sand py-16 md:py-24"
       aria-labelledby="gift-givers-heading"
     >
       <div className="mx-auto max-w-4xl px-6 md:px-8">
@@ -57,19 +57,19 @@ export default function ForGiftGivers() {
           {/* Headline */}
           <h2
             id="gift-givers-heading"
-            className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#2D2D2D] text-center"
+            className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-brand-charcoal text-center"
           >
             Giving this as a gift?
           </h2>
 
           {/* Subhead */}
-          <p className="mt-6 font-sans text-lg md:text-xl text-[#2D2D2D]/80 text-center max-w-2xl mx-auto">
+          <p className="mt-6 font-sans text-lg md:text-xl text-brand-charcoal/80 text-center max-w-2xl mx-auto">
             You're about to give the best wedding gift anyone's ever received.
           </p>
 
           {/* The Process */}
           <div className="mt-10 md:mt-12">
-            <p className="font-sans text-base font-medium text-[#2D2D2D]/60 uppercase tracking-wider mb-6">
+            <p className="font-sans text-base font-medium text-brand-charcoal/60 uppercase tracking-wider mb-6">
               Here's the deal:
             </p>
             
@@ -88,10 +88,10 @@ export default function ForGiftGivers() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: index * 0.1 }}
                 >
-                  <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#D4A854]/20 text-[#D4A854] font-medium flex items-center justify-center text-sm">
+                  <span className="flex-shrink-0 w-8 h-8 rounded-full bg-brand-honey/20 text-brand-honey font-medium flex items-center justify-center text-sm">
                     {index + 1}
                   </span>
-                  <span className="font-sans text-lg text-[#2D2D2D]/80 pt-1">
+                  <span className="font-sans text-lg text-brand-charcoal/80 pt-1">
                     {step}
                   </span>
                 </motion.li>
@@ -101,7 +101,7 @@ export default function ForGiftGivers() {
 
           {/* Reassurance */}
           <motion.p
-            className="mt-10 font-sans text-base text-[#2D2D2D]/60 text-center"
+            className="mt-10 font-sans text-base text-brand-charcoal/60 text-center"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -112,20 +112,20 @@ export default function ForGiftGivers() {
 
           {/* Pricing Context */}
           <motion.div
-            className="mt-8 pt-8 border-t border-[#E8E0D5]"
+            className="mt-8 pt-8 border-t border-brand-sand"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.5 }}
           >
-            <p className="font-sans text-center text-[#2D2D2D]/70">
+            <p className="font-sans text-center text-brand-charcoal/70">
               <span className="block text-lg">One gift from the group.</span>
-              <span className="block mt-2 text-base text-[#2D2D2D]/60">
+              <span className="block mt-2 text-base text-brand-charcoal/60">
                 Split among bridesmaids or family, it's less than most registry items—
                 <span className="block">and infinitely more meaningful.</span>
               </span>
             </p>
-            <p className="mt-4 font-serif text-xl text-[#2D2D2D] text-center">
+            <p className="mt-4 font-serif text-xl text-brand-charcoal text-center">
               Books start at $120.
             </p>
           </motion.div>
@@ -141,7 +141,7 @@ export default function ForGiftGivers() {
             <button
               type="button"
               onClick={handleStartGift}
-              className="inline-flex items-center justify-center rounded-full bg-[#2D2D2D] hover:bg-[#1a1a1a] text-white px-10 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#2D2D2D]"
+              className="inline-flex items-center justify-center rounded-full bg-brand-charcoal hover:bg-[#1a1a1a] text-white px-10 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-charcoal"
               data-cta="gift-givers-primary"
             >
               Start a Book for Someone

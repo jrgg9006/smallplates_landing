@@ -182,7 +182,7 @@ function AdminContentPage() {
         <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 max-w-md">
-              <label className="text-sm font-medium text-gray-700 mb-1 block">Select Group</label>
+              <label className="text-form-label font-medium text-gray-700 mb-1 block">Select Group</label>
               <Select value={selectedGroupId} onValueChange={handleGroupChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Choose a group..." />
@@ -245,7 +245,7 @@ function AdminContentPage() {
                           {g.first_name} {g.last_name}
                           {g.is_self && <span className="text-xs text-gray-400 ml-1">(self)</span>}
                         </p>
-                        <p className="text-xs text-gray-500 truncate">{g.email}</p>
+                        <p className="text-secondary-sm text-gray-500 truncate">{g.email}</p>
                         <p className="text-xs text-gray-400 mt-0.5">
                           {g.recipes_received} / {g.number_of_recipes} recipes
                           {g.source === 'manual' && ' | manual'}

@@ -400,7 +400,7 @@ export default function ResetPasswordPage() {
         {/* Form */}
         <form onSubmit={handlePasswordReset} className="space-y-6">
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-form-label font-medium text-gray-700 mb-1">
               New Password *
             </label>
             <input
@@ -413,11 +413,11 @@ export default function ResetPasswordPage() {
               placeholder="Enter your new password"
               minLength={6}
             />
-            <p className="text-xs text-gray-500 mt-1">Must be at least 6 characters long</p>
+            <p className="text-secondary-sm text-gray-500 mt-1">Must be at least 6 characters long</p>
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="confirmPassword" className="block text-form-label font-medium text-gray-700 mb-1">
               Confirm Password *
             </label>
             <input

@@ -330,3 +330,51 @@ export async function POST(
   }
 }
 
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ recipeId: string }> }
+) {
+  try {
+    await requireAdminAuth();
+    
+    const { recipeId } = await params;
+
+    if (!recipeId) {
+      return NextResponse.json({ error: 'recipeId is required' }, { status: 400 });
+    }
+
+    const supabase = createSupabaseAdminClient();
+
+    const { data, error } = await supabase
+      .from('guest_recipes')
+      .select(`
+        *,
+        guests (*),
+        profiles!guest_recipes_user_id_fkey (*),
+        recipe_production_status (*),
+        group_recipes (*),
+        midjourney_prompts (*),
+        recipe_print_ready (*)
+      `)
+      .eq('id', recipeId)
+      .is('deleted_at', null)
+      .maybeSingle();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    if (!data) {
+      return NextResponse.json({ error: 'Recipe not found' }, { status: 404 });
+    }
+    
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('Error in /api/admin/operations/recipes/[recipeId] GET:', error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Unauthorized' },
+      { status: 401 }
+    );
+  }
+}
+

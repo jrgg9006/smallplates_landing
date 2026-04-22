@@ -37,7 +37,7 @@ export default function TheProblem() {
         {/* Main statement */}
         <motion.h2
           id="problem-heading"
-          className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#2D2D2D] leading-tight"
+          className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-brand-charcoal leading-tight"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
@@ -54,12 +54,12 @@ export default function TheProblem() {
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
         >
-          <p className="font-sans text-lg md:text-xl text-[#2D2D2D]/80 leading-relaxed">
+          <p className="font-sans text-lg md:text-xl text-brand-charcoal/80 leading-relaxed">
             Another blender. Another towel set. Another thing
             <span className="block">that ends up in a closet or returned.</span>
           </p>
           
-          <p className="font-sans text-lg md:text-xl text-[#2D2D2D]/70 leading-relaxed">
+          <p className="font-sans text-lg md:text-xl text-brand-charcoal/70 leading-relaxed">
             Not because people don't care.
             <span className="block">Because an object can't carry a person inside it.</span>
           </p>
@@ -73,12 +73,12 @@ export default function TheProblem() {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <div className="w-16 h-px bg-[#2D2D2D]/20"></div>
+          <div className="w-16 h-px bg-brand-charcoal/20"></div>
         </motion.div>
 
         {/* The pivot — the question that opens the door */}
         <motion.p
-          className="font-serif text-2xl sm:text-3xl md:text-4xl text-[#2D2D2D] leading-snug italic"
+          className="font-serif text-2xl sm:text-3xl md:text-4xl text-brand-charcoal leading-snug italic"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}

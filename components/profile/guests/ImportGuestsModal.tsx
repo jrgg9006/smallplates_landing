@@ -292,7 +292,7 @@ export function ImportGuestsModal({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute right-6 top-6 text-[#2D2D2D] hover:text-[#C4856C] transition-colors"
+          className="absolute right-6 top-6 text-brand-charcoal hover:text-brand-terracotta transition-colors"
         >
           <X size={24} />
         </button>
@@ -307,7 +307,7 @@ export function ImportGuestsModal({
         {/* ==================== STEP 1: Select Source ==================== */}
         {step === "select-source" && (
           <div>
-            <p className="text-sm text-[#2D2D2D] mb-5">
+            <p className="text-sm text-brand-charcoal mb-5">
               Where is your guest list from?
             </p>
 
@@ -316,7 +316,7 @@ export function ImportGuestsModal({
               <button
                 onClick={() => { setSource("zola"); setStep("upload-file"); }}
                 className={`flex-1 rounded-xl border-[1.5px] p-6 flex items-center justify-center cursor-pointer transition-all
-                  border-[#E8E0D5] bg-white hover:border-[#D4A854] hover:bg-[#FFF8EC]`}
+                  border-brand-sand bg-white hover:border-brand-honey hover:bg-[#FFF8EC]`}
               >
                 <img src="/images/guest_modal/Zola_Logo.png" alt="Zola" className="h-5 object-contain" />
               </button>
@@ -325,7 +325,7 @@ export function ImportGuestsModal({
               <button
                 onClick={() => { setSource("the_knot"); setStep("upload-file"); }}
                 className={`flex-1 rounded-xl border-[1.5px] p-6 flex items-center justify-center cursor-pointer transition-all
-                  border-[#E8E0D5] bg-white hover:border-[#D4A854] hover:bg-[#FFF8EC]`}
+                  border-brand-sand bg-white hover:border-brand-honey hover:bg-[#FFF8EC]`}
               >
                 <img src="/images/guest_modal/knot_logo.png" alt="The Knot" className="h-5 object-contain" />
               </button>
@@ -342,7 +342,7 @@ export function ImportGuestsModal({
         {/* ==================== STEP 2: Upload File ==================== */}
         {step === "upload-file" && (
           <div>
-            <p className="text-sm text-[#2D2D2D] mb-4">
+            <p className="text-sm text-brand-charcoal mb-4">
               Upload your{" "}
               {source === "zola" ? "Zola" : "The Knot"} guest list (CSV or
               Excel)
@@ -351,14 +351,14 @@ export function ImportGuestsModal({
             {/* How to export helper */}
             <button
               onClick={() => setShowHelp(!showHelp)}
-              className="flex items-center gap-1 text-sm text-[#D4A854] mb-4 hover:opacity-80 transition-opacity"
+              className="flex items-center gap-1 text-sm text-brand-honey mb-4 hover:opacity-80 transition-opacity"
             >
               How do I export my list?
               {showHelp ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </button>
 
             {showHelp && (
-              <div className="text-xs text-[#999] bg-white rounded-lg p-3 mb-4 border border-[#E8E0D5]">
+              <div className="text-xs text-[#999] bg-white rounded-lg p-3 mb-4 border border-brand-sand">
                 {source === "zola" ? (
                   <p>
                     Go to <strong>Guest List</strong> &rarr; click{" "}
@@ -386,22 +386,22 @@ export function ImportGuestsModal({
               className={`rounded-xl border-2 border-dashed p-10 text-center cursor-pointer transition-all
                 ${
                   isDragOver
-                    ? "bg-[#FFF8EC] border-[#C4856C]"
-                    : "bg-[#FDFBF8] border-[#D4A854] hover:bg-[#FFF8EC]"
+                    ? "bg-[#FFF8EC] border-brand-terracotta"
+                    : "bg-[#FDFBF8] border-brand-honey hover:bg-[#FFF8EC]"
                 }`}
             >
               {isLoading ? (
                 <div className="flex flex-col items-center gap-2">
-                  <div className="w-8 h-8 border-2 border-[#D4A854] border-t-transparent rounded-full animate-spin" />
+                  <div className="w-8 h-8 border-2 border-brand-honey border-t-transparent rounded-full animate-spin" />
                   <p className="text-sm text-[#999]">Reading your file...</p>
                 </div>
               ) : (
                 <>
                   <Upload
                     size={32}
-                    className="mx-auto mb-3 text-[#D4A854]"
+                    className="mx-auto mb-3 text-brand-honey"
                   />
-                  <p className="text-sm text-[#2D2D2D] font-medium">
+                  <p className="text-sm text-brand-charcoal font-medium">
                     Drop your file here
                   </p>
                   <p className="text-sm text-[#999] mt-1">
@@ -432,7 +432,7 @@ export function ImportGuestsModal({
 
             <button
               onClick={() => setStep("select-source")}
-              className="w-full text-center text-sm text-[#999] hover:text-[#2D2D2D] mt-6 transition-colors"
+              className="w-full text-center text-sm text-[#999] hover:text-brand-charcoal mt-6 transition-colors"
             >
               &larr; Back
             </button>
@@ -442,7 +442,7 @@ export function ImportGuestsModal({
         {/* ==================== STEP 3: Select Guests ==================== */}
         {step === "select-guests" && (
           <div>
-            <p className="text-xs text-[#2D2D2D] mb-3">
+            <p className="text-xs text-brand-charcoal mb-3">
               Select who to add to your book
             </p>
 
@@ -456,9 +456,9 @@ export function ImportGuestsModal({
                     selectedCount === selectableGuests.length
                   }
                   onChange={toggleSelectAll}
-                  className="w-4 h-4 rounded accent-[#D4A854] cursor-pointer"
+                  className="w-4 h-4 rounded accent-brand-honey cursor-pointer"
                 />
-                <span className="text-xs text-[#2D2D2D]">
+                <span className="text-xs text-brand-charcoal">
                   {selectedCount === selectableGuests.length
                     ? "Deselect All"
                     : "Select All"}
@@ -470,7 +470,7 @@ export function ImportGuestsModal({
             </div>
 
             {/* Guest list */}
-            <div className="max-h-[340px] overflow-y-auto rounded-lg border border-[#E8E0D5] bg-white">
+            <div className="max-h-[340px] overflow-y-auto rounded-lg border border-brand-sand bg-white">
               {parsedGuests.map((guest) => {
                 const isDisabled = guest.alreadyExists;
                 const isSelected = selectedIds.has(guest.id);
@@ -479,7 +479,7 @@ export function ImportGuestsModal({
                 return (
                   <div
                     key={guest.id}
-                    className={`flex items-center gap-2 px-3 py-2 border-b border-[#E8E0D5] last:border-b-0
+                    className={`flex items-center gap-2 px-3 py-2 border-b border-brand-sand last:border-b-0
                       ${isDisabled ? "opacity-60" : ""}`}
                   >
                     <input
@@ -487,18 +487,18 @@ export function ImportGuestsModal({
                       checked={isSelected && !isDisabled}
                       disabled={isDisabled}
                       onChange={() => !isDisabled && toggleGuest(guest.id)}
-                      className="w-4 h-4 flex-shrink-0 rounded accent-[#D4A854] cursor-pointer disabled:cursor-not-allowed"
+                      className="w-4 h-4 flex-shrink-0 rounded accent-brand-honey cursor-pointer disabled:cursor-not-allowed"
                     />
 
                     <div className="flex-1 min-w-0 flex items-center gap-1">
-                      <span className="text-xs font-medium text-[#2D2D2D] truncate">
+                      <span className="text-xs font-medium text-brand-charcoal truncate">
                         {guest.first_name} {guest.last_name}
                       </span>
                       {!hasContact && (
                         <span title="No email or phone">
                           <AlertTriangle
                             size={12}
-                            className="text-[#D4A854] flex-shrink-0"
+                            className="text-brand-honey flex-shrink-0"
                           />
                         </span>
                       )}
@@ -518,7 +518,7 @@ export function ImportGuestsModal({
                     )}
 
                     {isDisabled && (
-                      <span className="text-[10px] bg-[#E8E0D5] text-[#999] px-2 py-0.5 rounded-full flex-shrink-0">
+                      <span className="text-[10px] bg-brand-sand text-[#999] px-2 py-0.5 rounded-full flex-shrink-0">
                         Already added
                       </span>
                     )}
@@ -538,14 +538,14 @@ export function ImportGuestsModal({
                   setStep("upload-file");
                   setError(null);
                 }}
-                className="text-xs text-[#999] hover:text-[#2D2D2D] transition-colors"
+                className="text-xs text-[#999] hover:text-brand-charcoal transition-colors"
               >
                 &larr; Back
               </button>
               <button
                 onClick={handleImport}
                 disabled={selectedCount === 0 || isLoading}
-                className="px-4 py-2 rounded-lg bg-[#D4A854] text-white text-xs font-medium transition-opacity
+                className="px-4 py-2 rounded-lg bg-brand-honey text-white text-xs font-medium transition-opacity
                            disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 flex items-center gap-1.5"
               >
                 {isLoading ? (

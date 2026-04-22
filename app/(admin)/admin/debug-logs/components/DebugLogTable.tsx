@@ -193,7 +193,7 @@ export function DebugLogTable({ logs, onMarkReviewed, onReopen, onSaveNotes }: D
                             value={getNotesValue(log)}
                             onChange={e => handleNotesChange(log.id, e.target.value)}
                             placeholder="Add notes about this issue..."
-                            className="w-full h-32 border border-gray-200 rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#D4A854]/50 focus:border-[#D4A854]"
+                            className="w-full h-32 border border-gray-200 rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-brand-honey/50 focus:border-brand-honey"
                           />
                           <button
                             onClick={() => onSaveNotes(log.id, getNotesValue(log))}

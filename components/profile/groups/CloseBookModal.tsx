@@ -39,7 +39,7 @@ export function CloseBookModal({
         </DialogHeader>
 
         <div className="py-3">
-          <p className="text-sm text-[#8A8780] leading-relaxed">
+          <p className="text-sm text-[hsl(var(--brand-warm-gray))] leading-relaxed">
             {reviewed
               ? "Once you close the book, recipes can't be added or edited. We'll start designing right away."
               : "Closing locks the recipes and sends everything to design. You'll confirm a couple of details before we print."}
@@ -49,21 +49,21 @@ export function CloseBookModal({
         <div className="flex gap-2 pt-2">
           <button
             onClick={onClose}
-            className="flex-1 border border-[rgba(45,45,45,0.12)] text-[#2D2D2D] rounded-full py-3 text-[14px] font-medium hover:bg-gray-50 transition-colors"
+            className="flex-1 border border-[rgba(45,45,45,0.12)] text-brand-charcoal rounded-full py-3 text-[14px] font-medium hover:bg-gray-50 transition-colors"
           >
             Not ready yet
           </button>
           {reviewed ? (
             <button
               onClick={onStartCloseFlow}
-              className="flex-1 bg-[#2D2D2D] text-[#FAF7F2] rounded-full py-3 text-[14px] font-medium hover:bg-gray-800 transition-colors"
+              className="flex-1 bg-brand-charcoal text-[#FAF7F2] rounded-full py-3 text-[14px] font-medium hover:bg-gray-800 transition-colors"
             >
               Close the book →
             </button>
           ) : (
             <button
               onClick={onReview}
-              className="flex-1 bg-[#2D2D2D] text-[#FAF7F2] rounded-full py-3 text-[14px] font-medium hover:bg-gray-800 transition-colors"
+              className="flex-1 bg-brand-charcoal text-[#FAF7F2] rounded-full py-3 text-[14px] font-medium hover:bg-gray-800 transition-colors"
             >
               Review recipes →
             </button>

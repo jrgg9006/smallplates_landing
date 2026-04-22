@@ -39,7 +39,7 @@ export default function BookPreviewModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-5xl w-[95vw] h-[90vh] max-h-[90vh] flex flex-col overflow-hidden p-0 gap-0">
         <DialogHeader className="flex-shrink-0 px-8 pt-6 pb-4 border-b border-gray-200">
-          <DialogTitle className="font-serif text-2xl md:text-3xl font-medium text-[#2D2D2D]">
+          <DialogTitle className="font-serif text-2xl md:text-3xl font-medium text-brand-charcoal">
             Your people. Your recipes. One book.
           </DialogTitle>
         </DialogHeader>
@@ -53,7 +53,7 @@ export default function BookPreviewModal({
 
           {/* Elegant tagline */}
           <div className="text-center mt-6 mb-2">
-            <p className="font-serif text-lg md:text-xl text-[#2D2D2D] italic font-light">
+            <p className="font-serif text-lg md:text-xl text-brand-charcoal italic font-light">
               Made by the people who love you
             </p>
           </div>
@@ -62,13 +62,13 @@ export default function BookPreviewModal({
           <div className="flex gap-4 mt-6">
             <button
                 onClick={handleViewProductDetails}
-              className="px-6 py-3 bg-white text-[#2D2D2D] border border-[#E8E0D5] rounded-xl hover:bg-[#FAF7F2] transition-colors font-medium font-sans"
+              className="px-6 py-3 bg-white text-brand-charcoal border border-brand-sand rounded-xl hover:bg-[#FAF7F2] transition-colors font-medium font-sans"
             >
               See Inside
             </button>
             <button
                 onClick={handleCreateCookbook}
-              className="px-6 py-3 bg-[#D4A854] text-white rounded-xl hover:bg-[#c49b4a] transition-colors font-medium font-sans"
+              className="px-6 py-3 bg-brand-honey text-white rounded-xl hover:bg-brand-honey-dark transition-colors font-medium font-sans"
             >
               Give this Gift
             </button>

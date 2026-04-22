@@ -25,14 +25,14 @@ type ChatMessage = {
 
 const PROSE_CLASSES = `
   prose prose-gray max-w-none
-  prose-headings:font-semibold prose-headings:text-[#2D2D2D]
+  prose-headings:font-semibold prose-headings:text-brand-charcoal
   prose-h3:text-lg prose-h3:mt-8 prose-h3:mb-3
-  prose-p:text-[#2D2D2D]/80 prose-p:leading-relaxed prose-p:text-sm
-  prose-li:text-[#2D2D2D]/80 prose-li:text-sm
-  prose-strong:text-[#2D2D2D]
+  prose-p:text-brand-charcoal/80 prose-p:leading-relaxed prose-p:text-sm
+  prose-li:text-brand-charcoal/80 prose-li:text-sm
+  prose-strong:text-brand-charcoal
   prose-table:text-sm
-  prose-th:text-left prose-th:font-semibold prose-th:text-[#2D2D2D]
-  prose-td:text-[#2D2D2D]/80
+  prose-th:text-left prose-th:font-semibold prose-th:text-brand-charcoal
+  prose-td:text-brand-charcoal/80
   prose-code:text-sm prose-code:bg-gray-100 prose-code:px-1 prose-code:rounded
   prose-hr:my-6
 `;
@@ -269,7 +269,7 @@ export default function TikTokPage() {
               <Button
                 onClick={handleGenerate}
                 disabled={generating || !idea.trim()}
-                className="w-full bg-[#2D2D2D] text-white hover:bg-[#2D2D2D]/90"
+                className="w-full bg-brand-charcoal text-white hover:bg-brand-charcoal/90"
               >
                 {generating ? (
                   <span className="flex items-center gap-2">
@@ -293,7 +293,7 @@ export default function TikTokPage() {
                   // Reason: skip rendering the first user message (it's the auto-built prompt)
                   i === 0 ? null : (
                     <div className="flex justify-end mb-4">
-                      <div className="bg-[#2D2D2D] text-white rounded-xl rounded-br-sm px-4 py-3 max-w-[85%]">
+                      <div className="bg-brand-charcoal text-white rounded-xl rounded-br-sm px-4 py-3 max-w-[85%]">
                         <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                       </div>
                     </div>
@@ -331,7 +331,7 @@ export default function TikTokPage() {
             {generating && streamingContent && (
               <div className="bg-white rounded-xl shadow-lg p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="animate-spin rounded-full h-4 w-4 border-2 border-[#2D2D2D] border-t-transparent" />
+                  <span className="animate-spin rounded-full h-4 w-4 border-2 border-brand-charcoal border-t-transparent" />
                   <h2 className="text-lg font-semibold text-gray-900">Generating...</h2>
                 </div>
                 <article className={PROSE_CLASSES}>
@@ -346,7 +346,7 @@ export default function TikTokPage() {
             {generating && !streamingContent && (
               <div className="bg-white rounded-xl shadow-lg p-6">
                 <div className="flex items-center gap-2">
-                  <span className="animate-spin rounded-full h-4 w-4 border-2 border-[#2D2D2D] border-t-transparent" />
+                  <span className="animate-spin rounded-full h-4 w-4 border-2 border-brand-charcoal border-t-transparent" />
                   <p className="text-sm text-gray-600">Thinking...</p>
                 </div>
               </div>
@@ -374,7 +374,7 @@ export default function TikTokPage() {
                   <Button
                     onClick={handleFollowUp}
                     disabled={!followUp.trim()}
-                    className="self-end bg-[#2D2D2D] text-white hover:bg-[#2D2D2D]/90"
+                    className="self-end bg-brand-charcoal text-white hover:bg-brand-charcoal/90"
                   >
                     Send
                   </Button>

@@ -46,7 +46,7 @@ export function ProductSelectionStep({
     <div className="max-w-lg mx-auto">
       {/* Book quantity selector */}
       <div className="mb-6">
-        <p className="text-base font-medium text-[#2D2D2D] mb-6 text-center">
+        <p className="text-base font-medium text-brand-charcoal mb-6 text-center">
           First book $169. Each additional copy $129.
         </p>
 
@@ -55,15 +55,15 @@ export function ProductSelectionStep({
           <button
             type="button"
             onClick={() => setIsOpen(!isOpen)}
-            className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl border border-gray-300 bg-white text-left transition-all hover:border-[#D4A854] focus:outline-none focus:ring-2 focus:ring-[#D4A854]/20 focus:border-[#D4A854]"
+            className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl border border-gray-300 bg-white text-left transition-all hover:border-brand-honey focus:outline-none focus:ring-2 focus:ring-brand-honey/20 focus:border-brand-honey"
           >
-            <span className="text-[15px] text-[#2D2D2D]">
+            <span className="text-[15px] text-brand-charcoal">
               {bookQuantity === 1
                 ? `1 copy — $${BASE_BOOK_PRICE}`
                 : `${bookQuantity} copies — $${subtotal}`}
             </span>
             <svg
-              className={`w-4 h-4 text-[#8A8780] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+              className={`w-4 h-4 text-[hsl(var(--brand-warm-gray))] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -92,19 +92,19 @@ export function ProductSelectionStep({
                     onClick={() => handleSelect(qty)}
                     className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${
                       bookQuantity === qty
-                        ? "bg-[#FAF7F2] text-[#2D2D2D]"
-                        : "hover:bg-[#FAF7F2]/60 text-[#2D2D2D]"
+                        ? "bg-[#FAF7F2] text-brand-charcoal"
+                        : "hover:bg-[#FAF7F2]/60 text-brand-charcoal"
                     }`}
                   >
                     <span className="text-[14px]">
                       {qty === 1 ? "1 copy" : `${qty} copies`}
                       {qty > 1 && (
-                        <span className="text-[12px] text-[#9A9590] ml-1.5">
+                        <span className="text-[12px] text-[hsl(var(--brand-warm-gray-light))] ml-1.5">
                           +${ADDITIONAL_BOOK_PRICE * (qty - 1)}
                         </span>
                       )}
                     </span>
-                    <span className="text-[14px] text-[#2D2D2D]/70">
+                    <span className="text-[14px] text-brand-charcoal/70">
                       ${total}
                     </span>
                   </button>
@@ -115,10 +115,10 @@ export function ProductSelectionStep({
         </div>
 
         <div className="mt-5 px-5 py-4 rounded-xl bg-[#F5F3F0] text-center">
-          <span className="text-[#D4A854] text-base mr-1.5" style={{ fontFamily: "'Georgia', serif", fontStyle: "italic" }}>
+          <span className="text-brand-honey text-base mr-1.5" style={{ fontFamily: "'Georgia', serif", fontStyle: "italic" }}>
             Tip
           </span>
-          <span className="text-[13px] text-[#6B6560]">
+          <span className="text-[13px] text-[hsl(var(--brand-warm-gray-dark))]">
             Many people want extra copies for family and close friends.
           </span>
         </div>

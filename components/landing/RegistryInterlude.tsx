@@ -15,7 +15,7 @@ export default function RegistryInterlude() {
       <div className="mx-auto max-w-2xl px-6 md:px-8">
 
         <motion.div
-          className="text-center border border-[#E8E0D5] rounded-2xl py-8 px-6 md:py-10 md:px-10"
+          className="text-center border border-brand-sand rounded-2xl py-8 px-6 md:py-10 md:px-10"
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
@@ -27,7 +27,7 @@ export default function RegistryInterlude() {
           </h2>
 
           {/* Body text */}
-          <p className="type-body-small text-[15px] md:text-base text-[#8A8780] mb-6">
+          <p className="type-body-small text-[15px] md:text-base text-[hsl(var(--brand-warm-gray))] mb-6">
             You can put this on your registry.<br className="hidden sm:inline" />
             Your people fund it. They fill it. You keep it.
           </p>
@@ -35,7 +35,7 @@ export default function RegistryInterlude() {
           {/* CTA Button - Outline style */}
           <button
             onClick={() => setIsModalOpen(true)}
-            className="inline-block font-sans text-sm font-medium text-[#D4A854] border border-[#D4A854] rounded-full px-6 py-2.5 hover:bg-[#D4A854] hover:text-white transition-all duration-200"
+            className="inline-block font-sans text-sm font-medium text-brand-honey border border-brand-honey rounded-full px-6 py-2.5 hover:bg-brand-honey hover:text-white transition-all duration-200"
           >
             Add to Registry
           </button>

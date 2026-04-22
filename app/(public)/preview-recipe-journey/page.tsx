@@ -182,7 +182,7 @@ export default function PreviewPage() {
               <div className="space-y-4">
                 <div className="flex gap-4 items-end">
                   <div className="w-20">
-                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="firstName" className="block text-form-label font-medium text-gray-700 mb-1">
                       First initial
                     </label>
                     <Input
@@ -199,7 +199,7 @@ export default function PreviewPage() {
                     />
                   </div>
                   <div className="flex-1">
-                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="lastName" className="block text-form-label font-medium text-gray-700 mb-1">
                       Last name
                     </label>
                     <Input
@@ -248,7 +248,7 @@ export default function PreviewPage() {
                       No worries! We&apos;ll add you when you submit your plate.
                     </p>
                     <div className="space-y-2">
-                      <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                      <label htmlFor="fullName" className="block text-form-label font-medium text-gray-700 mb-1">Name</label>
                       <div className="flex gap-4 items-center">
                         <Input
                           id="fullName"
@@ -271,7 +271,7 @@ export default function PreviewPage() {
                           Continue
                         </Button>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">This is how we&apos;ll print your name in the cookbook.</p>
+                      <p className="text-secondary-sm text-gray-500 mt-1">This is how we&apos;ll print your name in the cookbook.</p>
                     </div>
                   </div>
                 </div>

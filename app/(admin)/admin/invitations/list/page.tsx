@@ -145,7 +145,7 @@ export default function InvitationsListPage() {
       {/* Simple Filter */}
       <div className="bg-white border-b px-6 py-3">
         <div className="flex items-center gap-4">
-          <label className="text-sm font-medium text-gray-700">Status:</label>
+          <label className="text-form-label font-medium text-gray-700">Status:</label>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}

@@ -76,7 +76,7 @@ export function ReviewRecipeCard({ recipe, index, total, onSave }: ReviewRecipeC
             {!isImageUpload && !isEditing && (
               <button
                 onClick={handleStartEdit}
-                className="text-xs text-gray-400 hover:text-[#D4A854] transition-colors flex items-center gap-1"
+                className="text-xs text-gray-400 hover:text-brand-honey transition-colors flex items-center gap-1"
               >
                 <Pencil className="h-3 w-3" /> Edit
               </button>
@@ -93,7 +93,7 @@ export function ReviewRecipeCard({ recipe, index, total, onSave }: ReviewRecipeC
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="text-xs text-[#D4A854] hover:text-[#c49a4a] font-medium transition-colors"
+                  className="text-xs text-brand-honey hover:text-brand-honey-dark font-medium transition-colors"
                 >
                   {saving ? "Saving..." : "Save"}
                 </button>
@@ -106,7 +106,7 @@ export function ReviewRecipeCard({ recipe, index, total, onSave }: ReviewRecipeC
             <input
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
-              className="w-full text-3xl lg:text-4xl font-serif text-gray-900 mb-4 leading-tight bg-white border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-[#D4A854]"
+              className="w-full text-3xl lg:text-4xl font-serif text-gray-900 mb-4 leading-tight bg-white border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-brand-honey"
             />
           ) : (
             <h1 className="text-3xl lg:text-4xl font-serif text-gray-900 mb-4 leading-tight">
@@ -121,7 +121,7 @@ export function ReviewRecipeCard({ recipe, index, total, onSave }: ReviewRecipeC
               onChange={(e) => setEditNote(e.target.value)}
               placeholder="Personal note (optional)"
               rows={2}
-              className="w-full text-sm italic text-gray-500 font-serif mb-6 bg-white border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-[#D4A854] resize-none"
+              className="w-full text-sm italic text-gray-500 font-serif mb-6 bg-white border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-brand-honey resize-none"
             />
           ) : displayNote.trim() ? (
             <p className="text-sm italic text-gray-500 font-serif mb-6">
@@ -134,11 +134,11 @@ export function ReviewRecipeCard({ recipe, index, total, onSave }: ReviewRecipeC
 
           {/* Image-upload info */}
           {isImageUpload && (
-            <div className="rounded-lg bg-[#D4A854]/10 border border-[#D4A854]/30 p-4 mb-6">
+            <div className="rounded-lg bg-brand-honey/10 border border-brand-honey/30 p-4 mb-6">
               <div className="flex items-start gap-3">
-                <ImageIcon className="h-5 w-5 text-[#D4A854] mt-0.5 flex-shrink-0" />
+                <ImageIcon className="h-5 w-5 text-brand-honey mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-[#2D2D2D]">
+                  <p className="text-sm font-medium text-brand-charcoal">
                     This recipe was uploaded as an image.
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
@@ -170,7 +170,7 @@ export function ReviewRecipeCard({ recipe, index, total, onSave }: ReviewRecipeC
                     value={editIngredients}
                     onChange={(e) => setEditIngredients(e.target.value)}
                     rows={10}
-                    className="w-full text-sm text-gray-700 font-serif leading-relaxed bg-white border border-gray-200 rounded px-3 py-2 resize-y focus:outline-none focus:border-[#D4A854]"
+                    className="w-full text-sm text-gray-700 font-serif leading-relaxed bg-white border border-gray-200 rounded px-3 py-2 resize-y focus:outline-none focus:border-brand-honey"
                   />
                 ) : displayIngredients.trim() ? (
                   <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed font-serif">
@@ -191,7 +191,7 @@ export function ReviewRecipeCard({ recipe, index, total, onSave }: ReviewRecipeC
                     value={editInstructions}
                     onChange={(e) => setEditInstructions(e.target.value)}
                     rows={14}
-                    className="w-full text-sm text-gray-700 font-serif leading-[1.6] bg-white border border-gray-200 rounded px-3 py-2 resize-y focus:outline-none focus:border-[#D4A854]"
+                    className="w-full text-sm text-gray-700 font-serif leading-[1.6] bg-white border border-gray-200 rounded px-3 py-2 resize-y focus:outline-none focus:border-brand-honey"
                   />
                 ) : displayInstructions.trim() ? (
                   <div className="text-sm text-gray-700 font-serif leading-[1.6]">

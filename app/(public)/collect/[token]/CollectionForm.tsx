@@ -214,7 +214,7 @@ export default function CollectionForm() {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4A854] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-honey mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -273,7 +273,7 @@ export default function CollectionForm() {
                 />
               </div>
             )}
-            <h1 className="text-2xl lg:text-3xl font-semibold text-[#2D2D2D] font-serif mb-4">
+            <h1 className="text-2xl lg:text-3xl font-semibold text-brand-charcoal font-serif mb-4">
               This book has been closed.
             </h1>
             <p className="text-gray-600 text-base lg:text-lg leading-relaxed mb-2">
@@ -362,7 +362,7 @@ export default function CollectionForm() {
                       </div>
                     )}
 
-                    <h1 className="text-2xl lg:text-3xl font-semibold text-[#2D2D2D] mb-4 font-serif">
+                    <h1 className="text-2xl lg:text-3xl font-semibold text-brand-charcoal mb-4 font-serif">
                       {personalizedMessage.beforeName}
                       {personalizedMessage.name && (
                         <span className="font-semibold text-gray-900 mx-1">
@@ -430,7 +430,7 @@ export default function CollectionForm() {
               <div className="space-y-4">
               <div className="flex gap-4 items-end">
                 <div className="w-20">
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="firstName" className="block text-form-label font-medium text-gray-700 mb-1">
                     First initial
                   </label>
                   <Input
@@ -449,7 +449,7 @@ export default function CollectionForm() {
                   />
                 </div>
                 <div className="flex-1">
-                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="lastName" className="block text-form-label font-medium text-gray-700 mb-1">
                     Last name
                   </label>
                   <Input
@@ -475,7 +475,7 @@ export default function CollectionForm() {
                   className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[80px] transition-colors ${
                     !firstName.trim() || searching
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-[#D4A854] text-white hover:bg-[#c49b4a]'
+                      : 'bg-brand-honey text-white hover:bg-brand-honey-dark'
                   }`}
                 >
                   {searching ? (
@@ -493,7 +493,7 @@ export default function CollectionForm() {
               {/* Name entry when user explicitly chooses "I don't see my name" */}
               {searchCompleted && showNameEntry && (
                 <div className="space-y-2 mt-6">
-                  <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                  <label htmlFor="fullName" className="block text-form-label font-medium text-gray-700 mb-1">Name</label>
                   <div className="flex gap-4 items-center">
                     <Input
                       id="fullName"
@@ -512,7 +512,7 @@ export default function CollectionForm() {
                     <Button
                       onClick={handleContinueAsNew}
                       disabled={!fullName.trim()}
-                      className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!fullName.trim() ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[#D4A854] text-white hover:bg-[#c49b4a]'}`}
+                      className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!fullName.trim() ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-brand-honey text-white hover:bg-brand-honey-dark'}`}
                     >
                       Continue
                     </Button>
@@ -523,10 +523,10 @@ export default function CollectionForm() {
 
               {/* Search Results */}
               {searchCompleted && !showNameEntry && (
-                <div className="border-t border-[#D4A854]/20 pt-6">
+                <div className="border-t border-brand-honey/20 pt-6">
                   {searchResults.length > 0 ? (
                     <div className="space-y-4">
-                      <h3 className="text-xl font-medium text-[#2D2D2D] font-serif">
+                      <h3 className="text-xl font-medium text-brand-charcoal font-serif">
                         That&apos;s you, right?
                       </h3>
                       <div className="space-y-3">
@@ -534,13 +534,13 @@ export default function CollectionForm() {
                           <button
                             key={guest.id}
                             onClick={() => handleGuestSelect(guest)}
-                            className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-[#D4A854]/50 hover:bg-[#FAF7F2] transition-colors text-left bg-white"
+                            className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-brand-honey/50 hover:bg-[#FAF7F2] transition-colors text-left bg-white"
                           >
-                            <span className="text-[#2D2D2D] font-medium">
+                            <span className="text-brand-charcoal font-medium">
                               {guest.first_name} {guest.last_name}
                             </span>
                             <svg
-                              className="w-5 h-5 text-[#D4A854]"
+                              className="w-5 h-5 text-brand-honey"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -556,13 +556,13 @@ export default function CollectionForm() {
                             setFullName('');
                             setTimeout(() => document.getElementById('fullName')?.focus(), 100);
                           }}
-                          className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-[#D4A854]/50 hover:bg-[#FAF7F2] transition-colors text-left bg-white"
+                          className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-brand-honey/50 hover:bg-[#FAF7F2] transition-colors text-left bg-white"
                         >
-                          <span className="text-[#2D2D2D] font-medium">
+                          <span className="text-brand-charcoal font-medium">
                             I don&apos;t see my name
                           </span>
                           <svg
-                            className="w-5 h-5 text-[#D4A854]"
+                            className="w-5 h-5 text-brand-honey"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -574,14 +574,14 @@ export default function CollectionForm() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      <h3 className="text-xl font-medium text-[#2D2D2D] font-serif">
+                      <h3 className="text-xl font-medium text-brand-charcoal font-serif">
                         Not on the list yet? No problem.
                       </h3>
                       <p className="text-gray-600 mb-4 text-sm">
                         We&apos;ll add you when you submit your recipe.
                       </p>
                       <div className="space-y-2">
-                        <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <label htmlFor="fullName" className="block text-form-label font-medium text-gray-700 mb-1">Name</label>
                         <div className="flex gap-4 items-center">
                           <Input
                             id="fullName"
@@ -600,7 +600,7 @@ export default function CollectionForm() {
                           <Button
                             onClick={handleContinueAsNew}
                             disabled={!((fullName || firstName).trim())}
-                            className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!((fullName || firstName).trim()) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[#D4A854] text-white hover:bg-[#c49b4a]'}`}
+                            className={`px-4 sm:px-8 py-2 rounded-full h-10 min-w-[100px] transition-colors ${!((fullName || firstName).trim()) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-brand-honey text-white hover:bg-brand-honey-dark'}`}
                           >
                             Continue
                           </Button>

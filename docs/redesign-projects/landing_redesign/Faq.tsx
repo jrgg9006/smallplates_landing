@@ -66,16 +66,16 @@ const faqs: FAQItem[] = [
 function FAQItemComponent({ faq, isOpen, onClick }: { faq: FAQItem; isOpen: boolean; onClick: () => void }) {
   return (
     <motion.div
-      className="border-b border-[#E8E0D5] last:border-b-0"
+      className="border-b border-brand-sand last:border-b-0"
       initial={false}
     >
       <button
         type="button"
         onClick={onClick}
-        className="w-full py-6 flex items-center justify-between text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A854] focus-visible:ring-offset-2 rounded-lg"
+        className="w-full py-6 flex items-center justify-between text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-honey focus-visible:ring-offset-2 rounded-lg"
         aria-expanded={isOpen}
       >
-        <h3 className="font-serif text-lg md:text-xl font-medium text-[#2D2D2D] pr-8">
+        <h3 className="font-serif text-lg md:text-xl font-medium text-brand-charcoal pr-8">
           {faq.question}
         </h3>
         <motion.div
@@ -96,7 +96,7 @@ function FAQItemComponent({ faq, isOpen, onClick }: { faq: FAQItem; isOpen: bool
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            <p className="pb-6 font-sans text-base md:text-lg text-[#2D2D2D]/70 leading-relaxed pr-12">
+            <p className="pb-6 font-sans text-base md:text-lg text-brand-charcoal/70 leading-relaxed pr-12">
               {faq.answer}
             </p>
           </motion.div>
@@ -131,11 +131,11 @@ export default function FAQ() {
         >
           <h2
             id="faq-heading"
-            className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#2D2D2D]"
+            className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-brand-charcoal"
           >
             Questions?
           </h2>
-          <p className="mt-4 font-sans text-lg text-[#2D2D2D]/60">
+          <p className="mt-4 font-sans text-lg text-brand-charcoal/60">
             We've got answers.
           </p>
         </motion.div>
@@ -169,7 +169,7 @@ export default function FAQ() {
           Still have questions?{" "}
           <a 
             href="mailto:hello@smallplates.co" 
-            className="text-[#D4A854] hover:text-[#c49b4a] underline underline-offset-2 transition-colors"
+            className="text-brand-honey hover:text-brand-honey-dark underline underline-offset-2 transition-colors"
           >
             We're here.
           </a>

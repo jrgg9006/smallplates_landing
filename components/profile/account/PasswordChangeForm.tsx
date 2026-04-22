@@ -200,7 +200,7 @@ export function PasswordChangeForm() {
           </div>
         )}
         
-        <div className="text-xs text-gray-500 mt-1 space-y-1">
+        <div className="text-secondary-sm text-gray-500 mt-1 space-y-1">
           <p>Password must contain:</p>
           <ul className="list-disc list-inside space-y-0.5 ml-2">
             <li className={newPassword.length >= 8 ? 'text-green-600' : 'text-gray-500'}>

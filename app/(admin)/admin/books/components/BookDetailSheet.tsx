@@ -410,7 +410,7 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                                 )}
                               </div>
                               <div className="flex items-center gap-2">
-                                <span className="text-xs text-gray-500">{c.recipes_received} recipe{c.recipes_received !== 1 ? 's' : ''}</span>
+                                <span className="text-secondary-sm text-gray-500">{c.recipes_received} recipe{c.recipes_received !== 1 ? 's' : ''}</span>
                                 <button
                                   onClick={() => {
                                     setEditingField(editKey);
@@ -609,7 +609,7 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                       <Button
                         variant="outline"
                         size="sm"
-                        className="border-[#D4A854] text-[#D4A854] hover:bg-[#D4A854]/10"
+                        className="border-brand-honey text-brand-honey hover:bg-brand-honey/10"
                         disabled={downloadingPackage}
                         onClick={async () => {
                           setDownloadingPackage(true);

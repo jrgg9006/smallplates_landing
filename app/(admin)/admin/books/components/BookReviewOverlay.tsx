@@ -830,7 +830,7 @@ function SummaryView({
           </Button>
         </div>
         {!allApproved && (
-          <p className="text-xs text-gray-500 text-center">
+          <p className="text-secondary-sm text-gray-500 text-center">
             All recipes must be approved before marking the book as ready to print
           </p>
         )}

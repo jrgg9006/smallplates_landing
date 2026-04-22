@@ -224,7 +224,7 @@ export default function AdminWaitlistPage() {
                           {user.first_name} {user.last_name}
                         </div>
                         {user.has_partner && user.partner_first_name && (
-                          <div className="text-xs text-gray-500">
+                          <div className="text-secondary-sm text-gray-500">
                             + {user.partner_first_name} {user.partner_last_name}
                           </div>
                         )}
@@ -246,7 +246,7 @@ export default function AdminWaitlistPage() {
                         <div className="text-sm text-gray-900">
                           {new Date(user.created_at).toLocaleDateString()}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-secondary-sm text-gray-500">
                           {new Date(user.created_at).toLocaleTimeString()}
                         </div>
                       </td>
@@ -279,7 +279,7 @@ export default function AdminWaitlistPage() {
                             {user.status === 'visited' && (
                               <div className="flex flex-col gap-2">
                                 <div className="text-sm text-orange-600 font-medium">👁️ Visited page</div>
-                                <div className="text-xs text-gray-500">
+                                <div className="text-secondary-sm text-gray-500">
                                   Started signup but didn&apos;t complete
                                 </div>
                                 <button

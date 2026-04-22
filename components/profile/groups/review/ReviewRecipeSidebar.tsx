@@ -36,7 +36,7 @@ export function ReviewRecipeSidebar({ recipes, currentIndex, onSelect }: ReviewR
                 }`}
               >
                 <p className={`font-serif text-[15px] leading-snug truncate ${
-                  isActive ? "text-[#2D2D2D] font-medium" : "text-gray-500"
+                  isActive ? "text-brand-charcoal font-medium" : "text-gray-500"
                 }`}>
                   {name}
                 </p>

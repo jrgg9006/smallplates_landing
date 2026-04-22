@@ -322,7 +322,7 @@ export function GuestDetailsModal({
             <button
               onClick={() => setShowDeleteConfirm(true)}
               disabled={showDeleteConfirm}
-              className="text-xs text-[#9A9590] hover:text-red-600 transition-colors disabled:opacity-40"
+              className="text-xs text-[hsl(var(--brand-warm-gray-light))] hover:text-red-600 transition-colors disabled:opacity-40"
             >
               Delete guest
             </button>

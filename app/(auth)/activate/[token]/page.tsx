@@ -148,7 +148,7 @@ export default function ActivateAccountPage({ params }: { params: Promise<{ toke
             Please contact us at{" "}
             <a
               href="mailto:team@smallplatesandcompany.com"
-              className="text-[#D4A854] hover:underline"
+              className="text-brand-honey hover:underline"
             >
               team@smallplatesandcompany.com
             </a>
@@ -209,7 +209,7 @@ export default function ActivateAccountPage({ params }: { params: Promise<{ toke
             className="mx-auto mb-8"
             priority
           />
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4A854] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-honey mx-auto"></div>
           <p className="text-gray-600 mt-4">Validating activation link...</p>
         </div>
       </div>
@@ -268,7 +268,7 @@ export default function ActivateAccountPage({ params }: { params: Promise<{ toke
             </p>
           )}
           {tokenData?.coupleNames && (
-            <p className="text-sm text-[#D4A854] mt-2">
+            <p className="text-sm text-brand-honey mt-2">
               {tokenData.coupleNames}&apos;s Cookbook
             </p>
           )}
@@ -277,7 +277,7 @@ export default function ActivateAccountPage({ params }: { params: Promise<{ toke
         {/* Form */}
         <form onSubmit={handleActivation} className="space-y-6">
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-form-label font-medium text-gray-700 mb-1">
               Password *
             </label>
             <input
@@ -286,15 +286,15 @@ export default function ActivateAccountPage({ params }: { params: Promise<{ toke
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-honey focus:border-transparent outline-none transition-all"
               placeholder="Enter your password"
               minLength={8}
             />
-            <p className="text-xs text-gray-500 mt-1">Must be at least 8 characters long</p>
+            <p className="text-secondary-sm text-gray-500 mt-1">Must be at least 8 characters long</p>
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="confirmPassword" className="block text-form-label font-medium text-gray-700 mb-1">
               Confirm Password *
             </label>
             <input
@@ -303,7 +303,7 @@ export default function ActivateAccountPage({ params }: { params: Promise<{ toke
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-honey focus:border-transparent outline-none transition-all"
               placeholder="Confirm your password"
               minLength={8}
             />
@@ -334,7 +334,7 @@ export default function ActivateAccountPage({ params }: { params: Promise<{ toke
             disabled={!isFormValid || loading}
             className={`w-full py-3 rounded-xl font-semibold transition-colors ${
               isFormValid && !loading
-                ? "bg-[#D4A854] text-white hover:bg-[#c49b4a]"
+                ? "bg-brand-honey text-white hover:bg-brand-honey-dark"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >

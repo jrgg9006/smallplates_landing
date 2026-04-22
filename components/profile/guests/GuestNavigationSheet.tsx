@@ -157,9 +157,9 @@ export function GuestNavigationSheet({
 
           {/* Success toast */}
           {importSuccessCount !== null && (
-            <div className="mx-4 mt-3 px-4 py-2.5 rounded-lg bg-[#D4A854]/10 border border-[#D4A854]/30 flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
-              <Check size={14} className="text-[#D4A854] flex-shrink-0" />
-              <span className="text-xs text-[#2D2D2D]">
+            <div className="mx-4 mt-3 px-4 py-2.5 rounded-lg bg-brand-honey/10 border border-brand-honey/30 flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+              <Check size={14} className="text-brand-honey flex-shrink-0" />
+              <span className="text-xs text-brand-charcoal">
                 {importSuccessCount} guest{importSuccessCount !== 1 ? "s" : ""} added
               </span>
             </div>
@@ -255,11 +255,11 @@ export function GuestNavigationSheet({
             {/* Import button */}
             <button
               onClick={() => setShowImportModal(true)}
-              className="w-full py-3 px-4 rounded-lg bg-[#FAF7F2] border-[1.5px] border-dashed border-[#D4A854]
-                         flex items-center justify-center gap-2 text-[#2D2D2D] text-sm font-medium
-                         hover:bg-[#E8E0D5] hover:border-solid transition-all"
+              className="w-full py-3 px-4 rounded-lg bg-[#FAF7F2] border-[1.5px] border-dashed border-brand-honey
+                         flex items-center justify-center gap-2 text-brand-charcoal text-sm font-medium
+                         hover:bg-brand-sand hover:border-solid transition-all"
             >
-              <Upload size={16} className="text-[#D4A854]" />
+              <Upload size={16} className="text-brand-honey" />
               <span>Import guests from</span>
               <img src="/images/guest_modal/Zola_Logo.png" alt="Zola" className="h-2.5 object-contain" />
               <span className="text-[#999]">/</span>

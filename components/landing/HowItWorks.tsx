@@ -49,7 +49,7 @@ export default function HowItWorks() {
           >
             Here&apos;s how it happens.
           </h2>
-          <p className="mt-4 type-body text-[#2D2D2D]/60">
+          <p className="mt-4 type-body text-brand-charcoal/60">
             Three steps. Easier than you think.
           </p>
         </motion.div>
@@ -67,7 +67,7 @@ export default function HowItWorks() {
             >
               {/* Step Number - positioned above image */}
               <div className="flex justify-center mb-6">
-                <span className="flex-shrink-0 w-12 h-12 rounded-full bg-[#F5F5F0] text-[#9A9590] font-serif font-medium flex items-center justify-center text-lg">
+                <span className="flex-shrink-0 w-12 h-12 rounded-full bg-[#F5F5F0] text-[hsl(var(--brand-warm-gray-light))] font-serif font-medium flex items-center justify-center text-lg">
                   {step.number}
                 </span>
               </div>

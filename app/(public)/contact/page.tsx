@@ -20,7 +20,7 @@ export default function ContactPage() {
               <h1 className="type-heading mb-6">
                 Something off?
               </h1>
-              <div className="w-12 h-px bg-[#D4A854] mx-auto mb-6"></div>
+              <div className="w-12 h-px bg-brand-honey mx-auto mb-6"></div>
               <p className="type-body-small">
                 Tell us what&rsquo;s happening. We read everything.
               </p>

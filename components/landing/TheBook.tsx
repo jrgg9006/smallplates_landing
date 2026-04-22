@@ -8,8 +8,6 @@ import SpecsGrid from "@/components/landing/TheBook/SpecsGrid";
 import HandmadeCallout from "@/components/landing/TheBook/HandmadeCallout";
 import DetailStrip from "@/components/landing/TheBook/DetailStrip";
 import { trackEvent } from "@/lib/analytics";
-// TODO: Re-enable when full specifications page is built
-// import BookDetailsModal from "@/components/landing/BookDetailsModal";
 
 /**
  * THE BOOK SECTION — Small Plates Wedding Landing Page
@@ -63,7 +61,7 @@ export default function TheBook() {
           >
             What shows up at her door.
           </h2>
-          <p className="mt-5 type-body-small text-[#9A9590] max-w-[520px] mx-auto">
+          <p className="mt-5 type-body-small text-[hsl(var(--brand-warm-gray-light))] max-w-[520px] mx-auto">
             Every book is hardcover and full color. Because what&apos;s
             inside deserves to be held in something real.
           </p>
@@ -175,12 +173,12 @@ export default function TheBook() {
               </h3>
 
               <div className="space-y-4">
-                <p className="type-body-small text-[#9A9590]">
+                <p className="type-body-small text-[hsl(var(--brand-warm-gray-light))]">
                   Every Small Plates book is a hardcover cookbook &mdash; professionally
                   designed and printed in full color.
                   No templates. No shortcuts.
                 </p>
-                <p className="type-body-small text-[#9A9590]">
+                <p className="type-body-small text-[hsl(var(--brand-warm-gray-light))]">
                   Each book is different, because every couple&apos;s people are different.
                 </p>
               </div>
@@ -190,7 +188,7 @@ export default function TheBook() {
                 {specTags.map((tag) => (
                   <span
                     key={tag}
-                    className="font-sans text-xs bg-[#F5F1EB] border border-[#E8E0D5] text-[#2D2D2D]/60 px-3.5 py-1.5 rounded-sm"
+                    className="font-sans text-xs bg-[#F5F1EB] border border-brand-sand text-brand-charcoal/60 px-3.5 py-1.5 rounded-sm"
                   >
                     {tag}
                   </span>
@@ -217,19 +215,19 @@ export default function TheBook() {
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
-          <p className="font-serif text-2xl md:text-3xl font-medium text-[#2D2D2D] leading-snug">
+          <p className="font-serif text-2xl md:text-3xl font-medium text-brand-charcoal leading-snug">
             Designed by us. Printed for them.
           </p>
-          <p className="mt-3 font-serif text-2xl md:text-3xl font-medium text-[#2D2D2D] leading-snug">
+          <p className="mt-3 font-serif text-2xl md:text-3xl font-medium text-brand-charcoal leading-snug">
             Made to be{" "}
-            <span className="italic text-[#D4A854]">used.</span>
+            <span className="italic text-brand-honey">used.</span>
           </p>
 
           <div className="mt-10">
             <button
               type="button"
               onClick={handleCTA}
-              className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-8 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#D4A854]"
+              className="inline-flex items-center justify-center rounded-full bg-brand-honey hover:bg-brand-honey-dark text-white px-8 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-honey"
               data-cta="the-book-primary"
             >
               Start the Book

@@ -260,45 +260,45 @@ export function SendInvitationsPage({
       1: {
         subject: `We need your recipe.`,
         headerLabel: "New Email",
-        headerColor: "bg-[#2D2D2D]",
+        headerColor: "bg-brand-charcoal",
         body: (
           <>
             <p>We&apos;re making them a cookbook. A real one. With recipes from the people who matter most to them.</p>
             <p>Send a recipe and you&apos;re in their kitchen.</p>
-            <p className="text-[#2D2D2D] font-medium">Doesn&apos;t have to be fancy. Just has to be yours.</p>
+            <p className="text-brand-charcoal font-medium">Doesn&apos;t have to be fancy. Just has to be yours.</p>
           </>
         ),
       },
       2: {
         subject: "Still thinking what recipe to send?",
         headerLabel: "Reminder 1 of 3",
-        headerColor: "bg-[#D4A854]",
+        headerColor: "bg-brand-honey",
         body: (
           <>
             <p>Hi {selectedGuestName}, {coupleNames}&apos;s cookbook is coming together and your page is still open.</p>
-            <p className="text-[#2D2D2D] font-medium">Doesn&apos;t have to be fancy. Just has to be yours.</p>
+            <p className="text-brand-charcoal font-medium">Doesn&apos;t have to be fancy. Just has to be yours.</p>
           </>
         ),
       },
       3: {
         subject: "There's still time",
         headerLabel: "Reminder 2 of 3",
-        headerColor: "bg-[#D4A854]",
+        headerColor: "bg-brand-honey",
         body: (
           <>
             <p>Hi {selectedGuestName}, we know life gets busy. {coupleNames}&apos;s recipe book is still open, and there&apos;s still room for yours.</p>
-            <p className="text-[#2D2D2D] font-medium">Five minutes. One recipe. A page in their kitchen.</p>
+            <p className="text-brand-charcoal font-medium">Five minutes. One recipe. A page in their kitchen.</p>
           </>
         ),
       },
       4: {
         subject: `Last call for ${coupleNames}'s book`,
         headerLabel: "Reminder 3 of 3 · Final",
-        headerColor: "bg-[#9A9590]",
+        headerColor: "bg-[hsl(var(--brand-warm-gray-light))]",
         body: (
           <>
             <p>Hi {selectedGuestName}, this is our last reminder about {coupleNames}&apos;s recipe book.</p>
-            <p className="text-[#2D2D2D] font-medium">No hard feelings if not. But the door&apos;s still open.</p>
+            <p className="text-brand-charcoal font-medium">No hard feelings if not. But the door&apos;s still open.</p>
           </>
         ),
       },
@@ -309,22 +309,22 @@ export function SendInvitationsPage({
   return (
     <div>
       {/* Top bar — Back on left, Add Recipients title on right */}
-      <div className="border-b border-[#E8E0D5] flex">
+      <div className="border-b border-brand-sand flex">
         {/* Left side of top bar (aligned with email preview column) */}
         <div className="flex-1 lg:w-[68%] lg:flex-none px-6 lg:px-10 py-4">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-base font-medium text-[#2D2D2D] hover:text-[#9A9590] transition-colors"
+            className="flex items-center gap-2 text-base font-medium text-brand-charcoal hover:text-[hsl(var(--brand-warm-gray-light))] transition-colors"
           >
             <ChevronLeft size={20} strokeWidth={2} />
             Back
           </button>
         </div>
         {/* Right side of top bar (aligned with recipients column) */}
-        <div className="hidden lg:flex items-center justify-between lg:w-[32%] lg:flex-none px-8 border-l border-[#E8E0D5]">
+        <div className="hidden lg:flex items-center justify-between lg:w-[32%] lg:flex-none px-8 border-l border-brand-sand">
           {showAddEmails ? (
             <>
-              <h2 className="font-serif text-xl font-semibold text-[#2D2D2D]">
+              <h2 className="font-serif text-xl font-semibold text-brand-charcoal">
                 Add Email Addresses
               </h2>
               <button
@@ -332,31 +332,31 @@ export function SendInvitationsPage({
                   setShowAddEmails(false);
                   setEmailDrafts({});
                 }}
-                className="text-[#9A9590] hover:text-[#2D2D2D] transition-colors"
+                className="text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors"
               >
                 <X size={18} />
               </button>
             </>
           ) : showAddGuest ? (
             <>
-              <h2 className="font-serif text-xl font-semibold text-[#2D2D2D]">
+              <h2 className="font-serif text-xl font-semibold text-brand-charcoal">
                 Add a Guest
               </h2>
               <button
                 onClick={resetAddGuest}
-                className="text-[#9A9590] hover:text-[#2D2D2D] transition-colors"
+                className="text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors"
               >
                 <X size={18} />
               </button>
             </>
           ) : (
             <>
-              <h2 className="font-serif text-xl font-semibold text-[#2D2D2D]">
+              <h2 className="font-serif text-xl font-semibold text-brand-charcoal">
                 Add Recipients
               </h2>
               <button
                 onClick={() => setShowAddGuest(true)}
-                className="flex items-center gap-1.5 text-[15px] text-[#9A9590] hover:text-[#2D2D2D] transition-colors"
+                className="flex items-center gap-1.5 text-[15px] text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors"
               >
                 <Plus size={15} />
                 Add guests
@@ -373,9 +373,9 @@ export function SendInvitationsPage({
           <div className="w-full max-w-[560px]">
           {/* Hint: upload couple image */}
           {!coupleImageUrl && (
-            <p className="text-xs text-[#9A9590] mb-4 text-center">
+            <p className="text-xs text-[hsl(var(--brand-warm-gray-light))] mb-4 text-center">
               Want to add a photo to the email? Upload one in your{" "}
-              <button onClick={onBack} className="underline hover:text-[#2D2D2D] transition-colors">
+              <button onClick={onBack} className="underline hover:text-brand-charcoal transition-colors">
                 Collect Recipes settings
               </button>.
             </p>
@@ -391,17 +391,17 @@ export function SendInvitationsPage({
             </div>
 
             {/* From / Subject rows */}
-            <div className="bg-white border-b border-[#E8E0D5]">
-              <div className="px-6 py-2.5 border-b border-[#F0EDE8]">
+            <div className="bg-white border-b border-brand-sand">
+              <div className="px-6 py-2.5 border-b border-brand-sand">
                 <p className="text-sm">
-                  <span className="text-[#9A9590]">From:</span>{" "}
-                  <span className="text-[#2D2D2D]">{coupleNames}</span>
+                  <span className="text-[hsl(var(--brand-warm-gray-light))]">From:</span>{" "}
+                  <span className="text-brand-charcoal">{coupleNames}</span>
                 </p>
               </div>
               <div className="px-6 py-2.5">
                 <p className="text-sm">
-                  <span className="text-[#9A9590]">Subject:</span>{" "}
-                  <span className="text-[#2D2D2D]">{emailContent[previewEmailNumber].subject}</span>
+                  <span className="text-[hsl(var(--brand-warm-gray-light))]">Subject:</span>{" "}
+                  <span className="text-brand-charcoal">{emailContent[previewEmailNumber].subject}</span>
                 </p>
               </div>
             </div>
@@ -409,13 +409,13 @@ export function SendInvitationsPage({
             {/* Email body */}
             <div className="bg-white px-8 lg:px-14 py-12 lg:py-16 text-center">
               {/* Couple names — the hero */}
-              <p className="text-xs tracking-[0.25em] uppercase text-[#9A9590] mb-3">
+              <p className="text-xs tracking-[0.25em] uppercase text-[hsl(var(--brand-warm-gray-light))] mb-3">
                 A wedding cookbook gift for
               </p>
-              <h2 className="font-serif text-3xl lg:text-4xl text-[#2D2D2D] leading-tight mb-3">
+              <h2 className="font-serif text-3xl lg:text-4xl text-brand-charcoal leading-tight mb-3">
                 {coupleNames}
               </h2>
-              <div className="w-12 h-px bg-[#D4A854] mx-auto mb-10" />
+              <div className="w-12 h-px bg-brand-honey mx-auto mb-10" />
 
               {/* Couple image — subtle, rectangular */}
               {coupleImageUrl && (
@@ -441,23 +441,23 @@ export function SendInvitationsPage({
                   href={collectionUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block px-10 py-3.5 bg-[#2D2D2D] text-white text-xs font-medium rounded tracking-[0.15em] uppercase hover:bg-[#444] transition-colors"
+                  className="inline-block px-10 py-3.5 bg-brand-charcoal text-white text-xs font-medium rounded tracking-[0.15em] uppercase hover:bg-[#444] transition-colors"
                 >
                   Add Your Recipe
                 </a>
               ) : (
-                <span className="inline-block px-10 py-3.5 bg-[#2D2D2D] text-white text-xs font-medium rounded tracking-[0.15em] uppercase">
+                <span className="inline-block px-10 py-3.5 bg-brand-charcoal text-white text-xs font-medium rounded tracking-[0.15em] uppercase">
                   Add Your Recipe
                 </span>
               )}
 
               {/* Sub-text */}
-              <p className="text-xs text-[#9A9590] mt-5">
+              <p className="text-xs text-[hsl(var(--brand-warm-gray-light))] mt-5">
                 5 minutes. That&apos;s it.
               </p>
 
               {/* Divider + logo footer */}
-              <div className="mt-12 pt-6 border-t border-[#F0EDE8] space-y-4">
+              <div className="mt-12 pt-6 border-t border-brand-sand space-y-4">
                 <img
                   src="/images/logo_svg/SmallPlates_logo_horizontal.svg"
                   alt="Small Plates & Co."
@@ -465,7 +465,7 @@ export function SendInvitationsPage({
                 />
                 {senderName && (
                   <div className="space-y-1.5">
-                    <p className="text-xs text-[#9A9590]">
+                    <p className="text-xs text-[hsl(var(--brand-warm-gray-light))]">
                       This invitation was sent by {senderName} via Small Plates &amp; Co.
                     </p>
                   </div>
@@ -477,12 +477,12 @@ export function SendInvitationsPage({
         </div>
 
         {/* ── Right column: Recipients (fixed height, internal scroll) ── */}
-        <div className="lg:w-[32%] bg-white border-t lg:border-t-0 lg:border-l border-[#E8E0D5] flex flex-col lg:h-full lg:overflow-hidden">
+        <div className="lg:w-[32%] bg-white border-t lg:border-t-0 lg:border-l border-brand-sand flex flex-col lg:h-full lg:overflow-hidden">
           {/* Mobile-only title (on desktop it's in the top bar) */}
           <div className="lg:hidden px-6 pt-6 flex items-center justify-between mb-4">
             {showAddEmails ? (
               <>
-                <h2 className="font-serif text-lg text-[#2D2D2D]">
+                <h2 className="font-serif text-lg text-brand-charcoal">
                   Add Email Addresses
                 </h2>
                 <button
@@ -490,31 +490,31 @@ export function SendInvitationsPage({
                     setShowAddEmails(false);
                     setEmailDrafts({});
                   }}
-                  className="text-[#9A9590] hover:text-[#2D2D2D] transition-colors"
+                  className="text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors"
                 >
                   <X size={18} />
                 </button>
               </>
             ) : showAddGuest ? (
               <>
-                <h2 className="font-serif text-lg text-[#2D2D2D]">
+                <h2 className="font-serif text-lg text-brand-charcoal">
                   Add a Guest
                 </h2>
                 <button
                   onClick={resetAddGuest}
-                  className="text-[#9A9590] hover:text-[#2D2D2D] transition-colors"
+                  className="text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors"
                 >
                   <X size={18} />
                 </button>
               </>
             ) : (
               <>
-                <h2 className="font-serif text-lg text-[#2D2D2D]">
+                <h2 className="font-serif text-lg text-brand-charcoal">
                   Add Recipients
                 </h2>
                 <button
                   onClick={() => setShowAddGuest(true)}
-                  className="flex items-center gap-1 text-sm text-[#9A9590] hover:text-[#2D2D2D] transition-colors"
+                  className="flex items-center gap-1 text-sm text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors"
                 >
                   <Plus size={14} />
                   Add guests
@@ -526,13 +526,13 @@ export function SendInvitationsPage({
           {/* Tabs (hidden when adding emails or guests) */}
           {!showAddEmails && !showAddGuest && (
             <div className="px-6 lg:px-8 pt-3 lg:pt-5">
-              <div className="flex border-b border-[#E8E0D5]">
+              <div className="flex border-b border-brand-sand">
                 <button
                   onClick={() => setActiveTab("compose")}
                   className={`pb-3.5 px-1 mr-6 text-[15px] font-medium transition-colors border-b-2 ${
                     activeTab === "compose"
-                      ? "border-[#2D2D2D] text-[#2D2D2D]"
-                      : "border-transparent text-[#9A9590] hover:text-[#2D2D2D]"
+                      ? "border-brand-charcoal text-brand-charcoal"
+                      : "border-transparent text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal"
                   }`}
                 >
                   Invite ({uninvitedGuests.length})
@@ -546,8 +546,8 @@ export function SendInvitationsPage({
                   }}
                   className={`pb-3.5 px-1 text-[15px] font-medium transition-colors border-b-2 ${
                     activeTab === "sent"
-                      ? "border-[#2D2D2D] text-[#2D2D2D]"
-                      : "border-transparent text-[#9A9590] hover:text-[#2D2D2D]"
+                      ? "border-brand-charcoal text-brand-charcoal"
+                      : "border-transparent text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal"
                   }`}
                 >
                   Sent &amp; Reminders ({invitedGuests.length})
@@ -558,9 +558,9 @@ export function SendInvitationsPage({
 
           {/* Success toast */}
           {sendResult && sendResult.sent > 0 && (
-            <div className="mx-6 lg:mx-8 mt-4 px-4 py-3 rounded-lg bg-[#D4A854]/10 border border-[#D4A854]/30 flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
-              <Check size={14} className="text-[#D4A854] flex-shrink-0" />
-              <span className="text-sm text-[#2D2D2D]">
+            <div className="mx-6 lg:mx-8 mt-4 px-4 py-3 rounded-lg bg-brand-honey/10 border border-brand-honey/30 flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+              <Check size={14} className="text-brand-honey flex-shrink-0" />
+              <span className="text-sm text-brand-charcoal">
                 {sendResult.sent} invitation
                 {sendResult.sent !== 1 ? "s" : ""} sent
               </span>
@@ -585,19 +585,19 @@ export function SendInvitationsPage({
                 <div className="py-5 border-b border-[#F5F5F4]">
                   <div className="flex flex-col sm:flex-row gap-4 sm:gap-3">
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-[#2D2D2D] mb-1">
-                        First Name <span className="text-[#D4A854]">*</span>
+                      <p className="text-sm font-semibold text-brand-charcoal mb-1">
+                        First Name <span className="text-brand-honey">*</span>
                       </p>
                       <input
                         type="text"
                         placeholder="First Name"
                         value={newGuestFirst}
                         onChange={(e) => setNewGuestFirst(e.target.value)}
-                        className="w-full px-4 py-2.5 text-sm border border-[#E8E0D5] rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-[#2D2D2D] focus:outline-none focus:border-[#D4A854] focus:ring-1 focus:ring-[#D4A854]"
+                        className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                       />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-[#2D2D2D] mb-1">
+                      <p className="text-sm font-semibold text-brand-charcoal mb-1">
                         Last Name
                       </p>
                       <input
@@ -605,7 +605,7 @@ export function SendInvitationsPage({
                         placeholder="Last Name"
                         value={newGuestLast}
                         onChange={(e) => setNewGuestLast(e.target.value)}
-                        className="w-full px-4 py-2.5 text-sm border border-[#E8E0D5] rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-[#2D2D2D] focus:outline-none focus:border-[#D4A854] focus:ring-1 focus:ring-[#D4A854]"
+                        className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                       />
                     </div>
                   </div>
@@ -613,7 +613,7 @@ export function SendInvitationsPage({
 
                 {/* Printed Name */}
                 <div className="py-5 border-b border-[#F5F5F4]">
-                  <p className="text-sm font-semibold text-[#2D2D2D] mb-1">
+                  <p className="text-sm font-semibold text-brand-charcoal mb-1">
                     Printed Name
                   </p>
                   <input
@@ -621,16 +621,16 @@ export function SendInvitationsPage({
                     placeholder="How this person's name should appear in the book"
                     value={newGuestPrintedName}
                     onChange={(e) => setNewGuestPrintedName(e.target.value)}
-                    className="w-full px-4 py-2.5 text-sm border border-[#E8E0D5] rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-[#2D2D2D] focus:outline-none focus:border-[#D4A854] focus:ring-1 focus:ring-[#D4A854]"
+                    className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                   />
-                  <p className="text-xs text-[#9A9590] mt-2">
+                  <p className="text-xs text-[hsl(var(--brand-warm-gray-light))] mt-2">
                     Leave empty to use first and last name. This is how the name will appear in the printed cookbook.
                   </p>
                 </div>
 
                 {/* Email */}
                 <div className="py-5">
-                  <p className="text-sm font-semibold text-[#2D2D2D] mb-1">
+                  <p className="text-sm font-semibold text-brand-charcoal mb-1">
                     Email
                   </p>
                   <input
@@ -638,19 +638,19 @@ export function SendInvitationsPage({
                     placeholder="Email address"
                     value={newGuestEmail}
                     onChange={(e) => setNewGuestEmail(e.target.value)}
-                    className="w-full px-4 py-2.5 text-sm border border-[#E8E0D5] rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-[#2D2D2D] focus:outline-none focus:border-[#D4A854] focus:ring-1 focus:ring-[#D4A854]"
+                    className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                   />
                 </div>
               </div>
             ) : showAddEmails ? (
               /* ── Add Email Addresses view ── */
               <div>
-                <p className="text-sm text-[#9A9590] pb-5 border-b border-[#F5F5F4]">
+                <p className="text-sm text-[hsl(var(--brand-warm-gray-light))] pb-5 border-b border-[#F5F5F4]">
                   Please add email addresses for the following guests.
                 </p>
                 {guestsWithoutEmail.map((guest) => (
                   <div key={guest.id} className="py-5 border-b border-[#F5F5F4]">
-                    <p className="text-sm font-medium text-[#2D2D2D] mb-2.5">
+                    <p className="text-sm font-medium text-brand-charcoal mb-2.5">
                       {guest.first_name} {guest.last_name || ""}
                     </p>
                     <input
@@ -663,7 +663,7 @@ export function SendInvitationsPage({
                           [guest.id]: e.target.value,
                         }))
                       }
-                      className="w-full px-4 py-2.5 text-sm border border-[#E8E0D5] rounded-xl bg-[#FAF7F2] placeholder-[#9A9590] text-[#2D2D2D] focus:outline-none focus:border-[#D4A854] focus:ring-1 focus:ring-[#D4A854]"
+                      className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                     />
                   </div>
                 ))}
@@ -673,9 +673,9 @@ export function SendInvitationsPage({
               uninvitedGuests.length === 0 && guestsWithoutEmail.length === 0 ? (
                 <div className="text-center py-16">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-                    <Check className="w-8 h-8 text-[#D4A854]" />
+                    <Check className="w-8 h-8 text-brand-honey" />
                   </div>
-                  <p className="text-[#9A9590] text-sm">
+                  <p className="text-[hsl(var(--brand-warm-gray-light))] text-sm">
                     All guests have been invited.
                   </p>
                 </div>
@@ -687,7 +687,7 @@ export function SendInvitationsPage({
                       onClick={() => setShowAddEmails(true)}
                       className="mb-5 w-full text-left px-5 py-4 rounded-xl bg-[#FFF0E6] hover:bg-[#FFE8D9] transition-colors"
                     >
-                      <span className="text-[15px] font-medium text-[#2D2D2D] underline">
+                      <span className="text-[15px] font-medium text-brand-charcoal underline">
                         Add an email address for {guestsWithoutEmail.length} guest{guestsWithoutEmail.length !== 1 ? "s" : ""}
                       </span>
                     </button>
@@ -695,7 +695,7 @@ export function SendInvitationsPage({
 
                   {/* Select all */}
                   {uninvitedGuests.length > 0 && (
-                    <label className="flex items-center gap-4 cursor-pointer py-4 border-b border-[#E8E0D5]">
+                    <label className="flex items-center gap-4 cursor-pointer py-4 border-b border-brand-sand">
                       <input
                         type="checkbox"
                         checked={
@@ -703,9 +703,9 @@ export function SendInvitationsPage({
                           uninvitedGuests.length > 0
                         }
                         onChange={toggleSelectAll}
-                        className="w-[18px] h-[18px] rounded border-gray-300 text-[#D4A854] focus:ring-[#D4A854]"
+                        className="w-[18px] h-[18px] rounded border-gray-300 text-brand-honey focus:ring-brand-honey"
                       />
-                      <span className="text-[15px] font-semibold text-[#2D2D2D]">
+                      <span className="text-[15px] font-semibold text-brand-charcoal">
                         Select all {uninvitedGuests.length} guest
                         {uninvitedGuests.length !== 1 ? "s" : ""}
                       </span>
@@ -723,21 +723,21 @@ export function SendInvitationsPage({
                           type="checkbox"
                           checked={selectedIds.has(guest.id)}
                           onChange={() => toggleSelect(guest.id)}
-                          className="w-[18px] h-[18px] rounded border-gray-300 text-[#D4A854] focus:ring-[#D4A854]"
+                          className="w-[18px] h-[18px] rounded border-gray-300 text-brand-honey focus:ring-brand-honey"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className="text-[15px] font-medium text-[#2D2D2D] truncate">
+                            <p className="text-[15px] font-medium text-brand-charcoal truncate">
                               {guest.first_name} {guest.last_name || ""}
                             </p>
                             {(guest.recipes_received || 0) > 0 && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#D4A854]/10 text-[#D4A854] flex-shrink-0">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-brand-honey/10 text-brand-honey flex-shrink-0">
                                 <Check size={10} />
                                 Recipe in
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-[#9A9590] truncate mt-0.5">
+                          <p className="text-sm text-[hsl(var(--brand-warm-gray-light))] truncate mt-0.5">
                             {guest.email}
                           </p>
                         </div>
@@ -753,7 +753,7 @@ export function SendInvitationsPage({
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                     <Send className="w-8 h-8 text-gray-400" />
                   </div>
-                  <p className="text-[#9A9590] text-sm">
+                  <p className="text-[hsl(var(--brand-warm-gray-light))] text-sm">
                     No invitations sent yet.
                   </p>
                 </div>
@@ -773,13 +773,13 @@ export function SendInvitationsPage({
                         onClick={() => !hasRecipe && setSelectedSentGuestId(guest.id)}
                         className={`flex items-center gap-3 py-3.5 border-b border-[#F5F5F4] transition-colors ${
                           !hasRecipe ? "cursor-pointer hover:bg-[#FAF7F2]" : ""
-                        } ${isSelected ? "bg-[#FAF7F2] border-l-2 border-l-[#D4A854]" : ""}`}
+                        } ${isSelected ? "bg-[#FAF7F2] border-l-2 border-l-brand-honey" : ""}`}
                       >
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-[#2D2D2D] truncate">
+                          <p className="text-sm font-medium text-brand-charcoal truncate">
                             {guest.first_name} {guest.last_name || ""}
                           </p>
-                          <p className="text-xs text-[#9A9590]">
+                          <p className="text-xs text-[hsl(var(--brand-warm-gray-light))]">
                             Invited{" "}
                             {guest.invitation_started_at
                               ? formatDate(guest.invitation_started_at)
@@ -797,12 +797,12 @@ export function SendInvitationsPage({
                         </div>
 
                         {hasRecipe ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[#D4A854]/10 text-[#D4A854]">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-brand-honey/10 text-brand-honey">
                             <Check size={12} />
                             Recipe added
                           </span>
                         ) : allRemindersSent ? (
-                          <span className="text-xs text-[#9A9590] px-2.5 py-1">
+                          <span className="text-xs text-[hsl(var(--brand-warm-gray-light))] px-2.5 py-1">
                             3 of 3 sent
                           </span>
                         ) : (
@@ -810,7 +810,7 @@ export function SendInvitationsPage({
                             <button
                               onClick={(e) => { e.stopPropagation(); handleRemind(guest.id); }}
                               disabled={isReminding || justReminded}
-                              className="text-xs font-medium px-3 py-1.5 rounded-md border border-[#E8E0D5] text-[#2D2D2D] hover:border-[#2D2D2D] transition-colors disabled:opacity-50 disabled:cursor-default"
+                              className="text-xs font-medium px-3 py-1.5 rounded-md border border-brand-sand text-brand-charcoal hover:border-brand-charcoal transition-colors disabled:opacity-50 disabled:cursor-default"
                             >
                               {isReminding ? (
                                 <span className="flex items-center gap-1">
@@ -821,7 +821,7 @@ export function SendInvitationsPage({
                                   Sending
                                 </span>
                               ) : justReminded ? (
-                                <span className="flex items-center gap-1 text-[#D4A854]">
+                                <span className="flex items-center gap-1 text-brand-honey">
                                   <Check size={12} />
                                   Sent
                                 </span>
@@ -841,17 +841,17 @@ export function SendInvitationsPage({
 
           {/* Fixed footer */}
           {showAddGuest ? (
-            <div className="px-6 lg:px-8 py-5 border-t border-[#E8E0D5] bg-white flex gap-3">
+            <div className="px-6 lg:px-8 py-5 border-t border-brand-sand bg-white flex gap-3">
               <button
                 onClick={resetAddGuest}
-                className="flex-1 py-3 text-sm font-medium text-[#2D2D2D] border border-[#E8E0D5] rounded-full hover:bg-[#FAF7F2] transition-colors"
+                className="flex-1 py-3 text-sm font-medium text-brand-charcoal border border-brand-sand rounded-full hover:bg-[#FAF7F2] transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveGuest}
                 disabled={isSavingGuest || !newGuestFirst.trim()}
-                className="flex-1 py-3 text-sm font-medium text-white bg-[#D4A854] rounded-full hover:bg-[#C19940] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                className="flex-1 py-3 text-sm font-medium text-white bg-brand-honey rounded-full hover:bg-brand-honey-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
               >
                 {isSavingGuest ? (
                   <>
@@ -864,13 +864,13 @@ export function SendInvitationsPage({
               </button>
             </div>
           ) : showAddEmails ? (
-            <div className="px-6 lg:px-8 py-5 border-t border-[#E8E0D5] bg-white flex gap-3">
+            <div className="px-6 lg:px-8 py-5 border-t border-brand-sand bg-white flex gap-3">
               <button
                 onClick={() => {
                   setShowAddEmails(false);
                   setEmailDrafts({});
                 }}
-                className="flex-1 py-3 text-sm font-medium text-[#2D2D2D] border border-[#E8E0D5] rounded-full hover:bg-[#FAF7F2] transition-colors"
+                className="flex-1 py-3 text-sm font-medium text-brand-charcoal border border-brand-sand rounded-full hover:bg-[#FAF7F2] transition-colors"
               >
                 Cancel
               </button>
@@ -882,7 +882,7 @@ export function SendInvitationsPage({
                     (e) => e.trim() && e.includes("@")
                   )
                 }
-                className="flex-1 py-3 text-sm font-medium text-white bg-[#D4A854] rounded-full hover:bg-[#C19940] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                className="flex-1 py-3 text-sm font-medium text-white bg-brand-honey rounded-full hover:bg-brand-honey-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
               >
                 {isSavingEmails ? (
                   <>
@@ -895,12 +895,12 @@ export function SendInvitationsPage({
               </button>
             </div>
           ) : activeTab === "compose" && uninvitedGuests.length > 0 ? (
-            <div className="px-6 lg:px-8 py-6 border-t border-[#E8E0D5] bg-white">
+            <div className="px-6 lg:px-8 py-6 border-t border-brand-sand bg-white">
               <button
                 onClick={handleSendInvitations}
                 disabled={selectedIds.size === 0 || isSending}
-                className="w-full py-3.5 rounded-full bg-[#D4A854] text-white font-medium text-[15px]
-                           hover:bg-[#C19940] transition-colors disabled:opacity-40 disabled:cursor-not-allowed
+                className="w-full py-3.5 rounded-full bg-brand-honey text-white font-medium text-[15px]
+                           hover:bg-brand-honey-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed
                            flex items-center justify-center gap-2"
               >
                 {isSending ? (

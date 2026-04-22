@@ -190,7 +190,7 @@ export default function AdminProspectsPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4A854] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-honey mx-auto mb-4"></div>
           <p className="text-gray-600">{isAdmin ? 'Loading prospects...' : 'Checking access...'}</p>
         </div>
       </div>
@@ -299,12 +299,12 @@ export default function AdminProspectsPage() {
                         <td className="px-6 py-4">
                           <div className="text-sm font-medium text-gray-900">{prospect.email}</div>
                           {prospect.user_type === 'gift_giver' && prospect.gift_giver_name && (
-                            <div className="text-xs text-gray-500">From: {prospect.gift_giver_name}</div>
+                            <div className="text-secondary-sm text-gray-500">From: {prospect.gift_giver_name}</div>
                           )}
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm text-gray-900 capitalize">{prospect.user_type.replace('_', ' ')}</div>
-                          <div className="text-xs text-[#D4A854] font-medium">{getTierBadge(prospect.selected_tier)}</div>
+                          <div className="text-xs text-brand-honey font-medium">{getTierBadge(prospect.selected_tier)}</div>
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm text-gray-900">
@@ -314,7 +314,7 @@ export default function AdminProspectsPage() {
                             )}
                           </div>
                           {prospect.wedding_date && (
-                            <div className="text-xs text-gray-500">
+                            <div className="text-secondary-sm text-gray-500">
                               Wedding: {new Date(prospect.wedding_date).toLocaleDateString()}
                             </div>
                           )}
@@ -323,7 +323,7 @@ export default function AdminProspectsPage() {
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-xs text-gray-500 space-y-1">
+                          <div className="text-secondary-sm text-gray-500 space-y-1">
                             {prospect.planning_stage && <div>Stage: {prospect.planning_stage}</div>}
                             {prospect.guest_count && <div>Guests: {prospect.guest_count}</div>}
                             {prospect.relationship && <div>Relationship: {prospect.relationship}</div>}
@@ -347,7 +347,7 @@ export default function AdminProspectsPage() {
                             {prospect.status === 'paid' && (
                               <button
                                 onClick={() => handleGenerateActivationLink(prospect)}
-                                className="text-xs px-3 py-1.5 bg-[#D4A854] text-white rounded hover:bg-[#c49b4a] transition-colors font-medium mt-1"
+                                className="text-xs px-3 py-1.5 bg-brand-honey text-white rounded hover:bg-brand-honey-dark transition-colors font-medium mt-1"
                               >
                                 Generate Activation Link
                               </button>
@@ -356,7 +356,7 @@ export default function AdminProspectsPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">{date}</div>
-                          <div className="text-xs text-gray-500">{time}</div>
+                          <div className="text-secondary-sm text-gray-500">{time}</div>
                         </td>
                       </tr>
                     );
@@ -413,7 +413,7 @@ export default function AdminProspectsPage() {
 
               {/* Email Input */}
               <div className="mb-6">
-                <label htmlFor="activation-email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="activation-email" className="block text-form-label font-medium text-gray-700 mb-2">
                   Activation Email
                 </label>
                 <input
@@ -422,9 +422,9 @@ export default function AdminProspectsPage() {
                   value={activationEmail}
                   onChange={(e) => setActivationEmail(e.target.value)}
                   placeholder={selectedProspect.email}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D4A854] focus:border-transparent outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-honey focus:border-transparent outline-none"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-secondary-sm text-gray-500 mt-1">
                   Default: {selectedProspect.email}. Change if needed (e.g., for multiple accounts).
                 </p>
               </div>
@@ -449,7 +449,7 @@ export default function AdminProspectsPage() {
                     />
                     <button
                       onClick={() => copyToClipboard(activationLink)}
-                      className="px-4 py-2 bg-[#D4A854] text-white rounded hover:bg-[#c49b4a] transition-colors text-sm font-medium"
+                      className="px-4 py-2 bg-brand-honey text-white rounded hover:bg-brand-honey-dark transition-colors text-sm font-medium"
                     >
                       Copy
                     </button>
@@ -475,7 +475,7 @@ export default function AdminProspectsPage() {
                     className={`px-6 py-2 rounded-lg font-medium transition-colors ${
                       generatingToken || !activationEmail.trim()
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-[#D4A854] text-white hover:bg-[#c49b4a]'
+                        : 'bg-brand-honey text-white hover:bg-brand-honey-dark'
                     }`}
                   >
                     {generatingToken ? (

@@ -47,7 +47,7 @@ export default function FAQ() {
           {faqs.map((faq, index) => (
             <motion.div 
               key={index} 
-              className="border-b border-[#E8E0D5] pb-8 last:border-b-0"
+              className="border-b border-brand-sand pb-8 last:border-b-0"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "50px" }}

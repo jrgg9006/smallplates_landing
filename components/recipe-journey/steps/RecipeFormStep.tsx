@@ -53,7 +53,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
 
       {/* Ingredients */}
       <section id="ingredients" aria-labelledby="ingredients-label" className="space-y-2">
-        <label id="ingredients-label" htmlFor="ingredients-input" className="text-sm font-medium text-gray-700">
+        <label id="ingredients-label" htmlFor="ingredients-input" className="text-form-label font-medium text-gray-700">
           What you need to make this plate
         </label>
         <textarea
@@ -62,14 +62,14 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
           onChange={(e) => onChange('ingredients', e.target.value)}
           placeholder={"• The last box of pasta\n• A suspicious amount of garlic\n• Good olive oil\n• Chili flakes\n• Cheese of questionable origin\n• Hunger"}
           rows={8}
-          className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:border-transparent resize-vertical"
+          className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent resize-vertical"
           aria-describedby="ingredients-help"
         />
       </section>
 
       {/* Instructions */}
       <section id="instructions" aria-labelledby="instructions-label" className="space-y-2">
-        <label id="instructions-label" htmlFor="instructions-input" className="text-sm font-medium text-gray-700">
+        <label id="instructions-label" htmlFor="instructions-input" className="text-form-label font-medium text-gray-700">
           How to make this plate. Tell it your way.
         </label>
         <textarea
@@ -78,10 +78,10 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
           onChange={(e) => onChange('instructions', e.target.value)}
           placeholder={"Cook the pasta until it smells right\nAdd more garlic than the recipe would admit\nStir, sip wine (or whatever you're drinking)\nServe immediately or five minutes too late\nDoesn't matter, you'll eat it anyway"}
           rows={10}
-          className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:border-transparent resize-vertical"
+          className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent resize-vertical"
           aria-describedby="instructions-help"
         />
-        <p id="instructions-help" className="text-xs text-gray-500">Explain it like to a friend.</p>
+        <p id="instructions-help" className="text-secondary-sm text-gray-500">Explain it like to a friend.</p>
       </section>
 
       {/* Personal Note */}
@@ -97,10 +97,10 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
               value={pastedText}
               onChange={(e) => setPastedText(e.target.value)}
               rows={14}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:border-transparent resize-vertical"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent resize-vertical"
               placeholder={"Paste your entire recipe text here"}
             />
-            <p className="text-xs text-gray-500">
+            <p className="text-secondary-sm text-gray-500">
               <button type="button" className="underline underline-offset-2" onClick={() => setShowPasteModal(false)}>
                 Back to structured form
               </button>
@@ -128,7 +128,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
                 }
                 setShowPasteModal(false);
               }}
-              className="px-6 py-2 rounded-full bg-[#D4A854] text-white hover:bg-[#c49b4a]"
+              className="px-6 py-2 rounded-full bg-brand-honey text-white hover:bg-brand-honey-dark"
             >
               Continue
             </button>

@@ -277,7 +277,7 @@ export function AddToCookbookModal({
                         >
                           {cookbook.name}
                           {cookbook.is_default && (
-                            <span className="ml-2 text-xs text-gray-500">(Default)</span>
+                            <span className="ml-2 text-secondary-sm text-gray-500">(Default)</span>
                           )}
                         </button>
                       ))}

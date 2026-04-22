@@ -132,7 +132,7 @@ function WelcomeContent() {
   if (loadingSession) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#FAF8F4" }}>
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4A854]" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-honey" />
       </div>
     );
   }
@@ -140,9 +140,9 @@ function WelcomeContent() {
   if (!sessionUser) return null;
 
   const sansFont = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-  const labelClass = "block text-[13px] font-medium text-[#2D2D2D] mb-1.5";
+  const labelClass = "block text-[13px] font-medium text-brand-charcoal mb-1.5";
   const inputClass =
-    "w-full px-4 h-[52px] border border-[#E8E0D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:border-transparent text-[15px] bg-white transition-all";
+    "w-full px-4 h-[52px] border border-brand-sand rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent text-[15px] bg-white transition-all";
 
   return (
     <div className="min-h-screen" style={{ background: "#FAF8F4" }}>
@@ -155,11 +155,11 @@ function WelcomeContent() {
         />
 
         {/* Headline */}
-        <h1 className="text-center mb-3 font-serif text-[38px] font-light leading-[1.15] text-[#2D2D2D]">
+        <h1 className="text-center mb-3 font-serif text-[38px] font-light leading-[1.15] text-brand-charcoal">
           One quick <em>thing.</em>
         </h1>
         <p
-          className="text-center text-[15px] text-[#2D2D2D]/70 mb-10 max-w-[380px]"
+          className="text-center text-[15px] text-brand-charcoal/70 mb-10 max-w-[380px]"
           style={{ fontFamily: sansFont }}
         >
           Want to set a password so you can log in faster next time?
@@ -207,7 +207,7 @@ function WelcomeContent() {
           )}
 
           <p
-            className="text-[12px] text-[#9A9590] text-center -mt-2"
+            className="text-[12px] text-[hsl(var(--brand-warm-gray-light))] text-center -mt-2"
             style={{ fontFamily: sansFont }}
           >
             If you already had a password, this will replace it.
@@ -217,7 +217,7 @@ function WelcomeContent() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="w-full h-[56px] bg-[#D4A854] hover:bg-[#c49b4a] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors text-[15px]"
+            className="w-full h-[56px] bg-brand-honey hover:bg-brand-honey-dark disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors text-[15px]"
             style={{ fontFamily: sansFont }}
           >
             {saving ? "Saving..." : "Save password and continue"}
@@ -226,7 +226,7 @@ function WelcomeContent() {
           <button
             type="button"
             onClick={handleSkip}
-            className="w-full text-center text-[14px] text-[#9A9590] hover:text-[#2D2D2D] transition-colors py-2"
+            className="w-full text-center text-[14px] text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors py-2"
             style={{ fontFamily: sansFont }}
           >
             Skip — I&apos;ll log in by email next time →
@@ -241,7 +241,7 @@ function WelcomeContent() {
           Need help?{" "}
           <a
             href="mailto:team@smallplatesandcompany.com"
-            className="underline hover:text-[#2D2D2D]"
+            className="underline hover:text-brand-charcoal"
           >
             team@smallplatesandcompany.com
           </a>
@@ -256,7 +256,7 @@ export default function WelcomePage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center" style={{ background: "#FAF8F4" }}>
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4A854]" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-honey" />
         </div>
       }
     >

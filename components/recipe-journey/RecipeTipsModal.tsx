@@ -83,14 +83,14 @@ export default function RecipeTipsModal({ isOpen, onClose }: RecipeTipsModalProp
               {activeCategory !== 'main' ? (
                 <button 
                   onClick={() => setActiveCategory('main')}
-                  className="flex items-center text-[#9A9590] hover:text-[#2D2D2D] transition-colors focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:ring-offset-2 rounded-md p-1 -ml-1 w-fit"
+                  className="flex items-center text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors focus:outline-none focus:ring-2 focus:ring-brand-honey focus:ring-offset-2 rounded-md p-1 -ml-1 w-fit"
                   aria-label="Back to categories"
                 >
                   <ChevronLeft className="w-5 h-5 mr-1" />
                   <span className="sr-only sm:not-sr-only">Back</span>
                 </button>
               ) : (
-                <SheetTitle className="font-medium text-base text-[#2D2D2D] mb-2">
+                <SheetTitle className="font-medium text-base text-brand-charcoal mb-2">
                   Tips
                 </SheetTitle>
               )}
@@ -116,14 +116,14 @@ export default function RecipeTipsModal({ isOpen, onClose }: RecipeTipsModalProp
           {activeCategory !== 'main' ? (
             <button 
               onClick={() => setActiveCategory('main')}
-              className="flex items-center text-[#9A9590] hover:text-[#2D2D2D] transition-colors focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:ring-offset-2 rounded-md p-1 -ml-1 w-fit"
+              className="flex items-center text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors focus:outline-none focus:ring-2 focus:ring-brand-honey focus:ring-offset-2 rounded-md p-1 -ml-1 w-fit"
               aria-label="Back to categories"
             >
               <ChevronLeft className="w-5 h-5 mr-1" />
               <span className="sr-only sm:not-sr-only">Back</span>
             </button>
           ) : (
-            <DialogTitle className="font-medium text-base text-[#2D2D2D] mb-4">
+            <DialogTitle className="font-medium text-base text-brand-charcoal mb-4">
               Tips
             </DialogTitle>
           )}
@@ -161,10 +161,10 @@ function MainView({ onSelectCategory }: { onSelectCategory: (cat: TipCategory) =
 
       {/* Title and Subheader */}
       <div className="text-center space-y-2">
-        <h2 id="tips-modal-title" className="font-serif text-2xl font-medium text-[#2D2D2D]">
+        <h2 id="tips-modal-title" className="font-serif text-2xl font-medium text-brand-charcoal">
           What should I put?
         </h2>
-        <p className="text-[#9A9590] text-sm">
+        <p className="text-[hsl(var(--brand-warm-gray-light))] text-sm">
           Short answer: anything.<br />
           Here are some ideas to get you started.
         </p>
@@ -201,20 +201,20 @@ function CategoryCard({ title, description, icon, onClick }: {
   return (
     <button
       onClick={onClick}
-      className="w-full p-4 min-h-[56px] bg-[#FAF7F2] hover:bg-[#E8E0D5] active:bg-[#E8E0D5] rounded-xl transition-colors group focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:ring-offset-2 touch-manipulation flex items-center gap-3"
+      className="w-full p-4 min-h-[56px] bg-[#FAF7F2] hover:bg-brand-sand active:bg-brand-sand rounded-xl transition-colors group focus:outline-none focus:ring-2 focus:ring-brand-honey focus:ring-offset-2 touch-manipulation flex items-center gap-3"
       role="button"
       tabIndex={0}
     >
       {icon && (
-        <span className="text-[#D4A854] flex-shrink-0 opacity-70">
+        <span className="text-brand-honey flex-shrink-0 opacity-70">
           {icon}
         </span>
       )}
-      <h3 className="font-normal text-[#2D2D2D] text-center flex-1">
+      <h3 className="font-normal text-brand-charcoal text-center flex-1">
         {title}
       </h3>
       {description && (
-        <p className="text-[#9A9590] text-sm mt-1">
+        <p className="text-[hsl(var(--brand-warm-gray-light))] text-sm mt-1">
           {description}
         </p>
       )}
@@ -224,9 +224,9 @@ function CategoryCard({ title, description, icon, onClick }: {
 
 function TipItem({ title, description }: { title: string; description: string }) {
   return (
-    <div className="pb-4 border-b border-[#E8E0D5] last:border-0">
-      <p className="font-medium text-[#2D2D2D]">{title}</p>
-      <p className="text-[#9A9590] text-sm mt-1">{description}</p>
+    <div className="pb-4 border-b border-brand-sand last:border-0">
+      <p className="font-medium text-brand-charcoal">{title}</p>
+      <p className="text-[hsl(var(--brand-warm-gray-light))] text-sm mt-1">{description}</p>
     </div>
   );
 }
@@ -261,10 +261,10 @@ function EasyStuffView() {
       </div>
 
       <div>
-        <h2 className="font-serif text-2xl font-medium text-[#2D2D2D]">
+        <h2 className="font-serif text-2xl font-medium text-brand-charcoal">
           The easy stuff
         </h2>
-        <p className="text-[#9A9590] mt-2">
+        <p className="text-[hsl(var(--brand-warm-gray-light))] mt-2">
           You don&apos;t need a signature dish. You just need something real.
         </p>
       </div>
@@ -308,10 +308,10 @@ function BorrowedRecipesView() {
       </div>
 
       <div>
-        <h2 className="font-serif text-2xl font-medium text-[#2D2D2D]">
+        <h2 className="font-serif text-2xl font-medium text-brand-charcoal">
           Borrowed recipes
         </h2>
-        <p className="text-[#9A9590] mt-2">
+        <p className="text-[hsl(var(--brand-warm-gray-light))] mt-2">
           Some of the best recipes aren&apos;t yours. They&apos;re your mom&apos;s. Or your roommate&apos;s. Or that restaurant you can&apos;t stop thinking about.
         </p>
       </div>
@@ -359,10 +359,10 @@ function FunStuffView() {
       </div>
 
       <div>
-        <h2 className="font-serif text-2xl font-medium text-[#2D2D2D]">
+        <h2 className="font-serif text-2xl font-medium text-brand-charcoal">
           The fun stuff
         </h2>
-        <p className="text-[#9A9590] mt-2">
+        <p className="text-[hsl(var(--brand-warm-gray-light))] mt-2">
           For when you want your page to be the one they laugh about. Or toast to.
         </p>
       </div>

@@ -20,9 +20,9 @@ const RELATIONSHIP_OPTIONS = [
 ];
 
 const SANS_FONT = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const LABEL_CLASS = "block text-[13px] font-medium text-[#2D2D2D] mb-1.5";
+const LABEL_CLASS = "block text-[13px] font-medium text-brand-charcoal mb-1.5";
 const INPUT_CLASS =
-  "w-full px-4 h-[52px] border border-[#E8E0D5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:border-transparent text-[15px] bg-white transition-all";
+  "w-full px-4 h-[52px] border border-brand-sand rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent text-[15px] bg-white transition-all";
 
 /**
  * Inline dropdown styled identically to the text inputs (same height, border, font size).
@@ -61,11 +61,11 @@ function RelationshipDropdown({
         className={`${INPUT_CLASS} flex items-center justify-between text-left`}
         style={{ fontFamily: SANS_FONT }}
       >
-        <span className={selected ? "text-[#2D2D2D]" : "text-[#9A9590]"}>
+        <span className={selected ? "text-brand-charcoal" : "text-[hsl(var(--brand-warm-gray-light))]"}>
           {selected ? selected.label : "Select your relationship"}
         </span>
         <svg
-          className={`w-4 h-4 text-[#9A9590] transition-transform ${isOpen ? "rotate-180" : ""}`}
+          className={`w-4 h-4 text-[hsl(var(--brand-warm-gray-light))] transition-transform ${isOpen ? "rotate-180" : ""}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -76,7 +76,7 @@ function RelationshipDropdown({
 
       {isOpen && (
         <div
-          className="absolute z-[60] w-full mt-2 bg-white border border-[#E8E0D5] rounded-xl shadow-lg overflow-hidden"
+          className="absolute z-[60] w-full mt-2 bg-white border border-brand-sand rounded-xl shadow-lg overflow-hidden"
           style={{ fontFamily: SANS_FONT }}
         >
           {RELATIONSHIP_OPTIONS.map((opt) => (
@@ -88,7 +88,7 @@ function RelationshipDropdown({
                 setIsOpen(false);
               }}
               className={`w-full px-4 py-3 text-left text-[15px] hover:bg-[#FAF7F2] transition-colors ${
-                value === opt.value ? "bg-[#FDF9F0] text-[#2D2D2D]" : "text-[#2D2D2D]"
+                value === opt.value ? "bg-[#FDF9F0] text-brand-charcoal" : "text-brand-charcoal"
               }`}
             >
               {opt.label}
@@ -199,7 +199,7 @@ export function CoupleNamesModal({ open, groupId, userEmail, isFirstBook = true,
         />
 
         {/* Headline — swaps copy for returning customers buying their Nth book. */}
-        <h1 className="text-center mb-3 font-serif text-[38px] font-light leading-[1.15] text-[#2D2D2D]">
+        <h1 className="text-center mb-3 font-serif text-[38px] font-light leading-[1.15] text-brand-charcoal">
           {isFirstBook ? (
             <>
               Your book<br />
@@ -267,7 +267,7 @@ export function CoupleNamesModal({ open, groupId, userEmail, isFirstBook = true,
                 Create a password
               </label>
               <p
-                className="text-[13px] text-[#9A9590] mb-2"
+                className="text-[13px] text-[hsl(var(--brand-warm-gray-light))] mb-2"
                 style={{ fontFamily: SANS_FONT }}
               >
                 So you can log in later without waiting for an email.
@@ -290,7 +290,7 @@ export function CoupleNamesModal({ open, groupId, userEmail, isFirstBook = true,
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A9590] hover:text-[#2D2D2D] transition-colors p-1"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors p-1"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -342,7 +342,7 @@ export function CoupleNamesModal({ open, groupId, userEmail, isFirstBook = true,
             type="button"
             onClick={handleSubmit}
             disabled={!canSubmit || submitting}
-            className="w-full h-[56px] bg-[#D4A854] hover:bg-[#c49b4a] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors text-[15px] mt-2"
+            className="w-full h-[56px] bg-brand-honey hover:bg-brand-honey-dark disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors text-[15px] mt-2"
             style={{ fontFamily: SANS_FONT }}
           >
             {submitting ? "Saving..." : "Open your dashboard →"}
@@ -350,11 +350,11 @@ export function CoupleNamesModal({ open, groupId, userEmail, isFirstBook = true,
 
           {/* Footer copy under CTA */}
           <p
-            className="text-center text-[13px] text-[#9A9590] leading-relaxed"
+            className="text-center text-[13px] text-[hsl(var(--brand-warm-gray-light))] leading-relaxed"
             style={{ fontFamily: SANS_FONT }}
           >
             We&apos;ll also email a login link to{" "}
-            <span className="text-[#2D2D2D]">{userEmail}</span>.
+            <span className="text-brand-charcoal">{userEmail}</span>.
           </p>
           <p
             className="text-center text-[12px] text-[#C8C3BC]"
@@ -363,7 +363,7 @@ export function CoupleNamesModal({ open, groupId, userEmail, isFirstBook = true,
             Need help?{" "}
             <a
               href="mailto:team@smallplatesandcompany.com"
-              className="underline hover:text-[#2D2D2D]"
+              className="underline hover:text-brand-charcoal"
             >
               team@smallplatesandcompany.com
             </a>

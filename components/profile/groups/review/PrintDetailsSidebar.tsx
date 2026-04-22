@@ -120,7 +120,7 @@ export function PrintDetailsSidebar({
                 type="text"
                 value={nameValue}
                 onChange={(e) => setNameValue(e.target.value)}
-                className="w-full text-lg font-serif text-[#2D2D2D] bg-white border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#D4A854]"
+                className="w-full text-lg font-serif text-brand-charcoal bg-white border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-brand-honey"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleSaveName();
@@ -137,7 +137,7 @@ export function PrintDetailsSidebar({
                 <button
                   onClick={handleSaveName}
                   disabled={savingName || !nameValue.trim()}
-                  className="text-xs text-[#D4A854] hover:text-[#c49a4a] font-medium transition-colors"
+                  className="text-xs text-brand-honey hover:text-brand-honey-dark font-medium transition-colors"
                 >
                   {savingName ? "Saving..." : "Save"}
                 </button>
@@ -145,12 +145,12 @@ export function PrintDetailsSidebar({
             </div>
           ) : (
             <div className="group">
-              <p className="text-xl font-serif text-[#2D2D2D] leading-snug">
+              <p className="text-xl font-serif text-brand-charcoal leading-snug">
                 {printCoupleName}
               </p>
               <button
                 onClick={() => setEditingName(true)}
-                className="mt-1 text-xs text-gray-300 group-hover:text-[#D4A854] transition-colors flex items-center gap-1"
+                className="mt-1 text-xs text-gray-300 group-hover:text-brand-honey transition-colors flex items-center gap-1"
               >
                 <Pencil className="h-3 w-3" /> Edit name
               </button>
@@ -175,7 +175,7 @@ export function PrintDetailsSidebar({
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingImage}
-                  className="text-xs text-[#D4A854] hover:text-[#c49a4a] transition-colors"
+                  className="text-xs text-brand-honey hover:text-brand-honey-dark transition-colors"
                 >
                   Change
                 </button>
@@ -191,10 +191,10 @@ export function PrintDetailsSidebar({
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingImage}
-              className="w-full aspect-square rounded-xl border-2 border-dashed border-gray-200 hover:border-[#D4A854] flex flex-col items-center justify-center gap-1 transition-colors"
+              className="w-full aspect-square rounded-xl border-2 border-dashed border-gray-200 hover:border-brand-honey flex flex-col items-center justify-center gap-1 transition-colors"
             >
               {uploadingImage ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#D4A854]" />
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-brand-honey" />
               ) : (
                 <>
                   <Upload className="h-4 w-4 text-gray-400" />

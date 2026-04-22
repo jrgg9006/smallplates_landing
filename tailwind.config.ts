@@ -46,6 +46,100 @@ const config: Config = {
   				'sans-serif'
   			]
   		},
+  		fontSize: {
+  			// Display — hero titulars, landing covers
+  			// Fluid from 36px (mobile) to 72px (desktop)
+  			'display': ['clamp(2.25rem, 1.75rem + 2.5vw, 4.5rem)', {
+  				lineHeight: '1.1',
+  				letterSpacing: '-0.02em',
+  			}],
+
+  			// Heading — section titles
+  			// Fluid from 30px mobile to 48px desktop
+  			'heading': ['clamp(1.875rem, 1.5rem + 1.875vw, 3rem)', {
+  				lineHeight: '1.15',
+  				letterSpacing: '-0.01em',
+  			}],
+
+  			// Subheading — card/modal titles, subsection headers
+  			// Fluid from 24px mobile to 30px desktop
+  			'subheading': ['clamp(1.5rem, 1.375rem + 0.625vw, 1.875rem)', {
+  				lineHeight: '1.2',
+  				letterSpacing: '0',
+  			}],
+
+  			// Body — primary prose (paragraphs, descriptions)
+  			// Fixed 16px
+  			'body': ['1rem', {
+  				lineHeight: '1.65',
+  				letterSpacing: '0',
+  			}],
+
+  			// Body-lead — lead prose editorial (follows a heading)
+  			// Fluid from 18px mobile to 24px desktop
+  			'body-lead': ['clamp(1.125rem, 0.9rem + 1.125vw, 1.5rem)', {
+  				lineHeight: '1.65',
+  				letterSpacing: '0',
+  			}],
+
+  			// Body-small — secondary prose (helper text, info boxes)
+  			// Fixed 14px
+  			'body-small': ['0.875rem', {
+  				lineHeight: '1.6',
+  				letterSpacing: '0',
+  			}],
+
+  			// Caption — metadata, timestamps, small labels
+  			// Fixed 12px
+  			'caption': ['0.75rem', {
+  				lineHeight: '1.5',
+  				letterSpacing: '0',
+  			}],
+
+  			// Eyebrow — ALL CAPS kickers above headings
+  			// Fixed 11px
+  			'eyebrow': ['0.6875rem', {
+  				lineHeight: '1.4',
+  				letterSpacing: '0.15em',
+  			}],
+
+  			// Action — buttons, CTAs, navigation
+  			// Fixed 15px
+  			'action': ['0.9375rem', {
+  				lineHeight: '1.0',
+  				letterSpacing: '0',
+  			}],
+
+  			// --- Platform tokens — Phase 1.3.3 ---
+
+  			// Modal-title — modal / sheet dialog titles
+  			// Fixed 24px
+  			'modal-title': ['1.5rem', {
+  				lineHeight: '2rem',
+  				letterSpacing: '0',
+  			}],
+
+  			// Form-label — primary form input labels
+  			// Fixed 14px
+  			'form-label': ['0.875rem', {
+  				lineHeight: '1.5',
+  				letterSpacing: '0',
+  			}],
+
+  			// Form-label-muted — secondary form input labels (softer)
+  			// Fixed 14px — identical size, color applied by consumer
+  			'form-label-muted': ['0.875rem', {
+  				lineHeight: '1.5',
+  				letterSpacing: '0',
+  			}],
+
+  			// Secondary-sm — small secondary gray text (badges, helper text, metadata, tags)
+  			// Fixed 12px
+  			'secondary-sm': ['0.75rem', {
+  				lineHeight: '1.4',
+  				letterSpacing: '0',
+  			}],
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
@@ -92,9 +186,6 @@ const config: Config = {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			},
-  			smallplates_green: '#00676F',
-  			smallplates_red: '#E33D26',
-  			smallplates_darkblue: '#444459',
   			// Small Plates Brand Colors
   			brand: {
   				'warm-white': 'hsl(var(--brand-warm-white))',
@@ -106,7 +197,9 @@ const config: Config = {
   				'sand': 'hsl(var(--brand-sand))',
   				'white': 'hsl(var(--brand-white))',
   				'olive': 'hsl(var(--brand-olive))',
-  				'terracotta': 'hsl(var(--brand-terracotta))'
+  				'terracotta': 'hsl(var(--brand-terracotta))',
+  				'warm-gray-dark': 'hsl(var(--brand-warm-gray-dark))',
+  				'warm-gray-light': 'hsl(var(--brand-warm-gray-light))'
   			}
   		}
   	}

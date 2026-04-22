@@ -292,7 +292,7 @@ export function AddressForm({ address, onSuccess, onCancel }: AddressFormProps) 
           placeholder="+1 (555) 123-4567"
           disabled={loading}
         />
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-secondary-sm text-gray-500 mt-1">
           Optional - used by shipping carrier for delivery notifications
         </p>
       </div>

@@ -37,12 +37,12 @@ function SuccessContent() {
         hideProgress={true}
       >
         <div className="max-w-sm mx-auto text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4A854] mx-auto mb-8"></div>
-          <p className="text-[#2D2D2D]/60 font-light">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-honey mx-auto mb-8"></div>
+          <p className="text-brand-charcoal/60 font-light">
             If this takes too long, reach out at{" "}
             <a
               href="mailto:team@smallplatesandcompany.com"
-              className="text-[#2D2D2D]/50 hover:text-[#D4A854] transition-colors"
+              className="text-brand-charcoal/50 hover:text-brand-honey transition-colors"
             >
               team@smallplatesandcompany.com
             </a>
@@ -63,26 +63,26 @@ function SuccessContent() {
     >
       <div className="max-w-sm mx-auto text-center">
         {/* Success Icon */}
-        <div className="w-16 h-16 mx-auto mb-12 rounded-full bg-[#D4A854]/10 flex items-center justify-center">
-          <CheckCircle className="w-8 h-8 text-[#D4A854]" />
+        <div className="w-16 h-16 mx-auto mb-12 rounded-full bg-brand-honey/10 flex items-center justify-center">
+          <CheckCircle className="w-8 h-8 text-brand-honey" />
         </div>
 
         {/* Email notification */}
-        <p className="text-[#2D2D2D]/60 font-light mb-4">
+        <p className="text-brand-charcoal/60 font-light mb-4">
           Check your email for a link to access your dashboard.
         </p>
 
         {/* Tagline */}
-        <p className="text-[#D4A854] font-medium text-lg mb-16">
+        <p className="text-brand-honey font-medium text-lg mb-16">
           You just started something real.
         </p>
 
         {/* Contact */}
-        <p className="text-sm text-[#2D2D2D]/40 font-light">
+        <p className="text-sm text-brand-charcoal/40 font-light">
           Questions?{" "}
           <a
             href="mailto:team@smallplatesandcompany.com"
-            className="text-[#2D2D2D]/50 hover:text-[#D4A854] transition-colors"
+            className="text-brand-charcoal/50 hover:text-brand-honey transition-colors"
           >
             team@smallplatesandcompany.com
           </a>
@@ -97,7 +97,7 @@ export default function SuccessPage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-white flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4A854]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-honey"></div>
         </div>
       }
     >

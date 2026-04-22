@@ -141,8 +141,8 @@ const specs = [
 export default function SpecsGrid() {
   return (
     <div className="mt-16 md:mt-24">
-      {/* Reason: gap-px + bg-[#E8E0D5] creates 1px divider lines between cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[#E8E0D5] rounded-lg overflow-hidden">
+      {/* Reason: gap-px + bg-brand-sand creates 1px divider lines between cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-brand-sand rounded-lg overflow-hidden">
         {specs.map((spec, index) => (
           <motion.div
             key={spec.heading}
@@ -152,7 +152,7 @@ export default function SpecsGrid() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.5, delay: index * 0.05 }}
           >
-            <div className="text-[#D4A854] mb-5">{spec.icon}</div>
+            <div className="text-brand-honey mb-5">{spec.icon}</div>
             <h3 className="type-subheading text-lg md:text-xl mb-3">
               {spec.heading}
             </h3>

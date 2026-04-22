@@ -62,7 +62,7 @@ export default function RecipeTypeStep({ onSelectType, selectedType }: RecipeTyp
       <div className="w-full space-y-8 px-4 md:px-6">
         {/* Header */}
         <div className="space-y-3 text-center">
-          <h2 className="font-serif text-3xl md:text-4xl font-semibold text-[#2D2D2D]">
+          <h2 className="font-serif text-3xl md:text-4xl font-semibold text-brand-charcoal">
             What are you bringing to the table?
           </h2>
           <p className="text-base text-gray-600">
@@ -81,15 +81,15 @@ export default function RecipeTypeStep({ onSelectType, selectedType }: RecipeTyp
                 w-full p-4 rounded-xl border-2 transition-all duration-200 bg-white text-left
                 flex items-center gap-4
                 ${selectedType?.id === option.id
-                  ? 'border-[#D4A854] bg-[#FAF7F2]'
-                  : 'border-gray-200 hover:border-[#D4A854] hover:bg-[#FAF7F2]'
+                  ? 'border-brand-honey bg-[#FAF7F2]'
+                  : 'border-gray-200 hover:border-brand-honey hover:bg-[#FAF7F2]'
                 }
               `}
             >
               <span className="text-2xl flex-shrink-0" aria-hidden="true">
                 {option.emoji}
               </span>
-              <span className="text-[#2D2D2D] text-base">
+              <span className="text-brand-charcoal text-base">
                 {option.label}
               </span>
             </button>

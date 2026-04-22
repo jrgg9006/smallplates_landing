@@ -48,7 +48,7 @@ export default function YourTools() {
           >
             Everything you need to pull this off.
           </h2>
-          <p className="mt-4 type-body text-[#2D2D2D]/50">
+          <p className="mt-4 type-body text-brand-charcoal/50">
             Without losing your mind.
           </p>
         </motion.div>
@@ -58,7 +58,7 @@ export default function YourTools() {
           {cards.map((card, i) => (
             <motion.div
               key={card.title}
-              className="bg-white rounded-2xl border border-[#E8E0D5] overflow-hidden flex flex-col"
+              className="bg-white rounded-2xl border border-brand-sand overflow-hidden flex flex-col"
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
@@ -71,7 +71,7 @@ export default function YourTools() {
                 <h3 className="type-subheading mb-4">
                   {card.title}
                 </h3>
-                <p className="type-body-small text-[#2D2D2D]/60">
+                <p className="type-body-small text-brand-charcoal/60">
                   {card.description}
                 </p>
               </div>
@@ -103,10 +103,10 @@ export default function YourTools() {
                 className="h-7 w-auto"
               />
           </div>
-          <p className="font-serif text-xl md:text-2xl font-normal text-[#2D2D2D]">
+          <p className="font-serif text-xl md:text-2xl font-normal text-brand-charcoal">
             Bring the guest list from The Knot or Zola
           </p>
-          <p className="mt-2 font-sans font-light text-base text-[#2D2D2D]/50 max-w-md mx-auto">
+          <p className="mt-2 font-sans font-light text-base text-brand-charcoal/50 max-w-md mx-auto">
             The guest list is already built. Get it from the couple, import it, and invite everyone&mdash;even the people you&apos;ve never met.
           </p>
         </motion.div>

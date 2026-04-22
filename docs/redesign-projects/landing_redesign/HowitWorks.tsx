@@ -78,11 +78,11 @@ export default function HowItWorks() {
         >
           <h2
             id="how-it-works-heading"
-            className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#2D2D2D]"
+            className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-brand-charcoal"
           >
             Here's how it happens.
           </h2>
-          <p className="mt-4 font-sans text-lg md:text-xl text-[#2D2D2D]/60">
+          <p className="mt-4 font-sans text-lg md:text-xl text-brand-charcoal/60">
             Simpler than you think.
           </p>
         </motion.div>
@@ -99,7 +99,7 @@ export default function HowItWorks() {
               transition={{ duration: 0.6, delay: index * 0.15, ease: "easeOut" }}
             >
               {/* Step Number */}
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#FAF7F2] text-[#D4A854] font-serif text-lg font-medium mb-6">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#FAF7F2] text-brand-honey font-serif text-lg font-medium mb-6">
                 {step.number}
               </div>
 
@@ -115,12 +115,12 @@ export default function HowItWorks() {
               </div>
 
               {/* Title */}
-              <h3 className="font-serif text-2xl md:text-3xl font-medium text-[#2D2D2D] mb-3">
+              <h3 className="font-serif text-2xl md:text-3xl font-medium text-brand-charcoal mb-3">
                 {step.title}
               </h3>
 
               {/* Description */}
-              <p className="font-sans text-base md:text-lg text-[#2D2D2D]/70 max-w-xs mx-auto">
+              <p className="font-sans text-base md:text-lg text-brand-charcoal/70 max-w-xs mx-auto">
                 {step.description}
               </p>
             </motion.div>
@@ -128,7 +128,7 @@ export default function HowItWorks() {
         </div>
 
         {/* Optional: Connector line on desktop */}
-        <div className="hidden md:block absolute top-1/2 left-0 right-0 h-px bg-[#E8E0D5] -z-10" />
+        <div className="hidden md:block absolute top-1/2 left-0 right-0 h-px bg-brand-sand -z-10" />
 
       </div>
     </section>

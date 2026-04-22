@@ -386,7 +386,7 @@ export default function RecipeEditor({ recipeId, recipeIds = [], onClose, onSave
               </div>
 
               {/* Metadata */}
-              <div className="text-xs text-gray-500 space-y-1">
+              <div className="text-secondary-sm text-gray-500 space-y-1">
                 {!isOriginal && hasPrintReady && prMeta && (
                   <>
                     {prMeta.language && <div>Lang: {prMeta.language}</div>}

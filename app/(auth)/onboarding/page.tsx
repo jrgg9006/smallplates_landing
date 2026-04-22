@@ -48,7 +48,7 @@ function ProductStep() {
           onClick={nextStep}
           disabled={!canContinue}
           className={`px-8 py-3 rounded-xl font-semibold transition-colors ${
-            canContinue ? "bg-[#D4A854] text-white hover:bg-[#c49b4a]" : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            canContinue ? "bg-brand-honey text-white hover:bg-brand-honey-dark" : "bg-gray-300 text-gray-500 cursor-not-allowed"
           }`}
         >
           Continue
@@ -192,10 +192,10 @@ function ReviewAndPaymentStep() {
           email they must log out first. */}
       <div className="space-y-3 mb-6">
         {isReturningCustomer && (
-          <div className="rounded-xl bg-[#FAF7F2] border border-[#E8E0D5] px-4 py-3">
+          <div className="rounded-xl bg-[#FAF7F2] border border-brand-sand px-4 py-3">
             <p className="text-[13px] text-[#5A5550] leading-relaxed">
               This book will be added to your account —{" "}
-              <span className="text-[#2D2D2D] font-medium">{email}</span>. To buy with a different email,{" "}
+              <span className="text-brand-charcoal font-medium">{email}</span>. To buy with a different email,{" "}
               <button
                 type="button"
                 onClick={async () => {
@@ -203,7 +203,7 @@ function ReviewAndPaymentStep() {
                   await supabase.auth.signOut();
                   router.replace("/onboarding");
                 }}
-                className="underline decoration-dotted underline-offset-2 hover:text-[#2D2D2D]"
+                className="underline decoration-dotted underline-offset-2 hover:text-brand-charcoal"
               >
                 log out
               </button>
@@ -212,7 +212,7 @@ function ReviewAndPaymentStep() {
           </div>
         )}
         <div>
-          <label htmlFor="buyer-name" className="block text-sm font-medium text-[#2D2D2D] mb-1.5">
+          <label htmlFor="buyer-name" className="block text-sm font-medium text-brand-charcoal mb-1.5">
             Your name
           </label>
           <input
@@ -222,17 +222,17 @@ function ReviewAndPaymentStep() {
             onChange={(e) => !isNameLocked && setBuyerName(e.target.value)}
             readOnly={isNameLocked}
             style={{ fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontSize: "15px" }}
-            className={`w-full px-4 py-3 border border-[#E8E0D5] rounded-xl outline-none ${
+            className={`w-full px-4 py-3 border border-brand-sand rounded-xl outline-none ${
               isNameLocked
                 ? "bg-[#F5F1EA] text-[#5A5550] cursor-not-allowed"
-                : "bg-white focus:ring-2 focus:ring-[#D4A854] focus:border-transparent"
+                : "bg-white focus:ring-2 focus:ring-brand-honey focus:border-transparent"
             }`}
             placeholder="Your name"
             autoComplete="name"
           />
         </div>
         <div>
-          <label htmlFor="buyer-email" className="block text-sm font-medium text-[#2D2D2D] mb-1.5">
+          <label htmlFor="buyer-email" className="block text-sm font-medium text-brand-charcoal mb-1.5">
             Your email
           </label>
           <input
@@ -249,9 +249,9 @@ function ReviewAndPaymentStep() {
             style={{ fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontSize: "15px" }}
             className={`w-full px-4 py-3 border rounded-xl outline-none ${
               isEmailLocked
-                ? "bg-[#F5F1EA] text-[#5A5550] cursor-not-allowed border-[#E8E0D5]"
-                : `bg-white focus:ring-2 focus:ring-[#D4A854] focus:border-transparent ${
-                    emailError ? "border-red-400" : "border-[#E8E0D5]"
+                ? "bg-[#F5F1EA] text-[#5A5550] cursor-not-allowed border-brand-sand"
+                : `bg-white focus:ring-2 focus:ring-brand-honey focus:border-transparent ${
+                    emailError ? "border-red-400" : "border-brand-sand"
                   }`
             }`}
             placeholder="your@email.com"
@@ -272,7 +272,7 @@ function ReviewAndPaymentStep() {
         onClick={handleContinueToPayment}
         disabled={!canSubmit}
         className={`w-full px-8 py-3.5 rounded-xl font-semibold transition-colors ${
-          canSubmit ? "bg-[#2D2D2D] text-white hover:bg-[#1a1a1a]" : "bg-gray-300 text-gray-500 cursor-not-allowed"
+          canSubmit ? "bg-brand-charcoal text-white hover:bg-[#1a1a1a]" : "bg-gray-300 text-gray-500 cursor-not-allowed"
         }`}
       >
         {isRedirectingToCheckout ? "Redirecting…" : "Continue to payment →"}
@@ -287,7 +287,7 @@ function ReviewAndPaymentStep() {
         Back
       </button>
 
-      <div className="flex items-center justify-center gap-2 text-xs text-[#2D2D2D]/40 mt-6">
+      <div className="flex items-center justify-center gap-2 text-xs text-brand-charcoal/40 mt-6">
         <Lock className="w-3 h-3" />
         <span>Secure checkout powered by</span>
         <img src="/images/logo_svg/stripe_logo.png" alt="Stripe" className="h-4 opacity-40" />
@@ -316,12 +316,12 @@ function Step4Shell({ summary, total, children }: { summary: React.ReactNode; to
       </button>
 
       {/* Mobile: summary collapsible above payment */}
-      <details className="lg:hidden group border-b border-[#E8E0D5] bg-[#FAF7F2] [&_summary::-webkit-details-marker]:hidden">
+      <details className="lg:hidden group border-b border-brand-sand bg-[#FAF7F2] [&_summary::-webkit-details-marker]:hidden">
         <summary className="px-6 py-4 flex justify-between items-center cursor-pointer list-none">
-          <span className="flex items-center gap-2 text-sm font-medium text-[#2D2D2D]">
+          <span className="flex items-center gap-2 text-sm font-medium text-brand-charcoal">
             Order summary
           </span>
-          <span className="text-sm font-semibold text-[#2D2D2D]">${total}</span>
+          <span className="text-sm font-semibold text-brand-charcoal">${total}</span>
         </summary>
         <div className="px-6 pb-6">{summary}</div>
       </details>
@@ -363,9 +363,9 @@ function ProgressBar({ step, total }: { step: number; total: number }) {
             <div
               className={`w-6 h-6 lg:w-8 lg:h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
                 isActive
-                  ? "bg-white text-[#9A9590] border-2 border-[#D4A854]"
+                  ? "bg-white text-[hsl(var(--brand-warm-gray-light))] border-2 border-brand-honey"
                   : isDone
-                  ? "bg-[#D4A854] text-white"
+                  ? "bg-brand-honey text-white"
                   : "bg-white text-gray-400 border border-gray-200"
               }`}
               aria-current={isActive ? "step" : undefined}
@@ -400,56 +400,56 @@ function OrderSummaryPanel({
 
   return (
     <div>
-      <p className="type-eyebrow mb-8 text-[#9A9590] tracking-widest text-[12px]">Order summary</p>
+      <p className="type-eyebrow mb-8 text-[hsl(var(--brand-warm-gray-light))] tracking-widest text-[12px]">Order summary</p>
 
       {/* Buyer info */}
       {(buyerName || email) && (
-        <div className="text-[15px] space-y-2.5 mb-8 pb-8 border-b border-[#E8E0D5]/80">
+        <div className="text-[15px] space-y-2.5 mb-8 pb-8 border-b border-brand-sand/80">
           {buyerName && (
             <div className="flex justify-between gap-3">
-              <span className="text-[#9A9590]">Name</span>
-              <span className="text-[#2D2D2D] text-right">{buyerName}</span>
+              <span className="text-[hsl(var(--brand-warm-gray-light))]">Name</span>
+              <span className="text-brand-charcoal text-right">{buyerName}</span>
             </div>
           )}
           {email && (
             <div className="flex justify-between gap-3">
-              <span className="text-[#9A9590]">Email</span>
-              <span className="text-[#2D2D2D] text-right truncate min-w-0">{email}</span>
+              <span className="text-[hsl(var(--brand-warm-gray-light))]">Email</span>
+              <span className="text-brand-charcoal text-right truncate min-w-0">{email}</span>
             </div>
           )}
         </div>
       )}
 
       {/* Line items */}
-      <div className="text-[15px] space-y-4 mb-8 pb-8 border-b border-[#E8E0D5]/80">
+      <div className="text-[15px] space-y-4 mb-8 pb-8 border-b border-brand-sand/80">
         <div className="flex justify-between items-start gap-3">
           <div className="min-w-0">
-            <div className="text-[#2D2D2D] leading-tight">The Book</div>
-            <div className="text-xs text-[#9A9590] mt-0.5">Hardcover, 50 recipes</div>
+            <div className="text-brand-charcoal leading-tight">The Book</div>
+            <div className="text-xs text-[hsl(var(--brand-warm-gray-light))] mt-0.5">Hardcover, 50 recipes</div>
           </div>
-          <div className="text-[#2D2D2D] tabular-nums">${BASE_BOOK_PRICE}</div>
+          <div className="text-brand-charcoal tabular-nums">${BASE_BOOK_PRICE}</div>
         </div>
         {additionalCopies > 0 && (
           <div className="flex justify-between items-start gap-3">
             <div className="min-w-0">
-              <div className="text-[#2D2D2D] leading-tight">
+              <div className="text-brand-charcoal leading-tight">
                 {additionalCopies} extra {additionalCopies === 1 ? "copy" : "copies"}
               </div>
-              <div className="text-xs text-[#9A9590] mt-0.5">${ADDITIONAL_BOOK_PRICE} each</div>
+              <div className="text-xs text-[hsl(var(--brand-warm-gray-light))] mt-0.5">${ADDITIONAL_BOOK_PRICE} each</div>
             </div>
-            <div className="text-[#2D2D2D] tabular-nums">${additionalCopies * ADDITIONAL_BOOK_PRICE}</div>
+            <div className="text-brand-charcoal tabular-nums">${additionalCopies * ADDITIONAL_BOOK_PRICE}</div>
           </div>
         )}
         <div className="flex justify-between items-center">
-          <span className="text-[#9A9590]">Shipping</span>
-          <span className="text-[#9A9590]">Included</span>
+          <span className="text-[hsl(var(--brand-warm-gray-light))]">Shipping</span>
+          <span className="text-[hsl(var(--brand-warm-gray-light))]">Included</span>
         </div>
       </div>
 
       {/* Total */}
       <div className="flex justify-between items-baseline">
-        <span className="text-[#2D2D2D]/70 text-[15px]">Total</span>
-        <span className="text-[#2D2D2D] font-serif font-semibold text-[32px] tabular-nums leading-none">${total}</span>
+        <span className="text-brand-charcoal/70 text-[15px]">Total</span>
+        <span className="text-brand-charcoal font-serif font-semibold text-[32px] tabular-nums leading-none">${total}</span>
       </div>
     </div>
   );

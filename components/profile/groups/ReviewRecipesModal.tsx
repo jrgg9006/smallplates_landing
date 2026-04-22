@@ -98,7 +98,7 @@ export function ReviewRecipesModal({
               </p>
 
               {/* Recipe title */}
-              <h3 className="font-serif text-3xl lg:text-4xl font-semibold text-[#2D2D2D] leading-tight mb-4">
+              <h3 className="font-serif text-3xl lg:text-4xl font-semibold text-brand-charcoal leading-tight mb-4">
                 {recipe.recipe_name || "Untitled Recipe"}
               </h3>
 

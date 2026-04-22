@@ -438,7 +438,7 @@ export default function AcceptInvitationPage() {
         {/* Form */}
         <form onSubmit={handlePasswordSetup} className="space-y-6">
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-form-label font-medium text-gray-700 mb-1">
               Nueva Contraseña *
             </label>
             <input
@@ -451,11 +451,11 @@ export default function AcceptInvitationPage() {
               placeholder="Ingresa tu nueva contraseña"
               minLength={6}
             />
-            <p className="text-xs text-gray-500 mt-1">Debe tener al menos 6 caracteres</p>
+            <p className="text-secondary-sm text-gray-500 mt-1">Debe tener al menos 6 caracteres</p>
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="confirmPassword" className="block text-form-label font-medium text-gray-700 mb-1">
               Confirmar Contraseña *
             </label>
             <input

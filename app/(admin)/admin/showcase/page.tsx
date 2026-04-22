@@ -481,9 +481,9 @@ export default function ShowcasePage() {
 
         {/* Stats bar — maps 1:1 to the three sections below */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-xl border border-[#D4A854] p-4">
+          <div className="bg-white rounded-xl border border-brand-honey p-4">
             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Pending today</div>
-            <div className="text-3xl font-bold text-[#D4A854] mt-1">{stats.pending}</div>
+            <div className="text-3xl font-bold text-brand-honey mt-1">{stats.pending}</div>
           </div>
           <div className="bg-white rounded-xl border border-gray-200 p-4">
             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Waiting for book</div>
@@ -709,7 +709,7 @@ function SectionCard({ title, subtitle, count, tone, defaultOpen, open, onToggle
   };
 
   const headerBg = tone === 'primary' ? 'bg-[#FAF7F2]' : 'bg-gray-50';
-  const countColor = tone === 'primary' ? 'text-[#D4A854]' : 'text-gray-500';
+  const countColor = tone === 'primary' ? 'text-brand-honey' : 'text-gray-500';
 
   return (
     <div className="bg-white rounded-xl shadow overflow-hidden">
@@ -722,7 +722,7 @@ function SectionCard({ title, subtitle, count, tone, defaultOpen, open, onToggle
             <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
             <span className={`text-xl font-bold ${countColor}`}>{count}</span>
           </div>
-          <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>
+          <p className="text-secondary-sm text-gray-500 mt-0.5">{subtitle}</p>
         </div>
         <span className="text-gray-400 text-sm">{isOpen ? '▾' : '▸'}</span>
       </button>
@@ -792,11 +792,11 @@ function GuestTable({
             <tr key={guest.guest_id} className="border-b last:border-b-0 align-top hover:bg-gray-50">
               <td className="px-4 py-3">
                 <div className="font-medium text-gray-900">{guest.guest_name}</div>
-                <div className="text-gray-500 text-xs">{guest.guest_email}</div>
+                <div className="text-gray-500 text-secondary-sm">{guest.guest_email}</div>
               </td>
               <td className="px-4 py-3">
                 <div className="text-gray-900 text-xs font-medium truncate">{guest.group_name || '—'}</div>
-                <div className="text-gray-500 text-xs mt-0.5">
+                <div className="text-gray-500 text-secondary-sm mt-0.5">
                   {bookLabel}
                   {variant === 'ready' && guest.book_close_date && (
                     <> · closed {formatDaysAgo(guest.book_close_date)}</>

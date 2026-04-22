@@ -83,7 +83,7 @@ export default function ProfileNavigation({
               <button
                 key={item.href}
                 onClick={() => setIsGroupSheetOpen(true)}
-                className={`text-sm text-[hsl(var(--brand-light-gray))] hover:text-[hsl(var(--brand-charcoal))] cursor-pointer transition-colors`}
+                className={`text-sm text-[hsl(var(--brand-warm-gray-dark))] hover:text-[hsl(var(--brand-charcoal))] cursor-pointer transition-colors`}
                 aria-current={item.isActive ? "page" : undefined}
               >
                 {item.label}
@@ -94,7 +94,7 @@ export default function ProfileNavigation({
             <Link
               key={item.href}
               href={item.href}
-              className={`text-sm text-[hsl(var(--brand-light-gray))] hover:text-[hsl(var(--brand-charcoal))] cursor-pointer transition-colors`}
+              className={`text-sm text-[hsl(var(--brand-warm-gray-dark))] hover:text-[hsl(var(--brand-charcoal))] cursor-pointer transition-colors`}
               aria-current={item.isActive ? "page" : undefined}
             >
               {item.label}

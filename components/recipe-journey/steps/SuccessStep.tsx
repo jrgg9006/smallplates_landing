@@ -75,10 +75,10 @@ export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn =
       <div className="text-center max-w-md mx-auto px-4">
 
         {/* Checkmark */}
-        <div className="text-[#D4A854] text-2xl mb-6 mt-8">{'\u2713'}</div>
+        <div className="text-brand-honey text-2xl mb-6 mt-8">{'\u2713'}</div>
 
         {/* Main heading */}
-        <h2 id="thanks-heading" className="font-serif text-4xl md:text-[2.5rem] font-semibold text-[#2D2D2D] tracking-tight">
+        <h2 id="thanks-heading" className="font-serif text-4xl md:text-[2.5rem] font-semibold text-brand-charcoal tracking-tight">
           {recipeName ? (
             <>Your <em className="text-[#4a4a4a]">{recipeName}</em> is in the book.</>
           ) : (
@@ -87,13 +87,13 @@ export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn =
         </h2>
 
         {coupleNames && (
-          <p className="text-xs tracking-[0.25em] uppercase text-[#D4A854]/70 mt-5 font-medium">
+          <p className="text-xs tracking-[0.25em] uppercase text-brand-honey/70 mt-5 font-medium">
             {coupleNames}
           </p>
         )}
 
         {/* Divider */}
-        <div className="w-8 h-[2px] bg-[#2D2D2D] mx-auto my-8" />
+        <div className="w-8 h-[2px] bg-brand-charcoal mx-auto my-8" />
 
         {/* Divider */}
         <div className="w-full h-px bg-gray-200 my-8" />
@@ -115,7 +115,7 @@ export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn =
                   placeholder="your@email.com"
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); setSaved(false); }}
-                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder:text-gray-300 focus:outline-none focus:border-[#D4A854] transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder:text-gray-300 focus:outline-none focus:border-brand-honey transition-colors"
                   disabled={saving}
                 />
                 <button
@@ -143,7 +143,7 @@ export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn =
               disabled={newsletterStatus === 'submitting' || newsletterStatus === 'done' || !availableEmail}
               className="peer sr-only"
             />
-            <span className="relative mt-[3px] flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[4px] border border-gray-300 bg-white transition-all peer-checked:bg-[#D4A854] peer-checked:border-[#D4A854] peer-hover:border-[#D4A854] peer-disabled:opacity-40 peer-focus-visible:ring-2 peer-focus-visible:ring-[#D4A854]/30 peer-focus-visible:ring-offset-1">
+            <span className="relative mt-[3px] flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[4px] border border-gray-300 bg-white transition-all peer-checked:bg-brand-honey peer-checked:border-brand-honey peer-hover:border-brand-honey peer-disabled:opacity-40 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-honey/30 peer-focus-visible:ring-offset-1">
               {newsletterOptIn && (
                 <svg
                   viewBox="0 0 12 12"
@@ -161,9 +161,9 @@ export default function SuccessStep({ defaultName, defaultEmail, hasGuestOptIn =
             </span>
             <span className="text-[12px] leading-[1.5] flex-1">
               {newsletterStatus === 'done' ? (
-                <span className="text-[#D4A854]">You&apos;re on the list. First one lands soon.</span>
+                <span className="text-brand-honey">You&apos;re on the list. First one lands soon.</span>
               ) : newsletterStatus === 'error' ? (
-                <span className="text-[#C4856C]">Try again later.</span>
+                <span className="text-brand-terracotta">Try again later.</span>
               ) : newsletterStatus === 'submitting' ? (
                 <span className="text-gray-500">Adding you...</span>
               ) : (

@@ -56,7 +56,7 @@ export default async function CopyPage({
           height={40}
           priority
         />
-        <p className="text-[15px] text-[#8A8780] mt-8 text-center">
+        <p className="text-[15px] text-[hsl(var(--brand-warm-gray))] mt-8 text-center">
           This link is no longer available.
         </p>
       </div>

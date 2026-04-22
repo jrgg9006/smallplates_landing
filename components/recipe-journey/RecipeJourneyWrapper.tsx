@@ -680,7 +680,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
           <button
             type="button"
             onClick={handleAddAnother}
-            className="px-4 py-2.5 sm:px-6 sm:py-3 rounded-full bg-[#D4A854] text-white hover:bg-[#c49b4a] text-sm sm:text-base"
+            className="px-4 py-2.5 sm:px-6 sm:py-3 rounded-full bg-brand-honey text-white hover:bg-brand-honey-dark text-sm sm:text-base"
           >
             <span className="sm:hidden">Add Another</span>
             <span className="hidden sm:inline">Add another Small Plate</span>
@@ -716,7 +716,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
             (current === 'recipeTitle' && recipeData.rawRecipeText && submitting) ||
             submitting
           }
-          className="px-8 py-3 rounded-full bg-[#D4A854] text-white hover:bg-[#c49b4a] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-8 py-3 rounded-full bg-brand-honey text-white hover:bg-brand-honey-dark disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {current === 'imageUpload'
             ? (uploadingImages ? `Submitting... ${uploadProgress}%` : 'Submit Small Plate')
@@ -734,7 +734,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
           type="button"
           onClick={handleSubmit}
           disabled={submitting || submitSuccess}
-          className="px-8 py-3 rounded-full bg-[#D4A854] text-white hover:bg-[#c49b4a] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-8 py-3 rounded-full bg-brand-honey text-white hover:bg-brand-honey-dark disabled:opacity-50 disabled:cursor-not-allowed"
           aria-busy={submitting}
         >
           {submitting ? 'Submitting…' : submitSuccess ? 'Submitted!' : 'Add my creation'}

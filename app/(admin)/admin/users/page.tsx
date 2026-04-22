@@ -454,7 +454,7 @@ export default function AdminUsersPage() {
                   setFilterPaid('all');
                   setFilterContent('all');
                 }}
-                className="ml-auto text-xs text-gray-500 hover:text-gray-700 underline"
+                className="ml-auto text-secondary-sm text-gray-500 hover:text-gray-700 underline"
               >
                 Clear filters
               </button>
@@ -506,7 +506,7 @@ export default function AdminUsersPage() {
                                 </span>
                               )}
                             </div>
-                            <span className="text-xs text-gray-500">{user.full_name || '—'}</span>
+                            <span className="text-secondary-sm text-gray-500">{user.full_name || '—'}</span>
                           </div>
                         </td>
                         <td className="px-3 py-3 whitespace-nowrap text-center" onClick={(e) => e.stopPropagation()}>
@@ -772,7 +772,7 @@ export default function AdminUsersPage() {
                               OWNER
                             </span>
                           </div>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-secondary-sm text-gray-500">
                             {new Date(group.created_at).toLocaleDateString()}
                           </span>
                         </div>

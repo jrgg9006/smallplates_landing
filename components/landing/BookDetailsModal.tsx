@@ -83,7 +83,7 @@ export default function BookDetailsModal({ isOpen, onClose }: BookDetailsModalPr
             {/* Header */}
             <div className="pt-4 md:pt-6 mb-8">
               <p className="type-eyebrow text-center mb-4">The Book</p>
-              <h1 id="modal-title" className="font-serif text-2xl md:text-3xl font-normal text-[#2D2D2D] text-center mb-4">
+              <h1 id="modal-title" className="font-serif text-2xl md:text-3xl font-normal text-brand-charcoal text-center mb-4">
                 Your Kitchen. Their Love.
               </h1>
               <p className="type-body-small text-center max-w-lg mx-auto">
@@ -93,7 +93,7 @@ export default function BookDetailsModal({ isOpen, onClose }: BookDetailsModalPr
 
             {/* Divider */}
             <div className="flex justify-center mb-8">
-              <div className="w-12 h-px bg-[#E8E0D5]"></div>
+              <div className="w-12 h-px bg-brand-sand"></div>
             </div>
 
             {/* Specifications */}
@@ -103,7 +103,7 @@ export default function BookDetailsModal({ isOpen, onClose }: BookDetailsModalPr
                   <dt className="type-eyebrow mb-1">
                     {spec.label}
                   </dt>
-                  <dd className="font-sans text-sm text-[#2D2D2D]">
+                  <dd className="font-sans text-sm text-brand-charcoal">
                     {spec.value}
                   </dd>
                 </div>
@@ -111,7 +111,7 @@ export default function BookDetailsModal({ isOpen, onClose }: BookDetailsModalPr
             </dl>
 
             {/* Footer */}
-            <div className="border-t border-[#E8E0D5] pt-6">
+            <div className="border-t border-brand-sand pt-6">
               <p className="type-caption italic text-center">
                 Built to live in your kitchen for decades. Not a shelf.
               </p>

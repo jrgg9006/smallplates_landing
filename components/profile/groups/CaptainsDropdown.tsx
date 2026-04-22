@@ -102,7 +102,7 @@ export function CaptainsDropdown({ isOpen, selectedGroup, onClose, onInviteCapta
               className={`w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-medium ${
                 captain.role === 'Creator' 
                   ? 'bg-[hsl(var(--brand-charcoal))] text-[hsl(var(--brand-white))]'
-                  : 'bg-[#E8E6E1] text-[hsl(var(--brand-light-gray))]'
+                  : 'bg-[#E8E6E1] text-[hsl(var(--brand-warm-gray-dark))]'
               }`}
             >
               {captain.initial}
@@ -167,7 +167,7 @@ export function CaptainsDropdown({ isOpen, selectedGroup, onClose, onInviteCapta
             onInviteCaptain?.();
             onClose();
           }}
-          className="w-full mt-3 py-2.5 bg-transparent border border-dashed border-[hsl(var(--brand-border-button))] rounded-[20px] text-[13px] text-[hsl(var(--brand-light-gray))] hover:bg-[hsl(var(--brand-border))] transition-colors"
+          className="w-full mt-3 py-2.5 bg-transparent border border-dashed border-[hsl(var(--brand-border-button))] rounded-[20px] text-[13px] text-[hsl(var(--brand-warm-gray-dark))] hover:bg-[hsl(var(--brand-border))] transition-colors"
         >
           + Invite Captain
         </button>

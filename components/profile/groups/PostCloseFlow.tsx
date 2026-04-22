@@ -92,15 +92,15 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
         return (
           <React.Fragment key={stepNum}>
             {i > 0 && (
-              <div className={`w-8 h-px ${completed ? "bg-[#D4A854]" : "bg-[rgba(45,45,45,0.12)]"}`} />
+              <div className={`w-8 h-px ${completed ? "bg-brand-honey" : "bg-[rgba(45,45,45,0.12)]"}`} />
             )}
             <div
               className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
                 completed
-                  ? "bg-[#D4A854] text-white"
+                  ? "bg-brand-honey text-white"
                   : active
-                  ? "border-2 border-[#D4A854] text-[#D4A854]"
-                  : "border border-[rgba(45,45,45,0.12)] text-[#8A8780]"
+                  ? "border-2 border-brand-honey text-brand-honey"
+                  : "border border-[rgba(45,45,45,0.12)] text-[hsl(var(--brand-warm-gray))]"
               }`}
             >
               {completed ? <Check className="w-3.5 h-3.5" /> : stepNum}
@@ -135,10 +135,10 @@ function StepExtras({
       <StepIndicator current={1} total={totalSteps} />
 
       {/* Headline */}
-      <h1 className="font-serif text-[34px] font-normal text-[#2D2D2D] text-center leading-tight mb-3">
+      <h1 className="font-serif text-[34px] font-normal text-brand-charcoal text-center leading-tight mb-3">
         Before we print, <br />who else gets one?
       </h1>
-      <p className="text-[15px] text-[#8A8780] text-center leading-relaxed mb-6 max-w-sm">
+      <p className="text-[15px] text-[hsl(var(--brand-warm-gray))] text-center leading-relaxed mb-6 max-w-sm">
         This book is going to live in a kitchen for years.<br />
         Some people should have their own.
       </p>
@@ -156,18 +156,18 @@ function StepExtras({
       </div> */}
 
       {/* Price block */}
-      <p className="text-[11px] uppercase tracking-[0.08em] text-[#8A8780] mb-2">
+      <p className="text-[11px] uppercase tracking-[0.08em] text-[hsl(var(--brand-warm-gray))] mb-2">
         Each additional copy
       </p>
       <div className="flex items-baseline justify-center gap-3 mb-1">
         <span className="font-serif text-[22px] text-[#B0ADA8] line-through decoration-[1.5px]">${BASE_BOOK_PRICE}</span>
         <span className="flex items-baseline">
-          <span className="font-serif text-2xl text-[#8A8780] mr-1">$</span>
-          <span className="font-serif text-[56px] text-[#2D2D2D] leading-none">129</span>
+          <span className="font-serif text-2xl text-[hsl(var(--brand-warm-gray))] mr-1">$</span>
+          <span className="font-serif text-[56px] text-brand-charcoal leading-none">129</span>
         </span>
       </div>
       <div className="flex items-center gap-2 mb-10">
-        <span className="text-sm text-[#8A8780]">same book, same quality</span>
+        <span className="text-sm text-[hsl(var(--brand-warm-gray))]">same book, same quality</span>
         <span className="bg-[#F5EDD8] text-[#7A5C10] text-[11px] rounded-[10px] px-2.5 py-0.5 font-medium">
           ships free
         </span>
@@ -178,18 +178,18 @@ function StepExtras({
         <button
           onClick={() => setQty(Math.max(0, qty - 1))}
           disabled={qty === 0}
-          className="w-[50px] h-[50px] rounded-full border-[1.5px] border-[rgba(45,45,45,0.12)] flex items-center justify-center text-[#2D2D2D] text-2xl disabled:opacity-25 transition-opacity"
+          className="w-[50px] h-[50px] rounded-full border-[1.5px] border-[rgba(45,45,45,0.12)] flex items-center justify-center text-brand-charcoal text-2xl disabled:opacity-25 transition-opacity"
           aria-label="Remove copy"
         >
           <Minus className="w-5 h-5" />
         </button>
-        <span className="font-serif text-[40px] text-[#2D2D2D] min-w-[52px] text-center tabular-nums">
+        <span className="font-serif text-[40px] text-brand-charcoal min-w-[52px] text-center tabular-nums">
           {qty}
         </span>
         <button
           onClick={() => setQty(Math.min(5, qty + 1))}
           disabled={qty >= 5}
-          className="w-[50px] h-[50px] rounded-full bg-[#D4A854] flex items-center justify-center text-white disabled:opacity-50 transition-opacity"
+          className="w-[50px] h-[50px] rounded-full bg-brand-honey flex items-center justify-center text-white disabled:opacity-50 transition-opacity"
           aria-label="Add copy"
         >
           <Plus className="w-5 h-5" />
@@ -197,7 +197,7 @@ function StepExtras({
       </div>
 
       {/* Dynamic message — hidden for now */}
-      {/* <p className="text-sm italic text-[#D4A854] h-5 mb-8 text-center">
+      {/* <p className="text-sm italic text-brand-honey h-5 mb-8 text-center">
         {QTY_MESSAGES[qty] || ""}
       </p> */}
       <div className="mb-8" />
@@ -205,22 +205,22 @@ function StepExtras({
       {/* Totals — only when qty > 0 */}
       {qty > 0 && (
         <div className="w-full border-t border-[rgba(45,45,45,0.12)] pt-4 mb-6 space-y-2 text-[13px]">
-          <div className="flex justify-between text-[#8A8780]">
+          <div className="flex justify-between text-[hsl(var(--brand-warm-gray))]">
             <span>Original book</span>
             <span>Already paid · ${BASE_BOOK_PRICE}</span>
           </div>
-          <div className="flex justify-between text-[#2D2D2D]">
+          <div className="flex justify-between text-brand-charcoal">
             <span>{qty} extra {qty === 1 ? "copy" : "copies"}</span>
             <span>
-              <span className="text-[#8A8780] line-through mr-1.5">${qty * BASE_BOOK_PRICE}</span>
+              <span className="text-[hsl(var(--brand-warm-gray))] line-through mr-1.5">${qty * BASE_BOOK_PRICE}</span>
               ${total}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-[#8A8780]">Shipping</span>
+            <span className="text-[hsl(var(--brand-warm-gray))]">Shipping</span>
             <span className="text-[#14532D]">Free — ships with your book</span>
           </div>
-          <div className="flex justify-between font-medium text-[15px] text-[#2D2D2D] pt-2 border-t border-[rgba(45,45,45,0.12)]">
+          <div className="flex justify-between font-medium text-[15px] text-brand-charcoal pt-2 border-t border-[rgba(45,45,45,0.12)]">
             <span>Due today</span>
             <span>${total}</span>
           </div>
@@ -230,7 +230,7 @@ function StepExtras({
       {/* CTA */}
       <button
         onClick={onContinue}
-        className="w-full bg-[#2D2D2D] text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 transition-colors"
+        className="w-full bg-brand-charcoal text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 transition-colors"
       >
         {qty > 0
           ? `Add ${qty} ${qty === 1 ? "copy" : "copies"} — $${total} →`
@@ -241,14 +241,14 @@ function StepExtras({
       {qty > 0 && (
         <button
           onClick={onSkip}
-          className="mt-4 text-sm text-[#8A8780] hover:underline transition-colors"
+          className="mt-4 text-sm text-[hsl(var(--brand-warm-gray))] hover:underline transition-colors"
         >
           Continue without extra copies
         </button>
       )}
 
       {/* Caption */}
-      <p className="text-xs text-[#8A8780] text-center mt-4">
+      <p className="text-xs text-[hsl(var(--brand-warm-gray))] text-center mt-4">
         {qty > 0
           ? `All ${qty + 1} copies ship to the same address. Shipping is free on extras.`
           : ""}
@@ -392,12 +392,12 @@ function StepShipping({
   const totalCopies = 1 + qty;
   const extraTotal = qty * ADDITIONAL_BOOK_PRICE;
 
-  const inputClasses = "bg-white border-[rgba(45,45,45,0.12)] rounded-[10px] px-4 py-3 text-[15px] focus:border-[#D4A854] focus:ring-[#D4A854]/20";
+  const inputClasses = "bg-white border-[rgba(45,45,45,0.12)] rounded-[10px] px-4 py-3 text-[15px] focus:border-brand-honey focus:ring-brand-honey/20";
 
   if (!loaded) {
     return (
       <div className="flex justify-center py-20">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#D4A854]" />
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-honey" />
       </div>
     );
   }
@@ -411,7 +411,7 @@ function StepShipping({
           value={region}
           onChange={(e) => setRegion(e.target.value)}
           disabled={saving}
-          className="w-full h-[46px] bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-3 text-[14px] text-[#2D2D2D] focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none"
+          className="w-full h-[46px] bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-3 text-[14px] text-brand-charcoal focus:border-brand-honey focus:ring-2 focus:ring-brand-honey/20 focus:outline-none"
         >
           <option value="">{countryConfig.regionLabel}</option>
           {US_STATES.map((s) => (
@@ -426,7 +426,7 @@ function StepShipping({
           value={region}
           onChange={(e) => setRegion(e.target.value)}
           disabled={saving}
-          className="w-full h-[46px] bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-3 text-[14px] text-[#2D2D2D] focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none"
+          className="w-full h-[46px] bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-3 text-[14px] text-brand-charcoal focus:border-brand-honey focus:ring-2 focus:ring-brand-honey/20 focus:outline-none"
         >
           <option value="">{countryConfig.regionLabel}</option>
           {MX_STATES.map((s) => (
@@ -450,20 +450,20 @@ function StepShipping({
     <div className="flex flex-col items-center w-full">
       <StepIndicator current={2} total={totalSteps} />
 
-      <h1 className="font-serif text-[34px] font-normal text-[#2D2D2D] text-center leading-tight mb-3">
+      <h1 className="font-serif text-[34px] font-normal text-brand-charcoal text-center leading-tight mb-3">
         {qty > 0 ? "Where should we send them?" : "Where should we send it?"}
       </h1>
-      <p className="text-[15px] text-[#8A8780] text-center mb-8">
+      <p className="text-[15px] text-[hsl(var(--brand-warm-gray))] text-center mb-8">
         We&apos;ll email you tracking details when it ships.
       </p>
 
       {/* Context bar */}
       <div className="w-full bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-[18px] py-[14px] flex items-center justify-between mb-8">
         <div>
-          <p className="text-sm font-medium text-[#2D2D2D]">
+          <p className="text-sm font-medium text-brand-charcoal">
             {totalCopies} {totalCopies === 1 ? "copy" : "copies"}
           </p>
-          <p className="text-xs text-[#8A8780]">
+          <p className="text-xs text-[hsl(var(--brand-warm-gray))]">
             {qty > 0
               ? `Original + ${qty} extra · $${extraTotal} due · shipping included`
               : `Original book · $${BASE_BOOK_PRICE} already paid · shipping included`}
@@ -476,12 +476,12 @@ function StepShipping({
       <div className="w-full space-y-4">
         {/* Country — native select to avoid Radix/Google Maps portal conflicts */}
         <div>
-          <Label className="text-xs text-[#8A8780] mb-1 block">Country</Label>
+          <Label className="text-xs text-[hsl(var(--brand-warm-gray))] mb-1 block">Country</Label>
           <select
             value={country}
             onChange={(e) => handleCountryChange(e.target.value)}
             disabled={saving}
-            className="w-full h-[46px] bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-4 text-[15px] text-[#2D2D2D] focus:border-[#D4A854] focus:ring-2 focus:ring-[#D4A854]/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_16px_center] bg-no-repeat"
+            className="w-full h-[46px] bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-4 text-[15px] text-brand-charcoal focus:border-brand-honey focus:ring-2 focus:ring-brand-honey/20 focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A8780%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_16px_center] bg-no-repeat"
           >
             {SUPPORTED_COUNTRIES.map((c) => (
               <option key={c.code} value={c.code}>{c.name}</option>
@@ -490,13 +490,13 @@ function StepShipping({
         </div>
 
         <div>
-          <Label className="text-xs text-[#8A8780] mb-1 block">Recipient name</Label>
+          <Label className="text-xs text-[hsl(var(--brand-warm-gray))] mb-1 block">Recipient name</Label>
           <Input value={recipientName} onChange={(e) => setRecipientName(e.target.value)} placeholder="Who should receive the book?" disabled={saving} className={inputClasses} />
         </div>
 
         {/* Street address with Google Places Autocomplete */}
         <div>
-          <Label className="text-xs text-[#8A8780] mb-1 block">Street address</Label>
+          <Label className="text-xs text-[hsl(var(--brand-warm-gray))] mb-1 block">Street address</Label>
           {mapsLoaded ? (
             <Autocomplete
               onLoad={(ac) => { autocompleteRef.current = ac; }}
@@ -526,27 +526,27 @@ function StepShipping({
         </div>
 
         <div>
-          <Label className="text-xs text-[#8A8780] mb-1 block">Apt / Suite <span className="text-[#8A8780]/60">(optional)</span></Label>
+          <Label className="text-xs text-[hsl(var(--brand-warm-gray))] mb-1 block">Apt / Suite <span className="text-[hsl(var(--brand-warm-gray))]/60">(optional)</span></Label>
           <Input value={apartmentUnit} onChange={(e) => setApartmentUnit(e.target.value)} placeholder="Optional" disabled={saving} className={inputClasses} />
         </div>
 
         <div className="grid grid-cols-[1fr_88px_100px] gap-3">
           <div>
-            <Label className="text-xs text-[#8A8780] mb-1 block">City</Label>
+            <Label className="text-xs text-[hsl(var(--brand-warm-gray))] mb-1 block">City</Label>
             <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" disabled={saving} className={inputClasses} />
           </div>
           <div>
-            <Label className="text-xs text-[#8A8780] mb-1 block">{countryConfig.regionLabel}</Label>
+            <Label className="text-xs text-[hsl(var(--brand-warm-gray))] mb-1 block">{countryConfig.regionLabel}</Label>
             {renderRegionField()}
           </div>
           <div>
-            <Label className="text-xs text-[#8A8780] mb-1 block">{countryConfig.postalLabel}</Label>
+            <Label className="text-xs text-[hsl(var(--brand-warm-gray))] mb-1 block">{countryConfig.postalLabel}</Label>
             <Input value={postalCode} onChange={(e) => setPostalCode(e.target.value)} placeholder={countryConfig.postalPlaceholder} disabled={saving} className={inputClasses} />
           </div>
         </div>
 
         <div>
-          <Label className="text-xs text-[#8A8780] mb-1 block">Phone <span className="text-[#8A8780]/60">(optional)</span></Label>
+          <Label className="text-xs text-[hsl(var(--brand-warm-gray))] mb-1 block">Phone <span className="text-[hsl(var(--brand-warm-gray))]/60">(optional)</span></Label>
           <Input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="+1 (555) 123-4567" disabled={saving} className={inputClasses} />
         </div>
 
@@ -560,17 +560,17 @@ function StepShipping({
         <button
           onClick={handleSubmit}
           disabled={saving}
-          className="w-full bg-[#2D2D2D] text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors mt-2"
+          className="w-full bg-brand-charcoal text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors mt-2"
         >
           {saving ? "Saving..." : "Send it to print →"}
         </button>
 
-        <p className="text-[13px] text-[#8A8780] text-center mt-4 leading-[1.5]">
+        <p className="text-[13px] text-[hsl(var(--brand-warm-gray))] text-center mt-4 leading-[1.5]">
           Need to ship copies to different addresses?{" "}
-          <a href="mailto:team@smallplatesandcompany.com" className="text-[#D4A854] hover:opacity-80 transition-opacity">Email us</a> and we&apos;ll sort it out.
+          <a href="mailto:team@smallplatesandcompany.com" className="text-brand-honey hover:opacity-80 transition-opacity">Email us</a> and we&apos;ll sort it out.
         </p>
 
-        <p className="text-xs text-[#8A8780] text-center mt-3">
+        <p className="text-xs text-[hsl(var(--brand-warm-gray))] text-center mt-3">
           We&apos;ll email you tracking details when it ships.
         </p>
       </div>
@@ -635,8 +635,8 @@ export function PostCloseFlow({ groupId, onDone, onBack }: PostCloseFlowProps) {
   if (redirecting) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-[#F5F3EF]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4A854] mb-4" />
-        <p className="text-sm text-[#8A8780]">Redirecting to checkout…</p>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-honey mb-4" />
+        <p className="text-sm text-[hsl(var(--brand-warm-gray))]">Redirecting to checkout…</p>
       </div>
     );
   }
@@ -654,7 +654,7 @@ export function PostCloseFlow({ groupId, onDone, onBack }: PostCloseFlowProps) {
             className="p-2 rounded-full hover:bg-white/60 transition-colors"
             aria-label="Back"
           >
-            <ArrowLeft className="h-5 w-5 text-[#2D2D2D]" />
+            <ArrowLeft className="h-5 w-5 text-brand-charcoal" />
           </button>
         )}
       </div>

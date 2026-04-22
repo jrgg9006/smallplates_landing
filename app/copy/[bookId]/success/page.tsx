@@ -12,14 +12,14 @@ function NotAvailable() {
         height={40}
         priority
       />
-      <p className="text-[15px] text-[#8A8780] mt-8 text-center">
+      <p className="text-[15px] text-[hsl(var(--brand-warm-gray))] mt-8 text-center">
         We couldn&apos;t verify this order. If you just paid, check your email for a receipt.
       </p>
-      <p className="text-[13px] text-[#8A8780] mt-3 text-center">
+      <p className="text-[13px] text-[hsl(var(--brand-warm-gray))] mt-3 text-center">
         Questions?{" "}
         <a
           href="mailto:team@smallplatesandcompany.com"
-          className="underline hover:text-[#2D2D2D] transition-colors"
+          className="underline hover:text-brand-charcoal transition-colors"
         >
           team@smallplatesandcompany.com
         </a>
@@ -46,10 +46,10 @@ function OrderProcessing() {
         height={40}
         priority
       />
-      <p className="text-[15px] text-[#2D2D2D] mt-8 text-center">
+      <p className="text-[15px] text-brand-charcoal mt-8 text-center">
         Your payment was successful.
       </p>
-      <p className="text-[13px] text-[#8A8780] mt-3 text-center max-w-sm">
+      <p className="text-[13px] text-[hsl(var(--brand-warm-gray))] mt-3 text-center max-w-sm">
         We&apos;re finalizing your order. This page will refresh automatically.
       </p>
     </div>
@@ -143,37 +143,37 @@ export default async function CopySuccessPage({
             />
           </div>
 
-          <p className="text-xs text-[#D4A854] uppercase tracking-[0.08em] text-center mb-2 font-medium">
+          <p className="text-xs text-brand-honey uppercase tracking-[0.08em] text-center mb-2 font-medium">
             Order confirmed
           </p>
 
-          <h1 className="font-serif text-[34px] text-[#2D2D2D] text-center leading-tight mb-3">
+          <h1 className="font-serif text-[34px] text-brand-charcoal text-center leading-tight mb-3">
             Your {order.book_quantity === 1 ? "copy is" : "copies are"} on the way.
           </h1>
 
-          <p className="text-sm text-[#8A8780] text-center mb-8">
+          <p className="text-sm text-[hsl(var(--brand-warm-gray))] text-center mb-8">
             We&apos;ll email you tracking details when it ships. Arrives in approximately 3 weeks.
           </p>
 
           <div className="bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-[18px] py-[16px] space-y-4 mb-8">
             <div>
-              <p className="text-[11px] text-[#8A8780] uppercase tracking-[0.08em] mb-0.5">Book</p>
-              <p className="text-[15px] text-[#2D2D2D]">{order.couple_name || "—"}</p>
+              <p className="text-[11px] text-[hsl(var(--brand-warm-gray))] uppercase tracking-[0.08em] mb-0.5">Book</p>
+              <p className="text-[15px] text-brand-charcoal">{order.couple_name || "—"}</p>
             </div>
             <div>
-              <p className="text-[11px] text-[#8A8780] uppercase tracking-[0.08em] mb-0.5">Copies</p>
-              <p className="text-[15px] text-[#2D2D2D]">
+              <p className="text-[11px] text-[hsl(var(--brand-warm-gray))] uppercase tracking-[0.08em] mb-0.5">Copies</p>
+              <p className="text-[15px] text-brand-charcoal">
                 {order.book_quantity} {order.book_quantity === 1 ? "copy" : "copies"}
               </p>
             </div>
             <div>
-              <p className="text-[11px] text-[#8A8780] uppercase tracking-[0.08em] mb-0.5">Total paid</p>
-              <p className="text-[15px] text-[#2D2D2D]">${totalDollars}</p>
+              <p className="text-[11px] text-[hsl(var(--brand-warm-gray))] uppercase tracking-[0.08em] mb-0.5">Total paid</p>
+              <p className="text-[15px] text-brand-charcoal">${totalDollars}</p>
             </div>
             {addressLine && (
               <div>
-                <p className="text-[11px] text-[#8A8780] uppercase tracking-[0.08em] mb-0.5">Ships to</p>
-                <p className="text-[15px] text-[#2D2D2D]">
+                <p className="text-[11px] text-[hsl(var(--brand-warm-gray))] uppercase tracking-[0.08em] mb-0.5">Ships to</p>
+                <p className="text-[15px] text-brand-charcoal">
                   {address?.recipient_name && <>{address.recipient_name}<br /></>}
                   {addressLine}
                 </p>
@@ -181,12 +181,12 @@ export default async function CopySuccessPage({
             )}
           </div>
 
-          <p className="text-[13px] text-[#8A8780] text-center leading-relaxed">
+          <p className="text-[13px] text-[hsl(var(--brand-warm-gray))] text-center leading-relaxed">
             {order.email && <>A receipt is on its way to {order.email}.<br /></>}
             Questions?{" "}
             <a
               href="mailto:team@smallplatesandcompany.com"
-              className="underline hover:text-[#2D2D2D] transition-colors"
+              className="underline hover:text-brand-charcoal transition-colors"
             >
               team@smallplatesandcompany.com
             </a>

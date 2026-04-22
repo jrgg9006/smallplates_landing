@@ -209,7 +209,7 @@ export default function BooksPrinted() {
             <h2 className="type-heading mb-4">
               Real recipes. Real people. Real books.
             </h2>
-            <p className="type-body text-[#2D2D2D]/70 max-w-3xl">
+            <p className="type-body text-brand-charcoal/70 max-w-3xl">
               They send the recipe. We create an image for every single one.
             </p>
           </motion.div>
@@ -225,7 +225,7 @@ export default function BooksPrinted() {
             <button
               type="button"
               onClick={handleGetStarted}
-              className="inline-flex items-center justify-center rounded-full bg-[#D4A854] hover:bg-[#c49b4a] text-white px-8 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#D4A854]"
+              className="inline-flex items-center justify-center rounded-full bg-brand-honey hover:bg-brand-honey-dark text-white px-8 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-honey"
               data-cta="proof-primary"
             >
               Start Their Book

@@ -25,7 +25,7 @@ export default function WelcomeStep({ creatorName }: WelcomeStepProps) {
     <>
       <div className="min-h-[calc(100vh-180px)] flex items-center justify-center" role="region" aria-labelledby="welcome-heading">
         <div className="text-left px-4 md:px-6 max-w-md">
-          <h1 id="welcome-heading" className="font-serif text-3xl md:text-4xl font-semibold text-[#2D2D2D]">
+          <h1 id="welcome-heading" className="font-serif text-3xl md:text-4xl font-semibold text-brand-charcoal">
             You&apos;re in!
           </h1>
           <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light mt-4">
@@ -38,12 +38,12 @@ export default function WelcomeStep({ creatorName }: WelcomeStepProps) {
             <div className="flex items-start gap-3">
               <span className="text-base font-light flex-shrink-0" aria-hidden="true">💡</span>
               <div className="flex-1 min-w-0">
-                <p className="text-[15px] text-[#2D2D2D] leading-relaxed">
+                <p className="text-[15px] text-brand-charcoal leading-relaxed">
                   {randomTip}
                 </p>
                 <button 
                   onClick={() => setShowTips(true)}
-                  className="text-[#D4A854] hover:text-[#b8923a] text-sm mt-2 font-light transition-colors"
+                  className="text-brand-honey hover:text-[#b8923a] text-sm mt-2 font-light transition-colors"
                 >
                   More ideas →
                 </button>

@@ -42,7 +42,7 @@ export default function PersonalNoteStep({ personalNote, onChange, userName, cou
         )}
         
         <div className="space-y-2 text-center">
-          <h2 className="font-serif text-3xl md:text-4xl font-semibold text-[#2D2D2D]">
+          <h2 className="font-serif text-3xl md:text-4xl font-semibold text-brand-charcoal">
             Add a note for the couple
           </h2>
         </div>
@@ -54,7 +54,7 @@ export default function PersonalNoteStep({ personalNote, onChange, userName, cou
               onChange={(e) => onChange(e.target.value)}
               placeholder="A note for the couple. A story about this recipe. When to make it. Why it's special. Whatever you want to share."
               rows={6}
-              className={`w-full px-4 py-3 border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[#D4A854] focus:border-transparent resize-none ${
+              className={`w-full px-4 py-3 border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent resize-none ${
                 isOverLimit ? 'border-red-300' : 'border-gray-300'
               }`}
             />
@@ -62,7 +62,7 @@ export default function PersonalNoteStep({ personalNote, onChange, userName, cou
               {characterCount}/{MAX_CHARACTERS}
             </div>
           </div>
-          <p className="mt-2 text-xs text-gray-500 text-center">
+          <p className="mt-2 text-secondary-sm text-gray-500 text-center">
             Your note will live on the page with your recipe. A piece of you in their kitchen.
           </p>
           {isOverLimit && (

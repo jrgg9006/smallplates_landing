@@ -135,7 +135,7 @@ export function CustomizeCollectorModal({
                   className="flex-1"
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-secondary-sm text-gray-500 mt-1">
                 Choose a memorable URL for your recipe collection page
               </p>
             </div>
@@ -152,7 +152,7 @@ export function CustomizeCollectorModal({
                 className="mt-1"
                 placeholder="Share Your Favorite Recipe!"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-secondary-sm text-gray-500 mt-1">
                 This is the main headline your guests will see
               </p>
             </div>
@@ -169,7 +169,7 @@ export function CustomizeCollectorModal({
                 className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[100px]"
                 placeholder="Tell your guests why you're collecting recipes..."
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-secondary-sm text-gray-500 mt-1">
                 Explain why you&apos;re collecting recipes and make it personal
               </p>
             </div>

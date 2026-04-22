@@ -153,7 +153,7 @@ export default function PersonalNotes() {
                     <p className="type-caption text-[15px] md:text-base font-medium">
                       — {currentNote.recipe}
                     </p>
-                    <p className="type-caption text-[#8A8780]/70">
+                    <p className="type-caption text-[hsl(var(--brand-warm-gray))]/70">
                       from {currentNote.from}
                     </p>
                   </div>
@@ -169,8 +169,8 @@ export default function PersonalNotes() {
                   onClick={() => goToNote(index)}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     index === currentIndex
-                      ? "bg-[#D4A854] w-6"
-                      : "bg-[#D4D0C8] hover:bg-[#D4A854]/50"
+                      ? "bg-brand-honey w-6"
+                      : "bg-[#D4D0C8] hover:bg-brand-honey/50"
                   }`}
                   aria-label={`Go to note ${index + 1}`}
                 />
