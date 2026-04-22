@@ -413,7 +413,7 @@ export default function AdminProspectsPage() {
 
               {/* Email Input */}
               <div className="mb-6">
-                <label htmlFor="activation-email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="activation-email" className="block text-form-label font-medium text-gray-700 mb-2">
                   Activation Email
                 </label>
                 <input

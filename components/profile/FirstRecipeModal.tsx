@@ -72,7 +72,7 @@ export function FirstRecipeModal({ isOpen, onClose, onSubmit, isFirstRecipe = tr
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Recipe Title */}
           <div className="space-y-2">
-            <label htmlFor="recipeName" className="text-sm font-medium text-gray-700">
+            <label htmlFor="recipeName" className="text-form-label font-medium text-gray-700">
               Recipe title
             </label>
             <Input
@@ -87,7 +87,7 @@ export function FirstRecipeModal({ isOpen, onClose, onSubmit, isFirstRecipe = tr
 
           {/* Ingredients */}
           <div className="space-y-2">
-            <label htmlFor="ingredients" className="text-sm font-medium text-gray-700">
+            <label htmlFor="ingredients" className="text-form-label font-medium text-gray-700">
               Ingredients
             </label>
             <textarea
@@ -103,7 +103,7 @@ export function FirstRecipeModal({ isOpen, onClose, onSubmit, isFirstRecipe = tr
 
           {/* Instructions */}
           <div className="space-y-2">
-            <label htmlFor="instructions" className="text-sm font-medium text-gray-700">
+            <label htmlFor="instructions" className="text-form-label font-medium text-gray-700">
               Instructions
             </label>
             <textarea
@@ -119,7 +119,7 @@ export function FirstRecipeModal({ isOpen, onClose, onSubmit, isFirstRecipe = tr
 
           {/* Personal Note */}
           <div className="space-y-2">
-            <label htmlFor="personalNote" className="text-sm font-medium text-gray-700">
+            <label htmlFor="personalNote" className="text-form-label font-medium text-gray-700">
               Personal note (optional)
             </label>
             <textarea

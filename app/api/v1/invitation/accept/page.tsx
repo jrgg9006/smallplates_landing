@@ -438,7 +438,7 @@ export default function AcceptInvitationPage() {
         {/* Form */}
         <form onSubmit={handlePasswordSetup} className="space-y-6">
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-form-label font-medium text-gray-700 mb-1">
               Nueva Contraseña *
             </label>
             <input
@@ -455,7 +455,7 @@ export default function AcceptInvitationPage() {
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="confirmPassword" className="block text-form-label font-medium text-gray-700 mb-1">
               Confirmar Contraseña *
             </label>
             <input

@@ -302,7 +302,7 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-form-label font-medium text-gray-700 mb-1">
               Password *
             </label>
             <input
@@ -319,7 +319,7 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="confirmPassword" className="block text-form-label font-medium text-gray-700 mb-1">
               Confirm Password *
             </label>
             <input

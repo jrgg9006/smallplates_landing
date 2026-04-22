@@ -430,7 +430,7 @@ export default function CollectionForm() {
               <div className="space-y-4">
               <div className="flex gap-4 items-end">
                 <div className="w-20">
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="firstName" className="block text-form-label font-medium text-gray-700 mb-1">
                     First initial
                   </label>
                   <Input
@@ -449,7 +449,7 @@ export default function CollectionForm() {
                   />
                 </div>
                 <div className="flex-1">
-                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="lastName" className="block text-form-label font-medium text-gray-700 mb-1">
                     Last name
                   </label>
                   <Input
@@ -493,7 +493,7 @@ export default function CollectionForm() {
               {/* Name entry when user explicitly chooses "I don't see my name" */}
               {searchCompleted && showNameEntry && (
                 <div className="space-y-2 mt-6">
-                  <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                  <label htmlFor="fullName" className="block text-form-label font-medium text-gray-700 mb-1">Name</label>
                   <div className="flex gap-4 items-center">
                     <Input
                       id="fullName"
@@ -581,7 +581,7 @@ export default function CollectionForm() {
                         We&apos;ll add you when you submit your recipe.
                       </p>
                       <div className="space-y-2">
-                        <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <label htmlFor="fullName" className="block text-form-label font-medium text-gray-700 mb-1">Name</label>
                         <div className="flex gap-4 items-center">
                           <Input
                             id="fullName"

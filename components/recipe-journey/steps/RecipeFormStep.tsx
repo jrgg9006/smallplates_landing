@@ -53,7 +53,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
 
       {/* Ingredients */}
       <section id="ingredients" aria-labelledby="ingredients-label" className="space-y-2">
-        <label id="ingredients-label" htmlFor="ingredients-input" className="text-sm font-medium text-gray-700">
+        <label id="ingredients-label" htmlFor="ingredients-input" className="text-form-label font-medium text-gray-700">
           What you need to make this plate
         </label>
         <textarea
@@ -69,7 +69,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
 
       {/* Instructions */}
       <section id="instructions" aria-labelledby="instructions-label" className="space-y-2">
-        <label id="instructions-label" htmlFor="instructions-input" className="text-sm font-medium text-gray-700">
+        <label id="instructions-label" htmlFor="instructions-input" className="text-form-label font-medium text-gray-700">
           How to make this plate. Tell it your way.
         </label>
         <textarea

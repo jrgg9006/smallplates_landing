@@ -1264,7 +1264,7 @@ ${instructions}`;
       {/* Filters */}
       <div className="bg-white border-b px-6 py-3 flex items-center gap-4 flex-wrap">
         <div className="flex items-center gap-2 flex-1 min-w-[180px] max-w-[350px]">
-          <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Search:</label>
+          <label className="text-form-label font-medium text-gray-700 whitespace-nowrap">Search:</label>
           <input
             type="text"
             value={searchQuery}
@@ -1274,7 +1274,7 @@ ${instructions}`;
           />
         </div>
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700">Group:</label>
+          <label className="text-form-label font-medium text-gray-700">Group:</label>
           <select
             value={groupFilter}
             onChange={(e) => setGroupFilter(e.target.value)}
@@ -1301,7 +1301,7 @@ ${instructions}`;
           </label>
         </div>
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700">User:</label>
+          <label className="text-form-label font-medium text-gray-700">User:</label>
           <select
             value={userFilter}
             onChange={(e) => setUserFilter(e.target.value)}
@@ -1316,7 +1316,7 @@ ${instructions}`;
           </select>
         </div>
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700">Guest:</label>
+          <label className="text-form-label font-medium text-gray-700">Guest:</label>
           <select
             value={guestFilter}
             onChange={(e) => setGuestFilter(e.target.value)}
@@ -1331,7 +1331,7 @@ ${instructions}`;
           </select>
         </div>
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700">Status:</label>
+          <label className="text-form-label font-medium text-gray-700">Status:</label>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as any)}
@@ -1344,7 +1344,7 @@ ${instructions}`;
           </select>
         </div>
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700">Image:</label>
+          <label className="text-form-label font-medium text-gray-700">Image:</label>
           <select
             value={imageFilter}
             onChange={(e) => setImageFilter(e.target.value as 'all' | 'yes' | 'no')}

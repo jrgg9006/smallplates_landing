@@ -128,7 +128,7 @@ export function FirstRecipeExperience({ onSubmit, onSkip }: FirstRecipeExperienc
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Recipe Name */}
                   <div className="space-y-2">
-                    <label htmlFor="recipeName" className="text-sm font-medium text-gray-700">
+                    <label htmlFor="recipeName" className="text-form-label font-medium text-gray-700">
                       Name of the Recipe
                     </label>
                     <Input
@@ -143,7 +143,7 @@ export function FirstRecipeExperience({ onSubmit, onSkip }: FirstRecipeExperienc
 
                   {/* Ingredients */}
                   <div className="space-y-2">
-                    <label htmlFor="ingredients" className="text-sm font-medium text-gray-700">
+                    <label htmlFor="ingredients" className="text-form-label font-medium text-gray-700">
                       Ingredients
                     </label>
                     <textarea
@@ -161,7 +161,7 @@ export function FirstRecipeExperience({ onSubmit, onSkip }: FirstRecipeExperienc
 
                   {/* Steps */}
                   <div className="space-y-2">
-                    <label htmlFor="instructions" className="text-sm font-medium text-gray-700">
+                    <label htmlFor="instructions" className="text-form-label font-medium text-gray-700">
                       Steps
                     </label>
                     <textarea
@@ -179,7 +179,7 @@ export function FirstRecipeExperience({ onSubmit, onSkip }: FirstRecipeExperienc
 
                   {/* Notes */}
                   <div className="space-y-2">
-                    <label htmlFor="personalNote" className="text-sm font-medium text-gray-700">
+                    <label htmlFor="personalNote" className="text-form-label font-medium text-gray-700">
                       Notes (optional)
                     </label>
                     <textarea

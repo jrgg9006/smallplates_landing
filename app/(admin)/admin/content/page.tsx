@@ -182,7 +182,7 @@ function AdminContentPage() {
         <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 max-w-md">
-              <label className="text-sm font-medium text-gray-700 mb-1 block">Select Group</label>
+              <label className="text-form-label font-medium text-gray-700 mb-1 block">Select Group</label>
               <Select value={selectedGroupId} onValueChange={handleGroupChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Choose a group..." />

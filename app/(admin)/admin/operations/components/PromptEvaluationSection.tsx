@@ -156,7 +156,7 @@ export default function PromptEvaluationSection({
       <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg shadow-sm space-y-5">
         {/* Rating Stars */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-form-label font-medium text-gray-700 mb-2">
             Rating <span className="text-red-500">*</span>
           </label>
           <div className="flex gap-2">
@@ -186,7 +186,7 @@ export default function PromptEvaluationSection({
         {/* What Worked - Show for ratings 3+ */}
         {rating >= 3 && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-form-label font-medium text-gray-700 mb-2">
               What worked well?
             </label>
             <textarea
@@ -202,7 +202,7 @@ export default function PromptEvaluationSection({
         {/* What Failed - Show for ratings 3 or less */}
         {rating > 0 && rating <= 3 && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-form-label font-medium text-gray-700 mb-2">
               What Failed?
               <span className="text-gray-400 font-normal ml-1">(helps improve the AI)</span>
             </label>
@@ -221,7 +221,7 @@ export default function PromptEvaluationSection({
           <div className="border-t border-gray-200 pt-5">
             {/* Edit Prompt Toggle */}
             <div className="flex items-center justify-between mb-3">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-form-label font-medium text-gray-700">
                 Did you edit the prompt manually?
               </label>
               <button
@@ -271,7 +271,7 @@ export default function PromptEvaluationSection({
               ▸ Additional Details (optional)
             </summary>
             <div className="px-4 py-3 border-t border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-form-label font-medium text-gray-700 mb-2">
                 Notes
               </label>
               <textarea

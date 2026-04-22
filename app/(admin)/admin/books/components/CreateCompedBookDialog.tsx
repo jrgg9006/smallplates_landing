@@ -101,7 +101,7 @@ export default function CreateCompedBookDialog({ onCreated }: CreateCompedBookDi
         <div className="space-y-4 mt-2">
           {/* Owner email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Book owner</label>
+            <label className="block text-form-label font-medium text-gray-700 mb-1.5">Book owner</label>
             <select
               value={ownerEmail}
               onChange={(e) => setOwnerEmail(e.target.value)}
@@ -115,7 +115,7 @@ export default function CreateCompedBookDialog({ onCreated }: CreateCompedBookDi
 
           {/* User type — gift_giver prominent, couple as text link */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Who is setting up the book?</label>
+            <label className="block text-form-label font-medium text-gray-700 mb-1.5">Who is setting up the book?</label>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setUserType('gift_giver')}
@@ -142,7 +142,7 @@ export default function CreateCompedBookDialog({ onCreated }: CreateCompedBookDi
 
           {/* Couple names */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-form-label font-medium text-gray-700 mb-1.5">
               {userType === 'couple' ? 'Your name' : "Partner 1's name"}
             </label>
             <input
@@ -155,7 +155,7 @@ export default function CreateCompedBookDialog({ onCreated }: CreateCompedBookDi
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-form-label font-medium text-gray-700 mb-1.5">
               {userType === 'couple' ? "Partner's name" : "Partner 2's name"}
             </label>
             <input
@@ -170,7 +170,7 @@ export default function CreateCompedBookDialog({ onCreated }: CreateCompedBookDi
           {/* Relationship — only for gift giver */}
           {userType === 'gift_giver' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Relationship to couple</label>
+              <label className="block text-form-label font-medium text-gray-700 mb-1.5">Relationship to couple</label>
               <select
                 value={relationship}
                 onChange={(e) => setRelationship(e.target.value)}
@@ -188,7 +188,7 @@ export default function CreateCompedBookDialog({ onCreated }: CreateCompedBookDi
 
           {/* Wedding date */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Wedding date</label>
+            <label className="block text-form-label font-medium text-gray-700 mb-1.5">Wedding date</label>
             <div className="relative">
               <button
                 type="button"
