@@ -24,7 +24,7 @@ body > div.pac-container ~ div:not([id]):not([class]) {
      * Accent warm-white = #FAF7F2 (warmer, L~96%)
      *   → intentionally kept as literal hex in ~59 components:
      *     landing large sections (TheProblem, TheBook, BooksPrinted,
-     *     YourTools, NewsletterSignup, GuestListStrip), /collect funnel
+     *     YourTools, NewsletterSignup), /collect funnel
      *     pages, onboarding sidebar, text on dark CTAs.
      * The two-tone contrast is the intended editorial rhythm.
      * If converging to a single value in the future, migrate deliberately. */

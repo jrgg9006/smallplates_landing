@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
 import Banner from '@/components/landing/Banner'
 import Hero from '@/components/landing/Hero'
 import TheProblem from '@/components/landing/TheProblem'
@@ -18,12 +17,6 @@ import NewsletterSignup from '@/components/landing/NewsletterSignup'
 import Footer from '@/components/landing/Footer'
 
 export default function Home() {
-  const router = useRouter();
-
-  const handleGetStarted = () => {
-    router.push("/onboarding");
-  };
-
   return (
     <>
       <Banner />

@@ -10,7 +10,6 @@ import { trackEvent } from "@/lib/analytics";
  *
  * Design: A centered "invitation-style" card as the visual centerpiece,
  * with the two price points side by side (equal weight, different context).
- * Decorative flourishes match ForGiftGivers section language.
  * Features listed with honey accent dots.
  */
 

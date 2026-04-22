@@ -8,8 +8,6 @@ import SpecsGrid from "@/components/landing/TheBook/SpecsGrid";
 import HandmadeCallout from "@/components/landing/TheBook/HandmadeCallout";
 import DetailStrip from "@/components/landing/TheBook/DetailStrip";
 import { trackEvent } from "@/lib/analytics";
-// TODO: Re-enable when full specifications page is built
-// import BookDetailsModal from "@/components/landing/BookDetailsModal";
 
 /**
  * THE BOOK SECTION — Small Plates Wedding Landing Page
