@@ -9,16 +9,13 @@ import TheSolution from '@/components/landing/TheSolution'
 import ForGiftGivers from '@/components/landing/ForGiftGivers'
 import YourTools from '@/components/landing/YourTools'
 import EmotionalClose from '@/components/landing/EmotionalClose'
-import FeatureGrid from '@/components/landing/FeatureGrid'
 import BooksPrinted from '@/components/landing/BooksPrinted'
 import HowItWorks from '@/components/landing/HowItWorks'
 import GuestListStrip from '@/components/landing/GuestListStrip'
 import RegistryInterlude from '@/components/landing/RegistryInterlude'
 import PersonalNotes from '@/components/landing/PersonalNotes'
 import TheBook from '@/components/landing/TheBook'
-import ShareBanner from '@/components/landing/ShareBanner'
 import FAQ from '@/components/landing/FAQ'
-import CTAButton from '@/components/landing/CTAButton'
 import NewsletterSignup from '@/components/landing/NewsletterSignup'
 import Footer from '@/components/landing/Footer'
 
@@ -47,16 +44,6 @@ export default function Home() {
         <EmotionalClose />
         <FAQ />
         <NewsletterSignup />
-        {/* Hidden sections - not part of wedding flow */}
-        {/* <FeatureGrid /> */}
-        {/* <ShareBanner /> */}
-
-        {/* Repeat CTA at bottom per best practices */}
-        {/* <section className="bg-white">
-          <div className="mx-auto max-w-7xl px-6 md:px-8 py-12 text-center">
-            <CTAButton data-cta="footer-primary" onClick={handleGetStarted} />
-          </div>
-        </section> */}
       </main>
       <Footer />
     </>
