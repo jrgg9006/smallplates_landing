@@ -48,22 +48,22 @@ const config: Config = {
   		},
   		fontSize: {
   			// Display — hero titulars, landing covers
-  			// Fluid from 38px (mobile <400px) to 56px (desktop >1440px)
-  			'display': ['clamp(2.375rem, 1.875rem + 2.5vw, 3.5rem)', {
+  			// Fluid from 36px (mobile) to 72px (desktop)
+  			'display': ['clamp(2.25rem, 1.75rem + 2.5vw, 4.5rem)', {
   				lineHeight: '1.1',
   				letterSpacing: '-0.02em',
   			}],
 
   			// Heading — section titles
-  			// Fluid from 28px mobile to 36px desktop
-  			'heading': ['clamp(1.75rem, 1.375rem + 1.875vw, 2.25rem)', {
+  			// Fluid from 30px mobile to 48px desktop
+  			'heading': ['clamp(1.875rem, 1.5rem + 1.875vw, 3rem)', {
   				lineHeight: '1.15',
   				letterSpacing: '-0.01em',
   			}],
 
   			// Subheading — card/modal titles, subsection headers
-  			// Fluid from 24px mobile to 28px desktop
-  			'subheading': ['clamp(1.5rem, 1.375rem + 0.625vw, 1.75rem)', {
+  			// Fluid from 24px mobile to 30px desktop
+  			'subheading': ['clamp(1.5rem, 1.375rem + 0.625vw, 1.875rem)', {
   				lineHeight: '1.2',
   				letterSpacing: '0',
   			}],
