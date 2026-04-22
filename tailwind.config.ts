@@ -115,7 +115,7 @@ const config: Config = {
   			// Modal-title — modal / sheet dialog titles
   			// Fixed 24px
   			'modal-title': ['1.5rem', {
-  				lineHeight: '1.2',
+  				lineHeight: '2rem',
   				letterSpacing: '0',
   			}],
 

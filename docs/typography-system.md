@@ -74,7 +74,7 @@ Tokens are named by what they communicate, not by their size. `text-body` is "th
 | `text-caption` | Metadata, timestamps, small labels | 12px | normal | normal (1.5) | default | sans |
 | `text-eyebrow` | Kickers above headings, ALL CAPS labels | 11px | medium | normal (1.4) | wide (0.15em) | sans, uppercase |
 | `text-action` | Button labels, CTAs, navigation | 15px | medium | none (1.0) | default | sans |
-| `text-modal-title` | Modal dialog / sheet titles | 24px | semibold | tight (1.2) | default | serif |
+| `text-modal-title` | Modal dialog / sheet titles | 24px | semibold | 2rem (matches text-2xl) | default | serif |
 | `text-form-label` | Form input labels (primary — more legible) | 14px | medium | normal (1.5) | default | sans |
 | `text-form-label-muted` | Form input labels (secondary — softer) | 14px | medium | normal (1.5) | default | sans |
 | `text-secondary-sm` | Helper text below inputs, char counters, notes | 12px | normal | normal (1.4) | default | sans |
