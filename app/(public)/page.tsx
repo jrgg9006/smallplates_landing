@@ -11,17 +11,13 @@ import YourTools from '@/components/landing/YourTools'
 import EmotionalClose from '@/components/landing/EmotionalClose'
 import FeatureGrid from '@/components/landing/FeatureGrid'
 import BooksPrinted from '@/components/landing/BooksPrinted'
-import FoodPerfect from '@/components/landing/FoodPerfect'
-import WhatsIncluded from '@/components/landing/WhatsIncluded'
 import HowItWorks from '@/components/landing/HowItWorks'
 import GuestListStrip from '@/components/landing/GuestListStrip'
 import RegistryInterlude from '@/components/landing/RegistryInterlude'
 import PersonalNotes from '@/components/landing/PersonalNotes'
 import TheBook from '@/components/landing/TheBook'
 import ShareBanner from '@/components/landing/ShareBanner'
-// import PlayModeSelection from '@/components/landing/PlayModeSelection'
 import FAQ from '@/components/landing/FAQ'
-// import Guarantee from '@/components/landing/Guarantee'
 import CTAButton from '@/components/landing/CTAButton'
 import NewsletterSignup from '@/components/landing/NewsletterSignup'
 import Footer from '@/components/landing/Footer'
@@ -53,11 +49,7 @@ export default function Home() {
         <NewsletterSignup />
         {/* Hidden sections - not part of wedding flow */}
         {/* <FeatureGrid /> */}
-        {/* <FoodPerfect /> */}
-        {/* <WhatsIncluded /> */}
         {/* <ShareBanner /> */}
-        {/* <PlayModeSelection /> */}
-        {/* <Guarantee /> */}
 
         {/* Repeat CTA at bottom per best practices */}
         {/* <section className="bg-white">
