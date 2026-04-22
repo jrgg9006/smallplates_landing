@@ -61,7 +61,7 @@ Tokens are named by what they communicate, not by their size. `text-body` is "th
 
 ---
 
-## The 9 tokens
+## The 13 tokens
 
 | Token | Role | Size (mobile → desktop) | Weight default | Line-height | Letter-spacing | Family |
 |-------|------|-------------------------|----------------|-------------|----------------|--------|
@@ -74,6 +74,10 @@ Tokens are named by what they communicate, not by their size. `text-body` is "th
 | `text-caption` | Metadata, timestamps, small labels | 12px | normal | normal (1.5) | default | sans |
 | `text-eyebrow` | Kickers above headings, ALL CAPS labels | 11px | medium | normal (1.4) | wide (0.15em) | sans, uppercase |
 | `text-action` | Button labels, CTAs, navigation | 15px | medium | none (1.0) | default | sans |
+| `text-modal-title` | Modal dialog / sheet titles | 24px | semibold | tight (1.2) | default | serif |
+| `text-form-label` | Form input labels (primary — more legible) | 14px | medium | normal (1.5) | default | sans |
+| `text-form-label-muted` | Form input labels (secondary — softer) | 14px | medium | normal (1.5) | default | sans |
+| `text-helper` | Helper text below inputs, char counters, notes | 12px | normal | normal (1.4) | default | sans |
 
 ### Per-token semantic definitions
 
@@ -216,6 +220,80 @@ Interactive text. The text inside buttons, links that behave as buttons, CTAs, a
 - Inline links inside paragraphs (they inherit `text-body` size; underline is the signal)
 - Button icons without text
 
+#### `text-modal-title`
+
+**Role:** Titles of modal dialogs and sheet overlays. The first text the user reads when a modal opens — it establishes the modal's purpose.
+
+**Use for:**
+- `<DialogTitle>` content in shadcn dialogs
+- `<SheetTitle>` content in slide-over sheets
+- Main heading inside any modal/popover overlay
+
+**Do not use for:**
+- Page-level headings (use `text-heading` or `text-display`)
+- Section titles within the modal body (use `text-subheading` if large enough, else body weight)
+- Standalone headings outside modal context
+
+**Why it exists:** 20+ platform modals (`AddRecipeModal`, `CreateCookbookModal`, `CreateGroupModal`, `EditCookbookNameModal`, `EditGroupModal`, `EditRecipeModal`, `AddNoteModal`, `AddGuestModal`, `AddFriendToGroupModal`, `BulkAddToCookbookModal`, `CloseBookModal`, `ReviewRecipesModal`, `RemoveRecipeFromGroupModal`, `CustomizeCollectorModal`, `DeleteGuestModal`, `DeleteRecipeModal`, `SendMessageModal`, `GroupNavigationSheet`, `GuestNavigationSheet`, `ImportGuestsModal`, `ShareCollectionModal`, `GuestDetailsModal`) all repeat the verbatim `font-serif text-2xl font-semibold` pattern. Consolidating into one token reduces duplication and makes future tuning a single-file change.
+
+**Value:** `1.5rem` = 24px fixed. Serif family with semibold weight is applied by the utility chain (token encodes size + line-height + letter-spacing only).
+
+#### `text-form-label`
+
+**Role:** Primary label for form inputs. The darker, more legible variant.
+
+**Use for:**
+- Labels above text inputs, selects, checkboxes in modal forms
+- Form field labels in the onboarding flow where maximum legibility matters
+- Any `<label>` element tied to an input where the user benefits from clear reading
+
+**Do not use for:**
+- Headings (use modal-title or subheading)
+- Body text (use body or body-small)
+- Non-input labels like section dividers (consider `text-caption` or an eyebrow)
+
+**Why it exists:** 60+ form labels in dashboard and key onboarding modals (`AddRecipeModal`, `GuestDetailsModal`, `FirstRecipeModal`, onboarding step labels) use `text-sm font-medium text-gray-700` verbatim. Consolidation.
+
+**Value:** `0.875rem` = 14px fixed. Sans-serif with medium weight and `text-gray-700` color are applied by the consumer's utility chain. The token encodes size + line-height.
+
+#### `text-form-label-muted`
+
+**Role:** Secondary label for form inputs. Same size and weight as `text-form-label`, but with softer `text-gray-600` color for contexts where labels shouldn't compete with content.
+
+**Use for:**
+- Form field labels in visually dense modals where label prominence would distract
+- Labels in secondary or optional fields
+- Currently: the default label style in most modal forms (AddNoteModal, DeleteRecipeModal, most of the 40+ labels using `text-gray-600`)
+
+**Do not use for:** anything that isn't a form label.
+
+**Why it exists:** the platform has two label conventions (`text-gray-600` in ~40 places, `text-gray-700` in ~60 places). Two tokens with identical size/weight but different default colors let consumers migrate to whichever they currently use without visual shift. A future consolidation pass can decide to collapse into one; for now, preserve both.
+
+**Value:** `0.875rem` = 14px fixed (identical to `text-form-label`). Sans-serif with medium weight and `text-gray-600` color are applied by the consumer's utility chain.
+
+**Relationship to `text-form-label`:** identical size/weight/family, different default color. A consumer that uses `text-gray-700` picks `text-form-label`; one that uses `text-gray-600` picks `text-form-label-muted`. If the team decides later that one color is the standard, this token can be deprecated and consumers migrated to the survivor.
+
+#### `text-helper`
+
+**Role:** Helper text, char counters, small hints, optional field indicators — the "quieter" text adjacent to primary content.
+
+**Use for:**
+- Helper / hint text displayed below a form input
+- Character counters (e.g., "142 / 500 characters")
+- Small notes or disclaimers near interactive elements
+- "(optional)" indicators beside label text
+
+**Do not use for:**
+- Body copy (use `text-body` or `text-body-small`)
+- Error messages (use dedicated error pattern — typically `text-sm text-red-600`, NOT `text-helper`)
+- Metadata or timestamps (use `text-caption` — similar size but different semantic role)
+
+**Why it exists:** 50+ instances of `text-xs text-gray-500` across modal forms, dashboard helpers, and form validators. Unified, consistent pattern.
+
+**Value:** `0.75rem` = 12px fixed (same size as `text-caption`). Sans-serif with normal weight and `text-gray-500` color are applied by the consumer.
+
+**Relationship to `text-caption`:** same size (12px), but different semantic role. `text-caption` is for metadata, attributions, timestamps that are read as "info about the content." `text-helper` is for guidance on an interactive action. Both render visually the same, but the naming distinguishes intent. This distinction matters for Claude Design and future tooling that may treat them differently.
+
 ---
 
 ## Documented exceptions
@@ -236,7 +314,7 @@ Before modifying any file in `components/landing/**`, check this table. If the l
 
 **Rule for ongoing development:**
 
-New code in `components/landing/**` should still use the 9 tokens. This exceptions table is for the 3 elements listed above, not a license to author new responsive size overrides.
+New code in `components/landing/**` should still use the 13 tokens. This exceptions table is for the 3 elements listed above, not a license to author new responsive size overrides.
 
 **Not pixel-perfect (L2 — deltas acceptable):**
 
@@ -291,6 +369,25 @@ Updated values:
 Consequence for Documented exceptions: the 5 elements previously listed are reduced to 3. Elements 3 and 5 (`TheProblem.tsx:38` and `TheSolution.tsx:65`), which use plain `.type-heading` without overrides, are now fully preserved by the recalibrated token and no longer need explicit protection. Elements 1, 2, 4 remain exceptions because they carry hand-authored responsive overrides beyond what any token encodes.
 
 Consequence for non-landing consumers: 5 public-page titles (check-your-email success/error, contact, pricing, ContactForm confirmation) will render at the recalibrated sizes. Per Ricardo's decision, these are acceptable — public-page titles benefit from editorial weight rather than being compromised by a system tuned to smaller surfaces.
+
+### Platform tokens — Phase 1.3.3
+
+Phase 1.3.1 built the typography system against landing + about surfaces. A Phase 1.3.3 audit revealed that the platform surfaces (dashboard, onboarding, 23 modal files) had 0 consumers of `.type-*` utilities — the entire platform bypassed the system and relied on raw Tailwind utilities with highly repetitive patterns.
+
+Four tokens were added to close this gap for the three most-repeated patterns:
+
+- `text-modal-title` (24px) — consolidates ~20 modal titles that repeated `font-serif text-2xl font-semibold` verbatim.
+- `text-form-label` (14px, gray-700 default) and `text-form-label-muted` (14px, gray-600 default) — consolidates 100+ form labels. Two tokens preserve zero visual delta during migration; a future consolidation pass can collapse them.
+- `text-helper` (12px) — consolidates 50+ helper-text patterns.
+
+These 4 tokens are additive. They do not change any existing token's value. Migration of consumers happens in subsequent commits (not this one).
+
+Tokens NOT yet added (deferred to future sessions):
+- Recipe card title serif italic pattern (~3-5 consumers) — too narrow for consolidation yet.
+- Recipe title large (`font-serif text-3xl lg:text-4xl` in RecipeDetailsModal, ReviewRecipeCard) — needs design decision on whether to consolidate with `text-heading` or remain distinct.
+- Serif eyebrow pattern (`font-serif uppercase tracking-[0.2em]`) — variant of the existing sans eyebrow. Decision needed on whether to create a serif variant.
+- Onboarding's arbitrary `text-[Npx]` values — requires a dedicated pass to resolve each to a canonical token.
+- `CoupleNamesModal.tsx` inline styles and arbitrary values — requires dedicated refactor pass.
 
 ---
 
