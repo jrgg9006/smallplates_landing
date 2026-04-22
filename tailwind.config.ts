@@ -109,6 +109,36 @@ const config: Config = {
   				lineHeight: '1.0',
   				letterSpacing: '0',
   			}],
+
+  			// --- Platform tokens — Phase 1.3.3 ---
+
+  			// Modal-title — modal / sheet dialog titles
+  			// Fixed 24px
+  			'modal-title': ['1.5rem', {
+  				lineHeight: '1.2',
+  				letterSpacing: '0',
+  			}],
+
+  			// Form-label — primary form input labels
+  			// Fixed 14px
+  			'form-label': ['0.875rem', {
+  				lineHeight: '1.5',
+  				letterSpacing: '0',
+  			}],
+
+  			// Form-label-muted — secondary form input labels (softer)
+  			// Fixed 14px — identical size, color applied by consumer
+  			'form-label-muted': ['0.875rem', {
+  				lineHeight: '1.5',
+  				letterSpacing: '0',
+  			}],
+
+  			// Helper — helper text, char counters, notes below inputs
+  			// Fixed 12px
+  			'helper': ['0.75rem', {
+  				lineHeight: '1.4',
+  				letterSpacing: '0',
+  			}],
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
