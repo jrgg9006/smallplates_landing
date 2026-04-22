@@ -86,7 +86,7 @@ export function SendMessageModal({ guest, isOpen, onClose }: SendMessageModalPro
               className="mt-1 w-full min-h-[120px] px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical"
               placeholder="Write your message here..."
             />
-            <div className="mt-1 text-xs text-gray-500 text-right">
+            <div className="mt-1 text-secondary-sm text-gray-500 text-right">
               {message.length}/1000
             </div>
           </div>

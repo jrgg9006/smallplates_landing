@@ -245,7 +245,7 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
                       <div className="font-medium text-sm truncate">
                         {member.profiles?.full_name || member.profiles?.email?.split('@')[0] || 'Unknown User'}
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <div className="flex items-center gap-2 text-secondary-sm text-gray-500">
                         <span className={getRoleColor(member.role)}>
                           {getRoleLabel(member.role)}
                         </span>
@@ -282,7 +282,7 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
           {pendingInvitations.length > 0 && (
             <>
               <DropdownMenuSeparator />
-              <DropdownMenuLabel className="flex items-center gap-2 text-xs text-gray-500 font-normal">
+              <DropdownMenuLabel className="flex items-center gap-2 text-secondary-sm text-gray-500 font-normal">
                 <Mail className="h-3 w-3" />
                 Invited ({pendingInvitations.length})
               </DropdownMenuLabel>
@@ -308,7 +308,7 @@ export function GroupMembersDropdown({ group, onInviteFriend }: GroupMembersDrop
                         <div className="text-sm text-gray-700 truncate">
                           {firstName} {lastName}
                         </div>
-                        <div className="text-xs text-gray-500 truncate">
+                        <div className="text-secondary-sm text-gray-500 truncate">
                           {invitation.email}
                         </div>
                       </div>

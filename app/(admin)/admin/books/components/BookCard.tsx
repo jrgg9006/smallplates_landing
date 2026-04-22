@@ -78,7 +78,7 @@ export default function BookCard({ book, onClick, onStatusChange }: BookCardProp
         </div>
       </div>
 
-      <p className="text-xs text-gray-500 mb-2">{weddingDate}</p>
+      <p className="text-secondary-sm text-gray-500 mb-2">{weddingDate}</p>
 
       {book.book_closed_by_user && (
         <p className="mb-2">

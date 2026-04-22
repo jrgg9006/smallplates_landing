@@ -299,7 +299,7 @@ export default function AdminProspectsPage() {
                         <td className="px-6 py-4">
                           <div className="text-sm font-medium text-gray-900">{prospect.email}</div>
                           {prospect.user_type === 'gift_giver' && prospect.gift_giver_name && (
-                            <div className="text-xs text-gray-500">From: {prospect.gift_giver_name}</div>
+                            <div className="text-secondary-sm text-gray-500">From: {prospect.gift_giver_name}</div>
                           )}
                         </td>
                         <td className="px-6 py-4">
@@ -314,7 +314,7 @@ export default function AdminProspectsPage() {
                             )}
                           </div>
                           {prospect.wedding_date && (
-                            <div className="text-xs text-gray-500">
+                            <div className="text-secondary-sm text-gray-500">
                               Wedding: {new Date(prospect.wedding_date).toLocaleDateString()}
                             </div>
                           )}
@@ -323,7 +323,7 @@ export default function AdminProspectsPage() {
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-xs text-gray-500 space-y-1">
+                          <div className="text-secondary-sm text-gray-500 space-y-1">
                             {prospect.planning_stage && <div>Stage: {prospect.planning_stage}</div>}
                             {prospect.guest_count && <div>Guests: {prospect.guest_count}</div>}
                             {prospect.relationship && <div>Relationship: {prospect.relationship}</div>}
@@ -356,7 +356,7 @@ export default function AdminProspectsPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">{date}</div>
-                          <div className="text-xs text-gray-500">{time}</div>
+                          <div className="text-secondary-sm text-gray-500">{time}</div>
                         </td>
                       </tr>
                     );
@@ -424,7 +424,7 @@ export default function AdminProspectsPage() {
                   placeholder={selectedProspect.email}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-honey focus:border-transparent outline-none"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-secondary-sm text-gray-500 mt-1">
                   Default: {selectedProspect.email}. Change if needed (e.g., for multiple accounts).
                 </p>
               </div>

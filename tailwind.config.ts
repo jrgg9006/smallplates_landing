@@ -133,9 +133,9 @@ const config: Config = {
   				letterSpacing: '0',
   			}],
 
-  			// Helper — helper text, char counters, notes below inputs
+  			// Secondary-sm — small secondary gray text (badges, helper text, metadata, tags)
   			// Fixed 12px
-  			'helper': ['0.75rem', {
+  			'secondary-sm': ['0.75rem', {
   				lineHeight: '1.4',
   				letterSpacing: '0',
   			}],

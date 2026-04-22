@@ -271,7 +271,7 @@ export default function PreviewPage() {
                           Continue
                         </Button>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">This is how we&apos;ll print your name in the cookbook.</p>
+                      <p className="text-secondary-sm text-gray-500 mt-1">This is how we&apos;ll print your name in the cookbook.</p>
                     </div>
                   </div>
                 </div>

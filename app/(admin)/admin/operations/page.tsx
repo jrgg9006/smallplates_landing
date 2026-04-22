@@ -1290,7 +1290,7 @@ ${instructions}`;
               </option>
             ))}
           </select>
-          <label className="flex items-center gap-1 text-xs text-gray-500 cursor-pointer">
+          <label className="flex items-center gap-1 text-secondary-sm text-gray-500 cursor-pointer">
             <input
               type="checkbox"
               checked={hidePrinted}
@@ -2098,13 +2098,13 @@ ${instructions}`;
                       <h3 className="text-lg font-semibold text-gray-900 mb-3">Ingredients</h3>
                       <div className="space-y-3">
                         <div>
-                          <div className="text-xs font-medium text-gray-500 mb-1">Before:</div>
+                          <div className="text-secondary-sm font-medium text-gray-500 mb-1">Before:</div>
                           <div className="bg-gray-100 border border-gray-200 p-4 rounded-lg text-sm text-gray-800 whitespace-pre-wrap font-sans">
                             {changesSummary.ingredients.before || '(empty)'}
                           </div>
                         </div>
                         <div>
-                          <div className="text-xs font-medium text-gray-500 mb-1">After:</div>
+                          <div className="text-secondary-sm font-medium text-gray-500 mb-1">After:</div>
                           <div className="bg-green-50 border border-green-200 p-4 rounded-lg text-sm text-gray-800 whitespace-pre-wrap font-sans">
                             {changesSummary.ingredients.after || '(empty)'}
                           </div>
@@ -2118,13 +2118,13 @@ ${instructions}`;
                       <h3 className="text-lg font-semibold text-gray-900 mb-3">Steps</h3>
                       <div className="space-y-3">
                         <div>
-                          <div className="text-xs font-medium text-gray-500 mb-1">Before:</div>
+                          <div className="text-secondary-sm font-medium text-gray-500 mb-1">Before:</div>
                           <div className="bg-gray-100 border border-gray-200 p-4 rounded-lg text-sm text-gray-800 whitespace-pre-wrap font-sans">
                             {changesSummary.instructions.before || '(empty)'}
                           </div>
                         </div>
                         <div>
-                          <div className="text-xs font-medium text-gray-500 mb-1">After:</div>
+                          <div className="text-secondary-sm font-medium text-gray-500 mb-1">After:</div>
                           <div className="bg-green-50 border border-green-200 p-4 rounded-lg text-sm text-gray-800 whitespace-pre-wrap font-sans">
                             {changesSummary.instructions.after || '(empty)'}
                           </div>

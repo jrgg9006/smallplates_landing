@@ -77,7 +77,7 @@ Tokens are named by what they communicate, not by their size. `text-body` is "th
 | `text-modal-title` | Modal dialog / sheet titles | 24px | semibold | tight (1.2) | default | serif |
 | `text-form-label` | Form input labels (primary — more legible) | 14px | medium | normal (1.5) | default | sans |
 | `text-form-label-muted` | Form input labels (secondary — softer) | 14px | medium | normal (1.5) | default | sans |
-| `text-helper` | Helper text below inputs, char counters, notes | 12px | normal | normal (1.4) | default | sans |
+| `text-secondary-sm` | Helper text below inputs, char counters, notes | 12px | normal | normal (1.4) | default | sans |
 
 ### Per-token semantic definitions
 
@@ -273,7 +273,7 @@ Interactive text. The text inside buttons, links that behave as buttons, CTAs, a
 
 **Relationship to `text-form-label`:** identical size/weight/family, different default color. A consumer that uses `text-gray-700` picks `text-form-label`; one that uses `text-gray-600` picks `text-form-label-muted`. If the team decides later that one color is the standard, this token can be deprecated and consumers migrated to the survivor.
 
-#### `text-helper`
+#### `text-secondary-sm`
 
 **Role:** Helper text, char counters, small hints, optional field indicators — the "quieter" text adjacent to primary content.
 
@@ -285,14 +285,14 @@ Interactive text. The text inside buttons, links that behave as buttons, CTAs, a
 
 **Do not use for:**
 - Body copy (use `text-body` or `text-body-small`)
-- Error messages (use dedicated error pattern — typically `text-sm text-red-600`, NOT `text-helper`)
+- Error messages (use dedicated error pattern — typically `text-sm text-red-600`, NOT `text-secondary-sm`)
 - Metadata or timestamps (use `text-caption` — similar size but different semantic role)
 
 **Why it exists:** 50+ instances of `text-xs text-gray-500` across modal forms, dashboard helpers, and form validators. Unified, consistent pattern.
 
 **Value:** `0.75rem` = 12px fixed (same size as `text-caption`). Sans-serif with normal weight and `text-gray-500` color are applied by the consumer.
 
-**Relationship to `text-caption`:** same size (12px), but different semantic role. `text-caption` is for metadata, attributions, timestamps that are read as "info about the content." `text-helper` is for guidance on an interactive action. Both render visually the same, but the naming distinguishes intent. This distinction matters for Claude Design and future tooling that may treat them differently.
+**Relationship to `text-caption`:** same size (12px), but different semantic role. `text-caption` is for metadata, attributions, timestamps that are read as "info about the content." `text-secondary-sm` is for guidance on an interactive action. Both render visually the same, but the naming distinguishes intent. This distinction matters for Claude Design and future tooling that may treat them differently.
 
 ---
 
@@ -378,7 +378,7 @@ Four tokens were added to close this gap for the three most-repeated patterns:
 
 - `text-modal-title` (24px) — consolidates ~20 modal titles that repeated `font-serif text-2xl font-semibold` verbatim.
 - `text-form-label` (14px, gray-700 default) and `text-form-label-muted` (14px, gray-600 default) — consolidates 100+ form labels. Two tokens preserve zero visual delta during migration; a future consolidation pass can collapse them.
-- `text-helper` (12px) — consolidates 50+ helper-text patterns.
+- `text-secondary-sm` (12px) — consolidates 50+ helper-text patterns.
 
 These 4 tokens are additive. They do not change any existing token's value. Migration of consumers happens in subsequent commits (not this one).
 

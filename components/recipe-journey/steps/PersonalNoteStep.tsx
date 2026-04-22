@@ -62,7 +62,7 @@ export default function PersonalNoteStep({ personalNote, onChange, userName, cou
               {characterCount}/{MAX_CHARACTERS}
             </div>
           </div>
-          <p className="mt-2 text-xs text-gray-500 text-center">
+          <p className="mt-2 text-secondary-sm text-gray-500 text-center">
             Your note will live on the page with your recipe. A piece of you in their kitchen.
           </p>
           {isOverLimit && (

@@ -722,7 +722,7 @@ function SectionCard({ title, subtitle, count, tone, defaultOpen, open, onToggle
             <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
             <span className={`text-xl font-bold ${countColor}`}>{count}</span>
           </div>
-          <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>
+          <p className="text-secondary-sm text-gray-500 mt-0.5">{subtitle}</p>
         </div>
         <span className="text-gray-400 text-sm">{isOpen ? '▾' : '▸'}</span>
       </button>
@@ -792,11 +792,11 @@ function GuestTable({
             <tr key={guest.guest_id} className="border-b last:border-b-0 align-top hover:bg-gray-50">
               <td className="px-4 py-3">
                 <div className="font-medium text-gray-900">{guest.guest_name}</div>
-                <div className="text-gray-500 text-xs">{guest.guest_email}</div>
+                <div className="text-gray-500 text-secondary-sm">{guest.guest_email}</div>
               </td>
               <td className="px-4 py-3">
                 <div className="text-gray-900 text-xs font-medium truncate">{guest.group_name || '—'}</div>
-                <div className="text-gray-500 text-xs mt-0.5">
+                <div className="text-gray-500 text-secondary-sm mt-0.5">
                   {bookLabel}
                   {variant === 'ready' && guest.book_close_date && (
                     <> · closed {formatDaysAgo(guest.book_close_date)}</>

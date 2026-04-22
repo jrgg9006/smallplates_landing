@@ -680,7 +680,7 @@ export function ShareCollectionModal({
                           <p className="text-sm text-gray-600 mb-1 font-medium">
                             Add couple image
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-secondary-sm text-gray-500">
                             Click to upload (JPEG, PNG, WebP • max 5MB)
                           </p>
                         </div>

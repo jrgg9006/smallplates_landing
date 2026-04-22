@@ -28,7 +28,7 @@ function DiffField({ label, before, after }: { label: string; before: string | n
 
   return (
     <div className="mt-2">
-      <p className="text-xs font-medium text-gray-500 mb-1">{label}</p>
+      <p className="text-secondary-sm font-medium text-gray-500 mb-1">{label}</p>
       {before && (
         <div className="bg-red-50 border border-red-200 rounded p-2 mb-1">
           <p className="text-xs text-red-800 whitespace-pre-wrap">{before}</p>
@@ -85,7 +85,7 @@ export default function EditHistoryPanel({ history }: EditHistoryPanelProps) {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-500">by {editorName}</p>
+                <p className="text-secondary-sm text-gray-500">by {editorName}</p>
                 {entry.edit_reason && (
                   <p className="text-xs text-gray-600 mt-0.5 italic">
                     &quot;{entry.edit_reason}&quot;

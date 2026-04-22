@@ -186,7 +186,7 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
               disabled={loading}
               className="mt-1"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-secondary-sm text-gray-500 mt-1">
               An invitation to join will be sent to this email
             </p>
           </div>

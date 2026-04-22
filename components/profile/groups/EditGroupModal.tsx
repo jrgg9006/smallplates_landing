@@ -226,7 +226,7 @@ export function EditGroupModal({
             </div>
 
             {giftDateUndecided && (
-              <p className="text-xs text-gray-500 italic mt-2">
+              <p className="text-secondary-sm text-gray-500 italic mt-2">
                 No recipe deadline will be shown until you set a date
               </p>
             )}

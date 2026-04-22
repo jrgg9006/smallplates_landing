@@ -149,7 +149,7 @@ export function PersonalInfoForm() {
           className="w-full"
           placeholder="+1 (555) 123-4567"
         />
-        <p className="text-xs text-gray-500 mt-1">Optional - used for order notifications</p>
+        <p className="text-secondary-sm text-gray-500 mt-1">Optional - used for order notifications</p>
       </div>
 
       {/* Printed Name */}
@@ -165,7 +165,7 @@ export function PersonalInfoForm() {
           className="w-full"
           placeholder="e.g. Rich G."
         />
-        <p className="text-xs text-gray-500 mt-1">How your name appears in printed cookbooks</p>
+        <p className="text-secondary-sm text-gray-500 mt-1">How your name appears in printed cookbooks</p>
       </div>
 
       {/* Email Display (Read-only) */}
@@ -176,7 +176,7 @@ export function PersonalInfoForm() {
         <div className="w-full p-3 bg-gray-50 border border-gray-200 rounded-md text-gray-700">
           {user?.email}
         </div>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-secondary-sm text-gray-500 mt-1">
           To change your email, use the Email Change section below
         </p>
       </div>

@@ -410,7 +410,7 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                                 )}
                               </div>
                               <div className="flex items-center gap-2">
-                                <span className="text-xs text-gray-500">{c.recipes_received} recipe{c.recipes_received !== 1 ? 's' : ''}</span>
+                                <span className="text-secondary-sm text-gray-500">{c.recipes_received} recipe{c.recipes_received !== 1 ? 's' : ''}</span>
                                 <button
                                   onClick={() => {
                                     setEditingField(editKey);

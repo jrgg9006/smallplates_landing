@@ -305,7 +305,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
             </p>
 
             <div className="mb-6">
-              <Label className="text-xs text-gray-500 mb-1 block">Your email</Label>
+              <Label className="text-secondary-sm text-gray-500 mb-1 block">Your email</Label>
               <Input
                 type="email"
                 value={email}
@@ -384,7 +384,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
 
           <div className="w-full space-y-3">
             <div>
-              <Label className="text-xs text-gray-500 mb-1 block">Country</Label>
+              <Label className="text-secondary-sm text-gray-500 mb-1 block">Country</Label>
               <select
                 value={country}
                 onChange={(e) => handleCountryChange(e.target.value)}
@@ -397,7 +397,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
               </select>
             </div>
             <div>
-              <Label className="text-xs text-gray-500 mb-1 block">Recipient name</Label>
+              <Label className="text-secondary-sm text-gray-500 mb-1 block">Recipient name</Label>
               <Input
                 value={recipientName}
                 onChange={(e) => setRecipientName(e.target.value)}
@@ -407,7 +407,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
               />
             </div>
             <div>
-              <Label className="text-xs text-gray-500 mb-1 block">Street address</Label>
+              <Label className="text-secondary-sm text-gray-500 mb-1 block">Street address</Label>
               {mapsLoaded ? (
                 <Autocomplete
                   onLoad={(ac) => { autocompleteRef.current = ac; }}
@@ -433,7 +433,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
               )}
             </div>
             <div>
-              <Label className="text-xs text-gray-500 mb-1 block">
+              <Label className="text-secondary-sm text-gray-500 mb-1 block">
                 Apt / Suite <span className="text-gray-400">(optional)</span>
               </Label>
               <Input
@@ -446,7 +446,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
             </div>
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <Label className="text-xs text-gray-500 mb-1 block">City</Label>
+                <Label className="text-secondary-sm text-gray-500 mb-1 block">City</Label>
                 <Input
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
@@ -456,11 +456,11 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
                 />
               </div>
               <div>
-                <Label className="text-xs text-gray-500 mb-1 block">{countryConfig.regionLabel}</Label>
+                <Label className="text-secondary-sm text-gray-500 mb-1 block">{countryConfig.regionLabel}</Label>
                 {renderRegionField()}
               </div>
               <div>
-                <Label className="text-xs text-gray-500 mb-1 block">{countryConfig.postalLabel}</Label>
+                <Label className="text-secondary-sm text-gray-500 mb-1 block">{countryConfig.postalLabel}</Label>
                 <Input
                   value={postalCode}
                   onChange={(e) => setPostalCode(e.target.value)}
@@ -471,7 +471,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
               </div>
             </div>
             <div>
-              <Label className="text-xs text-gray-500 mb-1 block">
+              <Label className="text-secondary-sm text-gray-500 mb-1 block">
                 Phone <span className="text-gray-400">(optional)</span>
               </Label>
               <Input

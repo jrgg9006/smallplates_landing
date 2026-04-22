@@ -77,7 +77,7 @@ export default function RecipePreviewCard({ recipe, groupId, onReview }: RecipeP
           </span>
         )}
 
-        <span className="text-xs text-gray-500 shrink-0">
+        <span className="text-secondary-sm text-gray-500 shrink-0">
           by {recipe.guest_name}
         </span>
 

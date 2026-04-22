@@ -81,7 +81,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
           className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent resize-vertical"
           aria-describedby="instructions-help"
         />
-        <p id="instructions-help" className="text-xs text-gray-500">Explain it like to a friend.</p>
+        <p id="instructions-help" className="text-secondary-sm text-gray-500">Explain it like to a friend.</p>
       </section>
 
       {/* Personal Note */}
@@ -100,7 +100,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
               className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent resize-vertical"
               placeholder={"Paste your entire recipe text here"}
             />
-            <p className="text-xs text-gray-500">
+            <p className="text-secondary-sm text-gray-500">
               <button type="button" className="underline underline-offset-2" onClick={() => setShowPasteModal(false)}>
                 Back to structured form
               </button>

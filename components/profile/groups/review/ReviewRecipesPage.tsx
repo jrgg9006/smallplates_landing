@@ -158,7 +158,7 @@ export function ReviewRecipesPage({ group, onBack, onMarkReviewed, onStartCloseF
         {/* Book details toggle + Approve button */}
         <button
           onClick={() => setShowBookDetails(true)}
-          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-brand-charcoal transition-colors flex-shrink-0"
+          className="flex items-center gap-1.5 text-secondary-sm text-gray-500 hover:text-brand-charcoal transition-colors flex-shrink-0"
         >
           <BookOpen className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Book Details</span>

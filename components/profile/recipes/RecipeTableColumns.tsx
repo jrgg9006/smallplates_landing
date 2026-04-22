@@ -353,7 +353,7 @@ export const columns: ColumnDef<RecipeWithGuest>[] = [
               {displayName}
             </div>
             {showSubtitle && (
-              <div className="text-xs text-gray-500 whitespace-nowrap">
+              <div className="text-secondary-sm text-gray-500 whitespace-nowrap">
                 {fullName}
               </div>
             )}

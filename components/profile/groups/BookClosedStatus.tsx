@@ -514,7 +514,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
               <div className="space-y-3">
                 {/* Country */}
                 <div>
-                  <Label className="text-xs text-gray-500 mb-1 block">Country</Label>
+                  <Label className="text-secondary-sm text-gray-500 mb-1 block">Country</Label>
                   <select
                     value={country}
                     onChange={(e) => handleCountryChange(e.target.value)}
@@ -528,7 +528,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
                 </div>
 
                 <div>
-                  <Label className="text-xs text-gray-500 mb-1 block">Recipient name</Label>
+                  <Label className="text-secondary-sm text-gray-500 mb-1 block">Recipient name</Label>
                   <Input
                     value={recipientName}
                     onChange={(e) => setRecipientName(e.target.value)}
@@ -540,7 +540,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
 
                 {/* Street address with Google Places Autocomplete */}
                 <div>
-                  <Label className="text-xs text-gray-500 mb-1 block">Street address</Label>
+                  <Label className="text-secondary-sm text-gray-500 mb-1 block">Street address</Label>
                   {mapsLoaded ? (
                     <Autocomplete
                       onLoad={(ac) => { autocompleteRef.current = ac; }}
@@ -570,7 +570,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
                 </div>
 
                 <div>
-                  <Label className="text-xs text-gray-500 mb-1 block">Apt / Suite <span className="text-gray-400">(optional)</span></Label>
+                  <Label className="text-secondary-sm text-gray-500 mb-1 block">Apt / Suite <span className="text-gray-400">(optional)</span></Label>
                   <Input
                     value={apartmentUnit}
                     onChange={(e) => setApartmentUnit(e.target.value)}
@@ -581,7 +581,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <Label className="text-xs text-gray-500 mb-1 block">City</Label>
+                    <Label className="text-secondary-sm text-gray-500 mb-1 block">City</Label>
                     <Input
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
@@ -591,11 +591,11 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
                     />
                   </div>
                   <div>
-                    <Label className="text-xs text-gray-500 mb-1 block">{countryConfig.regionLabel}</Label>
+                    <Label className="text-secondary-sm text-gray-500 mb-1 block">{countryConfig.regionLabel}</Label>
                     {renderRegionField()}
                   </div>
                   <div>
-                    <Label className="text-xs text-gray-500 mb-1 block">{countryConfig.postalLabel}</Label>
+                    <Label className="text-secondary-sm text-gray-500 mb-1 block">{countryConfig.postalLabel}</Label>
                     <Input
                       value={postalCode}
                       onChange={(e) => setPostalCode(e.target.value)}
@@ -606,7 +606,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
                   </div>
                 </div>
                 <div>
-                  <Label className="text-xs text-gray-500 mb-1 block">Phone <span className="text-gray-400">(optional)</span></Label>
+                  <Label className="text-secondary-sm text-gray-500 mb-1 block">Phone <span className="text-gray-400">(optional)</span></Label>
                   <Input
                     type="tel"
                     value={phoneNumber}

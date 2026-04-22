@@ -245,7 +245,7 @@ function AdminContentPage() {
                           {g.first_name} {g.last_name}
                           {g.is_self && <span className="text-xs text-gray-400 ml-1">(self)</span>}
                         </p>
-                        <p className="text-xs text-gray-500 truncate">{g.email}</p>
+                        <p className="text-secondary-sm text-gray-500 truncate">{g.email}</p>
                         <p className="text-xs text-gray-400 mt-0.5">
                           {g.recipes_received} / {g.number_of_recipes} recipes
                           {g.source === 'manual' && ' | manual'}

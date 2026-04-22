@@ -151,7 +151,7 @@ export function EmailChangeForm() {
           />
           <div className="flex items-center gap-2 mt-1">
             <Shield className="h-3 w-3 text-gray-400" />
-            <p className="text-xs text-gray-500">
+            <p className="text-secondary-sm text-gray-500">
               Required to confirm your identity for this security-sensitive change
             </p>
           </div>

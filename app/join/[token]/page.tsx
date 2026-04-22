@@ -315,7 +315,7 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
               placeholder="Enter your password"
               minLength={8}
             />
-            <p className="text-xs text-gray-500 mt-1">Must be at least 8 characters</p>
+            <p className="text-secondary-sm text-gray-500 mt-1">Must be at least 8 characters</p>
           </div>
 
           <div>

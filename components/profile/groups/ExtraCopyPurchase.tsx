@@ -309,7 +309,7 @@ function StepShipping({
 
       <div className="w-full space-y-3">
         <div>
-          <Label className="text-xs text-gray-500 mb-1 block">Country</Label>
+          <Label className="text-secondary-sm text-gray-500 mb-1 block">Country</Label>
           <select
             value={country}
             onChange={(e) => handleCountryChange(e.target.value)}
@@ -322,11 +322,11 @@ function StepShipping({
           </select>
         </div>
         <div>
-          <Label className="text-xs text-gray-500 mb-1 block">Recipient name</Label>
+          <Label className="text-secondary-sm text-gray-500 mb-1 block">Recipient name</Label>
           <Input value={recipientName} onChange={(e) => setRecipientName(e.target.value)} placeholder="Full name" disabled={redirecting} className={inputClasses} />
         </div>
         <div>
-          <Label className="text-xs text-gray-500 mb-1 block">Street address</Label>
+          <Label className="text-secondary-sm text-gray-500 mb-1 block">Street address</Label>
           {mapsLoaded ? (
             <Autocomplete
               onLoad={(ac) => { autocompleteRef.current = ac; }}
@@ -340,25 +340,25 @@ function StepShipping({
           )}
         </div>
         <div>
-          <Label className="text-xs text-gray-500 mb-1 block">Apt / Suite <span className="text-gray-400">(optional)</span></Label>
+          <Label className="text-secondary-sm text-gray-500 mb-1 block">Apt / Suite <span className="text-gray-400">(optional)</span></Label>
           <Input value={apartmentUnit} onChange={(e) => setApartmentUnit(e.target.value)} placeholder="Optional" disabled={redirecting} className={inputClasses} />
         </div>
         <div className="grid grid-cols-3 gap-2">
           <div>
-            <Label className="text-xs text-gray-500 mb-1 block">City</Label>
+            <Label className="text-secondary-sm text-gray-500 mb-1 block">City</Label>
             <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" disabled={redirecting} className={inputClasses} />
           </div>
           <div>
-            <Label className="text-xs text-gray-500 mb-1 block">{countryConfig.regionLabel}</Label>
+            <Label className="text-secondary-sm text-gray-500 mb-1 block">{countryConfig.regionLabel}</Label>
             {renderRegionField()}
           </div>
           <div>
-            <Label className="text-xs text-gray-500 mb-1 block">{countryConfig.postalLabel}</Label>
+            <Label className="text-secondary-sm text-gray-500 mb-1 block">{countryConfig.postalLabel}</Label>
             <Input value={postalCode} onChange={(e) => setPostalCode(e.target.value)} placeholder={countryConfig.postalPlaceholder} disabled={redirecting} className={inputClasses} />
           </div>
         </div>
         <div>
-          <Label className="text-xs text-gray-500 mb-1 block">Phone <span className="text-gray-400">(optional)</span></Label>
+          <Label className="text-secondary-sm text-gray-500 mb-1 block">Phone <span className="text-gray-400">(optional)</span></Label>
           <Input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="+1 (555) 123-4567" disabled={redirecting} className={inputClasses} />
         </div>
       </div>

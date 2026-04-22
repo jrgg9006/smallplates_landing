@@ -164,7 +164,7 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded, isFirstGuest = fa
               className="mt-1"
               placeholder="How this person's name should appear in the book"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-secondary-sm text-gray-500 mt-1">
               Leave empty to use first and last name. This is how the name will appear in the printed cookbook.
             </p>
           </div>

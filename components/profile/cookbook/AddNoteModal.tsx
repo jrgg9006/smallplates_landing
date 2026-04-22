@@ -121,7 +121,7 @@ export function AddNoteModal({
             className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-vertical min-h-[150px]"
             placeholder="Add a personal note about this recipe in your cookbook..."
           />
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-secondary-sm text-gray-500">
             This note will appear in your cookbook for this recipe.
           </p>
         </div>

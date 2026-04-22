@@ -413,7 +413,7 @@ export default function ResetPasswordPage() {
               placeholder="Enter your new password"
               minLength={6}
             />
-            <p className="text-xs text-gray-500 mt-1">Must be at least 6 characters long</p>
+            <p className="text-secondary-sm text-gray-500 mt-1">Must be at least 6 characters long</p>
           </div>
 
           <div>

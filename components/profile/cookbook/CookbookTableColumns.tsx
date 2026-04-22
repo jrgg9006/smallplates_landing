@@ -288,7 +288,7 @@ export function createCookbookColumns(
               <div className="font-normal text-base whitespace-nowrap">
                 {guest.printed_name}
               </div>
-              <div className="text-xs text-gray-500 whitespace-nowrap">
+              <div className="text-secondary-sm text-gray-500 whitespace-nowrap">
                 {fullName}
               </div>
             </div>

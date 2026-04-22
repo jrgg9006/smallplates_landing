@@ -183,7 +183,7 @@ export function MobileGuestCard({
 
         {/* Recipe Count (if applicable) */}
         {showRecipeCount && (
-          <div className="text-xs text-gray-500">
+          <div className="text-secondary-sm text-gray-500">
             Recipes: {guest.recipes_received || 0}
           </div>
         )}
