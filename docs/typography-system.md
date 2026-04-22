@@ -594,4 +594,65 @@ This doc is reviewed:
 - **Before any major feature launch** that introduces new visual patterns (e.g., a new admin subsystem, a new landing section with unusual hierarchy).
 - **When two or more team members independently propose breaking the system** — if that happens, the system likely has a gap.
 
+---
+
+## Lessons learned (Phase 1.3.1 — April 2026)
+
+This section captures key philosophy lessons from the Phase 1.3.1 session that attempted to migrate `.type-*` utilities to consume typography tokens. Three attempts were made; all were reverted or rejected. The pattern of errors reveals principles that future sessions must respect.
+
+### Principle 1 — The page must not change visually as a side effect of system adoption
+
+The purpose of a typography system is to give the codebase a shared vocabulary for consistent decisions going forward. It is not to "fix" the existing page. If system adoption causes the existing page to render differently, the system is wrong, not the page.
+
+Ricardo's explicit statement: *"la página casi no debe de cambiar."*
+
+Future sessions must treat any visible shift on landing, about, dashboard, collect, or onboarding surfaces as a regression requiring revert or token recalibration — not as an acceptable cost of "better organization."
+
+### Principle 2 — The system describes the codebase, not prescribes it
+
+Token values must be derived from measuring what the codebase actually renders today. External design ideals (Kinfolk, Aesop, Everlane) are inspiration for semantic roles, not prescriptive for pixel values.
+
+The recalibration cycle in this session (commits `447a684` + `1eb8f71`) moved `text-display` from 38→56px to 36→72px, `text-heading` from 28→36px to 30→48px, and `text-subheading` from 24→28px to 24→30px — not because the new values are right in an abstract sense, but because they match what the utilities currently produce.
+
+### Principle 3 — Aggressive consolidation (8-10px deltas) is rejected
+
+The third refactor attempt tried to route `.type-body` from its current rendering (18→20px via `text-lg md:text-xl`) to `text-body-lead` (18→24px). Ricardo rejected the desktop +4px shift as making landing prose feel too heavy.
+
+Similarly, routing `.type-body-small` from 16→18px to a flat 14px (−2 to −4px reduction) produced text that was "demasiado pequeño" on landing body copy.
+
+The rule: a token change that shifts consumers by more than approximately 2px is a material visual change, not an adjustment. It requires evidence-based per-surface smoke testing and is usually not worth the theoretical organizational benefit.
+
+### Principle 4 — Pre-flight measurement is mandatory
+
+Before proposing any token value, the session must first:
+
+1. Identify all consumers of the utilities that will route to the token.
+2. Measure the rendered size each consumer produces.
+3. Choose token values that preserve those renderings (zero or near-zero delta).
+4. Only then propose the token to Ricardo.
+
+The first two Phase 1.3.1 attempts skipped this step. Values were proposed first, then consumers audited. This order is the error. Audit first, propose second.
+
+### Principle 5 — Legacy cleanup precedes consolidation
+
+This session surfaced ~6 landing components that are legacy (not rendered on the live site): `FoodPerfect.tsx`, `Guarantee.tsx`, `PlayModeSelection.tsx`, `MemorableExperience.tsx`, `WhatsIncluded.tsx`, `WellWhatIf.tsx`. These components distorted the consumers audit — they appeared as candidates for token migration despite being invisible to users.
+
+Future sessions must first clean (delete or deprecate) dead code before proposing consolidation. A system designed against a codebase that contains ghost code will misweight its decisions.
+
+### Operational guidance for future sessions
+
+When migrating `.type-*` utilities or any other typography surface:
+
+1. **Start with a consumer audit.** Grep all usages. Categorize by surface (landing, dashboard, collect, modal, etc.). Note consumers with inline overrides separately from those that rely on the utility's base.
+
+2. **Map current rendered sizes per consumer.** For each consumer, record what pixel value it renders at each breakpoint. This is the source of truth for token calibration.
+
+3. **Propose token values that preserve current renderings with near-zero delta.** If a proposed token shifts consumers by more than ~2px, either calibrate the token or add the consumer as a Documented exception.
+
+4. **Smoke test before commit.** The person (not the agent alone) must verify the rendered page against pre-refactor state. A 20-point visual checklist against localhost is cheap compared to a shipped regression.
+
+5. **When in doubt, don't migrate.** A token in `tailwind.config.ts` available for future use is better than a migration that ships a visual change Ricardo rejects.
+
+6. **Respect "casi no debe cambiar" as an absolute rule.** Small deltas on L2 surfaces are acceptable only if Ricardo explicitly approves them in the context of specific surfaces, not as a blanket policy.
+
 Changes to this doc require a commit with a clear justification and are tagged with `docs(tokens):` in the commit message.
