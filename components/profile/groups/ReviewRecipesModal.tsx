@@ -75,7 +75,7 @@ export function ReviewRecipesModal({
         <DialogTitle className="sr-only">Review Recipes</DialogTitle>
         {/* Header */}
         <div className="px-8 pt-6 pb-2 flex-shrink-0">
-          <h2 className="font-serif text-modal-title font-semibold text-[hsl(var(--brand-charcoal))]">
+          <h2 className="font-serif text-2xl font-semibold text-[hsl(var(--brand-charcoal))]">
             Review Recipes
           </h2>
         </div>

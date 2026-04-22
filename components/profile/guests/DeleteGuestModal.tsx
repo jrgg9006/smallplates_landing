@@ -24,7 +24,7 @@ export function DeleteGuestModal({ isOpen, guestName, onClose, onConfirm, loadin
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-serif text-modal-title font-semibold mb-4">Remove Guest</DialogTitle>
+          <DialogTitle className="font-serif text-2xl font-semibold mb-4">Remove Guest</DialogTitle>
           <DialogDescription>
             Are you sure you want to remove <span className="font-medium text-foreground">{guestName}</span> from your guest list?
             <br />

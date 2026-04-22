@@ -24,7 +24,7 @@ export function DeleteRecipeModal({ isOpen, recipeName, onClose, onConfirm, load
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-serif text-modal-title font-semibold mb-4">Remove Recipe</DialogTitle>
+          <DialogTitle className="font-serif text-2xl font-semibold mb-4">Remove Recipe</DialogTitle>
           <DialogDescription>
             Are you sure you want to remove <span className="font-medium text-foreground">&quot;{recipeName}&quot;</span> from your recipes?
             <br />

@@ -417,7 +417,7 @@ export function ShareCollectionModal({
         showMessageCustomization ? 'lg:max-w-[900px]' : 'sm:max-w-[500px]'
       } transition-all duration-300 max-h-[90vh] flex flex-col`}>
         <DialogHeader>
-          <DialogTitle className="font-serif text-modal-title font-semibold">
+          <DialogTitle className="font-serif text-2xl font-semibold">
             Collect Recipes
           </DialogTitle>
         </DialogHeader>

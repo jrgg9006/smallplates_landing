@@ -935,7 +935,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
             
             <div className="p-6 flex flex-col h-full overflow-hidden bg-white">
               <SheetHeader className="px-0">
-                <SheetTitle className="font-serif text-modal-title font-semibold mb-4">Add a new Recipe</SheetTitle>
+                <SheetTitle className="font-serif text-2xl font-semibold mb-4">Add a new Recipe</SheetTitle>
               </SheetHeader>
               
               <div className="flex-1 overflow-hidden flex flex-col overflow-y-auto">
@@ -980,7 +980,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-6xl w-[95vw] h-[90vh] max-h-[90vh] flex flex-col overflow-hidden p-0 gap-0 bg-white">
           <DialogHeader className="flex-shrink-0 px-8 pt-6 pb-2">
-            <DialogTitle className="font-serif text-modal-title font-semibold text-gray-900">Add a new Recipe</DialogTitle>
+            <DialogTitle className="font-serif text-2xl font-semibold text-gray-900">Add a new Recipe</DialogTitle>
           </DialogHeader>
           
           <div className="flex-1 overflow-hidden flex flex-col pl-8 pr-8 pb-6 min-w-0">

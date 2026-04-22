@@ -351,7 +351,7 @@ export default function AdminHomePage() {
       <Dialog open={showDeletePasswordModal} onOpenChange={setShowDeletePasswordModal}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="font-serif text-modal-title font-semibold">
+            <DialogTitle className="font-serif text-2xl font-semibold">
               Confirm Access
             </DialogTitle>
             <DialogDescription>

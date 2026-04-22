@@ -107,7 +107,7 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded, isFirstGuest = fa
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="font-serif text-modal-title font-semibold">
+          <DialogTitle className="font-serif text-2xl font-semibold">
             Add Guest
           </DialogTitle>
         </DialogHeader>
