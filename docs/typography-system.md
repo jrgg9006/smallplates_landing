@@ -65,9 +65,9 @@ Tokens are named by what they communicate, not by their size. `text-body` is "th
 
 | Token | Role | Size (mobile → desktop) | Weight default | Line-height | Letter-spacing | Family |
 |-------|------|-------------------------|----------------|-------------|----------------|--------|
-| `text-display` | Hero titulars, landing covers | 38px → 56px | medium | tight (1.1) | tight (-0.02em) | serif (Minion Pro) |
-| `text-heading` | Section titles | 28px → 36px | medium | tight (1.15) | default | serif |
-| `text-subheading` | Card / modal titles, subsection headers | 24px → 28px | medium | tight (1.2) | default | serif |
+| `text-display` | Hero titulars, landing covers | 36px → 72px | medium | tight (1.1) | tight (-0.02em) | serif (Minion Pro) |
+| `text-heading` | Section titles | 30px → 48px | medium | tight (1.15) | default | serif |
+| `text-subheading` | Card / modal titles, subsection headers | 24px → 30px | medium | tight (1.2) | default | serif |
 | `text-body` | Primary body copy (paragraphs, descriptions) | 16px | light | relaxed (1.65) | default | sans (Inter) |
 | `text-body-lead` | Lead prose editorial (follows a heading) | 18px → 24px | light | relaxed (1.65) | default | sans |
 | `text-body-small` | Secondary body copy (helper text, info boxes) | 14px | light | relaxed (1.6) | default | sans |
@@ -228,9 +228,7 @@ Any Phase 1.3+ migration that touches `components/landing/**` must consult this 
 |---|------|------|---------|-------------------|------|
 | 1 | `components/landing/Hero.tsx` | 46 | `<motion.h1>` "Recipes from the people who love you." | `type-display text-white leading-[1.1]` | Primary hero headline |
 | 2 | `components/landing/Hero.tsx` | 55 | `<motion.p>` "A wedding cookbook made by everyone who showed up..." | `type-body mt-6 sm:text-xl md:text-2xl text-white/90 max-w-2xl` | Hero subtitle prose |
-| 3 | `components/landing/TheProblem.tsx` | 38 | `<motion.h2>` "Wedding gifts have a problem." | `type-heading` | Problem section headline |
-| 4 | `components/landing/TheProblem.tsx` | 80 | `<motion.p>` "You know her. The gift should too." | `type-accent text-2xl sm:text-3xl md:text-4xl leading-snug` | Problem conclusion accent |
-| 5 | `components/landing/TheSolution.tsx` | 65 | `<h2>` "A cookbook made by everyone who showed up." | `type-heading` | Product section headline |
+| 3 | `components/landing/TheProblem.tsx` | 80 | `<motion.p>` "You know her. The gift should too." | `type-accent text-2xl sm:text-3xl md:text-4xl leading-snug` | Problem conclusion accent |
 
 **Rule for agents:**
 
@@ -238,7 +236,7 @@ Before modifying any file in `components/landing/**`, check this table. If the l
 
 **Rule for ongoing development:**
 
-New code in `components/landing/**` should still use the 9 tokens. This exceptions table is for the 5 elements listed above, not a license to author new responsive size overrides.
+New code in `components/landing/**` should still use the 9 tokens. This exceptions table is for the 3 elements listed above, not a license to author new responsive size overrides.
 
 **Not pixel-perfect (L2 — deltas acceptable):**
 
@@ -272,6 +270,27 @@ Root cause: the 8-token system had no tier for "editorial lead prose" in the 18-
 Resolution: added `text-body-lead` as the 9th token. `.type-body` and `.type-accent` base now route to `text-body-lead`, preserving landing editorial weight. Components that need compact UI body (modals, forms, dashboards) consume `text-body` (16px) directly.
 
 The 5 landing hero elements that drove the regression are additionally captured in the "Documented exceptions" section above — not because they need `text-body-lead`, but because their current responsive overrides are pixel-perfect calibrated to the editorial character of the landing, and any token migration should not touch them.
+
+### Recalibration of text-display, text-heading, text-subheading
+
+After the 9th-token amendment, a pre-flight consumers audit of `.type-heading`, `.type-subheading`, and `.type-display` surfaced that the utilities' current rendering values are higher than the originally proposed tokens:
+
+- `.type-display` renders `text-4xl sm:text-5xl md:text-6xl lg:text-7xl` = 36→48→60→72px. Original token proposed 38→56px.
+- `.type-heading` renders `text-3xl sm:text-4xl md:text-5xl` = 30→36→48px. Original token proposed 28→36px.
+- `.type-subheading` renders `text-2xl md:text-3xl` = 24→30px. Original token proposed 24→28px.
+
+The audit also confirmed zero consumers in L1 paths (dashboard, collect, onboarding, modals, email, admin). All 26 consumers across the 3 utilities live in landing (21) or public pages — contact, pricing, check-your-email (5).
+
+Ricardo's decision: recalibrate the 3 tokens upward to encode the codebase's actual rendering values. The token system is a formalization of the codebase's intentional patterns, not an external design imposition.
+
+Updated values:
+- `text-display`: 36→72px (was 38→56). Clamp: `clamp(2.25rem, 1.75rem + 2.5vw, 4.5rem)`.
+- `text-heading`: 30→48px (was 28→36). Clamp: `clamp(1.875rem, 1.5rem + 1.875vw, 3rem)`.
+- `text-subheading`: 24→30px (was 24→28). Clamp: `clamp(1.5rem, 1.375rem + 0.625vw, 1.875rem)`.
+
+Consequence for Documented exceptions: the 5 elements previously listed are reduced to 3. Elements 3 and 5 (`TheProblem.tsx:38` and `TheSolution.tsx:65`), which use plain `.type-heading` without overrides, are now fully preserved by the recalibrated token and no longer need explicit protection. Elements 1, 2, 4 remain exceptions because they carry hand-authored responsive overrides beyond what any token encodes.
+
+Consequence for non-landing consumers: 5 public-page titles (check-your-email success/error, contact, pricing, ContactForm confirmation) will render at the recalibrated sizes. Per Ricardo's decision, these are acceptable — public-page titles benefit from editorial weight rather than being compromised by a system tuned to smaller surfaces.
 
 ---
 
