@@ -354,3 +354,123 @@ These are non-token issues surfaced during typography and color recons. Not in s
 - Anything outside Phase 1.2 scope (e.g., token system refresh for other product surfaces, responsive typography, spacing tokens).
 - Decisions that require product input (OnboardingBadge, semantic tokens).
 - Book.css as a whole — it's an intentional off-system file.
+
+---
+
+## Phase 2 scope — Design system cleanup (pending)
+
+**Status:** Scoped, not started. Follows Phase 1 (color token migration, 
+completed April 2026).
+
+**Source:** Recon performed April 22, 2026 during Claude Design setup 
+preparation. Recon revealed unintentional inconsistency in 
+radius, shadows, spacing, and shadcn integration that was not visible 
+during Phase 1 color work.
+
+**Decision to defer:** Claude Design setup was paused because generating 
+a Design System from the current codebase would encode drift as doctrine. 
+Phase 2 cleanup runs first; Claude Design setup resumes after.
+
+---
+
+### Scope items
+
+#### Radius consolidation
+- **Current state:** Mixed use of `rounded-lg` (339 uses, 12px), 
+  `rounded-md` (128, 10px), `rounded-xl` (151, 16px Tailwind default — 
+  not mapped in config), `rounded-2xl` (30, 24px), `rounded-full` 
+  (293, pill).
+- **Problem:** 10px vs 12px distinction is accidental, not doctrinal. 
+  `rounded-xl` consumption is Tailwind default rather than design system 
+  token. Pill buttons (`rounded-full` in `.btn-primary`/`.btn-secondary`) 
+  are inherited, not chosen.
+- **Direction:** Ricardo prefers "slightly more square" (onboarding 
+  buttons are less pill, he likes that). Likely target: single radius 
+  value for surface (probably `rounded-md` = 10px or a new canonical 
+  value), with conscious decision on whether any category keeps pill.
+- **Scale:** ~940 total radius class usages to audit; decisions across 
+  buttons, cards, modals, inputs, badges.
+
+#### Shadow tokenization
+- **Current state:** Tailwind defaults dominate (`shadow-lg` 87, 
+  `shadow-sm` 47, `shadow-2xl` 21, `shadow-xl` 12, `shadow-md` 12). 
+  Custom shadows exist inline using `rgba(45,45,45,…)` which is 
+  `--brand-charcoal` un-tokenized.
+- **Problem:** Tailwind default shadows use neutral blue-gray tints 
+  that contradict the brand's charcoal-tinted shadow palette. Custom 
+  shadows are not tokenized — each component reinvents its own.
+- **Direction:** Define 3-4 shadow tokens based on the charcoal pattern 
+  (`shadow-card-base`, `shadow-card-hover`, `shadow-modal-prominent`, 
+  possibly one more). Replace Tailwind-default shadow usage with these 
+  tokens. Decide which surfaces should have no shadow at all 
+  (editorial rhythm).
+- **Scale:** ~180 shadow class usages to audit.
+
+#### Spacing scale discipline
+- **Current state:** Landing sections use `py-16` (14), `py-24` (10), 
+  `py-32` (2), `py-28` (2), `py-20` (2), `py-40` (1). Dominant pattern 
+  is `py-16`/`py-24` but with noticeable noise.
+- **Problem:** No canonical landing rhythm enforced. Variables 
+  `--space-*` defined in `app/globals.css` but never consumed — dead code.
+- **Direction:** Pick canonical landing rhythm 
+  (likely `py-16` / `py-24` / `py-32` as the only sanctioned values for 
+  top-level sections). Refactor outliers. Remove dead `--space-*` 
+  variables from `globals.css`, OR decide to use them and refactor 
+  consuming components to reference them.
+
+#### Shadcn integration drift
+- **Current state:** Several shadcn defaults remain unmodified and 
+  bypass the custom token system.
+- **Known examples:**
+  - `DialogTitle` uses `text-lg font-semibold leading-none tracking-tight` 
+    hardcoded, does NOT consume `text-modal-title` 
+    (custom token defined in Phase 1.3.3).
+  - `card.tsx` uses `rounded-xl` (Tailwind default 16px), 
+    not `var(--radius)`.
+  - `button.tsx` base variant uses `rounded-md` — but brand buttons 
+    (`.btn-primary`/`.btn-secondary` in `globals.css`) use `rounded-full` 
+    instead of extending the Button component.
+- **Problem:** Brand tokens exist but are not wired through shadcn 
+  primitives. Custom brand classes parallel shadcn rather than extend it, 
+  creating two sources of truth for the same UI.
+- **Direction:** Audit each shadcn component in `components/ui/` for:
+  (a) which tokens it should consume but doesn't, 
+  (b) whether brand CSS classes in `globals.css` should become shadcn 
+  component variants instead.
+- **Scale:** ~12 shadcn components to review.
+
+#### Dead tokens
+- `--space-1` through `--space-7` in `app/globals.css` — defined, 
+  never consumed via CSS variable. Either wire up or remove.
+- Any other orphaned CSS variables to be identified during cleanup.
+
+---
+
+### Not in scope for Phase 2
+
+- Typography system — recon confirmed it is doctrinally mature 
+  (Minion Pro with 4 optical variants + Inter + DM Sans, editorial 
+  scale with eyebrow/caption/display tokens). No changes needed. 
+  Documented as firm doctrine when `token-philosophy.md` is eventually 
+  written.
+- Color tokens — Phase 1 already closed. Any future color work is 
+  continuation of existing followups in earlier sections of this document, 
+  not Phase 2.
+
+---
+
+### Suggested execution order (draft)
+
+Each sub-item is likely its own session under the working-method, 
+with its own recon + plan + execute + smoke-test loop.
+
+1. Radius consolidation (biggest scale, most visible, blocks clean 
+   shadcn integration).
+2. Shadcn integration drift (once radius is canonical, wiring shadcn 
+   to tokens becomes simpler).
+3. Shadow tokenization (smaller scope, self-contained).
+4. Spacing discipline + dead token cleanup (smallest scope, good 
+   closing pass).
+
+After Phase 2 closes, `token-philosophy.md` gets written as the 
+doctrinal record of the full system, and Claude Design setup resumes.
