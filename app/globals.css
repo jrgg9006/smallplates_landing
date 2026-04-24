@@ -125,6 +125,19 @@ body > div.pac-container ~ div:not([id]):not([class]) {
   /* Small Plates Component Styles */
   
   /* Button Components - Updated per Implementation Guide */
+  /* -----------------------------------------------------------------------------
+     LEGACY BUTTON CLASSES — retained for Action Bar in profile/groups/page.tsx
+     
+     .btn-primary, .btn-secondary, and .btn-tertiary are kept temporarily
+     until Lote 1.5 (Action Bar consolidation session) migrates the 6
+     remaining consumers to the new compound-variant system defined below.
+     After Lote 1.5 closes, this legacy block is deleted.
+     
+     Consumers as of April 2026:
+     - .btn-primary: profile/groups/page.tsx:830 (Collect Recipes)
+     - .btn-secondary: profile/groups/page.tsx:839, :848, :857
+     - .btn-tertiary: profile/groups/page.tsx:869, :881
+     ----------------------------------------------------------------------------- */
   .btn-primary {
     @apply bg-[hsl(var(--brand-honey))] hover:bg-[hsl(var(--brand-honey-dark))] 
            text-white font-medium text-sm px-6 py-3 rounded-full
@@ -142,6 +155,66 @@ body > div.pac-container ~ div:not([id]):not([class]) {
     @apply bg-transparent border border-[hsl(var(--brand-border-button))] 
            text-[hsl(var(--brand-warm-gray-dark))] text-sm px-5 py-3 rounded-full
            transition-all duration-200;
+  }
+
+  /* =============================================================================
+     BUTTON SYSTEM — Phase 2.1 (April 2026)
+     
+     Composable: base `btn` + one size modifier + one variant modifier.
+     Example: `btn btn-md btn-dark w-full`
+     
+     Sizes:    btn-lg (landing CTAs) · btn-md (flow actions) · btn-sm (modals, toolbars)
+     Variants: btn-honey (honey bg) · btn-dark (charcoal bg) · btn-outline (white bg + border)
+     
+     NOT part of this system (preserved as-is, do not migrate without separate decision):
+     - ProfileHeader buttons (components/profile/ProfileHeader.tsx)
+     - Ghost buttons in dropdowns/tables (styling inherited from container)
+     - Icon-round buttons (rounded-full, no label — circular by nature of shape)
+     - Structural unstyled buttons inside container layouts
+     - Action Bar in profile/groups/page.tsx — pending Lote 1.5
+     
+     Literals used (pending tokenization, tracked in docs/token-migration-followups.md):
+     - #1A1A1A — charcoal-hover tier (see Section C.1)
+     - #F5F1EA — warm off-white accent (see Section C.2)
+     ============================================================================= */
+
+  .btn {
+    @apply rounded-full font-medium transition-colors inline-flex items-center justify-center;
+  }
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* Sizes */
+  .btn-lg { @apply px-8 py-4 text-lg; }
+  .btn-md { @apply py-4 text-base; }
+  .btn-sm { @apply px-6 py-3 text-sm; }
+
+  /* Variants */
+  .btn-honey {
+    background-color: hsl(var(--brand-honey));
+    color: #FFFFFF;
+  }
+  .btn-honey:hover:not(:disabled) {
+    background-color: hsl(var(--brand-honey-dark));
+  }
+
+  .btn-dark {
+    background-color: hsl(var(--brand-charcoal));
+    color: #FFFFFF;
+  }
+  .btn-dark:hover:not(:disabled) {
+    background-color: #1A1A1A;
+  }
+
+  .btn-outline {
+    background-color: #FFFFFF;
+    color: hsl(var(--brand-charcoal));
+    border: 1px solid hsl(var(--brand-sand));
+  }
+  .btn-outline:hover:not(:disabled) {
+    background-color: #F5F1EA;
   }
   
   .text-link {

@@ -229,8 +229,9 @@ function StepExtras({
 
       {/* CTA */}
       <button
+        type="button"
         onClick={onContinue}
-        className="w-full bg-brand-charcoal text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 transition-colors"
+        className="btn btn-md btn-dark w-full"
       >
         {qty > 0
           ? `Add ${qty} ${qty === 1 ? "copy" : "copies"} — $${total} →`
@@ -558,9 +559,10 @@ function StepShipping({
         )}
 
         <button
+          type="button"
           onClick={handleSubmit}
           disabled={saving}
-          className="w-full bg-brand-charcoal text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors mt-2"
+          className="btn btn-md btn-dark w-full"
         >
           {saving ? "Saving..." : "Send it to print →"}
         </button>

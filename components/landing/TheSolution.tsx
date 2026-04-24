@@ -94,7 +94,7 @@ export default function TheSolution() {
               <button
                 type="button"
                 onClick={handleStartBook}
-                className="inline-flex items-center justify-center rounded-full bg-brand-honey hover:bg-brand-honey-dark text-white px-8 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-honey"
+                className="btn btn-lg btn-honey"
                 data-cta="solution-primary"
               >
                 Start a Book for Them

@@ -128,9 +128,10 @@ export function PrintDetailsWizard({
               )}
 
               <button
+                type="button"
                 onClick={handleContinueToImage}
                 disabled={!coupleName.trim()}
-                className="mt-8 w-full bg-brand-charcoal text-white rounded-full py-4 text-base font-medium hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="btn btn-md btn-dark w-full mt-8"
               >
                 Looks good, continue
               </button>
@@ -206,9 +207,10 @@ export function PrintDetailsWizard({
               )}
 
               <button
+                type="button"
                 onClick={handleFinish}
                 disabled={saving}
-                className="mt-8 w-full bg-brand-charcoal text-white rounded-full py-4 text-base font-medium hover:bg-gray-800 disabled:opacity-40 transition-colors"
+                className="btn btn-md btn-dark w-full mt-8"
               >
                 {saving ? "Saving..." : "Continue"}
               </button>

@@ -325,8 +325,9 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
             </div>
 
             <button
+              type="button"
               onClick={handleOrderContinue}
-              className="w-full bg-brand-charcoal text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 transition-colors"
+              className="btn btn-md btn-dark w-full"
             >
               Order &mdash; ${total} &rarr;
             </button>
@@ -493,9 +494,10 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
           )}
 
           <button
+            type="button"
             onClick={handleShippingContinue}
             disabled={redirecting}
-            className="w-full bg-brand-charcoal text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors mt-5"
+            className="btn btn-md btn-dark w-full"
           >
             Continue to payment &rarr;
           </button>

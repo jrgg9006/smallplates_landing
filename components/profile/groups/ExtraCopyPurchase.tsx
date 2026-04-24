@@ -118,8 +118,9 @@ function StepQty({
       </div>
 
       <button
+        type="button"
         onClick={onContinue}
-        className="w-full bg-brand-charcoal text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 transition-colors"
+        className="btn btn-md btn-dark w-full"
       >
         Continue — ${grandTotal}
       </button>
@@ -371,9 +372,10 @@ function StepShipping({
       )}
 
       <button
+        type="button"
         onClick={handleSubmit}
         disabled={redirecting}
-        className="w-full bg-brand-charcoal text-[#FAF7F2] rounded-full py-4 text-base font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors mt-5"
+        className="btn btn-md btn-dark w-full"
       >
         Continue to payment →
       </button>
