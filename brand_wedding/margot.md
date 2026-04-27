@@ -13,7 +13,7 @@
 
 28. Brooklyn. Creative Director at an independent studio. Partnered, not married, not in a rush. Cooks actual food. Has strong taste she doesn't announce. She is the person every audience — bride, MOH, mom — sees themselves reflected in, from a different angle.
 
-*Full character study lives in `/archive/margot-character-study.md` for anyone who wants depth.*
+*Full character study lives in `brand_legacy_documents/legacy_documents/archive/margot-character-study.md` for anyone who wants depth.*
 
 ---
 

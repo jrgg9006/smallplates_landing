@@ -26,6 +26,14 @@ We rebuild it. Not with another app. With objects you hold, use, and stain — t
 
 ---
 
+## WHY NOW
+
+After a decade of mass digitalization, a generation raised entirely online is actively choosing physical objects, analog rituals, and experiences that require presence. Not out of nostalgia — they have no nostalgia for it. Out of hunger.
+
+The culture is arriving at something Small Plates was built around from the start.
+
+---
+
 ## WHAT WE MAKE
 
 A collaborative wedding cookbook written by everyone who showed up. Each guest sends a recipe and a note. We collect, design, print, and bind them. The couple receives a hardcover book with every guest in it. It lives in the kitchen.
@@ -33,6 +41,20 @@ A collaborative wedding cookbook written by everyone who showed up. Each guest s
 The book is the proof. Presence is the product.
 
 This is the first thing we make. It won't be the last.
+
+---
+
+## WHY PHYSICAL
+
+The obvious alternative is digital — a shared album, a website, a video montage. Cheaper. Easier. More shareable.
+
+But digital alternatives don't do what the book does, and the reason is behavioral, not aesthetic.
+
+A physical object made by 80 people carries a signal no individual purchase can replicate: *this required coordination.* Someone organized it. Everyone contributed. The weight of it — literal and figurative — is the proof. You can hold it. You can open it in front of people and watch them look for their own name. It passes from hand to hand. It gets stained and stays on the counter. Digital things don't do this.
+
+The value is not the recipes. The value is the artifact of 80 people showing up — made countable, holdable, and permanent. That's what a digital file structurally cannot be, at any price point.
+
+This is also why price is a feature, not a problem. A cheap book would undermine the signal. The price says: these 80 people were worth it.
 
 ---
 
@@ -50,7 +72,15 @@ That's the whole idea.
 
 **The organizer.** The friend, the sister, the mom, the maid of honor — the person who carries the emotional weight of making something meaningful happen for someone she loves. 
 
-Full operational detail in `organizer.md`.
+Full operational detail in `characters.md`.
+
+---
+
+## HOW TO EXPLAIN IT
+
+*Five sentences. For press, investors, cold intros, anyone who asks.*
+
+Small Plates & Co. makes collaborative wedding cookbooks — one book, written by everyone who showed up. The organizer sets up a collection link; guests submit a recipe and a note; we design, print, and deliver a hardcover book with every contributor in it. Given at the shower or rehearsal dinner, it lives in the kitchen, gets opened on a Tuesday, gets stained. Most wedding gifts go in a drawer within a year. This one stays on the counter.
 
 ---
 
@@ -64,12 +94,15 @@ Photo albums archive people. We keep them active. Passive vs. active presence is
 
 ## THE SYSTEM
 
-Four documents. That's the whole brand.
+Seven documents. That's the whole brand.
 
-- `**foundation.md`** — the brand. (This doc.)
-- `**organizer.md`** — the audience.
-- `**margot.md`** — the taste filter.
-- `**visual-identity.md**` — the visual system.
+- `brand-idea.md` — the brand. (This doc.)
+- `manifesto.md` — the public declaration.
+- `characters.md` — the audience and cast.
+- `margot.md` — the taste filter.
+- `tone-of-voice.md` — how we sound.
+- `visual-identity.md` — the visual system.
+- `wedding-category-rules.md` — how we position against the category.
 
 ---
 
