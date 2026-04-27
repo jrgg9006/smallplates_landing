@@ -22,8 +22,6 @@ Rules are classified in four categories:
 
 ## A1 — THE FIVE MANIFESTO RUPTURES
 
-These are the declarations. When we write copy, build product, photograph, or design, all five should be legible in the work. If a piece fails to carry any of these, it's not Small Plates.
-
 ### A1.1 — We reject the entire verbal and narrative playbook of the wedding industry
 
 The industry sells *"your special day / your perfect moment / forever starts here."* We don't. We use the opposite structure: *"everyone leaves / who stays / the afterward."* We refuse the banned vocabulary (*cherish, treasure, memories, special, unique, perfect, amazing, curated, journey, loved ones, celebrate*). We elevate the 80 guests as co-authors and refuse the exclusive protagonism of the couple. This is our most complete and unambiguous rupture.
@@ -115,10 +113,10 @@ Rules that look like they apply to us and might pull the brand off-course if ado
 
 ## RELATIONSHIP TO OTHER CANONICAL DOCS
 
-- **`foundation.md`** — operating system. This doc implements the positioning foundation establishes.
-- **`essence.md`** — narrative declaration. The enemy ("Everyone leaves") and the function ("We make sure they stay") are the root of the A1 ruptures listed here.
-- **`organizer.md`** — audience. A1.2 (buyer is organizer, not couple) is canonized there in greater depth.
-- **`visual-principles.md`** — companion document. Translates these ruptures into operational visual language. If this doc changes, `visual-principles.md` must be reviewed.
+- `**foundation.md*`* — operating system. This doc implements the positioning foundation establishes.
+- `**essence.md**` — narrative declaration. The enemy ("Everyone leaves") and the function ("We make sure they stay") are the root of the A1 ruptures listed here.
+- `**organizer.md**` — audience. A1.2 (buyer is organizer, not couple) is canonized there in greater depth.
+- `**visual-principles.md**` — companion document. Translates these ruptures into operational visual language. If this doc changes, `visual-principles.md` must be reviewed.
 
 ---
 

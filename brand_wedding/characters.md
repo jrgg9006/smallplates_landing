@@ -2,7 +2,7 @@
 
 *Not personas. Not demographics. Behavioral roles in an emotional system.*
 
-*There is one audience: the organizer. Everyone else is a role she interacts with. The bride is the receiver of the gift, not the buyer. The guests are contributors, not a market. Product-level segmentation stops at the organizer.*
+*There is one audience: the organizer. Everyone else is a role she interacts with. The bride is the receiver of the gift, not the buyer. The guests are contributors, not a market.* 
 
 ---
 
@@ -13,6 +13,7 @@ She is the engine. The one who actually makes things happen.
 This is not a demographic. It's a character. She can be MOH, mom, sister, aunt, friend — the label is irrelevant. What matters is the behavior: she's the one who opens the group chat, sends reminders, follows up. Proactivity correlates with product success in production. Role does not.
 
 She carries:
+
 - the logistics nobody sees
 - the emotional weight of getting it right
 - the pressure of representing the group
@@ -25,13 +26,9 @@ She carries:
 - **Subjugation:** *"What if I do all the work and someone else gets the credit — or worse, the bride never knows?"*
 - **Depletion:** *"What if this drains me when I'm already running on fumes?"*
 
-### Her secret question
-
-*"Can I pull this off without losing my mind — and still make her cry?"*
-
 ### What she wants
 
-Glory without grief. Proof she's the friend who gets it right. A done-for-you system that makes her look like a genius.
+Glory without grief. Proof she's the person who gets it right. A done-for-you system that makes her look like a genius.
 
 ### What she doesn't want
 
