@@ -121,7 +121,7 @@ export default function EmotionalClose() {
           <button
             type="button"
             onClick={handleStartBook}
-            className="inline-flex items-center justify-center rounded-full bg-brand-honey hover:bg-brand-honey-dark text-white px-10 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-charcoal focus-visible:ring-brand-honey"
+            className="btn btn-lg btn-honey"
             data-cta="emotional-close-primary"
           >
             Start Their Book

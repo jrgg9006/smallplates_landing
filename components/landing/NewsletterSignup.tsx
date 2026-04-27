@@ -112,7 +112,7 @@ export default function NewsletterSignup() {
               <button
                 type="submit"
                 disabled={status === "loading" || !email.trim()}
-                className="rounded-full bg-brand-honey hover:bg-brand-honey-dark text-white px-8 py-3 font-sans font-semibold text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                className="btn btn-sm btn-honey whitespace-nowrap"
               >
                 {status === "loading" ? "Adding..." : "I'm in"}
               </button>

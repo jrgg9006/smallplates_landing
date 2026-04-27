@@ -62,13 +62,13 @@ export default function BookPreviewModal({
           <div className="flex gap-4 mt-6">
             <button
                 onClick={handleViewProductDetails}
-              className="px-6 py-3 bg-white text-brand-charcoal border border-brand-sand rounded-xl hover:bg-[#FAF7F2] transition-colors font-medium font-sans"
+              className="btn btn-sm btn-outline"
             >
               See Inside
             </button>
             <button
                 onClick={handleCreateCookbook}
-              className="px-6 py-3 bg-brand-honey text-white rounded-xl hover:bg-brand-honey-dark transition-colors font-medium font-sans"
+              className="btn btn-sm btn-honey"
             >
               Give this Gift
             </button>

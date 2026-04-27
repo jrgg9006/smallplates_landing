@@ -129,7 +129,7 @@ export default function Footer() {
             <Link
               href="/onboarding"
               onClick={() => trackEvent('start_book_click', { cta_location: 'footer_card' })}
-              className="inline-flex items-center justify-center rounded-full bg-brand-honey hover:bg-brand-honey-dark text-white px-6 py-3 text-base font-medium transition-colors"
+              className="btn btn-sm btn-honey"
             >
               Start the Book
             </Link>
