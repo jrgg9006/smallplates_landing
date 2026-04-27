@@ -352,11 +352,7 @@ export function DatePickerStep({
           type="button"
           onClick={handleContinue}
           disabled={!canContinue}
-          className={`px-8 py-3 rounded-xl font-semibold transition-colors ${
-            canContinue
-              ? "bg-brand-honey text-white hover:bg-brand-honey-dark"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
+          className="btn btn-md btn-honey btn-form"
         >
           Continue
         </button>

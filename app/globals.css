@@ -159,7 +159,7 @@ body > div.pac-container ~ div:not([id]):not([class]) {
 
   /* Sizes */
   .btn-lg { @apply px-8 py-4 text-lg; }
-  .btn-md { @apply px-8 py-4 text-base; }
+  .btn-md { @apply px-8 py-3 text-base; }
   .btn-sm { @apply px-6 py-3 text-sm; }
 
   /* Variants */

@@ -6,7 +6,7 @@ interface CreateCheckoutBody {
   userType: 'couple' | 'gift_giver';
   giftDate: string | null;
   giftDateUndecided: boolean;
-  bookCloseDate: string;
+  bookCloseDate: string | null;
   email: string;
 }
 
@@ -34,10 +34,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid userType' }, { status: 400 });
   }
   if (
-    !bookCloseDate ||
-    typeof bookCloseDate !== 'string' ||
-    !ISO_DATE_RE.test(bookCloseDate) ||
-    Number.isNaN(Date.parse(bookCloseDate))
+    !giftDateUndecided &&
+    (!bookCloseDate ||
+      typeof bookCloseDate !== 'string' ||
+      !ISO_DATE_RE.test(bookCloseDate) ||
+      Number.isNaN(Date.parse(bookCloseDate)))
   ) {
     return NextResponse.json({ error: 'Invalid bookCloseDate (must be ISO format)' }, { status: 400 });
   }
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
     userType,
     giftDate: giftDate ?? '',
     giftDateUndecided: String(giftDateUndecided),
-    bookCloseDate,
+    bookCloseDate: bookCloseDate ?? '',
   };
 
   try {
