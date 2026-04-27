@@ -828,7 +828,7 @@ export default function GroupsPage() {
             <div className="flex items-center gap-3 mt-5 pb-6 border-b border-[hsl(var(--brand-border))]">
               {/* PRIMARY - Collect Recipes (HONEY, ROUNDED) */}
               <button
-                className="btn-primary"
+                className="btn btn-sm btn-honey"
                 onClick={handleCollectRecipes}
                 disabled={!selectedGroup}
               >
@@ -837,7 +837,7 @@ export default function GroupsPage() {
 
               {/* SECONDARY - Add Your Own (OUTLINE, ROUNDED) */}
               <button
-                className="btn-secondary"
+                className="btn btn-sm btn-outline"
                 onClick={() => groupsSectionRef.current?.openAddNewRecipeModal()}
                 disabled={!selectedGroup}
               >
@@ -846,7 +846,7 @@ export default function GroupsPage() {
 
               {/* Guests Button - Hidden on mobile */}
               <button
-                className="btn-secondary hidden sm:block"
+                className="btn btn-sm btn-outline hidden sm:block"
                 onClick={handleViewGuests}
                 disabled={!selectedGroup}
               >
@@ -855,7 +855,7 @@ export default function GroupsPage() {
 
               {/* Send Invitations Button - Hidden on mobile */}
               <button
-                className="btn-secondary hidden sm:block"
+                className="btn btn-sm btn-outline hidden sm:block"
                 onClick={handleSendInvitations}
                 disabled={!selectedGroup}
               >
@@ -866,7 +866,7 @@ export default function GroupsPage() {
               <div className="relative hidden sm:block">
                 <button
                   onClick={() => setShowCaptains(!showCaptains)}
-                  className="btn-tertiary flex items-center gap-1.5"
+                  className="btn btn-subtle gap-1.5"
                 >
                   Captains
                   <ChevronDown size={10} />
@@ -878,7 +878,7 @@ export default function GroupsPage() {
               <div className="relative">
                 <button
                   onClick={() => setShowMoreMenu(!showMoreMenu)}
-                  className="btn-tertiary px-3.5"
+                  className="btn btn-subtle px-3.5"
                 >
                   ⋯
                 </button>

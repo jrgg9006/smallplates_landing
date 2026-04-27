@@ -125,54 +125,24 @@ body > div.pac-container ~ div:not([id]):not([class]) {
   /* Small Plates Component Styles */
   
   /* Button Components - Updated per Implementation Guide */
-  /* -----------------------------------------------------------------------------
-     LEGACY BUTTON CLASSES — retained for Action Bar in profile/groups/page.tsx
-     
-     .btn-primary, .btn-secondary, and .btn-tertiary are kept temporarily
-     until Lote 1.5 (Action Bar consolidation session) migrates the 6
-     remaining consumers to the new compound-variant system defined below.
-     After Lote 1.5 closes, this legacy block is deleted.
-     
-     Consumers as of April 2026:
-     - .btn-primary: profile/groups/page.tsx:830 (Collect Recipes)
-     - .btn-secondary: profile/groups/page.tsx:839, :848, :857
-     - .btn-tertiary: profile/groups/page.tsx:869, :881
-     ----------------------------------------------------------------------------- */
-  .btn-primary {
-    @apply bg-[hsl(var(--brand-honey))] hover:bg-[hsl(var(--brand-honey-dark))] 
-           text-white font-medium text-sm px-6 py-3 rounded-full
-           transition-colors duration-200;
-  }
-  
-  .btn-secondary {
-    @apply bg-transparent border border-[hsl(var(--brand-border-button))] 
-           hover:border-[hsl(var(--brand-honey))] hover:text-[hsl(var(--brand-honey))]
-           text-[hsl(var(--brand-charcoal))] font-medium text-sm px-6 py-3 rounded-full
-           transition-all duration-200;
-  }
-
-  .btn-tertiary {
-    @apply bg-transparent border border-[hsl(var(--brand-border-button))] 
-           text-[hsl(var(--brand-warm-gray-dark))] text-sm px-5 py-3 rounded-full
-           transition-all duration-200;
-  }
-
   /* =============================================================================
      BUTTON SYSTEM — Phase 2.1 (April 2026)
-     
+
      Composable: base `btn` + one size modifier + one variant modifier.
-     Example: `btn btn-md btn-dark w-full`
-     
+     Example: `btn btn-sm btn-outline`
+
      Sizes:    btn-lg (landing CTAs) · btn-md (flow actions) · btn-sm (modals, toolbars)
-     Variants: btn-honey (honey bg) · btn-dark (charcoal bg) · btn-outline (white bg + border)
-     
+     Variants: btn-honey · btn-dark · btn-outline · btn-subtle
+
+     btn-subtle is self-sizing (px-5 py-3 text-sm) — no size modifier needed.
+     Use for tertiary actions: muted border, gray text, no hover color shift.
+
      NOT part of this system (preserved as-is, do not migrate without separate decision):
      - ProfileHeader buttons (components/profile/ProfileHeader.tsx)
      - Ghost buttons in dropdowns/tables (styling inherited from container)
      - Icon-round buttons (rounded-full, no label — circular by nature of shape)
      - Structural unstyled buttons inside container layouts
-     - Action Bar in profile/groups/page.tsx — pending Lote 1.5
-     
+
      Literals used (pending tokenization, tracked in docs/token-migration-followups.md):
      - #1A1A1A — charcoal-hover tier (see Section C.1)
      - #F5F1EA — warm off-white accent (see Section C.2)
@@ -209,12 +179,18 @@ body > div.pac-container ~ div:not([id]):not([class]) {
   }
 
   .btn-outline {
-    background-color: #FFFFFF;
+    background-color: transparent;
     color: hsl(var(--brand-charcoal));
-    border: 1px solid hsl(var(--brand-sand));
+    border: 1px solid hsl(var(--brand-border-button));
   }
   .btn-outline:hover:not(:disabled) {
-    background-color: #F5F1EA;
+    border-color: hsl(var(--brand-honey));
+    color: hsl(var(--brand-honey));
+  }
+
+  .btn-subtle {
+    @apply bg-transparent border border-[hsl(var(--brand-border-button))]
+           text-[hsl(var(--brand-warm-gray-dark))] text-sm px-5 py-3;
   }
   
   .text-link {
