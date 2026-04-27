@@ -47,9 +47,7 @@ function ProductStep() {
           type="button"
           onClick={nextStep}
           disabled={!canContinue}
-          className={`px-8 py-3 rounded-sm font-semibold transition-colors ${
-            canContinue ? "bg-brand-honey text-white hover:bg-brand-honey-dark" : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
+          className="btn btn-md btn-honey btn-form"
         >
           Continue
         </button>
@@ -271,9 +269,7 @@ function ReviewAndPaymentStep() {
         type="button"
         onClick={handleContinueToPayment}
         disabled={!canSubmit}
-        className={`w-full px-8 py-3.5 rounded-sm font-semibold transition-colors ${
-          canSubmit ? "bg-brand-charcoal text-white hover:bg-[#1a1a1a]" : "bg-gray-300 text-gray-500 cursor-not-allowed"
-        }`}
+        className="btn btn-md btn-dark btn-form w-full"
       >
         {isRedirectingToCheckout ? "Redirecting…" : "Continue to payment →"}
       </button>

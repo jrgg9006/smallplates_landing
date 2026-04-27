@@ -133,6 +133,7 @@ body > div.pac-container ~ div:not([id]):not([class]) {
 
      Sizes:    btn-lg (landing CTAs) · btn-md (flow actions) · btn-sm (modals, toolbars)
      Variants: btn-honey · btn-dark · btn-outline · btn-subtle
+     Modifier: btn-form (8px radius override — use in onboarding/checkout flows where pill feels wrong)
 
      btn-subtle is self-sizing (px-5 py-3 text-sm) — no size modifier needed.
      Use for tertiary actions: muted border, gray text, no hover color shift.
@@ -158,7 +159,7 @@ body > div.pac-container ~ div:not([id]):not([class]) {
 
   /* Sizes */
   .btn-lg { @apply px-8 py-4 text-lg; }
-  .btn-md { @apply py-4 text-base; }
+  .btn-md { @apply px-8 py-4 text-base; }
   .btn-sm { @apply px-6 py-3 text-sm; }
 
   /* Variants */
@@ -192,6 +193,8 @@ body > div.pac-container ~ div:not([id]):not([class]) {
     @apply bg-transparent border border-[hsl(var(--brand-border-button))]
            text-[hsl(var(--brand-warm-gray-dark))] text-sm px-5 py-3;
   }
+
+  .btn-form { @apply rounded-sm; }
   
   .text-link {
     @apply text-[hsl(var(--brand-honey))] font-medium text-sm hover:underline 
