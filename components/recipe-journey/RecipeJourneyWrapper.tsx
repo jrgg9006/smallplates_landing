@@ -682,8 +682,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
             onClick={handleAddAnother}
             className="px-4 py-2.5 sm:px-6 sm:py-3 rounded-full bg-brand-honey text-white hover:bg-brand-honey-dark text-sm sm:text-base"
           >
-            <span className="sm:hidden">Add Another</span>
-            <span className="hidden sm:inline">Add another Small Plate</span>
+            <span className="sm:hidden">Got another?</span>
+            <span className="hidden sm:inline">Got another recipe?</span>
           </button>
           <button
             type="button"
