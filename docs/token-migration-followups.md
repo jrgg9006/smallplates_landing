@@ -463,7 +463,6 @@ Lote 1.5 will: add staging coverage for Action Bar including .btn-tertiary
 pattern, decide whether the compound system needs a fourth variant for
 the "tertiary" tier, migrate all 6 buttons atomically, and delete the
 three legacy classes from globals.css.
-
 ---
 
 ### Not in scope for Phase 2

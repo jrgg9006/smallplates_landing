@@ -47,7 +47,7 @@ function ProductStep() {
           type="button"
           onClick={nextStep}
           disabled={!canContinue}
-          className={`px-8 py-3 rounded-xl font-semibold transition-colors ${
+          className={`px-8 py-3 rounded-sm font-semibold transition-colors ${
             canContinue ? "bg-brand-honey text-white hover:bg-brand-honey-dark" : "bg-gray-300 text-gray-500 cursor-not-allowed"
           }`}
         >
@@ -192,7 +192,7 @@ function ReviewAndPaymentStep() {
           email they must log out first. */}
       <div className="space-y-3 mb-6">
         {isReturningCustomer && (
-          <div className="rounded-xl bg-[#FAF7F2] border border-brand-sand px-4 py-3">
+          <div className="rounded-sm bg-[#FAF7F2] border border-brand-sand px-4 py-3">
             <p className="text-[13px] text-[#5A5550] leading-relaxed">
               This book will be added to your account —{" "}
               <span className="text-brand-charcoal font-medium">{email}</span>. To buy with a different email,{" "}
@@ -222,7 +222,7 @@ function ReviewAndPaymentStep() {
             onChange={(e) => !isNameLocked && setBuyerName(e.target.value)}
             readOnly={isNameLocked}
             style={{ fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontSize: "15px" }}
-            className={`w-full px-4 py-3 border border-brand-sand rounded-xl outline-none ${
+            className={`w-full px-4 py-3 border border-brand-sand rounded-sm outline-none ${
               isNameLocked
                 ? "bg-[#F5F1EA] text-[#5A5550] cursor-not-allowed"
                 : "bg-white focus:ring-2 focus:ring-brand-honey focus:border-transparent"
@@ -247,7 +247,7 @@ function ReviewAndPaymentStep() {
             onBlur={handleEmailBlur}
             readOnly={isEmailLocked}
             style={{ fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontSize: "15px" }}
-            className={`w-full px-4 py-3 border rounded-xl outline-none ${
+            className={`w-full px-4 py-3 border rounded-sm outline-none ${
               isEmailLocked
                 ? "bg-[#F5F1EA] text-[#5A5550] cursor-not-allowed border-brand-sand"
                 : `bg-white focus:ring-2 focus:ring-brand-honey focus:border-transparent ${
@@ -271,7 +271,7 @@ function ReviewAndPaymentStep() {
         type="button"
         onClick={handleContinueToPayment}
         disabled={!canSubmit}
-        className={`w-full px-8 py-3.5 rounded-xl font-semibold transition-colors ${
+        className={`w-full px-8 py-3.5 rounded-sm font-semibold transition-colors ${
           canSubmit ? "bg-brand-charcoal text-white hover:bg-[#1a1a1a]" : "bg-gray-300 text-gray-500 cursor-not-allowed"
         }`}
       >
