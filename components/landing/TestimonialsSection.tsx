@@ -1,18 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useRef, useState, useEffect, useCallback } from "react";
 import { TestimonialCard, type Testimonial } from "@/components/landing/TestimonialCard";
 
 // One scroll step = 1u card + gap (288 + 20 = 308px)
 const UNIT = 308;
-
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.1 },
-  },
-};
 
 // Cards 1 (Sarah K.) and 5 (David R.) are 2u — photo placeholders until real shots arrive
 const testimonials: Testimonial[] = [
@@ -72,6 +65,15 @@ function ChevronRight() {
 }
 
 export default function TestimonialsSection() {
+  const reduced = useReducedMotion();
+
+  const containerVariants = {
+    hidden: {},
+    visible: {
+      transition: { staggerChildren: reduced ? 0 : 0.1 },
+    },
+  };
+
   const trackRef = useRef<HTMLDivElement>(null);
   const [prevDisabled, setPrevDisabled] = useState(true);
   const [nextDisabled, setNextDisabled] = useState(false);
@@ -109,10 +111,10 @@ export default function TestimonialsSection() {
         {/* ── Header + arrows ── */}
         <motion.div
           className="flex items-end justify-between mb-12 md:mb-14"
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: reduced ? 0 : 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          transition={{ duration: reduced ? 0.2 : 0.6, ease: "easeOut" }}
         >
           <div>
             <p className="type-eyebrow mb-4">PEOPLE WHO GOT THE BOOK</p>

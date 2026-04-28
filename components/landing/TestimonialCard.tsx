@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 export type Testimonial = {
   id: number;
@@ -12,15 +12,6 @@ export type Testimonial = {
 };
 
 const EASE_OUT_SPRING: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 28 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.65, ease: EASE_OUT_SPRING },
-  },
-};
 
 // Heroicons solid star (viewBox 0 0 24 24)
 const STAR_PATH =
@@ -59,6 +50,17 @@ function CardBody({ t }: { t: Testimonial }) {
 }
 
 export function TestimonialCard({ t }: { t: Testimonial }) {
+  const reduced = useReducedMotion();
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: reduced ? 0 : 28 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: reduced ? 0.15 : 0.65, ease: EASE_OUT_SPRING },
+    },
+  };
+
   if (t.photo) {
     // 2u — "open book": text left, photo right on desktop; photo top, text bottom on mobile
     return (
