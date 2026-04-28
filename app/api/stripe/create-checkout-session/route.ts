@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe, BASE_BOOK_PRICE, ADDITIONAL_BOOK_PRICE } from '@/lib/stripe/client';
+import Stripe from 'stripe';
+import { stripe, ADDITIONAL_BOOK_PRICE } from '@/lib/stripe/client';
 
 interface CreateCheckoutBody {
   bookQuantity: number;
@@ -51,20 +52,11 @@ export async function POST(request: NextRequest) {
 
   // Reason: Our pricing is non-linear ($169 base + $129 per additional). We express
   // that to Stripe as two line_items instead of one with a linear unit_amount.
-  const lineItems: Array<{
-    price_data: {
-      currency: string;
-      product_data: { name: string };
-      unit_amount: number;
-    };
-    quantity: number;
-  }> = [
+  // Reason: Cookbook uses a catalog Price ID (not price_data inline) so that
+  // product-restricted coupons (e.g. REFERRAL2026) can match against it.
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
     {
-      price_data: {
-        currency: 'usd',
-        product_data: { name: 'Small Plates Cookbook' },
-        unit_amount: BASE_BOOK_PRICE * 100,
-      },
+      price: process.env.STRIPE_PRICE_ID_COOKBOOK!,
       quantity: 1,
     },
   ];
