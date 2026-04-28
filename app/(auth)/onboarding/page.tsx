@@ -291,14 +291,103 @@ function ReviewAndPaymentStep() {
     </div>
   );
 
-  return <Step4Shell summary={summary} total={total}>{right}</Step4Shell>;
+  const trustItems = [
+    {
+      title: "Product Features",
+      body: (
+        <div className="space-y-3">
+          <p>
+            A premium hardcover book made to live on the kitchen counter — opened, stained,
+            and actually used. Every detail is chosen for durability and the kind of finish
+            that still looks good ten years in.
+          </p>
+          <ul className="space-y-1.5 list-disc pl-5 marker:text-brand-honey">
+            <li><span className="text-brand-charcoal">Format:</span> Hardcover, Adhesive Casebound (PUR)</li>
+            <li><span className="text-brand-charcoal">Size:</span> US Letter Tall (8&quot; × 10&quot;) — Portrait</li>
+            <li><span className="text-brand-charcoal">Printing:</span> Full-color throughout</li>
+            <li><span className="text-brand-charcoal">Paper:</span> 100 lb Satin Text interior pages</li>
+            <li><span className="text-brand-charcoal">Finish:</span> Matte lamination on cover</li>
+            <li><span className="text-brand-charcoal">Recipes:</span> 50 included, additional recipes available</li>
+          </ul>
+        </div>
+      ),
+    },
+    {
+      title: "Shipping",
+      body: (
+        <>
+          We ship to the United States, Mexico, and the European Union. To make sure the
+          book arrives in time, close the book at least 3 weeks before you want to give it —
+          that&apos;s the window we need to print, bind, and deliver.
+        </>
+      ),
+    },
+    {
+      title: "Pricing Details",
+      body: (
+        <ul className="space-y-1.5 list-disc pl-5">
+          <li>The Book: ${BASE_BOOK_PRICE} USD</li>
+          <li>Each additional copy: ${ADDITIONAL_BOOK_PRICE} USD</li>
+          <li>Up to 50 recipes included</li>
+          <li>Each extra recipe: $1 USD</li>
+        </ul>
+      ),
+    },
+    {
+      title: "Support",
+      body: (
+        <>
+          Something off with your book? Email{" "}
+          <a href="mailto:team@smallplatesandcompany.com" className="underline hover:text-brand-charcoal">
+            team@smallplatesandcompany.com
+          </a>{" "}
+          and we&apos;ll fix it. No forms, no hoops.
+        </>
+      ),
+    },
+  ];
+
+  const accordion = (
+    <div className="border-t border-brand-sand">
+      {trustItems.map((item) => (
+        <details
+          key={item.title}
+          className="group border-b border-brand-sand [&_summary::-webkit-details-marker]:hidden"
+        >
+          <summary className="flex items-center justify-between py-4 cursor-pointer list-none text-sm font-medium text-brand-charcoal hover:text-brand-charcoal/70 transition-colors">
+            <span>{item.title}</span>
+            <svg
+              className="w-4 h-4 text-brand-charcoal/50 transition-transform duration-200 group-open:rotate-180"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div className="pb-4 pr-6 text-sm text-brand-charcoal/70 leading-relaxed">
+            {item.body}
+          </div>
+        </details>
+      ))}
+    </div>
+  );
+
+  return <Step4Shell summary={summary} total={total} accordion={accordion}>{right}</Step4Shell>;
 }
 
 /**
  * Two-column shell for Step 3. Left = summary (sticky on desktop, collapsible on mobile).
  * Right = name/email + Continue-to-payment area.
  */
-function Step4Shell({ summary, total, children }: { summary: React.ReactNode; total: number; children: React.ReactNode }) {
+function Step4Shell({
+  summary, total, accordion, children,
+}: {
+  summary: React.ReactNode;
+  total: number;
+  accordion?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   const router = useRouter();
 
   return (
@@ -313,7 +402,7 @@ function Step4Shell({ summary, total, children }: { summary: React.ReactNode; to
 
       {/* Mobile: summary collapsible above payment */}
       <details className="lg:hidden group border-b border-brand-sand bg-[#FAF7F2] [&_summary::-webkit-details-marker]:hidden">
-        <summary className="px-6 py-4 flex justify-between items-center cursor-pointer list-none">
+        <summary className="pl-6 pr-14 py-4 flex justify-between items-center cursor-pointer list-none">
           <span className="flex items-center gap-2 text-sm font-medium text-brand-charcoal">
             Order summary
           </span>
@@ -332,16 +421,25 @@ function Step4Shell({ summary, total, children }: { summary: React.ReactNode; to
           </div>
         </aside>
 
-        {/* Right: progress + form — vertically centered */}
-        <main className="px-6 py-10 lg:px-14 xl:px-20 lg:py-16 w-full lg:min-h-screen lg:flex lg:items-center">
-          <div className="w-full max-w-md mx-auto">
-            <ProgressBar step={3} total={TOTAL_STEPS} />
-            <h1 className="font-serif text-2xl md:text-3xl font-semibold text-gray-900 text-center mb-10">
-              Almost there.
-            </h1>
-            {children}
-          </div>
-        </main>
+        {/* Right column: form centered + accordions below (separate from centering) */}
+        <div className="flex flex-col">
+          <main className="px-6 py-10 lg:px-14 xl:px-20 lg:pt-[14vh] lg:pb-16 w-full">
+            <div className="w-full max-w-md mx-auto">
+              <ProgressBar step={3} total={TOTAL_STEPS} />
+              <h1 className="font-serif text-2xl md:text-3xl font-semibold text-gray-900 text-center mb-10">
+                Almost there.
+              </h1>
+              {children}
+            </div>
+          </main>
+          {accordion && (
+            <div className="px-6 pb-10 lg:px-14 xl:px-20">
+              <div className="w-full max-w-md mx-auto">
+                {accordion}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
