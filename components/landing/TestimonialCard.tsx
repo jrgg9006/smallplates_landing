@@ -65,7 +65,7 @@ export function TestimonialCard({ t }: { t: Testimonial }) {
       <motion.article
         variants={cardVariants}
         className="
-          flex-shrink-0 snap-start
+          flex-shrink-0 snap-start md:snap-align-none
           bg-brand-charcoal rounded-2xl overflow-hidden
           flex flex-col md:flex-row
           w-[85vw] md:w-[596px] md:h-[400px]
@@ -97,7 +97,7 @@ export function TestimonialCard({ t }: { t: Testimonial }) {
     <motion.article
       variants={cardVariants}
       className="
-        flex-shrink-0 snap-start
+        flex-shrink-0 snap-start md:snap-align-none
         bg-brand-charcoal rounded-2xl overflow-hidden
         flex flex-col
         w-[85vw] md:w-[288px] md:h-[400px]
