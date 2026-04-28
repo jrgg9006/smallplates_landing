@@ -88,7 +88,7 @@ export function CreateCookbookModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl font-semibold">
+          <DialogTitle className="type-modal-title">
             Create New Book
           </DialogTitle>
           <DialogDescription>

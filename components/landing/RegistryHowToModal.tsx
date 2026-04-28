@@ -19,7 +19,7 @@ export default function RegistryHowToModal({
       <DialogContent className="max-w-4xl w-[95vw] p-0 overflow-hidden bg-white">
         <div className="p-6 pb-4">
           <DialogHeader>
-            <DialogTitle className="font-serif text-2xl font-semibold text-gray-900">
+            <DialogTitle className="type-modal-title text-gray-900">
               How to add to your registry
             </DialogTitle>
           </DialogHeader>

@@ -142,7 +142,7 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl font-semibold">
+          <DialogTitle className="type-modal-title">
             Invite a Captain
           </DialogTitle>
         </DialogHeader>

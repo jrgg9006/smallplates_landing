@@ -262,7 +262,7 @@ export function CustomizeCollectorModal({
           
           <div className="p-6 flex flex-col h-full overflow-hidden">
             <SheetHeader className="px-0">
-              <SheetTitle className="font-serif text-2xl font-semibold mb-4">Customize Your Recipe Collector</SheetTitle>
+              <SheetTitle className="type-modal-title mb-4">Customize Your Recipe Collector</SheetTitle>
             </SheetHeader>
             
             <div className="flex-1 overflow-hidden flex flex-col">
@@ -290,7 +290,7 @@ export function CustomizeCollectorModal({
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="right" className="!w-[45%] !max-w-none h-full flex flex-col overflow-hidden">
         <SheetHeader>
-          <SheetTitle className="font-serif text-2xl font-semibold mb-4">
+          <SheetTitle className="type-modal-title mb-4">
             Customize Your Recipe Collector
           </SheetTitle>
         </SheetHeader>

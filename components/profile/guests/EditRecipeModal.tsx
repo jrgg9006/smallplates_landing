@@ -85,7 +85,7 @@ export function EditRecipeModal({ recipe, isOpen, onClose, onRecipeUpdated }: Ed
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl font-semibold mb-4">
+          <DialogTitle className="type-modal-title mb-4">
             Edit Recipe
           </DialogTitle>
         </DialogHeader>

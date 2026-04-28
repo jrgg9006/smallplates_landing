@@ -52,7 +52,7 @@ export function SendMessageModal({ guest, isOpen, onClose }: SendMessageModalPro
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl fixed top-[15%] left-[50%] translate-x-[-50%] translate-y-0 z-[60]">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl font-semibold mb-4">Send Message</DialogTitle>
+          <DialogTitle className="type-modal-title mb-4">Send Message</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6 pb-20" onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}>

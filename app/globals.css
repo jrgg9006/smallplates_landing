@@ -404,3 +404,10 @@ body > div.pac-container ~ div:not([id]):not([class]) {
     animation: slide-in-bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
+
+@layer utilities {
+  /* type-modal-title: Títulos de modales y sheets — en utilities para ganar sobre los defaults de shadcn/ui */
+  .type-modal-title {
+    @apply font-serif text-2xl font-semibold;
+  }
+}

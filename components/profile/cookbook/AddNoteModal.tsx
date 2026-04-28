@@ -145,7 +145,7 @@ export function AddNoteModal({
           
           <div className="p-6 flex flex-col h-full overflow-hidden">
             <SheetHeader className="px-0">
-              <SheetTitle className="font-serif text-2xl font-semibold mb-4">
+              <SheetTitle className="type-modal-title mb-4">
                 {currentNote ? 'Edit Personal Note' : 'Add Personal Note'}
               </SheetTitle>
             </SheetHeader>
@@ -175,7 +175,7 @@ export function AddNoteModal({
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="right" className="!w-[45%] !max-w-none h-full flex flex-col overflow-hidden">
         <SheetHeader>
-          <SheetTitle className="font-serif text-2xl font-semibold mb-4">
+          <SheetTitle className="type-modal-title mb-4">
             {currentNote ? 'Edit Personal Note' : 'Add Personal Note'}
           </SheetTitle>
         </SheetHeader>

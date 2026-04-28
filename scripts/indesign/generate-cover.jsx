@@ -154,6 +154,7 @@ function readJSON(filePath) {
 // ============================================
 var MIXAM_CONFIRMED = {
     88:  0.510,
+    108: 0.580,
     140: 0.690,
     156: 0.750
     // Agregar más conforme se confirmen:
