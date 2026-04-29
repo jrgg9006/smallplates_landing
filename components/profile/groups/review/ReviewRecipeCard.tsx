@@ -64,7 +64,7 @@ export function ReviewRecipeCard({ recipe, index, total, onSave }: ReviewRecipeC
   };
 
   return (
-    <div className="bg-[#FAF7F2] rounded-xl shadow-sm border border-gray-100 mx-auto w-full max-w-3xl h-full flex flex-col">
+    <div className="bg-brand-warm-white-warm rounded-xl shadow-sm border border-gray-100 mx-auto w-full max-w-3xl h-full flex flex-col">
       {/* Scrollable content area — matches BookReviewOverlay left page */}
       <div className="p-8 lg:p-12 flex-1 overflow-y-auto">
         <div>

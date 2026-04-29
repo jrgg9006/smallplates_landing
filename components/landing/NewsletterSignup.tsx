@@ -50,7 +50,7 @@ export default function NewsletterSignup() {
 
   return (
     <section
-      className="bg-[#FAF7F2] py-20 md:py-28"
+      className="bg-brand-warm-white-warm py-20 md:py-28"
       aria-labelledby="newsletter-heading"
     >
       <div className="mx-auto max-w-2xl px-6 md:px-8 text-center">

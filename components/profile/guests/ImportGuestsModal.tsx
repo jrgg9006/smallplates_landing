@@ -286,7 +286,7 @@ export function ImportGuestsModal({
 
       {/* Modal */}
       <div
-        className="relative w-full max-w-[600px] rounded-2xl bg-[#FAF7F2] p-8 max-sm:p-5 shadow-[0_20px_60px_rgba(0,0,0,0.15)]
+        className="relative w-full max-w-[600px] rounded-2xl bg-brand-warm-white-warm p-8 max-sm:p-5 shadow-[0_20px_60px_rgba(0,0,0,0.15)]
                     max-sm:max-w-none max-sm:rounded-none max-sm:rounded-t-2xl max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:max-h-[90vh] max-sm:overflow-y-auto"
       >
         {/* Close button */}

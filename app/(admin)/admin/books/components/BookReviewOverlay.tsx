@@ -366,7 +366,7 @@ export default function BookReviewOverlay({
           <div className="flex-1 flex overflow-hidden">
             {/* Left page — recipe text */}
             <div className={`flex-1 overflow-y-auto p-8 lg:p-12 transition-colors duration-200 ${
-              isEditing ? 'bg-blue-50' : 'bg-[#FAF7F2]'
+              isEditing ? 'bg-blue-50' : 'bg-brand-warm-white-warm'
             }`}>
               <div className="max-w-xl mx-auto">
                 {showOriginal && (

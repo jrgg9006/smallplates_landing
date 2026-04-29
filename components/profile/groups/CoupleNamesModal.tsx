@@ -87,7 +87,7 @@ function RelationshipDropdown({
                 onChange(opt.value);
                 setIsOpen(false);
               }}
-              className={`w-full px-4 py-3 text-left text-[15px] hover:bg-[#FAF7F2] transition-colors ${
+              className={`w-full px-4 py-3 text-left text-[15px] hover:bg-brand-warm-white-warm transition-colors ${
                 value === opt.value ? "bg-[#FDF9F0] text-brand-charcoal" : "text-brand-charcoal"
               }`}
             >

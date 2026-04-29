@@ -255,7 +255,7 @@ export function GuestNavigationSheet({
             {/* Import button */}
             <button
               onClick={() => setShowImportModal(true)}
-              className="w-full py-3 px-4 rounded-lg bg-[#FAF7F2] border-[1.5px] border-dashed border-brand-honey
+              className="w-full py-3 px-4 rounded-lg bg-brand-warm-white-warm border-[1.5px] border-dashed border-brand-honey
                          flex items-center justify-center gap-2 text-brand-charcoal text-sm font-medium
                          hover:bg-brand-sand hover:border-solid transition-all"
             >

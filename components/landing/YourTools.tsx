@@ -32,7 +32,7 @@ const cards = [
 
 export default function YourTools() {
   return (
-    <section className="bg-[#FAF7F2] py-16 md:py-24" aria-labelledby="your-tools-heading">
+    <section className="bg-brand-warm-white-warm py-16 md:py-24" aria-labelledby="your-tools-heading">
       <div className="mx-auto max-w-7xl px-6 md:px-8">
         {/* Section header */}
         <motion.div

@@ -190,7 +190,7 @@ function ReviewAndPaymentStep() {
           email they must log out first. */}
       <div className="space-y-3 mb-6">
         {isReturningCustomer && (
-          <div className="rounded-sm bg-[#FAF7F2] border border-brand-sand px-4 py-3">
+          <div className="rounded-sm bg-brand-warm-white-warm border border-brand-sand px-4 py-3">
             <p className="text-[13px] text-[#5A5550] leading-relaxed">
               This book will be added to your account —{" "}
               <span className="text-brand-charcoal font-medium">{email}</span>. To buy with a different email,{" "}
@@ -222,7 +222,7 @@ function ReviewAndPaymentStep() {
             style={{ fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontSize: "15px" }}
             className={`w-full px-4 py-3 border border-brand-sand rounded-sm outline-none ${
               isNameLocked
-                ? "bg-[#F5F1EA] text-[#5A5550] cursor-not-allowed"
+                ? "bg-brand-cream text-[#5A5550] cursor-not-allowed"
                 : "bg-white focus:ring-2 focus:ring-brand-honey focus:border-transparent"
             }`}
             placeholder="Your name"
@@ -247,7 +247,7 @@ function ReviewAndPaymentStep() {
             style={{ fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontSize: "15px" }}
             className={`w-full px-4 py-3 border rounded-sm outline-none ${
               isEmailLocked
-                ? "bg-[#F5F1EA] text-[#5A5550] cursor-not-allowed border-brand-sand"
+                ? "bg-brand-cream text-[#5A5550] cursor-not-allowed border-brand-sand"
                 : `bg-white focus:ring-2 focus:ring-brand-honey focus:border-transparent ${
                     emailError ? "border-red-400" : "border-brand-sand"
                   }`
@@ -401,7 +401,7 @@ function Step4Shell({
       </button>
 
       {/* Mobile: summary collapsible above payment */}
-      <details className="lg:hidden group border-b border-brand-sand bg-[#FAF7F2] [&_summary::-webkit-details-marker]:hidden">
+      <details className="lg:hidden group border-b border-brand-sand bg-brand-warm-white-warm [&_summary::-webkit-details-marker]:hidden">
         <summary className="pl-6 pr-14 py-4 flex justify-between items-center cursor-pointer list-none">
           <span className="flex items-center gap-2 text-sm font-medium text-brand-charcoal">
             Order summary
@@ -413,7 +413,7 @@ function Step4Shell({
 
       <div className="lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:min-h-screen">
         {/* Desktop left: sticky summary — vertically centered */}
-        <aside className="hidden lg:block bg-[#FAF7F2]">
+        <aside className="hidden lg:block bg-brand-warm-white-warm">
           <div className="sticky top-0 min-h-screen flex items-center">
             <div className="w-full max-w-[440px] mx-auto px-8 py-16">
               {summary}

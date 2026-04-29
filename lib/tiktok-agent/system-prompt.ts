@@ -171,7 +171,7 @@ For TikTok, Ana Karen IS the face. She speaks to camera. She's real, she's warm,
 ## VIDEO DESIGN SYSTEM
 
 ### COLOR PALETTE FOR TEXT
-- **Warm White (#FAF7F2)** — primary text on dark backgrounds or over video
+- **Warm White (--brand-warm-white-warm, #FAF7F2)** — primary text on dark backgrounds or over video
 - **Soft Charcoal (#2D2D2D)** — text on light backgrounds. Never pure black.
 - **Honey (#D4A854)** — accent only. Series titles, quote marks. Not body text.
 
@@ -275,7 +275,7 @@ Deliver hook's promise. For P2: Ana reads message, Message Card on screen.
 3. **Loop** — Trigger rewatch.
 
 ### END CARD (last 3s of every video)
-- Fade to Warm White (#FAF7F2)
+- Fade to Warm White (--brand-warm-white-warm, #FAF7F2)
 - "Recipes from the people who love you." — serif, Soft Charcoal
 - "smallplatesandco.com" — sans-serif, smaller
 - Music at 50-60%, fade out on last second

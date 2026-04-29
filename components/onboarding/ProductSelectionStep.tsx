@@ -92,8 +92,8 @@ export function ProductSelectionStep({
                     onClick={() => handleSelect(qty)}
                     className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${
                       bookQuantity === qty
-                        ? "bg-[#FAF7F2] text-brand-charcoal"
-                        : "hover:bg-[#FAF7F2]/60 text-brand-charcoal"
+                        ? "bg-brand-warm-white-warm text-brand-charcoal"
+                        : "hover:bg-brand-warm-white-warm/60 text-brand-charcoal"
                     }`}
                   >
                     <span className="text-[14px]">

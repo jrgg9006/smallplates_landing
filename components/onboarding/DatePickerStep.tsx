@@ -204,9 +204,8 @@ export function DatePickerStep({
             tabIndex={0}
             onClick={handleInputClick}
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleInputClick(); } }}
-            className="w-full h-12 px-4 flex items-center rounded-lg cursor-pointer transition-all duration-200"
+            className="w-full h-12 px-4 flex items-center rounded-lg cursor-pointer transition-all duration-200 bg-brand-warm-white-warm"
             style={{
-              background: "#FAF7F2",
               border: `1px solid ${selectedDate ? "hsl(var(--brand-honey))" : popoverOpen ? "hsl(var(--brand-honey))" : "hsl(var(--brand-sand))"}`,
               boxShadow: popoverOpen ? "0 0 0 2px rgba(212, 168, 84, 0.15)" : "none",
             }}

@@ -111,7 +111,7 @@ export function CustomDropdown({ options, value, onChange, placeholder, label }:
               key={option.value}
               type="button"
               onClick={() => handleSelect(option.value)}
-              className={`w-full p-4 text-left hover:bg-[#FAF7F2] transition-colors duration-200 first:rounded-t-xl last:rounded-b-xl ${
+              className={`w-full p-4 text-left hover:bg-brand-warm-white-warm transition-colors duration-200 first:rounded-t-xl last:rounded-b-xl ${
                 value === option.value ? "bg-brand-sand/40 text-brand-charcoal" : "text-gray-900"
               }`}
             >

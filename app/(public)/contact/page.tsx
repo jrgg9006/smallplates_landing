@@ -13,7 +13,7 @@ export default function ContactPage() {
   return (
     <>
       <Banner />
-      <main className="min-h-screen bg-[#FAF7F2]">
+      <main className="min-h-screen bg-brand-warm-white-warm">
         <section className="pt-20 pb-16 md:pt-28 md:pb-20">
           <div className="mx-auto max-w-xl px-6 md:px-8">
             <div className="text-center mb-12">

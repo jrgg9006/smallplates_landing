@@ -53,7 +53,7 @@ export function WelcomeOverlay({ userName, onStart, onDismiss, isVisible }: Welc
               <div className="flex justify-center">
                 <Button
                   onClick={onStart}
-                  className="inline-flex items-center justify-center rounded-full bg-brand-charcoal hover:bg-[#1a1a1a] text-white px-10 py-3 text-base font-medium shadow-md transition-all"
+                  className="inline-flex items-center justify-center rounded-full bg-brand-charcoal hover:bg-brand-charcoal-deep text-white px-10 py-3 text-base font-medium shadow-md transition-all"
                 >
                   Show me
                 </Button>

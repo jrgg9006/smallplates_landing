@@ -244,7 +244,7 @@ export function GroupJoinForm({
           </p>
           <Button 
             onClick={() => router.push('/')}
-            className="bg-brand-charcoal text-white hover:bg-[#1A1A1A]"
+            className="bg-brand-charcoal text-white hover:bg-brand-charcoal-deep"
           >
             Go to Home Page
           </Button>
@@ -433,7 +433,7 @@ export function GroupJoinForm({
           {/* Submit Button */}
           <Button
             type="submit"
-            className="w-full bg-brand-charcoal text-white hover:bg-[#1A1A1A] py-3 text-sm font-semibold mt-2"
+            className="w-full bg-brand-charcoal text-white hover:bg-brand-charcoal-deep py-3 text-sm font-semibold mt-2"
             disabled={loading}
           >
             {loading

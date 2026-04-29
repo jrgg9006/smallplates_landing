@@ -42,7 +42,7 @@ export default function TheBook() {
 
   return (
     <section
-      className="bg-[#FAF7F2] py-16 md:py-24"
+      className="bg-brand-warm-white-warm py-16 md:py-24"
       aria-labelledby="the-book-heading"
     >
       <div className="mx-auto max-w-7xl px-6 md:px-8">
@@ -56,7 +56,7 @@ export default function TheBook() {
         >
           <h2
             id="the-book-heading"
-            className="type-heading font-normal text-[#1A1A1A]"
+            className="type-heading font-normal text-brand-charcoal"
             style={{ letterSpacing: "-0.02em" }}
           >
             What shows up at her door.
@@ -188,7 +188,7 @@ export default function TheBook() {
                 {specTags.map((tag) => (
                   <span
                     key={tag}
-                    className="font-sans text-xs bg-[#F5F1EB] border border-brand-sand text-brand-charcoal/60 px-3.5 py-1.5 rounded-sm"
+                    className="font-sans text-xs bg-brand-cream border border-brand-sand text-brand-charcoal/60 px-3.5 py-1.5 rounded-sm"
                   >
                     {tag}
                   </span>

@@ -195,7 +195,7 @@ export default function BooksPrinted() {
   );
 
   return (
-    <section className="bg-[#FAF7F2] py-16 md:py-24">
+    <section className="bg-brand-warm-white-warm py-16 md:py-24">
       <div className="mx-auto max-w-7xl px-6 md:px-8">
         {/* Header Section */}
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-12 md:mb-16">

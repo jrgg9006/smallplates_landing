@@ -593,7 +593,7 @@ export function SendInvitationsPage({
                         placeholder="First Name"
                         value={newGuestFirst}
                         onChange={(e) => setNewGuestFirst(e.target.value)}
-                        className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
+                        className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-brand-warm-white-warm placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                       />
                     </div>
                     <div className="flex-1">
@@ -605,7 +605,7 @@ export function SendInvitationsPage({
                         placeholder="Last Name"
                         value={newGuestLast}
                         onChange={(e) => setNewGuestLast(e.target.value)}
-                        className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
+                        className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-brand-warm-white-warm placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                       />
                     </div>
                   </div>
@@ -621,7 +621,7 @@ export function SendInvitationsPage({
                     placeholder="How this person's name should appear in the book"
                     value={newGuestPrintedName}
                     onChange={(e) => setNewGuestPrintedName(e.target.value)}
-                    className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
+                    className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-brand-warm-white-warm placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                   />
                   <p className="text-xs text-[hsl(var(--brand-warm-gray-light))] mt-2">
                     Leave empty to use first and last name. This is how the name will appear in the printed cookbook.
@@ -638,7 +638,7 @@ export function SendInvitationsPage({
                     placeholder="Email address"
                     value={newGuestEmail}
                     onChange={(e) => setNewGuestEmail(e.target.value)}
-                    className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
+                    className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-brand-warm-white-warm placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                   />
                 </div>
               </div>
@@ -663,7 +663,7 @@ export function SendInvitationsPage({
                           [guest.id]: e.target.value,
                         }))
                       }
-                      className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-[#FAF7F2] placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
+                      className="w-full px-4 py-2.5 text-sm border border-brand-sand rounded-xl bg-brand-warm-white-warm placeholder-[hsl(var(--brand-warm-gray-light))] text-brand-charcoal focus:outline-none focus:border-brand-honey focus:ring-1 focus:ring-brand-honey"
                     />
                   </div>
                 ))}
@@ -717,7 +717,7 @@ export function SendInvitationsPage({
                     {uninvitedGuests.map((guest) => (
                       <label
                         key={guest.id}
-                        className="flex items-center gap-4 py-4 border-b border-[#F5F5F4] cursor-pointer hover:bg-[#FAF7F2] transition-colors -mx-2 px-2 rounded"
+                        className="flex items-center gap-4 py-4 border-b border-[#F5F5F4] cursor-pointer hover:bg-brand-warm-white-warm transition-colors -mx-2 px-2 rounded"
                       >
                         <input
                           type="checkbox"
@@ -772,8 +772,8 @@ export function SendInvitationsPage({
                         key={guest.id}
                         onClick={() => !hasRecipe && setSelectedSentGuestId(guest.id)}
                         className={`flex items-center gap-3 py-3.5 border-b border-[#F5F5F4] transition-colors ${
-                          !hasRecipe ? "cursor-pointer hover:bg-[#FAF7F2]" : ""
-                        } ${isSelected ? "bg-[#FAF7F2] border-l-2 border-l-brand-honey" : ""}`}
+                          !hasRecipe ? "cursor-pointer hover:bg-brand-warm-white-warm" : ""
+                        } ${isSelected ? "bg-brand-warm-white-warm border-l-2 border-l-brand-honey" : ""}`}
                       >
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-brand-charcoal truncate">
@@ -844,7 +844,7 @@ export function SendInvitationsPage({
             <div className="px-6 lg:px-8 py-5 border-t border-brand-sand bg-white flex gap-3">
               <button
                 onClick={resetAddGuest}
-                className="flex-1 py-3 text-sm font-medium text-brand-charcoal border border-brand-sand rounded-full hover:bg-[#FAF7F2] transition-colors"
+                className="flex-1 py-3 text-sm font-medium text-brand-charcoal border border-brand-sand rounded-full hover:bg-brand-warm-white-warm transition-colors"
               >
                 Cancel
               </button>
@@ -870,7 +870,7 @@ export function SendInvitationsPage({
                   setShowAddEmails(false);
                   setEmailDrafts({});
                 }}
-                className="flex-1 py-3 text-sm font-medium text-brand-charcoal border border-brand-sand rounded-full hover:bg-[#FAF7F2] transition-colors"
+                className="flex-1 py-3 text-sm font-medium text-brand-charcoal border border-brand-sand rounded-full hover:bg-brand-warm-white-warm transition-colors"
               >
                 Cancel
               </button>

@@ -201,7 +201,7 @@ function CategoryCard({ title, description, icon, onClick }: {
   return (
     <button
       onClick={onClick}
-      className="w-full p-4 min-h-[56px] bg-[#FAF7F2] hover:bg-brand-sand active:bg-brand-sand rounded-xl transition-colors group focus:outline-none focus:ring-2 focus:ring-brand-honey focus:ring-offset-2 touch-manipulation flex items-center gap-3"
+      className="w-full p-4 min-h-[56px] bg-brand-warm-white-warm hover:bg-brand-sand active:bg-brand-sand rounded-xl transition-colors group focus:outline-none focus:ring-2 focus:ring-brand-honey focus:ring-offset-2 touch-manipulation flex items-center gap-3"
       role="button"
       tabIndex={0}
     >

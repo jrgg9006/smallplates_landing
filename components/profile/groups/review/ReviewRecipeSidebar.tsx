@@ -31,7 +31,7 @@ export function ReviewRecipeSidebar({ recipes, currentIndex, onSelect }: ReviewR
                 onClick={() => onSelect(i)}
                 className={`w-full text-left py-4 px-4 transition-all rounded-lg ${
                   isActive
-                    ? "bg-[#FAF7F2]"
+                    ? "bg-brand-warm-white-warm"
                     : "hover:bg-gray-50/50"
                 }`}
               >

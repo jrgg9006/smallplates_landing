@@ -88,7 +88,7 @@ export function PrintDetailsWizard({
   };
 
   return (
-    <div className="flex flex-col h-screen bg-[#FAF7F2]">
+    <div className="flex flex-col h-screen bg-brand-warm-white-warm">
       {/* Header */}
       <div className="flex items-center px-4 py-3 flex-shrink-0">
         <button

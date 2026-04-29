@@ -20,7 +20,7 @@ import { motion } from "framer-motion";
  *   Margot doesn't over-explain. She trusts you to get it.
  * 
  * Design rationale:
- * - Warm White background (#FAF7F2) — breathing room
+ * - Warm White background (--brand-warm-white-warm, #FAF7F2) — breathing room
  * - Centered text — this is a moment of pause and reflection
  * - No images — let the words land
  * - Generous spacing — Margot doesn't crowd you
@@ -29,7 +29,7 @@ import { motion } from "framer-motion";
 export default function TheProblem() {
   return (
     <section 
-      className="bg-[#FAF7F2] py-20 md:py-28 lg:py-36"
+      className="bg-brand-warm-white-warm py-20 md:py-28 lg:py-36"
       aria-labelledby="problem-heading"
     >
       <div className="mx-auto max-w-3xl px-6 md:px-8 text-center">

@@ -56,14 +56,14 @@ export function CloseBookModal({
           {reviewed ? (
             <button
               onClick={onStartCloseFlow}
-              className="flex-1 bg-brand-charcoal text-[#FAF7F2] rounded-full py-3 text-[14px] font-medium hover:bg-gray-800 transition-colors"
+              className="flex-1 bg-brand-charcoal text-brand-warm-white-warm rounded-full py-3 text-[14px] font-medium hover:bg-gray-800 transition-colors"
             >
               Close the book →
             </button>
           ) : (
             <button
               onClick={onReview}
-              className="flex-1 bg-brand-charcoal text-[#FAF7F2] rounded-full py-3 text-[14px] font-medium hover:bg-gray-800 transition-colors"
+              className="flex-1 bg-brand-charcoal text-brand-warm-white-warm rounded-full py-3 text-[14px] font-medium hover:bg-gray-800 transition-colors"
             >
               Review recipes →
             </button>

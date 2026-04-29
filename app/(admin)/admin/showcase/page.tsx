@@ -708,7 +708,7 @@ function SectionCard({ title, subtitle, count, tone, defaultOpen, open, onToggle
     else setInternalOpen(v => !v);
   };
 
-  const headerBg = tone === 'primary' ? 'bg-[#FAF7F2]' : 'bg-gray-50';
+  const headerBg = tone === 'primary' ? 'bg-brand-warm-white-warm' : 'bg-gray-50';
   const countColor = tone === 'primary' ? 'text-brand-honey' : 'text-gray-500';
 
   return (

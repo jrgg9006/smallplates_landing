@@ -42,7 +42,7 @@ export default function HandmadeCallout() {
       </div>
 
       {/* Right Panel — Text */}
-      <div className="bg-[#F5F1EB] p-8 md:p-12 lg:p-16 flex flex-col justify-center">
+      <div className="bg-brand-cream p-8 md:p-12 lg:p-16 flex flex-col justify-center">
         {/* Eyebrow */}
         <p className="type-eyebrow mb-4">
           One of one

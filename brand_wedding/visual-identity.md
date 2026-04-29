@@ -18,6 +18,39 @@ The palette is built on warmth with sophistication — colors that feel like can
 | **Primary Dark**    | Soft Charcoal | #2D2D2D | Primary text, logo                           |
 
 
+## The Two-Tone Warm White System
+
+Small Plates uses two warm whites in deliberate counterpoint — never interchangeably. They are the same family, separated by 2% saturation. The contrast is perceptually subtle and structurally significant: it provides layering without requiring borders or shadows, preserving editorial restraint.
+
+| Token | Hex | Role |
+|-------|-----|------|
+| **Airy** | `#FAF9F7` | Lighter, more spacious. The "respirable" white. |
+| **Warm** | `#FAF7F2` | Deeper, more enveloping. The "kitchen-warm" white. |
+
+### The Canvas-vs-Layer Rule
+
+The roles invert by register:
+
+**In brand register** (landing pages, marketing, editorial, showcase email):
+- **Warm is canvas.** Default for full-width section backgrounds, hero sections, the body of editorial pages. The warmer tone creates the enveloping atmosphere — kitchen-warm, candle-warm, dinner-table-warm.
+- **Airy is layer.** Used sparingly when a section needs to feel lighter or more spacious — to create contrast against the predominantly Warm canvas.
+
+**In product register** (organizer dashboard, submission flow, transactional surfaces):
+- **Airy is canvas.** Default for body, page background, full-width app surfaces. The airier tone creates breathing room — workflow-clear, focus-supportive, friction-free.
+- **Warm is layer.** Used for elements that lift from the canvas: callouts, info banners, selected states, hover states, input field backgrounds, modal backgrounds, sheet backgrounds.
+
+### Hard rules
+
+- **Never** use Warm as a body or page background in product register.
+- **Never** use Airy as a section background in brand register.
+- **Never** use literal hex (`#FAF9F7` or `#FAF7F2`) in code. Always reference the named token (`bg-brand-warm-white-airy` or `bg-brand-warm-white-warm`).
+- The 2% saturation difference is the entire point. Do not "consolidate to one warm white for simplicity" — the two-tone IS the system.
+
+### Why this exists
+
+Editorial publications (Kinfolk, Apartamento, Cherry Bombe) use subtle tonal counterpoint to create visual rhythm between sections without leaning on harsh dividers or shadows. Small Plates inherits this technique. The Canvas-vs-Layer Rule is how the technique becomes operational at scale — every developer, every AI output, every future component knows which warm white belongs where, without having to ask.
+
+
 ## Secondary Palette
 
 

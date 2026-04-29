@@ -17,37 +17,58 @@ body > div.pac-container ~ div:not([id]):not([class]) {
 
 @layer base {
   :root {
-    /* Small Plates Brand Colors - Updated per Implementation Guide */
-    /* WARM-WHITE TWO-TONE SYSTEM (deliberate — decided Apr 2026):
-     * --brand-background / --brand-warm-white = #FAF9F7 (airy, L~98%)
-     *   → body, shadcn --background, shadcn --popover, default cards
-     * Accent warm-white = #FAF7F2 (warmer, L~96%)
-     *   → intentionally kept as literal hex in ~59 components:
-     *     landing large sections (TheProblem, TheBook, BooksPrinted,
-     *     YourTools, NewsletterSignup), /collect funnel
-     *     pages, onboarding sidebar, text on dark CTAs.
-     * The two-tone contrast is the intended editorial rhythm.
-     * If converging to a single value in the future, migrate deliberately. */
-    --brand-background: 36 30% 98%;     /* #FAF9F7 — airy body bg, see docs */
+    /* Small Plates Brand Colors */
+    /* TWO-TONE WARM WHITE SYSTEM — see Canvas-vs-Layer Rule
+     *
+     * Small Plates uses two warm whites in deliberate counterpoint, never
+     * interchangeably. Their roles invert by register:
+     *
+     * BRAND register (landing, marketing, editorial, showcase emails):
+     *   --brand-warm-white-warm  → canvas (default for full-width sections, body)
+     *   --brand-warm-white-airy  → layer (sparingly, for contrast/breathing room)
+     *
+     * PRODUCT register (dashboard, submission flow, transactional):
+     *   --brand-warm-white-airy  → canvas (default for body, page bg, app surfaces)
+     *   --brand-warm-white-warm  → layer (callouts, inputs, hovers, selected states, modals)
+     *
+     * The two values differ by ~2% saturation — subtle, structural. Provides
+     * layering without borders or shadows, preserving editorial restraint.
+     *
+     * Canonical reference: brand_wedding/visual-identity.md
+     */
+    --brand-warm-white-airy: 36 30% 98%;   /* #FAF9F7 — airy: canvas in product, layer in brand */
+    --brand-warm-white-warm: 36 44% 96.5%; /* #FAF7F2 — warm: canvas in brand, layer in product */
+
+    /* Backward-compat aliases — preserved so existing code keeps working
+       during migration. Body defaults to airy (matches current shadcn --background). */
+    --brand-background: var(--brand-warm-white-airy);
+    --brand-warm-white: var(--brand-warm-white-airy);
     --brand-white: 0 0% 100%;           /* #FFFFFF */
     --brand-honey: 41 66% 58%;          /* #D4A854 */
     --brand-charcoal: 0 0% 18%;         /* #2D2D2D */
+    --brand-charcoal-deep: 0 0% 10%;    /* #1A1A1A — canonical Deep Charcoal from visual-identity.md, used for elevated emphasis (btn-dark hover) */
     --brand-warm-gray: 30 11% 54%;      /* #8A8780 */
     --brand-warm-gray-dark: 30 7% 42%;  /* #6B6966 */
     --brand-warm-gray-light: 30 5% 58%; /* #9A9590 */
-    --brand-border: 35 30% 87%;         /* ≈ #E8E0D5 (renders #E8E0D4) */
-    --brand-border-button: 36 17% 80%;  /* #D4D0C8 */
-    --brand-decorative-line: 36 17% 80%; /* #D4D0C8 */
-    --brand-hero-gradient-start: 36 25% 89%; /* #E8E4DC */
-    --brand-hero-gradient-end: 36 20% 79%;   /* #D4CFC4 */
-    
-    /* Legacy colors for backward compatibility */
-    --brand-warm-white: var(--brand-background);
-    --brand-honey-dark: 40 51% 53%;     /* ≈ #C49B4A (renders #C49C4A) */
-    --brand-cream: 36 25% 93%;          /* #F5F1EB */
-    --brand-sand: var(--brand-border);
-    --brand-olive: 91 20% 43%;          /* #6B7B5E */
-    --brand-terracotta: 14 44% 58%;     /* #C4856C */
+    --brand-sand: 35 30% 87%;           /* #E8E0D5 — canonical Soft Neutral (visual-identity.md) */
+    --brand-border: var(--brand-sand);  /* borders use canonical Sand */
+
+    /* Semantic structural tokens — use-specific neutrals, currently sharing
+       value but conceptually distinct. Do NOT consolidate: button border is
+       interactive (hover/focus states), decorative line is atmospheric. */
+    --brand-border-button: 36 17% 80%;   /* #D4D0C8 — outline button border */
+    --brand-decorative-line: 36 17% 80%; /* #D4D0C8 — dividers, recipes, decorative separators */
+    --brand-hero-gradient-start: 36 25% 89%; /* #E8E4DC — hero gradient start */
+    --brand-hero-gradient-end: 36 20% 79%;   /* #D4CFC4 — hero gradient end */
+
+    /* Canonical palette extensions — secondary palette per visual-identity.md */
+    --brand-cream: 36 25% 93%;          /* #F5F1EB — Soft Neutral, alternative light bg */
+    --brand-olive: 91 20% 43%;          /* #6B7B5E — Cool Accent, organic feel */
+    --brand-terracotta: 14 44% 58%;     /* #C4856C — Warm Accent */
+    --brand-honey-dark: 40 51% 53%;     /* #C49C4A — Honey hover state (desaturated, not darkened) */
+
+    /* Semantic aliases */
+    --brand-warm-white: var(--brand-background);  /* alias — see two-tone system note above */
     
     /* Spacing System (8px base unit) */
     --space-1: 0.25rem;  /* 4px */
@@ -84,32 +105,6 @@ body > div.pac-container ~ div:not([id]):not([class]) {
     --ring: var(--brand-honey);
     --radius: 0.75rem
   }
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%
-  }
 }
 
 @layer base {
@@ -144,9 +139,6 @@ body > div.pac-container ~ div:not([id]):not([class]) {
      - Icon-round buttons (rounded-full, no label — circular by nature of shape)
      - Structural unstyled buttons inside container layouts
 
-     Literals used (pending tokenization, tracked in docs/token-migration-followups.md):
-     - #1A1A1A — charcoal-hover tier (see Section C.1)
-     - #F5F1EA — warm off-white accent (see Section C.2)
      ============================================================================= */
 
   .btn {
@@ -176,7 +168,7 @@ body > div.pac-container ~ div:not([id]):not([class]) {
     color: #FFFFFF;
   }
   .btn-dark:hover:not(:disabled) {
-    background-color: #1A1A1A;
+    background-color: hsl(var(--brand-charcoal-deep));
   }
 
   .btn-outline {

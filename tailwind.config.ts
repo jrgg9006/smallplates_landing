@@ -1,7 +1,6 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-    darkMode: ["class"],
     content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -189,9 +188,12 @@ const config: Config = {
   			// Small Plates Brand Colors
   			brand: {
   				'warm-white': 'hsl(var(--brand-warm-white))',
+				'warm-white-airy': 'hsl(var(--brand-warm-white-airy))',
+				'warm-white-warm': 'hsl(var(--brand-warm-white-warm))',
   				'honey': 'hsl(var(--brand-honey))',
   				'honey-dark': 'hsl(var(--brand-honey-dark))',
   				'charcoal': 'hsl(var(--brand-charcoal))',
+				'charcoal-deep': 'hsl(var(--brand-charcoal-deep))',
   				'warm-gray': 'hsl(var(--brand-warm-gray))',
   				'cream': 'hsl(var(--brand-cream))',
   				'sand': 'hsl(var(--brand-sand))',

@@ -146,7 +146,7 @@ export default function SpecsGrid() {
         {specs.map((spec, index) => (
           <motion.div
             key={spec.heading}
-            className="bg-[#FAF7F2] p-8 md:p-10 lg:p-12 transition-colors duration-300 hover:bg-[#F5F1EB]"
+            className="bg-brand-warm-white-warm p-8 md:p-10 lg:p-12 transition-colors duration-300 hover:bg-brand-cream"
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}

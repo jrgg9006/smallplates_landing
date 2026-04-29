@@ -289,7 +289,7 @@ export default function CollectionForm() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-brand-warm-white-airy">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-center">
@@ -534,7 +534,7 @@ export default function CollectionForm() {
                           <button
                             key={guest.id}
                             onClick={() => handleGuestSelect(guest)}
-                            className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-brand-honey/50 hover:bg-[#FAF7F2] transition-colors text-left bg-white"
+                            className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-brand-honey/50 hover:bg-brand-warm-white-warm transition-colors text-left bg-white"
                           >
                             <span className="text-brand-charcoal font-medium">
                               {guest.first_name} {guest.last_name}
@@ -556,7 +556,7 @@ export default function CollectionForm() {
                             setFullName('');
                             setTimeout(() => document.getElementById('fullName')?.focus(), 100);
                           }}
-                          className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-brand-honey/50 hover:bg-[#FAF7F2] transition-colors text-left bg-white"
+                          className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-brand-honey/50 hover:bg-brand-warm-white-warm transition-colors text-left bg-white"
                         >
                           <span className="text-brand-charcoal font-medium">
                             I don&apos;t see my name

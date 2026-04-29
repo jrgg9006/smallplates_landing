@@ -9,7 +9,7 @@ const details = [
       "Smooth matte hardcover. Elegant, durable, designed to age beautifully.",
     visual: (
       // Reason: Subtle gradient simulating matte surface with light reflection
-      <div className="relative w-full aspect-square rounded-md overflow-hidden bg-gradient-to-br from-[#F5F1EB] via-[#EDE8E0] to-brand-sand">
+      <div className="relative w-full aspect-square rounded-md overflow-hidden bg-gradient-to-br from-brand-cream via-[#EDE8E0] to-brand-sand">
         <div
           className="absolute inset-0"
           style={{
@@ -29,7 +29,7 @@ const details = [
       "150 gsm couch\u00e9. Thick, smooth, built to hold vivid color and survive the kitchen.",
     visual: (
       // Reason: Abstract page representation with text-like lines
-      <div className="relative w-full aspect-square rounded-md overflow-hidden bg-[#F5F1EB] flex items-center justify-center">
+      <div className="relative w-full aspect-square rounded-md overflow-hidden bg-brand-cream flex items-center justify-center">
         <div className="w-3/5 space-y-2">
           <div className="w-10 h-12 bg-white border border-brand-sand rounded-sm mx-auto shadow-sm" />
           <div className="space-y-1.5 mt-3">
@@ -48,7 +48,7 @@ const details = [
       "Full color throughout. Every recipe, every photo, every page \u2014 vivid and rich.",
     visual: (
       // Reason: 2x2 color swatches showing palette range
-      <div className="relative w-full aspect-square rounded-md overflow-hidden bg-[#F5F1EB] flex items-center justify-center">
+      <div className="relative w-full aspect-square rounded-md overflow-hidden bg-brand-cream flex items-center justify-center">
         <div className="grid grid-cols-2 gap-2 w-3/5">
           <div className="aspect-square rounded-sm bg-brand-terracotta" />
           <div className="aspect-square rounded-sm bg-brand-honey" />
@@ -64,7 +64,7 @@ const details = [
       "Letter format. Big enough to read while cooking. A statement on any shelf.",
     visual: (
       // Reason: Outlined rectangle showing 8x10 aspect ratio with dimension labels
-      <div className="relative w-full aspect-square rounded-md overflow-hidden bg-[#F5F1EB] flex items-center justify-center">
+      <div className="relative w-full aspect-square rounded-md overflow-hidden bg-brand-cream flex items-center justify-center">
         <div className="relative" style={{ width: "55%", aspectRatio: "8/10" }}>
           <div className="w-full h-full border-2 border-dashed border-brand-charcoal/20 rounded-sm flex items-center justify-center">
             <span className="font-sans text-sm text-brand-charcoal/30 font-medium">

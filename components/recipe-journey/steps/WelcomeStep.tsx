@@ -34,7 +34,7 @@ export default function WelcomeStep({ creatorName }: WelcomeStepProps) {
           </p>
           
           {/* Random Tip Box */}
-          <div className="mt-6 bg-[#FAF7F2] rounded-lg p-4">
+          <div className="mt-6 bg-brand-warm-white-warm rounded-lg p-4">
             <div className="flex items-start gap-3">
               <span className="text-base font-light flex-shrink-0" aria-hidden="true">💡</span>
               <div className="flex-1 min-w-0">

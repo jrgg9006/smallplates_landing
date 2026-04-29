@@ -103,7 +103,7 @@ export default function TestimonialsSection() {
 
   return (
     <section
-      className="bg-[#FAF7F2] pt-20 md:pt-28 pb-32 md:pb-40"
+      className="bg-brand-warm-white-warm pt-20 md:pt-28 pb-32 md:pb-40"
       aria-labelledby="testimonials-heading"
     >
       <div className="mx-auto max-w-7xl px-6 md:px-8">
