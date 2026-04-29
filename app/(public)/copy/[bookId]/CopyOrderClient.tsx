@@ -497,7 +497,7 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
             type="button"
             onClick={handleShippingContinue}
             disabled={redirecting}
-            className="btn btn-md btn-dark w-full"
+            className="btn btn-md btn-dark w-full mt-5"
           >
             Continue to payment &rarr;
           </button>

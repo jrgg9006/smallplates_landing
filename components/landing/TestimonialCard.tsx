@@ -38,7 +38,7 @@ function CardBody({ t }: { t: Testimonial }) {
   return (
     <div className="flex flex-col flex-1 px-6 py-6">
       <StarRow />
-      <blockquote className="type-body-small text-white/80 flex-1">
+      <blockquote className="type-caption text-white/80 flex-1 leading-relaxed">
         {t.quote}
       </blockquote>
       <footer className="mt-5 pt-4 border-t border-white/[0.07]">
@@ -70,7 +70,7 @@ export function TestimonialCard({ t }: { t: Testimonial }) {
           flex-shrink-0 snap-start md:snap-align-none
           bg-brand-charcoal rounded-2xl overflow-hidden
           flex flex-col md:flex-row
-          w-[85vw] md:w-[596px] md:h-[400px]
+          w-[85vw] md:w-[596px] md:h-[480px]
         "
       >
         {/* Photo — top on mobile (first in DOM), right on desktop (order-last) */}
@@ -79,7 +79,7 @@ export function TestimonialCard({ t }: { t: Testimonial }) {
             src={t.photo}
             alt=""
             fill
-            className="object-cover object-center grayscale"
+            className="object-cover object-center"
             sizes="(max-width: 768px) 85vw, 298px"
           />
           {/* Vignette so the card edge reads as charcoal, not raw photo */}
@@ -87,7 +87,7 @@ export function TestimonialCard({ t }: { t: Testimonial }) {
         </div>
 
         {/* Text — bottom on mobile, left on desktop (order-first) */}
-        <div className="md:order-first flex flex-col md:w-1/2">
+        <div className="md:order-first flex flex-col md:w-1/2 md:flex-shrink-0">
           <CardBody t={t} />
         </div>
       </motion.article>
@@ -102,7 +102,7 @@ export function TestimonialCard({ t }: { t: Testimonial }) {
         flex-shrink-0 snap-start md:snap-align-none
         bg-brand-charcoal rounded-2xl overflow-hidden
         flex flex-col
-        w-[85vw] md:w-[288px] md:h-[400px]
+        w-[85vw] md:w-[288px] md:h-[480px]
       "
     >
       <CardBody t={t} />

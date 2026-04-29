@@ -375,7 +375,7 @@ function StepShipping({
         type="button"
         onClick={handleSubmit}
         disabled={redirecting}
-        className="btn btn-md btn-dark w-full"
+        className="btn btn-md btn-dark w-full mt-5"
       >
         Continue to payment →
       </button>

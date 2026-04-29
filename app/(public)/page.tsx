@@ -12,6 +12,7 @@ import HowItWorks from '@/components/landing/HowItWorks'
 import RegistryInterlude from '@/components/landing/RegistryInterlude'
 import PersonalNotes from '@/components/landing/PersonalNotes'
 import TheBook from '@/components/landing/TheBook'
+import TestimonialsSection from '@/components/landing/TestimonialsSection'
 import FAQ from '@/components/landing/FAQ'
 import NewsletterSignup from '@/components/landing/NewsletterSignup'
 import Footer from '@/components/landing/Footer'
@@ -30,6 +31,7 @@ export default function Home() {
         <BooksPrinted />
         <PersonalNotes />
         <TheBook />
+        <TestimonialsSection />
         <EmotionalClose />
         <FAQ />
         <NewsletterSignup />

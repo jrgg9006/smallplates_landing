@@ -12,39 +12,39 @@ const testimonials: Testimonial[] = [
   {
     id: 1,
     quote:
-      "We had 74 guests submit a recipe. I didn't chase a single one. The book arrived and my sister opened it on the front step.",
-    author: "Sarah K.",
-    descriptor: "Sister of the bride — Austin, TX",
-    photo: "/images/notes_section/grandmas_tatis.jpg",
+      "This is the most thoughtful gift my partner and I have ever received. The book is beautiful and of great quality, but most of all, it made us feel so appreciated by everyone who sent a recipe. The Small Plates team was amazing, thank you!",
+    author: "Bárbara A.",
+    descriptor: "Bride",
+    photo: "/testimonials/Barbara_testimonial.jpg",
   },
   {
     id: 2,
     quote:
-      "I gave it as a gift. Six months later he texted me a photo of pasta stains on page 34. Best review I've ever gotten.",
-    author: "Marcus T.",
-    descriptor: "Gift-giver — Brooklyn, NY",
+      "We did this as an anniversary gift and it was one of the most meaningful things we've done since our wedding. Small Plates and Company gives your family and friends a chance to bring their favorite recipes into your home and you get the meals that matter to the people you love. Highly recommend for anyone looking for a thoughtful gift they'll use all the time.",
+    author: "Donald C.",
+    descriptor: "Groom",
   },
-  {
-    id: 3,
-    quote:
-      "The book came out better than I expected. Which is saying something because I expected a lot.",
-    author: "Ana L.",
-    descriptor: "Mother of the bride — Miami, FL",
-  },
+    {
+      id: 3,
+      quote:
+        "AMAZING GIFT!",
+      author: "Victor B. & Rocío",
+      descriptor: "Couple",
+      photo: "/testimonials/victor_testimonial.jpg",
+    },
   {
     id: 4,
     quote:
-      "Guests who said they don't cook submitted the best notes. One wrote three paragraphs about frozen pizza. It's in the book. It's everyone's favorite page.",
-    author: "Jamie & Chris",
-    descriptor: "Married November 2024",
+      "I loved it! and I'd definitely do this for other people too. It feels like such a thoughtful, meaningful gift.",
+    author: "Mariana",
+    descriptor: "Guest - Contributor",
   },
   {
     id: 5,
     quote:
-      "We put it on the registry. 47 people contributed. The book had 80 recipes. My wife uses it every week.",
-    author: "David R.",
-    descriptor: "Groom — Chicago, IL",
-    photo: "/images/notes_section/grandmas_tatis.jpg",
+      "I loved it. It's so easy to create the recipes, and the final result is incredible.",
+    author: "Maria Cristina",
+    descriptor: "Guest - Contributor",
   },
 ];
 
@@ -103,7 +103,7 @@ export default function TestimonialsSection() {
 
   return (
     <section
-      className="bg-[#FAF7F2] pt-10 md:pt-14 pb-20 md:pb-28"
+      className="bg-[#FAF7F2] pt-20 md:pt-28 pb-32 md:pb-40"
       aria-labelledby="testimonials-heading"
     >
       <div className="mx-auto max-w-7xl px-6 md:px-8">

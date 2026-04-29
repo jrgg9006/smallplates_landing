@@ -410,4 +410,13 @@ body > div.pac-container ~ div:not([id]):not([class]) {
   .type-modal-title {
     @apply font-serif text-2xl font-semibold;
   }
+
+  /* Hide scrollbar while keeping scroll functionality (used by TestimonialsSection carousel) */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
