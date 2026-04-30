@@ -1,0 +1,332 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-04-29T00:00:00Z",
+  "title": "Design System: Small Plates & Co.",
+  "extensions": {
+    "colorMeta": {
+      "honey": {
+        "role": "primary",
+        "displayName": "Honey",
+        "canonical": "#D4A854",
+        "cssVar": "--brand-honey",
+        "tonalRamp": ["#2B1D07", "#4E350C", "#714E12", "#946618", "#B47F1E", "#C99845", "#DBB87A", "#EFD9B0"]
+      },
+      "warm-white-airy": {
+        "role": "primary",
+        "displayName": "Warm White Airy",
+        "canonical": "#FAF9F7",
+        "cssVar": "--brand-warm-white-airy",
+        "register": "product-canvas / brand-layer",
+        "tonalRamp": ["#2A2017", "#4A3828", "#69503A", "#8A6A4C", "#A5876B", "#C2A991", "#DDD0BE", "#FAF9F7"]
+      },
+      "warm-white-warm": {
+        "role": "primary",
+        "displayName": "Warm White Warm",
+        "canonical": "#FAF7F2",
+        "cssVar": "--brand-warm-white-warm",
+        "register": "brand-canvas / product-layer",
+        "tonalRamp": ["#291E0D", "#4A3719", "#6B5025", "#8E6931", "#B08340", "#CCA35E", "#DEC48B", "#FAF7F2"]
+      },
+      "soft-charcoal": {
+        "role": "primary",
+        "displayName": "Soft Charcoal",
+        "canonical": "#2D2D2D",
+        "cssVar": "--brand-charcoal",
+        "tonalRamp": ["#0D0D0D", "#1A1A1A", "#2D2D2D", "#474747", "#636363", "#8A8A8A", "#B5B5B5", "#E0E0E0"]
+      },
+      "deep-charcoal": {
+        "role": "neutral",
+        "displayName": "Deep Charcoal",
+        "canonical": "#1A1A1A",
+        "cssVar": "--brand-charcoal-deep",
+        "tonalRamp": ["#0A0A0A", "#1A1A1A", "#2D2D2D", "#404040", "#595959", "#7A7A7A", "#ABABAB", "#DCDCDC"]
+      },
+      "cream": {
+        "role": "neutral",
+        "displayName": "Cream",
+        "canonical": "#F5F1EB",
+        "cssVar": "--brand-cream",
+        "tonalRamp": ["#261C0D", "#443218", "#624923", "#826130", "#A07940", "#BFAB7A", "#D9C9AD", "#F5F1EB"]
+      },
+      "sand": {
+        "role": "neutral",
+        "displayName": "Sand",
+        "canonical": "#E8E0D5",
+        "cssVar": "--brand-sand",
+        "tonalRamp": ["#221A0C", "#3E2F17", "#5B4522", "#785B2D", "#967141", "#B39B7B", "#CCC0A8", "#E8E0D5"]
+      },
+      "olive": {
+        "role": "secondary",
+        "displayName": "Olive",
+        "canonical": "#6B7B5E",
+        "cssVar": "--brand-olive",
+        "tonalRamp": ["#1E2716", "#2E3B22", "#3E502E", "#4E643B", "#5E7849", "#6B7B5E", "#8A9A7D", "#CCDBC3"]
+      },
+      "terracotta": {
+        "role": "secondary",
+        "displayName": "Terracotta",
+        "canonical": "#C4856C",
+        "cssVar": "--brand-terracotta",
+        "tonalRamp": ["#2E1409", "#521F0F", "#762A15", "#9A3720", "#B85A3A", "#C4856C", "#D5A999", "#E8CDC6"]
+      },
+      "warm-gray": {
+        "role": "neutral",
+        "displayName": "Warm Gray",
+        "canonical": "#9A9590",
+        "cssVar": "--brand-warm-gray-light",
+        "tonalRamp": ["#1C1A18", "#312E2B", "#47443F", "#5E5B54", "#747069", "#9A9590", "#B7B4AE", "#D4D2CC"]
+      },
+      "honey-dark": {
+        "role": "primary",
+        "displayName": "Honey Dark",
+        "canonical": "#C49C4A",
+        "cssVar": "--brand-honey-dark",
+        "purpose": "Honey hover state — desaturated, not simply darkened",
+        "tonalRamp": ["#2A1E09", "#4A360F", "#6A4D16", "#8A641C", "#AA7C23", "#C49C4A", "#D7BA7E", "#EDD9B2"]
+      },
+      "border-button": {
+        "role": "neutral",
+        "displayName": "Border Button",
+        "canonical": "#D4D0C8",
+        "cssVar": "--brand-border-button",
+        "purpose": "Interactive border token for outline/subtle buttons — hover and focus states apply",
+        "tonalRamp": ["#1F1E1C", "#39382F", "#535243", "#6D6B57", "#87856B", "#A8A59C", "#C6C4BC", "#D4D0C8"]
+      },
+      "decorative-line": {
+        "role": "neutral",
+        "displayName": "Decorative Line",
+        "canonical": "#D4D0C8",
+        "cssVar": "--brand-decorative-line",
+        "purpose": "Atmospheric separator token — dividers, recipe card accent lines. No interactive states.",
+        "tonalRamp": ["#1F1E1C", "#39382F", "#535243", "#6D6B57", "#87856B", "#A8A59C", "#C6C4BC", "#D4D0C8"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero headlines only. Landing page H1s. Never section headings or card titles.",
+        "opticalSize": "Minion Pro Display"
+      },
+      "heading": {
+        "displayName": "Heading",
+        "purpose": "Section H2s on marketing surfaces. Emotional section openers.",
+        "opticalSize": "Minion Pro Standard"
+      },
+      "subheading": {
+        "displayName": "Subheading",
+        "purpose": "Sub-section H3s, card titles, modal titles.",
+        "opticalSize": "Minion Pro Subhead"
+      },
+      "accent": {
+        "displayName": "Accent",
+        "purpose": "Taglines, pull-quotes, poetic lines below hero headings. Use sparingly — only when the content earns it.",
+        "opticalSize": "Minion Pro Standard, italic"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Main paragraphs, product descriptions, landing page prose. Max 65-75ch line length.",
+        "opticalSize": "Inter Light"
+      },
+      "body-small": {
+        "displayName": "Body Small",
+        "purpose": "Secondary descriptions, FAQ answers, card supporting text, form helper text.",
+        "opticalSize": "Inter Light"
+      },
+      "eyebrow": {
+        "displayName": "Eyebrow",
+        "purpose": "Uppercase kickers above headings. Always Honey colored. Always ALL CAPS. Counts toward the 10% Honey budget.",
+        "opticalSize": "Inter Medium"
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Attributions, timestamps, photo credits, metadata. Always Warm Gray, never Soft Charcoal.",
+        "opticalSize": "Inter Regular"
+      }
+    },
+    "shadows": [
+      {
+        "name": "ambient-rest",
+        "value": "0 1px 3px rgba(45,45,45,0.06)",
+        "purpose": "Recipe cards and book preview at rest. Barely perceptible — signals a distinct surface without lifting it."
+      },
+      {
+        "name": "hover-lift",
+        "value": "0 4px 20px rgba(45,45,45,0.10)",
+        "transform": "translateY(-2px)",
+        "purpose": "Interactive cards on hover. Paired with translateY(-2px) — depth reads without a larger shadow footprint."
+      },
+      {
+        "name": "floating",
+        "value": "0 25px 50px rgba(0,0,0,0.25)",
+        "purpose": "Modals, bottom sheets, dropdowns. Full visual separation from the page."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "duration": "300ms",
+        "purpose": "Sheet and modal entrance animations (slide-in-bottom). Ease-out curve for entrances."
+      },
+      {
+        "name": "ease-transition",
+        "value": "ease",
+        "duration": "150ms",
+        "purpose": "Button hover, input focus, opacity fades. Fast state transitions that respond to interaction."
+      },
+      {
+        "name": "ease-card",
+        "value": "ease",
+        "duration": "200ms",
+        "purpose": "Recipe card hover lift. Slightly longer than button transitions — considered, not snappy."
+      }
+    ],
+    "breakpoints": [
+      {"name": "sm", "value": "640px", "purpose": "Mobile — stack layouts, full-width buttons"},
+      {"name": "md", "value": "768px", "purpose": "Tablet — two-column grids become available"},
+      {"name": "lg", "value": "1024px", "purpose": "Desktop — full navigation, multi-column layouts"},
+      {"name": "xl", "value": "1280px", "purpose": "Wide desktop — max content width, increased whitespace"}
+    ]
+  },
+  "components": [
+    {
+      "name": "Button: Honey (Primary CTA)",
+      "kind": "button",
+      "refersTo": "button-honey",
+      "description": "Primary call to action. Honey fill, pill shape. One per view maximum.",
+      "html": "<button class=\"ds-btn-honey\">Get started</button>",
+      "css": ".ds-btn-honey { background-color: #D4A854; color: #FFFFFF; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-size: 0.9375rem; font-weight: 500; line-height: 1; padding: 16px 32px; border-radius: 9999px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: background-color 0.15s ease; } .ds-btn-honey:hover:not(:disabled) { background-color: #C49C4A; } .ds-btn-honey:focus-visible { outline: 2px solid #D4A854; outline-offset: 2px; } .ds-btn-honey:disabled { opacity: 0.4; cursor: not-allowed; }"
+    },
+    {
+      "name": "Button: Dark (Secondary Action)",
+      "kind": "button",
+      "refersTo": "button-dark",
+      "description": "Secondary action. Soft Charcoal fill, pill shape.",
+      "html": "<button class=\"ds-btn-dark\">See how it works</button>",
+      "css": ".ds-btn-dark { background-color: #2D2D2D; color: #FFFFFF; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-size: 0.9375rem; font-weight: 500; line-height: 1; padding: 16px 32px; border-radius: 9999px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: background-color 0.15s ease; } .ds-btn-dark:hover:not(:disabled) { background-color: #1A1A1A; } .ds-btn-dark:focus-visible { outline: 2px solid #2D2D2D; outline-offset: 2px; } .ds-btn-dark:disabled { opacity: 0.4; cursor: not-allowed; }"
+    },
+    {
+      "name": "Button: Outline (Tertiary)",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Tertiary action. Transparent fill, Sand border. Hover shifts border and text to Honey.",
+      "html": "<button class=\"ds-btn-outline\">Learn more</button>",
+      "css": ".ds-btn-outline { background-color: transparent; color: #2D2D2D; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-size: 0.9375rem; font-weight: 500; line-height: 1; padding: 16px 32px; border-radius: 9999px; border: 1px solid #D4D0C8; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: color 0.15s ease, border-color 0.15s ease; } .ds-btn-outline:hover:not(:disabled) { color: #D4A854; border-color: #D4A854; } .ds-btn-outline:focus-visible { outline: 2px solid #D4A854; outline-offset: 2px; } .ds-btn-outline:disabled { opacity: 0.4; cursor: not-allowed; }"
+    },
+    {
+      "name": "Button: Subtle (Inline/Minimal)",
+      "kind": "button",
+      "refersTo": "button-subtle",
+      "description": "Minimal tertiary action. Transparent fill, Warm Gray text, Sand border. No hover color shift.",
+      "html": "<button class=\"ds-btn-subtle\">Cancel</button>",
+      "css": ".ds-btn-subtle { background-color: transparent; color: #9A9590; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-size: 0.875rem; font-weight: 400; line-height: 1; padding: 12px 20px; border-radius: 9999px; border: 1px solid #D4D0C8; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; } .ds-btn-subtle:focus-visible { outline: 2px solid #D4A854; outline-offset: 2px; } .ds-btn-subtle:disabled { opacity: 0.4; cursor: not-allowed; }"
+    },
+    {
+      "name": "Recipe Card",
+      "kind": "card",
+      "refersTo": "recipe-card",
+      "description": "Guest recipe submission card. White surface, serif italic title, decorative line, sans attribution. Hover lifts with shadow.",
+      "html": "<div class=\"ds-recipe-card\"><p class=\"ds-recipe-card__title\">Nonna's Ribollita</p><div class=\"ds-recipe-card__line\"></div><p class=\"ds-recipe-card__contributor\">From Maria Rossi</p></div>",
+      "css": ".ds-recipe-card { background-color: #FFFFFF; border-radius: 12px; border: 1px solid #E8E0D5; padding: 32px 24px; min-height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; box-shadow: 0 1px 3px rgba(45,45,45,0.06); } .ds-recipe-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(45,45,45,0.10); } .ds-recipe-card__title { font-family: 'Minion Pro', Georgia, 'Times New Roman', serif; font-size: 1.125rem; font-weight: 400; font-style: italic; color: #2D2D2D; margin: 0; } .ds-recipe-card__line { width: 24px; height: 1px; background-color: #D4D0C8; margin: 16px auto; } .ds-recipe-card__contributor { font-family: Inter, -apple-system, sans-serif; font-size: 0.8125rem; font-weight: 400; color: #9A9590; margin: 0; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Text input with label. White fill, Sand border. Focus shifts border to Honey. Minimum 44px touch target.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-field__label\" for=\"ds-recipe-name\">Recipe name</label><input class=\"ds-field__input\" id=\"ds-recipe-name\" type=\"text\" placeholder=\"e.g. Grandma's risotto\" /></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 8px; } .ds-field__label { font-family: Inter, -apple-system, sans-serif; font-size: 0.875rem; font-weight: 500; color: #2D2D2D; display: block; } .ds-field__input { width: 100%; padding: 12px 16px; font-family: Inter, -apple-system, sans-serif; font-size: 0.9375rem; font-weight: 400; color: #2D2D2D; background-color: #FFFFFF; border: 1px solid #E8E0D5; border-radius: 12px; transition: border-color 0.15s ease; outline: none; min-height: 44px; box-sizing: border-box; } .ds-field__input::placeholder { color: #9A9590; } .ds-field__input:focus { border-color: #D4A854; }"
+    },
+    {
+      "name": "Eyebrow",
+      "kind": "custom",
+      "refersTo": "eyebrow",
+      "description": "ALL CAPS uppercase kicker above headings. Always Honey colored. Counts toward the 10% Honey budget.",
+      "html": "<span class=\"ds-eyebrow\">THE BOOK</span>",
+      "css": ".ds-eyebrow { font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-size: 0.6875rem; font-weight: 500; line-height: 1.4; letter-spacing: 0.15em; text-transform: uppercase; color: #D4A854; display: inline-block; }"
+    },
+    {
+      "name": "Book Preview (Signature Component)",
+      "kind": "custom",
+      "refersTo": "recipe-card",
+      "description": "The product artifact in its natural habitat. Cream container, white inner card, Honey contributor count as the emotional payload.",
+      "html": "<div class=\"ds-book-preview\"><div class=\"ds-book-preview__card\"><p class=\"ds-book-preview__title\">The Martinez Wedding</p><p class=\"ds-book-preview__subtitle\">Guest Cookbook · 2024</p><p class=\"ds-book-preview__progress\"><span class=\"ds-book-preview__count\">78</span> recipes collected</p></div></div>",
+      "css": ".ds-book-preview { background-color: #F5F1EB; border-radius: 16px; padding: 32px; text-align: center; } .ds-book-preview__card { background-color: #FFFFFF; border-radius: 12px; padding: 40px; box-shadow: 0 10px 15px rgba(0,0,0,0.07), 0 4px 6px rgba(0,0,0,0.04); } .ds-book-preview__title { font-family: 'Minion Pro', Georgia, serif; font-size: 1.75rem; font-weight: 400; color: #2D2D2D; margin: 0 0 8px; } .ds-book-preview__subtitle { font-family: Inter, -apple-system, sans-serif; font-size: 0.875rem; font-weight: 400; color: #9A9590; margin: 0 0 16px; } .ds-book-preview__progress { font-family: Inter, -apple-system, sans-serif; font-size: 0.875rem; font-weight: 400; color: #9A9590; margin: 0; } .ds-book-preview__count { font-weight: 500; color: #D4A854; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Still at the Table",
+    "overview": "The visual world is the afterward — the Wednesday two years in, when she opens the book for the risotto and finds her grandmother's handwriting on the page. Domestic tables, kitchen counters, mid-meal scenes, hands doing things, books open next to plates that have something on them. Never wedding settings. Never the day-of. The brand exists in the time when the people who came are still here, still showing up.\n\nThe work the system does: turn \"they love you\" into something the recipient can hold. Eighty contributions are harder to dismiss than a card or a feeling. The book is the proof. Every visual choice serves that — the photograph that shows real use, the type that earns its weight, the warm white that asks you to spend time on the page.\n\nThe system is editorial without being precious. Premium materials, deliberate restraint, but never mistaken for a wellness retreat or a luxury brochure. Things are allowed to look used. Pages get stained. Counters have crumbs. The serif belongs in a cookbook, not in a logo concept board. If a surface looks like it was art-directed within an inch of its life, it has lost the brand.",
+    "keyCharacteristics": [
+      "Flat surfaces with tonal warmth. Depth through two-tone warm whites, not shadows.",
+      "Serif at scale, sans in function. Never swapped.",
+      "Honey earns every appearance through scarcity.",
+      "Editorial restraint, not minimalism. Whitespace is purposeful, never cold or aspirational.",
+      "The book gets stained. The brand permits and prefers visible use.",
+      "\"Still\" is present tense. The brand is not about remembering a day; it is about continuing to live with what it made.",
+      "Premium does not mean precious. The brand can be funny. Specific is funnier than abstract anyway."
+    ],
+    "rules": [
+      {
+        "name": "The Honey Rule",
+        "body": "Honey is the spice, not the dish. It appears on at most 10% of any given surface. Its value is its rarity. An interface saturated with Honey has spent the spice. When in doubt: less. Eyebrow uses count toward the 10% Honey budget; if a surface has many eyebrows, the surface is over-spent.",
+        "section": "colors"
+      },
+      {
+        "name": "The Canvas-vs-Layer Rule",
+        "body": "The system uses two warm whites whose roles invert by register. In brand register: Warm White Warm (--brand-warm-white-warm, #FAF7F2) is canvas; Warm White Airy (--brand-warm-white-airy, #FAF9F7) is layer. In product register: Warm White Airy is canvas; Warm White Warm is layer. Never use Warm White Warm as a body or page background in product register. Never use Warm White Airy as a section background in brand register. Never use literal hex — always the named token.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two-Tone Saturation Rule",
+        "body": "The 2% saturation difference is the entire point. Do not consolidate. Two warm whites that look almost the same create depth without borders, without shadows, without harshness. One warm white is editorial uniformity. The system depends on both existing.",
+        "section": "colors"
+      },
+      {
+        "name": "The Flat-by-Default Rule",
+        "body": "Surfaces are flat at rest. The two warm whites provide all ambient depth. Shadows are state responses, not decorative permanence. If a surface has a shadow purely to look elevated at rest, remove it.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Used-Object Rule",
+        "body": "Every photograph, every layout, every component should look like it could exist in someone's actual life. If it would only exist in a styled photograph, it is wrong. Stains, crumbs, fingerprints, slightly off-center crops, hands mid-motion, plates with something missing — these are features. The book exists in homes; the brand should never feel like it doesn't.",
+        "section": "components"
+      },
+      {
+        "name": "The Cut-the-Last-Sentence Rule",
+        "body": "If you're not sure, cut the last sentence. That's where the explanation hides.",
+        "section": "donts"
+      },
+      {
+        "name": "The Book-In-Use Rule",
+        "body": "Photograph the book stained, open, on counters. Never pristine.",
+        "section": "donts"
+      },
+      {
+        "name": "The Behavioral-Not-Demographic Rule",
+        "body": "Never address the organizer by role; address her by behavior.",
+        "section": "donts"
+      }
+    ],
+    "dos": [
+      "Do use Honey sparingly, always earned. It anchors CTAs, active states, the eyebrow kicker, and progress highlights. Nowhere else.",
+      "Do choose the warm white token by register. Brand surfaces: --brand-warm-white-warm as canvas. Product surfaces: --brand-warm-white-airy as canvas. Never swap. Never use hex literals.",
+      "Do let specifics carry the emotion. '32 of 45 guests have submitted' is emotional. 'A meaningful experience' is not. Numbers, names, and observable actions do what adjectives cannot.",
+      "Do photograph the book in use. Stained pages, open on a kitchen counter, next to a glass, mid-meal. Real surfaces. Real light. Real use.",
+      "Do address the organizer by behavior. The one who opens the group chat, sends the link, follows up. Not: the MOH, the bridesmaid, the sister, the mom. Behavioral targeting expands the audience; role targeting collapses it.",
+      "Do pair Minion Pro with Inter only. Serif for headings and emotional moments. Sans for body and UI. Never swapped. Never a third typeface.",
+      "Do cap body text at 65-75 characters per line. Generous line height (1.65) and a contained measure make prose editorial, not exhausting."
+    ],
+    "donts": [
+      "Don't use banned vocabulary in any context — copy, UI labels, email subject lines, alt text, tooltips. Banned list: cherish · treasure · memories · special · unique · loved ones · celebrate · journey · curated · perfect · amazing · so blessed · yummy · heartfelt keepsake · meaningful · timeless.",
+      "Don't reach for the easy word. Always ask: is this the word, or is this the easy word?",
+      "Don't say 'loved ones' — say 'the people'. Don't say 'your nearest and dearest' — say 'everyone who showed up'. Don't say 'a timeless keepsake' — say 'the book lives in the kitchen'. Don't say 'who gathered to celebrate' — say 'who came'. Don't say 'forever / always' — say 'the afterward'. Don't say 'a collaborative, curated experience' — say '80 guests, one book'. Don't say 'she created something special' — say 'she pulled it off'. Don't say 'cherish / treasure' — say 'at the table'. Don't say 'your special day' — say 'Wednesday'. Don't say 'her loved ones' — say 'the people in her life'.",
+      "Don't produce anything that could appear on vinst.me (cookbook-as-AI-tool: AI is the value driver — Small Plates is the inverse: the guests make the cookbook), createmycookbook.com (cookbook-as-template: DIY framing, spiral-bound institutional signal), The Knot/Zola/Brides.com/Minted/Paperless Post (wedding industry cluster: script calligraphy, golden-hour photography, 'your perfect day' copy), Playfair Display + script calligraphy (wedding typeface pairing — banned at every size and weight; fall to Georgia if Minion Pro unavailable), light-and-airy photography (overexposed whites, golden hour, couples mid-joy, drone shots — the inverse of Wednesday at the kitchen counter), generic SaaS/AI tool aesthetic (purple gradients, glassmorphism, 'Boost your X' value props, stock illustrations, Lottie as decoration, hero-metric dashboards).",
+      "Don't use Honey for body text or critical information. It fails WCAG AA on Warm White at approximately 2.1:1. Color is never the sole signal for UI state — always paired with text, icon, or shape.",
+      "Don't use pure black (#000000) anywhere. Soft Charcoal (#2D2D2D) is the darkest text color. Deep Charcoal (#1A1A1A) for elevated emphasis only.",
+      "Don't introduce new colors. No pinks, blues, or purples. No cool-tinted grays. Every color outside the palette is a vote against the warmth the system has built.",
+      "Don't apply side-stripe borders (border-left or border-right larger than 1px as a colored accent on cards, list items, or callouts). Rewrite with full borders, background tints, leading icons, or nothing.",
+      "Don't use gradient text (background-clip: text with a gradient fill). Use a single solid color. Emphasis through weight or size."
+    ]
+  }
+}
