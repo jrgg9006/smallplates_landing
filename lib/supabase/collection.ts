@@ -52,6 +52,8 @@ export async function validateCollectionToken(token: string, groupId?: string | 
     let customShareMessage: string | null = null;
     let customShareSignature: string | null = null;
     let coupleNames: string | null = null;
+    let coupleFirstName: string | null = null;
+    let partnerFirstName: string | null = null;
     let coupleImageUrl: string | null = null;
     let coupleImagePositionY = 50;
     let coupleImagePositionX = 50;
@@ -68,6 +70,8 @@ export async function validateCollectionToken(token: string, groupId?: string | 
         .single();
 
       if (group) {
+        coupleFirstName = group.couple_first_name ?? null;
+        partnerFirstName = group.partner_first_name ?? null;
         if (group.couple_first_name && group.partner_first_name) {
           coupleNames = `${group.couple_first_name} & ${group.partner_first_name}`;
         } else if (group.couple_first_name) {
@@ -107,7 +111,7 @@ export async function validateCollectionToken(token: string, groupId?: string | 
     if (!groupId) {
       const { data: userGroups } = await supabase
         .from('group_members')
-        .select('group_id, groups!inner(id, name, book_closed_by_user)')
+        .select('group_id, groups!inner(id, name, book_closed_by_user, couple_first_name, partner_first_name)')
         .eq('profile_id', profile.id)
         .eq('role', 'owner');
 
@@ -133,6 +137,24 @@ export async function validateCollectionToken(token: string, groupId?: string | 
 
         if (candidates.length === 1) {
           resolvedGroupId = candidates[0].id;
+          // Reason: Populate couple names from auto-resolved group so the landing page
+          // shows the correct names even when the URL has no ?group= param
+          const resolvedGroupData = userGroups.find((gm) => {
+            const g = gm.groups as unknown as { id: string };
+            return g.id === resolvedGroupId;
+          });
+          if (resolvedGroupData) {
+            const g = resolvedGroupData.groups as unknown as { couple_first_name?: string | null; partner_first_name?: string | null };
+            coupleFirstName = g.couple_first_name ?? null;
+            partnerFirstName = g.partner_first_name ?? null;
+            if (g.couple_first_name && g.partner_first_name) {
+              coupleNames = `${g.couple_first_name} & ${g.partner_first_name}`;
+            } else if (g.couple_first_name) {
+              coupleNames = g.couple_first_name;
+            } else if (g.partner_first_name) {
+              coupleNames = g.partner_first_name;
+            }
+          }
         }
         // Reason: If multiple groups, we can't auto-resolve — the UI should show a selector.
         // But to prevent orphans, we still provide the list so the submit function can try.
@@ -147,6 +169,8 @@ export async function validateCollectionToken(token: string, groupId?: string | 
         custom_share_message: customShareMessage,
         custom_share_signature: customShareSignature,
         couple_names: coupleNames,
+        couple_first_name: coupleFirstName,
+        partner_first_name: partnerFirstName,
         couple_image_url: coupleImageUrl,
         couple_image_position_y: coupleImagePositionY,
         couple_image_position_x: coupleImagePositionX,
