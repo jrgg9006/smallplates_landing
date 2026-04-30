@@ -37,7 +37,7 @@ export default function Hero() {
           sizes="100vw"
         />
         {/* Warm overlay — maintains brand warmth while ensuring text legibility */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/30 to-black/20"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#2D2D2D]/60 via-[#2D2D2D]/35 to-[#2D2D2D]/10"></div>
       </div>
 
       {/* Content */}
@@ -50,7 +50,7 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           >
-            Recipes from the people who love you.
+            A cookbook made by your wedding guests.
           </motion.h1>
           <motion.p
             className="type-body mt-6 sm:text-xl md:text-2xl text-white/90 max-w-2xl"
@@ -58,10 +58,7 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
           >
-            A wedding cookbook made by everyone who showed up.
-            <span className="block mt-1 text-white/80">
-              You set it up. We handle the rest.
-            </span>
+            You set it up. We handle the rest.
           </motion.p>
           <motion.div
             className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4"
@@ -89,19 +86,6 @@ export default function Hero() {
             </button>
           </motion.div>
 
-          {/* Scroll link to The Book section */}
-          <motion.button
-            type="button"
-            onClick={() => {
-              document.getElementById("the-book-heading")?.scrollIntoView({ behavior: "smooth" });
-            }}
-            className="mt-4 text-sm text-white/60 hover:text-white/90 transition-colors duration-200 focus:outline-none"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 1.2, ease: "easeOut" }}
-          >
-            See the book &rarr;
-          </motion.button>
         </div>
       </div>
 
