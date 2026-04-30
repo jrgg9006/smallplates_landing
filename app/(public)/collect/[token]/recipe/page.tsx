@@ -106,7 +106,7 @@ export default function RecipeFormPage() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-white lg:bg-brand-warm-white-warm flex items-center justify-center">
+      <div className="min-h-screen bg-brand-warm-white-airy flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-honey mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
@@ -118,9 +118,9 @@ export default function RecipeFormPage() {
   // Error state
   if (error || !tokenInfo || !guestData) {
     return (
-      <div className="min-h-screen bg-white lg:bg-brand-warm-white-warm">
+      <div className="min-h-screen bg-brand-warm-white-airy">
         {/* Header */}
-        <div className="bg-white lg:bg-brand-warm-white-warm border-b border-gray-200">
+        <div className="bg-brand-warm-white-airy border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-center">
             <Link href="/" className="hover:opacity-80 transition-opacity">
               <Image
@@ -160,7 +160,7 @@ export default function RecipeFormPage() {
 
   // Main journey experience - fullscreen like onboarding
   return (
-    <div className="min-h-screen bg-white lg:bg-brand-warm-white-warm">
+    <div className="min-h-screen bg-brand-warm-white-airy">
       {/* Recipe Journey - No header, fullscreen */}
       <RecipeJourneyWrapper
         tokenInfo={tokenInfo}

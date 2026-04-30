@@ -984,6 +984,8 @@ export interface CollectionTokenInfo {
   custom_share_message: string | null;
   custom_share_signature: string | null;
   couple_names: string | null;
+  couple_first_name: string | null;
+  partner_first_name: string | null;
   couple_image_url: string | null;
   couple_image_position_y: number;
   couple_image_position_x: number;

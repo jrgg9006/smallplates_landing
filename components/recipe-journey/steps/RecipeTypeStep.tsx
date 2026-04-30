@@ -63,10 +63,10 @@ export default function RecipeTypeStep({ onSelectType, selectedType }: RecipeTyp
         {/* Header */}
         <div className="space-y-3 text-center">
           <h2 className="font-serif text-3xl md:text-4xl font-semibold text-brand-charcoal">
-            What are you bringing to the table?
+          Doesn&apos;t have to be fancy. Just has to be yours.
           </h2>
-          <p className="text-base text-gray-600">
-            Doesn&apos;t have to be fancy. Just has to be yours.
+          <p className="type-body-small">
+            What are you bringing to the table?
           </p>
         </div>
 
@@ -89,7 +89,7 @@ export default function RecipeTypeStep({ onSelectType, selectedType }: RecipeTyp
               <span className="text-2xl flex-shrink-0" aria-hidden="true">
                 {option.emoji}
               </span>
-              <span className="text-brand-charcoal text-base">
+              <span className="text-gray-600 text-base">
                 {option.label}
               </span>
             </button>
