@@ -109,6 +109,7 @@ export interface Database {
           last_email_sent_at: string | null;
           emails_sent_count: number;
           invitation_paused_at: string | null;
+          showcase_opted_out: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -136,6 +137,7 @@ export interface Database {
           last_email_sent_at?: string | null;
           emails_sent_count?: number;
           invitation_paused_at?: string | null;
+          showcase_opted_out?: boolean;
         };
         Update: {
           first_name?: string;
@@ -159,6 +161,7 @@ export interface Database {
           last_email_sent_at?: string | null;
           emails_sent_count?: number;
           invitation_paused_at?: string | null;
+          showcase_opted_out?: boolean;
         };
       };
       guest_recipes: {
