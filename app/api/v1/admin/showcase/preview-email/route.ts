@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     // Fetch guest info with group
     const { data: guest } = await supabase
       .from('guests')
-      .select('first_name, last_name, group_id, groups:group_id(couple_display_name)')
+      .select('first_name, last_name, group_id, groups:group_id(name, couple_display_name)')
       .eq('id', guestId)
       .single();
 
@@ -41,8 +41,8 @@ export async function GET(request: NextRequest) {
     }
 
     const guestName = `${guest.first_name} ${guest.last_name}`;
-    const group = guest.groups as unknown as { couple_display_name: string | null } | null;
-    const coupleNamePlain = group?.couple_display_name || 'The couple';
+    const group = guest.groups as unknown as { name: string | null; couple_display_name: string | null } | null;
+    const coupleNamePlain = group?.couple_display_name || group?.name || 'The couple';
     const coupleNameHtml = coupleNamePlain.replace(/&/g, '&amp;');
 
     let html = buildShowcaseEmailHTML({
