@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import WhatsAppFAB from "@/components/landing/WhatsAppFAB";
 import {
   Carousel,
   CarouselContent,
@@ -563,6 +564,7 @@ export default function HowItWorksPage() {
           </div>
         </section>
       </main>
+      <WhatsAppFAB />
     </>
   );
 }

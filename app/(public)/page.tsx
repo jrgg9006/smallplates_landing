@@ -14,6 +14,7 @@ import PersonalNotes from '@/components/landing/PersonalNotes'
 import TheBook from '@/components/landing/TheBook'
 import TestimonialsSection from '@/components/landing/TestimonialsSection'
 import FAQ from '@/components/landing/FAQ'
+import WhatsAppFAB from '@/components/landing/WhatsAppFAB'
 import NewsletterSignup from '@/components/landing/NewsletterSignup'
 import Footer from '@/components/landing/Footer'
 
@@ -37,6 +38,7 @@ export default function Home() {
         <NewsletterSignup />
       </main>
       <Footer />
+      <WhatsAppFAB />
     </>
   )
 }
