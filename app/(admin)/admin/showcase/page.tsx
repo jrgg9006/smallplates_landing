@@ -377,6 +377,7 @@ export default function ShowcasePage() {
           guest_name: guest.guest_name,
           guest_email: guest.guest_email,
           couple_name: guest.couple_display_name,
+          group_name: guest.group_name,
           override,
           recipes: readyRecipes.map(r => ({
             recipe_id: r.recipe_id,

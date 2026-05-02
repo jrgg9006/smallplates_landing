@@ -237,6 +237,23 @@ export default function AdminHomePage() {
             </div>
           </Link>
 
+          {/* PDF Delivery */}
+          <Link href="/admin/pdf-delivery" className="group">
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-black cursor-pointer h-full">
+              <div className="text-5xl mb-4">📄</div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">PDF Delivery</h2>
+              <p className="text-gray-600 mb-4">
+                Send the full digital cookbook to recipe contributors
+              </p>
+              <div className="flex items-center text-sm text-gray-500 group-hover:text-black transition-colors">
+                <span>Manage delivery</span>
+                <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </Link>
+
           {/* TikTok Content Generator - Active */}
           <Link href="/admin/tiktok" className="group">
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-brand-honey cursor-pointer h-full">

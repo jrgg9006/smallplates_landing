@@ -12,10 +12,11 @@ interface ShowcaseRecipeItem {
 
 interface ShowcaseEmailParams {
   guestName: string;
-  coupleName: string;      // HTML-safe, e.g. "Sarah &amp; Mike"
-  coupleNamePlain: string; // Plain text, e.g. "Sarah & Mike"
+  coupleName: string;        // HTML-safe, e.g. "Sarah &amp; Mike"
+  coupleNamePlain: string;   // Plain text, e.g. "Sarah & Mike"
   recipes: ShowcaseRecipeItem[];
-  guestId: string;         // Reason: used as inviter_id in the seed link for GA4 attribution
+  guestId: string;           // Reason: used as inviter_id in the seed link for GA4 attribution
+  unsubscribeUrl?: string;   // One-click unsubscribe URL; falls back to mailto if omitted
 }
 
 function buildRecipeSpreadBlock(recipe: ShowcaseRecipeItem, guestName: string, coupleNamePlain: string): string {
@@ -63,7 +64,13 @@ export function buildShowcaseEmailHTML({
   coupleNamePlain,
   recipes,
   guestId,
+  unsubscribeUrl,
 }: ShowcaseEmailParams): string {
+  // Reason: mailto fallback lets us stay CAN-SPAM compliant before we build a full
+  // one-click endpoint. We include the guest ID in the body so we can process it manually.
+  const unsubHref = unsubscribeUrl
+    || `mailto:team@smallplatesandcompany.com?subject=Unsubscribe&body=Guest%20ID%3A%20${encodeURIComponent(guestId)}`;
+
   // Reason: UTMs + inviter_id let us see in GA4 which showcase emails actually drove
   // traffic back to the site, and decode which specific guest clicked when needed.
   const seedLinkBase = 'https://smallplatesandcompany.com/';
@@ -129,6 +136,7 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
       .seed-link { color: #888888 !important; border-bottom-color: #3a3a3a !important; }
       /* Invert logo to white in dark mode — works in Apple Mail */
       .logo-img { filter: invert(1) !important; }
+      .referral-bg { background-color: #3a3632 !important; }
     }
   </style>
 </head>
@@ -220,40 +228,50 @@ ${spreadBlocks}
                       </p>
                     </td>
                   </tr>
+                </table>
+
+                <!-- Referral block -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
-                    <td align="center" style="padding-bottom: 36px;">
-                      <p style="margin: 0; font-family: Georgia, serif; font-size: 16px; color: #2D2D2D;
-                        line-height: 1.7; text-align: center; font-style: italic;" class="darkmode-heading">
-                      </p>
+                    <td style="padding-bottom: 32px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                          <td align="center"
+                            style="background-color: #2D2D2D; border-radius: 6px; padding: 24px 40px;"
+                            class="referral-bg">
+
+                            <!-- Intro line -->
+                            <p style="margin: 0 0 16px 0; font-family: Georgia, serif;
+                              font-size: 14px; color: #9A9590; line-height: 1.4;
+                              text-align: center; font-style: italic;">
+                              Someone you know is getting married.
+                            </p>
+
+                            <!-- Label + code -->
+                            <p style="margin: 0 0 6px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                              font-size: 11px; color: #9A9590; letter-spacing: 0.12em;
+                              text-transform: uppercase; text-align: center;">
+                              Discount code
+                            </p>
+                            <p style="margin: 0 0 16px 0; font-family: Georgia, serif;
+                              font-size: 22px; color: #F5F1EB; letter-spacing: 0.18em;
+                              text-align: center; font-weight: 400;">
+                              REFERRAL2026
+                            </p>
+
+                            <!-- Subtext -->
+                            <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                              font-size: 13px; color: #9A9590; line-height: 1.5; text-align: center;">
+                              15% off their next book.
+                            </p>
+
+                          </td>
+                        </tr>
+                      </table>
                     </td>
                   </tr>
                 </table>
 
-                <!-- Divider -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td style="border-top: 1px solid #E8E0D5; padding-bottom: 28px;" class="card-divider">
-                    </td>
-                  </tr>
-                </table>
-
-                <!-- Seed — no button, no price, just a door -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td align="center" style="padding-bottom: 36px;">
-                      <p style="margin: 0 0 6px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-                        font-size: 13px; color: #B5AFA8; line-height: 1.6; text-align: center;" class="seed-text">
-                        Want one of these for your own wedding?<br>
-                        Or someone you love?
-                      </p>
-                      <a href="${seedLinkHref}"
-                        style="font-family: Georgia, serif; font-size: 13px; color: #9A9590; text-decoration: none;
-                          border-bottom: 1px solid #E8E0D5; line-height: 1.6;" class="seed-link">
-                        smallplatesandcompany.com
-                      </a>
-                    </td>
-                  </tr>
-                </table>
 
                 <!-- Footer -->
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
@@ -279,7 +297,9 @@ ${spreadBlocks}
               <td align="center" style="padding: 16px 20px 0;">
                 <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
                   font-size: 11px; color: #B5AFA8; line-height: 1.5; text-align: center;">
-                  You received this because you opted in when you submitted your recipe.
+                  You received this because you opted in when you submitted your recipe. Discount code REFERRAL2026 can be applied directly at checkout. No expiration. &nbsp;&middot;&nbsp;
+                  <a href="${unsubHref}"
+                    style="color: #B5AFA8; text-decoration: underline;">Unsubscribe</a>
                 </p>
               </td>
             </tr>

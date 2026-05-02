@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
       guest_name,
       guest_email,
       couple_name,
+      group_name,
       recipes,
       override,
     } = await request.json() as {
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest) {
       guest_name: string;
       guest_email: string;
       couple_name: string;
+      group_name?: string;
       recipes: RecipePayload[];
       override?: boolean;
     };
@@ -82,14 +84,21 @@ export async function POST(request: NextRequest) {
       })
     );
 
-    const coupleNamePlain = couple_name || 'The couple';
+    const coupleNamePlain = couple_name || group_name || 'The couple';
     const coupleNameHtml = coupleNamePlain.replace(/&/g, '&amp;');
+
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://smallplatesandcompany.com';
+    // Reason: two separate URLs — the page URL is for humans clicking the footer link,
+    // the API URL is for email clients doing RFC 8058 one-click POST.
+    const unsubscribePageUrl = `${baseUrl}/unsubscribe?gid=${guest_id}`;
+    const unsubscribeApiUrl = `${baseUrl}/api/v1/unsubscribe?gid=${guest_id}`;
 
     const html = buildShowcaseEmailHTML({
       guestName: guest_name || 'Friend',
       coupleName: coupleNameHtml,
       coupleNamePlain,
       guestId: guest_id,
+      unsubscribeUrl: unsubscribePageUrl,
       recipes: recipes.map((r, i) => ({
         recipeName: r.recipe_name || 'Your recipe',
         cid: `cid:recipe-spread-${i}`,
@@ -106,6 +115,10 @@ export async function POST(request: NextRequest) {
       ? `${coupleNamePlain} via Small Plates`
       : 'Team Small Plates & Co.';
 
+    // Reason: List-Unsubscribe-Post triggers Gmail/Apple Mail's native "Unsubscribe" button
+    // at the top of the email (RFC 8058). The mailto fallback covers clients that don't
+    // support one-click POST.
+    const unsubMailto = `mailto:team@smallplatesandcompany.com?subject=Unsubscribe&body=Guest%20ID%3A%20${encodeURIComponent(guest_id)}`;
     await postmarkClient.sendEmail({
       From: `${fromName} <${fromEmail}>`,
       ReplyTo: 'team@smallplatesandcompany.com',
@@ -114,6 +127,10 @@ export async function POST(request: NextRequest) {
       HtmlBody: html,
       MessageStream: 'outbound',
       Attachments: attachments,
+      Headers: [
+        { Name: 'List-Unsubscribe', Value: `<${unsubscribeApiUrl}>, <${unsubMailto}>` },
+        { Name: 'List-Unsubscribe-Post', Value: 'List-Unsubscribe=One-Click' },
+      ],
     });
 
     const sentAt = new Date().toISOString();
