@@ -10,7 +10,7 @@ export type OrderStatus = 'paid' | 'processing' | 'in_production' | 'shipped' | 
 export type GuestStatus = 'pending' | 'submitted' | 'reached_out';
 export type GuestSource = 'manual' | 'collection' | 'imported';
 export type RecipeSubmissionStatus = 'draft' | 'submitted' | 'approved' | 'rejected';
-export type CommunicationType = 'invitation' | 'reminder' | 'thank_you' | 'custom' | 'recipe_showcase';
+export type CommunicationType = 'invitation' | 'reminder' | 'thank_you' | 'custom' | 'recipe_showcase' | 'pdf_delivery';
 export type CommunicationChannel = 'email' | 'sms' | 'whatsapp';
 export type CommunicationStatus = 'pending' | 'sent' | 'delivered' | 'failed' | 'opened';
 
@@ -110,6 +110,8 @@ export interface Database {
           emails_sent_count: number;
           invitation_paused_at: string | null;
           showcase_opted_out: boolean;
+          notify_opt_in: boolean;
+          notify_email: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -437,6 +439,7 @@ export interface Database {
           book_notes: string | null;
           print_couple_name: string | null;
           print_details_confirmed_at: string | null;
+          pdf_url: string | null;
           status: GroupStatus;
           created_at: string;
           updated_at: string;
@@ -469,6 +472,7 @@ export interface Database {
           book_notes?: string | null;
           print_couple_name?: string | null;
           print_details_confirmed_at?: string | null;
+          pdf_url?: string | null;
           shipping_address_id?: string | null;
           status?: GroupStatus;
         };
@@ -499,6 +503,7 @@ export interface Database {
           book_notes?: string | null;
           print_couple_name?: string | null;
           print_details_confirmed_at?: string | null;
+          pdf_url?: string | null;
           shipping_address_id?: string | null;
           status?: GroupStatus;
         };
