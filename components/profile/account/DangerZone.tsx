@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { deleteAccount } from '@/lib/supabase/profiles';
-import { AlertTriangle, Trash2, Shield, Loader2, X } from 'lucide-react';
+import { AlertTriangle, Trash2, Loader2, X, CheckCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function DangerZone() {
@@ -15,6 +15,7 @@ export function DangerZone() {
   const [confirmationText, setConfirmationText] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const CONFIRMATION_TEXT = 'DELETE MY ACCOUNT';
 
@@ -48,18 +49,13 @@ export function DangerZone() {
         return;
       }
 
-      // Account deletion successful - user is automatically signed out
-      // Show success message based on deletion type
-      if (data?.deletionType === 'soft') {
-        // Soft delete - data preserved
-        alert('✅ Your account has been deleted. All your recipes and book data have been preserved.');
-      } else {
-        // Hard delete - completely removed
-        alert('✅ Your account has been permanently deleted.');
-      }
+      const msg =
+        data?.deletionType === 'soft'
+          ? 'Account deactivated. Your book data is preserved.'
+          : 'Account permanently deleted.';
 
-      // Redirect to home page
-      router.push('/');
+      setSuccessMessage(msg);
+      setTimeout(() => router.push('/'), 2000);
     } catch (err) {
       setError('Failed to delete account. Please try again.');
     } finally {
@@ -76,30 +72,22 @@ export function DangerZone() {
 
   return (
     <div className="space-y-6">
-      {/* Danger Zone Header */}
-      <div className="border border-red-200 rounded-lg p-6 bg-red-50">
+      {/* Danger Zone Section */}
+      <div className="border border-red-200 rounded-lg p-6">
         <div className="flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="text-lg font-semibold text-red-900 mb-2">Danger Zone</h3>
-            <p className="text-sm text-red-700 mb-4">
-              Once you delete your account, there is no going back. This action cannot be undone.
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">Delete account</h3>
+            <p className="text-sm text-gray-600 mb-1">
+              Once deleted, this can&apos;t be undone. If you have existing books or recipes, your
+              account will be deactivated and data preserved. Otherwise it&apos;s permanently
+              removed.
             </p>
-            
-            <div className="space-y-2 text-sm text-red-700">
-              <p><strong>What happens when you delete your account:</strong></p>
-              <ul className="list-disc list-inside space-y-1 ml-4">
-                <li>If you have recipes, guests, or books: Your account will be deactivated but all your data (recipes, guests, books) will be preserved</li>
-                <li>If you have no content: Your account and all data will be permanently deleted</li>
-                <li>Your recipe collection link will be disabled</li>
-                <li>You will be signed out of all devices</li>
-                <li>This action cannot be undone</li>
-              </ul>
-            </div>
 
             <Button
               onClick={() => setShowDeleteModal(true)}
               variant="destructive"
+              size="sm"
               className="mt-4 bg-red-600 hover:bg-red-700"
             >
               <Trash2 className="h-4 w-4 mr-2" />
@@ -111,7 +99,7 @@ export function DangerZone() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-md w-full p-6 space-y-6">
             {/* Modal Header */}
             <div className="flex items-center justify-between">
@@ -128,98 +116,101 @@ export function DangerZone() {
               </button>
             </div>
 
-            {/* Warning */}
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-800 font-medium mb-2">
-                ⚠️ This action is irreversible!
-              </p>
-              <p className="text-sm text-red-700">
-                All your data will be permanently deleted and cannot be recovered.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              {/* Password Confirmation */}
-              <div>
-                <Label htmlFor="deletePassword" className="block text-sm font-medium text-gray-700 mb-1">
-                  Enter your password to confirm *
-                </Label>
-                <Input
-                  id="deletePassword"
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="w-full"
-                  placeholder="Current password"
-                  required
-                  disabled={loading}
-                />
+            {/* Success state */}
+            {successMessage ? (
+              <div className="flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-green-800">{successMessage} Redirecting...</p>
               </div>
-
-              {/* Confirmation Text */}
-              <div>
-                <Label htmlFor="confirmText" className="block text-sm font-medium text-gray-700 mb-1">
-                  Type &quot;{CONFIRMATION_TEXT}&quot; to confirm *
-                </Label>
-                <Input
-                  id="confirmText"
-                  type="text"
-                  value={confirmationText}
-                  onChange={(e) => setConfirmationText(e.target.value)}
-                  className="w-full"
-                  placeholder={CONFIRMATION_TEXT}
-                  required
-                  disabled={loading}
-                />
-              </div>
-
-              {/* Error Message */}
-              {error && (
-                <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
-                  <AlertTriangle className="h-4 w-4 text-red-600 flex-shrink-0" />
-                  <p className="text-sm text-red-600">{error}</p>
-                </div>
-              )}
-
-              {/* Security Notice */}
-              <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                <div className="flex items-start gap-2">
-                  <Shield className="h-4 w-4 text-gray-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-gray-600">
-                    For security reasons, we require your password to confirm this action.
+            ) : (
+              <>
+                {/* Warning */}
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-800">
+                    This action is irreversible. All your data will be deleted and cannot be
+                    recovered.
                   </p>
                 </div>
-              </div>
-            </div>
 
-            {/* Modal Actions */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-4">
-              <Button
-                onClick={handleDeleteAccount}
-                disabled={loading || !currentPassword || confirmationText !== CONFIRMATION_TEXT}
-                className="flex-1 bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Deleting Account...
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete Account Forever
-                  </>
-                )}
-              </Button>
-              <Button
-                onClick={handleCancel}
-                variant="outline"
-                disabled={loading}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-            </div>
+                <div className="space-y-4">
+                  {/* Password Confirmation */}
+                  <div>
+                    <Label
+                      htmlFor="deletePassword"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Enter your password *
+                    </Label>
+                    <Input
+                      id="deletePassword"
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      className="w-full"
+                      placeholder="Current password"
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+
+                  {/* Confirmation Text */}
+                  <div>
+                    <Label
+                      htmlFor="confirmText"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Type &quot;{CONFIRMATION_TEXT}&quot; to confirm *
+                    </Label>
+                    <Input
+                      id="confirmText"
+                      type="text"
+                      value={confirmationText}
+                      onChange={(e) => setConfirmationText(e.target.value)}
+                      className="w-full"
+                      placeholder={CONFIRMATION_TEXT}
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+
+                  {/* Error Message */}
+                  {error && (
+                    <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
+                      <AlertTriangle className="h-4 w-4 text-red-600 flex-shrink-0" />
+                      <p className="text-sm text-red-600">{error}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Modal Actions */}
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                  <Button onClick={handleCancel} variant="outline" disabled={loading}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleDeleteAccount}
+                    disabled={
+                      loading ||
+                      !currentPassword ||
+                      confirmationText !== CONFIRMATION_TEXT
+                    }
+                    className="bg-red-600 text-white hover:bg-red-700 min-w-[150px]"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Deleting...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Forever
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

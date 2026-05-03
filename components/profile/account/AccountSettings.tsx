@@ -35,7 +35,9 @@ export function AccountSettings() {
       </div>
 
       {/* Setup Guide preferences — restore hidden setup checklists */}
-      <SetupGuidePreferences />
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <SetupGuidePreferences />
+      </div>
 
       {/* Account Deletion */}
       <DangerZone />

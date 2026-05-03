@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { updatePassword } from '@/lib/supabase/profiles';
-import { CheckCircle, AlertCircle, Loader2, Shield, Eye, EyeOff } from 'lucide-react';
+import { CheckCircle, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 
 export function PasswordChangeForm() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -200,7 +200,7 @@ export function PasswordChangeForm() {
           </div>
         )}
         
-        <div className="text-secondary-sm text-gray-500 mt-1 space-y-1">
+        <div className="text-sm text-gray-500 mt-1 space-y-1">
           <p>Password must contain:</p>
           <ul className="list-disc list-inside space-y-0.5 ml-2">
             <li className={newPassword.length >= 8 ? 'text-green-600' : 'text-gray-500'}>
@@ -265,43 +265,29 @@ export function PasswordChangeForm() {
       )}
 
       {/* Form Actions */}
-      <div className="flex flex-col sm:flex-row gap-3 pt-4">
-        <Button
-          type="submit"
-          disabled={loading}
-          className="flex-1 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Updating Password...
-            </>
-          ) : (
-            'Update Password'
-          )}
-        </Button>
+      <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
         <Button
           type="button"
           variant="outline"
           onClick={handleCancel}
           disabled={loading}
-          className="flex-1"
         >
           Cancel
         </Button>
-      </div>
-
-      {/* Security Notice */}
-      <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-        <div className="flex items-start gap-2">
-          <Shield className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-xs text-blue-700">
-              <strong>Security tip:</strong> Use a unique password that you haven&apos;t used on other websites. 
-              Consider using a password manager to generate and store strong passwords.
-            </p>
-          </div>
-        </div>
+        <Button
+          type="submit"
+          disabled={loading}
+          className="bg-gray-900 text-white hover:bg-gray-800 min-w-[130px]"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Updating...
+            </>
+          ) : (
+            'Update Password'
+          )}
+        </Button>
       </div>
     </form>
   );
