@@ -76,17 +76,17 @@ export default function Banner() {
           </button>
         </div>
 
-        {/* Mobile dropdown — always solid white regardless of scroll state */}
+        {/* Mobile dropdown */}
         <div
           className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-            isMobileMenuOpen ? "max-h-64 border-b border-gray-100" : "max-h-0"
+            isMobileMenuOpen ? "max-h-64" : "max-h-0"
           }`}
         >
-          <div className="bg-white px-6 py-4 space-y-4">
+          <div className="px-6 py-5 flex flex-col gap-3">
             {user ? (
               <Link
                 href="/profile/groups"
-                className="block w-full text-center py-3 px-4 rounded-full bg-black text-white font-semibold hover:bg-gray-800 transition-colors"
+                className="block w-full text-center py-3 px-4 rounded-full border border-white/60 text-white font-semibold hover:bg-white/10 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Go to Profile
@@ -98,13 +98,13 @@ export default function Banner() {
                     setIsLoginModalOpen(true);
                     setIsMobileMenuOpen(false);
                   }}
-                  className="block w-full text-center py-3 px-4 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+                  className="block w-full text-center py-3 px-4 rounded-full border border-white/60 bg-black/70 text-white font-semibold hover:bg-black/90 transition-colors"
                 >
                   Login
                 </button>
                 <Link
                   href="/onboarding"
-                  className="block w-full text-center py-3 px-4 rounded-full bg-black text-white font-semibold hover:bg-gray-800 transition-colors"
+                  className="block w-full text-center py-3 px-4 rounded-full border border-white/60 bg-black/70 text-white font-semibold hover:bg-black/90 transition-colors"
                   onClick={() => {
                     trackEvent("start_book_click", { cta_location: "header_nav_mobile" });
                     setIsMobileMenuOpen(false);
