@@ -410,13 +410,13 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
 
       {/* Close Book Banner */}
       {selectedGroup && !bookClosed && recipes.length >= 25 && onCloseBookClick && (
-        <div className="bg-[hsl(var(--brand-sand))]/50 rounded-xl px-4 py-3 flex items-center justify-between">
+        <div className="bg-[hsl(var(--brand-sand))]/50 rounded-xl px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
           <p className="text-sm text-[hsl(var(--brand-charcoal))]">
             {recipes.length} recipes in the book. That&apos;s enough for something real.
           </p>
           <button
             onClick={onCloseBookClick}
-            className="text-sm font-medium text-[hsl(var(--brand-honey))] hover:underline whitespace-nowrap ml-4"
+            className="text-sm font-medium text-[hsl(var(--brand-honey))] hover:underline whitespace-nowrap sm:ml-4 text-left min-h-[44px] flex items-center sm:min-h-0"
           >
             Review and close the book &rarr;
           </button>

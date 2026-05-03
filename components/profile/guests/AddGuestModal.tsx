@@ -193,18 +193,19 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded, isFirstGuest = fa
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-3">
-          <Button 
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <Button
             variant="outline"
             onClick={onClose}
             disabled={loading}
+            className="w-full sm:w-auto min-h-[44px]"
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleSave}
             disabled={loading || !firstName.trim()}
-            className="bg-black text-white hover:bg-gray-800"
+            className="w-full sm:w-auto min-h-[44px] bg-black text-white hover:bg-gray-800"
           >
             {loading ? 'Saving...' : 'Save'}
           </Button>

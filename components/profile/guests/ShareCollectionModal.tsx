@@ -168,7 +168,7 @@ export function ShareCollectionModal({
       
       // Only save to group_members (requires groupId)
       if (!groupId) {
-        setError('Unable to save: no group selected');
+        setError('Something went wrong. Try closing and reopening this.');
         setIsSaving(false);
         return;
       }
@@ -203,7 +203,7 @@ export function ShareCollectionModal({
     try {
       // Only reset from group_members (requires groupId)
       if (!groupId) {
-        setError('Unable to reset: no group selected');
+        setError('Something went wrong. Try closing and reopening this.');
         setIsSaving(false);
         return;
       }
@@ -234,7 +234,7 @@ export function ShareCollectionModal({
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
       setError('Invalid file type. Only JPEG, PNG, and WebP are allowed.');
-      // Reset input on error
+      setTimeout(() => setError(null), 5000);
       event.target.value = '';
       return;
     }
@@ -242,7 +242,7 @@ export function ShareCollectionModal({
     // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
       setError('File too large. Maximum size is 5MB.');
-      // Reset input on error
+      setTimeout(() => setError(null), 5000);
       event.target.value = '';
       return;
     }
@@ -429,11 +429,10 @@ export function ShareCollectionModal({
               {/* Hero Message */}
               <div className="text-center space-y-2">
                 <p className="text-gray-900 text-lg">
-                  You&apos;re about to create something incredible.
+                  Send this link to everyone who should be in the book.
                 </p>
                 <p className="text-gray-600 text-sm">
-                  Send this link to everyone who loves them. They&apos;ll add their favorite recipes. 
-                  We&apos;ll turn it into a book they&apos;ll cook from forever.
+                  They submit a recipe. We design and print the book. That&apos;s it.
                 </p>
               </div>
 
@@ -442,9 +441,9 @@ export function ShareCollectionModal({
                 {/* Primary Action - Copy Link */}
                 <Button
                   onClick={handleCopyLink}
-                  className={`w-full flex items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all ${
-                    copied 
-                      ? 'bg-[hsl(var(--brand-honey))] border-[hsl(var(--brand-honey))] text-black hover:bg-[hsl(var(--brand-honey))] hover:border-[hsl(var(--brand-honey))] hover:text-black' 
+                  className={`min-h-[44px] w-full flex items-center justify-center gap-3 px-4 rounded-xl border-2 transition-all ${
+                    copied
+                      ? 'bg-[hsl(var(--brand-honey))] border-[hsl(var(--brand-honey))] text-black hover:bg-[hsl(var(--brand-honey))] hover:border-[hsl(var(--brand-honey))] hover:text-black'
                       : 'bg-black text-white hover:bg-gray-800 border-black'
                   }`}
                 >
@@ -460,16 +459,15 @@ export function ShareCollectionModal({
                     </>
                   )}
                 </Button>
-                
-                {/* Secondary Actions */}
-                <div className="text-center space-y-2">
-                  <button
-                    onClick={handleShowMessageCustomization}
-                    className="text-sm text-gray-600 hover:text-gray-900 transition-colors block mx-auto"
-                  >
-                    Customize message
-                  </button>
-                </div>
+
+                {/* Secondary Action - Customize message */}
+                <Button
+                  onClick={handleShowMessageCustomization}
+                  variant="outline"
+                  className="min-h-[44px] w-full rounded-xl border border-[rgba(45,45,45,0.15)] text-[hsl(var(--brand-charcoal))] hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Customize message
+                </Button>
               </div>
 
               {/* Preview Link */}
@@ -489,25 +487,24 @@ export function ShareCollectionModal({
           ) : (
             /* Expanded layout - responsive for mobile */
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
-              {/* Left Column - Main Content */}
-              <div className="lg:col-span-2 space-y-4 lg:space-y-6">
-                {/* Hero Message */}
-                <div className="text-left space-y-2">
+              {/* Left Column - Main Content (appears below editor on mobile) */}
+              <div className="order-2 lg:order-1 lg:col-span-2 space-y-4 lg:space-y-6">
+                {/* Hero Message — hidden on mobile (already read in previous state) */}
+                <div className="hidden lg:block text-left space-y-2">
                   <p className="text-gray-900 text-lg">
-                    You&apos;re about to create something incredible.
+                    Send this link to everyone who should be in the book.
                   </p>
                   <p className="text-gray-600 text-sm">
-                    Send this link to everyone who loves them. They&apos;ll add their favorite recipes. 
-                    We&apos;ll turn it into a book they&apos;ll cook from forever.
+                    They submit a recipe. We design and print the book. That&apos;s it.
                   </p>
                 </div>
 
                 {/* Copy Link Button */}
                 <Button
                   onClick={handleCopyLink}
-                  className={`w-full flex items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all ${
-                    copied 
-                      ? 'bg-[hsl(var(--brand-honey))] border-[hsl(var(--brand-honey))] text-black hover:bg-[hsl(var(--brand-honey))] hover:border-[hsl(var(--brand-honey))] hover:text-black' 
+                  className={`min-h-[44px] w-full flex items-center justify-center gap-3 px-4 rounded-xl border-2 transition-all ${
+                    copied
+                      ? 'bg-[hsl(var(--brand-honey))] border-[hsl(var(--brand-honey))] text-black hover:bg-[hsl(var(--brand-honey))] hover:border-[hsl(var(--brand-honey))] hover:text-black'
                       : 'bg-black text-white hover:bg-gray-800 border-black'
                   }`}
                 >
@@ -524,19 +521,24 @@ export function ShareCollectionModal({
                   )}
                 </Button>
 
-                {/* Customize Message Link */}
-                <div className="text-left">
+                {/* Preview link — sits below Copy Link in both layouts */}
+                <div className="text-center">
                   <button
-                    onClick={handleShowMessageCustomization}
-                    className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                    onClick={() => {
+                      if (collectionUrl && typeof window !== 'undefined') {
+                        window.open(collectionUrl, '_blank', 'noopener,noreferrer');
+                      }
+                    }}
+                    className="text-sm text-gray-600 hover:text-gray-900 underline transition-colors py-2"
                   >
-                    Customize message
+                    Preview what guests will see
                   </button>
                 </div>
+
               </div>
 
-              {/* Right Column - Image Upload + Message Customization */}
-              <div className="lg:col-span-3 space-y-4 lg:space-y-6">
+              {/* Right Column - Image Upload + Message Customization (appears first on mobile) */}
+              <div className="order-1 lg:order-2 lg:col-span-3 space-y-4 lg:space-y-6">
                 {/* Couple Image Section */}
                 {groupId && (
                   <div className="space-y-4">
@@ -589,6 +591,7 @@ export function ShareCollectionModal({
                                 size="sm"
                                 variant="outline"
                                 onClick={handleCancelCoupleReposition}
+                                className="min-h-[44px]"
                               >
                                 Cancel
                               </Button>
@@ -597,7 +600,7 @@ export function ShareCollectionModal({
                                 size="sm"
                                 onClick={handleSaveCoupleReposition}
                                 disabled={isSavingCouplePosition}
-                                className="bg-black text-white hover:bg-gray-800"
+                                className="min-h-[44px] bg-black text-white hover:bg-gray-800"
                               >
                                 {isSavingCouplePosition ? 'Saving...' : 'Save'}
                               </Button>
@@ -618,7 +621,7 @@ export function ShareCollectionModal({
                           </div>
                         )}
                         {!isRepositioningCoupleImage && (
-                          <div className="flex gap-2 justify-end">
+                          <div className="grid grid-cols-3 gap-2 sm:flex sm:gap-2 sm:justify-end">
                             <Button
                               type="button"
                               size="sm"
@@ -629,7 +632,7 @@ export function ShareCollectionModal({
                                 handleDeleteImage();
                               }}
                               disabled={isUploadingImage}
-                              className="text-red-600 border-red-200 hover:bg-red-50"
+                              className="min-h-[44px] text-red-600 border-red-200 hover:bg-red-50"
                             >
                               <X className="w-4 h-4 mr-1" />
                               Remove
@@ -644,6 +647,7 @@ export function ShareCollectionModal({
                                 handleStartCoupleReposition();
                               }}
                               disabled={isUploadingImage}
+                              className="min-h-[44px]"
                             >
                               <Move className="w-4 h-4 mr-1" />
                               Reposition
@@ -658,6 +662,7 @@ export function ShareCollectionModal({
                                 handleImageClick();
                               }}
                               disabled={isUploadingImage}
+                              className="min-h-[44px]"
                             >
                               <Upload className="w-4 h-4 mr-1" />
                               Change
@@ -712,7 +717,7 @@ export function ShareCollectionModal({
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-sm font-medium text-gray-900 mb-3">
-                      Your message to guests:
+                      Your invite message
                     </h3>
                   </div>
                   
@@ -728,16 +733,14 @@ export function ShareCollectionModal({
                       placeholder="Your message to guests..."
                       maxLength={300}
                     />
-                    <div className="flex justify-between items-center">
-                      <span className={`text-xs ${editingMessage.length > 280 ? 'text-red-500' : 'text-gray-400'}`}>
-                        {editingMessage.length}/300
-                      </span>
+                    <div className="space-y-2 sm:space-y-0 sm:flex sm:justify-between sm:items-center">
                       <div className="flex gap-2">
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={handleCancelEdit}
                           disabled={isSaving}
+                          className="flex-1 sm:flex-none min-h-[44px]"
                         >
                           Cancel
                         </Button>
@@ -746,34 +749,25 @@ export function ShareCollectionModal({
                           variant="outline"
                           onClick={handleResetMessage}
                           disabled={isSaving}
+                          className="flex-1 sm:flex-none min-h-[44px]"
                         >
-                          Reset
+                          Use default
                         </Button>
                         <Button
                           size="sm"
                           onClick={handleSaveMessage}
                           disabled={isSaving || editingMessage.trim().length === 0}
-                          className="bg-black text-white hover:bg-gray-800"
+                          className="flex-1 sm:flex-none min-h-[44px] bg-black text-white hover:bg-gray-800"
                         >
                           Save
                         </Button>
                       </div>
+                      <span className={`text-xs ${editingMessage.length > 280 ? 'text-red-500' : 'text-gray-400'}`}>
+                        {editingMessage.length}/300
+                      </span>
                     </div>
                   </div>
 
-                  {/* Preview Link in Right Column */}
-                  <div className="pt-2">
-                    <button
-                      onClick={() => {
-                        if (collectionUrl && typeof window !== 'undefined') {
-                          window.open(collectionUrl, '_blank', 'noopener,noreferrer');
-                        }
-                      }}
-                      className="text-sm text-gray-600 hover:text-gray-900 underline transition-colors"
-                    >
-                      Preview what guests will see
-                    </button>
-                  </div>
                 </div>
               </div>
             </div>
