@@ -199,42 +199,63 @@ export function RecipeImageUpload({
             )}
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {selectedFiles.map((file, index) => (
-              <div key={index} className="relative group">
-                <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200">
-                  {file.type.startsWith('image/') && previewUrls[index] ? (
-                    <Image
-                      src={previewUrls[index]}
-                      alt={`Recipe image ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : file.type === 'application/pdf' ? (
-                    <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                      <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <span className="text-xs">PDF</span>
+          {/* PDF files — compact horizontal rows */}
+          {selectedFiles.some(f => f.type === 'application/pdf') && (
+            <div className="space-y-2">
+              {selectedFiles.map((file, index) =>
+                file.type !== 'application/pdf' ? null : (
+                  <div key={index} className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+                    <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span className="text-sm text-gray-600 flex-1 truncate">{file.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeFile(index)}
+                      className="p-1 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+                    >
+                      <XIcon className="w-4 h-4" />
+                    </button>
+                  </div>
+                )
+              )}
+            </div>
+          )}
+
+          {/* Image files — grid */}
+          {selectedFiles.some(f => f.type.startsWith('image/')) && (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {selectedFiles.map((file, index) =>
+                !file.type.startsWith('image/') ? null : (
+                  <div key={index} className="relative group">
+                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200">
+                      {previewUrls[index] ? (
+                        <Image
+                          src={previewUrls[index]}
+                          alt={`Recipe image ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                          <UploadIcon className="w-8 h-8 mb-2" />
+                          <span className="text-xs">File</span>
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                      <UploadIcon className="w-8 h-8 mb-2" />
-                      <span className="text-xs">File</span>
-                    </div>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeFile(index)}
-                  className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600 z-10"
-                >
-                  <XIcon className="w-4 h-4" />
-                </button>
-                <p className="mt-2 text-xs text-gray-600 truncate">{file.name}</p>
-              </div>
-            ))}
-          </div>
+                    <button
+                      type="button"
+                      onClick={() => removeFile(index)}
+                      className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600 z-10"
+                    >
+                      <XIcon className="w-4 h-4" />
+                    </button>
+                    <p className="mt-2 text-xs text-gray-600 truncate">{file.name}</p>
+                  </div>
+                )
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

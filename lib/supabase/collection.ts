@@ -482,8 +482,8 @@ export async function submitGuestRecipeWithFiles(
       documentUrlsSaved: recipe.document_urls
     });
 
-    // Add image to processing queue
-    if (recipe && submission.upload_method === 'image' && finalFileUrls.length > 0) {
+    // Add image to processing queue (skip PDFs — the agent can't process them as images)
+    if (recipe && submission.upload_method === 'image' && finalFileUrls.length > 0 && !finalFileUrls[0].toLowerCase().endsWith('.pdf')) {
       console.log('📝 Adding image to processing queue for recipe:', recipe.id);
       
       const { error: queueError } = await supabase
