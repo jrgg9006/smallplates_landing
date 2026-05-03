@@ -752,8 +752,8 @@ export async function addRecipeWithFiles(
         }
       }
       
-      // Step 6: Add image to processing queue
-      if (finalFileUrls.length > 0) {
+      // Step 6: Add image to processing queue (skip PDFs — the agent can't process them as images)
+      if (finalFileUrls.length > 0 && !finalFileUrls[0].toLowerCase().endsWith('.pdf')) {
         console.log('📝 Adding image to processing queue for recipe:', recipe.id);
         
         // Use regular client for queue operations

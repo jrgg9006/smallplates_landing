@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Edit } from "lucide-react";
+import { Edit, Download } from "lucide-react";
 import Image from "next/image";
 import { updateRecipe } from "@/lib/supabase/recipes";
 import { useAuth } from "@/lib/contexts/AuthContext";
@@ -230,22 +230,37 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     ? 'Collected from link'
     : 'Added manually';
 
+  const isPdfUrl = (url: string) =>
+    url.toLowerCase().endsWith('.pdf') || url.toLowerCase().includes('application/pdf');
+
+  const firstDocUrl = localRecipe.document_urls?.[0] ?? null;
+  const firstDocIsPdf = firstDocUrl ? isPdfUrl(firstDocUrl) : false;
+
   // Helper function to determine if recipe is still processing
   const isRecipeProcessing = () => {
     if (localRecipe.upload_method !== 'image') return false;
     if (!localRecipe.document_urls || localRecipe.document_urls.length === 0) return false;
-    
+
+    // PDFs are not processed by the AI pipeline — never show the spinner
+    if (localRecipe.document_urls.every(isPdfUrl)) return false;
+
     // Check if ingredients/instructions contain placeholder text
     const ingredients = localRecipe.ingredients || '';
     const instructions = localRecipe.instructions || '';
-    
+
     const isPlaceholderIngredients = ingredients === 'See uploaded images';
     const isPlaceholderInstructions = instructions.match(/^\d+ images? uploaded$/);
-    
+
     return isPlaceholderIngredients || isPlaceholderInstructions;
   };
 
   const showProcessingIndicator = isRecipeProcessing();
+
+  // When a PDF was uploaded, ingredients/instructions keep placeholder text — show a note instead
+  const hasPdfPlaceholder =
+    firstDocIsPdf &&
+    (localRecipe.ingredients === 'See uploaded images' ||
+      !!(localRecipe.instructions || '').match(/^\d+ images? uploaded$/));
 
   // Format groups text
   const formatGroupsText = () => {
@@ -292,20 +307,56 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         </p>
       )}
 
-      {/* Recipe Image */}
-      {localRecipe.document_urls && localRecipe.document_urls.length > 0 && (
+      {/* Recipe Image or PDF */}
+      {firstDocUrl && (
         <div className="flex-shrink-0 mb-6">
-          <div className="rounded-xl overflow-hidden shadow-lg bg-gray-100">
-            <div className="relative aspect-video w-full">
-              <Image
-                src={localRecipe.document_urls[0]}
-                alt={localRecipe.recipe_name || 'Recipe image'}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1280px) 65vw, 50vw"
-              />
-            </div>
-          </div>
+          {firstDocIsPdf ? (
+            <>
+              <a
+                href={firstDocUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-5 py-3.5 hover:bg-gray-100 transition-colors group"
+              >
+                <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span className="text-sm text-gray-600 flex-1">Uploaded PDF</span>
+                <span className="text-sm text-gray-400 group-hover:text-gray-600 transition-colors">View →</span>
+              </a>
+              {hasPdfPlaceholder && (
+                <p className="mt-2 text-xs text-gray-400 italic">
+                  We&apos;ll pull the text from this PDF and add it to the book — nothing to do on your end.
+                </p>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="rounded-xl overflow-hidden shadow-lg bg-gray-100">
+                <div className="relative aspect-video w-full">
+                  <Image
+                    src={firstDocUrl}
+                    alt={localRecipe.recipe_name || 'Recipe image'}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1280px) 65vw, 50vw"
+                  />
+                </div>
+              </div>
+              <div className="mt-2 flex justify-end">
+                <a
+                  href={firstDocUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download
+                  className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Download image
+                </a>
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -321,6 +372,8 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
               Processing image...
             </div>
+          ) : hasPdfPlaceholder ? (
+            <p className="text-sm text-gray-400 italic">See the PDF above</p>
           ) : localRecipe.ingredients && localRecipe.ingredients.trim() ? (
             <pre className="whitespace-pre-wrap break-words font-serif text-base text-gray-700 leading-relaxed m-0">
               {localRecipe.ingredients}
@@ -338,6 +391,8 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
               Processing image...
             </div>
+          ) : hasPdfPlaceholder ? (
+            <p className="text-sm text-gray-400 italic">See the PDF above</p>
           ) : localRecipe.instructions && localRecipe.instructions.trim() ? (
             <pre className="whitespace-pre-wrap break-words font-serif text-base text-gray-700 leading-[1.6] m-0">
               {localRecipe.instructions}
@@ -381,20 +436,56 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         </p>
       )}
 
-      {/* Recipe Image */}
-      {localRecipe.document_urls && localRecipe.document_urls.length > 0 && (
+      {/* Recipe Image or PDF */}
+      {firstDocUrl && (
         <div className="flex-shrink-0 mb-6">
-          <div className="rounded-xl overflow-hidden shadow-lg bg-gray-100">
-            <div className="relative aspect-video w-full">
-              <Image
-                src={localRecipe.document_urls[0]}
-                alt={localRecipe.recipe_name || 'Recipe image'}
-                fill
-                className="object-cover"
-                sizes="95vw"
-              />
-            </div>
-          </div>
+          {firstDocIsPdf ? (
+            <>
+              <a
+                href={firstDocUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-5 py-3.5 hover:bg-gray-100 transition-colors group"
+              >
+                <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span className="text-sm text-gray-600 flex-1">Uploaded PDF</span>
+                <span className="text-sm text-gray-400 group-hover:text-gray-600 transition-colors">View →</span>
+              </a>
+              {hasPdfPlaceholder && (
+                <p className="mt-2 text-xs text-gray-400 italic">
+                  We&apos;ll pull the text from this PDF and add it to the book — nothing to do on your end.
+                </p>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="rounded-xl overflow-hidden shadow-lg bg-gray-100">
+                <div className="relative aspect-video w-full">
+                  <Image
+                    src={firstDocUrl}
+                    alt={localRecipe.recipe_name || 'Recipe image'}
+                    fill
+                    className="object-cover"
+                    sizes="95vw"
+                  />
+                </div>
+              </div>
+              <div className="mt-2 flex justify-end">
+                <a
+                  href={firstDocUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download
+                  className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Download image
+                </a>
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -410,6 +501,8 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
               Processing image...
             </div>
+          ) : hasPdfPlaceholder ? (
+            <p className="text-sm text-gray-400 italic">See the PDF above</p>
           ) : localRecipe.ingredients && localRecipe.ingredients.trim() ? (
             <pre className="whitespace-pre-wrap break-words font-serif text-base text-gray-700 leading-relaxed m-0">
               {localRecipe.ingredients}
@@ -427,6 +520,8 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
               Processing image...
             </div>
+          ) : hasPdfPlaceholder ? (
+            <p className="text-sm text-gray-400 italic">See the PDF above</p>
           ) : localRecipe.instructions && localRecipe.instructions.trim() ? (
             <pre className="whitespace-pre-wrap break-words font-serif text-base text-gray-700 leading-[1.6] m-0">
               {localRecipe.instructions}

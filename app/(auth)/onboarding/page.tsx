@@ -14,6 +14,7 @@ import {
   ADDITIONAL_BOOK_PRICE,
   calculateSubtotal,
 } from "@/lib/stripe/pricing";
+import WhatsAppFAB from "@/components/landing/WhatsAppFAB";
 
 const TOTAL_STEPS = 3;
 
@@ -573,6 +574,7 @@ export default function OnboardingPage() {
   return (
     <OnboardingProvider userType="gift_giver">
       <OnboardingContent />
+      <WhatsAppFAB />
     </OnboardingProvider>
   );
 }

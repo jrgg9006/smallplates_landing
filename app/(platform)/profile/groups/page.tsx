@@ -853,15 +853,6 @@ export default function GroupsPage() {
                 Guests
               </button>
 
-              {/* Send Invitations Button - Hidden on mobile */}
-              <button
-                className="btn btn-sm btn-outline hidden sm:block"
-                onClick={handleSendInvitations}
-                disabled={!selectedGroup}
-              >
-                Send Invitations
-              </button>
-
               {/* Captains Dropdown - Hidden on mobile */}
               <div className="relative hidden sm:block">
                 <button
@@ -890,7 +881,7 @@ export default function GroupsPage() {
                   onCaptainsClick={() => setShowCaptains(true)}
                   onViewGuestsClick={handleViewGuests}
                   showAddGuestOption={isMobile}
-                  showSendInvitationsOption={isMobile}
+                  showSendInvitationsOption={true}
                   onSendInvitationsClick={handleSendInvitations}
                   onCloseBookClick={!selectedGroup?.book_closed_by_user ? handleCloseBook : undefined}
                 />
