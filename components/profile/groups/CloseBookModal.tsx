@@ -46,24 +46,24 @@ export function CloseBookModal({
           </p>
         </div>
 
-        <div className="flex gap-2 pt-2">
+        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:gap-2">
           <button
             onClick={onClose}
-            className="flex-1 border border-[rgba(45,45,45,0.12)] text-brand-charcoal rounded-full py-3 text-[14px] font-medium hover:bg-gray-50 transition-colors"
+            className="w-full sm:flex-1 border border-[rgba(45,45,45,0.12)] text-brand-charcoal rounded-full py-3 text-[14px] font-medium hover:bg-gray-50 transition-colors"
           >
             Not ready yet
           </button>
           {reviewed ? (
             <button
               onClick={onStartCloseFlow}
-              className="flex-1 bg-brand-charcoal text-brand-warm-white-warm rounded-full py-3 text-[14px] font-medium hover:bg-gray-800 transition-colors"
+              className="w-full sm:flex-1 bg-brand-charcoal text-brand-warm-white-warm rounded-full py-3 text-[14px] font-medium hover:bg-gray-800 transition-colors"
             >
               Close the book →
             </button>
           ) : (
             <button
               onClick={onReview}
-              className="flex-1 bg-brand-charcoal text-brand-warm-white-warm rounded-full py-3 text-[14px] font-medium hover:bg-gray-800 transition-colors"
+              className="w-full sm:flex-1 bg-brand-charcoal text-brand-warm-white-warm rounded-full py-3 text-[14px] font-medium hover:bg-gray-800 transition-colors"
             >
               Review recipes →
             </button>

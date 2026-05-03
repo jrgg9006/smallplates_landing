@@ -7,10 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Copy, Check } from "lucide-react";
+import { Copy, Check } from "lucide-react";
 import type { GroupWithMembers } from "@/lib/types/database";
 
 interface AddFriendToGroupModalProps {
@@ -21,229 +19,72 @@ interface AddFriendToGroupModalProps {
 }
 
 export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: AddFriendToGroupModalProps) {
-  // Form state
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    relationship: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [inviteLink, setInviteLink] = useState('');
 
-  // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
-      setFormData({
-        name: '',
-        email: '',
-        relationship: '',
-      });
-      setError(null);
       setLinkCopied(false);
-    }
-  }, [isOpen]);
-
-  const handleInputChange = (field: keyof typeof formData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    // Clear error when user starts typing
-    if (error) {
       setError(null);
-    }
-  };
-
-  const handleSendInvite = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validate required fields
-    if (!formData.name.trim()) {
-      setError('Name is required');
-      return;
-    }
-
-    if (!formData.email.trim()) {
-      setError('Email is required');
-      return;
-    }
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError('Please enter a valid email address');
-      return;
-    }
-
-    if (!group?.id) {
-      setError('Group information is missing');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-
-      // Send invitation via API
-      const response = await fetch(`/api/v1/groups/${group.id}/invitations`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name.trim(),
-          email: formData.email.trim(),
-          relationship: formData.relationship,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Failed to send invitation');
-        return;
+      if (group?.id && typeof window !== 'undefined') {
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
+        setInviteLink(`${baseUrl}/groups/${group.id}/join`);
       }
-
-      // Success! Just close the modal
-      onClose();
-      if (onInviteSent) {
-        onInviteSent();
-      }
-    } catch (err) {
-      console.error('Error sending invite:', err);
-      setError('Failed to send invitation. Please try again.');
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [isOpen, group?.id]);
 
-  const handleCopyInviteLink = async () => {
+  const handleCopyLink = async () => {
     try {
-      // Generate shareable link for direct group joining
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
-      const inviteLink = `${baseUrl}/groups/${group?.id}/join`;
-      
       await navigator.clipboard.writeText(inviteLink);
       setLinkCopied(true);
-      
-      // Reset the button text after 2 seconds
-      setTimeout(() => {
-        setLinkCopied(false);
-      }, 2000);
-    } catch (err) {
-      console.error('Error copying invite link:', err);
-      setError('Failed to copy invite link');
+      onInviteSent?.();
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      setError('Failed to copy link');
+      setTimeout(() => setError(null), 3000);
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="type-modal-title">
             Invite a Captain
           </DialogTitle>
         </DialogHeader>
-        
-        {/* Explanation text */}
-        <p className="text-xs sm:text-sm text-brand-charcoal leading-relaxed font-light mt-2">
-          Captains have full access to this book and can help you collect recipes together.
-        </p>
-        
-        <div className="space-y-4 pt-4 pb-2">
-          {/* Name Field */}
-          <div>
-            <Label htmlFor="friendName" className="text-sm font-medium text-gray-600">
-              Name *
-            </Label>
-            <Input
-              id="friendName"
-              type="text"
-              value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              placeholder="Friend's name"
-              required
-              disabled={loading}
-              autoFocus
-              className="mt-1"
-            />
-          </div>
 
-          {/* Email Field */}
-          <div>
-            <Label htmlFor="friendEmail" className="text-sm font-medium text-gray-600">
-              Email *
-            </Label>
-            <Input
-              id="friendEmail"
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-              placeholder="friend@email.com"
-              required
-              disabled={loading}
-              className="mt-1"
-            />
-            <p className="text-secondary-sm text-gray-500 mt-1">
-              An invitation to join will be sent to this email
-            </p>
-          </div>
+        <div className="space-y-6 py-4">
+          <p className="text-gray-600 text-sm">
+            Captains have full access to this book and can help collect recipes. Share this link — they&apos;ll be asked to sign in when they open it.
+          </p>
 
-          {/* Copy Invite Link Button */}
-          <div>
-            <Label className="text-sm font-medium text-gray-600 mb-3 block">
-              Or share invite link
-            </Label>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCopyInviteLink}
-              className={`w-full flex items-center gap-2 transition-colors mb-2 ${
-                linkCopied ? 'text-green-700 border-green-700 hover:bg-green-50' : ''
-              }`}
-              disabled={loading || linkCopied}
-            >
-              {linkCopied ? (
-                <>
-                  <Check className="h-4 w-4" />
-                  Copied!
-                </>
-              ) : (
-                <>
-                  <Copy className="h-4 w-4" />
-                  Copy Invite Link
-                </>
-              )}
-            </Button>
-          </div>
+          {/* Copy button */}
+          <Button
+            onClick={handleCopyLink}
+            className={`w-full min-h-[44px] rounded-xl border-2 flex items-center justify-center gap-2 transition-all ${
+              linkCopied
+                ? 'bg-[hsl(var(--brand-honey))] border-[hsl(var(--brand-honey))] text-black hover:bg-[hsl(var(--brand-honey))] hover:border-[hsl(var(--brand-honey))] hover:text-black'
+                : 'bg-black text-white hover:bg-gray-800 border-black'
+            }`}
+          >
+            {linkCopied ? (
+              <>
+                <Check className="h-4 w-4" />
+                Copied
+              </>
+            ) : (
+              <>
+                <Copy className="h-4 w-4" />
+                Copy Link
+              </>
+            )}
+          </Button>
 
-          {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-3">
-              <p className="text-red-600 text-sm">{error}</p>
-            </div>
+            <p className="text-sm text-red-600 text-center">{error}</p>
           )}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-          <Button 
-            variant="outline"
-            onClick={onClose}
-            disabled={loading}
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleSendInvite}
-            className="bg-black text-white hover:bg-gray-800"
-            disabled={loading || !formData.name.trim() || !formData.email.trim()}
-          >
-            <UserPlus className="h-4 w-4 mr-2" />
-            {loading ? 'Sending...' : 'Send Invite'}
-          </Button>
         </div>
       </DialogContent>
     </Dialog>

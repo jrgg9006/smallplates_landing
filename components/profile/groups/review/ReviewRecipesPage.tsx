@@ -164,9 +164,10 @@ export function ReviewRecipesPage({ group, onBack, onMarkReviewed, onStartCloseF
           <span className="hidden sm:inline">Book Details</span>
         </button>
 
+        {/* CTA — desktop only; mobile gets the bottom bar */}
         <Button
           onClick={() => setShowConfirmModal(true)}
-          className="bg-brand-charcoal text-white hover:bg-gray-800 rounded-full text-xs px-4 py-1.5 h-auto flex-shrink-0"
+          className="hidden sm:flex bg-brand-charcoal text-white hover:bg-gray-800 rounded-full text-xs px-4 py-1.5 h-auto flex-shrink-0"
         >
           I&apos;ve reviewed everything
         </Button>
@@ -208,6 +209,16 @@ export function ReviewRecipesPage({ group, onBack, onMarkReviewed, onStartCloseF
           ) : null}
         </div>
 
+      </div>
+
+      {/* Mobile bottom bar — full-width CTA in thumb zone */}
+      <div className="sm:hidden flex-shrink-0 bg-white border-t border-gray-200 px-4 py-3">
+        <Button
+          onClick={() => setShowConfirmModal(true)}
+          className="w-full bg-brand-charcoal text-white hover:bg-gray-800 rounded-full text-sm py-3 h-auto"
+        >
+          I&apos;ve reviewed everything
+        </Button>
       </div>
 
       {/* Book details slide-over panel */}
