@@ -9,7 +9,7 @@ export function SetupGuidePreferences() {
   const hiddenCount = permanentlyDismissedGroupIds.length;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
+    <>
       <h3 className="text-lg font-semibold text-gray-900 mb-1 flex items-center gap-2">
         <Sparkles className="w-4 h-4 text-[hsl(var(--brand-honey))]" />
         Your playbook
@@ -40,6 +40,6 @@ export function SetupGuidePreferences() {
           </button>
         </div>
       )}
-    </div>
+    </>
   );
 }

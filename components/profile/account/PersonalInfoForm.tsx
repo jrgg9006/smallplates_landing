@@ -13,6 +13,7 @@ export function PersonalInfoForm() {
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [printedName, setPrintedName] = useState('');
+  const [original, setOriginal] = useState({ fullName: '', phoneNumber: '', printedName: '' });
   const [loading, setLoading] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +41,12 @@ export function PersonalInfoForm() {
         if (guestPrintedName) {
           setPrintedName(guestPrintedName);
         }
+
+        setOriginal({
+          fullName: profile?.full_name || '',
+          phoneNumber: profile?.phone_number || '',
+          printedName: guestPrintedName || '',
+        });
       } catch (err) {
         setError('Failed to load profile data');
       } finally {
@@ -98,11 +105,11 @@ export function PersonalInfoForm() {
   };
 
   const handleCancel = () => {
-    // Reset to original values (reload from server)
+    setFullName(original.fullName);
+    setPhoneNumber(original.phoneNumber);
+    setPrintedName(original.printedName);
     setError(null);
     setSuccess(false);
-    // Re-trigger the useEffect to reload data
-    setLoadingProfile(true);
   };
 
   if (loadingProfile) {
@@ -149,7 +156,7 @@ export function PersonalInfoForm() {
           className="w-full"
           placeholder="+1 (555) 123-4567"
         />
-        <p className="text-secondary-sm text-gray-500 mt-1">Optional - used for order notifications</p>
+        <p className="text-sm text-gray-500 mt-1">Optional - used for order notifications</p>
       </div>
 
       {/* Printed Name */}
@@ -165,7 +172,7 @@ export function PersonalInfoForm() {
           className="w-full"
           placeholder="e.g. Rich G."
         />
-        <p className="text-secondary-sm text-gray-500 mt-1">How your name appears in printed cookbooks</p>
+        <p className="text-sm text-gray-500 mt-1">How your name appears in printed cookbooks</p>
       </div>
 
       {/* Email Display (Read-only) */}
@@ -176,7 +183,7 @@ export function PersonalInfoForm() {
         <div className="w-full p-3 bg-gray-50 border border-gray-200 rounded-md text-gray-700">
           {user?.email}
         </div>
-        <p className="text-secondary-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 mt-1">
           To change your email, use the Email Change section below
         </p>
       </div>
@@ -198,11 +205,19 @@ export function PersonalInfoForm() {
       )}
 
       {/* Form Actions */}
-      <div className="flex flex-col sm:flex-row gap-3 pt-4">
+      <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleCancel}
+          disabled={loading}
+        >
+          Cancel
+        </Button>
         <Button
           type="submit"
           disabled={loading}
-          className="flex-1 bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50"
+          className="bg-gray-900 text-white hover:bg-gray-800 min-w-[110px]"
         >
           {loading ? (
             <>
@@ -212,15 +227,6 @@ export function PersonalInfoForm() {
           ) : (
             'Save Changes'
           )}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleCancel}
-          disabled={loading}
-          className="flex-1"
-        >
-          Cancel
         </Button>
       </div>
     </form>

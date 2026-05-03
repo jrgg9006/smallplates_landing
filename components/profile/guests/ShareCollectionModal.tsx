@@ -464,7 +464,7 @@ export function ShareCollectionModal({
                 <Button
                   onClick={handleShowMessageCustomization}
                   variant="outline"
-                  className="min-h-[44px] w-full rounded-xl border border-[rgba(45,45,45,0.15)] text-[hsl(var(--brand-charcoal))] hover:bg-gray-50 transition-colors font-medium"
+                  className="min-h-[44px] w-full rounded-xl border border-[rgba(45,45,45,0.15)] text-gray-900 hover:bg-gray-50 transition-colors font-medium"
                 >
                   Customize message
                 </Button>

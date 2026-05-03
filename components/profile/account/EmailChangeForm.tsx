@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { updateEmail } from '@/lib/supabase/profiles';
 import { useAuth } from '@/lib/contexts/AuthContext';
-import { CheckCircle, AlertCircle, Loader2, Mail, Shield } from 'lucide-react';
+import { CheckCircle, AlertCircle, Loader2, Shield } from 'lucide-react';
 
 export function EmailChangeForm() {
   const { user } = useAuth();
@@ -14,7 +14,6 @@ export function EmailChangeForm() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
 
   const validateForm = () => {
@@ -23,7 +22,6 @@ export function EmailChangeForm() {
       return false;
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(newEmail.trim())) {
       setError('Please enter a valid email address');
@@ -50,14 +48,13 @@ export function EmailChangeForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setLoading(true);
     setError(null);
-    setSuccess(false);
 
     try {
       const { error } = await updateEmail(newEmail.trim(), currentPassword);
@@ -68,7 +65,6 @@ export function EmailChangeForm() {
       }
 
       setVerificationSent(true);
-      setSuccess(true);
       setNewEmail('');
       setCurrentPassword('');
     } catch (err) {
@@ -82,19 +78,19 @@ export function EmailChangeForm() {
     setNewEmail('');
     setCurrentPassword('');
     setError(null);
-    setSuccess(false);
     setVerificationSent(false);
   };
 
   return (
     <div className="space-y-6">
       {/* Current Email Display */}
-      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <div className="flex items-center gap-2 mb-2">
-          <Mail className="h-4 w-4 text-blue-600" />
-          <span className="text-sm font-medium text-blue-900">Current Email</span>
+      <div>
+        <Label className="block text-sm font-medium text-gray-700 mb-1">
+          Current Email
+        </Label>
+        <div className="w-full p-3 bg-gray-50 border border-gray-200 rounded-md text-gray-700">
+          {user?.email}
         </div>
-        <p className="text-blue-800 font-medium">{user?.email}</p>
       </div>
 
       {/* Verification Success Message */}
@@ -102,15 +98,10 @@ export function EmailChangeForm() {
         <div className="flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
           <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-green-900 mb-1">
-              Verification Email Sent!
-            </p>
+            <p className="text-sm font-medium text-green-900 mb-1">Verification email sent</p>
             <p className="text-sm text-green-700">
-              We&apos;ve sent a verification email to <strong>{newEmail}</strong>. 
-              Click the link in the email to confirm your new email address.
-            </p>
-            <p className="text-xs text-green-600 mt-2">
-              Check your spam folder if you don&apos;t see the email within a few minutes.
+              Check your inbox and click the link to confirm the change. Your current email stays
+              active until then.
             </p>
           </div>
         </div>
@@ -149,11 +140,9 @@ export function EmailChangeForm() {
             required
             disabled={loading || verificationSent}
           />
-          <div className="flex items-center gap-2 mt-1">
+          <div className="flex items-center gap-1.5 mt-1">
             <Shield className="h-3 w-3 text-gray-400" />
-            <p className="text-secondary-sm text-gray-500">
-              Required to confirm your identity for this security-sensitive change
-            </p>
+            <p className="text-sm text-gray-500">Required to confirm your identity</p>
           </div>
         </div>
 
@@ -166,49 +155,33 @@ export function EmailChangeForm() {
         )}
 
         {/* Form Actions */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-4">
-          <Button
-            type="submit"
-            disabled={loading || verificationSent}
-            className="flex-1 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Sending Verification...
-              </>
-            ) : verificationSent ? (
-              'Verification Sent'
-            ) : (
-              'Change Email'
-            )}
-          </Button>
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
           <Button
             type="button"
             variant="outline"
             onClick={handleCancel}
             disabled={loading}
-            className="flex-1"
           >
             {verificationSent ? 'Close' : 'Cancel'}
           </Button>
+          <Button
+            type="submit"
+            disabled={loading || verificationSent}
+            className="bg-gray-900 text-white hover:bg-gray-800 min-w-[130px]"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Sending...
+              </>
+            ) : verificationSent ? (
+              'Sent'
+            ) : (
+              'Change Email'
+            )}
+          </Button>
         </div>
       </form>
-
-      {/* Security Notice */}
-      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-        <div className="flex items-start gap-2">
-          <Shield className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-medium text-amber-900 mb-1">Security Notice</p>
-            <ul className="text-xs text-amber-700 space-y-1">
-              <li>• You&apos;ll need to verify the new email before the change takes effect</li>
-              <li>• Your current email will remain active until verification is complete</li>
-              <li>• You&apos;ll receive notifications on both emails during the transition</li>
-            </ul>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
