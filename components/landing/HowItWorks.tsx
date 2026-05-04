@@ -30,7 +30,7 @@ const steps = [
     title: "We make the book.",
     description: "Designed. Printed. Hardcover. Delivered.",
     caption: "Start to delivery, around four weeks.",
-    image: "/images/HowitWorks_images/how_step3.2.png",
+    image: "/images/HowitWorks_images/book_in_hand_whitebackgound.png",
     imageAlt: "The finished hardcover cookbook",
     imageClass: "object-cover",
     imageBg: "bg-brand-cream",
@@ -59,6 +59,7 @@ function StepCard({ step, index }: { step: Step; index: number }) {
           fill
           className={step.imageClass}
           sizes="(max-width: 768px) 100vw, 33vw"
+          priority={index === 0}
         />
       </motion.div>
 
