@@ -1,4 +1,6 @@
 import RegalosBanner from "./_components/RegalosBanner";
+import RegalosHero from "./_components/RegalosHero";
+import RegalosTheProblem from "./_components/RegalosTheProblem";
 import RegalosFooter from "./_components/RegalosFooter";
 
 export const metadata = {
@@ -12,6 +14,8 @@ export default function RegalosPage() {
     <>
       <RegalosBanner />
       <main className="min-h-screen bg-white">
+        <RegalosHero />
+        <RegalosTheProblem />
         {/* Sections will be added in Phase 2B-2D */}
         <div className="py-32 text-center">
           <p className="type-caption text-brand-charcoal/40">
