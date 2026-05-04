@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { trackEvent } from "@/lib/analytics";
+import everyoneWhoShowedUpImage from "@/public/images/everyone_showedup/everyone_who_showed_up.png";
 
 /**
  * THE SOLUTION SECTION — Small Plates Wedding Landing Page
@@ -112,7 +113,7 @@ export default function TheSolution() {
           >
             <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl bg-gray-200">
               <Image
-                src="/images/everyone_showedup/everyone_who_showed_up.png"
+                src={everyoneWhoShowedUpImage}
                 alt="A cookbook made by everyone who showed up"
                 fill
                 className="object-cover"
