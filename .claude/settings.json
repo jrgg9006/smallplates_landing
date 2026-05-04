@@ -1,0 +1,6 @@
+{
+  "enabledPlugins": {
+    "banana-claude@banana-claude-marketplace": true,
+    "marketing-skills@marketingskills": true
+  }
+}
