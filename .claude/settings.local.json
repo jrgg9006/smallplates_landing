@@ -1,4 +1,7 @@
 {
+  "env": {
+    "GOOGLE_AI_API_KEY": "AIzaSyALgo0fJ2GU02fOj9wkS85tU5ApxNG8C90"
+  },
   "permissions": {
     "allow": [
       "Bash(grep:*)",
@@ -39,7 +42,14 @@
       "WebFetch(domain:help.remento.co)",
       "Bash(wait)",
       "Bash(npm run *)",
-      "Bash(npx impeccable *)"
+      "Bash(npx impeccable *)",
+      "Bash(echo \"EXIT_CODE: $?\")",
+      "Bash(echo \"EXIT_CODE: $?\")",
+      "Bash(python3 *)",
+      "Bash(node *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(identify /Users/macbook/Desktop/smallplates_landing/public/images/HowitWorks_images/how_step1.png)"
     ],
     "deny": []
   }
