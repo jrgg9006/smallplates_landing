@@ -1,6 +1,8 @@
 import RegalosBanner from "./_components/RegalosBanner";
 import RegalosHero from "./_components/RegalosHero";
 import RegalosTheProblem from "./_components/RegalosTheProblem";
+import RegalosTheSolution from "./_components/RegalosTheSolution";
+import RegalosHowItWorks from "./_components/RegalosHowItWorks";
 import RegalosFooter from "./_components/RegalosFooter";
 
 export const metadata = {
@@ -16,7 +18,9 @@ export default function RegalosPage() {
       <main className="min-h-screen bg-white">
         <RegalosHero />
         <RegalosTheProblem />
-        {/* Sections will be added in Phase 2B-2D */}
+        <RegalosTheSolution />
+        <RegalosHowItWorks />
+        {/* Sections will be added in Phase 2C-2D */}
         <div className="py-32 text-center">
           <p className="type-caption text-brand-charcoal/40">
             Construyendo /regalos — más secciones llegan pronto.
