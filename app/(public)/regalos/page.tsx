@@ -7,6 +7,7 @@ import RegalosBooksPrinted from "./_components/RegalosBooksPrinted";
 import RegalosPersonalNotes from "./_components/RegalosPersonalNotes";
 import RegalosTheBook from "./_components/RegalosTheBook";
 import RegalosTestimonialsSection from "./_components/RegalosTestimonialsSection";
+import RegalosEmotionalClose from "./_components/RegalosEmotionalClose";
 import RegalosFooter from "./_components/RegalosFooter";
 
 export const metadata = {
@@ -28,6 +29,7 @@ export default function RegalosPage() {
         <RegalosPersonalNotes />
         <RegalosTheBook />
         <RegalosTestimonialsSection />
+        <RegalosEmotionalClose />
         {/* Sections will be added in Phase 2D */}
         <div className="py-32 text-center">
           <p className="type-caption text-brand-charcoal/40">
