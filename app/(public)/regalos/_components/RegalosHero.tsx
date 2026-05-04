@@ -51,7 +51,7 @@ export default function RegalosHero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
           >
-            Un libro de cocina con las recetas de su fam y de la gente cercana a los novios.
+            Un libro de cocina con las recetas de su familia y de la gente cercana a los novios.
           </motion.p>
           <motion.div
             className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4"
