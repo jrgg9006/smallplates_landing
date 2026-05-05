@@ -22,7 +22,7 @@ export default function RegalosHero() {
       {/* Background image */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/images/profile/Hero_Profile_2400.jpg"
+          src="/images/regalo-landing/hero-regalos.png"
           alt="Pareja cocinando juntos con luz cálida de cocina"
           fill
           className="object-cover"
