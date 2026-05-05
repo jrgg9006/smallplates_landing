@@ -20,6 +20,7 @@ export const WHATSAPP_MESSAGES = {
   theBook: 'Hola, me gustaría ver más detalles del libro.',
   emotionalClose: 'Hola, me decidí. Quiero hacer un libro de recetas para los novios.',
   footer: 'Hola, vi su página y quisiera saber más sobre el libro.',
+  fab: 'Hola, tengo una pregunta sobre el libro de recetas.',
 } as const;
 
 export type WhatsAppMessageKey = keyof typeof WHATSAPP_MESSAGES;

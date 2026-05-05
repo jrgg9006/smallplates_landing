@@ -31,7 +31,7 @@ export default function RegalosEmotionalClose() {
           <p className="type-accent text-2xl sm:text-3xl md:text-4xl text-white/80 leading-relaxed font-light">
             Va a ver un nombre.
             <span className="block">Va a recordar una cara.</span>
-            <span className="block">Va a cocinar algo que sabe a estar querido.</span>
+            <span className="block">Va a cocinar algo que sabe a ser querido.</span>
           </p>
         </motion.div>
 
