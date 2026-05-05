@@ -32,7 +32,7 @@ export default function RegalosFAQ() {
     {
       question: "¿Cuánto cuesta?",
       answer:
-        "El libro principal para los novios cuesta $169 USD. Copias adicionales para quien quiera tener una, $129 USD cada una. Los detalles del costo total — incluido envío a México — se los explicamos por WhatsApp para que sepa exactamente qué incluye.",
+        "El libro principal para los novios cuesta $169 USD. Copias adicionales para quien quiera tener una, $129 USD cada una. El envío a México es gratis. Los detalles del costo total se los explicamos por WhatsApp para que sepa exactamente qué incluye.",
     },
     {
       question: "¿Pueden los novios no enterarse hasta el día?",

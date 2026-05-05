@@ -7,6 +7,13 @@ import { buildWhatsAppLink, WHATSAPP_MESSAGES } from "./whatsapp";
 export default function RegalosBanner() {
   return (
     <div className="absolute top-0 left-0 right-0 z-50">
+      {/* Announcement bar */}
+      <div className="py-2.5 text-center border-b border-white/20">
+        <span className="font-sans text-[11px] font-medium tracking-[0.15em] uppercase text-white">
+          ENVÍOS GRATIS A TODO MÉXICO.
+        </span>
+      </div>
+
       <header role="banner" aria-label="Top banner">
         <div className="mx-auto max-w-7xl px-6 md:px-8 h-16 flex items-center justify-between">
           {/* Logo */}
