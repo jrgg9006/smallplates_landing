@@ -9,7 +9,7 @@
  * var already used by components/landing/Footer.tsx.
  */
 
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '526142256589';
 
 export const WHATSAPP_MESSAGES = {
   banner: 'Hola, vi su página y quisiera saber más sobre el libro.',
@@ -20,14 +20,11 @@ export const WHATSAPP_MESSAGES = {
   theBook: 'Hola, me gustaría ver más detalles del libro.',
   emotionalClose: 'Hola, me decidí. Quiero hacer un libro de recetas para los novios.',
   footer: 'Hola, vi su página y quisiera saber más sobre el libro.',
+  fab: 'Hola, tengo una pregunta sobre el libro de recetas.',
 } as const;
 
 export type WhatsAppMessageKey = keyof typeof WHATSAPP_MESSAGES;
 
 export function buildWhatsAppLink(message: string): string {
-  if (!WHATSAPP_NUMBER) {
-    console.warn('[Regalos] NEXT_PUBLIC_WHATSAPP_NUMBER is not set. WhatsApp links will be broken.');
-    return '#';
-  }
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
