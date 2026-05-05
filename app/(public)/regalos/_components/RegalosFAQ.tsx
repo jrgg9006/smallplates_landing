@@ -5,9 +5,9 @@ import { motion } from "framer-motion";
 export default function RegalosFAQ() {
   const faqs = [
     {
-      question: "¿Tengo que cocinar yo?",
+      question: "¿Tengo que subir las fotos de la receta?",
       answer:
-        "No. El libro lo armamos nosotros. Usted no toca una sartén. Lo único que hace es invitar a la familia y a los amigos a mandar su receta favorita.",
+        "No. Las imágenes las creamos nosotros. Usted no toca una sartén. Lo único que hace es invitar a la familia y a los amigos a mandar su receta favorita.",
     },
     {
       question: "¿Y si alguien de la familia no cocina?",
@@ -15,7 +15,7 @@ export default function RegalosFAQ() {
         "Perfecto. Pueden mandar el platillo de un restaurante que les encanta. Una receta heredada que nunca aprendieron a hacer pero que recuerdan. Una bebida. No se trata de cocinar bien — se trata de estar en el libro.",
     },
     {
-      question: "¿Cuánto tarda?",
+      question: "¿Cuánto tarda una persona en subir su receta?",
       answer:
         "Cada persona se tarda como cinco minutos en mandar su receta. El proceso completo — desde que empezamos hasta que el libro llega a su casa — toma entre 4 y 6 semanas.",
     },

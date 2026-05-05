@@ -92,7 +92,7 @@ const specs = [
   {
     heading: "Encuadernación reforzada.",
     description:
-      "Encuadernación con pegamento Poliuretano Reactivo (PUR) — la más fuerte que existe. Hecha para quedarse abierta sobre la encimera mientras cocina.",
+      "Encuadernación con pegamento Poliuretano Reactivo (PUR) — la más fuerte que existe.",
     icon: (
       <svg
         viewBox="0 0 30 30"

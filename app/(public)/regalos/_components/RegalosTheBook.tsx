@@ -41,7 +41,7 @@ export default function RegalosTheBook() {
             Lo que llega a su casa.
           </h2>
           <p className="mt-5 type-body-small text-[hsl(var(--brand-warm-gray-light))] max-w-[520px] mx-auto">
-            Cada libro es de tapa dura y a todo color. Porque lo que vive adentro merece sentirse en algo real.
+            Cada libro es de tapa dura y a todo color. Porque lo que vive adentro merece quedarse para siempre.
           </p>
         </motion.div>
 
@@ -152,7 +152,7 @@ export default function RegalosTheBook() {
 
               <div className="space-y-4">
                 <p className="type-body-small text-[hsl(var(--brand-warm-gray-light))]">
-                  Cada libro de Small Plates es un recetario de tapa dura &mdash; diseñado profesionalmente e impreso a todo color.
+                  Cada libro de Small Plates es un recetario de tapa dura diseñado profesionalmente e impreso a todo color.
                   Sin plantillas. Sin atajos.
                 </p>
                 <p className="type-body-small text-[hsl(var(--brand-warm-gray-light))]">
@@ -215,9 +215,6 @@ export default function RegalosTheBook() {
             </a>
           </div>
 
-          <span className="mt-4 inline-block type-caption cursor-default">
-            Especificaciones completas &rarr;
-          </span>
         </motion.div>
       </div>
     </section>

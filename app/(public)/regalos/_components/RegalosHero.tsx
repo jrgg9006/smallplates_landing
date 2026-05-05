@@ -43,7 +43,7 @@ export default function RegalosHero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           >
-            Un regalo que se cocina, no que se guarda.
+            Un libro hecho por quienes más los quieren.
           </motion.h1>
           <motion.p
             className="type-body mt-6 sm:text-xl md:text-2xl text-white/90 max-w-2xl"
@@ -51,7 +51,7 @@ export default function RegalosHero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
           >
-            Un libro de cocina con las recetas de su familia y de la gente cercana a los novios.
+            Recetas de familia y amigos para acompañarlos en su nueva vida juntos.
           </motion.p>
           <motion.div
             className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4"

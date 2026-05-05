@@ -11,7 +11,7 @@ const testimonials: Testimonial[] = [
   {
     id: 1,
     quote:
-      "Este es el regalo más detallista que mi pareja y yo hemos recibido. El libro es precioso y de gran calidad, pero sobre todo, nos hizo sentir muy queridos por toda la gente que mandó una receta. El equipo de Small Plates fue increíble, ¡gracias!",
+      "Este es el regalo más único que mi pareja y yo hemos recibido. El libro es precioso y de gran calidad, pero sobre todo, nos hizo sentir muy queridos por toda la gente que mandó una receta. El equipo de Small Plates fue increíble, ¡gracias!",
     author: "Bárbara A.",
     descriptor: "Novia",
     photo: "/testimonials/Barbara_testimonial.jpg",

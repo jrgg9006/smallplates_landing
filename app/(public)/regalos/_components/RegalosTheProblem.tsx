@@ -61,7 +61,7 @@ export default function RegalosTheProblem() {
             viewport={VIEWPORT}
             transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
           >
-            Los novios escriben las gracias. Y ya.
+            
           </motion.p>
           <motion.p
             className="type-accent-large mt-2"

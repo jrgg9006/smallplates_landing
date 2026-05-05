@@ -54,7 +54,7 @@ export default function RegalosHandmadeCallout() {
 
         <div className="space-y-4">
           <p className="type-body-small text-brand-charcoal/80">
-            Recetas distintas. Gente distinta. Historias distintas. Cada libro que hacemos existe una sola vez &mdash; porque la gente que vive adentro nunca es la misma dos veces.
+            Recetas distintas. Gente distinta. Historias distintas. Cada libro que hacemos existe una sola vez &mdash; porque la gente que vive adentro nunca es la misma.
           </p>
 
           <p className="type-body-small text-brand-charcoal/80">

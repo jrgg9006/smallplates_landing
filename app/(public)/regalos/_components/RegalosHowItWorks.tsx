@@ -13,7 +13,7 @@ const steps = [
     number: "01",
     title: "Nosotros le ayudamos a empezar.",
     description:
-      "Hablamos por WhatsApp. Le explicamos cómo se ve el libro, cuánto cuesta, cuánto tarda. Si decide seguir adelante, le mandamos un link para que invite a la familia y a los amigos.",
+      "Hablamos por WhatsApp. Le damos acceso a la plataforma y le damos un link para que invite a la familia y a los amigos para enviar sus recetas.",
     image: "/images/HowitWorks_images/collect_iphone_mockup.png",
     imageAlt: "Invitación compartida por teléfono",
     imageClass: "object-cover",
@@ -118,7 +118,7 @@ export default function RegalosHowItWorks() {
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.5, ease: easeOut }}
         >
-          Sin formularios largos. Sin instalar nada. Sin que usted tenga que cocinar.
+          Sin formularios largos. Sin instalar nada.
         </motion.p>
 
         {/* WhatsApp CTA */}

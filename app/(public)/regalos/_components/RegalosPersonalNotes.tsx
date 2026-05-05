@@ -131,12 +131,12 @@ export default function RegalosPersonalNotes() {
 
             {/* Subheader */}
             <p className="type-body-small text-brand-charcoal/60 text-center lg:text-left">
-              Cada receta lleva una nota. Corta, larga, en serio, en broma. Lo que cada persona quiera dejarles a los novios.
+              
             </p>
 
             {/* Secondary line */}
             <p className="type-accent mt-2 text-center lg:text-left text-brand-charcoal/70">
-              Eso es lo que se queda.
+              
             </p>
 
             {/* Subtle divider */}

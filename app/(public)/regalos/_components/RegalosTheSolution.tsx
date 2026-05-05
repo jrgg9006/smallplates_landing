@@ -33,23 +33,17 @@ export default function RegalosTheSolution() {
               id="solution-heading"
               className="type-heading"
             >
-              Un libro de cocina, hecho por la gente que los quiere.
+              Un libro hecho por la gente que más los quiere.
             </h2>
 
             {/* Body copy */}
             <div className="mt-8 space-y-6">
               <p className="type-body">
-                Cada persona cercana a los novios manda una receta — la que cocina los domingos, la que aprendió de su mamá, la que le sale mejor.
-                <span className="block">Una nota corta. Una historia, si quiere.</span>
+                Cada persona cercana a los novios manda una receta.
               </p>
 
               <p className="type-body">
                 Nosotros las juntamos, las diseñamos y las imprimimos en un libro de tapa dura.
-                <span className="block">Una sola copia para los novios. Copias adicionales para quien quiera tenerlo.</span>
-              </p>
-
-              <p className="type-accent">
-                Ese libro va a vivir en su cocina. No en una caja.
               </p>
             </div>
 
