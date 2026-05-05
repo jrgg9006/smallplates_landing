@@ -37,7 +37,8 @@ export default function RegalosBanner() {
             className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold border border-white/60 text-white hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
             data-cta="regalos-banner"
           >
-            Hablemos por WhatsApp
+            <span className="sm:hidden">WhatsApp</span>
+            <span className="hidden sm:inline">Hablemos por WhatsApp</span>
           </a>
         </div>
       </header>
