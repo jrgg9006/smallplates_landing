@@ -5,9 +5,11 @@ import type { DebugLogRow } from '@/lib/types/database';
 import { ChevronDown, ChevronRight, RotateCcw } from 'lucide-react';
 
 // Reason: API enriches logs with _guest and _group from real DB lookups
+// _is_synthetic marks orphan_recipe entries that are computed on-the-fly, not stored in DB
 interface EnrichedDebugLog extends DebugLogRow {
   _guest?: { id: string; name: string | null } | null;
   _group?: { id: string; name: string | null } | null;
+  _is_synthetic?: boolean;
 }
 
 interface DebugLogTableProps {
@@ -53,6 +55,17 @@ function extractDisplayFields(log: EnrichedDebugLog) {
       groupName,
       groupId,
       errorSummary: `${ctx.function || 'unknown'} — group_id was null${ctx.failsafe ? ` (${ctx.failsafe})` : ''}`,
+    };
+  }
+
+  if (eventType === 'orphan_recipe') {
+    return {
+      recipeName: (ctx.recipe_name as string) || 'Unknown',
+      guestName: (ctx.guest_name as string) || null,
+      guestId: null,
+      groupName: null,
+      groupId: (ctx.group_id as string) || null,
+      errorSummary: 'No está en group_recipes — invisible en Book Production',
     };
   }
 
@@ -132,6 +145,8 @@ export function DebugLogTable({ logs, onMarkReviewed, onReopen, onSaveNotes }: D
                     <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
                       log.event_type === 'analysis_failed'
                         ? 'bg-red-100 text-red-700'
+                        : log.event_type === 'orphan_recipe'
+                        ? 'bg-orange-100 text-orange-700'
                         : 'bg-yellow-100 text-yellow-700'
                     }`}>
                       {log.event_type}
@@ -150,9 +165,11 @@ export function DebugLogTable({ logs, onMarkReviewed, onReopen, onSaveNotes }: D
                       <span className="block text-[10px] text-gray-400 font-mono">{fields.groupId.slice(0, 8)}</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-500 max-w-[250px] truncate">{fields.errorSummary}</td>
+                  <td className="px-4 py-3 text-gray-500 max-w-[280px] break-words">{fields.errorSummary}</td>
                   <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
-                    {isReviewed ? (
+                    {log._is_synthetic ? (
+                      <span className="text-xs text-orange-500 font-medium">Fix in DB</span>
+                    ) : isReviewed ? (
                       <button
                         onClick={() => onReopen(log.id)}
                         className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"

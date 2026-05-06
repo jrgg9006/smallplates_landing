@@ -54,10 +54,51 @@ export async function GET(request: Request) {
     // We look up by recipe_name in guest_recipes → guests → groups to get the real info.
     const enrichedLogs = await enrichLogsWithRecipeData(supabase, logs || []);
 
+    // Reason: detect orphan recipes (in guest_recipes but NOT in group_recipes) and surface
+    // them as synthetic log entries so admins can catch recipes that would be invisible in
+    // Book Production. Only injected when viewing active logs.
+    let syntheticOrphans: Record<string, unknown>[] = [];
+    if (status === 'active') {
+      const { data: allRecipes } = await supabase
+        .from('guest_recipes')
+        .select('id, recipe_name, group_id, created_at, guests (first_name, last_name)')
+        .is('deleted_at', null);
+
+      const { data: linkedRecipes } = await supabase
+        .from('group_recipes')
+        .select('recipe_id')
+        .is('removed_at', null);
+
+      const linkedIds = new Set((linkedRecipes || []).map((r: { recipe_id: string }) => r.recipe_id));
+      const orphans = (allRecipes || []).filter((r: { id: string }) => !linkedIds.has(r.id));
+
+      syntheticOrphans = orphans.map((r: { id: string; recipe_name: string; group_id: string | null; created_at: string; guests: unknown }) => {
+        const guest = r.guests as { first_name: string; last_name: string } | null;
+        return {
+          id: r.id,
+          created_at: r.created_at,
+          event_type: 'orphan_recipe',
+          context: {
+            recipe_id: r.id,
+            recipe_name: r.recipe_name,
+            group_id: r.group_id,
+            guest_name: guest ? `${guest.first_name} ${guest.last_name || ''}`.trim() : null,
+          },
+          recipe_id: r.id,
+          user_id: null,
+          status: 'active',
+          admin_notes: null,
+          reviewed_at: null,
+          reviewed_by: null,
+          _is_synthetic: true,
+        };
+      });
+    }
+
     return NextResponse.json({
-      logs: enrichedLogs,
+      logs: [...syntheticOrphans, ...enrichedLogs],
       stats: {
-        activeCount: activeCount || 0,
+        activeCount: (activeCount || 0) + syntheticOrphans.length,
         reviewedCount: reviewedCount || 0,
       },
     });

@@ -44,7 +44,7 @@ export default function HowItWorksPage() {
 
 
   const handleAddRecipe = () => {
-    router.push("/profile/recipes");
+    router.push("/profile/groups");
   };
 
   const handleInviteCollaborators = () => {
