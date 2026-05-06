@@ -780,6 +780,7 @@ export interface Order {
   group_id: string | null;
   discount_code: string | null;
   discount_amount: number | null;
+  referrer_book_id: string | null;
 }
 
 export interface OrderInsert {
@@ -801,6 +802,7 @@ export interface OrderInsert {
   group_id?: string | null;
   discount_code?: string | null;
   discount_amount?: number | null;
+  referrer_book_id?: string | null;
 }
 
 // Extended types with relationships
