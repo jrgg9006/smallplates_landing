@@ -12,10 +12,8 @@ import { RecipeTableControls } from "@/components/profile/recipes/RecipeTableCon
 import { AddRecipeModal } from "@/components/profile/recipes/AddRecipeModal";
 import { BulkActionsBar } from "@/components/profile/recipes/BulkActionsBar";
 import { BulkAddToCookbookModal } from "@/components/profile/recipes/BulkAddToCookbookModal";
-import { ShareCollectionModal } from "@/components/profile/guests/ShareCollectionModal";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { AddRecipePageDropdown } from "@/components/ui/AddRecipePageDropdown";
-import { Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getAllRecipes } from "@/lib/supabase/recipes";
 import { RecipeWithGuest } from "@/lib/types/database";
@@ -27,9 +25,6 @@ export default function RecipesPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isBulkAddToCookbookModalOpen, setIsBulkAddToCookbookModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
-  const [collectionUrl, setCollectionUrl] = useState<string>('');
-  const [userFullName, setUserFullName] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [clearSelectionTrigger, setClearSelectionTrigger] = useState(0);
   const [searchValue, setSearchValue] = useState('');
@@ -76,39 +71,15 @@ export default function RecipesPage() {
   };
 
   const handleShare = () => {
-    // Placeholder - will be implemented later
     setIsShareModalOpen(true);
-    // console.log removed for production
   };
 
   const handleCloseShareModal = () => {
     setIsShareModalOpen(false);
   };
 
-  const handleShareRecipes = () => {
-    // Placeholder - will be implemented later
-    // console.log removed for production
-  };
-
-  const handleGetRecipesFromFriends = async () => {
-    // Same logic as RecipeCollectorButton - open collection modal
-    try {
-      const { getUserCollectionToken } = await import("@/lib/supabase/collection");
-      const { getCurrentProfile } = await import("@/lib/supabase/profiles");
-      const { createShareURL } = await import("@/lib/utils/sharing");
-      
-      const { data: tokenData } = await getUserCollectionToken();
-      const { data: profile } = await getCurrentProfile();
-      
-      if (tokenData && typeof window !== 'undefined') {
-        const url = createShareURL(window.location.origin, tokenData);
-        setCollectionUrl(url);
-        setUserFullName(profile?.full_name || null);
-        setIsCollectionModalOpen(true);
-      }
-    } catch (err) {
-      console.error('Error loading collection data:', err);
-    }
+  const handleGetRecipesFromFriends = () => {
+    router.push('/profile/groups');
   };
 
   useEffect(() => {
@@ -198,13 +169,6 @@ export default function RecipesPage() {
             
             {/* Right side - Action buttons - centered on mobile, stacked vertically */}
             <div className="flex-shrink-0 flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:justify-end w-full lg:w-auto">
-              <Button
-                onClick={handleShareRecipes}
-                className="hidden w-full lg:w-auto bg-purple-700 text-white hover:bg-purple-900 rounded-lg px-8 py-3 text-base font-medium items-center justify-center gap-2"
-              >
-                <Share2 className="h-5 w-5" />
-                Share Recipes
-              </Button>
               <AddRecipePageDropdown
                 onAddRecipe={handleAddRecipe}
                 onGetRecipesFromFriends={handleGetRecipesFromFriends}
@@ -281,16 +245,6 @@ export default function RecipesPage() {
               </Button>
             </div>
           </div>
-        )}
-
-        {/* Collection Modal */}
-        {collectionUrl && (
-          <ShareCollectionModal
-            isOpen={isCollectionModalOpen}
-            onClose={() => setIsCollectionModalOpen(false)}
-            collectionUrl={collectionUrl}
-            userName={userFullName}
-          />
         )}
 
       </div>
