@@ -105,12 +105,14 @@ function ReviewAndPaymentStep() {
 
   const subtotal = calculateSubtotal(state.bookQuantity);
   // Reason: tráfico desde el QR del libro físico (utm_source=book) trae
-  // el cupón BOOK15 pre-aplicado en Stripe. Reflejamos el descuento aquí
-  // para que el Order Summary del onboarding sea coherente con lo que el
-  // cliente verá en Stripe Checkout — sin sorpresas, sin confusión.
+  // el cupón BOOK15 pre-aplicado en Stripe. El cupón aplica SOLO al primer
+  // libro (BASE_BOOK_PRICE) porque en Stripe está configurado para
+  // "specific products" apuntando al cookbook product. Las copias
+  // adicionales se mandan como `price_data` inline (otro product) y
+  // quedan fuera del descuento automáticamente.
   const fromBook = state.utm?.source === "book";
   const discountPercent = fromBook ? FROM_BOOK_DISCOUNT_PERCENT : 0;
-  const discount = calculateDiscount(subtotal, discountPercent);
+  const discount = calculateDiscount(BASE_BOOK_PRICE, discountPercent);
   const total = subtotal - discount;
 
   const validateEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
@@ -566,7 +568,7 @@ function OrderSummaryPanel({
             <div className="flex justify-between items-start gap-3">
               <div className="min-w-0">
                 <div className="text-brand-honey leading-tight">From-the-book discount</div>
-                <div className="text-xs text-[hsl(var(--brand-warm-gray-light))] mt-0.5">{discountPercent}% off, applied at checkout</div>
+                <div className="text-xs text-[hsl(var(--brand-warm-gray-light))] mt-0.5">{discountPercent}% off the first book</div>
               </div>
               <div className="text-brand-honey tabular-nums">−${discount.toFixed(2).replace(/\.00$/, '')}</div>
             </div>

@@ -380,6 +380,30 @@ export async function runPostPaymentSetupFromSession(
   const userType: "couple" | "gift_giver" =
     metadata.userType === "couple" ? "couple" : "gift_giver";
 
+  // Reason: Attribution from /from-the-book QR flow. The presence of a
+  // referrer_book_id (i.e. the GROUP_ID of the wedding book whose QR was
+  // scanned) is the queryable signal that this lead came from a physical
+  // book. The full UTM bag stays in onboarding_data JSONB for any deeper
+  // inspection — no need for dedicated columns until a second source of
+  // tracked traffic exists.
+  // Defensive: book_id may arrive malformed (URL tampering, dev test data,
+  // etc.). Validate UUID shape before persisting; fall back to NULL so a
+  // bad attribution param never blocks the order from being recorded.
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const rawBookId = metadata.book_id || "";
+  const referrerBookId: string | null = UUID_RE.test(rawBookId) ? rawBookId : null;
+  const fromBook = metadata.utm_source === "book";
+
+  // Reason: Stripe reports the actual discount applied in cents (smallest
+  // currency unit). Stored as-is in `discount_amount` (integer column) for
+  // consistency with `amount_total` which is also cents. Source of truth
+  // is Stripe — survives coupon config changes without code deploy.
+  const amountDiscountCents = session.total_details?.amount_discount;
+  const discountAmount = typeof amountDiscountCents === "number" && amountDiscountCents > 0
+    ? amountDiscountCents
+    : null;
+  const discountCode = fromBook && discountAmount ? "BOOK15" : null;
+
   // 1. Find or create user.
   const { userId, wasExisting } = await findOrCreateUser(supabaseAdmin, email, buyerName);
   if (!userId) {
@@ -417,6 +441,9 @@ export async function runPostPaymentSetupFromSession(
         onboarding_data: metadata,
         order_type: "initial_purchase",
         status: "paid",
+        referrer_book_id: referrerBookId,
+        discount_code: discountCode,
+        discount_amount: discountAmount,
       })
       .select("id, group_id")
       .maybeSingle();
