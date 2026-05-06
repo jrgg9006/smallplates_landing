@@ -1,6 +1,8 @@
 import { ReactNode, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useOnboarding } from "@/lib/contexts/OnboardingContext";
+import { onboardingExitHref } from "@/lib/utm/exit-href";
 
 interface OnboardingStepProps {
   stepNumber: number;
@@ -43,10 +45,11 @@ export default function OnboardingStep({
   hideProgress = false,
 }: OnboardingStepProps) {
   const router = useRouter();
+  const { state } = useOnboarding();
 
-  // Handle close/escape
+  // Handle close/escape — preserve from-the-book context if visitor came from QR
   const handleClose = () => {
-    router.push('/');
+    router.push(onboardingExitHref(state.utm));
   };
 
   // Form content component - memoized to prevent unnecessary re-renders

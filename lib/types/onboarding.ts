@@ -53,6 +53,13 @@ export interface OnboardingData {
 
 export type ShippingCountry = 'US' | 'MX';
 
+export interface OnboardingUtm {
+  source?: string;
+  medium?: string;
+  campaign?: string;
+  book_id?: string;
+}
+
 export interface OnboardingState {
   currentStep: number;
   totalSteps: number;
@@ -63,6 +70,7 @@ export interface OnboardingState {
   isComplete: boolean;
   paymentIntentId: string | null;
   clientSecret: string | null;
+  utm: OnboardingUtm | null;
 }
 
 export interface OnboardingContextType {

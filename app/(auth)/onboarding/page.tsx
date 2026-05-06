@@ -13,8 +13,11 @@ import {
   BASE_BOOK_PRICE,
   ADDITIONAL_BOOK_PRICE,
   calculateSubtotal,
+  calculateDiscount,
+  FROM_BOOK_DISCOUNT_PERCENT,
 } from "@/lib/stripe/pricing";
 import WhatsAppFAB from "@/components/landing/WhatsAppFAB";
+import { onboardingExitHref } from "@/lib/utm/exit-href";
 
 const TOTAL_STEPS = 3;
 
@@ -101,7 +104,14 @@ function ReviewAndPaymentStep() {
   const [redirectError, setRedirectError] = useState("");
 
   const subtotal = calculateSubtotal(state.bookQuantity);
-  const total = subtotal;
+  // Reason: tráfico desde el QR del libro físico (utm_source=book) trae
+  // el cupón BOOK15 pre-aplicado en Stripe. Reflejamos el descuento aquí
+  // para que el Order Summary del onboarding sea coherente con lo que el
+  // cliente verá en Stripe Checkout — sin sorpresas, sin confusión.
+  const fromBook = state.utm?.source === "book";
+  const discountPercent = fromBook ? FROM_BOOK_DISCOUNT_PERCENT : 0;
+  const discount = calculateDiscount(subtotal, discountPercent);
+  const total = subtotal - discount;
 
   const validateEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
   // Reason: If returning customer has no name in profile, let them type one.
@@ -151,6 +161,10 @@ function ReviewAndPaymentStep() {
           giftDateUndecided: step1?.gift_date_undecided === true,
           bookCloseDate: step1?.book_close_date,
           email: email.trim().toLowerCase(),
+          utm_source: state.utm?.source,
+          utm_medium: state.utm?.medium,
+          utm_campaign: state.utm?.campaign,
+          book_id: state.utm?.book_id,
         }),
       });
 
@@ -178,6 +192,9 @@ function ReviewAndPaymentStep() {
       buyerName={buyerName}
       email={email}
       bookQuantity={state.bookQuantity}
+      subtotal={subtotal}
+      discount={discount}
+      discountPercent={discountPercent}
       total={total}
     />
   );
@@ -390,11 +407,12 @@ function Step4Shell({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const { state } = useOnboarding();
 
   return (
     <div className="min-h-screen bg-white">
       <button
-        onClick={() => router.push("/")}
+        onClick={() => router.push(onboardingExitHref(state.utm))}
         className="fixed top-4 right-4 z-50 text-gray-600 hover:text-gray-900 transition-colors"
         aria-label="Close onboarding"
       >
@@ -407,7 +425,7 @@ function Step4Shell({
           <span className="flex items-center gap-2 text-sm font-medium text-brand-charcoal">
             Order summary
           </span>
-          <span className="text-sm font-semibold text-brand-charcoal">${total}</span>
+          <span className="text-sm font-semibold text-brand-charcoal">${total.toFixed(2).replace(/\.00$/, '')}</span>
         </summary>
         <div className="px-6 pb-6">{summary}</div>
       </details>
@@ -485,13 +503,17 @@ interface OrderSummaryPanelProps {
   buyerName: string;
   email: string;
   bookQuantity: number;
+  subtotal: number;
+  discount: number;
+  discountPercent: number;
   total: number;
 }
 
 function OrderSummaryPanel({
-  buyerName, email, bookQuantity, total,
+  buyerName, email, bookQuantity, subtotal, discount, discountPercent, total,
 }: OrderSummaryPanelProps) {
   const additionalCopies = bookQuantity - 1;
+  const hasDiscount = discount > 0 && discountPercent > 0;
 
   return (
     <div>
@@ -535,6 +557,21 @@ function OrderSummaryPanel({
             <div className="text-brand-charcoal tabular-nums">${additionalCopies * ADDITIONAL_BOOK_PRICE}</div>
           </div>
         )}
+        {hasDiscount && (
+          <>
+            <div className="flex justify-between items-center pt-2 border-t border-brand-sand/40">
+              <span className="text-[hsl(var(--brand-warm-gray-light))]">Subtotal</span>
+              <span className="text-[hsl(var(--brand-warm-gray-light))] tabular-nums">${subtotal}</span>
+            </div>
+            <div className="flex justify-between items-start gap-3">
+              <div className="min-w-0">
+                <div className="text-brand-honey leading-tight">From-the-book discount</div>
+                <div className="text-xs text-[hsl(var(--brand-warm-gray-light))] mt-0.5">{discountPercent}% off, applied at checkout</div>
+              </div>
+              <div className="text-brand-honey tabular-nums">−${discount.toFixed(2).replace(/\.00$/, '')}</div>
+            </div>
+          </>
+        )}
         <div className="flex justify-between items-center">
           <span className="text-[hsl(var(--brand-warm-gray-light))]">Shipping</span>
           <span className="text-[hsl(var(--brand-warm-gray-light))]">Included</span>
@@ -544,7 +581,7 @@ function OrderSummaryPanel({
       {/* Total */}
       <div className="flex justify-between items-baseline">
         <span className="text-brand-charcoal/70 text-[15px]">Total</span>
-        <span className="text-brand-charcoal font-serif font-semibold text-[32px] tabular-nums leading-none">${total}</span>
+        <span className="text-brand-charcoal font-serif font-semibold text-[32px] tabular-nums leading-none">${total.toFixed(2).replace(/\.00$/, '')}</span>
       </div>
     </div>
   );

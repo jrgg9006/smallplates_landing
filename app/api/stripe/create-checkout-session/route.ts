@@ -9,7 +9,15 @@ interface CreateCheckoutBody {
   giftDateUndecided: boolean;
   bookCloseDate: string | null;
   email: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  book_id?: string;
 }
+
+// Reason: Cupón aplicado automáticamente para tráfico que viene del QR del libro físico.
+// El cupón debe existir en Stripe Dashboard con este ID exacto.
+const FROM_BOOK_COUPON_ID = 'BOOK15';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?)?$/;
@@ -23,7 +31,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { bookQuantity, userType, giftDate, giftDateUndecided, bookCloseDate, email } = body;
+  const {
+    bookQuantity,
+    userType,
+    giftDate,
+    giftDateUndecided,
+    bookCloseDate,
+    email,
+    utm_source,
+    utm_medium,
+    utm_campaign,
+    book_id,
+  } = body;
 
   if (!email || typeof email !== 'string' || !EMAIL_RE.test(email.trim())) {
     return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
@@ -76,7 +95,13 @@ export async function POST(request: NextRequest) {
   // so the payment_intent.succeeded webhook handler can early-return on
   // `metadata.type === 'initial_purchase'` and let checkout.session.completed own
   // this flow.
-  const sharedMetadata = {
+  // Reason: tráfico desde el QR del libro lleva utm_source=book. Para esos casos
+  // pre-aplicamos el cupón BOOK15 (15% off) y desactivamos el campo manual de
+  // promo code — Stripe trata `discounts` y `allow_promotion_codes:true` como
+  // mutuamente exclusivos, así que tenemos que elegir una de las dos.
+  const fromBook = utm_source === 'book';
+
+  const sharedMetadata: Record<string, string> = {
     type: 'initial_purchase',
     email: email.trim().toLowerCase(),
     bookQuantity: String(bookQuantity),
@@ -85,13 +110,19 @@ export async function POST(request: NextRequest) {
     giftDateUndecided: String(giftDateUndecided),
     bookCloseDate: bookCloseDate ?? '',
   };
+  if (utm_source) sharedMetadata.utm_source = utm_source;
+  if (utm_medium) sharedMetadata.utm_medium = utm_medium;
+  if (utm_campaign) sharedMetadata.utm_campaign = utm_campaign;
+  if (book_id) sharedMetadata.book_id = book_id;
 
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: lineItems,
       customer_email: email.trim(),
-      allow_promotion_codes: true,
+      ...(fromBook
+        ? { discounts: [{ coupon: FROM_BOOK_COUPON_ID }] }
+        : { allow_promotion_codes: true }),
       metadata: sharedMetadata,
       // Reason: receipt_email guarantees Stripe sends the automatic receipt in
       // test and live modes regardless of the Dashboard toggle. The Dashboard

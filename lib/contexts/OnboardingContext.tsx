@@ -12,10 +12,11 @@ import {
   OnboardingState,
   OnboardingContextType,
   ShippingCountry,
+  OnboardingUtm,
 } from "@/lib/types/onboarding";
 
 // Reason: Bump this when the step order changes to invalidate stale localStorage
-const STATE_VERSION = 6;
+const STATE_VERSION = 8;
 
 // Reason: Consolidated flow — 1. Date → 2. Copies → 3. Review + Pay (name/email inline)
 const TOTAL_STEPS_COUPLE = 3;
@@ -31,7 +32,68 @@ const getInitialState = (userType: 'couple' | 'gift_giver'): OnboardingState => 
   isComplete: false,
   paymentIntentId: null,
   clientSecret: null,
+  utm: null,
 });
+
+/**
+ * Read UTM params + book_id from current URL. Returns null if nothing present.
+ * Reason: A fresh visit with UTMs in the URL must override any persisted UTM
+ * context — different campaigns shouldn't bleed into each other.
+ */
+const readUtmFromUrl = (): OnboardingUtm | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const utm: OnboardingUtm = {
+      source: params.get('utm_source') || undefined,
+      medium: params.get('utm_medium') || undefined,
+      campaign: params.get('utm_campaign') || undefined,
+      book_id: params.get('b') || undefined,
+    };
+    const hasAny = !!(utm.source || utm.medium || utm.campaign || utm.book_id);
+    return hasAny ? utm : null;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * UTMs persist in sessionStorage (NOT localStorage) so they only live during
+ * the current browser session. Reason: si los guardáramos en localStorage,
+ * un usuario que visitó /from-the-book ayer y hoy entra desde la landing
+ * principal recibiría descuento del 15% aunque no venga del libro físico.
+ * sessionStorage se limpia al cerrar la pestaña, lo cual ata el descuento
+ * a UNA sesión real.
+ */
+const UTM_SESSION_KEY = 'sp_onboarding_utm';
+
+const saveUtmToSession = (utm: OnboardingUtm | null): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    if (utm === null) {
+      sessionStorage.removeItem(UTM_SESSION_KEY);
+    } else {
+      sessionStorage.setItem(UTM_SESSION_KEY, JSON.stringify(utm));
+    }
+  } catch {
+    // Silent fail — UTM tracking should never break the app.
+  }
+};
+
+const loadUtmFromSession = (): OnboardingUtm | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(UTM_SESSION_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object') {
+      return parsed as OnboardingUtm;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
 
 /**
  * Get localStorage key for onboarding state
@@ -64,29 +126,40 @@ const loadStateFromStorage = (userType: 'couple' | 'gift_giver'): OnboardingStat
 };
 
 /**
- * Save onboarding state to localStorage
+ * Save onboarding state to localStorage.
+ * Reason: `utm` se excluye intencionalmente del payload de localStorage —
+ * los UTMs viven en sessionStorage para que no contaminen sesiones futuras.
  */
 const saveStateToStorage = (userType: 'couple' | 'gift_giver', state: OnboardingState): void => {
   if (typeof window === 'undefined') return;
-  
+
   try {
-    localStorage.setItem(getStorageKey(userType), JSON.stringify({ ...state, _version: STATE_VERSION }));
+    const { utm: _utm, ...stateWithoutUtm } = state;
+    void _utm;
+    localStorage.setItem(
+      getStorageKey(userType),
+      JSON.stringify({ ...stateWithoutUtm, _version: STATE_VERSION }),
+    );
   } catch (e) {
     console.warn('Failed to save onboarding state to localStorage:', e);
   }
 };
 
 /**
- * Clear onboarding state from localStorage
+ * Clear onboarding state from localStorage AND clear UTM context from
+ * sessionStorage. Reason: cuando un onboarding se completa o resetea, los
+ * UTMs ya cumplieron su función — no deben persistir para el siguiente
+ * visitante en la misma pestaña.
  */
 const clearStateFromStorage = (userType: 'couple' | 'gift_giver'): void => {
   if (typeof window === 'undefined') return;
-  
+
   try {
     localStorage.removeItem(getStorageKey(userType));
   } catch (e) {
     console.warn('Failed to clear onboarding state from localStorage:', e);
   }
+  saveUtmToSession(null);
 };
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(
@@ -113,6 +186,16 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
 
   // Load from localStorage after hydration (client-side only)
   useEffect(() => {
+    // Reason: URLs ganan siempre. Si la URL trae UTMs, esos son la fuente —
+    // refrescamos sessionStorage. Si la URL no trae nada, usamos lo que haya
+    // en sessionStorage (mismo browser tab, journey en curso). NO leer
+    // localStorage para UTMs — eso causaría leak entre sesiones.
+    const urlUtm = readUtmFromUrl();
+    if (urlUtm) {
+      saveUtmToSession(urlUtm);
+    }
+    const effectiveUtm = urlUtm ?? loadUtmFromSession();
+
     if (!skipAuth) {
       const saved = loadStateFromStorage(userType);
       if (saved && !saved.isComplete) {
@@ -130,8 +213,13 @@ export function OnboardingProvider({ children, userType = 'couple', skipAuth = f
           shippingCountry: saved.shippingCountry ?? null,
           paymentIntentId: saved.paymentIntentId ?? null,
           clientSecret: saved.clientSecret ?? null,
+          utm: effectiveUtm,
         });
+      } else if (effectiveUtm) {
+        setState((prev) => ({ ...prev, utm: effectiveUtm }));
       }
+    } else if (effectiveUtm) {
+      setState((prev) => ({ ...prev, utm: effectiveUtm }));
     }
     setIsHydrated(true);
   }, [userType, skipAuth]);

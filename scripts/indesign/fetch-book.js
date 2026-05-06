@@ -9,6 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const http = require('http');
+const QRCode = require('qrcode');
 
 // Cargar variables de entorno desde .env.local
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env.local') });
@@ -456,12 +457,43 @@ async function fetchBook() {
     }
   }
 
+  // ============================================
+  // PARTE 6: GENERAR QR CODE PARA "FROM THE BOOK"
+  // Razón: la última página del libro lleva un QR que apunta a /from-the-book
+  // con el GROUP_ID en query param para tracking por libro. El template de
+  // InDesign tiene un placeholder {{QR_IMAGE}} que generate-book_v11.jsx llena
+  // automáticamente con esta imagen.
+  // ============================================
+  console.log('── PASO 6: QR Code (from-the-book) ──');
+
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://smallplatesandcompany.com';
+  const qrUrl = `${SITE_URL}/from-the-book?b=${GROUP_ID}&utm_source=book&utm_medium=qr&utm_campaign=from_the_book`;
+  const qrPath = path.join(imagesDir, `qr.${GROUP_ID}.png`);
+
+  try {
+    await QRCode.toFile(qrPath, qrUrl, {
+      errorCorrectionLevel: 'H', // 30% redundancia — soporta manchas / desgaste
+      width: 1200,                // alta resolución para impresión
+      margin: 2,                  // quiet zone — crítico para escaneabilidad
+      color: { dark: '#2D2D2D', light: '#FFFFFF' }, // brand charcoal sobre blanco
+    });
+    console.log(`   ✅ QR generado`);
+    console.log(`   🔗 ${qrUrl}`);
+    console.log(`   📂 ${qrPath}`);
+  } catch (qrErr) {
+    console.error(`   ❌ Error al generar QR:`, qrErr.message);
+  }
+
   console.log('');
   console.log(`  📁 JSON: ${outputPath}`);
   console.log(`  📂 Imágenes: ${imagesDir}`);
+  console.log(`  🧾 QR: qr.${GROUP_ID}.png`);
   console.log('');
   console.log('  👉 Siguiente paso: Abrir SmallPlates_MasterTemplate_v1.indd');
   console.log('     y correr generate-book.jsx');
+  console.log('');
+  console.log('     ⚠️  Antes de mandar el PDF a impresor:');
+  console.log('     escanea el QR con tu celular y verifica que abre la URL.');
   console.log('');
   console.log('═══════════════════════════════════════════════════════════');
 }
