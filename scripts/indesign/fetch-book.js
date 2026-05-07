@@ -466,7 +466,12 @@ async function fetchBook() {
   // ============================================
   console.log('── PASO 6: QR Code (from-the-book) ──');
 
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://smallplatesandcompany.com';
+  // Reason: el QR se imprime en libros físicos que se distribuyen a personas
+  // externas. SIEMPRE debe apuntar a producción, nunca a localhost o dev.
+  // NEXT_PUBLIC_SITE_URL es para la app (puede ser localhost en desarrollo)
+  // y NO sirve aquí. Si necesitas overridear para staging testing, usa
+  // QR_SITE_URL como variable separada.
+  const SITE_URL = process.env.QR_SITE_URL || 'https://smallplatesandcompany.com';
   const qrUrl = `${SITE_URL}/from-the-book?b=${GROUP_ID}&utm_source=book&utm_medium=qr&utm_campaign=from_the_book`;
   const qrPath = path.join(imagesDir, `qr.${GROUP_ID}.png`);
 
