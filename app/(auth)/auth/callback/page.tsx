@@ -5,6 +5,22 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createSupabaseClient } from "@/lib/supabase/client";
 import Image from "next/image";
 
+function AnimatedDots() {
+  return (
+    <span className="inline-flex gap-[2px] ml-[1px]">
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="animate-bounce"
+          style={{ animationDelay: `${i * 0.15}s`, animationDuration: "1s" }}
+        >
+          .
+        </span>
+      ))}
+    </span>
+  );
+}
+
 function CallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -68,7 +84,7 @@ function CallbackContent() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center"
+      className="min-h-screen flex flex-col items-center justify-center gap-4"
       style={{ background: "#FAF8F4" }}
     >
       <Image
@@ -78,6 +94,9 @@ function CallbackContent() {
         height={40}
         className="h-auto opacity-80"
       />
+      <p className="text-sm tracking-wide" style={{ color: "rgba(45,45,45,0.4)" }}>
+        Signing you in<AnimatedDots />
+      </p>
     </div>
   );
 }
