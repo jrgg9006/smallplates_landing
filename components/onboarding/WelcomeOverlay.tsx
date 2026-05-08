@@ -42,11 +42,11 @@ export function WelcomeOverlay({ userName, onStart, onDismiss, isVisible }: Welc
               
               {/* Main message with editorial typography */}
               <h1 className="font-light text-4xl md:text-5xl mb-6 tracking-tight">
-                You&apos;re about to be the MVP of this wedding.
+                &ldquo;I wish I&apos;d invited more people.&rdquo;
               </h1>
 
               <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-10 max-w-xl mx-auto">
-                Here&apos;s your playbook. Five small things and the book starts filling itself.
+                Every organizer says it afterward. The book gets better with more people, not fewer. Below: five small things to set this up.
               </p>
 
               {/* Single CTA */}
