@@ -364,10 +364,23 @@ async function fetchBook() {
   // ============================================
   // PARTE 6: GENERAR JSON UNIFICADO
   // ============================================
+
+  // Reason: las URLs de los QR se calculan aquí (no en PARTE 6/6b) para que
+  // queden persistidas en el JSON. generate-book_v13.jsx las lee y las muestra
+  // en el alert final, así puedes verificar a dónde apunta cada QR sin tener
+  // que escanear.
+  const SITE_URL = process.env.QR_SITE_URL || 'https://smallplatesandcompany.com';
+  const qrUrl = `${SITE_URL}/from-the-book?b=${GROUP_ID}&utm_source=book&utm_medium=qr&utm_campaign=from_the_book`;
+  const repurchaseUrl = `${SITE_URL}/copy/${GROUP_ID}`;
+
   const bookData = {
     // Metadata
     group_id: GROUP_ID,
     generated_at: new Date().toISOString(),
+    qr_urls: {
+      from_the_book: qrUrl,
+      repurchase: repurchaseUrl
+    },
     
     // Datos de la pareja (para personalizar pp. 6-9)
     couple: {
@@ -466,13 +479,9 @@ async function fetchBook() {
   // ============================================
   console.log('── PASO 6: QR Code (from-the-book) ──');
 
-  // Reason: el QR se imprime en libros físicos que se distribuyen a personas
-  // externas. SIEMPRE debe apuntar a producción, nunca a localhost o dev.
-  // NEXT_PUBLIC_SITE_URL es para la app (puede ser localhost en desarrollo)
-  // y NO sirve aquí. Si necesitas overridear para staging testing, usa
-  // QR_SITE_URL como variable separada.
-  const SITE_URL = process.env.QR_SITE_URL || 'https://smallplatesandcompany.com';
-  const qrUrl = `${SITE_URL}/from-the-book?b=${GROUP_ID}&utm_source=book&utm_medium=qr&utm_campaign=from_the_book`;
+  // Reason: SITE_URL/qrUrl/repurchaseUrl ya se calcularon arriba (en PARTE 6,
+  // antes de bookData) para que vivan en el JSON. Aquí solo los usamos.
+  // QR_SITE_URL puede overridear el host para staging si hace falta.
   const qrPath = path.join(imagesDir, `qr.${GROUP_ID}.png`);
 
   try {
@@ -489,10 +498,39 @@ async function fetchBook() {
     console.error(`   ❌ Error al generar QR:`, qrErr.message);
   }
 
+  // ============================================
+  // PARTE 6b: GENERAR QR CODE PARA RECOMPRA
+  // Razón: el último spread también lleva un QR pequeño en la página izquierda
+  // que apunta a /copy/<GROUP_ID> — la página pública de recompra de ESE libro.
+  // El GROUP_ID viene del mismo libro que se está generando, así que es
+  // matemáticamente imposible que un libro lleve el QR de otra pareja.
+  // generate-book_v13.jsx busca {{QR_REPURCHASE}} y coloca este archivo.
+  // ============================================
+  console.log('');
+  console.log('── PASO 6b: QR Code (recompra) ──');
+
+  // Reason: repurchaseUrl ya está calculado (PARTE 6, persistido en el JSON).
+  const repurchasePath = path.join(imagesDir, `qr_repurchase.${GROUP_ID}.png`);
+
+  try {
+    await QRCode.toFile(repurchasePath, repurchaseUrl, {
+      errorCorrectionLevel: 'H',
+      width: 1200,
+      margin: 2,
+      color: { dark: '#2D2D2D', light: '#FFFFFF' },
+    });
+    console.log(`   ✅ QR de recompra generado`);
+    console.log(`   🔗 ${repurchaseUrl}`);
+    console.log(`   📂 ${repurchasePath}`);
+  } catch (qrErr) {
+    console.error(`   ❌ Error al generar QR de recompra:`, qrErr.message);
+  }
+
   console.log('');
   console.log(`  📁 JSON: ${outputPath}`);
   console.log(`  📂 Imágenes: ${imagesDir}`);
   console.log(`  🧾 QR: qr.${GROUP_ID}.png`);
+  console.log(`  🧾 QR recompra: qr_repurchase.${GROUP_ID}.png`);
   console.log('');
   console.log('  👉 Siguiente paso: Abrir SmallPlates_MasterTemplate_v1.indd');
   console.log('     y correr generate-book.jsx');
