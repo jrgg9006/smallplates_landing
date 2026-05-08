@@ -184,6 +184,148 @@ export async function sendNewRecipeNotification({
   }
 }
 
+export interface SendCopyOrderConfirmationParams {
+  to: string;
+  recipientName: string;
+  coupleName: string;
+  quantity: number;
+  totalDollars: number;
+  shippingAddress: {
+    recipient_name?: string;
+    street_address?: string;
+    apartment_unit?: string | null;
+    city?: string;
+    state?: string;
+    postal_code?: string;
+    country?: string;
+  };
+  orderedAt: Date;
+}
+
+/**
+ * Receipt for a public copy-order purchase. Buyer is a third party without
+ * a Small Plates account, so this email has no dashboard link — it's a plain
+ * confirmation. Uses inline HTML to avoid managing yet another Postmark template.
+ */
+export async function sendCopyOrderConfirmation({
+  to,
+  recipientName,
+  coupleName,
+  quantity,
+  totalDollars,
+  shippingAddress,
+  orderedAt,
+}: SendCopyOrderConfirmationParams) {
+  const greeting = recipientName ? `Hi ${recipientName}.` : 'Hi.';
+  const copiesLine = quantity === 1 ? '1 copy' : `${quantity} copies`;
+  const totalLine = `$${totalDollars.toFixed(2)}`;
+  const orderedLine = orderedAt.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const addressLines: string[] = [];
+  if (shippingAddress.recipient_name) addressLines.push(shippingAddress.recipient_name);
+  const street = [shippingAddress.street_address, shippingAddress.apartment_unit].filter(Boolean).join(', ');
+  if (street) addressLines.push(street);
+  const cityLine = [
+    shippingAddress.city,
+    shippingAddress.state && shippingAddress.postal_code
+      ? `${shippingAddress.state} ${shippingAddress.postal_code}`
+      : shippingAddress.state || shippingAddress.postal_code,
+  ]
+    .filter(Boolean)
+    .join(', ');
+  if (cityLine) addressLines.push(cityLine);
+  if (shippingAddress.country) addressLines.push(shippingAddress.country);
+
+  const addressHtml = addressLines.map((l) => escapeHtml(l)).join('<br>');
+  const addressText = addressLines.join('\n');
+
+  const rowStyle = 'margin: 0 0 14px;';
+  const labelStyle = 'font-size: 11px; color: #9A9590; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 2px;';
+  const valueStyle = 'font-size: 15px; color: #2D2D2D; margin: 0;';
+
+  const htmlBody = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; color: #2D2D2D;">
+      <h1 style="font-family: Georgia, 'Times New Roman', serif; font-weight: 500; font-size: 28px; margin: 0 0 16px; color: #2D2D2D;">Order confirmed</h1>
+      <p style="font-size: 15px; line-height: 1.6; color: #5A5550; margin: 0 0 24px;">
+        ${escapeHtml(greeting)} Here's what's coming.
+      </p>
+
+      <div style="background: #FFFFFF; border: 1px solid rgba(45, 45, 45, 0.12); border-radius: 10px; padding: 18px 18px 4px;">
+        <div style="${rowStyle}">
+          <p style="${labelStyle}">Book</p>
+          <p style="${valueStyle}">${escapeHtml(coupleName)}</p>
+        </div>
+        <div style="${rowStyle}">
+          <p style="${labelStyle}">Copies</p>
+          <p style="${valueStyle}">${escapeHtml(copiesLine)}</p>
+        </div>
+        <div style="${rowStyle}">
+          <p style="${labelStyle}">Total paid</p>
+          <p style="${valueStyle}">${escapeHtml(totalLine)}</p>
+        </div>
+        <div style="${rowStyle}">
+          <p style="${labelStyle}">Ordered on</p>
+          <p style="${valueStyle}">${escapeHtml(orderedLine)}</p>
+        </div>
+        ${
+          addressLines.length > 0
+            ? `<div style="${rowStyle}">
+                 <p style="${labelStyle}">Ships to</p>
+                 <p style="${valueStyle}">${addressHtml}</p>
+               </div>`
+            : ''
+        }
+      </div>
+
+      <p style="font-size: 13px; line-height: 1.6; color: #9A9590; margin: 24px 0 0;">
+        It takes about 3 weeks to print and ship. We'll email tracking when it leaves the warehouse.
+      </p>
+      <p style="font-size: 12px; color: #C8C3BC; margin: 24px 0 0;">
+        Questions? Just reply to this email or write to <a href="mailto:team@smallplatesandcompany.com" style="color: #9A9590;">team@smallplatesandcompany.com</a>.
+      </p>
+    </div>
+  `.trim();
+
+  const textBody =
+    `${greeting} Here's what's coming.\n\n` +
+    `Book:        ${coupleName}\n` +
+    `Copies:      ${copiesLine}\n` +
+    `Total paid:  ${totalLine}\n` +
+    `Ordered on:  ${orderedLine}\n` +
+    (addressText ? `\nShips to:\n${addressText}\n` : '') +
+    `\nIt takes about 3 weeks to print and ship. We'll email tracking when it leaves the warehouse.\n\n` +
+    `Questions? Just reply to this email or write to team@smallplatesandcompany.com.`;
+
+  try {
+    const result = await postmarkClient.sendEmail({
+      From: `Small Plates & Co. <${process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com'}>`,
+      ReplyTo: 'team@smallplatesandcompany.com',
+      To: to,
+      Subject: `Order confirmed — ${coupleName}`,
+      HtmlBody: htmlBody,
+      TextBody: textBody,
+      MessageStream: 'outbound',
+    });
+    return { success: true, messageId: result.MessageID };
+  } catch (error) {
+    console.error('Error sending copy-order confirmation email:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export async function sendGroupInvitationEmail({
   to,
   groupName,

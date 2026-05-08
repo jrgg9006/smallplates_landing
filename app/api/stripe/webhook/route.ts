@@ -7,6 +7,7 @@ import {
   runCopyOrderSetupFromSession,
   emitPostPaymentAutoLogin,
 } from '@/lib/stripe/post-payment-setup';
+import { sendCopyOrderConfirmation } from '@/lib/postmark';
 import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -112,5 +113,19 @@ async function handleCopyOrderPurchase(session: Stripe.Checkout.Session) {
       'handleCopyOrderPurchase: order was not created (likely idempotency hit)',
       { sessionId: session.id }
     );
+    return;
+  }
+
+  // Reason: Send confirmation receipt only when WE created the order row.
+  // Idempotent retries skip the email to avoid duplicates. The buyer has no
+  // dashboard/account, so this email is the ONLY post-purchase touchpoint.
+  if (result.emailContext) {
+    const emailResult = await sendCopyOrderConfirmation(result.emailContext);
+    if (!emailResult.success) {
+      console.error('handleCopyOrderPurchase: confirmation email failed', {
+        sessionId: session.id,
+        error: emailResult.error,
+      });
+    }
   }
 }

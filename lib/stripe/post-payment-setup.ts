@@ -741,8 +741,29 @@ export interface CopyOrderSetupFromSessionInput {
   session: Stripe.Checkout.Session;
 }
 
+export interface CopyOrderEmailContext {
+  to: string;
+  recipientName: string;
+  coupleName: string;
+  quantity: number;
+  totalDollars: number;
+  shippingAddress: {
+    recipient_name?: string;
+    street_address?: string;
+    apartment_unit?: string | null;
+    city?: string;
+    state?: string;
+    postal_code?: string;
+    country?: string;
+  };
+  orderedAt: Date;
+}
+
 export interface CopyOrderSetupFromSessionResult {
   orderCreated: boolean;
+  // Reason: present when an order row was inserted; consumed by the webhook
+  // handler to send the confirmation email. Undefined on idempotent retries.
+  emailContext?: CopyOrderEmailContext;
 }
 
 /**
@@ -841,5 +862,21 @@ export async function runCopyOrderSetupFromSession(
     throw insertError;
   }
 
-  return { orderCreated: !!inserted };
+  if (!inserted) {
+    return { orderCreated: false };
+  }
+
+  // Reason: data the webhook needs to send the confirmation email. Built here
+  // (not re-derived in the webhook) because we already have the book name.
+  const emailContext: CopyOrderEmailContext = {
+    to: email,
+    recipientName: shippingAddress.recipient_name || "",
+    coupleName: book?.name || "your book",
+    quantity: qty,
+    totalDollars: (session.amount_total ?? 0) / 100,
+    shippingAddress,
+    orderedAt: new Date(),
+  };
+
+  return { orderCreated: true, emailContext };
 }
