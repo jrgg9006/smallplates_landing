@@ -10,7 +10,16 @@ export type OrderStatus = 'paid' | 'processing' | 'in_production' | 'shipped' | 
 export type GuestStatus = 'pending' | 'submitted' | 'reached_out';
 export type GuestSource = 'manual' | 'collection' | 'imported';
 export type RecipeSubmissionStatus = 'draft' | 'submitted' | 'approved' | 'rejected';
-export type CommunicationType = 'invitation' | 'reminder' | 'thank_you' | 'custom' | 'recipe_showcase' | 'pdf_delivery';
+export type CommunicationType =
+  | 'invitation'
+  | 'reminder'
+  | 'thank_you'
+  | 'custom'
+  | 'recipe_showcase'
+  | 'pdf_delivery'
+  | 'captain_reminder'
+  | 'weekly_status'
+  | 'closing_nudge';
 export type CommunicationChannel = 'email' | 'sms' | 'whatsapp';
 export type CommunicationStatus = 'pending' | 'sent' | 'delivered' | 'failed' | 'opened';
 
@@ -59,6 +68,7 @@ export interface Database {
           user_type: 'couple' | 'gift_giver';
           onboarding_state: any;
           pending_email: string | null;
+          notification_emails_opt_out: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -72,6 +82,7 @@ export interface Database {
           user_type?: 'couple' | 'gift_giver';
           onboarding_state?: any;
           pending_email?: string | null;
+          notification_emails_opt_out?: boolean;
         };
         Update: {
           email?: string;
@@ -82,6 +93,7 @@ export interface Database {
           user_type?: 'couple' | 'gift_giver';
           onboarding_state?: any;
           pending_email?: string | null;
+          notification_emails_opt_out?: boolean;
         };
       };
       guests: {
@@ -236,7 +248,12 @@ export interface Database {
       communication_log: {
         Row: {
           id: string;
-          guest_id: string;
+          // Reason: nullable post-migration. Either guest_id or recipient_profile_id is set
+          // (CHECK constraint enforces at least one). Used for emails sent to profiles
+          // (organizer, captains) instead of guests — captain_reminder, weekly_status.
+          guest_id: string | null;
+          recipient_profile_id: string | null;
+          group_id: string | null;
           user_id: string;
           type: CommunicationType;
           channel: CommunicationChannel;
@@ -252,7 +269,9 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          guest_id: string;
+          guest_id?: string | null;
+          recipient_profile_id?: string | null;
+          group_id?: string | null;
           user_id: string;
           type: CommunicationType;
           channel: CommunicationChannel;
@@ -266,6 +285,9 @@ export interface Database {
           retry_count?: number;
         };
         Update: {
+          guest_id?: string | null;
+          recipient_profile_id?: string | null;
+          group_id?: string | null;
           type?: CommunicationType;
           channel?: CommunicationChannel;
           subject?: string | null;

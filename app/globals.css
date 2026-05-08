@@ -114,6 +114,20 @@ body > div.pac-container ~ div:not([id]):not([class]) {
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Reason: Chrome/Safari paint autofilled inputs with a blue tint by default,
+     which clashes with the brand. This swaps the autofill background to our
+     warm white token and keeps the text in brand charcoal. The 5000s transition
+     trick is the canonical way to defeat the autofill repaint. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: hsl(var(--brand-charcoal));
+    -webkit-box-shadow: 0 0 0 1000px hsl(var(--brand-warm-white-airy)) inset;
+    transition: background-color 5000s ease-in-out 0s;
+    caret-color: hsl(var(--brand-charcoal));
+  }
 }
 
 @layer components {

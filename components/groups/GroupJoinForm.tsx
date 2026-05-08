@@ -10,6 +10,24 @@ import { Label } from "@/components/ui/label";
 import { CheckCircle } from "lucide-react";
 import Image from "next/image";
 
+// Reason: matches the loading pattern from /auth/callback — three bouncing dots
+// after the verb keep the brand consistent on every "we're working on it" moment.
+function AnimatedDots() {
+  return (
+    <span className="inline-flex gap-[2px] ml-[1px]">
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="animate-bounce"
+          style={{ animationDelay: `${i * 0.15}s`, animationDuration: "1s" }}
+        >
+          .
+        </span>
+      ))}
+    </span>
+  );
+}
+
 interface GroupInfo {
   id: string;
   name: string;
@@ -216,12 +234,20 @@ export function GroupJoinForm({
 
   // Loading verification state
   if (verifying) {
+    // Strip trailing dots so AnimatedDots can supply them animated.
+    const cleanMessage = verifyMessage.replace(/\.+$/, '').trim();
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className="text-gray-600">{verifyMessage}</p>
-        </div>
+      <div className="min-h-screen bg-brand-warm-white-airy flex flex-col items-center justify-center gap-4">
+        <Image
+          src="/images/SmallPlates_logo_horizontal.png"
+          alt="Small Plates & Co."
+          width={160}
+          height={40}
+          className="h-auto opacity-80"
+        />
+        <p className="text-sm tracking-wide" style={{ color: "rgba(45,45,45,0.4)" }}>
+          {cleanMessage}<AnimatedDots />
+        </p>
       </div>
     );
   }
@@ -229,17 +255,17 @@ export function GroupJoinForm({
   // Error state (verification failed)
   if (verifyError && !groupData) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-brand-warm-white-airy flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-6">
           <div className="h-12 w-12 text-red-500 mx-auto mb-4 flex items-center justify-center">
             <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-serif font-semibold text-brand-charcoal mb-4">
+          <h1 className="type-subheading mb-4">
             {errorTitle}
           </h1>
-          <p className="text-[hsl(var(--brand-warm-gray-light))] mb-6">
+          <p className="text-brand-warm-gray-light mb-6">
             {verifyError}
           </p>
           <Button 
@@ -256,15 +282,14 @@ export function GroupJoinForm({
   // Success state
   if (success) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-brand-warm-white-airy flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-6">
           <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-serif font-semibold text-brand-charcoal mb-4">
-            Welcome to the Cookbook!
+          <h1 className="type-subheading mb-4">
+            You&rsquo;re in.
           </h1>
-          <p className="text-[hsl(var(--brand-warm-gray-light))] mb-6">
-            You&apos;ve successfully joined <span className="font-medium">{groupName}</span> and can now help create this special gift.
-            Redirecting to your cookbooks...
+          <p className="text-brand-warm-gray-light mb-6">
+            You joined <span className="font-medium text-brand-charcoal">{groupName}</span>. Add a recipe whenever you&rsquo;re ready.
           </p>
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 mx-auto"></div>
         </div>
@@ -274,9 +299,9 @@ export function GroupJoinForm({
 
   // Main join form
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-brand-warm-white-airy">
       {/* Header */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-brand-sand">
         <div className="max-w-md mx-auto px-6 h-14 flex items-center justify-center">
           <Link href="/" className="flex items-center hover:opacity-70 transition-opacity">
             <Image
@@ -322,24 +347,24 @@ export function GroupJoinForm({
               
               {/* Title Section */}
               <div className="text-center mb-8">
-                <h2 className="text-2xl sm:text-3xl font-serif font-semibold text-brand-charcoal mb-1">
+                <h2 className="type-subheading mb-1">
                   {title}
                 </h2>
                 {subtitle && (
-                  <p className="text-[hsl(var(--brand-warm-gray-light))] mb-2 text-sm">{subtitle}</p>
+                  <p className="text-brand-warm-gray-light mb-2 text-sm">{subtitle}</p>
                 )}
                 {groupData && (
                   <div className="mt-3">
                     {inviterName ? (
-                      <p className="text-[hsl(var(--brand-warm-gray-light))] text-sm">
+                      <p className="text-brand-warm-gray-light text-sm">
                         <span className="font-medium text-brand-charcoal">{inviterName}</span> invited you to join:
                       </p>
                     ) : (
-                      <p className="text-[hsl(var(--brand-warm-gray-light))] text-sm">
+                      <p className="text-brand-warm-gray-light text-sm">
                         You&apos;ve been invited to join:
                       </p>
                     )}
-                    <h3 className="text-lg sm:text-xl font-serif font-semibold text-brand-charcoal mt-1">
+                    <h3 className="font-serif text-xl md:text-2xl font-medium text-brand-charcoal mt-1 leading-tight">
                       {groupData.name}
                     </h3>
                   </div>
@@ -351,7 +376,7 @@ export function GroupJoinForm({
           {/* Name Field - Only show for new accounts */}
           {!hasAccount && (
             <div>
-              <Label htmlFor="fullName" className="text-xs font-medium text-[hsl(var(--brand-warm-gray-light))] uppercase tracking-wide">
+              <Label htmlFor="fullName" className="text-xs font-medium text-brand-warm-gray-light uppercase tracking-wide">
                 Name
               </Label>
               <Input
@@ -370,7 +395,7 @@ export function GroupJoinForm({
 
           {/* Email Field */}
           <div>
-            <Label htmlFor="email" className="text-xs font-medium text-[hsl(var(--brand-warm-gray-light))] uppercase tracking-wide">
+            <Label htmlFor="email" className="text-xs font-medium text-brand-warm-gray-light uppercase tracking-wide">
               Email
             </Label>
             <Input
@@ -387,7 +412,7 @@ export function GroupJoinForm({
 
           {/* Password Fields */}
           <div>
-            <Label htmlFor="password" className="text-xs font-medium text-[hsl(var(--brand-warm-gray-light))] uppercase tracking-wide">
+            <Label htmlFor="password" className="text-xs font-medium text-brand-warm-gray-light uppercase tracking-wide">
               Password
             </Label>
             <Input
@@ -407,7 +432,7 @@ export function GroupJoinForm({
           {/* Confirm Password - Only show for new accounts */}
           {!hasAccount && (
             <div>
-              <Label htmlFor="confirmPassword" className="text-xs font-medium text-[hsl(var(--brand-warm-gray-light))] uppercase tracking-wide">
+              <Label htmlFor="confirmPassword" className="text-xs font-medium text-brand-warm-gray-light uppercase tracking-wide">
                 Confirm Password
               </Label>
               <Input
@@ -430,10 +455,10 @@ export function GroupJoinForm({
             </div>
           )}
 
-          {/* Submit Button */}
+          {/* Submit Button — Honey is the primary CTA per DESIGN.md (one per view max) */}
           <Button
             type="submit"
-            className="w-full bg-brand-charcoal text-white hover:bg-brand-charcoal-deep py-3 text-sm font-semibold mt-2"
+            className="w-full bg-brand-honey text-white hover:bg-brand-honey-dark py-3 text-sm font-semibold mt-2"
             disabled={loading}
           >
             {loading
@@ -454,14 +479,14 @@ export function GroupJoinForm({
                       setFormData(prev => ({ ...prev, confirmPassword: '' }));
                     }
                   }}
-                  className="w-full text-center text-sm text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal transition-colors"
+                  className="w-full text-center text-sm text-brand-warm-gray-light hover:text-brand-charcoal transition-colors"
                 >
                   {hasAccount ? "Don't have an account? Create one" : 'Already have an account? Sign in'}
                 </button>
               </div>
 
               <div className="mt-4 text-center">
-                <p className="text-xs text-[hsl(var(--brand-warm-gray-light))]">
+                <p className="text-xs text-brand-warm-gray-light">
                   {footerText}
                 </p>
               </div>

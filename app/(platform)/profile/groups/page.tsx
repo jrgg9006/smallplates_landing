@@ -226,6 +226,37 @@ export default function GroupsPage() {
     groupsSectionRef.current?.handleGroupChange(group);
   };
 
+  // Reason: deep-link via ?group=ID — used by GroupJoinForm after a successful
+  // join to pre-select the just-joined group. Polls until the section ref's
+  // groups list populates, selects the match, then cleans the URL so refreshes
+  // don't re-fire.
+  useEffect(() => {
+    if (!user) return;
+    const params = new URLSearchParams(window.location.search);
+    const groupId = params.get('group');
+    if (!groupId) return;
+
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts += 1;
+      const groups = groupsSectionRef.current?.groups;
+      if (groups && groups.length > 0) {
+        const found = groups.find(g => g.id === groupId);
+        if (found) {
+          setSelectedGroup(found);
+          groupsSectionRef.current?.handleGroupChange(found);
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+        clearInterval(interval);
+      } else if (attempts > 30) {
+        // 3s timeout — give up if groups never load.
+        clearInterval(interval);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [user]);
+
   const handleFirstRecipeSubmit = async (recipeData: RecipeData) => {
     try {
       const userRecipeData: UserRecipeData = {

@@ -105,7 +105,7 @@ export default function GroupJoinPage({ params }: GroupJoinPageProps) {
       verifyMessage="Loading cookbook information..."
       verifyError={error}
       errorTitle="Group Not Found"
-      footerText="By joining this cookbook, you agree to share recipes and collaborate with group members."
+      footerText="Once you're in, add a recipe whenever you're ready."
       autoFocus={true}
     />
   );
