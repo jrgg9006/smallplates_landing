@@ -41,8 +41,19 @@ export async function POST(request: NextRequest) {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://smallplatesandcompany.com';
     const coupleNamePlain = stats.couple_display_name || stats.group_name || 'The couple';
     const coupleNameHtml = coupleNamePlain.replace(/&/g, '&amp;');
-    const dashboardUrl = `${baseUrl}/profile/groups`;
     const fromEmail = process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com';
+
+    // Reason: organizer's collection link with utm + ?group= so this email's
+    // engagement is attributable in analytics.
+    if (!stats.collection_link_token) {
+      return NextResponse.json(
+        { error: 'Organizer has no collection link token — cannot build CTA URL' },
+        { status: 400 }
+      );
+    }
+    const collectionLink =
+      `${baseUrl}/collect/${stats.collection_link_token}` +
+      `?group=${group_id}&utm_source=weekly_status&utm_medium=email`;
 
     const subject = buildWeeklyStatusSubject({
       coupleNamePlain,
@@ -71,7 +82,7 @@ export async function POST(request: NextRequest) {
         recipesThisWeek: stats.recipes_this_week,
         newGuestsThisWeek: stats.new_guests_this_week,
         daysLeft: stats.days_left,
-        dashboardUrl,
+        collectionLink,
         unsubscribeUrl: unsubscribePageUrl,
       });
 

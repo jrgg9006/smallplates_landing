@@ -34,6 +34,36 @@ export function EmptyRow({ message }: { message: string }) {
   return <div className="text-center py-8 text-gray-400 text-sm">{message}</div>;
 }
 
+// ---------- Email Meta Card (subject + in-email title preview) ----------
+
+export function EmailMetaCard({
+  subject,
+  subjectVariants,
+}: {
+  subject: string;
+  subjectVariants?: string[];
+}) {
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl px-5 py-3 mb-4 flex items-baseline gap-4">
+      <span className="text-[10px] font-medium text-gray-500 uppercase tracking-wide shrink-0">
+        Subject line
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-mono text-gray-900 break-words">{subject}</p>
+        {subjectVariants && subjectVariants.length > 0 && (
+          <ul className="mt-1 space-y-0.5">
+            {subjectVariants.map((v, i) => (
+              <li key={i} className="text-xs font-mono text-gray-500 break-words">
+                {v}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ---------- Onboarding guide (per-tab explainer) ----------
 
 export function CaptainReminderGuide() {
@@ -260,6 +290,67 @@ export function CaptainReminderRow({
   );
 }
 
+// ---------- Weekly Status Guide ----------
+
+export function WeeklyStatusGuide() {
+  return (
+    <details className="group bg-white rounded-xl border border-gray-200 mb-4 [&_summary::-webkit-details-marker]:hidden">
+      <summary className="cursor-pointer select-none flex items-center justify-between px-5 py-3 text-sm text-gray-600 hover:text-gray-900 transition">
+        <span>
+          <span className="font-medium">What this tab is</span>
+          <span className="text-gray-400 mx-2">&middot;</span>
+          <span>how the weekly send works</span>
+        </span>
+        <span className="text-gray-400 text-xs transition-transform group-open:rotate-90">&#9656;</span>
+      </summary>
+
+      <div className="px-5 pb-5 pt-2 border-t border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-5">
+
+        <div>
+          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+            What this is
+          </div>
+          <p className="text-sm text-gray-700 leading-relaxed">
+            Each captain and the organizer of an active book gets a personalized
+            weekly digest: total recipes, recipes this week, new people, days left.
+            Keeps momentum going so they don&rsquo;t lose interest mid-collection.
+          </p>
+        </div>
+
+        <div>
+          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+            What you do here
+          </div>
+          <p className="text-sm text-gray-700 leading-relaxed">
+            Click <span className="font-medium">Preview</span> to see a sample,
+            then <span className="font-medium">Send</span> to fire <em>one personalized
+            email per recipient</em> (each gets their own first name + their own
+            unsubscribe link). Already opted-out recipients are skipped automatically.
+          </p>
+        </div>
+
+        <div>
+          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+            Reading the colors
+          </div>
+          <ul className="text-sm text-gray-700 leading-relaxed space-y-1">
+            <li>
+              <span className="font-medium">Days left</span>:{' '}
+              <span className="text-red-600 font-medium">red</span> &le; 7d ·{' '}
+              <span className="text-amber-600">amber</span> 8&ndash;21d ·{' '}
+              <span className="text-gray-500">gray</span> &gt; 21d
+            </li>
+            <li>
+              <span className="font-medium">Sent</span>: total weekly campaigns fired. Full chronological trail shows below the row.
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </details>
+  );
+}
+
 // ---------- 1b. Books WITH captains (reference table, read-only) ----------
 
 export function BooksWithCaptainsTable({ groups }: { groups: GroupWithCaptainsSummary[] }) {
@@ -328,6 +419,7 @@ export function WeeklyStatusRow({
   const displayName = stats.couple_display_name || stats.group_name;
   const eligibleRecipients = stats.recipients.filter(r => !r.notification_emails_opt_out);
   const noRecipients = eligibleRecipients.length === 0;
+  const sentDates = stats.status_sent_dates;
 
   return (
     <div className="border-t first:border-t-0 px-5 py-4 hover:bg-gray-50 transition">
@@ -340,20 +432,27 @@ export function WeeklyStatusRow({
           </div>
         </div>
         <div className="flex items-center gap-4 text-sm text-gray-500 shrink-0">
-          <span>
-            <strong className="text-gray-900">{stats.total_recipes}</strong> total
-          </span>
-          <span>
-            <strong className="text-gray-900">+{stats.recipes_this_week}</strong> this week
-          </span>
-          <span>
-            <strong className="text-gray-900">+{stats.new_guests_this_week}</strong> new people
-          </span>
-          <span className="text-gray-400">
-            {stats.days_left === null ? 'no deadline' : `${stats.days_left}d left`}
+          {stats.days_left === null ? (
+            <span className="text-gray-300" title="No close date set">No close date</span>
+          ) : (
+            <span
+              className={deadlineTone(stats.days_left)}
+              title={`Book closes ${formatDate(stats.book_close_date)}`}
+            >
+              Closes in {stats.days_left}d
+            </span>
+          )}
+          <span className="text-gray-400 text-xs">
+            {stats.total_recipes} recipe{stats.total_recipes === 1 ? '' : 's'}
           </span>
           <span className="text-gray-400 text-xs">
-            last: {formatDate(stats.last_status_sent_at)}
+            +{stats.recipes_this_week} this week
+          </span>
+          <span className="text-gray-400 text-xs">
+            +{stats.new_guests_this_week} new people
+          </span>
+          <span>
+            <strong className="text-gray-900">{sentDates.length}</strong> sent
           </span>
         </div>
         <div className="flex items-center gap-3 shrink-0">
@@ -378,6 +477,37 @@ export function WeeklyStatusRow({
           </Button>
         </div>
       </div>
+
+      {sentDates.length > 0 && (
+        <div className="mt-2 text-xs text-gray-500">
+          <span className="font-medium uppercase tracking-wide text-[10px] text-gray-400 mr-2">
+            Sent
+          </span>
+          {sentDates.map((d, i) => (
+            <span key={d}>
+              {i > 0 && <span className="mx-2 text-gray-300">·</span>}
+              {formatDateLong(d)}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <ul className="mt-2 ml-3 space-y-1">
+        {stats.recipients.map(r => (
+          <li key={r.profile_id} className="text-xs text-gray-600">
+            <span className="font-medium text-gray-700">
+              {r.role === 'owner' ? 'Owner' : 'Captain'}:
+            </span>{' '}
+            <span className="text-gray-900">{r.full_name || '—'}</span>{' '}
+            <span className="text-gray-500">{r.email}</span>
+            {r.notification_emails_opt_out && (
+              <span className="text-red-500 text-[10px] uppercase tracking-wide ml-2">
+                opted out
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

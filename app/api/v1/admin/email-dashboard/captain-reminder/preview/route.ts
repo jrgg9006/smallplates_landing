@@ -45,10 +45,12 @@ export async function GET(request: NextRequest) {
       unsubscribeUrl: `${baseUrl}/api/v1/unsubscribe-profile?uid=${group.created_by}`,
     });
 
+    // Reason: encode subject for HTTP header safety — names with accents (ñ, ó, é)
+    // would otherwise reject the response with an InvalidCharacterError.
     return new NextResponse(html, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'X-Email-Subject': buildCaptainReminderSubject(coupleNamePlain),
+        'X-Email-Subject': encodeURIComponent(buildCaptainReminderSubject(coupleNamePlain)),
       },
     });
   } catch (error) {

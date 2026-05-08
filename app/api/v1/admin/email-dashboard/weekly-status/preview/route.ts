@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
         .gte('created_at', oneWeekAgo),
       supabase
         .from('profiles')
-        .select('full_name')
+        .select('full_name, collection_link_token')
         .eq('id', group.created_by)
         .single(),
     ]);
@@ -69,6 +69,14 @@ export async function GET(request: NextRequest) {
     const coupleNamePlain = group.couple_display_name || group.name || 'The couple';
     const coupleNameHtml = coupleNamePlain.replace(/&/g, '&amp;');
 
+    // Reason: same shape captain reminder uses — organizer's public collection
+    // token + ?group= disambiguator. Falls back to a placeholder for groups
+    // without a token so the preview still renders.
+    const token = organizerRes.data?.collection_link_token ?? 'preview-token';
+    const collectionLink =
+      `${baseUrl}/collect/${token}` +
+      `?group=${groupId}&utm_source=weekly_status&utm_medium=email`;
+
     const html = buildWeeklyStatusHTML({
       recipientName,
       coupleName: coupleNameHtml,
@@ -77,14 +85,17 @@ export async function GET(request: NextRequest) {
       recipesThisWeek,
       newGuestsThisWeek,
       daysLeft,
-      dashboardUrl: `${baseUrl}/profile/groups`,
+      collectionLink,
       unsubscribeUrl: `${baseUrl}/api/v1/unsubscribe-profile?uid=${group.created_by}`,
     });
 
+    // Reason: subject can contain non-ASCII (accented names, etc.), so encode it
+    // before placing in an HTTP header — undici rejects raw non-ISO-8859-1 chars.
+    const subject = buildWeeklyStatusSubject({ coupleNamePlain, totalRecipes, daysLeft });
     return new NextResponse(html, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'X-Email-Subject': buildWeeklyStatusSubject({ coupleNamePlain, totalRecipes, daysLeft }),
+        'X-Email-Subject': encodeURIComponent(subject),
       },
     });
   } catch (error) {

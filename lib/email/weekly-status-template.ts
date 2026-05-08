@@ -14,23 +14,18 @@ interface WeeklyStatusEmailParams {
   recipesThisWeek: number;
   newGuestsThisWeek: number;
   daysLeft: number | null;        // null when book_close_date is unset
-  dashboardUrl: string;
+  collectionLink: string;         // Public /collect/{token}?group=... URL the recipient shares
   unsubscribeUrl: string;
 }
 
 export function buildWeeklyStatusSubject({
   coupleNamePlain,
-  totalRecipes,
-  daysLeft,
 }: {
   coupleNamePlain: string;
-  totalRecipes: number;
-  daysLeft: number | null;
+  totalRecipes?: number;
+  daysLeft?: number | null;
 }): string {
-  if (daysLeft !== null && daysLeft <= 7 && daysLeft >= 0) {
-    return `${coupleNamePlain}'s book — ${daysLeft} day${daysLeft === 1 ? '' : 's'} left.`;
-  }
-  return `${coupleNamePlain}'s book — ${totalRecipes} recipe${totalRecipes === 1 ? '' : 's'} so far.`;
+  return `Your weekly update - ${coupleNamePlain}'s book`;
 }
 
 export function buildWeeklyStatusHTML({
@@ -41,9 +36,11 @@ export function buildWeeklyStatusHTML({
   recipesThisWeek,
   newGuestsThisWeek,
   daysLeft,
-  dashboardUrl,
+  collectionLink,
   unsubscribeUrl,
 }: WeeklyStatusEmailParams): string {
+  // Reason: shown below the CTA without protocol so it reads cleaner; href has the full URL.
+  const collectionLinkDisplay = collectionLink.replace(/^https?:\/\//, '');
   const daysLeftLabel = daysLeft === null
     ? '&mdash;'
     : daysLeft.toString();
@@ -54,7 +51,7 @@ export function buildWeeklyStatusHTML({
   // Reason: tone shifts based on momentum so the same email doesn't feel canned every week.
   let bodyLine: string;
   if (totalRecipes === 0) {
-    bodyLine = `Still early. The first few recipes always take the longest &mdash; once people see one, the rest start coming.`;
+    bodyLine = `Still early. The first few recipes always take the longest. Once people see one, the rest start coming.`;
   } else if (recipesThisWeek === 0) {
     bodyLine = `Quiet week. A nudge to one or two people usually shakes a few loose.`;
   } else if (recipesThisWeek >= 5) {
@@ -228,26 +225,36 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
                 <!-- Body line -->
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
-                    <td align="center" style="padding-bottom: 32px;">
+                    <td align="center" style="padding-bottom: 28px;">
                       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
                         font-size: 16px; color: #555555; font-weight: 300; line-height: 1.7; text-align: center;" class="darkmode-body">
-                        ${recipientName ? `${recipientName} &mdash; ` : ''}${bodyLine}
+                        ${recipientName ? `${recipientName}. ` : ''}${bodyLine}
                       </p>
                     </td>
                   </tr>
                 </table>
 
-                <!-- CTA -->
+                <!-- CTA + small link below -->
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
-                    <td align="center" style="padding-bottom: 32px;">
-                      <a href="${dashboardUrl}"
+                    <td align="center" style="padding-bottom: 12px;">
+                      <a href="${collectionLink}"
                         class="cta-button"
                         style="display: inline-block; background-color: #2D2D2D; color: #ffffff;
                           text-decoration: none; padding: 14px 36px; border-radius: 6px;
                           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
                           font-size: 15px; font-weight: 500; letter-spacing: 0.02em;">
-                        Open dashboard
+                        Collect Recipes
+                      </a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align="center" style="padding-bottom: 32px;">
+                      <a href="${collectionLink}"
+                        style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                          font-size: 12px; color: #C8C3BC; text-decoration: underline;
+                          word-break: break-all;">
+                        ${collectionLinkDisplay}
                       </a>
                     </td>
                   </tr>

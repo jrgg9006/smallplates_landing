@@ -71,10 +71,14 @@ export async function GET(request: NextRequest) {
       unsubscribeUrl: `${baseUrl}/api/v1/unsubscribe?gid=preview`,
     });
 
+    // Reason: encode subject for HTTP header safety — names with accents (ñ, ó, é)
+    // would otherwise reject the response with an InvalidCharacterError.
     return new NextResponse(html, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'X-Email-Subject': buildClosingNudgeSubject({ coupleNamePlain, closeDateLabel }),
+        'X-Email-Subject': encodeURIComponent(
+          buildClosingNudgeSubject({ coupleNamePlain, closeDateLabel })
+        ),
       },
     });
   } catch (error) {

@@ -177,7 +177,7 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
                     <td align="left" style="padding-bottom: 32px;">
                       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
                         font-size: 16px; color: #555555; font-weight: 300; line-height: 1.7; text-align: left;" class="darkmode-body">
-                        Send this link to whoever you want as captain. It takes 30 seconds. They sign in and they're in.
+                        It takes 30 seconds. They sign in and they're in.
                       </p>
                     </td>
                   </tr>

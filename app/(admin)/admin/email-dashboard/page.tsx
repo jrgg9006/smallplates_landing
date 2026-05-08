@@ -14,9 +14,11 @@ import type {
 import {
   Section,
   EmptyRow,
+  EmailMetaCard,
   CaptainReminderGuide,
   CaptainReminderRow,
   BooksWithCaptainsTable,
+  WeeklyStatusGuide,
   WeeklyStatusRow,
   ClosingNudgeRow,
 } from './components/EmailDashboardSections';
@@ -39,6 +41,15 @@ export default function EmailDashboardPage() {
   const [sendingKey, setSendingKey] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>('captain-reminder');
   const [showAllBooks, setShowAllBooks] = useState(false);
+  // Reason: client-side hostname check so any send button can refuse if we're
+  // on localhost. Initial value defers to false until mount to avoid hydration
+  // mismatch (window doesn't exist server-side).
+  const [isLocalhost, setIsLocalhost] = useState(false);
+
+  useEffect(() => {
+    const h = window.location.hostname;
+    setIsLocalhost(h === 'localhost' || h === '127.0.0.1' || h.endsWith('.local'));
+  }, []);
 
   useEffect(() => {
     void checkAdminAndLoad();
@@ -144,6 +155,23 @@ export default function EmailDashboardPage() {
       </div>
 
       <div className="max-w-[1400px] mx-auto px-6 py-6">
+        {isLocalhost && (
+          <div className="mb-4 p-4 bg-amber-50 border-2 border-amber-400 rounded-lg flex items-start gap-3">
+            <span className="text-2xl leading-none" aria-hidden>⚠️</span>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-amber-900 mb-0.5">
+                Heads up &mdash; you&rsquo;re on localhost.
+              </p>
+              <p className="text-xs text-amber-800 leading-relaxed">
+                Any email you send from here will contain links to{' '}
+                <code className="px-1 py-0.5 bg-amber-100 rounded">localhost:3000</code>{' '}
+                and won&rsquo;t work for the recipient. Sending still works for experiments &mdash;
+                just don&rsquo;t send to real customers from here.
+              </p>
+            </div>
+          </div>
+        )}
+
         {error && (
           <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
             {error}
@@ -183,6 +211,9 @@ export default function EmailDashboardPage() {
             {activeTab === 'captain-reminder' && (
               <>
                 <CaptainReminderGuide />
+                <EmailMetaCard
+                  subject="{Couple}'s book needs captains."
+                />
                 <div className="mb-3 flex items-center justify-end">
                   <label className="inline-flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
                     <input
@@ -230,7 +261,12 @@ export default function EmailDashboardPage() {
             )}
 
             {activeTab === 'weekly-status' && (
-              <Section title="Weekly status" tone="muted">
+              <>
+                <WeeklyStatusGuide />
+                <EmailMetaCard
+                  subject="Your weekly update - {Couple}'s book"
+                />
+                <Section title="Weekly status" tone="muted">
                 {data.weeklyStatus.length === 0 ? (
                   <EmptyRow message="No active books right now." />
                 ) : (
@@ -255,11 +291,16 @@ export default function EmailDashboardPage() {
                     />
                   ))
                 )}
-              </Section>
+                </Section>
+              </>
             )}
 
             {activeTab === 'closing-nudge' && (
-              <Section title="Pre-closing nudge" tone="muted">
+              <>
+                <EmailMetaCard
+                  subject="{Couple}'s book closes {Day}."
+                />
+                <Section title="Pre-closing nudge" tone="muted">
                 {data.closingNudge.length === 0 ? (
                   <EmptyRow message="Nothing closing in the next 7 days." />
                 ) : (
@@ -284,7 +325,8 @@ export default function EmailDashboardPage() {
                     />
                   ))
                 )}
-              </Section>
+                </Section>
+              </>
             )}
           </>
         )}

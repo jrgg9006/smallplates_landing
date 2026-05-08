@@ -73,7 +73,11 @@ export interface WeeklyStats {
   new_guests_this_week: number;
   days_left: number | null;
   recipients: WeeklyStatusRecipient[];
-  last_status_sent_at: string | null;
+  // Reason: full chronological trail of every weekly_status email sent for this group.
+  status_sent_dates: string[];
+  // Reason: organizer's public collection token, used to build the "Collect Recipes"
+  // CTA link that captains/organizer share with anyone who hasn't submitted yet.
+  collection_link_token: string | null;
 }
 
 // ---------- 3. Closing Nudge ----------
@@ -286,14 +290,14 @@ export async function getWeeklyStatsForGroup(groupId: string): Promise<WeeklySta
 
   const groupRes = await supabase
     .from('groups')
-    .select('id, name, couple_display_name, book_status, book_close_date')
+    .select('id, name, couple_display_name, book_status, book_close_date, created_by')
     .eq('id', groupId)
     .single();
 
   if (!groupRes.data) return null;
   const group = groupRes.data;
 
-  const [totalRes, weekRecipesRes, weekGuestsRes, membersRes, lastSentRes] = await Promise.all([
+  const [totalRes, weekRecipesRes, weekGuestsRes, membersRes, sentLogsRes, organizerProfileRes] = await Promise.all([
     supabase
       .from('guest_recipes')
       .select('id', { count: 'exact', head: true })
@@ -310,20 +314,44 @@ export async function getWeeklyStatsForGroup(groupId: string): Promise<WeeklySta
       .select('id', { count: 'exact', head: true })
       .eq('group_id', groupId)
       .gte('created_at', oneWeekAgo),
+    // Reason: select role + profile_id only, then fetch profiles in a separate
+    // query and join in JS. The nested .select('profiles(...)') form requires
+    // supabase-js to infer the FK relationship between group_members and
+    // profiles, which sometimes returns null silently — causing 0 recipients.
     supabase
       .from('group_members')
-      .select('profile_id, role, profiles(id, email, full_name, notification_emails_opt_out)')
+      .select('profile_id, role')
       .eq('group_id', groupId)
       .in('role', ['owner', 'member']),
+    // Reason: collect every weekly_status send date so the dashboard can show
+    // the full chronological trail. We dedupe by sent_at since one campaign
+    // produces N rows (one per recipient) but they all share a timestamp.
     supabase
       .from('communication_log')
       .select('sent_at')
       .eq('group_id', groupId)
       .eq('type', 'weekly_status')
-      .order('sent_at', { ascending: false })
-      .limit(1)
+      .order('sent_at', { ascending: true }),
+    // Reason: organizer's collection_link_token — drives the "Collect Recipes"
+    // CTA. Fetched in the same Promise.all to keep latency flat.
+    supabase
+      .from('profiles')
+      .select('collection_link_token')
+      .eq('id', group.created_by)
       .maybeSingle(),
   ]);
+
+  // Dedupe send timestamps to a campaign-level trail. Each weekly campaign produces
+  // one log per recipient — we want the dates of the campaigns themselves, not per-recipient.
+  const seenDays = new Set<string>();
+  const statusSentDates: string[] = [];
+  for (const row of sentLogsRes.data ?? []) {
+    if (!row.sent_at) continue;
+    const day = row.sent_at.slice(0, 10);
+    if (seenDays.has(day)) continue;
+    seenDays.add(day);
+    statusSentDates.push(row.sent_at);
+  }
 
   const days_left: number | null = group.book_close_date
     ? Math.max(
@@ -332,21 +360,23 @@ export async function getWeeklyStatsForGroup(groupId: string): Promise<WeeklySta
       )
     : null;
 
-  // Reason: when joining via foreign key, supabase-js returns the joined row
-  // either as an object or as an array depending on the relationship type.
-  // We normalize to a single profile object.
-  type RawMember = {
-    profile_id: string;
-    role: MemberRole;
-    profiles:
-      | { id: string; email: string; full_name: string | null; notification_emails_opt_out: boolean | null }
-      | { id: string; email: string; full_name: string | null; notification_emails_opt_out: boolean | null }[]
-      | null;
-  };
+  const memberRows = membersRes.data ?? [];
+  const memberProfileIds = Array.from(new Set(memberRows.map(m => m.profile_id)));
 
-  const recipients: WeeklyStatusRecipient[] = ((membersRes.data ?? []) as unknown as RawMember[])
+  const profilesRes = memberProfileIds.length > 0
+    ? await supabase
+        .from('profiles')
+        .select('id, email, full_name, notification_emails_opt_out')
+        .in('id', memberProfileIds)
+    : { data: [] as Array<{ id: string; email: string; full_name: string | null; notification_emails_opt_out: boolean | null }> };
+
+  const profileMap = new Map(
+    (profilesRes.data ?? []).map(p => [p.id, p])
+  );
+
+  const recipients: WeeklyStatusRecipient[] = memberRows
     .map(m => {
-      const p = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles;
+      const p = profileMap.get(m.profile_id);
       if (!p?.email) return null;
       const role = m.role === 'owner' || m.role === 'member' ? m.role : null;
       if (!role) return null;
@@ -371,7 +401,8 @@ export async function getWeeklyStatsForGroup(groupId: string): Promise<WeeklySta
     new_guests_this_week: weekGuestsRes.count ?? 0,
     days_left,
     recipients,
-    last_status_sent_at: lastSentRes.data?.sent_at ?? null,
+    status_sent_dates: statusSentDates,
+    collection_link_token: organizerProfileRes.data?.collection_link_token ?? null,
   };
 }
 
