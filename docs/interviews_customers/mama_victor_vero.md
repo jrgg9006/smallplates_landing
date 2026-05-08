@@ -1,0 +1,14 @@
+- “Me arrepiento de no haberle pedido a mas gente o no subir mas. NO me quedó claro de que se podían subir mas.”
+- “Como se va a VER”!!!! En el proceso vas a ciegas!! nadie sabe a que le esta entrando. Quieren ver el resultado final.
+- Mamás de los novios 100% !! saben los invitados.
+- Despedidas como momento clave
+- Wedding planners!
+- Capturar a la gente en el momento de que van a ver el vestido! cvan con la mamá o con amiga… ahí se les puede llegar la idea. NO el aniñño. Con el vestido llevas a mucha gente eespecial y con mucha emoción. Como podemos estar ahí!
+    - Entendamos el journey de la novia de elegir un vestido
+- Mamás con nada que hacer es ideal.
+- “Faltan recetas” me hubiera gustado reminders. Motivando a que haya más recetas.
+- Le pude haber dicho a muchas mas personas. Dispuesta a pagar con que estén todos.
+- Reminder: “Puedes subir hasta X recetas” tener claridad de que tienes MAS espacios!
+- Flyers y Videos para compartir por WHATS y por todos lados
+- Fácil todo a través de Whatsapp.Servicio al cleinte ahí!!
+- Vero: “Muy original, muy especial” ← ← ← por eso se regala!
