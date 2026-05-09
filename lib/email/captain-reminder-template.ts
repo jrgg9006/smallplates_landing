@@ -29,6 +29,14 @@ export function buildCaptainReminderHTML({
   // Reason: shown in the email body without protocol so it reads cleaner;
   // the href still has the full URL for the click.
   const joinLinkDisplay = joinLink.replace(/^https?:\/\//, '');
+  // Reason: industry-standard preheader hack. iOS/Gmail/Outlook fill the
+  // notification preview by reading the first visible text. A short preheader
+  // gets padded with the email body, which looked duplicate-y. Solution:
+  // (1) a longer preheader (~100 chars) that adds info beyond the subject,
+  // (2) a long block of zero-width-non-joiner + non-breaking-space pairs to
+  // push any leftover body text out of the notification window.
+  const preheader = 'Books with captains get 3x more recipes. Add a few people who can share the link with the ones you can\'t easily reach.';
+  const preheaderPadding = '&zwnj;&nbsp;'.repeat(100);
   return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml"
 xmlns:v="urn:schemas-microsoft-com:vml"
@@ -70,10 +78,12 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
 </head>
 <body style="margin: 0; padding: 0; word-spacing: normal; background-color: #FAF7F2;" class="darkmode-bg">
 
-  <!-- Preview text -->
+  <!-- Preview text + padding (industry-standard preheader hack) -->
   <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
-    Captains get you 3x the recipes. Adding one takes 30 seconds.
-    &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847;
+    ${preheader}
+  </div>
+  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+    ${preheaderPadding}
   </div>
 
   <div role="article" aria-roledescription="email" lang="en">
@@ -193,7 +203,7 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
                           text-decoration: none; padding: 14px 36px; border-radius: 6px;
                           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
                           font-size: 15px; font-weight: 500; letter-spacing: 0.02em;">
-                        Copy the invite link
+                        Invite captains
                       </a>
                     </td>
                   </tr>

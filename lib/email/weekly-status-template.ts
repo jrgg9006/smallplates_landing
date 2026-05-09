@@ -60,6 +60,23 @@ export function buildWeeklyStatusHTML({
     bodyLine = `Steady. ${recipesThisWeek === 1 ? 'One recipe' : `${recipesThisWeek} recipes`} this week.`;
   }
 
+  // Reason: industry-standard preheader hack. A longer, distinct-from-subject
+  // preheader (~100 chars) plus a block of zero-width-non-joiner + non-breaking-space
+  // pairs prevents iOS/Gmail/Outlook from filling the notification preview with
+  // body text — which made the original short preheader look duplicate-y.
+  let preheaderStats: string;
+  if (totalRecipes === 0) {
+    preheaderStats = 'Still no recipes yet.';
+  } else if (recipesThisWeek === 0) {
+    preheaderStats = `${totalRecipes} recipe${totalRecipes === 1 ? '' : 's'} so far. None added this week.`;
+  } else if (newGuestsThisWeek > 0) {
+    preheaderStats = `${totalRecipes} recipe${totalRecipes === 1 ? '' : 's'} so far. +${recipesThisWeek} since last week. ${newGuestsThisWeek} new ${newGuestsThisWeek === 1 ? 'person' : 'people'}.`;
+  } else {
+    preheaderStats = `${totalRecipes} recipe${totalRecipes === 1 ? '' : 's'} so far. +${recipesThisWeek} since last week.`;
+  }
+  const preheader = `${preheaderStats} ${bodyLine}`;
+  const preheaderPadding = '&zwnj;&nbsp;'.repeat(100);
+
   return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml"
 xmlns:v="urn:schemas-microsoft-com:vml"
@@ -104,10 +121,12 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
 </head>
 <body style="margin: 0; padding: 0; word-spacing: normal; background-color: #FAF7F2;" class="darkmode-bg">
 
-  <!-- Preview text -->
+  <!-- Preview text + padding (industry-standard preheader hack) -->
   <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
-    ${totalRecipes} recipes total. ${recipesThisWeek} this week. ${newGuestsThisWeek} new ${newGuestsThisWeek === 1 ? 'person' : 'people'}.
-    &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847;
+    ${preheader}
+  </div>
+  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+    ${preheaderPadding}
   </div>
 
   <div role="article" aria-roledescription="email" lang="en">
