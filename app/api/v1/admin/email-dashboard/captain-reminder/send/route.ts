@@ -71,7 +71,9 @@ export async function POST(request: NextRequest) {
 
     // Reason: public group join page — anyone with this link can become a captain.
     // The organizer copies it from the email and shares via WhatsApp/iMessage.
-    const joinLink = `${baseUrl}/groups/${group_id}/join`;
+    // inviter_id=organizer so group_members.invited_by gets populated when a new
+    // captain joins. Must mirror /preview to keep what we show == what we send.
+    const joinLink = `${baseUrl}/groups/${group_id}/join?inviter_id=${encodeURIComponent(organizer.id)}`;
     const unsubscribePageUrl = `${baseUrl}/unsubscribe-profile?uid=${organizer.id}`;
     const unsubscribeApiUrl = `${baseUrl}/api/v1/unsubscribe-profile?uid=${organizer.id}`;
     const unsubMailto = `mailto:team@smallplatesandcompany.com?subject=Unsubscribe&body=Profile%20ID%3A%20${encodeURIComponent(organizer.id)}`;
