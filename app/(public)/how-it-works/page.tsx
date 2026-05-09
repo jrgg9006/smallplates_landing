@@ -62,7 +62,7 @@ export default function HowItWorksPage() {
 
   const handleStartCookbook = () => {
     if (user) {
-      router.push("/profile");
+      router.push("/profile/groups");
     } else {
       router.push("/onboarding");
     }

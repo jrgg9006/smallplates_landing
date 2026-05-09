@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from "lucide-react";
 import type { GroupWithMembers } from "@/lib/types/database";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 interface AddFriendToGroupModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ interface AddFriendToGroupModalProps {
 }
 
 export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: AddFriendToGroupModalProps) {
+  const { user } = useAuth();
   const [linkCopied, setLinkCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [inviteLink, setInviteLink] = useState('');
@@ -29,10 +31,13 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
       setError(null);
       if (group?.id && typeof window !== 'undefined') {
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
-        setInviteLink(`${baseUrl}/groups/${group.id}/join`);
+        // Reason: include inviter_id so we can record who invited the new captain
+        // (group_members.invited_by). The user opening this modal is the inviter.
+        const inviterParam = user?.id ? `?inviter_id=${encodeURIComponent(user.id)}` : '';
+        setInviteLink(`${baseUrl}/groups/${group.id}/join${inviterParam}`);
       }
     }
-  }, [isOpen, group?.id]);
+  }, [isOpen, group?.id, user?.id]);
 
   const handleCopyLink = async () => {
     try {

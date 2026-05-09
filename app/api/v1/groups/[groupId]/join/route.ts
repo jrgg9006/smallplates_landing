@@ -27,7 +27,7 @@ export async function POST(
 ) {
   try {
     const { groupId } = await params;
-    const { password, fullName, email: providedEmail } = await request.json();
+    const { password, fullName, email: providedEmail, inviter_id: rawInviterId } = await request.json();
 
     // Validate input
     if (!groupId) {
@@ -217,15 +217,32 @@ export async function POST(
       console.log('✅ New user created successfully:', userId);
     }
 
-    // Step 2: Add user to group as member (using upsert for race condition protection)
-    // For direct links, we don't have an inviter, so set invited_by to null
+    // Step 2: Add user to group as member (using upsert for race condition protection).
+    // Reason: validate inviter_id from the URL before persisting. We accept it
+    // ONLY if it points to a real profile — anything else falls back to null
+    // silently (never block the join over a bogus query param).
+    let validatedInviterId: string | null = null;
+    if (typeof rawInviterId === 'string' && rawInviterId.length > 0) {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (uuidRegex.test(rawInviterId)) {
+        const { data: inviterProfile } = await supabaseAdmin
+          .from('profiles')
+          .select('id')
+          .eq('id', rawInviterId)
+          .maybeSingle();
+        if (inviterProfile) {
+          validatedInviterId = inviterProfile.id;
+        }
+      }
+    }
+
     const { error: memberError } = await supabaseAdmin
       .from('group_members')
       .upsert({
         group_id: groupId,
         profile_id: userId,
         role: 'member',
-        invited_by: null // No specific inviter for direct links
+        invited_by: validatedInviterId,
       }, {
         onConflict: 'group_id,profile_id'
       });

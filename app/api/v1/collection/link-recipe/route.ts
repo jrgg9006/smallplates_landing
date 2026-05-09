@@ -13,6 +13,35 @@ const supabaseAdmin = createClient(
   }
 );
 
+// Reason: write a debug_log row when the link-recipe pipeline fails so admins
+// see WHY a recipe ends up orphan (not just THAT it's orphan via the synthetic
+// detection). Fire-and-forget — never let logging break the request.
+async function logLinkRecipeFailure(args: {
+  recipeId: string;
+  profileId: string | null;
+  resolvedGroupId: string | null;
+  cookbookId: string | null;
+  failureReason: string;
+  errorDetails?: unknown;
+}) {
+  try {
+    await supabaseAdmin.from('debug_logs').insert({
+      event_type: 'link_recipe_failed',
+      recipe_id: args.recipeId,
+      user_id: args.profileId,
+      context: {
+        function: 'link-recipe',
+        resolved_group_id: args.resolvedGroupId,
+        cookbook_id: args.cookbookId,
+        failure_reason: args.failureReason,
+        error_details: args.errorDetails ? String(args.errorDetails) : null,
+      },
+    });
+  } catch (logErr) {
+    console.error('Failed to write link_recipe_failed debug log:', logErr);
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { recipeId, cookbookId, groupId, collectionToken } = await request.json();
@@ -47,14 +76,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Reason: CRITICAL — auto-resolve groupId server-side if client sent null
+    // Reason: CRITICAL — auto-resolve groupId server-side if client sent null.
+    // Captains (role='member') count as valid organizers too, same as in
+    // validateCollectionToken — only auto-resolves when there's exactly one
+    // active group for this profile.
     let resolvedGroupId = groupId;
     if (!resolvedGroupId && !cookbookId) {
       const { data: userGroups } = await supabaseAdmin
         .from('group_members')
         .select('group_id, groups!inner(id, name, book_closed_by_user)')
-        .eq('profile_id', profile.id)
-        .eq('role', 'owner');
+        .eq('profile_id', profile.id);
 
       if (userGroups && userGroups.length > 0) {
         const activeGroups = userGroups.filter((gm) => {
@@ -67,6 +98,10 @@ export async function POST(request: NextRequest) {
           console.log(`🛡️ SERVER FAIL-SAFE: Auto-resolved groupId ${resolvedGroupId} for recipe ${recipeId}`);
         } else {
           console.error(`🚨 CRITICAL: Cannot auto-resolve group for recipe ${recipeId} — user has ${candidates.length} groups`);
+          await logLinkRecipeFailure({
+            recipeId, profileId: profile.id, resolvedGroupId: null, cookbookId,
+            failureReason: `Cannot auto-resolve group: profile has ${candidates.length} active groups (multi-group edge case)`,
+          });
         }
       }
     }
@@ -83,6 +118,10 @@ export async function POST(request: NextRequest) {
         .maybeSingle();
 
       if (!groupMember) {
+        await logLinkRecipeFailure({
+          recipeId, profileId: profile.id, resolvedGroupId, cookbookId,
+          failureReason: 'User does not have access to this group',
+        });
         return NextResponse.json(
           { error: 'User does not have access to this group' },
           { status: 403 }
@@ -98,6 +137,10 @@ export async function POST(request: NextRequest) {
         .maybeSingle();
 
       if (!cookbook) {
+        await logLinkRecipeFailure({
+          recipeId, profileId: profile.id, resolvedGroupId, cookbookId,
+          failureReason: 'Group cookbook not found',
+        });
         return NextResponse.json(
           { error: 'Group cookbook not found' },
           { status: 404 }
@@ -114,6 +157,10 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (!cookbook) {
+        await logLinkRecipeFailure({
+          recipeId, profileId: profile.id, resolvedGroupId, cookbookId,
+          failureReason: 'Cookbook not found',
+        });
         return NextResponse.json(
           { error: 'Cookbook not found' },
           { status: 404 }
@@ -128,13 +175,17 @@ export async function POST(request: NextRequest) {
           .eq('group_id', cookbook.group_id)
           .eq('profile_id', profile.id)
           .maybeSingle();
-        
+
         hasAccess = !!groupMember;
       } else {
         hasAccess = cookbook.user_id === profile.id;
       }
 
       if (!hasAccess) {
+        await logLinkRecipeFailure({
+          recipeId, profileId: profile.id, resolvedGroupId, cookbookId,
+          failureReason: 'User does not have access to this cookbook',
+        });
         return NextResponse.json(
           { error: 'User does not have access to this cookbook' },
           { status: 403 }
@@ -143,6 +194,10 @@ export async function POST(request: NextRequest) {
 
       targetCookbookId = cookbookId;
     } else {
+      await logLinkRecipeFailure({
+        recipeId, profileId: profile.id, resolvedGroupId: null, cookbookId: null,
+        failureReason: 'Neither cookbookId nor groupId could be resolved',
+      });
       return NextResponse.json(
         { error: 'Either cookbookId or groupId is required' },
         { status: 400 }
@@ -183,6 +238,11 @@ export async function POST(request: NextRequest) {
 
     if (insertError) {
       console.error('❌ API - Error inserting recipe into cookbook:', insertError);
+      await logLinkRecipeFailure({
+        recipeId, profileId: profile.id, resolvedGroupId, cookbookId: targetCookbookId,
+        failureReason: 'Insert into cookbook_recipes failed',
+        errorDetails: insertError,
+      });
       return NextResponse.json(
         { error: insertError.message },
         { status: 500 }
@@ -211,6 +271,14 @@ export async function POST(request: NextRequest) {
 
         if (groupRecipeError) {
           console.error('Error adding to group_recipes:', groupRecipeError);
+          // Reason: this is the silent failure that produced the "Pulpito" orphan.
+          // Endpoint still returns 200 to keep the guest's submit success — but
+          // we now record the WHY for admin visibility.
+          await logLinkRecipeFailure({
+            recipeId, profileId: profile.id, resolvedGroupId, cookbookId: targetCookbookId,
+            failureReason: 'Insert into group_recipes failed',
+            errorDetails: groupRecipeError,
+          });
         }
       } else if (existingGroupRecipe.removed_at) {
         const { error: reactivateError } = await supabaseAdmin
@@ -226,6 +294,11 @@ export async function POST(request: NextRequest) {
 
         if (reactivateError) {
           console.error('Error reactivating in group_recipes:', reactivateError);
+          await logLinkRecipeFailure({
+            recipeId, profileId: profile.id, resolvedGroupId, cookbookId: targetCookbookId,
+            failureReason: 'Reactivate in group_recipes failed',
+            errorDetails: reactivateError,
+          });
         }
       }
       // If it exists and is active, do nothing (already in group)

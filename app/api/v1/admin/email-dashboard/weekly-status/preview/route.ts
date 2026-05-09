@@ -4,6 +4,7 @@ import {
   buildWeeklyStatusHTML,
   buildWeeklyStatusSubject,
 } from '@/lib/email/weekly-status-template';
+import { getStartOfThisWeekISO } from '@/lib/email/queries';
 
 // Reason: read-only preview, no auth check — same pattern as pdf-delivery/preview-email.
 export async function GET(request: NextRequest) {
@@ -26,7 +27,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Group not found' }, { status: 404 });
     }
 
-    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    // Reason: calendar week from Monday 00:00 (kept in sync with getWeeklyStatsForGroup).
+    const weekStart = getStartOfThisWeekISO();
 
     const [recipesAllRes, recipesWeekRes, guestsWeekRes, organizerRes] = await Promise.all([
       supabase
@@ -39,12 +41,12 @@ export async function GET(request: NextRequest) {
         .select('id', { count: 'exact', head: true })
         .eq('group_id', groupId)
         .in('submission_status', ['submitted', 'approved'])
-        .gte('submitted_at', oneWeekAgo),
+        .gte('submitted_at', weekStart),
       supabase
         .from('guests')
         .select('id', { count: 'exact', head: true })
         .eq('group_id', groupId)
-        .gte('created_at', oneWeekAgo),
+        .gte('created_at', weekStart),
       supabase
         .from('profiles')
         .select('full_name, collection_link_token')
@@ -69,10 +71,24 @@ export async function GET(request: NextRequest) {
     const coupleNamePlain = group.couple_display_name || group.name || 'The couple';
     const coupleNameHtml = coupleNamePlain.replace(/&/g, '&amp;');
 
-    // Reason: same shape captain reminder uses — organizer's public collection
-    // token + ?group= disambiguator. Falls back to a placeholder for groups
-    // without a token so the preview still renders.
-    const token = organizerRes.data?.collection_link_token ?? 'preview-token';
+    // Reason: preview the email as a specific recipient would see it. If
+    // recipient_id is provided, use that profile's token (so the preview
+    // matches exactly what they'd receive). Otherwise fall back to the
+    // organizer's token, then to a placeholder so the preview still renders.
+    const recipientId = url.searchParams.get('recipient_id');
+    let recipientToken: string | null = null;
+    if (recipientId) {
+      const { data: recipientProfile } = await supabase
+        .from('profiles')
+        .select('collection_link_token')
+        .eq('id', recipientId)
+        .maybeSingle();
+      recipientToken = recipientProfile?.collection_link_token ?? null;
+    }
+    const token =
+      recipientToken
+      ?? organizerRes.data?.collection_link_token
+      ?? 'preview-token';
     const collectionLink =
       `${baseUrl}/collect/${token}` +
       `?group=${groupId}&utm_source=weekly_status&utm_medium=email`;

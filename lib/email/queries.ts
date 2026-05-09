@@ -13,6 +13,19 @@ import type { BookStatus, MemberRole } from '@/lib/types/database';
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
+// Reason: "this week" in the weekly status email means the ISO calendar week
+// starting Monday 00:00 (not a rolling 7-day window). Aligns with the founder's
+// intent of sending on Saturdays — recipients read "+3 this week" as "+3 since
+// Monday", which matches their mental model. Used by getWeeklyStatsForGroup
+// AND the weekly-status preview route — keep them in sync.
+export function getStartOfThisWeekISO(): string {
+  const d = new Date();
+  const dayOfWeek = d.getDay() || 7; // Sun=0 → 7 so Monday stays the anchor
+  d.setDate(d.getDate() - dayOfWeek + 1);
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString();
+}
+
 // ---------- 1. Captain Reminder ----------
 
 // Read-only counterpart of GroupNeedingCaptain — for the "books with captains"
@@ -60,6 +73,10 @@ export interface WeeklyStatusRecipient {
   // in the type union but is not used operationally.
   role: Extract<MemberRole, 'owner' | 'member'>;
   notification_emails_opt_out: boolean;
+  // Reason: each recipient gets a CTA link built with THEIR own token so
+  // recipes captured via that link are attributed to them, not to the group
+  // creator. Falls back to the group creator's token when null.
+  collection_link_token: string | null;
 }
 
 export interface WeeklyStats {
@@ -286,7 +303,7 @@ export async function getGroupsWithCaptains(includeAll = false): Promise<GroupWi
 
 export async function getWeeklyStatsForGroup(groupId: string): Promise<WeeklyStats | null> {
   const supabase = createSupabaseAdminClient();
-  const oneWeekAgo = new Date(Date.now() - 7 * ONE_DAY_MS).toISOString();
+  const weekStart = getStartOfThisWeekISO();
 
   const groupRes = await supabase
     .from('groups')
@@ -308,12 +325,12 @@ export async function getWeeklyStatsForGroup(groupId: string): Promise<WeeklySta
       .select('id', { count: 'exact', head: true })
       .eq('group_id', groupId)
       .in('submission_status', ['submitted', 'approved'])
-      .gte('submitted_at', oneWeekAgo),
+      .gte('submitted_at', weekStart),
     supabase
       .from('guests')
       .select('id', { count: 'exact', head: true })
       .eq('group_id', groupId)
-      .gte('created_at', oneWeekAgo),
+      .gte('created_at', weekStart),
     // Reason: select role + profile_id only, then fetch profiles in a separate
     // query and join in JS. The nested .select('profiles(...)') form requires
     // supabase-js to infer the FK relationship between group_members and
@@ -366,9 +383,9 @@ export async function getWeeklyStatsForGroup(groupId: string): Promise<WeeklySta
   const profilesRes = memberProfileIds.length > 0
     ? await supabase
         .from('profiles')
-        .select('id, email, full_name, notification_emails_opt_out')
+        .select('id, email, full_name, notification_emails_opt_out, collection_link_token')
         .in('id', memberProfileIds)
-    : { data: [] as Array<{ id: string; email: string; full_name: string | null; notification_emails_opt_out: boolean | null }> };
+    : { data: [] as Array<{ id: string; email: string; full_name: string | null; notification_emails_opt_out: boolean | null; collection_link_token: string | null }> };
 
   const profileMap = new Map(
     (profilesRes.data ?? []).map(p => [p.id, p])
@@ -386,6 +403,7 @@ export async function getWeeklyStatsForGroup(groupId: string): Promise<WeeklySta
         full_name: p.full_name,
         role,
         notification_emails_opt_out: !!p.notification_emails_opt_out,
+        collection_link_token: p.collection_link_token ?? null,
       };
     })
     .filter((r): r is WeeklyStatusRecipient => r !== null);

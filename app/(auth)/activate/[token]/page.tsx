@@ -101,7 +101,7 @@ export default function ActivateAccountPage({ params }: { params: Promise<{ toke
       // Redirect after showing success message
       setTimeout(() => {
         if (!loginError) {
-          router.push("/profile"); // Go directly to profile
+          router.push("/profile/groups");
         } else {
           router.push("/?login=true"); // Fallback to login page
         }

@@ -43,17 +43,18 @@ export async function POST(request: NextRequest) {
     const coupleNameHtml = coupleNamePlain.replace(/&/g, '&amp;');
     const fromEmail = process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com';
 
-    // Reason: organizer's collection link with utm + ?group= so this email's
-    // engagement is attributable in analytics.
-    if (!stats.collection_link_token) {
+    // Reason: we no longer abort if the creator has no token — instead we
+    // build a per-recipient link inside the loop. We only abort if NO
+    // recipient has a usable token (neither their own nor the creator's).
+    const creatorToken = stats.collection_link_token;
+    const anyTokenAvailable =
+      !!creatorToken || stats.recipients.some(r => !!r.collection_link_token);
+    if (!anyTokenAvailable) {
       return NextResponse.json(
-        { error: 'Organizer has no collection link token — cannot build CTA URL' },
+        { error: 'No collection link token available — cannot build CTA URL' },
         { status: 400 }
       );
     }
-    const collectionLink =
-      `${baseUrl}/collect/${stats.collection_link_token}` +
-      `?group=${group_id}&utm_source=weekly_status&utm_medium=email`;
 
     const subject = buildWeeklyStatusSubject({
       coupleNamePlain,
@@ -68,6 +69,19 @@ export async function POST(request: NextRequest) {
         results.push({ email: recipient.email, status: 'skipped', reason: 'opted out' });
         continue;
       }
+
+      // Reason: each recipient gets a link built with their own token so that
+      // recipes captured via that link are attributed to them. Falls back to
+      // the creator's token if the recipient has none (defensive — every
+      // profile should have a token).
+      const recipientToken = recipient.collection_link_token || creatorToken;
+      if (!recipientToken) {
+        results.push({ email: recipient.email, status: 'skipped', reason: 'no token available' });
+        continue;
+      }
+      const collectionLink =
+        `${baseUrl}/collect/${recipientToken}` +
+        `?group=${group_id}&utm_source=weekly_status&utm_medium=email`;
 
       const recipientFirstName = recipient.full_name?.split(' ')[0] || '';
       const unsubscribePageUrl = `${baseUrl}/unsubscribe-profile?uid=${recipient.profile_id}`;

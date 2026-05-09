@@ -109,11 +109,13 @@ export async function validateCollectionToken(token: string, groupId?: string | 
     let availableGroups: { id: string; name: string }[] = [];
 
     if (!groupId) {
+      // Reason: include captains (role='member'), not just owners. The
+      // downstream candidates.length === 1 check still ensures we only
+      // auto-resolve when there's exactly one group for this profile.
       const { data: userGroups } = await supabase
         .from('group_members')
         .select('group_id, groups!inner(id, name, book_closed_by_user, couple_first_name, partner_first_name)')
-        .eq('profile_id', profile.id)
-        .eq('role', 'owner');
+        .eq('profile_id', profile.id);
 
       if (userGroups && userGroups.length > 0) {
         // Reason: Filter to groups still collecting recipes (not closed)

@@ -66,12 +66,19 @@ export default function GroupJoinPage({ params }: GroupJoinPageProps) {
     email: string;
     password: string;
   }) => {
+    // Reason: forward inviter_id from URL so the API can record who invited
+    // this captain (group_members.invited_by). Server validates before
+    // persisting; an invalid value falls back to null silently.
+    const inviterId = typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('inviter_id')
+      : null;
+
     const response = await fetch(`/api/v1/groups/${groupId}/join`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(formData)
+      body: JSON.stringify({ ...formData, inviter_id: inviterId })
     });
 
     const data = await response.json();

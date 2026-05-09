@@ -37,11 +37,18 @@ export async function GET(request: NextRequest) {
     const coupleNameHtml = coupleNamePlain.replace(/&/g, '&amp;');
     const organizerFirstName = organizer?.full_name?.split(' ')[0] || 'There';
 
+    // Reason: preview must mirror what /send produces — joinLink with
+    // inviter_id=organizer so group_members.invited_by gets populated
+    // when a new captain joins.
+    const joinLink = organizer?.id
+      ? `${baseUrl}/groups/${groupId}/join?inviter_id=${encodeURIComponent(organizer.id)}`
+      : `${baseUrl}/groups/${groupId}/join`;
+
     const html = buildCaptainReminderHTML({
       organizerName: organizerFirstName,
       coupleName: coupleNameHtml,
       coupleNamePlain,
-      joinLink: `${baseUrl}/groups/${groupId}/join`,
+      joinLink,
       unsubscribeUrl: `${baseUrl}/api/v1/unsubscribe-profile?uid=${group.created_by}`,
     });
 
