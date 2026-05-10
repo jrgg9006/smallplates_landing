@@ -7,6 +7,7 @@ import { validateCollectionToken, submitGuestRecipe } from '@/lib/supabase/colle
 import type { CollectionTokenInfo, CollectionGuestSubmission } from '@/lib/types/database';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import BrandLoader from '@/components/ui/BrandLoader';
 
 interface GuestData {
   id?: string;
@@ -129,14 +130,7 @@ export default function ReviewPage() {
 
   // Loading state
   if (loading) {
-    return (
-      <div className="min-h-screen bg-white lg:bg-brand-warm-white-warm flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-honey mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+    return <BrandLoader />;
   }
 
   // Error state

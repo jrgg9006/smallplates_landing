@@ -11,6 +11,7 @@ import type { CollectionTokenInfo, Guest } from '@/lib/types/database';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import BrandLoader from '@/components/ui/BrandLoader';
 import { captureAttribution, trackEvent, getAttribution } from '@/lib/analytics';
 
 // Reason: Format book_close_date as "Month Dth" for the deadline line, returns null if date is in the past
@@ -154,14 +155,7 @@ export default function CollectionForm() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-brand-warm-white-airy flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-honey mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+    return <BrandLoader />;
   }
 
   if (error && !tokenInfo) {

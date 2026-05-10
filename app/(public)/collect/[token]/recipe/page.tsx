@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { validateCollectionToken } from '@/lib/supabase/collection';
 import type { CollectionTokenInfo } from '@/lib/types/database';
 import { Card, CardContent } from '@/components/ui/card';
+import BrandLoader from '@/components/ui/BrandLoader';
 import RecipeJourneyWrapper from '@/components/recipe-journey/RecipeJourneyWrapper';
 
 interface GuestData {
@@ -105,14 +106,7 @@ export default function RecipeFormPage() {
 
   // Loading state
   if (loading) {
-    return (
-      <div className="min-h-screen bg-brand-warm-white-airy flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-honey mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+    return <BrandLoader />;
   }
 
   // Error state
