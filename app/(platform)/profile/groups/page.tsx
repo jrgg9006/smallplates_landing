@@ -24,13 +24,14 @@ import { ShareCollectionModal } from "@/components/profile/guests/ShareCollectio
 import { GuestNavigationSheet } from "@/components/profile/guests/GuestNavigationSheet";
 import { GuestDetailsModal } from "@/components/profile/guests/GuestDetailsModal";
 import { getUserCollectionToken } from "@/lib/supabase/collection";
-import { createShareURL } from "@/lib/utils/sharing";
+import { createShareURL, extractOgVersion } from "@/lib/utils/sharing";
 import type { Guest } from "@/lib/types/database";
 import { ImportGuestsModal } from "@/components/profile/guests/ImportGuestsModal";
 import { SendInvitationsPage } from "@/components/profile/guests/SendInvitationsPage";
 import { CloseBookModal } from "@/components/profile/groups/CloseBookModal";
 import { ReviewRecipesPage } from "@/components/profile/groups/review/ReviewRecipesPage";
 import { PostCloseFlow } from "@/components/profile/groups/PostCloseFlow";
+import BrandLoader from "@/components/ui/BrandLoader";
 // Reason: closeBook is now called inside PostCloseFlow, not from page.tsx
 
 // Reason: Format book_close_date as "Month Dth" with ordinal suffix (no year)
@@ -556,14 +557,7 @@ export default function GroupsPage() {
   // Show login redirect
   if (!user) {
     if (loading) {
-      return (
-        <div className="min-h-screen bg-[hsl(var(--brand-warm-white))] flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[hsl(var(--brand-honey))] mx-auto mb-4"></div>
-            <p className="text-[hsl(var(--brand-warm-gray))]">Loading...</p>
-          </div>
-        </div>
-      );
+      return <BrandLoader />;
     }
     return null;
   }
@@ -573,14 +567,7 @@ export default function GroupsPage() {
   return (
     <div className="min-h-screen bg-[hsl(var(--brand-background))]">
       {/* Loading overlay */}
-      {(loading || groupsLoading) && (
-        <div className="fixed inset-0 bg-[hsl(var(--brand-background))] z-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[hsl(var(--brand-honey))] mx-auto mb-4"></div>
-            <p className="text-[hsl(var(--brand-warm-gray))]">Loading...</p>
-          </div>
-        </div>
-      )}
+      {(loading || groupsLoading) && <BrandLoader fixed />}
 
       {/* Post-payment setup modal — blocks the dashboard until the owner fills in couple details. */}
       {selectedGroup?.status === "pending_setup" &&
@@ -638,7 +625,10 @@ export default function GroupsPage() {
           groupId={selectedGroup.id}
           coupleNames={selectedGroup.name}
           coupleImageUrl={selectedGroup.couple_image_url}
-          collectionUrl={collectionToken ? createShareURL(window.location.origin, collectionToken, { groupId: selectedGroup.id }) : null}
+          collectionUrl={collectionToken ? createShareURL(window.location.origin, collectionToken, {
+            groupId: selectedGroup.id,
+            imgVersion: extractOgVersion(selectedGroup.couple_image_og_url),
+          }) : null}
           senderName={senderName}
           onBack={() => setActiveView('book')}
           onOpenGuestSheet={() => setShowGuestSheet(true)}
@@ -968,7 +958,10 @@ export default function GroupsPage() {
         <ShareCollectionModal
           isOpen={showShareModal}
           onClose={() => setShowShareModal(false)}
-          collectionUrl={createShareURL(window.location.origin, collectionToken, { groupId: selectedGroup.id })}
+          collectionUrl={createShareURL(window.location.origin, collectionToken, {
+            groupId: selectedGroup.id,
+            imgVersion: extractOgVersion(selectedGroup.couple_image_og_url),
+          })}
           userName={user?.email?.split('@')[0] || null}
           groupId={selectedGroup.id}
           coupleNames={selectedGroup.name || null}

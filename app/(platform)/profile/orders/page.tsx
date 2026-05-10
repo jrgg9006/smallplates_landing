@@ -9,6 +9,7 @@ import Link from "next/link";
 import { OrderHistory } from "@/components/profile/orders/OrderHistory";
 import ProfileDropdown from "@/components/profile/ProfileDropdown";
 import { ArrowLeft } from "lucide-react";
+import BrandLoader from "@/components/ui/BrandLoader";
 
 export default function OrdersPage() {
   const { user, loading } = useAuth();
@@ -21,11 +22,7 @@ export default function OrdersPage() {
   }, [user, loading, router]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Loading...</p>
-      </div>
-    );
+    return <BrandLoader />;
   }
 
   if (!user) {

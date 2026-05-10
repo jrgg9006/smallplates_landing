@@ -15,6 +15,7 @@ import { BulkAddToCookbookModal } from "@/components/profile/recipes/BulkAddToCo
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { AddRecipePageDropdown } from "@/components/ui/AddRecipePageDropdown";
 import { Button } from "@/components/ui/button";
+import BrandLoader from "@/components/ui/BrandLoader";
 import { getAllRecipes } from "@/lib/supabase/recipes";
 import { RecipeWithGuest } from "@/lib/types/database";
 
@@ -120,11 +121,7 @@ export default function RecipesPage() {
   }, [user, refreshTrigger]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Loading...</p>
-      </div>
-    );
+    return <BrandLoader />;
   }
 
   if (!user) {
