@@ -89,7 +89,16 @@ export function getWhatsAppTroubleshootingTips(): string[] {
 export function createShareURL(
   baseUrl: string,
   token: string,
-  context?: { cookbookId?: string | null; groupId?: string | null; inviterId?: string | null }
+  context?: {
+    cookbookId?: string | null;
+    groupId?: string | null;
+    inviterId?: string | null;
+    // Reason: when present, included as `&v=<version>`. WhatsApp caches link
+    // previews by exact page URL with no retry — bumping `v` whenever the OG
+    // image regenerates makes the URL look new to WhatsApp and forces a fresh
+    // crawl, which is the only way to invalidate a stale cached preview.
+    imgVersion?: string | null;
+  }
 ): string {
   // Ensure the token is properly encoded (though our tokens are already URL-safe)
   const encodedToken = encodeURIComponent(token);
@@ -107,6 +116,9 @@ export function createShareURL(
     if (context.inviterId) {
       params.append('inviter_id', context.inviterId);
     }
+    if (context.imgVersion) {
+      params.append('v', context.imgVersion);
+    }
 
     params.append('utm_source', 'collection_link');
     params.append('utm_medium', 'share');
@@ -118,4 +130,18 @@ export function createShareURL(
   }
 
   return url;
+}
+
+/**
+ * Extract the cache-buster timestamp from a couple_image_og_url so it can be
+ * passed as `imgVersion` to createShareURL. Returns null when the URL is empty
+ * or has no `t` query param.
+ */
+export function extractOgVersion(ogUrl: string | null | undefined): string | null {
+  if (!ogUrl) return null;
+  try {
+    return new URL(ogUrl).searchParams.get('t');
+  } catch {
+    return null;
+  }
 }

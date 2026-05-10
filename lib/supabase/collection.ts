@@ -55,6 +55,7 @@ export async function validateCollectionToken(token: string, groupId?: string | 
     let coupleFirstName: string | null = null;
     let partnerFirstName: string | null = null;
     let coupleImageUrl: string | null = null;
+    let coupleImageOgUrl: string | null = null;
     let coupleImagePositionY = 50;
     let coupleImagePositionX = 50;
     let bookCloseDate: string | null = null;
@@ -65,7 +66,7 @@ export async function validateCollectionToken(token: string, groupId?: string | 
       // Get group info for couple names and image
       const { data: group } = await supabase
         .from('groups')
-        .select('couple_first_name, partner_first_name, couple_image_url, couple_image_position_y, couple_image_position_x, book_close_date, book_closed_by_user')
+        .select('couple_first_name, partner_first_name, couple_image_url, couple_image_og_url, couple_image_position_y, couple_image_position_x, book_close_date, book_closed_by_user')
         .eq('id', groupId)
         .single();
 
@@ -82,6 +83,7 @@ export async function validateCollectionToken(token: string, groupId?: string | 
         
         // Set couple image URL and position if available
         coupleImageUrl = group.couple_image_url;
+        coupleImageOgUrl = group.couple_image_og_url ?? null;
         coupleImagePositionY = group.couple_image_position_y ?? 50;
         coupleImagePositionX = group.couple_image_position_x ?? 50;
         bookCloseDate = group.book_close_date ?? null;
@@ -174,6 +176,7 @@ export async function validateCollectionToken(token: string, groupId?: string | 
         couple_first_name: coupleFirstName,
         partner_first_name: partnerFirstName,
         couple_image_url: coupleImageUrl,
+        couple_image_og_url: coupleImageOgUrl,
         couple_image_position_y: coupleImagePositionY,
         couple_image_position_x: coupleImagePositionX,
         book_close_date: bookCloseDate,

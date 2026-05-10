@@ -36,6 +36,7 @@ export default function PreviewPage() {
     token: 'preview-token',
     is_valid: true,
     couple_image_url: null,
+    couple_image_og_url: null,
     couple_image_position_y: 50,
     couple_image_position_x: 50,
     book_close_date: null,

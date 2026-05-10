@@ -27,6 +27,11 @@ interface ShareCollectionModalProps {
   // Reason: signal back to parent that the user copied the link, used by the
   // SetupChecklist to mark the "Share in WhatsApp" step as done.
   onLinkCopied?: () => void;
+  // Reason: signal back to parent whenever the couple image (or its position)
+  // changes inside the modal. Parent re-loads selectedGroup so collectionUrl
+  // is rebuilt with a fresh &v=<og_ts>, which is what makes WhatsApp re-crawl
+  // the link instead of serving a stale cached preview.
+  onImageChange?: () => void;
   // Reason: when opened from the Setup wizard, start in the expanded customization
   // state (photo + message editor visible) instead of the default collapsed state.
   openExpanded?: boolean;
@@ -45,6 +50,7 @@ export function ShareCollectionModal({
   currentCoupleImagePositionY = 50,
   currentCoupleImagePositionX = 50,
   onLinkCopied,
+  onImageChange,
   openExpanded = false,
 }: ShareCollectionModalProps) {
   const [copied, setCopied] = useState(false);
@@ -302,6 +308,10 @@ export function ShareCollectionModal({
       const fileInput = document.getElementById('coupleImageInput') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
 
+      // Reason: tell parent to refresh selectedGroup so collectionUrl
+      // gets rebuilt with the fresh &v=<og_ts> from the just-generated OG.
+      onImageChange?.();
+
     } catch (err) {
       setError('Failed to upload image');
     } finally {
@@ -338,6 +348,10 @@ export function ShareCollectionModal({
       // Reset file input
       const fileInput = document.getElementById('coupleImageInput') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
+
+      // Reason: parent must refresh so collectionUrl drops the &v= once og_url
+      // is null again (and so any other group state stays in sync)
+      onImageChange?.();
 
     } catch (err) {
       setError('Failed to delete image');
@@ -396,6 +410,9 @@ export function ShareCollectionModal({
         setCoupleImagePositionY(Math.round(tempCouplePositionY));
         setCoupleImagePositionX(Math.round(tempCouplePositionX));
         setIsRepositioningCoupleImage(false);
+        // Reason: PATCH regenerated the OG (new &v=<ts>); refresh parent so
+        // the next "Copy Link" produces a URL WhatsApp will treat as fresh.
+        onImageChange?.();
       } else {
         const result = await response.json();
         setError(result.error || 'Failed to save position');

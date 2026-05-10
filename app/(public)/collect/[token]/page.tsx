@@ -43,11 +43,14 @@ export async function generateMetadata({
   const defaultDescription = `${displayName} invites you to share your favorite recipe with them! They will print a cookbook with recipes from family and friends.`
   const description = tokenInfo.custom_share_message || defaultDescription
   
-  // Reason: proxy couple image through our API to resize (1200x630), compress (<600KB),
-  // and serve from our domain — Supabase adds x-robots-tag:none which can block crawlers
-  const ogImageUrl = tokenInfo.couple_image_url
-    ? `/api/og-image?url=${encodeURIComponent(tokenInfo.couple_image_url)}`
-    : '/images/2SmallPlates-verticallogowhiteback.png'
+  // Reason: prefer the pre-processed OG image (1200x630 JPEG <300KB) generated
+  // at upload/reposition time — eliminates sharp from the request path so
+  // WhatsApp's tight-timeout crawler always wins. Fall back to the live proxy
+  // for legacy groups that haven't re-uploaded since the og_url column shipped.
+  const ogImageUrl = tokenInfo.couple_image_og_url
+    || (tokenInfo.couple_image_url
+      ? `/api/og-image?url=${encodeURIComponent(tokenInfo.couple_image_url)}`
+      : '/images/2SmallPlates-verticallogowhiteback.png')
 
   const ogImageAlt = tokenInfo.couple_image_url
     ? `Recipe Collection for ${tokenInfo.couple_names || 'the couple'}`

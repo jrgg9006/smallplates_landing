@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 import { uploadGroupCoupleImageWithClient, deleteGroupCoupleImage } from '@/lib/supabase/storage';
+import {
+  generateCoupleImageOgBuffer,
+  uploadCoupleImageOgWithClient,
+} from '@/lib/supabase/og-image-processor';
 
 /**
  * POST /api/v1/groups/[groupId]/couple-image
@@ -104,11 +108,39 @@ export async function POST(
       );
     }
 
+    // Reason: pre-process the OG version (1200x630 JPEG <300KB) at upload time.
+    // WhatsApp's crawler has a tight timeout and caches failures with no retry —
+    // serving a ready-made file from storage is the only reliable path.
+    // Failure here is non-fatal: the original upload succeeded, so we leave
+    // og_url null and generateMetadata falls back to /api/og-image proxy.
+    let ogUrl: string | null = null;
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const ogBuffer = await generateCoupleImageOgBuffer(
+        Buffer.from(arrayBuffer),
+        50, // newly uploaded — default centered focal point
+        50,
+      );
+      const ogResult = await uploadCoupleImageOgWithClient(supabase, groupId, ogBuffer);
+      if (ogResult.error) {
+        console.error('OG image upload failed (non-fatal):', ogResult.error);
+      } else {
+        ogUrl = ogResult.url;
+      }
+    } catch (ogErr) {
+      console.error('OG image generation failed (non-fatal):', ogErr);
+    }
+
     // Update groups table with new image URL
     console.log('Updating groups table with URL:', url);
     const { error: updateError } = await supabase
       .from('groups')
-      .update({ couple_image_url: url, couple_image_position_y: 50, couple_image_position_x: 50 })
+      .update({
+        couple_image_url: url,
+        couple_image_og_url: ogUrl,
+        couple_image_position_y: 50,
+        couple_image_position_x: 50,
+      })
       .eq('id', groupId);
 
     console.log('Database update result:', { updateError });
@@ -193,7 +225,12 @@ export async function DELETE(
     // Update groups table to remove image URL
     const { error: updateError } = await supabase
       .from('groups')
-      .update({ couple_image_url: null, couple_image_position_y: 50, couple_image_position_x: 50 })
+      .update({
+        couple_image_url: null,
+        couple_image_og_url: null,
+        couple_image_position_y: 50,
+        couple_image_position_x: 50,
+      })
       .eq('id', groupId);
 
     if (updateError) {
@@ -302,6 +339,46 @@ export async function PATCH(
         { error: 'Failed to update image position' },
         { status: 500 }
       );
+    }
+
+    // Reason: regenerate the OG image with the new focal point so WhatsApp/Meta
+    // previews match what the user just repositioned in the dashboard. The
+    // freshly-stamped og_url also serves as the version param on the share URL,
+    // which forces WhatsApp to re-crawl rather than serve a cached preview.
+    // Non-fatal: position update already succeeded; if regen fails we just
+    // keep the previous og_url and the proxy still works as fallback.
+    try {
+      const { data: groupRow } = await supabase
+        .from('groups')
+        .select('couple_image_url, couple_image_position_x, couple_image_position_y')
+        .eq('id', groupId)
+        .single();
+
+      if (groupRow?.couple_image_url) {
+        const finalX = updateData.couple_image_position_x ?? groupRow.couple_image_position_x ?? 50;
+        const finalY = updateData.couple_image_position_y ?? groupRow.couple_image_position_y ?? 50;
+
+        // Reason: strip cache-buster query so we fetch the raw stored file
+        const cleanUrl = groupRow.couple_image_url.split('?')[0];
+        const response = await fetch(cleanUrl);
+        if (response.ok) {
+          const buffer = Buffer.from(await response.arrayBuffer());
+          const ogBuffer = await generateCoupleImageOgBuffer(buffer, finalX, finalY);
+          const ogResult = await uploadCoupleImageOgWithClient(supabase, groupId, ogBuffer);
+          if (!ogResult.error && ogResult.url) {
+            await supabase
+              .from('groups')
+              .update({ couple_image_og_url: ogResult.url })
+              .eq('id', groupId);
+          } else if (ogResult.error) {
+            console.error('OG regen on PATCH — upload failed (non-fatal):', ogResult.error);
+          }
+        } else {
+          console.error('OG regen on PATCH — could not fetch original (non-fatal):', response.status);
+        }
+      }
+    } catch (ogErr) {
+      console.error('OG regen on PATCH failed (non-fatal):', ogErr);
     }
 
     return NextResponse.json({

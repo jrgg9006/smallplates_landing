@@ -4,9 +4,13 @@ import sharp from 'sharp';
 /**
  * GET /api/og-image?url=<supabase-storage-url>
  *
- * Proxies and optimizes images for Open Graph / WhatsApp link previews.
+ * Fallback proxy for legacy groups whose couple_image_og_url is null.
+ * New uploads pre-generate the OG version at upload time and serve it directly
+ * (see lib/supabase/storage.ts: generateCoupleImageOgBuffer). This route stays
+ * as a graceful-degradation path so previews never go missing entirely.
+ *
  * - Resizes to 1200x630 (standard OG dimensions)
- * - Compresses as JPEG under 600KB (WhatsApp's limit)
+ * - Compresses as JPEG targeting <300KB (WhatsApp reliability threshold)
  * - Serves from our domain (avoids Supabase's x-robots-tag: none)
  */
 export async function GET(request: NextRequest) {
@@ -42,7 +46,7 @@ export async function GET(request: NextRequest) {
     const optimized = await sharp(buffer)
       .flatten({ background: { r: 255, g: 255, b: 255 } })
       .resize(1200, 630, { fit: 'cover', position: 'centre' })
-      .jpeg({ quality: 80, progressive: true })
+      .jpeg({ quality: 70, progressive: true, mozjpeg: true })
       .toBuffer();
 
     return new NextResponse(new Uint8Array(optimized), {

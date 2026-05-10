@@ -15,6 +15,10 @@ const nextConfig = {
       },
     ],
   },
+  // Reason: sharp is a Node-only native module used by /api/og-image and the
+  // couple-image OG processor. Marking it external prevents webpack from
+  // trying to bundle it (which fails on `child_process` and other Node APIs).
+  serverExternalPackages: ['sharp'],
   experimental: {
     serverActions: {
       bodySizeLimit: '50mb',

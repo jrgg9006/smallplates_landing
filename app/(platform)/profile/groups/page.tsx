@@ -969,6 +969,21 @@ export default function GroupsPage() {
           currentCoupleImagePositionY={selectedGroup.couple_image_position_y ?? 50}
           currentCoupleImagePositionX={selectedGroup.couple_image_position_x ?? 50}
           onLinkCopied={() => markSharedToWhatsapp(selectedGroup.id)}
+          onImageChange={async () => {
+            // Reason: refresh selectedGroup so collectionUrl picks up the new
+            // couple_image_og_url and rebuilds with a fresh &v=<og_ts>. Without
+            // this the modal copies a URL WhatsApp considers identical to the
+            // pre-upload one and serves a stale (or missing) preview from cache.
+            if (groupsSectionRef.current) {
+              await groupsSectionRef.current.loadGroups(true);
+              setTimeout(() => {
+                const updatedGroup = groupsSectionRef.current?.selectedGroup;
+                if (updatedGroup && updatedGroup.id === selectedGroup.id) {
+                  setSelectedGroup(updatedGroup);
+                }
+              }, 100);
+            }
+          }}
           openExpanded={shareOpenExpanded}
         />
       )}

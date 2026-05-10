@@ -446,6 +446,7 @@ export interface Database {
           partner_last_name: string | null;
           relationship_to_couple: 'couple' | 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
           couple_image_url: string | null;
+          couple_image_og_url: string | null;
           image_group_dashboard: string | null;
           dashboard_image_position_y: number;
           couple_image_position_y: number;
@@ -479,6 +480,7 @@ export interface Database {
           partner_last_name?: string | null;
           relationship_to_couple?: 'couple' | 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
           couple_image_url?: string | null;
+          couple_image_og_url?: string | null;
           image_group_dashboard?: string | null;
           dashboard_image_position_y?: number;
           couple_image_position_y?: number;
@@ -510,6 +512,7 @@ export interface Database {
           partner_last_name?: string | null;
           relationship_to_couple?: 'couple' | 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
           couple_image_url?: string | null;
+          couple_image_og_url?: string | null;
           image_group_dashboard?: string | null;
           dashboard_image_position_y?: number;
           couple_image_position_y?: number;
@@ -1019,6 +1022,7 @@ export interface CollectionTokenInfo {
   couple_first_name: string | null;
   partner_first_name: string | null;
   couple_image_url: string | null;
+  couple_image_og_url: string | null;
   couple_image_position_y: number;
   couple_image_position_x: number;
   book_close_date: string | null;

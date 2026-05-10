@@ -435,14 +435,17 @@ export async function uploadGroupCoupleImage(
  */
 export async function deleteGroupCoupleImage(groupId: string): Promise<{ error: string | null }> {
   const supabase = createSupabaseClient();
-  
+
   try {
     console.log(`Deleting couple image for group: ${groupId}`);
-    
+
     // List all possible image extensions to find existing files
     const extensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
     const possiblePaths = extensions.map(ext => `groups/${groupId}/couple_image.${ext}`);
-    
+    // Reason: also remove the pre-processed OG version (always .jpg) so storage
+    // is clean and a future re-upload doesn't serve a stale preview
+    possiblePaths.push(`groups/${groupId}/couple_image_og.jpg`);
+
     // Try to remove all possible paths (Supabase will ignore non-existent files)
     const { error: deleteError } = await supabase.storage
       .from('recipes')
