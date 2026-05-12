@@ -118,7 +118,7 @@ export default function PersonalNotes() {
           <div className="order-1 lg:order-2 lg:pl-8 relative z-10">
             {/* Headline */}
             <motion.h2
-              className="type-subheading text-center lg:text-left mb-6"
+              className="type-subheading text-3xl md:text-4xl text-center lg:text-left mb-6"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

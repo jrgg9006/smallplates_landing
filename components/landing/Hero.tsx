@@ -66,15 +66,20 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
           >
-            {/* Primary CTA */}
-            <button
-              type="button"
-              onClick={handleGetStarted}
-              className="btn btn-lg btn-honey"
-              data-cta="hero-primary"
-            >
-              Start the Book
-            </button>
+            {/* Primary CTA + price */}
+            <div className="flex flex-col items-center gap-2">
+              <button
+                type="button"
+                onClick={handleGetStarted}
+                className="btn btn-lg btn-honey"
+                data-cta="hero-primary"
+              >
+                Start the Book
+              </button>
+              <p className="type-eyebrow text-white/80">
+                Starts at $169
+              </p>
+            </div>
 
             {/* Secondary CTA */}
             <button
