@@ -56,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${inter.variable}`}>
+    <html lang="en" className={`${dmSans.variable} ${inter.variable}`} suppressHydrationWarning>
       <head>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-96BCVQ91GC"
