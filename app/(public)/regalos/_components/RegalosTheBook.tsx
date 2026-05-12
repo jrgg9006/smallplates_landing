@@ -4,7 +4,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import RegalosSpecsGrid from "./RegalosSpecsGrid";
-import RegalosHandmadeCallout from "./RegalosHandmadeCallout";
 import RegalosDetailStrip from "./RegalosDetailStrip";
 import { trackEvent } from "@/lib/analytics";
 import { buildWhatsAppLink, WHATSAPP_MESSAGES } from "./whatsapp";
@@ -178,10 +177,7 @@ export default function RegalosTheBook() {
         {/* Part 3: Specs Grid */}
         <RegalosSpecsGrid />
 
-        {/* Part 4: Handmade Callout */}
-        <RegalosHandmadeCallout />
-
-        {/* Part 5: Detail Strip */}
+        {/* Part 4: Detail Strip */}
         <RegalosDetailStrip />
 
         {/* Part 6: Closing + CTA */}

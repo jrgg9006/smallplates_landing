@@ -120,7 +120,7 @@ export default function RegalosPersonalNotes() {
           <div className="order-1 lg:order-2 lg:pl-8 relative z-10">
             {/* Headline */}
             <motion.h2
-              className="type-subheading text-center lg:text-left mb-4"
+              className="type-heading text-center lg:text-left mb-4"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -128,16 +128,6 @@ export default function RegalosPersonalNotes() {
             >
               No solo recetas. Es lo que escriben.
             </motion.h2>
-
-            {/* Subheader */}
-            <p className="type-body-small text-brand-charcoal/60 text-center lg:text-left">
-              
-            </p>
-
-            {/* Secondary line */}
-            <p className="type-accent mt-2 text-center lg:text-left text-brand-charcoal/70">
-              
-            </p>
 
             {/* Subtle divider */}
             <div className="flex justify-center lg:justify-start mt-6 mb-10 md:mb-12">
