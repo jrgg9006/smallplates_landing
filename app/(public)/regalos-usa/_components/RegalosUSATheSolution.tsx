@@ -33,7 +33,7 @@ export default function RegalosUSATheSolution() {
               id="solution-heading"
               className="type-heading"
             >
-              Un libro hecho por la gente que más los quiere.
+              Un libro que reúne a la gente que más los quiere.
             </h2>
 
             {/* Body copy */}
