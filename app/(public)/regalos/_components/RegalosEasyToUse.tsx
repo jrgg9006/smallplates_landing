@@ -16,7 +16,7 @@ const pillars = [
   {
     image: "/images/regalo-usa-landing/sube_recetas_escribiendo_2.png",
     imageAlt: "Escribiendo una receta directamente en el teléfono",
-    title: "O escríbela1 en el teléfono.",
+    title: "O escríbela en el teléfono.",
     body:
       "Si solo la tienes en la cabeza. Sin app, sin instalar nada. Te llega un link por WhatsApp y se escribe ahí mismo.",
   },
