@@ -9,7 +9,10 @@ export default function RegalosUSABanner() {
     <div className="absolute top-0 left-0 right-0 z-50">
       {/* Announcement bar */}
       <div className="py-2.5 text-center border-b border-white/20">
-        <span className="font-sans text-[11px] font-medium tracking-[0.15em] uppercase text-white">
+        <span className="font-sans text-[11px] font-medium tracking-[0.15em] uppercase text-white sm:hidden">
+          ENVÍOS A US &amp; MX
+        </span>
+        <span className="font-sans text-[11px] font-medium tracking-[0.15em] uppercase text-white hidden sm:inline">
           ENVÍOS GRATIS A TODO ESTADOS UNIDOS Y MÉXICO.
         </span>
       </div>

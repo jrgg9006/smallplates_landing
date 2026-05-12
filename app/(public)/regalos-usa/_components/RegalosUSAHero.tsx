@@ -51,7 +51,7 @@ export default function RegalosUSAHero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
           >
-            Su mamá, sus amigos, su abuela... todos escriben una receta para ellos. Lo convertimos en un libro de recetas.
+            Su mamá, sus amigos, su abuela... todos escriben una receta para ellos.<span className="hidden sm:inline"> Lo convertimos en un libro de recetas.</span>
           </motion.p>
           <motion.div
             className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4"
