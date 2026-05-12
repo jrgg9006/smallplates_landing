@@ -59,17 +59,22 @@ export default function RegalosHero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
           >
-            {/* Primary CTA */}
-            <a
-              href={buildWhatsAppLink(WHATSAPP_MESSAGES.hero)}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackEvent("start_book_click", { cta_location: "regalos_hero_primary" })}
-              className="btn btn-lg btn-honey"
-              data-cta="regalos-hero-primary"
-            >
-              Hablemos por WhatsApp
-            </a>
+            {/* Primary CTA + price */}
+            <div className="flex flex-col items-center gap-2">
+              <a
+                href={buildWhatsAppLink(WHATSAPP_MESSAGES.hero)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent("start_book_click", { cta_location: "regalos_hero_primary" })}
+                className="btn btn-lg btn-honey"
+                data-cta="regalos-hero-primary"
+              >
+                Hablemos por WhatsApp
+              </a>
+              <p className="type-eyebrow text-white/80">
+                Desde $169 USD
+              </p>
+            </div>
 
             {/* Secondary CTA — smooth scroll to #how-it-works */}
             <button
