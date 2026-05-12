@@ -3,6 +3,7 @@ import RegalosHero from "./_components/RegalosHero";
 import RegalosTheProblem from "./_components/RegalosTheProblem";
 import RegalosTheSolution from "./_components/RegalosTheSolution";
 import RegalosHowItWorks from "./_components/RegalosHowItWorks";
+import RegalosEasyToUse from "./_components/RegalosEasyToUse";
 import RegalosBooksPrinted from "./_components/RegalosBooksPrinted";
 import RegalosPersonalNotes from "./_components/RegalosPersonalNotes";
 import RegalosTheBook from "./_components/RegalosTheBook";
@@ -27,6 +28,7 @@ export default function RegalosPage() {
         <RegalosTheProblem />
         <RegalosTheSolution />
         <RegalosHowItWorks />
+        <RegalosEasyToUse />
         <RegalosBooksPrinted />
         <RegalosPersonalNotes />
         <RegalosTheBook />
