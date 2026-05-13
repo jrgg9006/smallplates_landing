@@ -85,7 +85,7 @@ export default function Hero() {
             <button
               type="button"
               onClick={scrollToHowItWorks}
-              className="text-white/90 hover:text-white text-lg font-light underline underline-offset-4 decoration-white/50 hover:decoration-white transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent rounded px-2 py-1"
+              className="hidden sm:inline-block text-white/90 hover:text-white text-lg font-light underline underline-offset-4 decoration-white/50 hover:decoration-white transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent rounded px-2 py-1"
             >
               See how it works
             </button>
