@@ -263,3 +263,27 @@ Si no puedes explicar algo en lenguaje simple a alguien que no sabe del tema, no
 El modelo (mapa) nunca es la realidad (territorio). Confundir uno con el otro es la fuente principal de errores costosos.
 *Ejemplo*: tu spreadsheet de unit economics dice que ganas $200/cliente. La realidad: incluyes solo costos directos, ignoras tu tiempo, soporte, retornos. El mapa miente.
 *Úsalo cuando*: una decisión importante depende de un modelo, métrica o pronóstico. Pregunta: ¿qué está dejando fuera este mapa?
+
+---
+
+## Ejemplo de aplicación end-to-end
+
+Esto es cómo se ve una respuesta correcta del skill. Úsalo como referencia de formato y voz.
+
+**Entrada de Ricardo**: "/super-pensar ¿Subo el precio del libro de $2,500 a $3,200?"
+
+**Respuesta del skill**:
+
+> **Modelos relevantes**: incentivos, asimetría, segundo orden.
+>
+> **Incentivos**: A $3,200 atraes parejas con menos sensibilidad al precio (boda más cara, menos negociación). El cliente cambia, no solo el precio. **Lo que ilumina**: estás eligiendo cliente, no número.
+>
+> **Asimetría**: Subir precio cuesta poco si te equivocas (lo bajas otra vez). Mantener precio bajo cuesta meses de runway si era posible cobrar más. **Lo que ilumina**: el riesgo está en NO subir, no en subir.
+>
+> **Segundo orden**: Si subes precio sin subir percepción, conversión cae. Si subes ambos a la vez, no sabes cuál movió la aguja. **Lo que ilumina**: separa los experimentos.
+>
+> **Síntesis**: Lo que importa no es el precio nuevo — es si tu narrativa actual sostiene $3,200. Eso depende de qué dicen los clientes que ya pagaron $2,500: ¿les pareció caro o barato?
+>
+> **Eso es lo que veo. Tú decides.**
+
+Nota: 3 modelos (no más), cada uno aplicado al caso concreto, cierre con pregunta que solo Ricardo puede contestar, sin recomendación directa.
