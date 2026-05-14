@@ -146,3 +146,30 @@ Decisión = probabilidad × tamaño del resultado. Una apuesta de 10% × $1M ven
 Las decisiones reversibles cuestan poco si te equivocas. Las irreversibles, mucho. Trátalas distinto.
 *Ejemplo*: subir precios = reversible (los puedes bajar). Contratar fulltime = casi irreversible (despedir es caro/lento).
 *Úsalo cuando*: estás dudando una decisión — la pregunta correcta no es "¿es la mejor?" sino "¿qué pasa si me equivoco?"
+
+### Grupo 2: Comportamiento humano
+
+**5. Incentivos**
+"Show me the incentive and I'll show you the outcome" — Munger. La gente responde a sus incentivos, casi nunca a la lógica o a lo "correcto".
+*Ejemplo*: si pagas a un comercial por leads (no por ventas), tendrás muchos leads malos.
+*Úsalo cuando*: alguien actúa "irracional" o un sistema da resultados absurdos. Busca el incentivo oculto.
+
+**6. Sesgo de confirmación**
+Buscamos información que confirma lo que ya creemos e ignoramos la que la contradice. Funciona en automático.
+*Ejemplo*: tu hipótesis es "los clientes quieren X" → solo recuerdas a los 3 que pidieron X, ignoras a los 30 que no lo mencionaron.
+*Úsalo cuando*: estás muy seguro de algo basado en "evidencia" anecdótica. Pregúntate qué dato te haría cambiar de opinión.
+
+**7. Hanlon's razor**
+"Nunca atribuyas a malicia lo que se explica por incompetencia" — o por descuido, prisa, o que no le importa lo mismo que a ti.
+*Ejemplo*: cliente no responde tu email → casi nunca es "no le interesas", casi siempre es "no lo vio o lo olvidó".
+*Úsalo cuando*: estás a punto de tomártelo personal. La explicación benigna casi siempre es la correcta.
+
+**8. Social proof**
+La gente decide qué hacer mirando lo que hacen otros, especialmente otros parecidos. No es debilidad, es heurística cognitiva.
+*Ejemplo*: testimonios de "novias en CDMX 2025" convierten más que testimonios genéricos para una novia en CDMX 2025.
+*Úsalo cuando*: estás diseñando algo que requiere que la gente tome una acción nueva. Pregunta: ¿quién parecido ya lo hizo?
+
+**9. Reciprocidad**
+Cuando alguien te da algo, sientes obligación de devolverlo. Funciona incluso cuando lo que te dieron es pequeño.
+*Ejemplo*: regalar un PDF útil antes de pedir email convierte mejor que pedir el email directo.
+*Úsalo cuando*: necesitas algo de alguien (referido, intro, feedback). Pregúntate qué le diste antes — si nada, da algo primero.
