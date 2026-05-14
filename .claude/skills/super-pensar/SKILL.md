@@ -173,3 +173,25 @@ La gente decide qué hacer mirando lo que hacen otros, especialmente otros parec
 Cuando alguien te da algo, sientes obligación de devolverlo. Funciona incluso cuando lo que te dieron es pequeño.
 *Ejemplo*: regalar un PDF útil antes de pedir email convierte mejor que pedir el email directo.
 *Úsalo cuando*: necesitas algo de alguien (referido, intro, feedback). Pregúntate qué le diste antes — si nada, da algo primero.
+
+### Grupo 3: Sistemas y consecuencias
+
+**10. Segundo orden**
+Las consecuencias de una decisión no terminan en el efecto inmediato. Pregunta: "Y luego, ¿qué pasa? ¿Y luego de eso?"
+*Ejemplo*: bajas el precio para vender más → vendes más → atraes clientes más sensibles a precio → exigen más descuentos → margen colapsa.
+*Úsalo cuando*: una decisión se ve "obvia" en primer orden. El efecto interesante casi siempre está en 2do o 3er orden.
+
+**11. Chesterton's fence**
+Antes de quitar una regla/sistema/proceso que parece innecesario, entiende por qué se puso ahí en primer lugar. Si no sabes, no lo quites.
+*Ejemplo*: "¿Por qué tenemos este step de aprobación manual?" → si no sabes, asume que alguien lo puso por una razón que no es obvia.
+*Úsalo cuando*: estás a punto de simplificar/eliminar algo que "claramente no aporta". El default es: averigua primero.
+
+**12. Ley de Goodhart**
+"Cuando una métrica se vuelve objetivo, deja de ser una buena métrica." La gente optimiza el número, no la realidad que el número medía.
+*Ejemplo*: medir productividad por líneas de código → tendrás código verboso. Medir por tickets cerrados → tendrás tickets divididos artificialmente.
+*Úsalo cuando*: vas a poner un KPI o una meta numérica. Pregunta: ¿cómo lo van a hackear?
+
+**13. Efectos compuestos**
+Mejoras pequeñas y consistentes ganan a esfuerzos grandes y esporádicos por el efecto del interés compuesto.
+*Ejemplo*: 1% de mejora diaria en conversión durante 1 año = 37x. Un sprint heroico cada 6 meses = poco.
+*Úsalo cuando*: estás eligiendo entre "hacer un esfuerzo grande ahora" vs "armar un sistema que mejore poco pero todos los días". El segundo casi siempre gana en el largo plazo.
