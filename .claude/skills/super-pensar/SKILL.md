@@ -229,3 +229,25 @@ El 80% de los resultados viene del 20% de los esfuerzos/clientes/features. El 20
 Sabes mucho de pocas cosas y poco de muchas. Quédate dentro de tu círculo de competencia para tomar decisiones con ventaja.
 *Ejemplo*: si no entiendes ads de Meta, no debates si la curva de CPM es alta — pregunta a alguien que sí.
 *Úsalo cuando*: estás a punto de decidir algo en un área donde no eres experto. Identifica el límite de tu círculo y decide si vale la pena salir o pedir ayuda.
+
+### Grupo 6: Negocios y estrategia
+
+**20. Moats**
+Una ventaja sostenible que evita que la competencia te alcance. Tipos: marca, network effects, costo, switching costs, escala.
+*Ejemplo*: Apple = marca + ecosistema. AWS = escala + switching costs. Coca-Cola = marca + distribución.
+*Úsalo cuando*: estás evaluando si un negocio (tuyo o ajeno) es defendible a largo plazo. Sin moat, los márgenes colapsan cuando entra competencia.
+
+**21. Network effects**
+El producto se vuelve más valioso para cada usuario conforme más usuarios se suman. El líder casi siempre gana todo.
+*Ejemplo*: WhatsApp vale por la gente que ya está ahí. Si la mitad se va a Telegram, tú probablemente también te vas.
+*Úsalo cuando*: evalúas un negocio donde "el primero en escala gana". Si no tienes network effects, no esperes "winner takes all".
+
+**22. Switching costs**
+Qué tan caro/molesto es para un cliente cambiarse a un competidor. Costos altos = retención alta, sin importar la calidad del producto.
+*Ejemplo*: cambiar de banco = días de papeleo = la gente se queda con bancos malísimos. Cambiar de Substack a Beehiiv = un clic = poca retención.
+*Úsalo cuando*: tu producto es "bueno" pero la gente lo deja. Probablemente el switching cost es bajo. Construye fricción positiva (datos, integraciones, hábito).
+
+**23. Comoditización**
+Cuando todos los competidores ofrecen lo mismo, el único diferenciador es precio. Margen tiende a cero.
+*Ejemplo*: hosting compartido = comoditizado. Hosting con DX excelente (Vercel) = no comoditizado, todavía.
+*Úsalo cuando*: tu propuesta de valor se parece sospechosamente a la del competidor. Si te están comparando feature-por-feature, ya estás casi comoditizado.
