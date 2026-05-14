@@ -195,3 +195,20 @@ Antes de quitar una regla/sistema/proceso que parece innecesario, entiende por q
 Mejoras pequeñas y consistentes ganan a esfuerzos grandes y esporádicos por el efecto del interés compuesto.
 *Ejemplo*: 1% de mejora diaria en conversión durante 1 año = 37x. Un sprint heroico cada 6 meses = poco.
 *Úsalo cuando*: estás eligiendo entre "hacer un esfuerzo grande ahora" vs "armar un sistema que mejore poco pero todos los días". El segundo casi siempre gana en el largo plazo.
+
+### Grupo 4: Probabilidad y riesgo
+
+**14. Padrón base (base rates)**
+Antes de evaluar un caso específico, mira la frecuencia base en la población. La intuición ignora base rates y se enfoca en detalles "vívidos".
+*Ejemplo*: "Voy a hacer un curso porque conozco a alguien que vendió $100K así." → base rate: 95% de los cursos venden <$5K. El caso vívido es la excepción.
+*Úsalo cuando*: una decisión depende de "si pasa X". Pregunta primero: ¿con qué frecuencia pasa X en general?
+
+**15. Regresión a la media**
+Los extremos tienden a moverse hacia el promedio en la siguiente medición. Un mes excelente probablemente es seguido por uno normal — no porque algo "se arruinó".
+*Ejemplo*: tu mejor mes de ventas casi nunca se repite el siguiente mes. No es que perdiste el touch — es estadística.
+*Úsalo cuando*: estás explicando un cambio (positivo o negativo) inventando una causa. A veces solo es regresión a la media.
+
+**16. Black Swan / asimetría de cola**
+Los eventos raros (positivos o negativos) tienen impacto desproporcionado. El mundo no es normal/gaussiano — es de colas gordas.
+*Ejemplo*: un cliente que se vuelve viral te puede generar más en una semana que 6 meses de marketing. Una crisis te puede borrar 6 meses de runway.
+*Úsalo cuando*: estás planeando con base en "el caso promedio". Pregunta: ¿qué pasa en el caso 1-en-100? ¿Lo aguanto?
