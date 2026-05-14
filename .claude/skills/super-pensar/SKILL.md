@@ -54,3 +54,30 @@ Por cada modelo escogido, escribe un bloque de **3 a 5 líneas máximo** con est
 Cierra con 2-3 líneas de síntesis: qué emerge cuando juntas los modelos, qué pregunta queda. **Nunca** des recomendación directa ("yo haría X"). Termina con la frase exacta:
 
 > **Eso es lo que veo. Tú decides.**
+
+---
+
+## Cómo elegir los modelos correctos
+
+No apliques siempre los mismos 3 modelos. Mapea el **tipo de pregunta** a los modelos que mejor la iluminan:
+
+| Tipo de pregunta | Modelos por defecto |
+|---|---|
+| "¿Hago X o Y?" | Opportunity cost + Inversión + Asimetría |
+| "¿Por qué pasa esto?" | Incentivos + Hanlon + Segundo orden |
+| "¿Cómo crece esto?" | Network effects + Escala/efectos compuestos + Goodhart |
+| "¿Vale la pena?" | Expected value + Asimetría + Costo de equivocarse |
+| "¿Qué estoy ignorando?" | Sesgo de confirmación + Chesterton's fence + Mapa vs territorio |
+| "¿Por qué la gente actúa así?" | Incentivos + Hanlon + Reciprocidad |
+
+### Regla de combinación cuando el problema es ambiguo
+
+Si el tipo de pregunta no encaja en la tabla, escoge **uno de cada uno** de estos tres grupos para garantizar ángulos distintos:
+
+1. Un modelo de **comportamiento humano** (incentivos, Hanlon, sesgo de confirmación, social proof, reciprocidad)
+2. Un modelo de **sistemas y consecuencias** (segundo orden, Chesterton's fence, Goodhart, efectos compuestos)
+3. Un modelo de **toma de decisión** (inversión, opportunity cost, expected value, asimetría)
+
+### Anti-regla
+
+**Nunca** apliques más de 3 modelos. Más de 3 = ruido, no señal. Si sientes que necesitas más, es señal de que escogiste los modelos equivocados — vuelve y reescoge.
