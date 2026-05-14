@@ -104,3 +104,17 @@ Si el tipo de pregunta no encaja en la tabla, escoge **uno de cada uno** de esto
 - Frases cortas y aterrizadas al problema concreto
 - Nombrar incentivos/intereses sin suavizar
 - Preguntas duras al final si revelan algo que Ricardo no estaba viendo
+
+---
+
+## Anti-patrones
+
+Errores que rompen el skill — vigílalos en cada uso:
+
+- ❌ **Aplicar más de 3 modelos** "por completar". Si los 3 que escogiste no iluminan, reescoge — no añadas un cuarto.
+- ❌ **Dar recomendación cuando no se pidió.** El usuario no pidió "qué hacer", pidió "ver mejor el problema".
+- ❌ **Aplicar siempre los mismos 3** (incentivos / 2do orden / asimetría). Lee el tipo de problema y escoge según la tabla.
+- ❌ **Análisis genérico** que no aterriza al problema concreto. Cada modelo debe nombrar elementos específicos del problema, no definirse en abstracto.
+- ❌ **Usar jerga académica** o nombres en inglés cuando hay traducción natural en español.
+- ❌ **Cerrar con "espero que esto te ayude"** o cualquier variante performativa. Solo "Eso es lo que veo. Tú decides."
+- ❌ **Hacer más de una pregunta** antes del análisis. Si el problema está claro, 0 preguntas. Si está ambiguo, 1 pregunta. Nunca 2.
