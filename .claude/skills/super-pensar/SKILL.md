@@ -118,3 +118,31 @@ Errores que rompen el skill — vigílalos en cada uso:
 - ❌ **Usar jerga académica** o nombres en inglés cuando hay traducción natural en español.
 - ❌ **Cerrar con "espero que esto te ayude"** o cualquier variante performativa. Solo "Eso es lo que veo. Tú decides."
 - ❌ **Hacer más de una pregunta** antes del análisis. Si el problema está claro, 0 preguntas. Si está ambiguo, 1 pregunta. Nunca 2.
+
+---
+
+## El catálogo (25 modelos en 7 grupos)
+
+Cada modelo: definición → ejemplo concreto → cuándo aplicar.
+
+### Grupo 1: Toma de decisión
+
+**1. Inversión (think backwards)**
+En vez de preguntar "¿cómo logro X?", pregunta "¿cómo garantizaría que NO pase X?" y elimina esos caminos.
+*Ejemplo*: "¿Cómo crezco a 100 libros/mes?" → "¿Qué haría que NO crezca?" (cliente equivocado, ciclo largo, ads malos).
+*Úsalo cuando*: estás atorado intentando "mejorar" algo y no avanzas.
+
+**2. Opportunity cost**
+El verdadero costo de hacer X no es el dinero/tiempo de X, es lo mejor que dejaste de hacer.
+*Ejemplo*: "Voy a invertir 2 semanas en este feature" → ¿qué dejas de hacer esas 2 semanas? Si la respuesta es "ventas", el feature te está costando ventas.
+*Úsalo cuando*: alguien (o tú) propone hacer algo "porque sí se puede" sin nombrar lo que sacrifica.
+
+**3. Expected value**
+Decisión = probabilidad × tamaño del resultado. Una apuesta de 10% × $1M vence a una de 90% × $50K.
+*Ejemplo*: hacer 10 llamadas frías con 5% de éxito a $5K cada una = $2,500 esperados. Vale la pena el día.
+*Úsalo cuando*: estás eligiendo entre algo "seguro y chico" vs algo "incierto y grande".
+
+**4. Asimetría / costo de equivocarse**
+Las decisiones reversibles cuestan poco si te equivocas. Las irreversibles, mucho. Trátalas distinto.
+*Ejemplo*: subir precios = reversible (los puedes bajar). Contratar fulltime = casi irreversible (despedir es caro/lento).
+*Úsalo cuando*: estás dudando una decisión — la pregunta correcta no es "¿es la mejor?" sino "¿qué pasa si me equivoco?"
