@@ -212,3 +212,20 @@ Los extremos tienden a moverse hacia el promedio en la siguiente medición. Un m
 Los eventos raros (positivos o negativos) tienen impacto desproporcionado. El mundo no es normal/gaussiano — es de colas gordas.
 *Ejemplo*: un cliente que se vuelve viral te puede generar más en una semana que 6 meses de marketing. Una crisis te puede borrar 6 meses de runway.
 *Úsalo cuando*: estás planeando con base en "el caso promedio". Pregunta: ¿qué pasa en el caso 1-en-100? ¿Lo aguanto?
+
+### Grupo 5: Foco y simplicidad
+
+**17. Navaja de Occam**
+Entre dos explicaciones que encajan con los datos, la más simple casi siempre es la correcta. No multiplicar entidades sin necesidad.
+*Ejemplo*: ventas bajaron este mes → ¿"el algoritmo de Meta cambió + competencia entró + estacionalidad"? O ¿"hicimos menos ads"? Empieza por lo simple.
+*Úsalo cuando*: estás construyendo una explicación con muchas variables. Pregunta: ¿hay una explicación con menos piezas que también encaja?
+
+**18. Pareto 80/20**
+El 80% de los resultados viene del 20% de los esfuerzos/clientes/features. El 20% restante consume el 80% del tiempo.
+*Ejemplo*: 80% de tus ingresos viene del 20% de tus clientes. 80% de tus bugs viene del 20% del código.
+*Úsalo cuando*: tu lista de tareas/features es larga. Identifica el 20% que mueve la aguja y haz solo eso.
+
+**19. Círculo de competencia**
+Sabes mucho de pocas cosas y poco de muchas. Quédate dentro de tu círculo de competencia para tomar decisiones con ventaja.
+*Ejemplo*: si no entiendes ads de Meta, no debates si la curva de CPM es alta — pregunta a alguien que sí.
+*Úsalo cuando*: estás a punto de decidir algo en un área donde no eres experto. Identifica el límite de tu círculo y decide si vale la pena salir o pedir ayuda.
