@@ -251,3 +251,15 @@ Qué tan caro/molesto es para un cliente cambiarse a un competidor. Costos altos
 Cuando todos los competidores ofrecen lo mismo, el único diferenciador es precio. Margen tiende a cero.
 *Ejemplo*: hosting compartido = comoditizado. Hosting con DX excelente (Vercel) = no comoditizado, todavía.
 *Úsalo cuando*: tu propuesta de valor se parece sospechosamente a la del competidor. Si te están comparando feature-por-feature, ya estás casi comoditizado.
+
+### Grupo 7: Comunicación y aprendizaje
+
+**24. Técnica Feynman**
+Si no puedes explicar algo en lenguaje simple a alguien que no sabe del tema, no lo entiendes. La explicación expone los huecos.
+*Ejemplo*: ¿Puedes explicar tu producto a tu mamá en 2 frases sin jerga? Si no, tu posicionamiento todavía no es claro.
+*Úsalo cuando*: tu copy o pitch suena "complicado" o "técnico". Reescríbelo para alguien fuera del nicho — verás dónde se rompe.
+
+**25. Mapa vs territorio**
+El modelo (mapa) nunca es la realidad (territorio). Confundir uno con el otro es la fuente principal de errores costosos.
+*Ejemplo*: tu spreadsheet de unit economics dice que ganas $200/cliente. La realidad: incluyes solo costos directos, ignoras tu tiempo, soporte, retornos. El mapa miente.
+*Úsalo cuando*: una decisión importante depende de un modelo, métrica o pronóstico. Pregunta: ¿qué está dejando fuera este mapa?
