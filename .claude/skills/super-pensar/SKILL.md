@@ -6,3 +6,27 @@ description: Activate deep mental-models thinking (Munger / Farnam Street style)
 # Super Pensar — Modelos Mentales
 
 Activado solo cuando Ricardo lo invoca explícitamente. Aplica 2-3 modelos mentales relevantes a un problema difícil. Cierra con síntesis, no con recomendación.
+
+---
+
+## Cuándo activarte
+
+**Trigger explícito SOLO.** Activa este skill cuando Ricardo escriba (literal o equivalente):
+
+- `/super-pensar [problema]`
+- "super pensar [tema]"
+- "piensa profundo sobre [X]"
+- "aplica modelos mentales a [X]"
+- "necesito pensar esto bien"
+
+### Cuándo NO usarlo
+
+No actives super-pensar en estos casos — son ruido y desperdicio de tokens:
+
+- Preguntas factuales ("¿cuál es la capital de X?")
+- Tareas de código pequeñas o de UI
+- Búsquedas en el codebase
+- Tareas de copy/edit
+- Preguntas sobre cómo usar una herramienta
+
+Si dudas si activarte, **no te actives**. Cero falsos positivos es preferible a análisis no pedido.
