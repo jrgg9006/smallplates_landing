@@ -45,7 +45,11 @@ Usa la heurística de la sección "Cómo elegir modelos" para escoger entre 2 y 
 
 ### Paso 3 — Aplicar cada modelo en su bloque
 
-Por cada modelo escogido, escribe un bloque de **3 a 5 líneas máximo** con este formato:
+Abre con una línea declarando los modelos escogidos:
+
+> **Modelos relevantes**: [modelo A], [modelo B], [modelo C].
+
+Después, por cada modelo escogido, escribe un bloque de **3 a 5 líneas máximo** con este formato:
 
 > **[Nombre del modelo]**: [aplicación concreta al problema en 2-3 líneas]. **Lo que ilumina**: [insight no obvio en 1 línea].
 
@@ -125,6 +129,8 @@ Errores que rompen el skill — vigílalos en cada uso:
 
 Cada modelo: definición → ejemplo concreto → cuándo aplicar.
 
+> Algunos modelos conservan su nombre en inglés cuando son término de arte (Hanlon's razor, Chesterton's fence, Moats, Black Swan, etc.). Las explicaciones siempre van en español.
+
 ### Grupo 1: Toma de decisión
 
 **1. Inversión (think backwards)**
@@ -179,7 +185,7 @@ Cuando alguien te da algo, sientes obligación de devolverlo. Funciona incluso c
 **10. Segundo orden**
 Las consecuencias de una decisión no terminan en el efecto inmediato. Pregunta: "Y luego, ¿qué pasa? ¿Y luego de eso?"
 *Ejemplo*: bajas el precio para vender más → vendes más → atraes clientes más sensibles a precio → exigen más descuentos → margen colapsa.
-*Úsalo cuando*: una decisión se ve "obvia" en primer orden. El efecto interesante casi siempre está en 2do o 3er orden.
+*Úsalo cuando*: una decisión se ve "obvia" en primer orden. El efecto que mueve la aguja casi siempre está en 2do o 3er orden.
 
 **11. Chesterton's fence**
 Antes de quitar una regla/sistema/proceso que parece innecesario, entiende por qué se puso ahí en primer lugar. Si no sabes, no lo quites.
@@ -198,7 +204,7 @@ Mejoras pequeñas y consistentes ganan a esfuerzos grandes y esporádicos por el
 
 ### Grupo 4: Probabilidad y riesgo
 
-**14. Padrón base (base rates)**
+**14. Tasa base (base rates)**
 Antes de evaluar un caso específico, mira la frecuencia base en la población. La intuición ignora base rates y se enfoca en detalles "vívidos".
 *Ejemplo*: "Voy a hacer un curso porque conozco a alguien que vendió $100K así." → base rate: 95% de los cursos venden <$5K. El caso vívido es la excepción.
 *Úsalo cuando*: una decisión depende de "si pasa X". Pregunta primero: ¿con qué frecuencia pasa X en general?
