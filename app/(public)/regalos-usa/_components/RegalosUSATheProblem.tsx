@@ -35,7 +35,7 @@ export default function RegalosUSATheProblem() {
           viewport={VIEWPORT}
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
-          Su cocina nunca fue solo una cocina.
+          La cocina nunca fue solo una cocina.
         </motion.h2>
 
         <div className="mt-8 md:mt-10 space-y-4">
