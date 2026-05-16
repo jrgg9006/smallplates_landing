@@ -18,6 +18,7 @@ import {
 } from "@/lib/stripe/pricing";
 import WhatsAppFAB from "@/components/landing/WhatsAppFAB";
 import { onboardingExitHref } from "@/lib/utm/exit-href";
+import FunnelEventTracker from "@/components/analytics/FunnelEventTracker";
 
 const TOTAL_STEPS = 3;
 
@@ -612,6 +613,7 @@ function OnboardingContent() {
 export default function OnboardingPage() {
   return (
     <OnboardingProvider userType="gift_giver">
+      <FunnelEventTracker event={{ type: "begin_checkout" }} />
       <OnboardingContent />
       <WhatsAppFAB />
     </OnboardingProvider>

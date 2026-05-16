@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { stripe } from "@/lib/stripe/client";
 import ResendButton from "./ResendButton";
+import FunnelEventTracker from "@/components/analytics/FunnelEventTracker";
 
 export default async function CheckYourEmailPage({
   searchParams,
@@ -39,8 +40,22 @@ export default async function CheckYourEmailPage({
     return <ErrorState />;
   }
 
+  // Reason: amount_total comes from Stripe in the smallest currency unit
+  // (cents for USD/MXN). Divide by 100 to send the human-readable value
+  // that Meta and GA4 expect for ROAS calculations.
+  const purchaseValue = (session.amount_total ?? 0) / 100;
+  const purchaseCurrency = (session.currency ?? "usd").toUpperCase();
+
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-6">
+      <FunnelEventTracker
+        event={{
+          type: "purchase",
+          transactionId: sessionId,
+          value: purchaseValue,
+          currency: purchaseCurrency,
+        }}
+      />
       <div className="max-w-md w-full text-center">
         <div className="flex justify-center mb-10">
           <Image

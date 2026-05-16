@@ -12,6 +12,7 @@ import RegalosEmotionalClose from "./_components/RegalosEmotionalClose";
 import RegalosFAQ from "./_components/RegalosFAQ";
 import RegalosFooter from "./_components/RegalosFooter";
 import RegalosWhatsAppFAB from "./_components/RegalosWhatsAppFAB";
+import WhatsAppTracker from "@/components/analytics/WhatsAppTracker";
 
 export const metadata = {
   title: "Small Plates — Un regalo que se cocina, no que se guarda",
@@ -22,6 +23,7 @@ export const metadata = {
 export default function RegalosPage() {
   return (
     <>
+      <WhatsAppTracker landing="regalos" />
       <RegalosBanner />
       <main className="min-h-screen bg-white">
         <RegalosHero />
