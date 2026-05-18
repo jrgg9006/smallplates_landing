@@ -105,7 +105,7 @@ interface FindOrCreateUserResult {
  * Returns `wasExisting` so callers can tailor messaging (e.g. welcome vs. "your new book"
  * email for a returning customer buying their Nth book).
  */
-async function findOrCreateUser(
+export async function findOrCreateUser(
   supabaseAdmin: SupabaseAdmin,
   email: string,
   buyerName: string
@@ -195,7 +195,7 @@ async function findOrCreateUser(
  * Safe to call concurrently — onConflict on id ensures idempotency with the
  * handle_new_user trigger that auto-creates a blank profile row.
  */
-async function upsertBuyerProfile(
+export async function upsertBuyerProfile(
   supabaseAdmin: SupabaseAdmin,
   userId: string,
   email: string,
@@ -229,7 +229,7 @@ async function upsertBuyerProfile(
  * wrote the row. The `add_group_creator_as_owner_trigger` migration auto-inserts
  * the owner row in group_members AFTER INSERT.
  */
-async function findOrCreatePendingGroup(
+export async function findOrCreatePendingGroup(
   supabaseAdmin: SupabaseAdmin,
   userId: string,
   initialGroupId: string | null,
