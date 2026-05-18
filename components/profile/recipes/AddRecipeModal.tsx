@@ -838,7 +838,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
             id="recipeNotes"
             value={recipeNotes}
             onChange={(e) => setRecipeNotes(e.target.value)}
-            className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[80px] bg-white transition-all duration-200"
+            className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[80px] bg-white transition-all duration-200"
             placeholder="Made this at 2am more times than I will admit."
           />
         </div>
@@ -865,7 +865,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
             id="recipeIngredients"
             value={recipeIngredients}
             onChange={(e) => setRecipeIngredients(e.target.value)}
-                className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[100px] bg-white transition-all duration-200"
+                className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[100px] bg-white transition-all duration-200"
             placeholder="Pecorino, not parmesan. Good eggs. The real guanciale."
           />
         </div>
@@ -876,7 +876,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
             id="recipeInstructions"
             value={recipeInstructions}
             onChange={(e) => setRecipeInstructions(e.target.value)}
-                className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[140px] bg-white transition-all duration-200"
+                className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[140px] bg-white transition-all duration-200"
             placeholder="Start with cold pan. Trust the process. Save the pasta water—you will need it."
           />
         </div>
