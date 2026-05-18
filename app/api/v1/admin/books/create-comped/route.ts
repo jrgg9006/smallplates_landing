@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
-import { canCreateCompedBooks, COMPED_EMAILS } from '@/lib/config/admin';
+import { canCreateCompedBooks } from '@/lib/config/admin';
+import {
+  findOrCreateUser,
+  upsertBuyerProfile,
+  findOrCreatePendingGroup,
+  emitPostPaymentAutoLogin,
+} from '@/lib/stripe/post-payment-setup';
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: NextRequest) {
   try {
-    // 1. Auth: verify caller is in the comped-emails whitelist
+    // 1. Caller must be in the comped-emails whitelist.
     const supabaseAuth = await createSupabaseServer();
     const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
 
@@ -17,101 +25,100 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not authorized to create comped books' }, { status: 403 });
     }
 
-    // 2. Parse body — same fields as complete-onboarding + ownerEmail
+    // 2. Parse + validate.
     const body = await request.json();
-    const {
-      ownerEmail,
-      coupleFirstName,
-      partnerFirstName,
-      relationship,
-      weddingDate,
-      weddingDateUndecided,
-      userType,
-    } = body;
+    const email: string = (body.email || '').trim().toLowerCase();
+    const customerName: string = (body.customerName || '').trim();
+    const amountCashDollars = Number(body.amountCashDollars);
+    const bookQuantity = parseInt(body.bookQuantity, 10);
+    const weddingDate: string | null = body.weddingDate || null;
+    const weddingDateUndecided: boolean = body.weddingDateUndecided === true;
+    const isDemo: boolean = body.isDemo === true;
 
-    if (!coupleFirstName || !partnerFirstName) {
-      return NextResponse.json({ error: 'Couple names are required' }, { status: 400 });
+    if (!email || !EMAIL_RE.test(email)) {
+      return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
     }
-
-    // Reason: ownerEmail must be one of the whitelisted emails to prevent abuse
-    const targetEmail = ownerEmail?.trim().toLowerCase();
-    if (!targetEmail || !COMPED_EMAILS.includes(targetEmail)) {
-      return NextResponse.json({ error: 'Invalid owner email' }, { status: 400 });
+    if (!customerName) {
+      return NextResponse.json({ error: 'Customer name is required' }, { status: 400 });
     }
-
-    const validUserTypes = ['couple', 'gift_giver'] as const;
-    type ValidUserType = typeof validUserTypes[number];
-    const resolvedUserType: ValidUserType = validUserTypes.includes(userType) ? userType : 'gift_giver';
+    if (!Number.isFinite(amountCashDollars) || amountCashDollars < 0) {
+      return NextResponse.json({ error: 'Amount must be ≥ 0' }, { status: 400 });
+    }
+    if (!Number.isInteger(bookQuantity) || bookQuantity < 1) {
+      return NextResponse.json({ error: 'Book quantity must be ≥ 1' }, { status: 400 });
+    }
 
     const supabaseAdmin = createSupabaseAdminClient();
 
-    // 3. Find the target owner's profile
-    const { data: existingProfile } = await supabaseAdmin
-      .from('profiles')
-      .select('id')
-      .eq('email', targetEmail)
-      .single();
-
-    if (!existingProfile) {
-      return NextResponse.json({ error: `Profile not found for ${targetEmail}. That user needs to log in at least once first.` }, { status: 400 });
+    // 3. Find or create the auth user + profile skeleton.
+    const { userId, wasExisting } = await findOrCreateUser(supabaseAdmin, email, customerName);
+    if (!userId) {
+      return NextResponse.json({ error: 'Could not provision user' }, { status: 500 });
     }
 
-    const userId = existingProfile.id;
-    const coupleName = `${coupleFirstName.trim()} & ${partnerFirstName.trim()}`;
+    // 4. Upsert profile with full_name + user_type. Customer can correct their relationship
+    //    later in CoupleNamesModal (organizer_relationship is stored on groups, not profiles).
+    await upsertBuyerProfile(supabaseAdmin, userId, email, customerName);
 
-    // 4. Create group — same shape as complete-onboarding
-    const { data: group, error: groupError } = await supabaseAdmin
-      .from('groups')
+    // 5. Create pending_setup group. Reason: DB trigger `add_group_creator_as_owner_trigger`
+    //    inserts the owner row in group_members, and `create_group_cookbook_trigger` creates
+    //    the cookbook automatically — same as Stripe's post-payment flow.
+    const { groupId } = await findOrCreatePendingGroup(
+      supabaseAdmin,
+      userId,
+      null,
+      weddingDate,
+      weddingDateUndecided,
+      null
+    );
+
+    if (!groupId) {
+      return NextResponse.json({ error: 'Could not create group' }, { status: 500 });
+    }
+
+    // 6. Cash order. Mirrors a Stripe initial_purchase order but with a synthetic
+    //    payment_intent identifier so it's traceable and unique.
+    const paymentIntentId = `comped_cash_${crypto.randomUUID()}`;
+    const amountCents = Math.round(amountCashDollars * 100);
+
+    const { error: orderError } = await supabaseAdmin
+      .from('orders')
       .insert({
-        name: coupleName,
-        description: `A wedding recipe book for ${coupleName}`,
-        created_by: userId,
-        couple_first_name: coupleFirstName.trim(),
-        partner_first_name: partnerFirstName.trim(),
-        relationship_to_couple: resolvedUserType === 'couple' ? 'couple' : (relationship || null),
-        wedding_date: weddingDate || null,
-        wedding_date_undecided: weddingDateUndecided || false,
-      })
-      .select('id, name')
-      .single();
+        user_id: userId,
+        email,
+        stripe_payment_intent: paymentIntentId,
+        amount_total: amountCents,
+        book_quantity: bookQuantity,
+        couple_name: null,
+        user_type: 'gift_giver',
+        order_type: 'initial_purchase',
+        status: 'paid',
+        group_id: groupId,
+        onboarding_data: {
+          comped: true,
+          payment_method: 'cash',
+          is_demo: isDemo,
+          created_by: user.email,
+          customer_name: customerName,
+        },
+      });
 
-    if (groupError) {
-      return NextResponse.json({ error: `Failed to create group: ${groupError.message}` }, { status: 500 });
+    if (orderError) {
+      console.error('create-comped: order insert failed', orderError);
+      return NextResponse.json({ error: `Failed to create order: ${orderError.message}` }, { status: 500 });
     }
 
-    // 5. Add owner as group member
-    await supabaseAdmin.from('group_members').insert({
-      group_id: group.id,
-      profile_id: userId,
-      role: 'owner',
-      relationship_to_couple: resolvedUserType === 'couple' ? 'couple' : (relationship || null),
+    // 7. Magic link + welcome email — same template the Stripe webhook uses.
+    await emitPostPaymentAutoLogin({
+      email,
+      buyerName: customerName,
+      wasExisting,
     });
 
-    // 6. Create cookbook
-    await supabaseAdmin.from('cookbooks').insert({
-      user_id: userId,
-      name: coupleName,
-      description: `Recipe book for ${coupleName}`,
-      is_group_cookbook: true,
-      group_id: group.id,
-    });
-
-    // 7. Create order record marked as comped
-    await supabaseAdmin.from('orders').insert({
-      user_id: userId,
-      email: targetEmail,
-      stripe_payment_intent: `comped_by_${user.email}`,
-      amount_total: 0,
-      book_quantity: 1,
-      couple_name: coupleName,
-      user_type: resolvedUserType,
-      onboarding_data: { comped: true, created_by: user.email },
-      status: 'paid',
-    });
-
-    return NextResponse.json({ success: true, groupId: group.id, name: coupleName });
+    return NextResponse.json({ success: true, groupId, email });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('create-comped route error:', err);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
