@@ -84,9 +84,12 @@ export async function POST(
       );
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+    // Reason: client compresses to ~2000px JPEG before upload, so anything
+    // arriving here should be well under 2MB. 10MB cap is generous headroom
+    // in case the client falls back to raw upload.
+    if (file.size > 10 * 1024 * 1024) {
       return NextResponse.json(
-        { error: 'File too large. Maximum size is 5MB.' },
+        { error: 'File too large. Maximum size is 10MB.' },
         { status: 400 }
       );
     }

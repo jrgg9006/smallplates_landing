@@ -12,6 +12,59 @@ import { Copy, Check, Upload, X, Image as ImageIcon, Move } from "lucide-react";
 import { getGroupShareMessage, updateGroupShareMessage, resetGroupShareMessage } from "@/lib/supabase/groups";
 import Image from "next/image";
 
+// Reason: iPhone screenshots and modern photos routinely exceed 5MB as PNG. We
+// downscale and re-encode to JPEG in the browser before upload so the server
+// never has to deal with raw 5-10MB files. Uses native Canvas API — no deps.
+// Also normalizes the output type (always image/jpeg) which simplifies server
+// validation. HEIC works only on browsers that can natively decode it (Safari).
+async function compressImageForUpload(file: File): Promise<File> {
+  const MAX_DIMENSION = 2000;
+  const QUALITY = 0.85;
+
+  const objectUrl = URL.createObjectURL(file);
+  const img = new window.Image();
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error('Could not decode image'));
+      img.src = objectUrl;
+    });
+
+    let { width, height } = img;
+    if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+      if (width > height) {
+        height = Math.round((height / width) * MAX_DIMENSION);
+        width = MAX_DIMENSION;
+      } else {
+        width = Math.round((width / height) * MAX_DIMENSION);
+        height = MAX_DIMENSION;
+      }
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas not supported');
+    ctx.drawImage(img, 0, 0, width, height);
+
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, 'image/jpeg', QUALITY);
+    });
+
+    if (!blob) throw new Error('Could not encode image');
+
+    const newName = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+    return new File([blob], newName, {
+      type: 'image/jpeg',
+      lastModified: Date.now(),
+    });
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 interface ShareCollectionModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -232,33 +285,46 @@ export function ShareCollectionModal({
   };
 
   // Image upload functions
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Reason: we now compress every image client-side via Canvas before upload,
+  // so we can accept a much broader range of inputs (modern iPhone PNGs that
+  // are 5-8MB, HEIC where the browser can decode it, etc.). Validation here
+  // is just a sanity check; the canvas pipeline normalizes everything to a
+  // 2000px-max JPEG that comfortably fits the server's limit.
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      setError('Invalid file type. Only JPEG, PNG, and WebP are allowed.');
-      setTimeout(() => setError(null), 5000);
+    // Permissive image check: trust MIME, fall back to extension for iOS
+    // quirks where file.type sometimes comes back empty.
+    const isImageByType = file.type.startsWith('image/');
+    const isImageByExt = /\.(jpe?g|png|webp|heic|heif|gif|bmp)$/i.test(file.name);
+    if (!isImageByType && !isImageByExt) {
+      setError("That doesn't look like an image. Try a JPEG or PNG.");
+      setTimeout(() => setError(null), 6000);
       event.target.value = '';
       return;
     }
 
-    // Validate file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
-      setError('File too large. Maximum size is 5MB.');
-      setTimeout(() => setError(null), 5000);
+    // Hard cap on raw input so the browser doesn't choke on huge files.
+    if (file.size > 30 * 1024 * 1024) {
+      setError('That image is too big (max 30MB). Try a smaller one.');
+      setTimeout(() => setError(null), 6000);
       event.target.value = '';
       return;
     }
 
-    // Clear previous file and error
-    setSelectedFile(file);
     setError(null);
-    
-    // Auto-upload the file
-    handleUploadImage(file);
+
+    try {
+      const compressed = await compressImageForUpload(file);
+      setSelectedFile(compressed);
+      handleUploadImage(compressed);
+    } catch (err) {
+      console.error('Image compression failed:', err);
+      setError("Couldn't read that image. iPhone HEIC photos aren't supported on all browsers — try saving it as a JPEG first, or use a different image.");
+      setTimeout(() => setError(null), 8000);
+      event.target.value = '';
+    }
   };
 
   const handleImageClick = () => {
@@ -438,7 +504,17 @@ export function ShareCollectionModal({
             Collect Recipes
           </DialogTitle>
         </DialogHeader>
-        
+
+        {/* Reason: errors used to render at the bottom of the scroll area where
+            mobile users couldn't see them — they'd hit "upload", nothing visible
+            would change, and the error would fade out of view. Anchoring here
+            keeps it visible regardless of scroll position. */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-3 mt-2 mx-0">
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+        )}
+
         <div className="py-4 overflow-y-auto flex-1 -mx-6 px-6">
           {!showMessageCustomization ? (
             /* Normal single-column layout */
@@ -811,13 +887,6 @@ export function ShareCollectionModal({
 
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-3 mt-4">
-              <p className="text-red-600 text-sm">{error}</p>
             </div>
           )}
         </div>
