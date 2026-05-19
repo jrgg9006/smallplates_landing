@@ -456,6 +456,10 @@ export function ShareCollectionModal({
               {/* Main Actions */}
               <div className="space-y-3">
                 {/* Primary Action - Copy Link */}
+                {/* Reason: when the user copies without a couple photo, swap the
+                    success text for a nudge to add one. Link still gets copied —
+                    the photo is critical for the WhatsApp preview but we don't
+                    block, just remind. */}
                 <Button
                   onClick={handleCopyLink}
                   className={`min-h-[44px] w-full flex items-center justify-center gap-3 px-4 rounded-xl border-2 transition-all ${
@@ -465,10 +469,17 @@ export function ShareCollectionModal({
                   }`}
                 >
                   {copied ? (
-                    <>
-                      <Check className="w-5 h-5" />
-                      Copied
-                    </>
+                    coupleImage ? (
+                      <>
+                        <Check className="w-5 h-5" />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <ImageIcon className="w-5 h-5 shrink-0" />
+                        <span className="text-sm sm:text-base">Add a photo of the couple first!</span>
+                      </>
+                    )
                   ) : (
                     <>
                       <Copy className="w-5 h-5" />
@@ -478,10 +489,16 @@ export function ShareCollectionModal({
                 </Button>
 
                 {/* Secondary Action - Customize message */}
+                {/* Reason: when the "add a photo first" nudge fires, ring this
+                    button in honey so the user can see WHERE to go next. Ring
+                    is bound to the same condition so it appears and fades with
+                    the warning text. */}
                 <Button
                   onClick={handleShowMessageCustomization}
                   variant="outline"
-                  className="min-h-[44px] w-full rounded-xl border border-[rgba(45,45,45,0.15)] bg-white text-gray-900 hover:bg-gray-50 hover:text-gray-900 transition-colors font-medium"
+                  className={`min-h-[44px] w-full rounded-xl border border-[rgba(45,45,45,0.15)] bg-white text-gray-900 hover:bg-gray-50 hover:text-gray-900 transition-all font-medium ${
+                    copied && !coupleImage ? 'ring-2 ring-[hsl(var(--brand-honey))]' : ''
+                  }`}
                 >
                   Add photo & message
                 </Button>
@@ -526,10 +543,17 @@ export function ShareCollectionModal({
                   }`}
                 >
                   {copied ? (
-                    <>
-                      <Check className="w-5 h-5" />
-                      Copied
-                    </>
+                    coupleImage ? (
+                      <>
+                        <Check className="w-5 h-5" />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <ImageIcon className="w-5 h-5 shrink-0" />
+                        <span className="text-sm sm:text-base">Add a photo of the couple first!</span>
+                      </>
+                    )
                   ) : (
                     <>
                       <Copy className="w-5 h-5" />
