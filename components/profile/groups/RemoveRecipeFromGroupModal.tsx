@@ -12,19 +12,17 @@ import { Button } from "@/components/ui/button";
 interface RemoveRecipeFromGroupModalProps {
   isOpen: boolean;
   recipeName: string;
-  isOwnRecipe?: boolean;
   onClose: () => void;
   onConfirm: () => void;
   loading?: boolean;
 }
 
-export function RemoveRecipeFromGroupModal({ 
-  isOpen, 
-  recipeName, 
-  isOwnRecipe = false,
-  onClose, 
-  onConfirm, 
-  loading = false 
+export function RemoveRecipeFromGroupModal({
+  isOpen,
+  recipeName,
+  onClose,
+  onConfirm,
+  loading = false,
 }: RemoveRecipeFromGroupModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -42,8 +40,7 @@ export function RemoveRecipeFromGroupModal({
           
           <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
             <p className="text-secondary-sm text-gray-500">
-              <strong>Note:</strong> The recipe won&apos;t be deleted—just removed from this book.
-              {isOwnRecipe && " Since this is your recipe, it will remain in your personal collection."}
+              <strong>Note:</strong> This recipe will be removed from this book and won&apos;t be printed.
             </p>
           </div>
         </div>

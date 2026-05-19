@@ -499,7 +499,6 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
       <RemoveRecipeFromGroupModal
         isOpen={removeRecipeModalOpen}
         recipeName={recipeToRemove?.recipe_name || ''}
-        isOwnRecipe={recipeToRemove?.guests?.is_self || false}
         onClose={() => {
           setRemoveRecipeModalOpen(false);
           setRecipeToRemove(null);
