@@ -46,7 +46,7 @@ export function RecipeCardGrid({
           No recipes yet. That&rsquo;s about to change.
         </p>
         {onImportGuests && (
-          <p className="text-sm text-[hsl(var(--brand-warm-gray))] mt-4 flex items-center justify-center gap-2">
+          <p className="hidden sm:flex text-sm text-[hsl(var(--brand-warm-gray))] mt-4 items-center justify-center gap-2">
             Import guests from
             <button
               onClick={() => onImportGuests("zola")}
