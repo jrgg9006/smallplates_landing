@@ -30,13 +30,12 @@ export default function RegalosBooksPrinted() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Book data for the gallery — recipe content kept in English per product decision
   const books = [
     // First set (original)
     {
       id: 1,
       title: "Chili",
-      author: "Shared by Karla Acosta",
+      author: "Por Karla Acosta",
       color: "bg-emerald-700",
       thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_1.png",
       fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_1.png",
@@ -44,23 +43,23 @@ export default function RegalosBooksPrinted() {
     {
       id: 2,
       title: "Tostadas de Atún Pandémicas",
-      author: "Shared by Jerry",
+      author: "Por Jerry",
       color: "bg-stone-200",
       thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_2.png",
       fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_2.png",
     },
     {
       id: 3,
-      title: "Birthday Tradition: Carrot Cake",
-      author: "Shared by Gabriela Ramirez",
+      title: "Pastel de zanahoria de cumpleaños",
+      author: "Por Gabriela Ramírez",
       color: "bg-slate-500",
       thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_3.png",
       fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_3.png",
     },
     {
       id: 4,
-      title: "Easy and Delicous Turkey",
-      author: "Shared by Ale Velasco",
+      title: "Pavo fácil y delicioso",
+      author: "Por Ale Velasco",
       color: "bg-red-800",
       thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_4.png",
       fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_4.png",
@@ -68,32 +67,32 @@ export default function RegalosBooksPrinted() {
     // Second set
     {
       id: 5,
-      title: "Healthy Matcha Pound Cake",
-      author: "Shared by Ber & Pat",
+      title: "Pound cake de matcha",
+      author: "Por Ber y Pat",
       color: "bg-amber-700",
       thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_5.png",
       fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_5.png",
     },
     {
       id: 6,
-      title: "Salmon with Olvies",
-      author: "Shared by Veronica Zorrilla",
+      title: "Salmón con aceitunas",
+      author: "Por Verónica Zorrilla",
       color: "bg-indigo-600",
       thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_6.png",
       fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_6.png",
     },
     {
       id: 7,
-      title: "Spice Bars",
-      author: "Shared by Stephanie Balcazar",
+      title: "Barritas de especias",
+      author: "Por Stephanie Balcázar",
       color: "bg-rose-600",
       thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_7.png",
       fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_7.png",
     },
     {
       id: 8,
-      title: "The Best Salmon Tacos",
-      author: "Shared by Barbs and Albert",
+      title: "Los mejores tacos de salmón",
+      author: "Por Barbs y Albert",
       color: "bg-teal-700",
       thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_8.png",
       fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_8.png",
@@ -101,32 +100,32 @@ export default function RegalosBooksPrinted() {
     // Third set
     {
       id: 9,
-      title: "Three Milk Cake",
-      author: "Shared by Patricia Garcia",
+      title: "Pastel de tres leches",
+      author: "Por Patricia García",
       color: "bg-purple-700",
       thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_9.png",
       fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_9.png",
     },
     {
       id: 10,
-      title: "Mom's Recipe",
-      author: "Shared by Rosy Carasín",
+      title: "La receta de mamá",
+      author: "Por Rosy Carasín",
       color: "bg-orange-700",
       thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_10.png",
       fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_10.png",
     },
     {
       id: 11,
-      title: "Banana Bread",
-      author: "Shared by Isabel Balcazar",
+      title: "Pan de plátano",
+      author: "Por Isabel Balcázar",
       color: "bg-green-700",
       thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_11.png",
       fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_11.png",
     },
     {
       id: 12,
-      title: "Cilantro Fish",
-      author: "Shared by Pau Berber de Cabelo",
+      title: "Pescado al cilantro",
+      author: "Por Pau Berber de Cabelo",
       color: "bg-blue-700",
       thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_12.png",
       fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_12.png",
@@ -221,7 +220,7 @@ export default function RegalosBooksPrinted() {
                     <div className="relative aspect-[3/4] mb-4 overflow-hidden rounded-lg shadow-md">
                       <Image
                         src={book.thumbnail}
-                        alt={`${book.title} recipe preview`}
+                        alt={book.title}
                         fill
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
@@ -260,7 +259,7 @@ export default function RegalosBooksPrinted() {
                     <div className="relative aspect-[3/4] mb-4 overflow-hidden rounded-lg shadow-md">
                       <Image
                         src={book.thumbnail}
-                        alt={`${book.title} recipe preview`}
+                        alt={book.title}
                         fill
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
