@@ -95,10 +95,12 @@ export async function PATCH(
     if (body.restore) {
       // Reason: Both guest_recipes.deleted_at and group_recipes.removed_at must be cleared
       // to fully restore an archived recipe back to its group
-      const { error: restoreRecipeError } = await supabase
+      const { data: restoredRecipe, error: restoreRecipeError } = await supabase
         .from('guest_recipes')
         .update({ deleted_at: null })
-        .eq('id', recipeId);
+        .eq('id', recipeId)
+        .select('guest_id, submission_status')
+        .maybeSingle();
 
       if (restoreRecipeError) {
         return NextResponse.json({ error: restoreRecipeError.message }, { status: 500 });
@@ -111,6 +113,43 @@ export async function PATCH(
 
       if (restoreGroupError) {
         return NextResponse.json({ error: restoreGroupError.message }, { status: 500 });
+      }
+
+      // Reason: Recompute guests.recipes_received from truth instead of trying
+      // to invert the original delete. Handles both user-delete (which decrements)
+      // and admin-archive (which doesn't) origins symmetrically.
+      if (restoredRecipe?.guest_id) {
+        const { count } = await supabase
+          .from('guest_recipes')
+          .select('id', { count: 'exact', head: true })
+          .eq('guest_id', restoredRecipe.guest_id)
+          .eq('submission_status', 'submitted')
+          .is('deleted_at', null);
+
+        const { data: guest } = await supabase
+          .from('guests')
+          .select('number_of_recipes, status')
+          .eq('id', restoredRecipe.guest_id)
+          .maybeSingle();
+
+        if (guest) {
+          const actualReceived = count || 0;
+          const expected = guest.number_of_recipes || 0;
+          const newStatus = actualReceived >= expected ? 'submitted' : (actualReceived > 0 ? 'responded' : guest.status);
+
+          const { error: counterError } = await supabase
+            .from('guests')
+            .update({
+              recipes_received: actualReceived,
+              status: newStatus,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', restoredRecipe.guest_id);
+
+          if (counterError) {
+            console.error('restore: failed to recompute guests counter', counterError);
+          }
+        }
       }
 
       return NextResponse.json({ success: true, restored: true });

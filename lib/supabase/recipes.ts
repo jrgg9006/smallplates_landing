@@ -170,6 +170,7 @@ export async function getAllRecipes() {
       )
     `)
     .eq('user_id', user.id) // Only get recipes owned by current user
+    .is('deleted_at', null)
     .order('updated_at', { ascending: false });
 
   return { data, error: error?.message || null };
@@ -219,6 +220,7 @@ export async function searchRecipes(searchQuery: string) {
         )
       `)
       .eq('user_id', user.id)
+      .is('deleted_at', null)
       .or(`recipe_name.ilike.%${searchTerm}%,ingredients.ilike.%${searchTerm}%,instructions.ilike.%${searchTerm}%`)
       .order('updated_at', { ascending: false });
 
@@ -244,6 +246,7 @@ export async function searchRecipes(searchQuery: string) {
         `)
         .eq('user_id', user.id)
         .in('guest_id', guestIds)
+        .is('deleted_at', null)
         .order('updated_at', { ascending: false });
 
       if (!guestRecipesError && guestRecipes) {
@@ -341,17 +344,98 @@ export async function rejectRecipe(recipeId: string) {
 }
 
 /**
- * Delete a recipe
+ * Soft-delete a recipe. Reversible from admin Operations → Restore.
+ *
+ * Mirrors the cascade behavior of the previous hard DELETE without destroying data:
+ *  1. Marks all active group_recipes entries as removed (with audit trail)
+ *  2. Sets guest_recipes.deleted_at
+ *  3. Replicates the `handle_recipe_deletion` trigger's counter decrement,
+ *     since that trigger only fires on real DELETE statements
  */
 export async function deleteRecipe(recipeId: string) {
   const supabase = createSupabaseClient();
-  
-  const { error } = await supabase
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { data: null, error: 'User not authenticated' };
+  }
+
+  // Reason: need guest_id + submission_status to replicate the trigger logic,
+  // and deleted_at to make the operation idempotent.
+  const { data: recipe, error: fetchError } = await supabase
     .from('guest_recipes')
-    .delete()
+    .select('id, guest_id, submission_status, deleted_at')
+    .eq('id', recipeId)
+    .maybeSingle();
+
+  if (fetchError) {
+    return { data: null, error: fetchError.message };
+  }
+  if (!recipe) {
+    return { data: null, error: 'Recipe not found' };
+  }
+  if (recipe.deleted_at) {
+    // Already soft-deleted, treat as success
+    return { data: null, error: null };
+  }
+
+  const nowIso = new Date().toISOString();
+
+  // Step 1: mirror the ON DELETE CASCADE on group_recipes by marking
+  // every active association as removed (with audit trail).
+  const { error: groupError } = await supabase
+    .from('group_recipes')
+    .update({ removed_at: nowIso, removed_by: user.id })
+    .eq('recipe_id', recipeId)
+    .is('removed_at', null);
+
+  if (groupError) {
+    return { data: null, error: groupError.message };
+  }
+
+  // Step 2: the soft-delete itself.
+  const { error: deleteError } = await supabase
+    .from('guest_recipes')
+    .update({ deleted_at: nowIso })
     .eq('id', recipeId);
 
-  return { data: null, error: error?.message || null };
+  if (deleteError) {
+    return { data: null, error: deleteError.message };
+  }
+
+  // Step 3: replicate handle_recipe_deletion trigger — decrement the guest's
+  // recipes_received and bump status back to 'responded' if it dropped below expected.
+  // Best-effort: a failure here leaves the recipe deleted but the counter off by 1
+  // (display issue only, not destructive).
+  if (recipe.submission_status === 'submitted' && recipe.guest_id) {
+    const { data: guest } = await supabase
+      .from('guests')
+      .select('recipes_received, number_of_recipes, status')
+      .eq('id', recipe.guest_id)
+      .maybeSingle();
+
+    if (guest) {
+      const currentReceived = guest.recipes_received || 0;
+      const newReceived = Math.max(currentReceived - 1, 0);
+      const expected = guest.number_of_recipes || 0;
+      const newStatus = newReceived < expected ? 'responded' : guest.status;
+
+      const { error: guestError } = await supabase
+        .from('guests')
+        .update({
+          recipes_received: newReceived,
+          status: newStatus,
+          updated_at: nowIso,
+        })
+        .eq('id', recipe.guest_id);
+
+      if (guestError) {
+        console.error('deleteRecipe: failed to decrement guest counter', guestError);
+      }
+    }
+  }
+
+  return { data: null, error: null };
 }
 
 /**

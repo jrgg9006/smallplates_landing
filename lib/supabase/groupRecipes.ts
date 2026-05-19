@@ -62,6 +62,9 @@ export async function getGroupRecipes(groupId: string): Promise<{ data: RecipeWi
   }
 
   // Get full recipe details
+  // Reason: defense in depth — the group_recipes filter on removed_at already
+  // excludes soft-deleted recipes (since deleteRecipe marks both fields), but
+  // filtering explicitly here blinds future paths that may bypass that invariant.
   const { data, error } = await supabase
     .from('guest_recipes')
     .select(`
@@ -75,7 +78,8 @@ export async function getGroupRecipes(groupId: string): Promise<{ data: RecipeWi
         source
       )
     `)
-    .in('id', recipeIds);
+    .in('id', recipeIds)
+    .is('deleted_at', null);
 
   if (error) {
     return { data: null, error: error.message };

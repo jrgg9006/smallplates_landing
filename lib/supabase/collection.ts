@@ -908,7 +908,8 @@ export async function updateGuestRecipeNotification(
     const { error } = await supabase
       .from('guest_recipes')
       .update(update)
-      .eq('id', recipeId);
+      .eq('id', recipeId)
+      .is('deleted_at', null);
 
     return { error: error?.message || null };
   } catch (err) {
@@ -1061,7 +1062,8 @@ export async function getCollectionSocialProof(
       .from('guest_recipes')
       .select('*', { count: 'exact', head: true })
       .eq('group_id', groupId)
-      .eq('submission_status', 'submitted');
+      .eq('submission_status', 'submitted')
+      .is('deleted_at', null);
     
     if (error) {
       console.error('Error fetching social proof:', error);
