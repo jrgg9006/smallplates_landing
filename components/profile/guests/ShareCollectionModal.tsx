@@ -449,7 +449,7 @@ export function ShareCollectionModal({
                   Send this link to everyone who should be in the book.
                 </p>
                 <p className="text-gray-600 text-sm">
-                  They submit a recipe. We design and print the book. That&apos;s it.
+                  They submit a recipe. We design and print the book.
                 </p>
               </div>
 
@@ -512,7 +512,7 @@ export function ShareCollectionModal({
                     Send this link to everyone who should be in the book.
                   </p>
                   <p className="text-gray-600 text-sm">
-                    They submit a recipe. We design and print the book. That&apos;s it.
+                    They submit a recipe. We design and print the book.
                   </p>
                 </div>
 
