@@ -139,8 +139,8 @@ export function GuestNavigationSheet({
     <Sheet open={isOpen && !showImportModal} onOpenChange={onClose}>
       <SheetContent 
         side={isMobile ? "bottom" : "left"} 
-        className={isMobile 
-          ? "!h-[85vh] !max-h-[85vh] rounded-t-[20px] p-0 overflow-hidden bg-white" 
+        className={isMobile
+          ? "!h-[92dvh] !max-h-[92dvh] rounded-t-[20px] p-0 overflow-hidden bg-white"
           : "w-[85%] sm:w-[400px] p-0 overflow-hidden bg-white [&_button[data-radix-dialog-close]]:focus:outline-none [&_button[data-radix-dialog-close]]:focus:ring-0 [&_button[data-radix-dialog-close]]:focus:ring-offset-0"
         }
       >
@@ -251,7 +251,10 @@ export function GuestNavigationSheet({
           </div>
 
           {/* Footer - Import & Add Guest Buttons */}
-          <div className={`${isMobile ? 'px-4 py-4 pb-8' : 'p-6'} border-t border-gray-100 space-y-2`}>
+          <div
+            className={`${isMobile ? 'px-4 pt-4' : 'p-6'} border-t border-gray-100 space-y-2`}
+            style={isMobile ? { paddingBottom: 'max(16px, env(safe-area-inset-bottom))' } : undefined}
+          >
             {/* Import button */}
             <button
               onClick={() => setShowImportModal(true)}
