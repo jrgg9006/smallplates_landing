@@ -85,6 +85,13 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
     .order('created_at', { ascending: false });
 
   // Apply filters
+  // Reason: when hideArchived is true, also exclude soft-deleted recipes (deleted_at IS NOT NULL).
+  // Combined with the post-filter on r.group !== null below, this hides both
+  // "removed from group" and "fully soft-deleted" recipes by default.
+  if (filters?.hideArchived === true) {
+    query = query.is('deleted_at', null);
+  }
+
   if (filters?.userId) {
     query = query.eq('user_id', filters.userId);
   }

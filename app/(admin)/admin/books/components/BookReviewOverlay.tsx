@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { X, ChevronLeft, ChevronRight, Check, AlertTriangle, Loader2, Pencil } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Check, AlertTriangle, Loader2, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { BookReviewStatus } from '@/lib/types/database';
+import { ArchiveRecipeModal } from './ArchiveRecipeModal';
 
 interface ReviewRecipe {
   id: string;
@@ -69,6 +70,8 @@ export default function BookReviewOverlay({
   const [editInstructions, setEditInstructions] = useState('');
   const [editNote, setEditNote] = useState('');
   const [savingEdit, setSavingEdit] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [archiveLoading, setArchiveLoading] = useState(false);
   const notesInputRef = useRef<HTMLInputElement>(null);
 
   const recipe = localRecipes[currentIndex];
@@ -143,6 +146,39 @@ export default function BookReviewOverlay({
     const ok = await saveReview(recipe.id, 'approved');
     if (ok) advanceToNext();
   }, [recipe, saving, saveReview, advanceToNext]);
+
+  const handleArchiveConfirm = useCallback(async () => {
+    if (!recipe || archiveLoading) return;
+    setArchiveLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/v1/admin/operations/recipes/${recipe.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ archive: true, archiveGroupId: groupId }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to archive recipe');
+      }
+      // Reason: remove from local state and adjust currentIndex so navigation stays consistent
+      const archivedId = recipe.id;
+      const removedIndex = currentIndex;
+      const newRecipes = localRecipes.filter(r => r.id !== archivedId);
+      setLocalRecipes(newRecipes);
+      setArchiveOpen(false);
+      if (newRecipes.length === 0) {
+        onReviewComplete();
+        onClose();
+      } else if (removedIndex >= newRecipes.length) {
+        setCurrentIndex(newRecipes.length - 1);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to archive');
+    } finally {
+      setArchiveLoading(false);
+    }
+  }, [recipe, archiveLoading, groupId, currentIndex, localRecipes, onClose, onReviewComplete]);
 
   const handleNeedsRevision = useCallback(async () => {
     if (!showNotesInput) {
@@ -571,6 +607,14 @@ export default function BookReviewOverlay({
                   >
                     <Pencil className="w-3 h-3" /> Edit Recipe <kbd className="text-[9px] opacity-40 ml-1 px-1 py-0.5 rounded border border-gray-600">E</kbd>
                   </button>
+                  <button
+                    onClick={() => setArchiveOpen(true)}
+                    disabled={saving || archiveLoading}
+                    className="text-xs px-2 py-1 rounded bg-gray-700 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors flex items-center gap-1 disabled:opacity-50"
+                    title="Quitar esta receta del libro (reversible)"
+                  >
+                    <Trash2 className="w-3 h-3" /> Quitar del libro
+                  </button>
                 </div>
 
                 {/* Right: actions */}
@@ -672,6 +716,15 @@ export default function BookReviewOverlay({
           )}
         </>
       ) : null}
+
+      <ArchiveRecipeModal
+        isOpen={archiveOpen}
+        recipeName={recipe?.recipe_name || ''}
+        bookName={coupleName}
+        onClose={() => !archiveLoading && setArchiveOpen(false)}
+        onConfirm={handleArchiveConfirm}
+        loading={archiveLoading}
+      />
     </div>
   );
 }

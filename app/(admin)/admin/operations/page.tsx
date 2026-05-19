@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { isAdminEmail } from '@/lib/config/admin';
 import { RecipeOperationsTable } from './components/RecipeOperationsTable';
+import { ArchiveRecipeModal } from '../books/components/ArchiveRecipeModal';
 import Image from 'next/image';
 import PromptEvaluationSection from './components/PromptEvaluationSection';
 
@@ -153,7 +154,9 @@ export default function OperationsPage() {
   const [notifyOptInFilter, setNotifyOptInFilter] = useState(false);
   const [imageFilter, setImageFilter] = useState<'all' | 'yes' | 'no'>('all');
   const [hidePrinted, setHidePrinted] = useState(true);
-  
+  const [archivingRecipe, setArchivingRecipe] = useState<RecipeWithProductionStatus | null>(null);
+  const [archiveLoading, setArchiveLoading] = useState(false);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -382,6 +385,35 @@ export default function OperationsPage() {
     });
     return { needingAction, readyToPrint };
   }, [filteredRecipes]);
+
+  const handleArchiveConfirm = async () => {
+    if (!archivingRecipe?.group) return;
+    setArchiveLoading(true);
+    try {
+      const res = await fetch(`/api/v1/admin/operations/recipes/${archivingRecipe.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ archive: true, archiveGroupId: archivingRecipe.group.id }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(`Error: ${err.error || 'Failed to archive recipe'}`);
+        return;
+      }
+      const archivedId = archivingRecipe.id;
+      setArchivingRecipe(null);
+      // Reason: close the detail sheet if the archived recipe was the one being viewed
+      if (selectedRecipe?.id === archivedId) {
+        setSelectedRecipe(null);
+      }
+      loadRecipes();
+    } catch (err) {
+      console.error('Error archiving recipe:', err);
+      alert('Failed to archive recipe');
+    } finally {
+      setArchiveLoading(false);
+    }
+  };
 
   const loadRecipes = async () => {
     try {
@@ -1526,6 +1558,18 @@ ${instructions}`;
                           )}
                         </button>
                       )}
+                      {selectedRecipe.group && !isEditingText && (
+                        <button
+                          onClick={() => setArchivingRecipe(selectedRecipe)}
+                          className="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors flex items-center gap-2"
+                          title="Quitar esta receta del libro (reversible)"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          <span>Remove from book</span>
+                        </button>
+                      )}
                       <button
                         onClick={copyEntireRecipe}
                         className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
@@ -2075,6 +2119,16 @@ ${instructions}`;
             </div>
           </>
         )}
+
+        {/* Archive Recipe Modal */}
+        <ArchiveRecipeModal
+          isOpen={!!archivingRecipe}
+          recipeName={archivingRecipe?.recipe_name || ''}
+          bookName={archivingRecipe?.group?.name || ''}
+          onClose={() => !archiveLoading && setArchivingRecipe(null)}
+          onConfirm={handleArchiveConfirm}
+          loading={archiveLoading}
+        />
 
         {/* Confirmation Modal */}
         {showConfirmModal && changesSummary && (

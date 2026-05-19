@@ -82,10 +82,10 @@ interface RecipeOperationsTableProps {
   onStatusUpdate?: () => void;
 }
 
-export function RecipeOperationsTable({ 
-  recipes, 
+export function RecipeOperationsTable({
+  recipes,
   onRecipeClick,
-  onStatusUpdate 
+  onStatusUpdate,
 }: RecipeOperationsTableProps) {
   const [updatingRecipeId, setUpdatingRecipeId] = useState<string | null>(null);
 

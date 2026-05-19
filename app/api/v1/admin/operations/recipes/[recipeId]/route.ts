@@ -12,6 +12,8 @@ interface PatchRequestBody extends RecipeProductionStatusUpdate {
   clearPrintReady?: boolean; // When true, clears generated_image_url_print, image_upscale_status, and image_dimensions
   deleteImage?: boolean;     // When true, deletes original + print-ready images and clears related fields
   restore?: boolean;         // When true, clears deleted_at on guest_recipes and removed_at/removed_by on group_recipes
+  archive?: boolean;         // When true, soft-archives recipe from a specific group (mirrors removeRecipeFromGroup)
+  archiveGroupId?: string;   // Required when archive=true
   printReady?: {
     ingredients_clean?: string;
     instructions_clean?: string;
@@ -25,14 +27,67 @@ export async function PATCH(
 ) {
   try {
     // Verify admin authentication
-    await requireAdminAuth();
-    
+    const admin = await requireAdminAuth();
+
     const { recipeId } = await params;
     const body = await req.json() as PatchRequestBody;
 
     const supabase = createSupabaseAdminClient();
     let productionStatusData = null;
     let printReadyData = null;
+
+    // ============================================================
+    // ARCHIVE: soft-remove recipe from a specific group (reversible)
+    // Mirrors removeRecipeFromGroup in lib/supabase/groupRecipes.ts:272
+    // ============================================================
+    if (body.archive) {
+      if (!body.archiveGroupId) {
+        return NextResponse.json(
+          { error: 'archiveGroupId is required when archive=true' },
+          { status: 400 }
+        );
+      }
+
+      const nowIso = new Date().toISOString();
+
+      // Reason: idempotent — `.is('removed_at', null)` ensures double-calls are no-ops
+      const { error: removeError } = await supabase
+        .from('group_recipes')
+        .update({ removed_at: nowIso, removed_by: admin.id })
+        .eq('recipe_id', recipeId)
+        .eq('group_id', body.archiveGroupId)
+        .is('removed_at', null);
+
+      if (removeError) {
+        return NextResponse.json({ error: removeError.message }, { status: 500 });
+      }
+
+      // Reason: if recipe no longer belongs to any active group, soft-delete it entirely
+      const { data: remaining, error: remainingError } = await supabase
+        .from('group_recipes')
+        .select('group_id')
+        .eq('recipe_id', recipeId)
+        .is('removed_at', null)
+        .limit(1);
+
+      if (remainingError) {
+        return NextResponse.json({ error: remainingError.message }, { status: 500 });
+      }
+
+      const fullySoftDeleted = !remaining || remaining.length === 0;
+      if (fullySoftDeleted) {
+        const { error: deleteError } = await supabase
+          .from('guest_recipes')
+          .update({ deleted_at: nowIso })
+          .eq('id', recipeId);
+
+        if (deleteError) {
+          return NextResponse.json({ error: deleteError.message }, { status: 500 });
+        }
+      }
+
+      return NextResponse.json({ success: true, archived: true, fullySoftDeleted });
+    }
 
     // ============================================================
     // RESTORE: clear deleted_at and removed_at so recipe is active again
