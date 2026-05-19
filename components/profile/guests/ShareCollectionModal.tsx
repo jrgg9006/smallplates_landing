@@ -483,7 +483,7 @@ export function ShareCollectionModal({
                   variant="outline"
                   className="min-h-[44px] w-full rounded-xl border border-[rgba(45,45,45,0.15)] bg-white text-gray-900 hover:bg-gray-50 hover:text-gray-900 transition-colors font-medium"
                 >
-                  Customize message
+                  Add photo & message
                 </Button>
               </div>
 
@@ -700,7 +700,7 @@ export function ShareCollectionModal({
                         >
                           <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                           <p className="text-sm text-gray-600 mb-1 font-medium">
-                            Add couple image
+                            Add a photo of the couple
                           </p>
                           <p className="text-secondary-sm text-gray-500">
                             Click to upload (JPEG, PNG, WebP • max 5MB)
