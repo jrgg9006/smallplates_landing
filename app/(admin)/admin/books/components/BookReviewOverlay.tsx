@@ -486,7 +486,8 @@ export default function BookReviewOverlay({
             </div>
 
             {/* Right page — image or original text for comparison */}
-            {showOriginal ? (
+            {/* Reason: while editing, force the original onto the right side so admin can compare against the source */}
+            {(showOriginal || isEditing) ? (
               <div className="flex-1 overflow-y-auto p-8 lg:p-12 bg-amber-50">
                 <div className="max-w-xl mx-auto">
                   <div className="mb-4 px-3 py-1.5 bg-amber-200/60 text-amber-800 text-xs font-medium rounded inline-block">
