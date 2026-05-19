@@ -196,15 +196,19 @@ export function EditGroupModal({
               When do you want this book delivered?
             </Label>
 
-            <div className="mb-3">
+            <div className="relative mb-3">
               <Input
                 type="date"
                 value={giftDate}
                 onChange={(e) => setGiftDate(e.target.value)}
                 disabled={giftDateUndecided}
-                className={giftDateUndecided ? 'opacity-50' : ''}
-                placeholder="Select delivery date"
+                className={`h-9 appearance-none ${giftDateUndecided ? 'opacity-50' : ''} ${!giftDate ? 'text-gray-400' : ''}`}
               />
+              {!giftDate && !giftDateUndecided && (
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+                  Select delivery date
+                </span>
+              )}
             </div>
 
             <div className="flex items-center">
