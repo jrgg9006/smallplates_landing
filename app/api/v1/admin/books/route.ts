@@ -37,22 +37,50 @@ export async function GET() {
 
     // Reason: group_recipes is the source of truth for group membership,
     // not guest_recipes.group_id which can be stale for linked/moved recipes
-    const { data: activeGroupRecipes } = await supabase
+    const { data: activeGroupRecipes, error: grError } = await supabase
       .from('group_recipes')
       .select('group_id, recipe_id')
       .in('group_id', groupIds)
       .is('removed_at', null);
 
+    if (grError) {
+      console.error('books/route: group_recipes query failed', grError);
+      return NextResponse.json({ error: grError.message }, { status: 500 });
+    }
+
     const activeRecipeIds = (activeGroupRecipes || []).map(gr => gr.recipe_id);
 
-    // Fetch recipe details for active group_recipes entries (exclude soft-deleted)
-    const { data: allRecipes } = activeRecipeIds.length > 0
-      ? await supabase
-          .from('guest_recipes')
-          .select('id, guest_id, generated_image_url_print, book_review_status')
-          .in('id', activeRecipeIds)
-          .is('deleted_at', null)
-      : { data: null };
+    // Reason: `.in()` with hundreds of UUIDs builds a query string that exceeds typical
+    // URL length limits (~8KB) and fails with "TypeError: fetch failed". Chunk the IDs
+    // and run the queries in parallel to stay under the limit.
+    const CHUNK = 100;
+    const chunkArray = <T>(arr: T[], size: number): T[][] => {
+      const out: T[][] = [];
+      for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+      return out;
+    };
+
+    let allRecipes: { id: string; guest_id: string; generated_image_url_print: string | null; book_review_status: string | null }[] | null = null;
+    if (activeRecipeIds.length > 0) {
+      const chunks = chunkArray(activeRecipeIds, CHUNK);
+      const results = await Promise.all(
+        chunks.map(c =>
+          supabase
+            .from('guest_recipes')
+            .select('id, guest_id, generated_image_url_print, book_review_status')
+            .in('id', c)
+            .is('deleted_at', null)
+        )
+      );
+      allRecipes = [];
+      for (const r of results) {
+        if (r.error) {
+          console.error('books/route: guest_recipes chunk failed', r.error);
+          return NextResponse.json({ error: r.error.message }, { status: 500 });
+        }
+        if (r.data) allRecipes.push(...r.data);
+      }
+    }
 
     // Build a recipe_id -> group_id map from group_recipes
     const recipeToGroupMap = new Map<string, string>();
@@ -65,20 +93,45 @@ export async function GET() {
 
     if (activeRecipeIdsSet.size > 0) {
       const recipeIds = Array.from(activeRecipeIdsSet);
+      const idChunks = chunkArray(recipeIds, CHUNK);
 
-      const { data: printReady } = await supabase
-        .from('recipe_print_ready')
-        .select('recipe_id')
-        .in('recipe_id', recipeIds);
+      const [printReadyResults, prodStatusResults] = await Promise.all([
+        Promise.all(
+          idChunks.map(c =>
+            supabase.from('recipe_print_ready').select('recipe_id').in('recipe_id', c)
+          )
+        ),
+        Promise.all(
+          idChunks.map(c =>
+            supabase
+              .from('recipe_production_status')
+              .select('recipe_id, needs_review')
+              .in('recipe_id', c)
+          )
+        ),
+      ]);
 
-      const { data: prodStatus } = await supabase
-        .from('recipe_production_status')
-        .select('recipe_id, needs_review')
-        .in('recipe_id', recipeIds);
+      const printReady: { recipe_id: string }[] = [];
+      for (const r of printReadyResults) {
+        if (r.error) {
+          console.error('books/route: recipe_print_ready chunk failed', r.error);
+          return NextResponse.json({ error: r.error.message }, { status: 500 });
+        }
+        if (r.data) printReady.push(...r.data);
+      }
 
-      const cleanRecipeIds = new Set((printReady || []).map(pr => pr.recipe_id));
+      const prodStatus: { recipe_id: string; needs_review: boolean | null }[] = [];
+      for (const r of prodStatusResults) {
+        if (r.error) {
+          console.error('books/route: recipe_production_status chunk failed', r.error);
+          return NextResponse.json({ error: r.error.message }, { status: 500 });
+        }
+        if (r.data) prodStatus.push(...r.data);
+      }
+
+      const cleanRecipeIds = new Set(printReady.map(pr => pr.recipe_id));
       const needsReviewIds = new Set(
-        (prodStatus || []).filter(ps => ps.needs_review).map(ps => ps.recipe_id)
+        prodStatus.filter(ps => ps.needs_review).map(ps => ps.recipe_id)
       );
 
       // Reason: "print-ready" = clean text + print image + no ops review needed + not flagged in book review
