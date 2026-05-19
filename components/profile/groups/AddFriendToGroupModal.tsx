@@ -62,7 +62,7 @@ export function AddFriendToGroupModal({ isOpen, onClose, group, onInviteSent }: 
 
         <div className="space-y-6 py-4">
           <p className="text-gray-600 text-sm">
-            Captains have full access to this book and can help collect recipes. Share this link — they&apos;ll be asked to sign in when they open it.
+            Captains have full access to this book and can help collect recipes. Anyone with this link becomes a captain — only share it with people you trust.
           </p>
 
           {/* Copy button */}
