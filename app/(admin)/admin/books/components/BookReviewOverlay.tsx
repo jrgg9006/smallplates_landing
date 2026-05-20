@@ -16,6 +16,8 @@ interface ReviewRecipe {
   image_url: string | null;
   generated_image_url: string | null;
   generated_image_url_print: string | null;
+  document_urls: string[] | null;
+  upload_method: string | null;
   has_print_ready: boolean;
   print_ready: {
     recipe_name_clean: string;
@@ -505,24 +507,44 @@ export default function BookReviewOverlay({
                     </p>
                   )}
                   <div className="border-t border-gray-200 my-6" />
-                  <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
-                    <div className="min-w-0">
-                      <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Ingredients</h3>
-                      <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed font-serif">
-                        {originalIngredients}
-                      </p>
+                  {/* Reason: when the guest uploaded photos instead of typing, the text fields hold placeholders. Show the actual images so admin can verify the clean version against what was submitted. */}
+                  {recipe.upload_method === 'image' && recipe.document_urls && recipe.document_urls.length > 0 ? (
+                    <div className="flex flex-col gap-4">
+                      {recipe.document_urls.map((url, i) => (
+                        <div key={url}>
+                          <p className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-2">
+                            Image {i + 1} of {recipe.document_urls!.length}
+                          </p>
+                          <a href={url} target="_blank" rel="noopener noreferrer" className="block">
+                            <img
+                              src={url}
+                              alt={`Original recipe image ${i + 1}`}
+                              className="w-full rounded border border-gray-200 hover:border-gray-400 transition-colors"
+                            />
+                          </a>
+                        </div>
+                      ))}
                     </div>
-                    <div>
-                      <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Instructions</h3>
-                      <div className="text-sm text-gray-700 font-serif leading-[1.6]">
-                        {originalInstructions?.split('\n').map((line, i) => (
-                          line.trim() === ''
-                            ? <div key={i} className="h-[2em]" />
-                            : <p key={i} className="m-0">{line}</p>
-                        ))}
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
+                      <div className="min-w-0">
+                        <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Ingredients</h3>
+                        <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed font-serif">
+                          {originalIngredients}
+                        </p>
+                      </div>
+                      <div>
+                        <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Instructions</h3>
+                        <div className="text-sm text-gray-700 font-serif leading-[1.6]">
+                          {originalInstructions?.split('\n').map((line, i) => (
+                            line.trim() === ''
+                              ? <div key={i} className="h-[2em]" />
+                              : <p key={i} className="m-0">{line}</p>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             ) : (
