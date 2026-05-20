@@ -592,8 +592,13 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                 {currentStatus === 'active' ? (
                   <Button
                     size="sm"
-                    onClick={() => setReviewOverlayOpen(true)}
-                    disabled={detail.recipes.length === 0}
+                    onClick={async () => {
+                      // Reason: explicitly move the book into 'reviewed' (In Review column) when admin starts the review.
+                      // The PATCH endpoint also re-evaluates per-recipe status, but the explicit transition guarantees the kanban moves.
+                      await patchBook({ book_status: 'reviewed' });
+                      setReviewOverlayOpen(true);
+                    }}
+                    disabled={detail.recipes.length === 0 || saving}
                   >
                     Start Book Review ({detail.recipes.length} recipes)
                   </Button>
