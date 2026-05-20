@@ -57,7 +57,7 @@ export async function GET(
           .select(`
             id, recipe_name, ingredients, instructions, comments,
             image_url, generated_image_url, generated_image_url_print, image_upscale_status,
-            document_urls, upload_method,
+            document_urls, upload_method, raw_recipe_text,
             guest_id, book_review_status, book_review_notes,
             guests(first_name, last_name, printed_name),
             recipe_print_ready(
@@ -169,6 +169,7 @@ export async function GET(
         image_upscale_status: r.image_upscale_status,
         document_urls: (r as Record<string, unknown>).document_urls as string[] | null || null,
         upload_method: (r as Record<string, unknown>).upload_method as string | null || null,
+        raw_recipe_text: (r as Record<string, unknown>).raw_recipe_text as string | null || null,
         has_print_ready: !!printReady,
         print_ready: printReady ? {
           recipe_name_clean: printReady.recipe_name_clean,

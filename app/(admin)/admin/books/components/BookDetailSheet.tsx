@@ -42,6 +42,7 @@ interface RecipeData {
   image_upscale_status: string | null;
   document_urls: string[] | null;
   upload_method: string | null;
+  raw_recipe_text: string | null;
   has_print_ready: boolean;
   print_ready: {
     recipe_name_clean: string;

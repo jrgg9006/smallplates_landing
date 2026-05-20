@@ -18,6 +18,7 @@ interface ReviewRecipe {
   generated_image_url_print: string | null;
   document_urls: string[] | null;
   upload_method: string | null;
+  raw_recipe_text: string | null;
   has_print_ready: boolean;
   print_ready: {
     recipe_name_clean: string;
@@ -524,6 +525,14 @@ export default function BookReviewOverlay({
                           </a>
                         </div>
                       ))}
+                    </div>
+                  ) : recipe.raw_recipe_text ? (
+                    /* Reason: when the guest pasted the full recipe as a single block, ingredients/instructions are placeholders. Show the raw paste so admin can verify the clean version. */
+                    <div>
+                      <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Pasted Recipe</h3>
+                      <div className="text-sm text-gray-700 font-serif leading-[1.6] whitespace-pre-wrap">
+                        {recipe.raw_recipe_text}
+                      </div>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
