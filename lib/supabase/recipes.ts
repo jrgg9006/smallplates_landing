@@ -836,8 +836,9 @@ export async function addRecipeWithFiles(
         }
       }
       
-      // Step 6: Add image to processing queue (skip PDFs — the agent can't process them as images)
-      if (finalFileUrls.length > 0 && !finalFileUrls[0].toLowerCase().endsWith('.pdf')) {
+      // Step 6: Add image or PDF to processing queue.
+      // The Railway backend handles both (uses is_pdf_url() to route internally).
+      if (finalFileUrls.length > 0) {
         console.log('📝 Adding image to processing queue for recipe:', recipe.id);
         
         // Use regular client for queue operations
