@@ -487,8 +487,9 @@ export async function submitGuestRecipeWithFiles(
       documentUrlsSaved: recipe.document_urls
     });
 
-    // Add image to processing queue (skip PDFs — the agent can't process them as images)
-    if (recipe && submission.upload_method === 'image' && finalFileUrls.length > 0 && !finalFileUrls[0].toLowerCase().endsWith('.pdf')) {
+    // Add image or PDF to processing queue.
+    // The Railway backend handles both (uses is_pdf_url() to route internally).
+    if (recipe && submission.upload_method === 'image' && finalFileUrls.length > 0) {
       console.log('📝 Adding image to processing queue for recipe:', recipe.id);
       
       const { error: queueError } = await supabase
