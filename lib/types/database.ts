@@ -675,6 +675,62 @@ export interface Database {
           unsubscribed_at?: string | null;
         };
       };
+      book_qa_reviews: {
+        Row: {
+          id: string;
+          group_id: string;
+          status: 'uploading' | 'processing' | 'complete' | 'failed';
+          storage_path: string | null;
+          pdf_size_bytes: number | null;
+          pdf_page_count: number | null;
+          findings: Array<Record<string, unknown>> | null;
+          human_summary: string | null;
+          critical_count: number;
+          warning_count: number;
+          info_count: number;
+          gemini_model: string | null;
+          cost_usd: number | null;
+          duration_ms: number | null;
+          error_message: string | null;
+          created_at: string;
+          created_by: string | null;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          group_id: string;
+          status: 'uploading' | 'processing' | 'complete' | 'failed';
+          storage_path?: string | null;
+          pdf_size_bytes?: number | null;
+          pdf_page_count?: number | null;
+          findings?: Array<Record<string, unknown>> | null;
+          human_summary?: string | null;
+          critical_count?: number;
+          warning_count?: number;
+          info_count?: number;
+          gemini_model?: string | null;
+          cost_usd?: number | null;
+          duration_ms?: number | null;
+          error_message?: string | null;
+          created_by?: string | null;
+          completed_at?: string | null;
+        };
+        Update: {
+          status?: 'uploading' | 'processing' | 'complete' | 'failed';
+          storage_path?: string | null;
+          pdf_size_bytes?: number | null;
+          pdf_page_count?: number | null;
+          findings?: Array<Record<string, unknown>> | null;
+          human_summary?: string | null;
+          critical_count?: number;
+          warning_count?: number;
+          info_count?: number;
+          cost_usd?: number | null;
+          duration_ms?: number | null;
+          error_message?: string | null;
+          completed_at?: string | null;
+        };
+      };
     };
     Functions: {
       get_guest_statistics: {
