@@ -6,6 +6,7 @@ structured output via response_schema.
 from __future__ import annotations
 
 import asyncio
+import io
 import json
 import os
 
@@ -122,10 +123,12 @@ async def gemini_visual_review(
     client = genai.Client(api_key=api_key)
 
     # Upload PDF to Files API (Gemini 2.5 Pro requires this for >inline limit)
-    # Use asyncio.to_thread because google-genai upload is sync
+    # Reason: the google-genai SDK treats `file=<bytes>` as a path string and
+    # tries to open it as a file. Wrap in BytesIO so it streams the bytes.
+    # Use asyncio.to_thread because google-genai upload is sync.
     pdf_file = await asyncio.to_thread(
         client.files.upload,
-        file=pdf_bytes,
+        file=io.BytesIO(pdf_bytes),
         config={"mime_type": "application/pdf"},
     )
 
