@@ -169,9 +169,13 @@ export default function AdminHomePage() {
             </div>
           </Link>
 
+        </div>
+
+        {/* Secondary — other tools */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Create Free Book — only visible to comped-emails */}
           {canCreateCompedBooks(userName) && (
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-dashed border-brand-honey/40 hover:border-brand-honey h-full flex flex-col">
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-black h-full flex flex-col">
               <div className="text-5xl mb-4">🎁</div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Free Book</h2>
               <p className="text-gray-600 mb-4">
@@ -182,10 +186,7 @@ export default function AdminHomePage() {
               </div>
             </div>
           )}
-        </div>
 
-        {/* Secondary — other tools */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Activity */}
           <Link href="/admin/activity" className="group">
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-black cursor-pointer h-full">
