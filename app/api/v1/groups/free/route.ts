@@ -47,12 +47,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: createError?.message || "Could not create account" }, { status: 500 });
     }
 
-    // 2. Check if user already has a free_tier group (prevent duplicates).
+    // 2. Find existing group to update (trigger-created placeholder or previous free_tier).
+    //    Reason: handle_new_user trigger auto-creates a "My First Cookbook" group for new
+    //    users. Instead of creating a second group, we update that one to become the
+    //    free_tier group. For returning users, we look for an existing free_tier group first.
     const { data: existingGroup } = await supabaseAdmin
       .from("groups")
-      .select("id")
+      .select("id, status")
       .eq("created_by", userId)
-      .eq("status", "free_tier")
+      .order("created_at", { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     let groupId: string;
@@ -62,6 +66,7 @@ export async function POST(request: NextRequest) {
         .from("groups")
         .update({
           name: bookName,
+          status: "free_tier",
           couple_first_name: coupleFirstName.trim(),
           partner_first_name: partnerFirstName.trim(),
           ...(bookDate ? { gift_date: bookDate } : {}),
@@ -69,6 +74,7 @@ export async function POST(request: NextRequest) {
         })
         .eq("id", groupId);
     } else {
+      // Reason: fallback if trigger didn't fire (shouldn't happen, but defensive).
       const { data: newGroup, error: groupError } = await supabaseAdmin
         .from("groups")
         .insert({
