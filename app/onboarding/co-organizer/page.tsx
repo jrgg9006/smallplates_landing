@@ -22,7 +22,6 @@ function CoOrganizerContent() {
     <OnboardingShell
       title="Add a co-organizer?"
       subtitle="Co-organizers can invite others and review recipes."
-      backHref="/onboarding/about-you"
       skipHref={nextHref}
       onContinue={handleContinue}
     >

@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
   const supabaseAdmin = createSupabaseAdminClient();
   const normalizedEmail = email.trim().toLowerCase();
-  const bookName = `${coupleFirstName.trim()} & ${partnerFirstName.trim()}'s Book`;
+  const bookName = `${coupleFirstName.trim()} & ${partnerFirstName.trim()}`;
 
   try {
     // 1. Find or create the auth user.
