@@ -87,27 +87,14 @@ export async function POST(request: NextRequest) {
         groupId = g.id;
       }
     } else {
-      // Existing user — look for an existing free_tier group to update.
-      const { data: freeTierGroup } = await supabaseAdmin
+      // Existing user — ALWAYS create a new group. Never touch existing ones
+      // (even free_tier — they may have recipes already).
+      const { data: g, error: e } = await supabaseAdmin
         .from("groups")
-        .select("id")
-        .eq("created_by", userId)
-        .eq("status", "free_tier")
-        .maybeSingle();
-
-      if (freeTierGroup) {
-        // Scenario B: re-doing the flow — update existing free_tier group.
-        groupId = freeTierGroup.id;
-        await supabaseAdmin.from("groups").update(freeTierFields).eq("id", groupId);
-      } else {
-        // Scenario C: has paid books, starting a new free project.
-        const { data: g, error: e } = await supabaseAdmin
-          .from("groups")
-          .insert({ ...freeTierFields, created_by: userId, description: "" })
-          .select("id").single();
-        if (e || !g) return NextResponse.json({ error: e?.message || "Could not create group" }, { status: 500 });
-        groupId = g.id;
-      }
+        .insert({ ...freeTierFields, created_by: userId, description: "" })
+        .select("id").single();
+      if (e || !g) return NextResponse.json({ error: e?.message || "Could not create group" }, { status: 500 });
+      groupId = g.id;
     }
 
     // 3. Generate magic link token for instant session (same pattern as post-payment-setup).
