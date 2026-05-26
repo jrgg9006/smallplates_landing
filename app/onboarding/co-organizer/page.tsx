@@ -10,20 +10,50 @@ function CoOrganizerContent() {
   const groupId = params.get("groupId");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const nextHref = `/onboarding/event-details?groupId=${groupId}`;
+  const hasInput = name.trim() !== "" && email.trim() !== "";
 
-  function handleContinue() {
-    // Reason: co-organizer invite logic deferred to M2 (needs invitation_type column).
-    router.push(nextHref);
+  async function handleContinue() {
+    if (!hasInput) {
+      router.push(nextHref);
+      return;
+    }
+
+    setSubmitting(true);
+    setError("");
+
+    try {
+      const res = await fetch(`/api/v1/groups/${groupId}/invitations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), email: email.trim() }),
+      });
+
+      if (!res.ok) {
+        const { error: errMsg } = await res.json();
+        setError(errMsg || "Could not send invitation");
+        setSubmitting(false);
+        return;
+      }
+
+      router.push(nextHref);
+    } catch {
+      setError("Something went wrong. Please try again.");
+      setSubmitting(false);
+    }
   }
 
   return (
     <OnboardingShell
-      title="Add a co-organizer?"
-      subtitle="Co-organizers can invite others and review recipes."
+      title="Add a Captain?"
+      subtitle="Captains have full access to your dashboard — they can invite people, review recipes, and help manage the book."
       skipHref={nextHref}
       onContinue={handleContinue}
+      continueLabel={hasInput ? "Invite & Continue" : "Continue"}
+      continueDisabled={submitting}
     >
       <div className="space-y-3">
         <div>
@@ -47,6 +77,7 @@ function CoOrganizerContent() {
             placeholder="ana@example.com"
           />
         </div>
+        {error && <p className="text-sm text-red-600">{error}</p>}
       </div>
     </OnboardingShell>
   );
