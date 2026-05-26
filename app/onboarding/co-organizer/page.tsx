@@ -13,7 +13,7 @@ function CoOrganizerContent() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const nextHref = `/onboarding/event-details?groupId=${groupId}`;
+  const nextHref = `/onboarding/personalize-invite?groupId=${groupId}`;
   const hasInput = name.trim() !== "" && email.trim() !== "";
 
   async function handleContinue() {
@@ -49,7 +49,7 @@ function CoOrganizerContent() {
   return (
     <OnboardingShell
       title="Add a Captain?"
-      subtitle="Captains have full access to your dashboard — they can invite people, review recipes, and help manage the book."
+      subtitle="Captains have full access to your dashboard — they can help you invite people, review recipes, and manage the book."
       skipHref={nextHref}
       onContinue={handleContinue}
       continueLabel={hasInput ? "Invite & Continue" : "Continue"}
