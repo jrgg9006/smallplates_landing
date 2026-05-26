@@ -23,8 +23,8 @@ export async function POST(request: NextRequest) {
 
   try {
     // 1. Find or create the auth user.
-    //    Try to create first; if email already exists, look up via profiles table.
     let userId: string;
+    let isNewUser = false;
     const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email: normalizedEmail,
       email_confirm: true,
@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
 
     if (newUser?.user) {
       userId = newUser.user.id;
+      isNewUser = true;
     } else if (createError?.message?.includes("already been registered")) {
       const { data: profile } = await supabaseAdmin
         .from("profiles")
@@ -47,53 +48,66 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: createError?.message || "Could not create account" }, { status: 500 });
     }
 
-    // 2. Find existing group to update (trigger-created placeholder or previous free_tier).
-    //    Reason: handle_new_user trigger auto-creates a "My First Cookbook" group for new
-    //    users. Instead of creating a second group, we update that one to become the
-    //    free_tier group. For returning users, we look for an existing free_tier group first.
-    const { data: existingGroup } = await supabaseAdmin
-      .from("groups")
-      .select("id, status")
-      .eq("created_by", userId)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    // 2. Find or create the free_tier group.
+    //    Three scenarios:
+    //    A) New user: trigger created a placeholder "My First Cookbook" → update it to free_tier.
+    //    B) Existing user re-doing free tier: has a free_tier group → update it.
+    //    C) Existing user with paid books wanting another: no free_tier → create new one.
+    //    NEVER touch active/pending_setup groups.
+    const freeTierFields = {
+      name: bookName,
+      status: "free_tier" as const,
+      couple_first_name: coupleFirstName.trim(),
+      partner_first_name: partnerFirstName.trim(),
+      ...(bookDate ? { gift_date: bookDate } : {}),
+      gift_date_undecided: bookDateUndecided || false,
+    };
 
     let groupId: string;
-    if (existingGroup) {
-      groupId = existingGroup.id;
-      await supabaseAdmin
-        .from("groups")
-        .update({
-          name: bookName,
-          status: "free_tier",
-          couple_first_name: coupleFirstName.trim(),
-          partner_first_name: partnerFirstName.trim(),
-          ...(bookDate ? { gift_date: bookDate } : {}),
-          gift_date_undecided: bookDateUndecided || false,
-        })
-        .eq("id", groupId);
-    } else {
-      // Reason: fallback if trigger didn't fire (shouldn't happen, but defensive).
-      const { data: newGroup, error: groupError } = await supabaseAdmin
-        .from("groups")
-        .insert({
-          name: bookName,
-          created_by: userId,
-          status: "free_tier",
-          description: "",
-          couple_first_name: coupleFirstName.trim(),
-          partner_first_name: partnerFirstName.trim(),
-          ...(bookDate ? { gift_date: bookDate } : {}),
-          gift_date_undecided: bookDateUndecided || false,
-        })
-        .select("id")
-        .single();
 
-      if (groupError || !newGroup) {
-        return NextResponse.json({ error: groupError?.message || "Could not create group" }, { status: 500 });
+    if (isNewUser) {
+      // Scenario A: update the trigger-created placeholder.
+      const { data: placeholder } = await supabaseAdmin
+        .from("groups")
+        .select("id")
+        .eq("created_by", userId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (placeholder) {
+        groupId = placeholder.id;
+        await supabaseAdmin.from("groups").update(freeTierFields).eq("id", groupId);
+      } else {
+        const { data: g, error: e } = await supabaseAdmin
+          .from("groups")
+          .insert({ ...freeTierFields, created_by: userId, description: "" })
+          .select("id").single();
+        if (e || !g) return NextResponse.json({ error: e?.message || "Could not create group" }, { status: 500 });
+        groupId = g.id;
       }
-      groupId = newGroup.id;
+    } else {
+      // Existing user — look for an existing free_tier group to update.
+      const { data: freeTierGroup } = await supabaseAdmin
+        .from("groups")
+        .select("id")
+        .eq("created_by", userId)
+        .eq("status", "free_tier")
+        .maybeSingle();
+
+      if (freeTierGroup) {
+        // Scenario B: re-doing the flow — update existing free_tier group.
+        groupId = freeTierGroup.id;
+        await supabaseAdmin.from("groups").update(freeTierFields).eq("id", groupId);
+      } else {
+        // Scenario C: has paid books, starting a new free project.
+        const { data: g, error: e } = await supabaseAdmin
+          .from("groups")
+          .insert({ ...freeTierFields, created_by: userId, description: "" })
+          .select("id").single();
+        if (e || !g) return NextResponse.json({ error: e?.message || "Could not create group" }, { status: 500 });
+        groupId = g.id;
+      }
     }
 
     // 3. Generate magic link token for instant session (same pattern as post-payment-setup).
