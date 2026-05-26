@@ -40,6 +40,43 @@ export async function sendWelcomeLoginEmail({ to, buyerName, loginLink }: SendWe
   }
 }
 
+export interface SendFreeTierWelcomeEmailParams {
+  to: string;
+  buyerName: string;
+  coupleName: string;
+  loginLink: string;
+  collectionLink: string;
+  bookDate: string | null;
+}
+
+export async function sendFreeTierWelcomeEmail({ to, buyerName, coupleName, loginLink, collectionLink, bookDate }: SendFreeTierWelcomeEmailParams) {
+  try {
+    const collectionLinkDisplay = collectionLink.replace(/^https?:\/\//, '');
+    const bookDateLine = bookDate ? ` by ${bookDate}` : '';
+
+    const result = await postmarkClient.sendEmailWithTemplate({
+      From: `Small Plates & Co. <${process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com'}>`,
+      ReplyTo: 'team@smallplatesandcompany.com',
+      To: to,
+      TemplateAlias: 'welcome-free-tier',
+      TemplateModel: {
+        buyerName,
+        coupleName,
+        loginLink,
+        collectionLink,
+        collectionLinkDisplay,
+        bookDateLine,
+      },
+      MessageStream: 'outbound',
+    });
+
+    return { success: true, messageId: result.MessageID };
+  } catch (error) {
+    console.error('Error sending free-tier welcome email:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
 export interface SendReturningCustomerEmailParams {
   to: string;
   buyerName: string;
