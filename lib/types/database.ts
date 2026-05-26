@@ -28,7 +28,7 @@ export type MemberRole = 'owner' | 'admin' | 'member';
 export type InvitationStatus = 'pending' | 'accepted' | 'declined' | 'expired';
 export type BookStatus = 'active' | 'reviewed' | 'ready_to_print' | 'printed' | 'inactive';
 export type BookReviewStatus = 'pending' | 'approved' | 'needs_revision';
-export type GroupStatus = 'pending_setup' | 'active';
+export type GroupStatus = 'free_tier' | 'pending_setup' | 'active';
 // Reason: Reuses the existing `groups.relationship_to_couple` column instead of a new one.
 // Values match the hyphenated form ("wedding-planner") already used by legacy data.
 export type OrganizerRelationship = 'couple' | 'family' | 'friend' | 'wedding-planner';

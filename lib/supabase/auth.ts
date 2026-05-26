@@ -96,12 +96,19 @@ export async function signInWithGoogle(options?: { loginHint?: string; redirectT
  *
  * The endpoint always returns success (even for unknown emails) to avoid account enumeration.
  */
-export async function sendMagicLink(email: string) {
+export async function sendMagicLink(
+  email: string,
+  options?: { allowSignup?: boolean; redirectTo?: string }
+) {
   try {
     const res = await fetch("/api/auth/send-login-link", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({
+        email,
+        ...(options?.allowSignup ? { allowSignup: true } : {}),
+        ...(options?.redirectTo ? { redirectTo: options.redirectTo } : {}),
+      }),
     });
 
     if (!res.ok) {

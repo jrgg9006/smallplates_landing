@@ -238,6 +238,37 @@ export async function findOrCreatePendingGroup(
   bookCloseDate: string | null
 ): Promise<{ groupId: string | null; groupCreated: boolean }> {
   let groupId: string | null = initialGroupId;
+
+  // Reason: If user started in free tier (created group via onboarding without paying),
+  // upgrade that group to pending_setup instead of creating a new one.
+  if (!groupId) {
+    const { data: freeTierGroup } = await supabaseAdmin
+      .from("groups")
+      .select("id")
+      .eq("created_by", userId)
+      .eq("status", "free_tier")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (freeTierGroup) {
+      const { error: upgradeError } = await supabaseAdmin
+        .from("groups")
+        .update({
+          status: "pending_setup",
+          gift_date: giftDate,
+          gift_date_undecided: giftDateUndecided,
+          book_close_date: bookCloseDate,
+        })
+        .eq("id", freeTierGroup.id);
+
+      if (!upgradeError) {
+        return { groupId: freeTierGroup.id, groupCreated: false };
+      }
+      console.error("findOrCreatePendingGroup: failed to upgrade free_tier group", upgradeError);
+    }
+  }
+
   if (!groupId) {
     const { data: existingGroup } = await supabaseAdmin
       .from("groups")

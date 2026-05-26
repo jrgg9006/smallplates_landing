@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { sendWelcomeLoginEmail } from "@/lib/postmark";
+import { isFreeTierEnabled } from "@/lib/feature-flags";
 
 /**
  * POST /api/auth/send-login-link
@@ -10,7 +11,7 @@ import { sendWelcomeLoginEmail } from "@/lib/postmark";
  * hash). This avoids the PKCE verifier requirement — the user can click the link from
  * any browser or device.
  *
- * Body: { email }
+ * Body: { email, allowSignup?, redirectTo? }
  * Returns: { success: true } — always, regardless of whether the email is registered,
  *   to avoid leaking account existence to attackers.
  */
@@ -18,6 +19,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const rawEmail: string | undefined = body.email;
+    const allowSignup: boolean = body.allowSignup === true && isFreeTierEnabled();
+    const redirectTo: string | undefined = body.redirectTo;
 
     if (!rawEmail) {
       return NextResponse.json({ error: "Missing email" }, { status: 400 });
@@ -31,38 +34,46 @@ export async function POST(request: NextRequest) {
 
     const supabaseAdmin = createSupabaseAdminClient();
 
-    // Reason: Only send a link if the user actually has a profile. Pre-checking here
-    // prevents `admin.generateLink` from silently creating new auth users for arbitrary
-    // emails a visitor might enter.
     const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("id, full_name")
       .eq("email", email)
       .maybeSingle();
 
-    if (!profile) {
-      // Reason: Return success to avoid account-enumeration. Attacker can't tell whether
-      // the email is registered from the response.
+    // Reason: In signup mode (free tier onboarding), we create the user if they don't exist.
+    // In login mode (original behavior), we silently succeed to prevent account enumeration.
+    if (!profile && !allowSignup) {
       return NextResponse.json({ success: true });
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL;
+    const safeRedirect = redirectTo && redirectTo.startsWith("/") ? redirectTo : "/welcome";
+    const redirectUrl = `${baseUrl}${safeRedirect}`;
+
+    // Reason: generateLink({ type: "signup" }) requires a password, which we don't want
+    // for passwordless signup. Instead, create the auth user first, then send a magiclink.
+    if (!profile) {
+      const randomPassword = crypto.randomUUID();
+      await supabaseAdmin.auth.admin.createUser({
+        email,
+        password: randomPassword,
+        email_confirm: false,
+      });
     }
 
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: "magiclink",
       email,
-      options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/welcome`,
-      },
+      options: { redirectTo: redirectUrl },
     });
 
     if (linkError || !linkData?.properties?.action_link) {
       console.error("send-login-link: generateLink failed", linkError);
-      // Reason: Still return success — don't leak the failure either. The user will just
-      // not receive an email and can try again or contact support.
       return NextResponse.json({ success: true });
     }
 
     try {
-      const firstName = profile.full_name?.split(" ")[0] || "";
+      const firstName = profile?.full_name?.split(" ")[0] || "";
       await sendWelcomeLoginEmail({
         to: email,
         buyerName: firstName,
