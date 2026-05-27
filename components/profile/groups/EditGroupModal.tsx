@@ -20,7 +20,7 @@ interface EditGroupModalProps {
   onGroupUpdated?: (group: GroupWithMembers) => void;
 }
 
-const MAX_NAME_LENGTH = 30;
+const MAX_NAME_LENGTH = 35;
 
 export function EditGroupModal({ 
   isOpen, 

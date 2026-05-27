@@ -32,6 +32,9 @@ import { CloseBookModal } from "@/components/profile/groups/CloseBookModal";
 import { ReviewRecipesPage } from "@/components/profile/groups/review/ReviewRecipesPage";
 import { PostCloseFlow } from "@/components/profile/groups/PostCloseFlow";
 import BrandLoader from "@/components/ui/BrandLoader";
+import { InviteDropdown } from "@/components/dashboard/InviteDropdown";
+import { DashboardChecklist } from "@/components/dashboard/DashboardChecklist";
+import { BookPreviewPanel } from "@/components/profile/groups/BookPreviewPanel";
 // Reason: closeBook is now called inside PostCloseFlow, not from page.tsx
 
 // Reason: Format book_close_date as "Month Dth" with ordinal suffix (no year)
@@ -58,6 +61,7 @@ export default function GroupsPage() {
   const [uniqueContributors, setUniqueContributors] = useState(0);
   const [showCaptains, setShowCaptains] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showInviteDropdown, setShowInviteDropdown] = useState(false);
   const [showAddCaptainModal, setShowAddCaptainModal] = useState(false);
   const [invitationsRefreshTrigger, setInvitationsRefreshTrigger] = useState(0);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -657,170 +661,14 @@ export default function GroupsPage() {
       )}
 
       {/* Main Content — book view (hidden but not unmounted during send-invitations) */}
-      <main className={`max-w-[1000px] mx-auto px-10 ${activeView !== 'book' ? 'hidden' : ''}`}>
+      <main className={`max-w-[1240px] mx-auto px-8 ${activeView !== 'book' ? 'hidden' : ''}`}>
             {/* Reason: Hide dashboard/buttons when book is closed — BookClosedStatus in GroupsSection handles the view */}
             {selectedGroup?.book_closed_by_user ? null : (<>
-            {/* Hero Image */}
-            <div
-              ref={repositionContainerRef}
-              className={`relative w-full h-[200px] mt-6 rounded-2xl overflow-hidden group ${isRepositioning ? 'cursor-grab active:cursor-grabbing touch-none' : 'cursor-pointer'}`}
-              {...(isRepositioning ? {
-                onMouseDown: handleRepositionMouseDown,
-                onMouseMove: handleRepositionMouseMove,
-                onMouseUp: handleRepositionMouseUp,
-                onMouseLeave: handleRepositionMouseUp,
-                onTouchStart: handleRepositionMouseDown,
-                onTouchMove: handleRepositionMouseMove,
-                onTouchEnd: handleRepositionMouseUp,
-              } : {})}
-            >
-              {currentDashboardImage ? (
-                /* Show uploaded dashboard image */
-                <>
-                  <Image
-                    key={currentDashboardImage}
-                    src={currentDashboardImage}
-                    alt="Group dashboard image"
-                    fill
-                    className="object-cover select-none"
-                    sizes="1000px"
-                    draggable={false}
-                    style={{ objectPosition: `center ${isRepositioning ? tempPositionY : (selectedGroup?.dashboard_image_position_y ?? 50)}%` }}
-                  />
-                  {isRepositioning ? (
-                    /* Reposition mode overlay - always visible */
-                    <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center gap-3">
-                      <p className="text-white text-sm font-medium select-none">Drag to reposition</p>
-                      <div className="flex gap-3">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleCancelReposition();
-                          }}
-                          className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-charcoal))] text-[hsl(var(--brand-warm-white))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-warm-gray))] transition-all duration-200 shadow-sm z-10"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleSaveReposition();
-                          }}
-                          disabled={isSavingPosition}
-                          className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-warm-white))] text-[hsl(var(--brand-charcoal))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-honey))] hover:text-black transition-all duration-200 shadow-sm z-10"
-                        >
-                          {isSavingPosition ? 'Saving...' : 'Save'}
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    /* Normal mode - Hover on desktop, tap on mobile */
-                    <div
-                      className={`absolute inset-0 bg-black/30 transition-opacity flex items-center justify-center ${showImageControls ? 'opacity-100' : 'opacity-0 md:group-hover:opacity-100'}`}
-                      onClick={() => setShowImageControls(!showImageControls)}
-                    >
-                      <div className="flex gap-3">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setShowImageControls(false);
-                            handleDashboardImageClick();
-                          }}
-                          disabled={isUploadingDashboardImage}
-                          className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-warm-white))] text-[hsl(var(--brand-charcoal))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-honey))] hover:text-black transition-all duration-200 shadow-sm z-10"
-                        >
-                          <Upload size={16} />
-                          Change
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setShowImageControls(false);
-                            handleStartReposition();
-                          }}
-                          disabled={isUploadingDashboardImage}
-                          className="hidden md:flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-warm-white))] text-[hsl(var(--brand-charcoal))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-honey))] hover:text-black transition-all duration-200 shadow-sm z-10"
-                        >
-                          <Move size={16} />
-                          Reposition
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setShowImageControls(false);
-                            handleDeleteDashboardImage();
-                          }}
-                          disabled={isUploadingDashboardImage}
-                          className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-charcoal))] text-[hsl(var(--brand-warm-white))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-warm-gray))] transition-all duration-200 shadow-sm z-10"
-                        >
-                          <X size={16} />
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </>
-              ) : (
-                /* Show placeholder with upload prompt */
-                <>
-                  <Image
-                    src="/images/profile/Hero_Profile_2400.jpg"
-                    alt="Couple cooking together"
-                    fill
-                    className="object-cover"
-                    sizes="1000px"
-                  />
-                  {/* Clickable overlay */}
-                  <div
-                    className="absolute inset-0 bg-black/10 flex items-center justify-center cursor-pointer hover:bg-black/15 transition-colors"
-                    onClick={handleDashboardImageClick}
-                  >
-                    <div className="flex flex-col items-center text-white/70">
-                      {isUploadingDashboardImage ? (
-                        <>
-                          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white/50 mb-2"></div>
-                          <span className="text-[12px] mt-1.5 font-normal opacity-80">Uploading...</span>
-                        </>
-                      ) : (
-                        <>
-                          <ImageIcon size={40} strokeWidth={1} className="opacity-60" />
-                          <span className="text-[12px] mt-1.5 font-normal opacity-80">Click to add your photo</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </>
-              )}
+            {/* Two-column layout: Title + Book Cover */}
+            <div className="mt-8 flex flex-col md:flex-row gap-8 items-start">
 
-              {/* Hidden file input */}
-              <input
-                id="dashboardImageInput"
-                type="file"
-                accept="image/jpeg,image/jpg,image/png,image/webp"
-                onChange={handleDashboardImageSelect}
-                className="hidden"
-              />
-            </div>
-
-            {/* Error Message */}
-            {dashboardImageError && (
-              <div className="mt-3 bg-red-50 border border-red-200 rounded-md p-3">
-                <p className="text-red-600 text-sm">{dashboardImageError}</p>
-              </div>
-            )}
-
-            {/* Title Section */}
-            <div className="mt-6">
+            {/* Left column — Title, stats, action bar */}
+            <div className="flex-1 min-w-0">
               <h1 className="cookbook-title mb-1.5">
                 {selectedGroup?.name || 'My Cookbook'}
               </h1>
@@ -843,90 +691,100 @@ export default function GroupsPage() {
                   )
                 )} · {recipeCount} recipes{uniqueContributors > 0 ? ` from ${uniqueContributors} people` : ''}
               </p>
+
+              {/* Gamified checklist */}
+              <DashboardChecklist
+                group={selectedGroup}
+                recipeCount={recipeCount}
+                hasCaptains={(selectedGroup?.group_members || []).some(m => m.role !== 'owner')}
+                hasEventInvite={false}
+                onCreateEventInvite={handleCollectRecipes}
+                onInviteCaptain={() => setShowAddCaptainModal(true)}
+                onAddRecipe={() => groupsSectionRef.current?.openAddNewRecipeModal()}
+                onPrintBook={handleCloseBook}
+              />
+
+            </div>{/* end left column */}
+
+            {/* Right column — Book cover mockup */}
+            <div className="w-full md:w-[340px] flex-shrink-0 self-stretch">
+              <BookPreviewPanel
+                group={selectedGroup}
+                recipeCount={recipeCount}
+                onPreviewClick={() => groupsSectionRef.current?.onEditGroup()}
+              />
             </div>
 
-            {/* Action Bar */}
-            <div className="flex items-center gap-3 mt-5 pb-6 border-b border-[hsl(var(--brand-border))]">
-              {/* PRIMARY - Collect Recipes (HONEY, ROUNDED) */}
-              <button
-                className="btn btn-sm btn-honey"
-                onClick={handleCollectRecipes}
-                disabled={!selectedGroup}
-              >
-                Collect Recipes
-              </button>
+            </div>{/* end two-column layout */}
 
-              {/* SECONDARY - Add Your Own (OUTLINE, ROUNDED) */}
-              <button
-                className="btn btn-sm btn-outline"
-                onClick={() => groupsSectionRef.current?.openAddNewRecipeModal()}
-                disabled={!selectedGroup}
-              >
-                Add Recipes
-              </button>
+            {/* Action Bar — separate section below */}
+            <div className="mt-10 pt-6 border-t border-[hsl(var(--brand-border))]">
+              <div className="flex items-center gap-3">
+                {/* PRIMARY - Invite dropdown (HONEY, ROUNDED) */}
+                <div className="relative">
+                  <button
+                    className="btn btn-sm btn-honey gap-2 px-14"
+                    onClick={() => setShowInviteDropdown(!showInviteDropdown)}
+                    disabled={!selectedGroup}
+                  >
+                    Invite
+                    <ChevronDown size={12} />
+                  </button>
+                  <InviteDropdown
+                    isOpen={showInviteDropdown}
+                    onClose={() => setShowInviteDropdown(false)}
+                    onInviteToEvent={handleCollectRecipes}
+                    onSendCollectionLink={handleCollectRecipes}
+                    onInviteCaptain={() => setShowAddCaptainModal(true)}
+                  />
+                </div>
 
-              {/* Guests Button - Hidden on mobile */}
-              <button
-                className="btn btn-sm btn-outline hidden sm:block"
-                onClick={handleViewGuests}
-                disabled={!selectedGroup}
-              >
-                Guests
-              </button>
-
-              {/* Captains Dropdown - Hidden on mobile */}
-              <div className="relative hidden sm:block">
+                {/* SECONDARY - Add Your Own (OUTLINE, ROUNDED) */}
                 <button
-                  onClick={() => setShowCaptains(!showCaptains)}
-                  className="btn btn-subtle gap-1.5"
+                  className="btn btn-sm btn-outline"
+                  onClick={() => groupsSectionRef.current?.openAddNewRecipeModal()}
+                  disabled={!selectedGroup}
                 >
-                  Captains
-                  <ChevronDown size={10} />
+                  Add a Recipe
                 </button>
-                {showCaptains && <CaptainsDropdown isOpen={showCaptains} selectedGroup={selectedGroup} onClose={() => setShowCaptains(false)} onInviteCaptain={handleInviteCaptain} refreshTrigger={invitationsRefreshTrigger} />}
-              </div>
 
-              {/* More Menu */}
-              <div className="relative">
+                {/* Send Reminders — placeholder */}
                 <button
-                  onClick={() => setShowMoreMenu(!showMoreMenu)}
-                  className="btn btn-subtle px-3.5"
+                  className="btn btn-sm btn-outline"
+                  onClick={() => {}}
+                  disabled={!selectedGroup}
                 >
-                  ⋯
+                  Send Reminders
                 </button>
-                <MoreMenuDropdown
-                  isOpen={showMoreMenu}
-                  onClose={() => setShowMoreMenu(false)}
-                  onEditProfile={handleEditProfile}
-                  showCaptainsOption={isMobile}
-                  onCaptainsClick={() => setShowCaptains(true)}
-                  onViewGuestsClick={handleViewGuests}
-                  showAddGuestOption={isMobile}
-                  showSendInvitationsOption={true}
-                  onSendInvitationsClick={handleSendInvitations}
-                  onCloseBookClick={!selectedGroup?.book_closed_by_user ? handleCloseBook : undefined}
-                />
-                {/* Captains dropdown for mobile */}
-                <div className="sm:hidden">
-                  {showCaptains && <CaptainsDropdown isOpen={showCaptains} selectedGroup={selectedGroup} onClose={() => setShowCaptains(false)} onInviteCaptain={handleInviteCaptain} refreshTrigger={invitationsRefreshTrigger} />}
+
+                {/* More Menu */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowMoreMenu(!showMoreMenu)}
+                    className="btn btn-subtle px-3.5"
+                  >
+                    ⋯
+                  </button>
+                  <MoreMenuDropdown
+                    isOpen={showMoreMenu}
+                    onClose={() => setShowMoreMenu(false)}
+                    onEditProfile={handleEditProfile}
+                    showCaptainsOption={isMobile}
+                    onCaptainsClick={() => setShowCaptains(true)}
+                    onViewGuestsClick={handleViewGuests}
+                    showAddGuestOption={isMobile}
+                    showSendInvitationsOption={true}
+                    onSendInvitationsClick={handleSendInvitations}
+                    onCloseBookClick={!selectedGroup?.book_closed_by_user ? handleCloseBook : undefined}
+                  />
+                  {/* Captains dropdown for mobile */}
+                  <div className="sm:hidden">
+                    {showCaptains && <CaptainsDropdown isOpen={showCaptains} selectedGroup={selectedGroup} onClose={() => setShowCaptains(false)} onInviteCaptain={handleInviteCaptain} refreshTrigger={invitationsRefreshTrigger} />}
+                  </div>
                 </div>
               </div>
             </div>
             </>)}
-
-            {/* Setup Checklist — drives new users toward the 5 highest-leverage actions */}
-            {selectedGroup && !selectedGroup.book_closed_by_user && (
-              <SetupChecklist
-                group={selectedGroup}
-                onOpenEditGroup={handleEditProfile}
-                onOpenInviteCaptain={handleInviteCaptain}
-                onOpenShareLink={handleCollectRecipesExpanded}
-                onOpenImportGuests={(source) => setImportSource(source)}
-                onOpenCouplePhoto={handleCollectRecipesExpanded}
-                autoOpen={shouldAutoOpenSetup}
-                onAutoOpenConsumed={() => setShouldAutoOpenSetup(false)}
-              />
-            )}
 
             {/* Recipe Grid */}
             <div className="mt-8 pb-16">
