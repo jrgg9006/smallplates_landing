@@ -47,8 +47,8 @@ export function DashboardChecklist({
       ),
     },
     {
-      done: recipeCount >= 20,
-      content: <>Reach 20 recipes</>,
+      done: recipeCount >= 25,
+      content: <>Reach +25 recipes</>,
     },
     {
       done: !!group.book_closed_by_user,
