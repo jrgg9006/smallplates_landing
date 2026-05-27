@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { isFreeTierEnabled } from '@/lib/feature-flags';
 import BookDetailsModal from './BookDetailsModal';
 import RegistryHowToModal from './RegistryHowToModal';
 import { trackEvent } from '@/lib/analytics';
@@ -21,6 +22,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
   const [isBookDetailsOpen, setIsBookDetailsOpen] = useState(false);
   const [isRegistryHowToOpen, setIsRegistryHowToOpen] = useState(false);
+  const onboardingHref = isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding";
   
   return (
     <footer className="bg-brand-charcoal">
@@ -70,7 +72,7 @@ export default function Footer() {
                   </li>
                   <li>
                     <Link
-                      href="/onboarding"
+                      href={onboardingHref}
                       onClick={() => trackEvent('start_book_click', { cta_location: 'footer_nav' })}
                       className="font-sans font-light text-base text-white/70 hover:text-white transition-colors"
                     >
@@ -149,7 +151,7 @@ export default function Footer() {
               Ready?
             </h3>
             <Link
-              href="/onboarding"
+              href={onboardingHref}
               onClick={() => trackEvent('start_book_click', { cta_location: 'footer_card' })}
               className="btn btn-sm btn-honey"
             >
