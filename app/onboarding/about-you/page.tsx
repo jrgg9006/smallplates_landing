@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
 import { useOnboardingState } from "@/components/onboarding/onboardingState";
@@ -13,15 +13,26 @@ export default function AboutYouPage() {
   const [partnerFirstName, setPartnerFirstName] = useState("");
   const [yourName, setYourName] = useState("");
   const [email, setEmail] = useState("");
+  const [isAuthed, setIsAuthed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const supabase = createSupabaseClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setIsAuthed(true);
+        setEmail(user.email || "");
+        setYourName(user.user_metadata?.full_name || user.user_metadata?.name || "");
+      }
+    });
+  }, []);
 
   async function handleSubmit() {
     setSubmitting(true);
     setError("");
 
     try {
-      // 1. Create user + group + get session token — single request.
       const res = await fetch("/api/v1/groups/free", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -45,14 +56,14 @@ export default function AboutYouPage() {
 
       const { groupId, tokenHash } = await res.json();
 
-      // 2. Establish session in the browser using the token hash.
-      const supabase = createSupabaseClient();
-      await supabase.auth.verifyOtp({
-        token_hash: tokenHash,
-        type: "magiclink",
-      });
+      if (!isAuthed) {
+        const supabase = createSupabaseClient();
+        await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: "magiclink",
+        });
+      }
 
-      // 3. Done — clear onboarding state and advance.
       reset();
       router.push(`/onboarding/co-organizer?groupId=${groupId}`);
     } catch {
@@ -64,12 +75,11 @@ export default function AboutYouPage() {
   const canSubmit = !submitting
     && coupleFirstName.trim() !== ""
     && partnerFirstName.trim() !== ""
-    && yourName.trim() !== ""
-    && email.trim() !== "";
+    && (isAuthed || (yourName.trim() !== "" && email.trim() !== ""));
 
   return (
     <OnboardingShell
-      title="Let's get started."
+      title={isAuthed ? "Your next book." : "Let's get started."}
       imageUrl=""
       backHref="/onboarding/book-date"
       onContinue={handleSubmit}
@@ -97,40 +107,43 @@ export default function AboutYouPage() {
           </div>
         </div>
 
-        {/* Organizer name */}
-        <div>
-          <label htmlFor="your-name" className="input-label">Your name</label>
-          <input
-            id="your-name"
-            type="text"
-            value={yourName}
-            onChange={(e) => setYourName(e.target.value)}
-            className="input-field"
-            placeholder="Maria Garcia"
-          />
-        </div>
+        {/* Only show name + email for new users */}
+        {!isAuthed && (
+          <>
+            <div>
+              <label htmlFor="your-name" className="input-label">Your name</label>
+              <input
+                id="your-name"
+                type="text"
+                value={yourName}
+                onChange={(e) => setYourName(e.target.value)}
+                className="input-field"
+                placeholder="Maria Garcia"
+              />
+            </div>
 
-        {/* Email */}
-        <div>
-          <label htmlFor="your-email" className="input-label">Your email</label>
-          <input
-            id="your-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="input-field"
-            placeholder="maria@example.com"
-          />
-        </div>
+            <div>
+              <label htmlFor="your-email" className="input-label">Your email</label>
+              <input
+                id="your-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="input-field"
+                placeholder="maria@example.com"
+              />
+            </div>
+
+            <p className="text-[12px] text-gray-400 leading-relaxed pt-2">
+              By continuing, you agree to our{" "}
+              <a href="/terms" target="_blank" className="underline hover:text-gray-600">terms of service</a>
+              {" "}and{" "}
+              <a href="/privacy" target="_blank" className="underline hover:text-gray-600">privacy policy</a>.
+            </p>
+          </>
+        )}
 
         {error && <p className="text-sm text-red-600">{error}</p>}
-
-        <p className="text-[12px] text-gray-400 leading-relaxed pt-2">
-          By continuing, you agree to our{" "}
-          <a href="/terms" target="_blank" className="underline hover:text-gray-600">terms of service</a>
-          {" "}and{" "}
-          <a href="/privacy" target="_blank" className="underline hover:text-gray-600">privacy policy</a>.
-        </p>
       </div>
     </OnboardingShell>
   );
