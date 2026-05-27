@@ -20,7 +20,7 @@ function PersonalizeInviteContent() {
     const supabase = createSupabaseClient();
     supabase
       .from("groups")
-      .select("couple_first_name, partner_first_name")
+      .select("couple_first_name, partner_first_name, couple_image_url")
       .eq("id", groupId)
       .single()
       .then(({ data }) => {
@@ -30,6 +30,9 @@ function PersonalizeInviteContent() {
         setMessage(
           `You're adding a recipe to ${couple}'s cookbook. Doesn't have to be fancy — just something you actually make.`
         );
+        if (data?.couple_image_url) {
+          setPhotoPreview(data.couple_image_url);
+        }
         setMessageLoaded(true);
       });
   }, [groupId, messageLoaded]);
@@ -148,7 +151,7 @@ function PersonalizeInviteContent() {
               <img
                 src={photoPreview}
                 alt="Couple"
-                className="w-44 h-44 object-cover rounded-xl border border-[hsl(var(--brand-sand))] shadow-sm"
+                className="w-56 h-56 object-cover rounded-xl border border-[hsl(var(--brand-sand))] shadow-sm"
               />
               <button
                 type="button"
