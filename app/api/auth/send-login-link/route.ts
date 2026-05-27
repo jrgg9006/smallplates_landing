@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { sendWelcomeLoginEmail } from "@/lib/postmark";
+import { sendWelcomeLoginEmail, sendLoginLinkEmail } from "@/lib/postmark";
 import { isFreeTierEnabled } from "@/lib/feature-flags";
 
 /**
@@ -74,11 +74,21 @@ export async function POST(request: NextRequest) {
 
     try {
       const firstName = profile?.full_name?.split(" ")[0] || "";
-      await sendWelcomeLoginEmail({
-        to: email,
-        buyerName: firstName,
-        loginLink: linkData.properties.action_link,
-      });
+      // Reason: existing users get the simple login-link template;
+      // new users (signup mode) get the welcome template with onboarding context.
+      if (profile) {
+        await sendLoginLinkEmail({
+          to: email,
+          buyerName: firstName || "there",
+          loginLink: linkData.properties.action_link,
+        });
+      } else {
+        await sendWelcomeLoginEmail({
+          to: email,
+          buyerName: firstName,
+          loginLink: linkData.properties.action_link,
+        });
+      }
     } catch (err) {
       console.error("send-login-link: Postmark send failed", err);
     }

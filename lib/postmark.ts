@@ -40,6 +40,27 @@ export async function sendWelcomeLoginEmail({ to, buyerName, loginLink }: SendWe
   }
 }
 
+export async function sendLoginLinkEmail({ to, buyerName, loginLink }: SendWelcomeLoginEmailParams) {
+  try {
+    const result = await postmarkClient.sendEmailWithTemplate({
+      From: `Small Plates & Co. <${process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com'}>`,
+      ReplyTo: 'team@smallplatesandcompany.com',
+      To: to,
+      TemplateAlias: 'login-link',
+      TemplateModel: {
+        buyerName,
+        loginLink,
+      },
+      MessageStream: 'outbound',
+    });
+
+    return { success: true, messageId: result.MessageID };
+  } catch (error) {
+    console.error('Error sending login link email:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
 export interface SendFreeTierWelcomeEmailParams {
   to: string;
   buyerName: string;
