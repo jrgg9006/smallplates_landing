@@ -669,9 +669,24 @@ export default function GroupsPage() {
 
             {/* Left column — Title, stats, action bar */}
             <div className="flex-1 min-w-0">
-              <h1 className="cookbook-title mb-1.5">
-                {selectedGroup?.name || 'My Cookbook'}
-              </h1>
+              <div className="flex items-start gap-5">
+                {selectedGroup?.couple_image_url && (
+                  <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-[hsl(var(--brand-border))]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={selectedGroup.couple_image_url}
+                      alt="Couple"
+                      className="w-full h-full object-cover"
+                      style={{
+                        objectPosition: `${selectedGroup.couple_image_position_x ?? 50}% ${selectedGroup.couple_image_position_y ?? 50}%`,
+                      }}
+                    />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <h1 className="cookbook-title">
+                    {selectedGroup?.name || 'My Cookbook'}
+                  </h1>
               <div className="flex items-center gap-3 cookbook-metadata">
                 {selectedGroup?.book_close_date ? (
                   <>Recipes due {getDeadlineText(selectedGroup.book_close_date)}</>
@@ -698,6 +713,8 @@ export default function GroupsPage() {
                   Edit Profile
                 </button>
               </div>
+                </div>{/* end title+stats wrapper */}
+              </div>{/* end avatar+content flex */}
 
               {/* Gamified checklist */}
               <DashboardChecklist
