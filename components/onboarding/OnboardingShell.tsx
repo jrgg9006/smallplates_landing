@@ -35,7 +35,7 @@ export function OnboardingShell({
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Right panel — image, custom content, or nothing */}
+      {/* Right panel — desktop only */}
       {hasRightPanel && (
         <div className="hidden lg:block fixed right-0 top-16 w-2/5 h-[calc(100vh-4rem)] z-0">
           {rightContent ? (
@@ -59,51 +59,53 @@ export function OnboardingShell({
         </div>
       )}
 
-      {/* Content — left 60% when right panel, full width when none */}
-      <div className={`min-h-screen flex items-start pt-20 lg:pt-24 pb-8 overflow-y-auto ${hasRightPanel ? "lg:mr-[40%]" : ""}`}>
-        <div className={`w-full px-8 lg:pl-28 lg:pr-12 ${hasRightPanel ? "max-w-2xl" : "max-w-4xl"}`}>
+      {/* Content */}
+      <div className={`min-h-screen flex items-start pt-8 lg:pt-24 pb-8 overflow-y-auto ${hasRightPanel ? "lg:mr-[40%]" : ""}`}>
+        <div className={`w-full px-5 sm:px-8 lg:pl-28 lg:pr-12 ${hasRightPanel ? "max-w-2xl" : "max-w-4xl"}`}>
           {/* Title */}
-          <div className="text-left mb-8">
-            <h1 className="font-serif text-4xl md:text-[46px] leading-tight font-light text-gray-900 mb-2 whitespace-nowrap">
+          <div className="text-left mb-6 lg:mb-8">
+            <h1 className="font-serif text-3xl sm:text-4xl lg:text-[46px] leading-tight font-light text-gray-900 mb-2">
               {title}
             </h1>
             {subtitle && (
-              <p className="text-base text-gray-500 mt-3">
+              <p className="text-sm sm:text-base text-gray-500 mt-2 lg:mt-3">
                 {subtitle}
               </p>
             )}
           </div>
 
           {/* Content */}
-          <div className="mb-10">{children}</div>
+          <div className="mb-8 lg:mb-10">{children}</div>
 
           {/* Navigation */}
-          <div className="flex items-center gap-6">
-            {backHref && (
-              <Link
-                href={backHref}
-                className="px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors"
-              >
-                Back
-              </Link>
-            )}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-6">
             {onContinue && (
               <button
                 onClick={onContinue}
                 disabled={continueDisabled}
-                className="btn btn-lg btn-honey px-14"
+                className="btn btn-lg btn-honey px-14 w-full sm:w-auto order-1 sm:order-2"
               >
                 {continueLabel}
               </button>
             )}
-            {skipHref && (
-              <Link
-                href={skipHref}
-                className="text-sm text-gray-500 hover:text-gray-700 underline transition-colors"
-              >
-                {skipLabel}
-              </Link>
-            )}
+            <div className="flex items-center justify-between sm:contents order-2 sm:order-1">
+              {backHref && (
+                <Link
+                  href={backHref}
+                  className="px-4 sm:px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors"
+                >
+                  Back
+                </Link>
+              )}
+              {skipHref && (
+                <Link
+                  href={skipHref}
+                  className="text-sm text-gray-500 hover:text-gray-700 underline transition-colors sm:order-3"
+                >
+                  {skipLabel}
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>

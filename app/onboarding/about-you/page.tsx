@@ -79,7 +79,7 @@ export default function AboutYouPage() {
         {/* Couple names */}
         <div>
           <label className="input-label">Who&apos;s the book for?</label>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input
               type="text"
               value={coupleFirstName}

@@ -269,7 +269,7 @@ function InviteFirstContent() {
       <div className="max-w-4xl">
 
         {/* Section 1: Copy link */}
-        <div className="flex items-center justify-between pb-8 mb-8 border-b border-[hsl(var(--brand-sand))]">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-8 mb-8 border-b border-[hsl(var(--brand-sand))]">
           <div>
             <p className="text-base font-medium text-gray-900">Invite via link</p>
             <p className="text-sm text-gray-500">Great for sending over text or social media.</p>
@@ -277,14 +277,14 @@ function InviteFirstContent() {
           <button
             onClick={handleCopy}
             disabled={!collectionLink}
-            className="btn btn-sm btn-outline shrink-0 min-w-[160px]"
+            className="btn btn-sm btn-outline shrink-0 w-full sm:w-auto sm:min-w-[160px]"
           >
             {copied ? "Copied!" : "Copy invite link"}
           </button>
         </div>
 
         {/* Section 2: WhatsApp */}
-        <div className="flex items-center justify-between pb-8 mb-8 border-b border-[hsl(var(--brand-sand))]">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-8 mb-8 border-b border-[hsl(var(--brand-sand))]">
           <div>
             <p className="text-base font-medium text-gray-900">Share via WhatsApp</p>
             <p className="text-sm text-gray-500">Opens WhatsApp with a pre-written message.</p>
@@ -293,7 +293,7 @@ function InviteFirstContent() {
             href={`https://wa.me/?text=${encodeURIComponent(whatsappText)}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn btn-sm shrink-0 inline-flex items-center gap-2 text-white min-w-[160px] justify-center"
+            className="btn btn-sm shrink-0 inline-flex items-center gap-2 text-white w-full sm:w-auto sm:min-w-[160px] justify-center"
             style={{ backgroundColor: "#25D366" }}
           >
             Send via WhatsApp
@@ -312,7 +312,7 @@ function InviteFirstContent() {
               Preview invite email
             </button>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="text"
               value={guestName}
@@ -330,7 +330,7 @@ function InviteFirstContent() {
             <button
               onClick={handleEmailInvite}
               disabled={emailSending || !guestName.trim() || !guestEmail.trim()}
-              className="btn btn-sm btn-outline shrink-0"
+              className="btn btn-sm btn-outline shrink-0 w-full sm:w-auto"
             >
               {emailSending ? "Sending..." : emailSent ? (
                 <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Sent!</span>
@@ -343,7 +343,7 @@ function InviteFirstContent() {
         {/* Email preview modal */}
         {showEmailPreview && (
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-6 z-50" onClick={() => setShowEmailPreview(false)}>
-            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white rounded-none sm:rounded-2xl max-w-2xl w-full h-full sm:h-auto sm:max-h-[80vh] overflow-y-auto shadow-xl" onClick={(e) => e.stopPropagation()}>
               {/* Email header */}
               <div className="px-8 pt-6 pb-4 border-b border-gray-100">
                 <div className="space-y-1.5 text-[13px]">

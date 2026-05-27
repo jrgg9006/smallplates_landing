@@ -105,7 +105,7 @@ function PersonalizeInviteContent() {
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="w-52 h-52 flex flex-col items-center justify-center gap-3 border-2 border-dashed border-[hsl(var(--brand-sand))] rounded-2xl text-gray-400 hover:border-[hsl(var(--brand-honey))] hover:text-gray-500 transition-colors"
+          className="w-40 h-40 sm:w-52 sm:h-52 flex flex-col items-center justify-center gap-3 border-2 border-dashed border-[hsl(var(--brand-sand))] rounded-2xl text-gray-400 hover:border-[hsl(var(--brand-honey))] hover:text-gray-500 transition-colors"
         >
           <Upload className="w-6 h-6" />
           <span className="text-sm">Upload a photo<br /><span className="text-xs">of the couple</span></span>
