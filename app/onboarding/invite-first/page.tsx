@@ -90,7 +90,7 @@ function InviteFirstContent() {
     setEmailError("");
 
     try {
-      const res = await fetch(`/api/v1/groups/${groupId}/invitations`, {
+      const res = await fetch(`/api/v1/groups/${groupId}/invite-guest`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: guestName.trim(), email: guestEmail.trim() }),
