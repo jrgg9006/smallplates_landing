@@ -64,7 +64,7 @@ export function OnboardingShell({
         <div className={`w-full px-8 lg:pl-28 lg:pr-12 ${hasRightPanel ? "max-w-2xl" : "max-w-4xl"}`}>
           {/* Title */}
           <div className="text-left mb-8">
-            <h1 className="font-serif text-4xl md:text-[46px] leading-tight font-light text-gray-900 mb-2">
+            <h1 className="font-serif text-4xl md:text-[46px] leading-tight font-light text-gray-900 mb-2 whitespace-nowrap">
               {title}
             </h1>
             {subtitle && (

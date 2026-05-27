@@ -24,7 +24,7 @@ function InviteFirstContent() {
   const [emailSent, setEmailSent] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [showEmailPreview, setShowEmailPreview] = useState(false);
-  const [previewTab, setPreviewTab] = useState<"whatsapp" | "sms">("whatsapp");
+  const [previewTab, setPreviewTab] = useState<"whatsapp" | "sms" | "guest">("whatsapp");
 
   useEffect(() => {
     if (!groupId) return;
@@ -120,7 +120,7 @@ function InviteFirstContent() {
     : "smallplatesandcompany.com/collect/...";
 
   const messagePreview = previewMessage ? (
-    <div className="w-full max-w-xs">
+    <div className="w-full max-w-sm">
       {/* Tabs */}
       <div className="flex justify-center gap-1 mb-3">
         <button
@@ -143,19 +143,39 @@ function InviteFirstContent() {
         >
           SMS
         </button>
+        <button
+          onClick={() => setPreviewTab("guest")}
+          className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+            previewTab === "guest"
+              ? "bg-gray-100 text-gray-700"
+              : "text-gray-400 hover:text-gray-600"
+          }`}
+        >
+          Guest view
+        </button>
       </div>
 
       {/* WhatsApp preview */}
       {previewTab === "whatsapp" && (
-        <div className="bg-[#ECE5DD] rounded-2xl p-4 min-h-[220px]">
-          <div className="max-w-[85%] ml-auto">
-            {coupleImageUrl && (
-              <img src={coupleImageUrl} alt="Couple" className="w-full h-28 object-cover rounded-t-lg" />
-            )}
-            <div className={`bg-[#DCF8C6] p-3 shadow-sm ${coupleImageUrl ? "rounded-b-lg" : "rounded-lg"}`}>
-              <p className="text-[13px] text-gray-800 leading-relaxed">{previewMessage}</p>
-              <p className="text-[12px] text-blue-600 mt-1.5 break-all">{shortLink}</p>
-              <p className="text-[10px] text-gray-500 text-right mt-1">now ✓✓</p>
+        <div className="bg-[#ECE5DD] rounded-2xl p-4 min-h-[240px] flex items-end">
+          <div className="max-w-[88%] ml-auto">
+            <div className="bg-[#DCF8C6] rounded-lg rounded-tr-none shadow-sm overflow-hidden">
+              <img
+                src={coupleImageUrl || "/images/onboarding/onboarding_lemon.png"}
+                alt="Preview"
+                className="w-full h-32 object-cover"
+              />
+              <div className="p-2.5">
+                <p className="text-[12px] font-medium text-gray-900 leading-tight">Share a Recipe to my Cookbook - SP&amp;Co</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">{coupleName} invites you to share your favorite recipe with them!</p>
+                <div className="flex items-center justify-between mt-1.5">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-gray-400">🔗</span>
+                    <span className="text-[10px] text-gray-400">smallplatesandcompany.com</span>
+                  </div>
+                  <span className="text-[10px] text-gray-500">9:42 AM ✓✓</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -163,13 +183,74 @@ function InviteFirstContent() {
 
       {/* SMS preview */}
       {previewTab === "sms" && (
-        <div className="bg-white rounded-2xl border border-gray-200 p-4 min-h-[220px]">
+        <div className="bg-white rounded-2xl border border-gray-200 p-4 min-h-[240px] flex flex-col justify-end">
+          <p className="text-[10px] text-gray-400 text-center mb-3">Today 9:42 AM</p>
           <div className="max-w-[85%] ml-auto">
-            <div className="bg-blue-500 text-white p-3 rounded-2xl rounded-br-sm">
-              <p className="text-[13px] leading-relaxed">{previewMessage}</p>
-              <p className="text-[12px] text-blue-100 mt-1.5 break-all">{shortLink}</p>
+            <div className="rounded-2xl rounded-br-sm overflow-hidden border border-gray-200">
+              <img
+                src={coupleImageUrl || "/images/onboarding/onboarding_lemon.png"}
+                alt="Preview"
+                className="w-full h-28 object-cover"
+              />
+              <div className="bg-gray-100 p-2.5">
+                <p className="text-[12px] font-medium text-gray-900 leading-tight">Share a Recipe to my Cookbook - SP&amp;Co</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">smallplatesandcompany.com</p>
+              </div>
             </div>
-            <p className="text-[10px] text-gray-400 text-right mt-1">Delivered</p>
+            <p className="text-[10px] text-gray-400 text-right mt-0.5">Delivered</p>
+          </div>
+        </div>
+      )}
+      {/* Guest view preview */}
+      {previewTab === "guest" && (
+        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden w-[280px] mx-auto">
+          {/* Logo */}
+          <div className="py-3 flex items-center justify-center bg-white">
+            <img
+              src="/images/SmallPlates_logo_horizontal1.png"
+              alt="Small Plates & Co."
+              className="h-3"
+            />
+          </div>
+
+          {/* Hero image */}
+          <div className="relative">
+            <img
+              src={coupleImageUrl || "/images/onboarding/onboarding_lemon.png"}
+              alt={coupleName}
+              className="w-full h-[170px] object-cover"
+            />
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-3 pb-3 pt-12">
+              <p className="text-[6px] tracking-[2px] uppercase text-white/60 mb-0.5">WEDDING COOKBOOK</p>
+              <p className="font-serif text-[16px] text-white font-medium leading-tight">{coupleName || "the couple"}</p>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div className="px-4 py-4">
+            <p className="text-[9px] text-gray-600 leading-relaxed mb-3">{previewMessage}</p>
+            <p className="text-[9px] text-gray-400 mb-3">Add yours by June 18th.</p>
+            <div className="border border-gray-200 rounded-full px-3 py-2 mb-3 text-center">
+              <p className="text-[8px] text-gray-800 font-medium">The book is filling up. Add yours now!</p>
+            </div>
+            <p className="text-[8px] text-gray-400 mb-3">Find your name. Add your recipe. Done.</p>
+
+            {/* Inputs row */}
+            <div className="flex gap-1.5 items-end">
+              <div className="w-[60px]">
+                <p className="text-[7px] font-medium text-gray-900 mb-0.5">First initial</p>
+                <div className="border border-gray-300 rounded h-[22px]"></div>
+              </div>
+              <div className="flex-1">
+                <p className="text-[7px] font-medium text-gray-900 mb-0.5">Last name</p>
+                <div className="border border-gray-300 rounded h-[22px]"></div>
+              </div>
+              <div className="shrink-0">
+                <div className="bg-gray-300 text-white text-[7px] font-medium px-2 py-[5px] rounded">
+                  Search
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -178,7 +259,7 @@ function InviteFirstContent() {
 
   return (
     <OnboardingShell
-      title="Invite people to contribute"
+      title="Invite people to send recipes"
       imageUrl=""
       rightContent={messagePreview}
       backHref={`/onboarding/personalize-invite?groupId=${groupId}`}

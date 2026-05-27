@@ -48,7 +48,7 @@ function CoOrganizerContent() {
 
   return (
     <OnboardingShell
-      title="Add a Captain?"
+      title="Add a Captain"
       subtitle="Captains have full access to your dashboard — they can help you invite people, review recipes, and manage the book."
       skipHref={nextHref}
       onContinue={handleContinue}
