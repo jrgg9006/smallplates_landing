@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { trackEvent } from "@/lib/analytics";
+import { isFreeTierEnabled } from "@/lib/feature-flags";
 import everyoneWhoShowedUpImage from "@/public/images/everyone_showedup/everyone_who_showed_up.png";
 
 /**
@@ -38,7 +39,7 @@ export default function TheSolution() {
 
   const handleStartBook = () => {
     trackEvent('start_book_click', { cta_location: 'solution_primary' });
-    router.push("/onboarding");
+    router.push(isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding");
   };
 
   return (

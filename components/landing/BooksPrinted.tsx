@@ -6,6 +6,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import RecipeModal from "./RecipeModal";
 import Autoplay from "embla-carousel-autoplay";
+import { isFreeTierEnabled } from "@/lib/feature-flags";
 import {
   Carousel,
   CarouselContent,
@@ -179,7 +180,7 @@ export default function BooksPrinted() {
 
   const handleGetStarted = () => {
     trackEvent('start_book_click', { cta_location: 'books_printed_proof' });
-    router.push("/onboarding");
+    router.push(isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding");
   };
 
   // Autoplay plugin for carousel

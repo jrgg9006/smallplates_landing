@@ -8,6 +8,7 @@ import SpecsGrid from "@/components/landing/TheBook/SpecsGrid";
 import HandmadeCallout from "@/components/landing/TheBook/HandmadeCallout";
 import DetailStrip from "@/components/landing/TheBook/DetailStrip";
 import { trackEvent } from "@/lib/analytics";
+import { isFreeTierEnabled } from "@/lib/feature-flags";
 
 /**
  * THE BOOK SECTION — Small Plates Wedding Landing Page
@@ -37,7 +38,7 @@ export default function TheBook() {
 
   const handleCTA = () => {
     trackEvent('start_book_click', { cta_location: 'the_book_primary' });
-    router.push("/onboarding");
+    router.push(isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding");
   };
 
   return (
