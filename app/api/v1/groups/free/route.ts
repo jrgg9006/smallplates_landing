@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
       partner_first_name: partnerFirstName.trim(),
       ...(bookDate ? { gift_date: bookDate } : {}),
       gift_date_undecided: bookDateUndecided || false,
+      ...(occasion ? { occasion } : {}),
     };
 
     let groupId: string;

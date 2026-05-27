@@ -464,6 +464,7 @@ export interface Database {
           print_details_confirmed_at: string | null;
           pdf_url: string | null;
           status: GroupStatus;
+          occasion: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -499,6 +500,7 @@ export interface Database {
           pdf_url?: string | null;
           shipping_address_id?: string | null;
           status?: GroupStatus;
+          occasion?: string | null;
         };
         Update: {
           name?: string;
@@ -531,6 +533,7 @@ export interface Database {
           pdf_url?: string | null;
           shipping_address_id?: string | null;
           status?: GroupStatus;
+          occasion?: string | null;
         };
       };
       group_members: {
