@@ -1,10 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LoginModal from "@/components/auth/LoginModal";
+import { createSupabaseClient } from "@/lib/supabase/client";
 
 export function OnboardingHeaderClient() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const supabase = createSupabaseClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setIsLoggedIn(true);
+    });
+  }, []);
+
+  if (isLoggedIn) return null;
 
   return (
     <>
