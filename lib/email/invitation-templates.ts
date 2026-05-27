@@ -213,7 +213,7 @@ function heroSection(coupleDisplayName: string): string {
 export function invitationEmail1(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
   const { coupleDisplayName, collectionLink, coupleImageUrl } = params;
 
-  const subject = `We need your recipe`;
+  const subject = `Can you send a recipe for ${coupleDisplayName}'s cookbook?`;
 
   const content = `
                       ${heroSection(coupleDisplayName)}

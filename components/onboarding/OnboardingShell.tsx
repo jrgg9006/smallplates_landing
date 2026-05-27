@@ -60,7 +60,7 @@ export function OnboardingShell({
       )}
 
       {/* Content — left 60% when right panel, full width when none */}
-      <div className={`min-h-screen flex items-center pb-8 overflow-y-auto -mt-16 ${hasRightPanel ? "lg:mr-[40%]" : ""}`}>
+      <div className={`min-h-screen flex items-start pt-20 lg:pt-24 pb-8 overflow-y-auto ${hasRightPanel ? "lg:mr-[40%]" : ""}`}>
         <div className={`w-full px-8 lg:pl-28 lg:pr-12 ${hasRightPanel ? "max-w-2xl" : "max-w-4xl"}`}>
           {/* Title */}
           <div className="text-left mb-8">
