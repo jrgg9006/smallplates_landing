@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Plus } from "lucide-react";
+import { isFreeTierEnabled } from "@/lib/feature-flags";
 import { getMyGroups } from "@/lib/supabase/groups";
 import type { GroupWithMembers } from "@/lib/types/database";
 
@@ -165,7 +166,7 @@ export function GroupNavigationSheet({ isOpen, onClose, onGroupSelect, currentGr
                 <button
                   onClick={() => {
                     onClose();
-                    router.push('/onboarding');
+                    router.push(isFreeTierEnabled() ? '/onboarding/welcome' : '/onboarding');
                   }}
                   className="w-full py-4 border-2 border-dashed border-[hsl(var(--brand-warm-gray))]/30 rounded-lg 
                              flex items-center justify-center gap-2 text-[hsl(var(--brand-warm-gray))] 
