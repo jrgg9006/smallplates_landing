@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL;
-    const safeRedirect = redirectTo && redirectTo.startsWith("/") ? redirectTo : "/welcome";
+    const safeRedirect = redirectTo && redirectTo.startsWith("/") ? redirectTo : "/profile/groups";
     const redirectUrl = `${baseUrl}${safeRedirect}`;
 
     // Reason: generateLink({ type: "signup" }) requires a password, which we don't want
