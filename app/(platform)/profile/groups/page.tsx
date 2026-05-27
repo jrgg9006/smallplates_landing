@@ -672,7 +672,7 @@ export default function GroupsPage() {
               <h1 className="cookbook-title mb-1.5">
                 {selectedGroup?.name || 'My Cookbook'}
               </h1>
-              <p className="cookbook-metadata">
+              <div className="flex items-center gap-3 cookbook-metadata">
                 {selectedGroup?.book_close_date ? (
                   <>Recipes due {getDeadlineText(selectedGroup.book_close_date)}</>
                 ) : selectedGroup?.gift_date_undecided ? (
@@ -690,7 +690,14 @@ export default function GroupsPage() {
                     null
                   )
                 )} · {recipeCount} recipes{uniqueContributors > 0 ? ` from ${uniqueContributors} people` : ''}
-              </p>
+                <span className="text-[hsl(var(--brand-border-button))]">·</span>
+                <button
+                  onClick={handleEditProfile}
+                  className="text-[hsl(var(--brand-honey))] hover:text-[hsl(var(--brand-honey-dark))] transition-colors"
+                >
+                  Edit Profile
+                </button>
+              </div>
 
               {/* Gamified checklist */}
               <DashboardChecklist

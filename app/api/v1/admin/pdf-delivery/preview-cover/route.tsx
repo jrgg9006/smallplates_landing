@@ -29,11 +29,11 @@ function readImage(relPath: string): string {
 
 // Scale title font size down for long names so it fits on one line
 function titleFontSize(maxPartLen: number): number {
-  if (maxPartLen <= 7) return 92;
-  if (maxPartLen <= 10) return 82;
-  if (maxPartLen <= 14) return 70;
-  if (maxPartLen <= 18) return 60;
-  return 50;
+  if (maxPartLen <= 7) return 80;
+  if (maxPartLen <= 10) return 72;
+  if (maxPartLen <= 14) return 62;
+  if (maxPartLen <= 18) return 54;
+  return 46;
 }
 
 export async function GET(request: NextRequest) {
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
           display: 'flex',
           position: 'relative',
           overflow: 'hidden',
-          backgroundColor: '#EDE8E1',
+          backgroundColor: '#f0ece3',
         }}
       >
         {/* Paella — independently positioned so we can move it freely */}
@@ -87,12 +87,12 @@ export async function GET(request: NextRequest) {
         <img
           src={paellaData}
           alt=""
-          width={1100}
-          height={1100}
+          width={1170}
+          height={1170}
           style={{
             position: 'absolute',
-            top: 120,
-            left: (W - 1100) / 2,
+            top: 110,
+            left: (W - 1170) / 2,
           }}
         />
 
@@ -139,13 +139,13 @@ export async function GET(request: NextRequest) {
           <div
             style={{
               position: 'absolute',
-              top: 135,
+              top: 160,
               left: 0,
               width: W,
               fontFamily: 'MinionPro-Display',
               fontSize: 22,
               letterSpacing: '0.24em',
-              color: '#b1b3b5',
+              color: '#8a8c8e',
               textAlign: 'center',
               display: 'flex',
               justifyContent: 'center',
@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
           <div
             style={{
               position: 'absolute',
-              top: 220,
+              top: 245,
               left: 0,
               width: W,
               display: 'flex',

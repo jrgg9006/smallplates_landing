@@ -238,7 +238,7 @@ body > div.pac-container ~ div:not([id]):not([class]) {
 
   /* Book Preview Component */
   .book-preview {
-    @apply bg-[hsl(var(--brand-cream))] rounded-2xl p-6 text-center flex flex-col h-full;
+    @apply rounded-2xl overflow-hidden;
   }
 
   .book-preview__cover {
