@@ -7,7 +7,7 @@ import { getUserCollectionToken } from "@/lib/supabase/collection";
 import { createSupabaseClient } from "@/lib/supabase/client";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
-import { Check, Copy, ArrowRight, Calendar, X, Smartphone, Monitor, MessageCircle } from "lucide-react";
+import { Check, Copy, ArrowRight, Calendar, X, Smartphone, Monitor, MessageCircle, Pencil } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { addMonths, format, parse } from "date-fns";
@@ -644,9 +644,12 @@ function EventInviteContent() {
           <p className="text-[15px] text-[hsl(var(--brand-warm-gray))] mb-4">
             Share this link with the people you want to invite to your event.
           </p>
-          <p className="text-[12px] text-[hsl(var(--brand-warm-gray))] italic mb-6">
-            Click any text on the invite to edit it.
-          </p>
+          <div className="flex items-start gap-2.5 bg-[hsl(var(--brand-honey))]/15 border border-[hsl(var(--brand-honey))]/30 rounded-xl px-4 py-3 mb-6">
+            <Pencil size={16} className="text-[hsl(var(--brand-honey-dark))] flex-shrink-0 mt-0.5" />
+            <p className="text-[13px] text-[hsl(var(--brand-charcoal))] font-medium leading-relaxed">
+              <span className="font-semibold">Tip:</span> Click any text on the invite to edit it.
+            </p>
+          </div>
 
           <button
             onClick={handleCopyLink}
