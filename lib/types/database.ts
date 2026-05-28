@@ -468,6 +468,7 @@ export interface Database {
           event_date: string | null;
           event_time: string | null;
           event_location: string | null;
+          event_venue: string | null;
           invite_title: string | null;
           invite_tagline: string | null;
           invite_message: string | null;
@@ -510,6 +511,7 @@ export interface Database {
           event_date?: string | null;
           event_time?: string | null;
           event_location?: string | null;
+          event_venue?: string | null;
           invite_title?: string | null;
           invite_tagline?: string | null;
           invite_message?: string | null;
@@ -549,6 +551,7 @@ export interface Database {
           event_date?: string | null;
           event_time?: string | null;
           event_location?: string | null;
+          event_venue?: string | null;
           invite_title?: string | null;
           invite_tagline?: string | null;
           invite_message?: string | null;

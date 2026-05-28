@@ -36,6 +36,9 @@ function EventInviteContent() {
   const [inviteMessage, setInviteMessage] = useState("");
 
   const [previewMode, setPreviewMode] = useState<"mobile" | "desktop" | "whatsapp">("desktop");
+  const [dateTimeModalOpen, setDateTimeModalOpen] = useState(false);
+  const [locationModalOpen, setLocationModalOpen] = useState(false);
+  const [eventVenue, setEventVenue] = useState("");
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [timePickerOpen, setTimePickerOpen] = useState(false);
@@ -86,12 +89,12 @@ function EventInviteContent() {
       }
       if (data.event_time) setEventTime(data.event_time);
       if (data.event_location) setEventLocation(data.event_location);
+      if (data.event_venue) setEventVenue(data.event_venue);
       if (data.event_date && data.event_location) {
         setStep(3);
       }
       const name = data.couple_display_name || data.name || "the couple";
-      const brideFirst = data.couple_first_name || name;
-      setInviteTitle(data.invite_title || `Let's Shower ${brideFirst}!`);
+      setInviteTitle(data.invite_title || "Let's Shower the Bride!");
       const ownerMember = (data.group_members || []).find((m: { role: string; profiles?: { full_name?: string | null } | null }) => m.role === "owner");
       const ownerName = (ownerMember?.profiles as { full_name?: string | null } | null)?.full_name || "";
       setInviteTagline(data.invite_tagline || ownerName || "The Family");
@@ -404,7 +407,7 @@ function EventInviteContent() {
 
       {/* Mobile mode — couple image centered */}
       {previewMode === "mobile" && group.couple_image_url && (
-        <div className="w-[200px] h-[200px] rounded-lg overflow-hidden mx-auto mb-6 shadow-md">
+        <div className="w-[200px] h-[200px] rounded-lg overflow-hidden mx-auto mb-8 shadow-md">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={group.couple_image_url}
@@ -417,16 +420,16 @@ function EventInviteContent() {
         </div>
       )}
 
-      <div className="flex flex-row gap-8">
+      <div className="flex flex-row gap-8 md:gap-12">
         {/* Left — text content */}
         <div className="flex-1 text-center max-w-[440px] mx-auto">
           <EditableField
             value={inviteTitle || coupleName}
             onChange={(v) => { setInviteTitle(v); saveField({ invite_title: v }); }}
-            className="font-serif text-[44px] font-medium text-[hsl(var(--brand-charcoal))] mb-4 leading-[1.1]"
+            className={`font-serif ${previewMode === "mobile" ? "text-[32px]" : "text-[52px]"} font-medium text-[hsl(var(--brand-charcoal))] mb-4 leading-[1.1]`}
           />
 
-          <div className="mt-6 mb-2">
+          <div className="mt-10 md:mt-12 mb-2">
             <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--brand-warm-gray))] mb-2">Hosted by</p>
             <EditableField
               value={inviteTagline}
@@ -440,7 +443,7 @@ function EventInviteContent() {
           <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--brand-warm-gray))] mb-2">When</p>
           <EditableField
             value={eventDate ? `${formatEventDate(eventDate)}${eventTime ? ` · ${formatEventTime(eventTime)}` : ""}` : ""}
-            onClick={() => setCalendarOpen(true)}
+            onClick={() => setDateTimeModalOpen(true)}
             className="text-[14px] text-[hsl(var(--brand-charcoal))] font-medium uppercase tracking-wide"
             readOnly
           />
@@ -448,12 +451,25 @@ function EventInviteContent() {
           <div className="my-10" />
 
           <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--brand-warm-gray))] mb-2">Where</p>
-          <EditableField
-            value={eventLocation}
-            onChange={(v) => { setEventLocation(v); saveField({ event_location: v }); }}
-            className="text-[14px] text-[hsl(var(--brand-charcoal))] font-medium uppercase tracking-wide"
-            placeholder="Add location"
-          />
+          <div
+            onClick={() => setLocationModalOpen(true)}
+            className="cursor-pointer rounded px-2 py-0.5 transition-colors hover:bg-[hsl(var(--brand-honey))]/10"
+          >
+            {eventVenue && (
+              <p className="text-[14px] text-[hsl(var(--brand-charcoal))] font-medium uppercase tracking-wide">
+                {eventVenue}
+              </p>
+            )}
+            {eventLocation ? (
+              <p className="text-[14px] text-[hsl(var(--brand-charcoal))] font-medium uppercase tracking-wide">
+                {eventLocation}
+              </p>
+            ) : !eventVenue ? (
+              <p className="text-[14px] italic opacity-50 text-[hsl(var(--brand-charcoal))]">
+                Add location
+              </p>
+            ) : null}
+          </div>
 
           <div className="w-full h-px bg-[hsl(var(--brand-border))] my-10" />
 
@@ -468,7 +484,7 @@ function EventInviteContent() {
 
         {/* Right — couple image (desktop only) */}
         {previewMode !== "mobile" && group.couple_image_url && (
-          <div className="w-[35%] flex-shrink-0 self-start">
+          <div className="w-[40%] flex-shrink-0 self-start">
             <div className="aspect-square rounded-lg overflow-hidden shadow-md">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -484,8 +500,22 @@ function EventInviteContent() {
         )}
       </div>
 
+      {/* Sticky Share a Recipe button — mirrors layout */}
+      <div className="sticky bottom-6 z-50 mt-12">
+        <div className="flex flex-row gap-8 md:gap-12">
+          <div className="flex-1 flex justify-center max-w-[440px] mx-auto">
+            <span className="inline-flex items-center justify-center px-10 py-4 rounded-full bg-[hsl(var(--brand-honey))] text-white text-[15px] font-medium shadow-lg whitespace-nowrap">
+              Share a Recipe →
+            </span>
+          </div>
+          {previewMode !== "mobile" && group.couple_image_url && (
+            <div className="w-[40%] flex-shrink-0" />
+          )}
+        </div>
+      </div>
+
       {/* Footer */}
-      <div className="mt-16 pt-8 flex flex-col items-center gap-3 pb-20">
+      <div className="mt-16 pt-8 flex flex-col items-center gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/images/SmallPlates_logo_horizontal.png" alt="Small Plates & Co." className="h-20 opacity-70" />
         <div className="flex items-center gap-4 text-[10px] text-[hsl(var(--brand-warm-gray))]">
@@ -526,16 +556,6 @@ function EventInviteContent() {
             >
               <Monitor size={18} />
             </button>
-            <button
-              onClick={() => setPreviewMode("whatsapp")}
-              className={`p-2 rounded-full transition-colors ${
-                previewMode === "whatsapp"
-                  ? "bg-[hsl(var(--brand-charcoal))] text-white"
-                  : "text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))]"
-              }`}
-            >
-              <MessageCircle size={18} />
-            </button>
           </div>
 
           {/* Mobile / Desktop preview */}
@@ -552,12 +572,6 @@ function EventInviteContent() {
               </div>
               <div className="flex-1 overflow-y-auto">
                 {invitePreview}
-              </div>
-              {/* Floating Share a Recipe button */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-none">
-                <span className="inline-block px-8 py-3 rounded-full bg-[hsl(var(--brand-honey))] text-white text-sm font-medium shadow-lg whitespace-nowrap">
-                  Share a Recipe →
-                </span>
               </div>
             </div>
           )}
@@ -637,7 +651,7 @@ function EventInviteContent() {
             className="btn btn-sm btn-honey w-full gap-2 mb-2"
           >
             {copied ? <Check size={14} /> : <Copy size={14} />}
-            {copied ? "Link Copied!" : "Copy Link"}
+            {copied ? "Link Copied!" : "Copy Invite Link"}
           </button>
 
           <button
@@ -663,6 +677,202 @@ function EventInviteContent() {
           </button>
         </div>
       </div>
+
+      {/* Location edit modal */}
+      {locationModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm"
+          onClick={() => setLocationModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="font-serif text-[22px] text-[hsl(var(--brand-charcoal))] mb-6">
+              Where is the event?
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="input-label">Venue Name</label>
+                <input
+                  type="text"
+                  value={eventVenue}
+                  onChange={(e) => setEventVenue(e.target.value)}
+                  onBlur={() => saveField({ event_venue: eventVenue })}
+                  className="input-field"
+                  placeholder="Maria's House, Casa Lilyth..."
+                />
+              </div>
+              <div>
+                <label className="input-label">Address</label>
+                <input
+                  type="text"
+                  value={eventLocation}
+                  onChange={(e) => setEventLocation(e.target.value)}
+                  onBlur={() => saveField({ event_location: eventLocation })}
+                  className="input-field"
+                  placeholder="455 E Waterside Dr, Chicago, IL"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => {
+                  saveField({ event_venue: eventVenue, event_location: eventLocation });
+                  setLocationModalOpen(false);
+                }}
+                className="btn btn-sm btn-honey"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Date & Time edit modal */}
+      {dateTimeModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm"
+          onClick={() => { setDateTimeModalOpen(false); setCalendarOpen(false); setTimePickerOpen(false); }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="font-serif text-[22px] text-[hsl(var(--brand-charcoal))] mb-6">
+              When is the event?
+            </h3>
+
+            <div className="space-y-4">
+              {/* Date trigger */}
+              <div>
+                <label className="input-label">Date</label>
+                <div className="relative">
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => { setCalendarOpen((p) => !p); setTimePickerOpen(false); }}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setCalendarOpen((p) => !p); } }}
+                    className="w-full h-12 px-4 flex items-center rounded-lg cursor-pointer transition-all duration-200 bg-[hsl(var(--brand-warm-white))]"
+                    style={{
+                      border: `1px solid ${selectedDate ? "hsl(var(--brand-honey))" : calendarOpen ? "hsl(var(--brand-honey))" : "hsl(var(--brand-sand))"}`,
+                      boxShadow: calendarOpen ? "0 0 0 2px rgba(212, 168, 84, 0.15)" : "none",
+                    }}
+                  >
+                    <Calendar className="w-[18px] h-[18px] text-[hsl(var(--brand-warm-gray))] mr-2.5 flex-shrink-0" strokeWidth={1.5} />
+                    {selectedDate ? (
+                      <span className="text-[15px] font-medium text-[hsl(var(--brand-charcoal))] flex-1 text-left">
+                        {format(selectedDate, "EEEE, MMMM d, yyyy")}
+                      </span>
+                    ) : (
+                      <span className="text-[15px] text-[hsl(var(--brand-warm-gray))] flex-1 text-left">
+                        Pick a date
+                      </span>
+                    )}
+                  </div>
+                  {calendarOpen && (
+                    <div
+                      className="absolute left-0 right-0 z-50 mt-2 bg-white rounded-xl p-4 flex justify-center"
+                      style={{ boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)" }}
+                    >
+                      <DayPicker
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={(date) => {
+                          setSelectedDate(date);
+                          if (date) {
+                            const formatted = format(date, "yyyy-MM-dd");
+                            setEventDate(formatted);
+                            saveField({ event_date: formatted });
+                            setCalendarOpen(false);
+                          }
+                        }}
+                        startMonth={fromDate}
+                        endMonth={toDate}
+                        disabled={{ before: fromDate, after: toDate }}
+                        defaultMonth={selectedDate || fromDate}
+                        style={{
+                          ["--rdp-accent-color" as string]: "hsl(var(--brand-honey))",
+                          ["--rdp-accent-background-color" as string]: "hsl(var(--brand-honey))",
+                          ["--rdp-today-color" as string]: "hsl(var(--brand-honey))",
+                          ["--rdp-day-height" as string]: "40px",
+                          ["--rdp-day-width" as string]: "40px",
+                          ["--rdp-selected-border" as string]: "none",
+                          fontFamily: "inherit",
+                          color: "hsl(var(--brand-charcoal))",
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Time trigger */}
+              <div>
+                <label className="input-label">Time</label>
+                <div className="relative">
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => { setTimePickerOpen((p) => !p); setCalendarOpen(false); }}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setTimePickerOpen((p) => !p); } }}
+                    className="w-full h-12 px-4 flex items-center rounded-lg cursor-pointer transition-all duration-200 bg-[hsl(var(--brand-warm-white))]"
+                    style={{
+                      border: `1px solid ${eventTime ? "hsl(var(--brand-honey))" : timePickerOpen ? "hsl(var(--brand-honey))" : "hsl(var(--brand-sand))"}`,
+                      boxShadow: timePickerOpen ? "0 0 0 2px rgba(212, 168, 84, 0.15)" : "none",
+                    }}
+                  >
+                    {eventTime ? (
+                      <span className="text-[15px] font-medium text-[hsl(var(--brand-charcoal))] flex-1 text-left">
+                        {formatEventTime(eventTime)}
+                      </span>
+                    ) : (
+                      <span className="text-[15px] text-[hsl(var(--brand-warm-gray))] flex-1 text-left">
+                        Pick a time
+                      </span>
+                    )}
+                  </div>
+                  {timePickerOpen && (
+                    <div
+                      className="absolute left-0 z-50 mt-2 bg-white rounded-xl p-3 max-h-[240px] overflow-y-auto w-[200px]"
+                      style={{ boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)" }}
+                    >
+                      <div className="grid grid-cols-1 gap-0.5">
+                        {generateTimeSlots().map((slot) => (
+                          <button
+                            key={slot.value}
+                            type="button"
+                            onClick={() => { setEventTime(slot.value); saveField({ event_time: slot.value }); setTimePickerOpen(false); }}
+                            className={`text-left px-3 py-2 rounded-lg text-[14px] transition-colors ${
+                              eventTime === slot.value
+                                ? "bg-[hsl(var(--brand-honey))] text-white font-medium"
+                                : "text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-warm-white))]"
+                            }`}
+                          >
+                            {slot.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => { setDateTimeModalOpen(false); setCalendarOpen(false); setTimePickerOpen(false); }}
+                className="btn btn-sm btn-honey"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

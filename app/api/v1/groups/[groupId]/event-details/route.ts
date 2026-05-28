@@ -40,12 +40,13 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { event_date, event_time, event_location, invite_title, invite_tagline, invite_message } = body;
+    const { event_date, event_time, event_location, event_venue, invite_title, invite_tagline, invite_message } = body;
 
     const updateFields: Record<string, string | null> = {};
     if (event_date !== undefined) updateFields.event_date = event_date?.trim() || null;
     if (event_time !== undefined) updateFields.event_time = event_time?.trim() || null;
     if (event_location !== undefined) updateFields.event_location = event_location?.trim() || null;
+    if (event_venue !== undefined) updateFields.event_venue = event_venue?.trim() || null;
     if (invite_title !== undefined) updateFields.invite_title = invite_title?.trim() || null;
     if (invite_tagline !== undefined) updateFields.invite_tagline = invite_tagline?.trim() || null;
     if (invite_message !== undefined) updateFields.invite_message = invite_message?.trim() || null;

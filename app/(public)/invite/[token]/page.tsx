@@ -18,7 +18,7 @@ async function getEventData(token: string, groupId: string | null) {
   const supabase = createSupabaseAdminClient();
   const { data: group } = await supabase
     .from("groups")
-    .select("name, couple_display_name, event_date, event_time, event_location, invite_title, invite_tagline, invite_message, couple_image_url, couple_image_position_x, couple_image_position_y")
+    .select("name, couple_display_name, event_date, event_time, event_location, event_venue, invite_title, invite_tagline, invite_message, couple_image_url, couple_image_position_x, couple_image_position_y")
     .eq("id", resolvedGroupId)
     .single();
 
@@ -95,6 +95,7 @@ export default async function InvitePage({ params, searchParams }: PageProps) {
       eventDate={data.group.event_date}
       eventTime={data.group.event_time}
       eventLocation={data.group.event_location}
+      eventVenue={data.group.event_venue}
       coupleImageUrl={data.group.couple_image_url}
       coupleImagePositionX={data.group.couple_image_position_x ?? 50}
       coupleImagePositionY={data.group.couple_image_position_y ?? 50}
