@@ -473,12 +473,14 @@ function EventInviteContent() {
 
           <div className="w-full h-px bg-[hsl(var(--brand-border))] my-10" />
 
-          <EditableField
-            value={inviteMessage}
-            onChange={(v) => { setInviteMessage(v); saveField({ invite_message: v }); }}
-            className="text-[13px] text-[hsl(var(--brand-warm-gray))] leading-relaxed"
-            multiline
-          />
+          <div className="bg-[hsl(var(--brand-sand))]/40 rounded-xl px-6 py-5">
+            <EditableField
+              value={inviteMessage}
+              onChange={(v) => { setInviteMessage(v); saveField({ invite_message: v }); }}
+              className="text-[15px] text-[hsl(var(--brand-charcoal))] leading-relaxed"
+              multiline
+            />
+          </div>
 
         </div>
 
@@ -640,7 +642,7 @@ function EventInviteContent() {
             Your invite is ready
           </h2>
           <p className="text-[15px] text-[hsl(var(--brand-warm-gray))] mb-4">
-            Share this link with the people you want to invite.
+            Share this link with the people you want to invite to your event.
           </p>
           <p className="text-[12px] text-[hsl(var(--brand-warm-gray))] italic mb-6">
             Click any text on the invite to edit it.

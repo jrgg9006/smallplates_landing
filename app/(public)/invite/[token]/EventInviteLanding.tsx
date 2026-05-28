@@ -129,9 +129,11 @@ export function EventInviteLanding({
 
             <div className="w-full h-px bg-[hsl(var(--brand-border))] my-10" />
 
-            <p className="text-[13px] text-[hsl(var(--brand-warm-gray))] leading-relaxed">
-              {message}
-            </p>
+            <div className="bg-[hsl(var(--brand-sand))]/40 rounded-xl px-6 py-5">
+              <p className="text-[15px] text-[hsl(var(--brand-charcoal))] leading-relaxed">
+                {message}
+              </p>
+            </div>
           </div>
 
           {/* Right — couple image (desktop only) */}

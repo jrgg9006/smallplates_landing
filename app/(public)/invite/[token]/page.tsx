@@ -54,11 +54,11 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
       : "/images/2SmallPlates-verticallogowhiteback.png");
 
   return {
-    title: `${coupleName}'s Event — Share a Recipe`,
+    title: coupleName,
     description,
     metadataBase: new URL("https://www.smallplatesandcompany.com"),
     openGraph: {
-      title: `${coupleName}'s Event — Share a Recipe`,
+      title: coupleName,
       description,
       type: "website",
       images: [{ url: ogImageUrl, width: 1200, height: 630 }],
