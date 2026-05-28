@@ -688,6 +688,13 @@ export default function GroupsPage() {
                     {selectedGroup?.name || 'My Cookbook'}
                   </h1>
               <div className="flex items-center gap-3 cookbook-metadata">
+                <button
+                  onClick={handleEditProfile}
+                  className="text-[hsl(var(--brand-honey))] hover:text-[hsl(var(--brand-honey-dark))] transition-colors"
+                >
+                  Edit Profile
+                </button>
+                <span className="text-[hsl(var(--brand-border-button))]">·</span>
                 {selectedGroup?.book_close_date ? (
                   <>Recipes due {getDeadlineText(selectedGroup.book_close_date)}</>
                 ) : selectedGroup?.gift_date_undecided ? (
@@ -704,14 +711,10 @@ export default function GroupsPage() {
                     selectedGroup?.wedding_date_undecided || false,
                     null
                   )
-                )} · {recipeCount} recipes{uniqueContributors > 0 ? ` from ${uniqueContributors} people` : ''}
-                <span className="text-[hsl(var(--brand-border-button))]">·</span>
-                <button
-                  onClick={handleEditProfile}
-                  className="text-[hsl(var(--brand-honey))] hover:text-[hsl(var(--brand-honey-dark))] transition-colors"
-                >
-                  Edit Profile
-                </button>
+                )} · {recipeCount} recipes{uniqueContributors > 0 && (<>{` from ${uniqueContributors} people `}<button
+                      onClick={() => setShowGuestSheet(true)}
+                      className="text-[hsl(var(--brand-honey))] hover:text-[hsl(var(--brand-honey-dark))] hover:underline transition-colors"
+                    >(view)</button></>)}
               </div>
                 </div>{/* end title+stats wrapper */}
               </div>{/* end avatar+content flex */}
@@ -721,8 +724,8 @@ export default function GroupsPage() {
                 group={selectedGroup}
                 recipeCount={recipeCount}
                 hasCaptains={(selectedGroup?.group_members || []).some(m => m.role !== 'owner')}
-                hasEventInvite={false}
-                onCreateEventInvite={handleCollectRecipes}
+                hasEventInvite={!!(selectedGroup?.event_date && selectedGroup?.event_location)}
+                onCreateEventInvite={() => router.push(`/event-invite?groupId=${selectedGroup?.id}`)}
                 onInviteCaptain={() => setShowAddCaptainModal(true)}
                 onAddRecipe={() => groupsSectionRef.current?.openAddNewRecipeModal()}
                 onPrintBook={handleCloseBook}
@@ -757,7 +760,7 @@ export default function GroupsPage() {
                   <InviteDropdown
                     isOpen={showInviteDropdown}
                     onClose={() => setShowInviteDropdown(false)}
-                    onInviteToEvent={handleCollectRecipes}
+                    onInviteToEvent={() => router.push(`/event-invite?groupId=${selectedGroup?.id}`)}
                     onSendCollectionLink={handleCollectRecipes}
                     onInviteCaptain={() => setShowAddCaptainModal(true)}
                   />

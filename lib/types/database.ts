@@ -465,6 +465,12 @@ export interface Database {
           pdf_url: string | null;
           status: GroupStatus;
           occasion: string | null;
+          event_date: string | null;
+          event_time: string | null;
+          event_location: string | null;
+          invite_title: string | null;
+          invite_tagline: string | null;
+          invite_message: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -501,6 +507,12 @@ export interface Database {
           shipping_address_id?: string | null;
           status?: GroupStatus;
           occasion?: string | null;
+          event_date?: string | null;
+          event_time?: string | null;
+          event_location?: string | null;
+          invite_title?: string | null;
+          invite_tagline?: string | null;
+          invite_message?: string | null;
         };
         Update: {
           name?: string;
@@ -534,6 +546,12 @@ export interface Database {
           shipping_address_id?: string | null;
           status?: GroupStatus;
           occasion?: string | null;
+          event_date?: string | null;
+          event_time?: string | null;
+          event_location?: string | null;
+          invite_title?: string | null;
+          invite_tagline?: string | null;
+          invite_message?: string | null;
         };
       };
       group_members: {
