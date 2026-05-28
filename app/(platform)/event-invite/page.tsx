@@ -90,8 +90,11 @@ function EventInviteContent() {
         setStep(3);
       }
       const name = data.couple_display_name || data.name || "the couple";
-      setInviteTitle(data.invite_title || name);
-      setInviteTagline(data.invite_tagline || "You're invited");
+      const brideFirst = data.couple_first_name || name;
+      setInviteTitle(data.invite_title || `Let's Shower ${brideFirst}!`);
+      const ownerMember = (data.group_members || []).find((m: { role: string; profiles?: { full_name?: string | null } | null }) => m.role === "owner");
+      const ownerName = (ownerMember?.profiles as { full_name?: string | null } | null)?.full_name || "";
+      setInviteTagline(data.invite_tagline || ownerName || "The Family");
       setInviteMessage(data.invite_message || `${name} invites you to share your favorite recipe with them! They will print a cookbook with recipes from family and friends.`);
     }
     setLoading(false);
@@ -394,8 +397,8 @@ function EventInviteContent() {
   }
 
   const invitePreview = (
-    <div className="bg-[hsl(var(--brand-warm-white))] px-8 py-8">
-      <p className="text-[11px] uppercase tracking-[0.25em] text-[hsl(var(--brand-warm-gray))] mb-6 text-left">
+    <div className="bg-[hsl(var(--brand-warm-white))] px-12 pt-10 pb-12">
+      <p className="text-[11px] uppercase tracking-[0.25em] text-[hsl(var(--brand-warm-gray))] mb-20 text-left">
         SMALL PLATES & CO. <span className="font-bold text-[hsl(var(--brand-charcoal))]">INVITE</span>
       </p>
 
@@ -416,22 +419,23 @@ function EventInviteContent() {
 
       <div className="flex flex-row gap-8">
         {/* Left — text content */}
-        <div className="flex-1 text-center">
+        <div className="flex-1 text-center max-w-[440px] mx-auto">
           <EditableField
             value={inviteTitle || coupleName}
             onChange={(v) => { setInviteTitle(v); saveField({ invite_title: v }); }}
-            className="font-serif text-[28px] text-[hsl(var(--brand-charcoal))] mb-2 leading-tight"
+            className="font-serif text-[44px] font-medium text-[hsl(var(--brand-charcoal))] mb-4 leading-[1.1]"
           />
 
-          <div className="mt-6 mb-6">
+          <div className="mt-6 mb-2">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--brand-warm-gray))] mb-2">Hosted by</p>
             <EditableField
               value={inviteTagline}
               onChange={(v) => { setInviteTagline(v); saveField({ invite_tagline: v }); }}
-              className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--brand-warm-gray))] mb-2"
+              className="text-[14px] uppercase tracking-[0.15em] text-[hsl(var(--brand-charcoal))] font-medium"
             />
           </div>
 
-          <div className="w-full h-px bg-[hsl(var(--brand-border))] my-6" />
+          <div className="w-full h-px bg-[hsl(var(--brand-charcoal))]/20 my-10" />
 
           <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--brand-warm-gray))] mb-2">When</p>
           <EditableField
@@ -441,7 +445,7 @@ function EventInviteContent() {
             readOnly
           />
 
-          <div className="w-full h-px bg-[hsl(var(--brand-border))] my-6" />
+          <div className="my-10" />
 
           <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--brand-warm-gray))] mb-2">Where</p>
           <EditableField
@@ -451,7 +455,7 @@ function EventInviteContent() {
             placeholder="Add location"
           />
 
-          <div className="w-full h-px bg-[hsl(var(--brand-border))] my-6" />
+          <div className="w-full h-px bg-[hsl(var(--brand-border))] my-10" />
 
           <EditableField
             value={inviteMessage}
@@ -460,21 +464,11 @@ function EventInviteContent() {
             multiline
           />
 
-          <div className="mt-6">
-            <span className="inline-block px-8 py-3 rounded-full bg-[hsl(var(--brand-honey))] text-white text-sm font-medium">
-              Share a Recipe →
-            </span>
-          </div>
-
-          <div className="mt-8 opacity-40">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/SmallPlates_logo_horizontal.png" alt="Small Plates" className="h-5 mx-auto" />
-          </div>
         </div>
 
         {/* Right — couple image (desktop only) */}
         {previewMode !== "mobile" && group.couple_image_url && (
-          <div className="w-[35%] flex-shrink-0 pt-4">
+          <div className="w-[35%] flex-shrink-0 self-start">
             <div className="aspect-square rounded-lg overflow-hidden shadow-md">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -488,6 +482,18 @@ function EventInviteContent() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Footer */}
+      <div className="mt-16 pt-8 flex flex-col items-center gap-3 pb-20">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/SmallPlates_logo_horizontal.png" alt="Small Plates & Co." className="h-20 opacity-70" />
+        <div className="flex items-center gap-4 text-[10px] text-[hsl(var(--brand-warm-gray))]">
+          <a href="/terms" target="_blank" rel="noreferrer" className="hover:text-[hsl(var(--brand-charcoal))] transition-colors">Terms and Privacy</a>
+          <span>·</span>
+          <a href="mailto:hello@smallplatesandcompany.com" className="hover:text-[hsl(var(--brand-charcoal))] transition-colors">Help</a>
+        </div>
+        <p className="text-[10px] text-[hsl(var(--brand-warm-gray))]">© {new Date().getFullYear()} Small Plates & Co.</p>
       </div>
     </div>
   );
@@ -535,16 +541,24 @@ function EventInviteContent() {
           {/* Mobile / Desktop preview */}
           {previewMode !== "whatsapp" && (
             <div
-              className={`bg-gray-100 rounded-2xl overflow-hidden shadow-lg border border-gray-200 transition-all duration-300 ${
+              className={`bg-gray-100 rounded-2xl overflow-hidden shadow-lg border border-gray-200 transition-all duration-300 flex flex-col max-h-[80vh] relative ${
                 previewMode === "mobile" ? "w-[360px]" : "w-full"
               }`}
             >
-              <div className="bg-gray-200 px-4 py-2 flex items-center gap-1.5">
+              <div className="bg-gray-200 px-4 py-2 flex items-center gap-1.5 flex-shrink-0">
                 <span className="w-2.5 h-2.5 rounded-full bg-gray-400" />
                 <span className="w-2.5 h-2.5 rounded-full bg-gray-400" />
                 <span className="w-2.5 h-2.5 rounded-full bg-gray-400" />
               </div>
-              {invitePreview}
+              <div className="flex-1 overflow-y-auto">
+                {invitePreview}
+              </div>
+              {/* Floating Share a Recipe button */}
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-none">
+                <span className="inline-block px-8 py-3 rounded-full bg-[hsl(var(--brand-honey))] text-white text-sm font-medium shadow-lg whitespace-nowrap">
+                  Share a Recipe →
+                </span>
+              </div>
             </div>
           )}
 
