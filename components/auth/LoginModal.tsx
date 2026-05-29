@@ -70,7 +70,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         {status === "sent" ? (
           <>
             {/* Sent state */}
-            <h2 className="font-serif text-2xl font-medium text-gray-900 mb-3">
+            <h2 className="type-modal-title text-[hsl(var(--brand-charcoal))] mb-3">
               Check your email
             </h2>
             <p className="text-sm text-gray-600 leading-relaxed mb-6">
@@ -118,7 +118,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         ) : (
           <>
             {/* Default state */}
-            <h2 className="font-serif text-2xl font-medium text-gray-900 mb-2">
+            <h2 className="type-modal-title text-[hsl(var(--brand-charcoal))] mb-2">
               Log in
             </h2>
             <p className="text-sm text-gray-500 mb-6">
