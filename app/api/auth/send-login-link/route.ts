@@ -48,7 +48,11 @@ export async function POST(request: NextRequest) {
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL;
     const safeRedirect = redirectTo && redirectTo.startsWith("/") ? redirectTo : "/profile/groups";
-    const redirectUrl = `${baseUrl}${safeRedirect}`;
+    // Reason: the magic link uses the implicit flow (#access_token in the hash), which only
+    // the /auth/callback client page knows how to exchange into a session. Pointing straight
+    // at a protected page (e.g. /profile/groups) bypasses that exchange — the page sees no
+    // session and bounces the user home. The final destination rides along as ?next=.
+    const redirectUrl = `${baseUrl}/auth/callback?next=${encodeURIComponent(safeRedirect)}`;
 
     // Reason: generateLink({ type: "signup" }) requires a password, which we don't want
     // for passwordless signup. Instead, create the auth user first, then send a magiclink.
