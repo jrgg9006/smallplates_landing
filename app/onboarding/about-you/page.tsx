@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
 import { useOnboardingState } from "@/components/onboarding/onboardingState";
 import { createSupabaseClient } from "@/lib/supabase/client";
@@ -81,6 +82,16 @@ export default function AboutYouPage() {
     <OnboardingShell
       title={isAuthed ? "Your next book." : "Let's get started."}
       imageUrl=""
+      rightContent={
+        <Image
+          src="/images/onboarding/drawing_champaign_glasses.svg"
+          alt=""
+          width={934}
+          height={697}
+          className="w-full max-w-md h-auto"
+          priority
+        />
+      }
       backHref="/onboarding/book-date"
       onContinue={handleSubmit}
       continueDisabled={!canSubmit}

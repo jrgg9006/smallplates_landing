@@ -124,7 +124,7 @@ export default function BookDatePage() {
 
   return (
     <OnboardingShell
-      title="When do you want the book?"
+      title="When do you want your cookbook?"
       subtitle="We use this date to schedule reminders. You can change it later."
       imageUrl=""
       rightContent={saveTheDateCard}

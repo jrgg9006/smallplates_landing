@@ -34,7 +34,7 @@ export function OnboardingShell({
   const hasRightPanel = !!imageUrl || !!rightContent;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-[calc(100vh-3.5rem)] sm:min-h-[calc(100vh-4rem)] bg-white">
       {/* Right panel — desktop only */}
       {hasRightPanel && (
         <div className="hidden lg:block fixed right-0 top-16 w-2/5 h-[calc(100vh-4rem)] z-0">
@@ -60,7 +60,7 @@ export function OnboardingShell({
       )}
 
       {/* Content */}
-      <div className={`min-h-screen flex items-start pt-8 lg:pt-24 pb-8 overflow-y-auto ${hasRightPanel ? "lg:mr-[40%]" : ""}`}>
+      <div className={`min-h-[calc(100vh-3.5rem)] sm:min-h-[calc(100vh-4rem)] flex items-start pt-8 lg:pt-24 pb-8 overflow-y-auto ${hasRightPanel ? "lg:mr-[40%]" : ""}`}>
         <div className={`w-full px-5 sm:px-8 lg:pl-28 lg:pr-12 ${hasRightPanel ? "max-w-2xl" : "max-w-4xl"}`}>
           {/* Title */}
           <div className="text-left mb-6 lg:mb-8">
