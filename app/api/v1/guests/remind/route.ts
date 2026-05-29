@@ -64,9 +64,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Guest not found in this group' }, { status: 404 });
     }
 
-    if ((guest.recipes_received || 0) > 0) {
-      return NextResponse.json({ error: 'Guest already submitted a recipe' }, { status: 400 });
-    }
+    // Reason: removed the "already submitted" guard. The Send Reminders modal
+    // intentionally shows submitted guests with a "Recipe received" badge and
+    // lets the organizer choose whether to include them (e.g., to send a thank
+    // you). If they explicitly checked the box, we trust the choice.
 
     if (!guest.email || guest.email.startsWith('NO_EMAIL_')) {
       return NextResponse.json({ error: 'Guest has no valid email' }, { status: 400 });

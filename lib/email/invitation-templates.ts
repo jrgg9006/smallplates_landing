@@ -290,35 +290,181 @@ Add your recipe: ${collectionLink}
 }
 
 // ============================================
-// EMAIL 2: First Reminder
+// EMAIL 2: Reminder — plain text-style, intentionally different from
+// the visual invitation. Inline HTML (not baseTemplate) because the layout
+// is left-aligned with a top logo, which doesn't fit the email-1 frame.
 // ============================================
 export function invitationEmail2(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
-  const { coupleDisplayName, guestName, collectionLink, coupleImageUrl, customBody } = params;
+  const { coupleDisplayName, guestName, collectionLink, customBody } = params;
 
-  const subject = `Still thinking what recipe to send?`;
+  const subject = `Reminder: your recipe for ${coupleDisplayName}'s cookbook`;
 
-  const defaultBody = `Hi ${guestName}, ${coupleDisplayName}'s cookbook is coming together and your page is still open.\n\nSend a recipe and you're in their kitchen.`;
+  // Reason: keep in sync with SendRemindersModal.DEFAULT_REMINDER_BODY so
+  // that "user kept the default → we save NULL → template uses this fallback"
+  // produces the same text the organizer saw in the modal.
+  const defaultBody = `Thanks to everyone who has already sent a recipe. The book is starting to come together.
 
-  const bodySection = customBody?.trim()
-    ? customBodySection(customBody)
-    : customBodySection(defaultBody);
+If you haven't yet, the page is still open and we'd love yours. It only takes 5 minutes. Doesn't have to be fancy. Just something you actually make.`;
 
-  const content = `
-                      ${heroSection(coupleDisplayName)}
+  const bodyText = customBody?.trim() || defaultBody;
 
-                      ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
+  const escapeHtml = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-                      ${bodySection}
+  // Reason: reminder paragraphs are left-aligned at 16px on a card layout —
+  // distinct from customBodySection which centers at 15px for email 1.
+  const bodyParagraphs = bodyText
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => escapeHtml(p).replace(/\n/g, "<br/>"))
+    .map((p) => `<p style="margin: 0 0 20px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #555555; line-height: 1.7;" class="darkmode-subtext">${p}</p>`)
+    .join("\n                  ");
 
-                      ${ctaButton(collectionLink)}`;
+  const html = `<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>${subject} - Small Plates &amp; Co.</title>
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+    table { border-collapse: collapse !important; }
+    body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+    @media screen and (max-width: 600px) {
+      .mobile-padding { padding: 36px 24px !important; }
+    }
+    @media (prefers-color-scheme: dark) {
+      body, .darkmode-bg { background-color: #1a1a1a !important; }
+      .container-bg { background-color: #2d2d2d !important; }
+      .darkmode-text { color: #ffffff !important; }
+      .darkmode-subtext { color: #cccccc !important; }
+    }
+    .button-a { transition: all 100ms ease-in; }
+    .button-a:hover { background: #C19940 !important; }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; word-spacing: normal; background-color: #FAF7F2;" class="darkmode-bg">
+  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+    A quick reminder — your recipe for ${coupleDisplayName}'s cookbook is still pending.
+  </div>
+  <div role="article" aria-roledescription="email" lang="en">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" width="100%" style="border-collapse: collapse;">
+      <tr>
+        <td align="center" style="padding: 40px 20px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" width="100%" style="max-width: 560px; border-collapse: collapse;">
+            <tr>
+              <td style="background-color: #ffffff; border-radius: 12px; padding: 56px 44px;" class="container-bg mobile-padding">
 
-  const text = `${customBody?.trim() || defaultBody}
+                <!-- Logo -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td align="left" style="padding-bottom: 36px;">
+                      <img src="https://smallplatesandcompany.com/images/SmallPlates_logo_horizontal1.png"
+                           alt="Small Plates &amp; Co."
+                           width="140"
+                           height="auto"
+                           style="display: block; max-width: 140px; height: auto;" />
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Greeting -->
+                <p style="margin: 0 0 20px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #2D2D2D; line-height: 1.7;" class="darkmode-text">
+                  Hi ${escapeHtml(guestName)},
+                </p>
+
+                <!-- Body (custom or default) -->
+                ${bodyParagraphs}
+
+                <!-- CTA Button -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding: 12px 0 14px;">
+                      <!--[if mso]>
+                      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${collectionLink}" style="height:48px;v-text-anchor:middle;width:200px;" arcsize="60%" stroke="f" fillcolor="#D4A854">
+                        <w:anchorlock/>
+                        <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:500;">Add Your Recipe</center>
+                      </v:roundrect>
+                      <![endif]-->
+                      <!--[if !mso]><!-->
+                      <a href="${collectionLink}" class="button-a"
+                         style="display: inline-block; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; font-weight: 500; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 999px; background-color: #D4A854;">
+                        Add Your Recipe
+                      </a>
+                      <!--<![endif]-->
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding-bottom: 36px;">
+                      <p style="margin: 6px 0 0 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #9A9590; line-height: 1.5;">
+                        Or copy this link:<br>
+                        <a href="${collectionLink}" style="color: #9A9590; text-decoration: underline; word-break: break-all;">${collectionLink}</a>
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Signature -->
+                <p style="margin: 0 0 4px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #555555; line-height: 1.7;" class="darkmode-subtext">
+                  Thanks,
+                </p>
+                <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #2D2D2D; line-height: 1.7;" class="darkmode-text">
+                  ${coupleDisplayName}
+                </p>
+
+                <!-- Disclaimer divider -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 40px;">
+                  <tr>
+                    <td style="border-top: 1px solid #F0EDE8; padding-top: 24px;">
+                      <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #9A9590; line-height: 1.6;">
+                        Something off? Just reply to this email.${params.captainName ? ` This reminder was sent by ${escapeHtml(params.captainName)} via Small Plates &amp; Co.` : ''}
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+          </table>
+
+          <!-- Outside-card credit -->
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" width="100%" style="max-width: 560px;">
+            <tr>
+              <td align="center" style="padding: 16px 20px 0;">
+                <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 11px; color: #B5AFA8; line-height: 1.5; text-align: center;">
+                  Sent via Small Plates &amp; Co. &nbsp;&middot;&nbsp;
+                  <a href="mailto:team@smallplatesandcompany.com" style="color: #B5AFA8; text-decoration: underline;">Contact us</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+
+        </td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>`;
+
+  const text = `Hi ${guestName},
+
+${bodyText}
 
 Add your recipe: ${collectionLink}
 
-5 minutes. That's it.\n\nSomething off? Just reply to this email.${params.captainName ? `\n\nThis invitation was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
+Thanks,
+${coupleDisplayName}
 
-  return { subject, html: baseTemplate(content, subject, params.captainName), text };
+—
+Something off? Just reply to this email.${params.captainName ? ` This reminder was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
+
+  return { subject, html, text };
 }
 
 // ============================================

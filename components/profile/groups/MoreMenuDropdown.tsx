@@ -27,7 +27,7 @@ export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsO
       />
       
       {/* Dropdown */}
-      <div className="absolute top-full right-0 mt-2 bg-[hsl(var(--brand-white))] rounded-2xl shadow-[0_4px_24px_rgba(45,45,45,0.12)] p-3 min-w-[180px] z-50 border border-[hsl(var(--brand-border))]">
+      <div className="absolute top-full left-0 mt-2 bg-[hsl(var(--brand-white))] rounded-2xl shadow-[0_4px_24px_rgba(45,45,45,0.12)] p-3 min-w-[240px] z-50 border border-[hsl(var(--brand-border))]">
         {showCaptainsOption && onCaptainsClick && (
           <button
             onClick={() => {
@@ -58,7 +58,7 @@ export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsO
             }}
             className="w-full text-left px-4 py-2.5 text-sm text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-border))] rounded-lg transition-colors"
           >
-            Send Invitations
+            Send email invitations
           </button>
         )}
         {onCloseBookClick && (

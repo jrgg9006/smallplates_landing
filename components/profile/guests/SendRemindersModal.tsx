@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { X, Send, Loader2, Check, AlertCircle, Bell } from "lucide-react";
+import { X, Loader2, Check, ChevronLeft } from "lucide-react";
 import { getGuestsByGroup } from "@/lib/supabase/guests";
 import { createSupabaseClient } from "@/lib/supabase/client";
 import type { Guest } from "@/lib/types/database";
@@ -12,9 +12,9 @@ interface SendRemindersModalProps {
   groupId: string;
 }
 
-const DEFAULT_REMINDER_BODY = `Just a friendly nudge — the recipe page is still open and we'd love yours in the cookbook.
+const DEFAULT_REMINDER_BODY = `Thanks to everyone who has already sent a recipe. The book is starting to come together.
 
-It only takes 5 minutes. Doesn't have to be fancy — just something you actually make.`;
+If you haven't yet, the page is still open and we'd love yours. It only takes 5 minutes. Doesn't have to be fancy. Just something you actually make.`;
 
 function daysAgo(dateString: string | null): string {
   if (!dateString) return "";
@@ -22,12 +22,13 @@ function daysAgo(dateString: string | null): string {
   const days = Math.floor(ms / (1000 * 60 * 60 * 24));
   if (days === 0) return "today";
   if (days === 1) return "yesterday";
-  if (days < 7) return `${days} days ago`;
-  if (days < 30) return `${Math.floor(days / 7)} wk ago`;
-  return `${Math.floor(days / 30)} mo ago`;
+  if (days < 7) return `${days}d ago`;
+  if (days < 30) return `${Math.floor(days / 7)}w ago`;
+  return `${Math.floor(days / 30)}mo ago`;
 }
 
 export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersModalProps) {
+  const [view, setView] = useState<"compose" | "recipients">("compose");
   const [guests, setGuests] = useState<Guest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -41,29 +42,25 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
     guest.email.trim() !== "" &&
     !guest.email.startsWith("NO_EMAIL_");
 
-  // Reason: only show guests who were invited (emails_sent_count >= 1)
-  // AND haven't submitted a recipe AND haven't hit the per-guest cap (4).
-  const eligibleGuests = useMemo(
+  // Reason: show every guest with a valid email who already got the first
+  // invitation. Recipe-submitted ones show with a badge so the organizer
+  // can decide whether to include them. Backend still caps at 4 emails per
+  // guest — if hit, the send fails silently for that one.
+  const visibleGuests = useMemo(
     () =>
       guests
-        .filter(
-          (g) =>
-            hasValidEmail(g) &&
-            g.invitation_started_at &&
-            (g.recipes_received || 0) === 0 &&
-            (g.emails_sent_count || 0) < 4
-        )
+        .filter((g) => hasValidEmail(g) && g.invitation_started_at)
         .sort((a, b) => {
-          // Reason: oldest contact first — those are the ones who most need a nudge
+          // Reason: pending first (the ones the organizer probably wants to nudge),
+          // submitted at the bottom (lighter priority but still visible).
+          const aHasRecipe = (a.recipes_received || 0) > 0;
+          const bHasRecipe = (b.recipes_received || 0) > 0;
+          if (aHasRecipe !== bHasRecipe) return aHasRecipe ? 1 : -1;
+          // Among pending: oldest contact first
           const aTime = a.last_email_sent_at ? new Date(a.last_email_sent_at).getTime() : 0;
           const bTime = b.last_email_sent_at ? new Date(b.last_email_sent_at).getTime() : 0;
           return aTime - bTime;
         }),
-    [guests]
-  );
-
-  const submittedCount = useMemo(
-    () => guests.filter((g) => (g.recipes_received || 0) > 0).length,
     [guests]
   );
 
@@ -92,19 +89,28 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
       loadGuests();
       loadBody();
       setSendResult(null);
+      setView("compose");
     }
     if (!isOpen) {
       setSelectedIds(new Set());
     }
   }, [isOpen, groupId, loadGuests, loadBody]);
 
-  // Reason: pre-check everyone eligible so it's one-click-to-all by default
+  // Reason: pre-check only guests who haven't submitted a recipe yet — those
+  // are the ones the organizer probably wants to nudge. Submitted ones stay
+  // visible but unchecked so they don't get a reminder by accident.
   useEffect(() => {
-    if (!loading && isOpen && eligibleGuests.length > 0 && selectedIds.size === 0) {
-      setSelectedIds(new Set(eligibleGuests.map((g) => g.id)));
+    if (!loading && isOpen && visibleGuests.length > 0 && selectedIds.size === 0) {
+      setSelectedIds(
+        new Set(
+          visibleGuests
+            .filter((g) => (g.recipes_received || 0) === 0)
+            .map((g) => g.id)
+        )
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, isOpen, eligibleGuests.length]);
+  }, [loading, isOpen, visibleGuests.length]);
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
@@ -116,10 +122,10 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.size === eligibleGuests.length) {
+    if (selectedIds.size === visibleGuests.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(eligibleGuests.map((g) => g.id)));
+      setSelectedIds(new Set(visibleGuests.map((g) => g.id)));
     }
   };
 
@@ -147,8 +153,7 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
     let sent = 0;
     let failed = 0;
     // Reason: the existing /remind endpoint sends one guest at a time. Loop here
-    // for the batch. This is slow for large lists but the rate-limit guard caps
-    // it anyway. If perf becomes an issue, add a batch endpoint.
+    // for the batch. Rate-limit guard caps it anyway.
     for (const guestId of Array.from(selectedIds)) {
       try {
         const res = await fetch("/api/v1/guests/remind", {
@@ -170,7 +175,7 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
 
   if (!isOpen) return null;
 
-  const allSelected = selectedIds.size === eligibleGuests.length && eligibleGuests.length > 0;
+  const allSelected = selectedIds.size === visibleGuests.length && visibleGuests.length > 0;
 
   return (
     <div
@@ -178,17 +183,25 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden"
+        className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <div className="flex items-center gap-2.5">
-            <Bell className="w-5 h-5 text-[hsl(var(--brand-honey))]" />
+        <div className="flex items-center justify-between px-6 py-6 ">
+          {view === "recipients" ? (
+            <button
+              onClick={() => setView("compose")}
+              className="flex items-center gap-1.5 text-sm text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] transition-colors"
+              type="button"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Back
+            </button>
+          ) : (
             <h3 className="type-modal-title text-[hsl(var(--brand-charcoal))]">
-              Send reminders
+              Send an email reminder
             </h3>
-          </div>
+          )}
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-700 transition-colors"
@@ -199,61 +212,39 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
-          <p className="text-sm text-[hsl(var(--brand-warm-gray))] leading-relaxed">
-            A friendly nudge to guests who haven&apos;t mailed in a recipe yet. The couple&apos;s photo, name, and the &quot;Add Your Recipe&quot; button are added automatically.
-          </p>
+        {view === "compose" ? (
+          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+            <p className="text-gray-600 text-base leading-relaxed">
+              You can send an email reminder to everyone you&apos;ve invited who hasn&apos;t sent a recipe yet.
+            </p>
 
-          {/* Editable body */}
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-wide text-[hsl(var(--brand-warm-gray))] mb-2 block">
-              Your reminder message
-            </label>
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
               onBlur={handleBodyBlur}
-              rows={5}
-              className="w-full p-3 bg-[hsl(var(--brand-warm-white))] border border-[hsl(var(--brand-border))] rounded-lg resize-none focus:outline-none focus:border-[hsl(var(--brand-honey))] focus:ring-1 focus:ring-[hsl(var(--brand-honey))] text-sm text-[hsl(var(--brand-charcoal))] leading-relaxed"
+              rows={6}
+              className="w-full p-4 bg-gray-50 border border-[hsl(var(--brand-border))] rounded-lg shadow-sm resize-none focus:outline-none focus:border-[hsl(var(--brand-honey))] focus:ring-1 focus:ring-[hsl(var(--brand-honey))] focus:bg-white text-sm text-[hsl(var(--brand-charcoal))] leading-relaxed transition-colors"
               placeholder={DEFAULT_REMINDER_BODY}
             />
-            <p className="text-[11px] text-[hsl(var(--brand-warm-gray))] mt-1">
-              Saved automatically.
-            </p>
           </div>
-
-          {/* Recipients */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <label className="text-xs font-semibold uppercase tracking-wide text-[hsl(var(--brand-warm-gray))]">
-                Recipients
-              </label>
-              {submittedCount > 0 && (
-                <span className="text-[11px] text-[hsl(var(--brand-warm-gray))] flex items-center gap-1">
-                  <Check className="w-3 h-3 text-[hsl(var(--brand-honey))]" />
-                  {submittedCount} already submitted
-                </span>
-              )}
-            </div>
-
+        ) : (
+          <div className="flex-1 min-h-[420px] px-6 py-5 flex flex-col">
             {loading ? (
               <div className="space-y-2">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="h-12 bg-gray-100 rounded-lg animate-pulse" />
                 ))}
               </div>
-            ) : eligibleGuests.length === 0 ? (
-              <div className="text-center py-10 border border-dashed border-[hsl(var(--brand-border))] rounded-lg">
+            ) : visibleGuests.length === 0 ? (
+              <div className="text-center py-10">
                 <p className="text-sm text-[hsl(var(--brand-warm-gray))]">
-                  No guests need a reminder right now.
-                </p>
-                <p className="text-[11px] text-[hsl(var(--brand-warm-gray))] mt-1">
-                  This list only shows guests who were emailed an invite and haven&apos;t submitted yet.
+                  No one to remind yet. Send the first invitation first.
                 </p>
               </div>
             ) : (
               <>
-                <label className="flex items-center gap-2 mb-2 cursor-pointer text-sm">
+                {/* Sticky select-all stays visible while list scrolls below */}
+                <label className="flex items-center gap-2.5 mb-3 cursor-pointer text-sm pb-3 border-b border-gray-100 flex-shrink-0">
                   <input
                     type="checkbox"
                     checked={allSelected}
@@ -261,24 +252,18 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
                     className="w-4 h-4 rounded border-gray-300 text-[hsl(var(--brand-honey))] focus:ring-[hsl(var(--brand-honey))]"
                   />
                   <span className="text-[hsl(var(--brand-charcoal))] font-medium">
-                    Select all {eligibleGuests.length}
+                    Select all {visibleGuests.length}
                   </span>
                 </label>
 
-                <ul className="space-y-1 max-h-[280px] overflow-y-auto -mx-1 px-1">
-                  {eligibleGuests.map((guest) => {
+                <ul className="space-y-1 flex-1 overflow-y-auto -mx-2 px-2">
+                  {visibleGuests.map((guest) => {
                     const checked = selectedIds.has(guest.id);
+                    const hasRecipe = (guest.recipes_received || 0) > 0;
                     const lastSentLabel = daysAgo(guest.last_email_sent_at);
-                    const reminderCount = (guest.emails_sent_count || 1) - 1;
                     return (
                       <li key={guest.id}>
-                        <label
-                          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors ${
-                            checked
-                              ? "bg-[hsl(var(--brand-honey))]/10"
-                              : "hover:bg-gray-50"
-                          }`}
-                        >
+                        <label className="flex items-center gap-3 px-2 py-2.5 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                           <input
                             type="checkbox"
                             checked={checked}
@@ -293,15 +278,16 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
                               {guest.email}
                             </p>
                           </div>
-                          <div className="text-[11px] text-[hsl(var(--brand-warm-gray))] text-right flex-shrink-0">
-                            <p>Last sent {lastSentLabel}</p>
-                            {reminderCount > 0 && (
-                              <p className="text-amber-700 flex items-center gap-1 justify-end">
-                                <AlertCircle className="w-3 h-3" />
-                                {reminderCount} reminder{reminderCount === 1 ? "" : "s"} already
-                              </p>
-                            )}
-                          </div>
+                          {hasRecipe ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[hsl(var(--brand-honey))]/10 text-[hsl(var(--brand-honey))] flex-shrink-0">
+                              <Check className="w-2.5 h-2.5" />
+                              Recipe received
+                            </span>
+                          ) : lastSentLabel ? (
+                            <span className="text-[11px] text-[hsl(var(--brand-warm-gray))] flex-shrink-0">
+                              {lastSentLabel}
+                            </span>
+                          ) : null}
                         </label>
                       </li>
                     );
@@ -310,44 +296,73 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
               </>
             )}
           </div>
-        </div>
+        )}
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100">
-          {sendResult && (
-            <div
-              className={`mb-3 p-3 rounded-lg text-sm flex items-center gap-2 ${
-                sendResult.failed === 0
-                  ? "bg-green-50 text-green-800"
-                  : "bg-amber-50 text-amber-800"
-              }`}
-            >
-              <Check className="w-4 h-4 flex-shrink-0" />
-              <span>
-                {sendResult.sent > 0 && `Sent ${sendResult.sent} reminder${sendResult.sent === 1 ? "" : "s"}`}
-                {sendResult.sent > 0 && sendResult.failed > 0 && " · "}
-                {sendResult.failed > 0 && `${sendResult.failed} failed`}
-              </span>
+        <div className="px-6 py-4">
+          {view === "compose" ? (
+            <>
+              {sendResult && (
+                <div
+                  className={`mb-3 p-2.5 rounded-lg text-sm flex items-center gap-2 ${
+                    sendResult.failed === 0
+                      ? "bg-green-50 text-green-800"
+                      : "bg-amber-50 text-amber-800"
+                  }`}
+                >
+                  <Check className="w-4 h-4 flex-shrink-0" />
+                  <span>
+                    {sendResult.sent > 0 && `Sent ${sendResult.sent} reminder${sendResult.sent === 1 ? "" : "s"}`}
+                    {sendResult.sent > 0 && sendResult.failed > 0 && " · "}
+                    {sendResult.failed > 0 && `${sendResult.failed} failed`}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setView("recipients")}
+                  className="text-sm text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] underline underline-offset-2 transition-colors"
+                >
+                  Recipients ({selectedIds.size})
+                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-4 py-2 text-sm text-[hsl(var(--brand-charcoal))] hover:bg-gray-50 rounded-full transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSend}
+                    disabled={selectedIds.size === 0 || isSending}
+                    className="px-5 py-2 rounded-full bg-[hsl(var(--brand-honey))] hover:bg-[hsl(var(--brand-honey-dark))] text-white font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {isSending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Sending…
+                      </>
+                    ) : (
+                      "Send"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setView("compose")}
+                className="px-5 py-2 rounded-full bg-[hsl(var(--brand-charcoal))] hover:bg-black text-white font-medium text-sm transition-colors"
+              >
+                Done
+              </button>
             </div>
           )}
-
-          <button
-            onClick={handleSend}
-            disabled={selectedIds.size === 0 || isSending}
-            className="w-full min-h-[44px] rounded-full bg-[hsl(var(--brand-honey))] hover:bg-[hsl(var(--brand-honey-dark))] text-white font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {isSending ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Sending…
-              </>
-            ) : (
-              <>
-                <Send className="w-4 h-4" />
-                Send {selectedIds.size > 0 ? `to ${selectedIds.size} guests` : "reminders"}
-              </>
-            )}
-          </button>
         </div>
       </div>
     </div>
