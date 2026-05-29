@@ -7,12 +7,14 @@ import { getUserCollectionToken } from "@/lib/supabase/collection";
 import { createSupabaseClient } from "@/lib/supabase/client";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
-import { Check, Copy, ArrowRight, Calendar, X, Smartphone, Monitor, MessageCircle, Pencil } from "lucide-react";
+import { Check, Copy, ArrowRight, Calendar, X, Smartphone, Monitor, MessageCircle, Pencil, Mail, QrCode, ArrowLeft, Download } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { addMonths, format, parse } from "date-fns";
 import type { GroupWithMembers } from "@/lib/types/database";
+import { isIOSDevice } from "@/lib/utils/sharing";
 import BrandLoader from "@/components/ui/BrandLoader";
+import QRCode from "qrcode";
 
 function EventInviteContent() {
   const router = useRouter();
@@ -38,6 +40,10 @@ function EventInviteContent() {
   const [previewMode, setPreviewMode] = useState<"mobile" | "desktop" | "whatsapp">("desktop");
   const [dateTimeModalOpen, setDateTimeModalOpen] = useState(false);
   const [locationModalOpen, setLocationModalOpen] = useState(false);
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [emailCopied, setEmailCopied] = useState(false);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [eventVenue, setEventVenue] = useState("");
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -190,6 +196,117 @@ function EventInviteContent() {
     const message = `${inviteMessage}\n\n${inviteUrl}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
   };
+
+  // Reason: rich HTML for paste into Gmail/Outlook/Apple Mail. Mirrors the
+  // event-invite preview design (couple photo + names + date + location + CTA)
+  // so the recipient sees a real invitation, not a generic share. Inline styles
+  // because email clients strip <style> tags.
+  const buildEmailHtml = (): string => {
+    const photoUrl = group?.couple_image_url || "";
+    const title = inviteTitle || coupleName;
+    const tagline = inviteTagline || "You're invited";
+    const dateLine = eventDate
+      ? `${formatEventDate(eventDate)}${eventTime ? ` · ${formatEventTime(eventTime)}` : ""}`
+      : "";
+    const venue = eventVenue || "";
+    const location = eventLocation || "";
+    const safeMessage = inviteMessage
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\n/g, "<br/>");
+
+    const imgBlock = photoUrl
+      ? `<img src="${photoUrl}" width="320" alt="${title}" style="display:block;width:320px;max-width:100%;height:320px;object-fit:cover;border-radius:12px;margin:0 auto 24px;" />`
+      : "";
+
+    return `
+<div style="font-family:Georgia,'Times New Roman',serif;max-width:520px;margin:0 auto;color:#2D2D2D;line-height:1.5;text-align:center;">
+  <p style="font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:#6B6B6B;margin:0 0 8px;">You're invited</p>
+  <h2 style="font-size:28px;font-weight:500;margin:0 0 24px;color:#2D2D2D;">${title}</h2>
+  ${imgBlock}
+  ${dateLine ? `<p style="font-size:14px;letter-spacing:0.1em;text-transform:uppercase;color:#2D2D2D;font-weight:500;margin:0 0 32px;">${dateLine}</p>` : ""}
+  ${venue ? `<p style="font-size:14px;letter-spacing:0.1em;text-transform:uppercase;color:#2D2D2D;font-weight:500;margin:0 0 4px;">${venue}</p>` : ""}
+  ${location ? `<p style="font-size:14px;color:#6B6B6B;margin:0 0 32px;">${location}</p>` : ""}
+  <p style="font-size:15px;color:#6B6B6B;margin:0 0 28px;line-height:1.6;">${safeMessage}</p>
+  <p style="margin:0;">
+    <a href="${inviteUrl}" style="display:inline-block;background:#D4A854;color:#FFFFFF;padding:14px 32px;border-radius:999px;text-decoration:none;font-weight:600;font-size:15px;">View Invite &amp; Share a Recipe →</a>
+  </p>
+</div>
+    `.trim();
+  };
+
+  const buildEmailPlainText = (): string => {
+    const title = inviteTitle || coupleName;
+    const dateLine = eventDate
+      ? `${formatEventDate(eventDate)}${eventTime ? ` · ${formatEventTime(eventTime)}` : ""}`
+      : "";
+    const parts = [
+      `You're invited to ${title}.`,
+      dateLine,
+      eventVenue,
+      eventLocation,
+      "",
+      inviteMessage,
+      "",
+      `View invite: ${inviteUrl}`,
+    ].filter(Boolean);
+    return parts.join("\n");
+  };
+
+  const handleCopyEmailBlock = async () => {
+    const html = buildEmailHtml();
+    const plain = buildEmailPlainText();
+    try {
+      if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
+        const item = new ClipboardItem({
+          "text/html": new Blob([html], { type: "text/html" }),
+          "text/plain": new Blob([plain], { type: "text/plain" }),
+        });
+        await navigator.clipboard.write([item]);
+      } else {
+        await navigator.clipboard.writeText(plain);
+      }
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2500);
+    } catch {
+      try {
+        await navigator.clipboard.writeText(plain);
+        setEmailCopied(true);
+        setTimeout(() => setEmailCopied(false), 2500);
+      } catch {
+        // silent — UI button stays in default state
+      }
+    }
+  };
+
+  const handleDownloadQR = () => {
+    if (!qrDataUrl) return;
+    const a = document.createElement("a");
+    a.href = qrDataUrl;
+    // Reason: distinct filename from the recipe-collection QR so the mom can
+    // tell them apart in her Downloads folder.
+    a.download = "event-invite-qr.png";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  // Generate QR when modal opens or inviteUrl changes
+  useEffect(() => {
+    if (!qrModalOpen || !inviteUrl) return;
+    let cancelled = false;
+    QRCode.toDataURL(inviteUrl, {
+      width: 600,
+      margin: 2,
+      color: { dark: "#2D2D2D", light: "#FFFFFF" },
+    }).then((url) => {
+      if (!cancelled) setQrDataUrl(url);
+    }).catch(() => {
+      // silent
+    });
+    return () => { cancelled = true; };
+  }, [qrModalOpen, inviteUrl]);
 
   const saveField = useCallback(async (fields: Record<string, string>) => {
     if (!groupId) return;
@@ -651,27 +768,53 @@ function EventInviteContent() {
             </p>
           </div>
 
-          <button
-            onClick={handleCopyLink}
-            className="btn btn-sm btn-honey w-full gap-2 mb-2"
-          >
-            {copied ? <Check size={14} /> : <Copy size={14} />}
-            {copied ? "Link Copied!" : "Copy Invite Link"}
-          </button>
+          {/* URL bar with inline Copy button — Paperless Post style */}
+          <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-full pl-3 pr-1 py-1 mb-4">
+            <input
+              type="text"
+              value={inviteUrl}
+              readOnly
+              onFocus={(e) => e.target.select()}
+              className="flex-1 bg-transparent text-[13px] text-gray-700 outline-none truncate min-w-0"
+            />
+            <button
+              onClick={handleCopyLink}
+              className={`flex-shrink-0 rounded-full px-4 py-1.5 text-[13px] font-medium transition-all ${
+                copied
+                  ? "bg-[hsl(var(--brand-honey))] text-black"
+                  : "bg-black text-white hover:bg-gray-800"
+              }`}
+            >
+              {copied ? "Copied" : "Copy"}
+            </button>
+          </div>
 
-          <button
-            onClick={handleWhatsApp}
-            className="btn btn-sm btn-outline w-full gap-2 mb-2"
-          >
-            Share via WhatsApp
-            <ArrowRight size={16} />
-          </button>
-
-          <div className="flex items-start gap-3 mt-4 mb-4">
-            <Copy size={16} className="text-[hsl(var(--brand-warm-gray))] flex-shrink-0 mt-0.5" />
-            <p className="text-[13px] text-[hsl(var(--brand-warm-gray))] leading-relaxed">
-              Share the link anywhere: text, social media, email, or WhatsApp.
-            </p>
+          {/* Quick share row */}
+          <div className="grid grid-cols-3 gap-2 mb-6">
+            <button
+              type="button"
+              onClick={handleWhatsApp}
+              className="flex flex-col items-center justify-center gap-1.5 py-3 hover:opacity-80 transition-opacity"
+            >
+              <MessageCircle className="w-6 h-6 text-[#25D366]" />
+              <span className="text-[11px] text-gray-700 font-medium">WhatsApp</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setEmailModalOpen(true)}
+              className="flex flex-col items-center justify-center gap-1.5 py-3 hover:opacity-80 transition-opacity"
+            >
+              <Mail className="w-6 h-6 text-gray-700" />
+              <span className="text-[11px] text-gray-700 font-medium">Email</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setQrModalOpen(true)}
+              className="flex flex-col items-center justify-center gap-1.5 py-3 hover:opacity-80 transition-opacity"
+            >
+              <QrCode className="w-6 h-6 text-gray-700" />
+              <span className="text-[11px] text-gray-700 font-medium">QR Code</span>
+            </button>
           </div>
 
           <button
@@ -683,6 +826,164 @@ function EventInviteContent() {
         </div>
       </div>
 
+      {/* Email share modal — for EVENT INVITE (distinct from recipe collection) */}
+      {emailModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm"
+          onClick={() => setEmailModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h3 className="type-modal-title text-[hsl(var(--brand-charcoal))]">Email your invite</h3>
+              <button
+                type="button"
+                onClick={() => setEmailModalOpen(false)}
+                className="text-gray-400 hover:text-gray-700 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2">
+              {/* Left column: instructions + copy button */}
+              <div className="flex flex-col justify-center items-center text-center space-y-4 px-6 py-8 lg:px-10 lg:py-12">
+                <h3 className="font-serif text-xl text-gray-900 leading-tight">
+                  Copy and paste to email
+                </h3>
+                <p className="text-sm text-gray-600 leading-relaxed max-w-xs">
+                  We&apos;ve bundled your invite into a styled block. Click the button below to copy it, then paste in a new email.
+                </p>
+                <button
+                  onClick={handleCopyEmailBlock}
+                  className={`min-h-[40px] px-6 rounded-full font-medium text-sm transition-all ${
+                    emailCopied
+                      ? "bg-[hsl(var(--brand-honey))] text-black"
+                      : "bg-black text-white hover:bg-gray-800"
+                  }`}
+                >
+                  {emailCopied ? (
+                    <span className="flex items-center gap-2"><Check className="w-4 h-4" />Copied</span>
+                  ) : (
+                    "Copy to Clipboard"
+                  )}
+                </button>
+              </div>
+
+              {/* Right column: preview card on cream background — scrollable so the
+                  user can see the full preview even when it's tall. */}
+              <div className="bg-[hsl(var(--brand-cream))] px-6 py-8 lg:px-10 lg:py-12 flex items-start justify-center overflow-y-auto max-h-[75vh]">
+                <div className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] p-4 sm:p-5 text-center w-full">
+                  <p className="text-[10px] uppercase tracking-[0.25em] text-gray-500 mb-2">
+                    You&apos;re invited
+                  </p>
+                  <h4 className="font-serif text-lg sm:text-xl text-gray-900 leading-tight mb-4">
+                    {inviteTitle || coupleName}
+                  </h4>
+                  {group.couple_image_url && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={group.couple_image_url}
+                      alt={coupleName}
+                      className="w-full aspect-square object-cover rounded-lg mb-5"
+                      style={{
+                        objectPosition: `${group.couple_image_position_x ?? 50}% ${group.couple_image_position_y ?? 50}%`,
+                      }}
+                    />
+                  )}
+                  {eventDate && (
+                    <p className="text-[11px] uppercase tracking-wide text-gray-700 font-medium mb-5">
+                      {formatEventDate(eventDate)}{eventTime ? ` · ${formatEventTime(eventTime)}` : ""}
+                    </p>
+                  )}
+                  {eventVenue && (
+                    <p className="text-[11px] uppercase tracking-wide text-gray-700 font-medium mb-1">
+                      {eventVenue}
+                    </p>
+                  )}
+                  {eventLocation && (
+                    <p className="text-[11px] text-gray-500 mb-5">{eventLocation}</p>
+                  )}
+                  <p className="text-xs text-gray-600 leading-relaxed mb-5 max-w-xs mx-auto">
+                    {inviteMessage}
+                  </p>
+                  <a
+                    href={inviteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block bg-[hsl(var(--brand-honey))] hover:bg-[hsl(var(--brand-honey-dark))] text-white font-semibold text-xs px-5 py-2 rounded-full transition-colors"
+                  >
+                    View Invite →
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QR code modal — for EVENT INVITE (distinct from recipe collection QR) */}
+      {qrModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm"
+          onClick={() => setQrModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="type-modal-title text-[hsl(var(--brand-charcoal))]">QR for your invite</h3>
+              <button
+                type="button"
+                onClick={() => setQrModalOpen(false)}
+                className="text-gray-400 hover:text-gray-700 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-600 leading-relaxed mb-5 text-center">
+              Print this on save-the-date cards or table cards. Guests scan to see the invitation and share a recipe.
+            </p>
+
+            <div className="flex justify-center mb-5">
+              <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6">
+                {qrDataUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={qrDataUrl} alt="Event invite QR code" className="w-40 h-40 sm:w-44 sm:h-44" />
+                ) : (
+                  <div className="w-40 h-40 sm:w-44 sm:h-44 flex items-center justify-center text-gray-400 text-sm">
+                    Generating QR…
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setQrModalOpen(false)}
+                className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors px-4 py-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </button>
+              <button
+                onClick={handleDownloadQR}
+                disabled={!qrDataUrl}
+                className="min-h-[44px] flex-1 flex items-center justify-center gap-3 rounded-xl bg-black text-white hover:bg-gray-800 disabled:opacity-50 font-medium text-sm"
+              >
+                <Download className="w-5 h-5" />
+                Download QR as PNG
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Location edit modal */}
       {locationModalOpen && (
         <div
@@ -693,7 +994,7 @@ function EventInviteContent() {
             className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="font-serif text-[22px] text-[hsl(var(--brand-charcoal))] mb-6">
+            <h3 className="type-modal-title text-[hsl(var(--brand-charcoal))] mb-6">
               Where is the event?
             </h3>
 
@@ -747,7 +1048,7 @@ function EventInviteContent() {
             className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="font-serif text-[22px] text-[hsl(var(--brand-charcoal))] mb-6">
+            <h3 className="type-modal-title text-[hsl(var(--brand-charcoal))] mb-6">
               When is the event?
             </h3>
 
