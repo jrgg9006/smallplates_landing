@@ -73,11 +73,17 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <h2 className="type-modal-title text-[hsl(var(--brand-charcoal))] mb-3">
               Check your email
             </h2>
-            <p className="text-sm text-gray-600 leading-relaxed mb-6">
+            <p className="text-sm text-gray-600 leading-relaxed mb-1">
               We sent a login link to{" "}
               <span className="font-medium text-gray-900">{email}</span>.
               Click the link to log in.
             </p>
+            <button
+              onClick={() => { setStatus("idle"); setEmail(""); }}
+              className="text-sm text-gray-400 underline underline-offset-2 hover:text-gray-600 transition-colors mb-6"
+            >
+              Use a different email
+            </button>
 
             {isGmail && (
               <a
@@ -90,14 +96,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               </a>
             )}
 
-            <button
-              onClick={() => { setStatus("idle"); setEmail(""); }}
-              className="w-full text-sm text-gray-500 hover:text-gray-700 transition-colors py-2"
-            >
-              Use a different email
-            </button>
-
-            <div className="border-t border-gray-100 mt-6 pt-5">
+            <div className="border-t border-gray-100 mt-2 pt-5">
               <p className="text-xs text-gray-400 leading-relaxed">
                 Don&apos;t want to wait? If your email is linked to Google, you can log in instantly.
               </p>

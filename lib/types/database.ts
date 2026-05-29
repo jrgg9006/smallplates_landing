@@ -474,6 +474,10 @@ export interface Database {
           invite_message: string | null;
           email_invite_message: string | null;
           email_reminder_message: string | null;
+          captain_invite_token: string | null;
+          captain_invite_token_expires_at: string | null;
+          captain_invite_token_max_uses: number;
+          captain_invite_token_uses: number;
           created_at: string;
           updated_at: string;
         };
@@ -519,6 +523,10 @@ export interface Database {
           invite_message?: string | null;
           email_invite_message?: string | null;
           email_reminder_message?: string | null;
+          captain_invite_token?: string | null;
+          captain_invite_token_expires_at?: string | null;
+          captain_invite_token_max_uses?: number;
+          captain_invite_token_uses?: number;
         };
         Update: {
           name?: string;
@@ -561,6 +569,10 @@ export interface Database {
           invite_message?: string | null;
           email_invite_message?: string | null;
           email_reminder_message?: string | null;
+          captain_invite_token?: string | null;
+          captain_invite_token_expires_at?: string | null;
+          captain_invite_token_max_uses?: number;
+          captain_invite_token_uses?: number;
         };
       };
       group_members: {

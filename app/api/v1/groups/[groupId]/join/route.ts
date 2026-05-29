@@ -1,286 +1,243 @@
 /**
- * API Route - Join Group (Direct Link)
- * Handles group joining via direct link without token
- * Creates account if needed, adds user to group
- * For existing users, verifies password before adding to group
- * Similar to token-based join but without invitation tracking
+ * API Route - Join Group (Captain Invite Token)
+ *
+ * Token-validated captain join with passwordless auth.
+ *  - New users: backend mints a magic-link hashed_token, frontend calls
+ *    verifyOtp() — zero inbox check, immediate session.
+ *  - Existing users: backend triggers a real magic-link email and DOES NOT
+ *    return a hashed_token — captain must click from their own inbox.
+ *    This prevents account takeover via shared invite URLs.
+ *  - Already-a-member of this group: skip the token claim entirely so
+ *    re-submits don't drain the use counter. Still send the magic link so
+ *    they can log in.
+ *
+ * The token is validated atomically by the SQL RPC `claim_captain_invite_slot`
+ * which checks expiry + max_uses + increments the counter in one round-trip.
  */
 
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { NextRequest, NextResponse } from "next/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
-// Create Supabase Admin client for admin operations
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-);
-
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ groupId: string }> }
-) {
-  try {
-    const { groupId } = await params;
-    const { password, fullName, email: providedEmail, inviter_id: rawInviterId } = await request.json();
-
-    // Validate input
-    if (!groupId) {
-      return NextResponse.json(
-        { error: 'Group ID is required' },
-        { status: 400 }
-      );
-    }
-
-    if (!providedEmail?.trim()) {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
-      );
-    }
-
-    const email = providedEmail.trim().toLowerCase();
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'Please enter a valid email address' },
-        { status: 400 }
-      );
-    }
-
-    console.log('🔗 Direct join request for group:', groupId);
-    console.log('📧 Email:', email);
-
-    // Step 1: Verify group exists
-    const { data: group, error: groupError } = await supabaseAdmin
-      .from('groups')
-      .select('id, name, description')
-      .eq('id', groupId)
-      .single();
-
-    if (groupError || !group) {
-      console.error('❌ Group not found:', groupError);
-      return NextResponse.json(
-        { error: 'Group not found' },
-        { status: 404 }
-      );
-    }
-
-    console.log('✅ Group found:', group.name);
-
-    // Check if user already exists in Supabase Auth
-    const { data: { users }, error: getUsersError } = await supabaseAdmin.auth.admin.listUsers();
-    const existingUser = users?.find(u => u.email?.toLowerCase() === email);
-    
-    let userId: string;
-    let isNewUser = false;
-
-    if (existingUser) {
-      // User exists - verify password before adding them to the group
-      userId = existingUser.id;
-      console.log('👤 Existing user found:', userId);
-      
-      // Verify password for existing users
-      if (!password) {
-        return NextResponse.json(
-          { error: 'Password is required to verify your account' },
-          { status: 400 }
-        );
-      }
-
-      // Try to sign in with the provided password to verify it's correct
-      const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
-        email: email.toLowerCase(),
-        password: password
-      });
-
-      if (signInError || !signInData.user) {
-        console.error('❌ Password verification failed:', signInError);
-        return NextResponse.json(
-          { error: 'Invalid password. Please check your password and try again.' },
-          { status: 401 }
-        );
-      }
-
-      // Verify that the signed-in user matches the existing user
-      if (signInData.user.id !== userId) {
-        console.error('❌ User ID mismatch during password verification');
-        // Sign out to clean up
-        await supabaseAdmin.auth.signOut();
-        return NextResponse.json(
-          { error: 'Authentication error. Please try again.' },
-          { status: 401 }
-        );
-      }
-
-      console.log('✅ Password verified for existing user');
-      
-      // Sign out after verification - frontend will create its own session
-      // This ensures no server-side session is left hanging
-      await supabaseAdmin.auth.signOut();
-      
-      // Check if user is already a member of this group
-      const { data: existingMember } = await supabaseAdmin
-        .from('group_members')
-        .select('profile_id')
-        .eq('group_id', groupId)
-        .eq('profile_id', userId)
-        .single();
-
-      if (existingMember) {
-        console.error('❌ User already a member of group');
-        return NextResponse.json({
-          success: true,
-          message: 'You are already a member of this group',
-          data: {
-            userId,
-            isNewUser: false,
-            groupId: group.id,
-            groupName: group.name,
-            alreadyMember: true
-          }
-        });
-      }
-
-    } else {
-      // New user - create account
-      if (!password) {
-        return NextResponse.json(
-          { error: 'Password is required for new users' },
-          { status: 400 }
-        );
-      }
-
-      if (password.length < 8) {
-        return NextResponse.json(
-          { error: 'Password must be at least 8 characters long' },
-          { status: 400 }
-        );
-      }
-
-      if (!fullName?.trim()) {
-        return NextResponse.json(
-          { error: 'Name is required' },
-          { status: 400 }
-        );
-      }
-
-      console.log('👤 Creating new user account for:', email);
-
-      const { data: signUpData, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
-        email: email,
-        password: password,
-        email_confirm: true,
-        user_metadata: {
-          joined_from_direct_link: true,
-          group_id: groupId,
-          group_name: group.name,
-          full_name: fullName.trim()
-        }
-      });
-
-      if (signUpError) {
-        console.error('❌ Error creating user:', signUpError);
-        
-        // Handle duplicate email
-        if (signUpError.message?.includes('already registered')) {
-          return NextResponse.json(
-            { error: 'This email is already registered. Please log in first, then visit the join link again.' },
-            { status: 409 }
-          );
-        }
-        
-        return NextResponse.json(
-          { error: signUpError.message || 'Failed to create account' },
-          { status: 500 }
-        );
-      }
-
-      if (!signUpData.user) {
-        console.error('❌ No user data returned');
-        return NextResponse.json(
-          { error: 'Failed to create account' },
-          { status: 500 }
-        );
-      }
-
-      userId = signUpData.user.id;
-      isNewUser = true;
-
-      console.log('✅ New user created successfully:', userId);
-    }
-
-    // Step 2: Add user to group as member (using upsert for race condition protection).
-    // Reason: validate inviter_id from the URL before persisting. We accept it
-    // ONLY if it points to a real profile — anything else falls back to null
-    // silently (never block the join over a bogus query param).
-    let validatedInviterId: string | null = null;
-    if (typeof rawInviterId === 'string' && rawInviterId.length > 0) {
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      if (uuidRegex.test(rawInviterId)) {
-        const { data: inviterProfile } = await supabaseAdmin
-          .from('profiles')
-          .select('id')
-          .eq('id', rawInviterId)
-          .maybeSingle();
-        if (inviterProfile) {
-          validatedInviterId = inviterProfile.id;
-        }
-      }
-    }
-
-    const { error: memberError } = await supabaseAdmin
-      .from('group_members')
-      .upsert({
-        group_id: groupId,
-        profile_id: userId,
-        role: 'member',
-        invited_by: validatedInviterId,
-      }, {
-        onConflict: 'group_id,profile_id'
-      });
-
-    if (memberError) {
-      console.error('❌ Error adding user to group:', memberError);
-      return NextResponse.json(
-        { error: 'Failed to add user to group: ' + memberError.message },
-        { status: 500 }
-      );
-    } else {
-      console.log('✅ User added to group successfully');
-    }
-
-    console.log('✅ Direct group join complete');
-
-    // Return success with user data
-    return NextResponse.json({
-      success: true,
-      message: isNewUser ? 'Account created and added to group successfully' : 'Added to group successfully',
-      data: {
-        userId,
-        email,
-        isNewUser,
-        groupId: group.id,
-        groupName: group.name,
-        groupDescription: group.description
-      }
-    });
-
-  } catch (error) {
-    console.error('❌ Unexpected error in direct group join:', error);
-    return NextResponse.json(
-      { 
-        error: error instanceof Error ? error.message : 'Failed to join group'
-      },
-      { status: 500 }
-    );
-  }
+interface JoinRequestBody {
+  token?: string;
+  fullName?: string;
+  email?: string;
 }
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ groupId: string }> }
+) {
+  const { groupId } = await params;
+  let body: JoinRequestBody;
+  try {
+    body = (await request.json()) as JoinRequestBody;
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  const token = body.token?.trim();
+  const fullName = body.fullName?.trim();
+  const email = body.email?.trim().toLowerCase();
+
+  if (!token) {
+    return NextResponse.json({ error: "token_missing" }, { status: 400 });
+  }
+  if (!fullName) {
+    return NextResponse.json({ error: "Name is required" }, { status: 400 });
+  }
+  if (!email || !EMAIL_REGEX.test(email)) {
+    return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
+  }
+
+  const supabaseAdmin = createSupabaseAdminClient();
+
+  // Load group (need created_by to credit the inviter).
+  const { data: group, error: groupErr } = await supabaseAdmin
+    .from("groups")
+    .select("created_by, name")
+    .eq("id", groupId)
+    .single();
+
+  if (groupErr || !group) {
+    return NextResponse.json({ error: "Group not found" }, { status: 404 });
+  }
+
+  // ── Pre-check: are they already a member? ──
+  // Reason: if they are, we DO NOT want to consume a token use. The same
+  // person clicking Submit twice (or refreshing the page) shouldn't burn
+  // slots from the organizer's max_uses budget.
+  let existingUserId: string | null = null;
+  let isAlreadyMember = false;
+
+  const { data: existingProfile } = await supabaseAdmin
+    .from("profiles")
+    .select("id")
+    .eq("email", email)
+    .maybeSingle();
+
+  if (existingProfile) {
+    existingUserId = existingProfile.id;
+    // Reason: group_members has a composite PK (group_id, profile_id) — no
+    // `id` column. Select profile_id to verify the row exists.
+    const { data: existingMember } = await supabaseAdmin
+      .from("group_members")
+      .select("profile_id")
+      .eq("group_id", groupId)
+      .eq("profile_id", existingUserId)
+      .maybeSingle();
+    if (existingMember) isAlreadyMember = true;
+  }
+
+  // ── Already a member: short-circuit, no slot consumed. ──
+  // Treat them like the existing-user path (they need to log in via magic
+  // link from their own inbox).
+  if (isAlreadyMember) {
+    return NextResponse.json({
+      groupId,
+      isNewUser: false,
+      existingUser: true,
+      alreadyMember: true,
+    });
+  }
+
+  // ── Not yet a member: atomic token claim (validates + increments). ──
+  const { data: claimedGroupId, error: claimError } = await supabaseAdmin.rpc(
+    "claim_captain_invite_slot",
+    { p_token: token }
+  );
+
+  if (claimError) {
+    return NextResponse.json({ error: "Could not validate invite" }, { status: 500 });
+  }
+
+  // RPC returns NULL when the token failed validation — distinguish why.
+  if (!claimedGroupId) {
+    const { data: tokenStatus } = await supabaseAdmin
+      .from("groups")
+      .select(
+        "id, captain_invite_token_expires_at, captain_invite_token_max_uses, captain_invite_token_uses"
+      )
+      .eq("captain_invite_token", token)
+      .maybeSingle();
+
+    if (!tokenStatus) {
+      return NextResponse.json({ error: "token_invalid" }, { status: 404 });
+    }
+    if (
+      tokenStatus.captain_invite_token_expires_at &&
+      new Date(tokenStatus.captain_invite_token_expires_at).getTime() < Date.now()
+    ) {
+      return NextResponse.json({ error: "token_expired" }, { status: 410 });
+    }
+    if (tokenStatus.captain_invite_token_uses >= tokenStatus.captain_invite_token_max_uses) {
+      return NextResponse.json({ error: "token_max_uses" }, { status: 410 });
+    }
+    return NextResponse.json({ error: "token_invalid" }, { status: 404 });
+  }
+
+  // Reason: token must belong to the group the URL says it does.
+  if (claimedGroupId !== groupId) {
+    return NextResponse.json({ error: "token_invalid" }, { status: 404 });
+  }
+
+  // ── Find or create the auth user ──
+  let userId: string;
+  let isNewUser = false;
+
+  if (existingUserId) {
+    // We already looked them up above.
+    userId = existingUserId;
+  } else {
+    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      email_confirm: true,
+      user_metadata: { full_name: fullName },
+    });
+
+    if (newUser?.user) {
+      userId = newUser.user.id;
+      isNewUser = true;
+    } else if (
+      createError?.message?.toLowerCase().includes("already been registered") ||
+      createError?.message?.toLowerCase().includes("already registered") ||
+      createError?.message?.toLowerCase().includes("already exists")
+    ) {
+      // Race: profile was created between our pre-check and the createUser call.
+      // Re-look up to recover gracefully.
+      const { data: raceProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("email", email)
+        .single();
+      if (!raceProfile) {
+        return NextResponse.json(
+          { error: "Could not resolve existing account" },
+          { status: 500 }
+        );
+      }
+      userId = raceProfile.id;
+    } else {
+      return NextResponse.json(
+        { error: createError?.message || "Could not create account" },
+        { status: 500 }
+      );
+    }
+  }
+
+  // ── Add captain to group_members ──
+  // Reason: upsert is defensive in case of races (e.g., the same captain
+  // submitting twice in flight).
+  const { error: memberError } = await supabaseAdmin
+    .from("group_members")
+    .upsert(
+      {
+        group_id: groupId,
+        profile_id: userId,
+        role: "member",
+        invited_by: group.created_by,
+      },
+      { onConflict: "group_id,profile_id" }
+    );
+
+  if (memberError) {
+    return NextResponse.json({ error: "Could not add member" }, { status: 500 });
+  }
+
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || "";
+  const redirectTo = `${baseUrl}/profile/groups?group=${groupId}`;
+
+  if (isNewUser) {
+    // Frictionless path: mint a hashed_token so the frontend can verifyOtp()
+    // and log the new user in immediately, without any inbox click.
+    const { data: linkData, error: linkError } =
+      await supabaseAdmin.auth.admin.generateLink({
+        type: "magiclink",
+        email,
+        options: { redirectTo },
+      });
+
+    if (linkError || !linkData?.properties?.hashed_token) {
+      return NextResponse.json({ error: "Could not generate session" }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      groupId,
+      isNewUser: true,
+      tokenHash: linkData.properties.hashed_token,
+    });
+  }
+
+  // Existing-user takeover defense: do NOT mint a session here. The frontend
+  // will call supabase.auth.signInWithOtp({ email }) which sends a real magic
+  // link to the inbox. The captain must click from their own inbox to log in,
+  // proving ownership of the email.
+  return NextResponse.json({
+    groupId,
+    isNewUser: false,
+    existingUser: true,
+  });
+}
