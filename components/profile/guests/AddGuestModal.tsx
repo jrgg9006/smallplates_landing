@@ -172,7 +172,7 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded, isFirstGuest = fa
           {/* Email */}
           <div>
             <Label htmlFor="email" className="text-sm font-medium text-gray-600">
-              Email
+              Email (Optional)
             </Label>
             <Input
               id="email"
