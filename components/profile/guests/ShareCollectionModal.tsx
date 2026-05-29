@@ -229,14 +229,20 @@ export function ShareCollectionModal({
       ? `<img src="${photoUrl}" width="320" alt="${couple}" style="display:block;width:320px;max-width:100%;height:320px;object-fit:cover;border-radius:12px;margin:0 auto 24px;" />`
       : "";
 
+    // Reason: emulate Paperless Post's pattern — plain centered text + simple
+    // underlined link. Email clients (Gmail compose, Outlook web, Apple Mail)
+    // can strip buttons/backgrounds/border-radius, but they always respect:
+    // basic <p>/<a>, font-family, font-size, color, text-align:center, and
+    // letter-spacing. Caps are written into the source so they survive even
+    // if text-transform gets stripped.
     return `
-<div style="font-family:Georgia,'Times New Roman',serif;max-width:480px;margin:0 auto;color:#2D2D2D;line-height:1.5;text-align:center;">
-  <p style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#6B6B6B;margin:0 0 8px;">Share a recipe with</p>
-  <h2 style="font-size:24px;font-weight:500;margin:0 0 20px;color:#2D2D2D;">${couple}</h2>
+<div style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:0 auto;color:#2D2D2D;line-height:1.6;text-align:center;">
+  <p style="font-size:18px;color:#2D2D2D;margin:0 0 4px;">Share a recipe with</p>
+  <p style="font-size:22px;line-height:1.2;margin:0 0 24px;color:#2D2D2D;"><b>${couple}</b></p>
   ${imgBlock}
-  <p style="font-size:15px;color:#6B6B6B;margin:0 0 24px;line-height:1.6;">We're gifting them a hardcover cookbook. We want to include your recipe.</p>
+  <p style="font-size:16px;color:#2D2D2D;margin:0 0 20px;line-height:1.5;">We're gifting them a hardcover cookbook. We want to include your recipe.</p>
   <p style="margin:0;">
-    <a href="${collectionUrl}" style="display:inline-block;background:#D4A854;color:#FFFFFF;padding:12px 28px;border-radius:999px;text-decoration:none;font-weight:600;font-size:14px;">Add Your Recipe →</a>
+    <a href="${collectionUrl}" style="color:#2D2D2D;font-size:16px;text-decoration:underline;"><b>Add your recipe</b></a>
   </p>
 </div>
     `.trim();

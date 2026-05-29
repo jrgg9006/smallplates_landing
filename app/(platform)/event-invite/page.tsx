@@ -223,37 +223,26 @@ function EventInviteContent() {
       ? `<img src="${photoUrl}" width="320" alt="${title}" style="display:block;width:320px;max-width:100%;height:320px;object-fit:cover;border-radius:12px;margin:0 auto 24px;" />`
       : "";
 
-    // Reason: Gmail/Outlook compose strip <a> with display:inline-block. Use
-    // table-based buttons (industry standard for transactional email).
-    const primaryButton = `
-<table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 12px;border-collapse:separate;">
-  <tr>
-    <td bgcolor="#D4A854" style="background-color:#D4A854;border-radius:999px;padding:14px 36px;text-align:center;">
-      <a href="${recipeUrl}" style="color:#FFFFFF;text-decoration:none;font-size:15px;font-family:Arial,Helvetica,sans-serif;"><b>Share a Recipe &rarr;</b></a>
-    </td>
-  </tr>
-</table>`;
-
-    const secondaryButton = `
-<table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;border-collapse:separate;">
-  <tr>
-    <td style="border:1px solid #2D2D2D;border-radius:999px;padding:13px 36px;text-align:center;">
-      <a href="${inviteUrl}" style="color:#2D2D2D;text-decoration:none;font-size:14px;font-family:Arial,Helvetica,sans-serif;"><b>View Invite</b></a>
-    </td>
-  </tr>
-</table>`;
-
+    // Reason: Paperless Post-style plain text + underlined links. Email clients
+    // (Gmail compose, Outlook web, Apple Mail) can strip buttons/backgrounds,
+    // but they ALWAYS respect <a> tags + basic font styling + text-align:center.
+    // Trades visual impact for 100% reliability when the user pastes into their
+    // own compose window.
     return `
-<div style="font-family:Georgia,'Times New Roman',serif;max-width:520px;margin:0 auto;color:#2D2D2D;line-height:1.5;text-align:center;">
-  <p style="font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:#6B6B6B;margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;"><b>You're invited</b></p>
-  <h2 style="font-size:38px;line-height:1.15;margin:0 0 28px;color:#2D2D2D;font-family:Georgia,'Times New Roman',serif;"><b>${title}</b></h2>
+<div style="font-family:Arial,Helvetica,sans-serif;max-width:520px;margin:0 auto;color:#2D2D2D;line-height:1.6;text-align:center;">
+  <p style="font-size:18px;color:#2D2D2D;margin:0 0 4px;">You're invited to</p>
+  <p style="font-size:32px;line-height:1.2;margin:0 0 28px;color:#2D2D2D;"><b>${title}</b></p>
   ${imgBlock}
-  ${dateLine ? `<p style="font-size:14px;letter-spacing:0.1em;text-transform:uppercase;color:#2D2D2D;margin:0 0 32px;font-family:Arial,Helvetica,sans-serif;"><b>${dateLine}</b></p>` : ""}
-  ${venue ? `<p style="font-size:14px;letter-spacing:0.1em;text-transform:uppercase;color:#2D2D2D;margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;"><b>${venue}</b></p>` : ""}
-  ${location ? `<p style="font-size:14px;color:#6B6B6B;margin:0 0 32px;font-family:Arial,Helvetica,sans-serif;">${location}</p>` : ""}
-  <p style="font-size:15px;color:#6B6B6B;margin:0 0 28px;line-height:1.6;font-family:Arial,Helvetica,sans-serif;">${safeMessage}</p>
-  ${primaryButton}
-  ${secondaryButton}
+  ${dateLine ? `<p style="font-size:16px;color:#2D2D2D;margin:0 0 20px;"><b>${dateLine}</b></p>` : ""}
+  ${venue ? `<p style="font-size:16px;color:#2D2D2D;margin:0 0 2px;"><b>${venue}</b></p>` : ""}
+  ${location ? `<p style="font-size:15px;color:#2D2D2D;margin:0 0 24px;">${location}</p>` : ""}
+  <p style="font-size:15px;color:#2D2D2D;margin:0 0 28px;line-height:1.6;">${safeMessage}</p>
+  <p style="margin:0 0 12px;">
+    <a href="${recipeUrl}" style="color:#2D2D2D;font-size:16px;text-decoration:underline;"><b>Share a recipe</b></a>
+  </p>
+  <p style="margin:0;">
+    <a href="${inviteUrl}" style="color:#2D2D2D;font-size:14px;text-decoration:underline;">View invite</a>
+  </p>
 </div>
     `.trim();
   };
