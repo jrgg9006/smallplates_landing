@@ -96,10 +96,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch group data for email
+    // Fetch group data for email (incl. organizer's custom body)
     const { data: group } = await supabase
       .from('groups')
-      .select('name, couple_first_name, partner_first_name, couple_image_url, created_by')
+      .select('name, couple_first_name, partner_first_name, couple_image_url, created_by, email_reminder_message')
       .eq('id', groupId)
       .single();
 
@@ -132,21 +132,9 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
       .single();
 
-    // Reason: emails_sent_count tracks total emails sent (1 = initial invite).
-    // Next email number = current count + 1, clamped to max 4 (last template).
-    const nextEmailNumber = Math.min((guest.emails_sent_count || 1) + 1, 4) as 1 | 2 | 3 | 4;
-
-    // Reason: Template 3 uses recipe count for social proof ("X people already shared")
-    let recipeCount: number | undefined;
-    if (nextEmailNumber === 3) {
-      const { count } = await supabase
-        .from('guest_recipes')
-        .select('id', { count: 'exact', head: true })
-        .eq('group_id', groupId)
-        .is('deleted_at', null);
-      recipeCount = count || undefined;
-    }
-
+    // Reason: simplified MVP — single reminder template (email2) regardless
+    // of how many times we've reminded this guest before. The max-emails-per-guest
+    // guard above still enforces the cap.
     const result = await sendGuestInvitationEmail({
       to: guest.email,
       guestName: guest.first_name,
@@ -154,8 +142,8 @@ export async function POST(request: NextRequest) {
       collectionLink,
       coupleImageUrl: group.couple_image_url || undefined,
       captainName: senderProfile?.full_name || undefined,
-      emailNumber: nextEmailNumber,
-      recipeCount,
+      emailNumber: 2,
+      customBody: group.email_reminder_message || undefined,
     });
 
     if (!result.success) {

@@ -22,6 +22,7 @@ import { getWeddingDisplayText, type WeddingTimeline } from "@/lib/utils/dateFor
 import { getCurrentProfile } from "@/lib/supabase/profiles";
 import { ShareCollectionModal } from "@/components/profile/guests/ShareCollectionModal";
 import { GuestNavigationSheet } from "@/components/profile/guests/GuestNavigationSheet";
+import { SendRemindersModal } from "@/components/profile/guests/SendRemindersModal";
 import { GuestDetailsModal } from "@/components/profile/guests/GuestDetailsModal";
 import { getUserCollectionToken } from "@/lib/supabase/collection";
 import { createShareURL, extractOgVersion } from "@/lib/utils/sharing";
@@ -73,6 +74,7 @@ export default function GroupsPage() {
   const [collectionToken, setCollectionToken] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [showCloseBookModal, setShowCloseBookModal] = useState(false);
+  const [showRemindersModal, setShowRemindersModal] = useState(false);
   const [bookReviewed, setBookReviewed] = useState(false);
   
   // Profile state
@@ -629,11 +631,6 @@ export default function GroupsPage() {
           groupId={selectedGroup.id}
           coupleNames={selectedGroup.name}
           coupleImageUrl={selectedGroup.couple_image_url}
-          collectionUrl={collectionToken ? createShareURL(window.location.origin, collectionToken, {
-            groupId: selectedGroup.id,
-            imgVersion: extractOgVersion(selectedGroup.couple_image_og_url),
-          }) : null}
-          senderName={senderName}
           onBack={() => setActiveView('book')}
           onOpenGuestSheet={() => setShowGuestSheet(true)}
         />
@@ -775,10 +772,10 @@ export default function GroupsPage() {
                   Add a Recipe
                 </button>
 
-                {/* Send Reminders — placeholder */}
+                {/* Send Reminders */}
                 <button
                   className="btn btn-sm btn-outline"
-                  onClick={() => {}}
+                  onClick={() => setShowRemindersModal(true)}
                   disabled={!selectedGroup}
                 >
                   Send Reminders
@@ -870,6 +867,15 @@ export default function GroupsPage() {
             }
           }}
           openExpanded={shareOpenExpanded}
+        />
+      )}
+
+      {/* Send Reminders modal */}
+      {selectedGroup && (
+        <SendRemindersModal
+          isOpen={showRemindersModal}
+          onClose={() => setShowRemindersModal(false)}
+          groupId={selectedGroup.id}
         />
       )}
 

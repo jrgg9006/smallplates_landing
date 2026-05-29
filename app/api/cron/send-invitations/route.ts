@@ -9,16 +9,16 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Email schedule: which email to send on which day
+// Email schedule: which email to send on which day.
+// Reason: simplified for MVP — only invite (day 0) and one reminder (day 5).
+// Email templates 3 & 4 were removed. The cron now sends at most 2 emails per guest.
 const EMAIL_SCHEDULE = [
   { day: 0, emailNumber: 1 },
-  { day: 3, emailNumber: 2 },
-  { day: 6, emailNumber: 3 },
-  { day: 9, emailNumber: 4 },
+  { day: 5, emailNumber: 2 },
 ] as const;
 
 // After this many days with all emails sent, mark as completed
-const COMPLETION_DAY = 10;
+const COMPLETION_DAY = 6;
 
 export async function GET(request: Request) {
   // Verify the request is from Vercel Cron
@@ -100,8 +100,8 @@ export async function GET(request: Request) {
 
         console.log(`Processing ${guest.first_name} (${guest.email}): Day ${daysSinceStart}, Emails sent: ${emailsSentCount}`);
 
-        // Check if we should mark as completed
-        if (daysSinceStart >= COMPLETION_DAY && emailsSentCount >= 4) {
+        // Check if we should mark as completed (after both emails sent)
+        if (daysSinceStart >= COMPLETION_DAY && emailsSentCount >= 2) {
           console.log(`Marking ${guest.first_name} as completed`);
           await supabaseAdmin
             .from('guests')
@@ -122,9 +122,9 @@ export async function GET(request: Request) {
         }
 
         // Determine which email to send (the next one after what we've already sent)
-        const emailToSend = (emailsSentCount + 1) as 1 | 2 | 3 | 4;
+        const emailToSend = (emailsSentCount + 1) as 1 | 2;
 
-        if (emailToSend > 4) {
+        if (emailToSend > 2) {
           console.log(`All emails already sent for ${guest.first_name}`);
           continue;
         }

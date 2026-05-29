@@ -15,6 +15,10 @@ interface InvitationTemplateParams {
   coupleImageUrl?: string;
   captainName?: string;
   recipeCount?: number;
+  // Reason: when set, replaces the hardcoded body copy with the organizer's
+  // edited message. Each newline becomes a paragraph break. Used for both the
+  // initial invite and the reminder.
+  customBody?: string;
 }
 
 // Base template wrapper with all styles
@@ -142,6 +146,28 @@ function coupleImageSection(coupleImageUrl: string | undefined, coupleDisplayNam
                       </table>`;
 }
 
+// Reason: render a user-edited custom body as paragraphs. Each blank line in
+// the source becomes a paragraph break. HTML is escaped to prevent injection.
+function customBodySection(body: string): string {
+  const escapeHtml = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const paragraphs = body
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => escapeHtml(p).replace(/\n/g, "<br/>"))
+    .map((p) => `<p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">${p}</p>`)
+    .join("\n                            ");
+  return `
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                          <td align="center" style="max-width: 340px; margin: 0 auto;">
+                            ${paragraphs}
+                          </td>
+                        </tr>
+                      </table>`;
+}
+
 // CTA Button — dark charcoal, uppercase tracking
 function ctaButton(link: string, text: string = "ADD YOUR RECIPE"): string {
   return `
@@ -211,16 +237,16 @@ function heroSection(coupleDisplayName: string): string {
 // EMAIL 1: Initial Invitation
 // ============================================
 export function invitationEmail1(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
-  const { coupleDisplayName, collectionLink, coupleImageUrl } = params;
+  const { coupleDisplayName, collectionLink, coupleImageUrl, customBody } = params;
 
-  const subject = `Can you send a recipe for ${coupleDisplayName}'s cookbook?`;
+  const subject = `Your recipe goes in ${coupleDisplayName}'s cookbook`;
 
-  const content = `
-                      ${heroSection(coupleDisplayName)}
-
-                      ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
-
-                      <!-- Body Copy -->
+  // Reason: when the organizer edited a custom body, use it; otherwise fall back
+  // to the brand-default copy.
+  const bodySection = customBody?.trim()
+    ? customBodySection(customBody)
+    : `
+                      <!-- Body Copy (default) -->
                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                         <tr>
                           <td align="center" style="max-width: 340px; margin: 0 auto;">
@@ -235,17 +261,26 @@ export function invitationEmail1(params: InvitationTemplateParams): { subject: s
                             </p>
                           </td>
                         </tr>
-                      </table>
+                      </table>`;
+
+  const content = `
+                      ${heroSection(coupleDisplayName)}
+
+                      ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
+
+                      ${bodySection}
 
                       ${ctaButton(collectionLink)}`;
 
-  const text = `A wedding cookbook gift for ${coupleDisplayName}
-
-We're making them a cookbook. A real one. With recipes from the people who matter most to them.
+  const defaultText = `We're making them a cookbook. A real one. With recipes from the people who matter most to them.
 
 Send a recipe and you're in their kitchen.
 
-Doesn't have to be fancy. Just has to be yours.
+Doesn't have to be fancy. Just has to be yours.`;
+
+  const text = `A wedding cookbook gift for ${coupleDisplayName}
+
+${customBody?.trim() || defaultText}
 
 Add your recipe: ${collectionLink}
 
@@ -258,36 +293,26 @@ Add your recipe: ${collectionLink}
 // EMAIL 2: First Reminder
 // ============================================
 export function invitationEmail2(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
-  const { coupleDisplayName, guestName, collectionLink, coupleImageUrl } = params;
+  const { coupleDisplayName, guestName, collectionLink, coupleImageUrl, customBody } = params;
 
   const subject = `Still thinking what recipe to send?`;
+
+  const defaultBody = `Hi ${guestName}, ${coupleDisplayName}'s cookbook is coming together and your page is still open.\n\nSend a recipe and you're in their kitchen.`;
+
+  const bodySection = customBody?.trim()
+    ? customBodySection(customBody)
+    : customBodySection(defaultBody);
 
   const content = `
                       ${heroSection(coupleDisplayName)}
 
                       ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
 
-                      <!-- Body Copy -->
-                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                        <tr>
-                          <td align="center">
-                            <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-                              Hi ${guestName}, ${coupleDisplayName}'s cookbook is coming together and your page is still open.
-                            </p>
-                            <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #2D2D2D; font-weight: 600; line-height: 1.6; text-align: center;" class="darkmode-text">
-                              Send a recipe and you're in their kitchen.
-                            </p>
-                          </td>
-                        </tr>
-                      </table>
+                      ${bodySection}
 
                       ${ctaButton(collectionLink)}`;
 
-  const text = `Hi ${guestName},
-
-${coupleDisplayName}'s cookbook is coming together and your page is still open.
-
-Send a recipe and you're in their kitchen.
+  const text = `${customBody?.trim() || defaultBody}
 
 Add your recipe: ${collectionLink}
 
@@ -299,99 +324,12 @@ Add your recipe: ${collectionLink}
 // ============================================
 // EMAIL 3: Second Reminder with Social Proof
 // ============================================
-export function invitationEmail3(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
-  const { coupleDisplayName, guestName, collectionLink, coupleImageUrl, recipeCount } = params;
-
-  const showSocialProof = recipeCount && recipeCount >= 10;
-
-  const subject = showSocialProof
-    ? `${coupleDisplayName}'s cookbook is taking shape`
-    : `There's still time`;
-
-  const bodyContent = showSocialProof
-    ? `<p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-         Hi ${guestName}, ${recipeCount} people have already shared their recipes.
-       </p>
-       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #2D2D2D; font-weight: 600; line-height: 1.6; text-align: center;" class="darkmode-text">
-         There's still room for yours.
-       </p>`
-    : `<p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-         Hi ${guestName}, we know life gets busy. But if you've been meaning to add your recipe to ${coupleDisplayName}'s book, now's a good time.
-       </p>
-       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #2D2D2D; font-weight: 600; line-height: 1.6; text-align: center;" class="darkmode-text">
-         Five minutes. One recipe. A page in their kitchen.
-       </p>`;
-
-  const content = `
-                      ${heroSection(coupleDisplayName)}
-
-                      ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
-
-                      <!-- Body Copy -->
-                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                        <tr>
-                          <td align="center">
-                            ${bodyContent}
-                          </td>
-                        </tr>
-                      </table>
-
-                      ${ctaButton(collectionLink)}`;
-
-  const textBody = showSocialProof
-    ? `Hi ${guestName},\n\n${recipeCount} people have already shared their recipes.\n\nThere's still room for yours.`
-    : `Hi ${guestName},\n\nWe know life gets busy. But if you've been meaning to add your recipe to ${coupleDisplayName}'s book, now's a good time.\n\nFive minutes. One recipe. A page in their kitchen.`;
-
-  const text = `${textBody}\n\nAdd your recipe: ${collectionLink}\n\n5 minutes. That's it.\n\nSomething off? Just reply to this email.${params.captainName ? `\n\nThis invitation was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
-
-  return { subject, html: baseTemplate(content, subject, params.captainName), text };
-}
-
+// Templates 3 and 4 removed — single reminder (email2) is enough for MVP.
 // ============================================
-// EMAIL 4: Last Reminder
-// ============================================
-export function invitationEmail4(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
-  const { coupleDisplayName, guestName, collectionLink, coupleImageUrl } = params;
 
-  const subject = `Last call for ${coupleDisplayName}'s book`;
-
-  const content = `
-                      ${heroSection(coupleDisplayName)}
-
-                      ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
-
-                      <!-- Body Copy -->
-                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                        <tr>
-                          <td align="center">
-                            <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-                              Hi ${guestName}, this is our last reminder about ${coupleDisplayName}'s recipe book.
-                            </p>
-                            <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #2D2D2D; font-weight: 600; line-height: 1.6; text-align: center;" class="darkmode-text">
-                              No hard feelings if not. But the door's still open.
-                            </p>
-                          </td>
-                        </tr>
-                      </table>
-
-                      ${ctaButton(collectionLink)}`;
-
-  const text = `Hi ${guestName},
-
-This is our last reminder about ${coupleDisplayName}'s recipe book.
-
-No hard feelings if not. But the door's still open.
-
-Add your recipe: ${collectionLink}
-
-5 minutes. That's it.\n\nSomething off? Just reply to this email.${params.captainName ? `\n\nThis invitation was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
-
-  return { subject, html: baseTemplate(content, subject, params.captainName), text };
-}
-
-// Helper to get template by number
+// Helper to get template by number — only 1 (invite) and 2 (reminder) supported.
 export function getInvitationTemplate(
-  emailNumber: 1 | 2 | 3 | 4,
+  emailNumber: 1 | 2,
   params: InvitationTemplateParams
 ): { subject: string; html: string; text: string } {
   switch (emailNumber) {
@@ -399,10 +337,6 @@ export function getInvitationTemplate(
       return invitationEmail1(params);
     case 2:
       return invitationEmail2(params);
-    case 3:
-      return invitationEmail3(params);
-    case 4:
-      return invitationEmail4(params);
     default:
       throw new Error(`Invalid email number: ${emailNumber}`);
   }

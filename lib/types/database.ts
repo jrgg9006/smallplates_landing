@@ -472,6 +472,8 @@ export interface Database {
           invite_title: string | null;
           invite_tagline: string | null;
           invite_message: string | null;
+          email_invite_message: string | null;
+          email_reminder_message: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -515,6 +517,8 @@ export interface Database {
           invite_title?: string | null;
           invite_tagline?: string | null;
           invite_message?: string | null;
+          email_invite_message?: string | null;
+          email_reminder_message?: string | null;
         };
         Update: {
           name?: string;
@@ -555,6 +559,8 @@ export interface Database {
           invite_title?: string | null;
           invite_tagline?: string | null;
           invite_message?: string | null;
+          email_invite_message?: string | null;
+          email_reminder_message?: string | null;
         };
       };
       group_members: {

@@ -4,15 +4,23 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import {
   Mail,
   Check,
-  Clock,
-  Send,
   Loader2,
   ChevronLeft,
   Plus,
   X,
+  Pencil,
 } from "lucide-react";
 import { getGuestsByGroup, updateGuest, addGuest } from "@/lib/supabase/guests";
+import { getGroupById } from "@/lib/supabase/groups";
 import type { Guest } from "@/lib/types/database";
+
+const DEFAULT_BODY = `We're making them a cookbook. A real one. With recipes from the people who matter most to them.
+
+Send a recipe and you're in their kitchen.
+
+Doesn't have to be fancy. Just has to be yours.`;
+
+const MAX_BODY_CHARS = 500;
 
 interface SendInvitationsPageProps {
   groupId: string;
@@ -23,8 +31,6 @@ interface SendInvitationsPageProps {
   onBack: () => void;
   onOpenGuestSheet: () => void;
 }
-
-type Tab = "compose" | "sent";
 
 export function SendInvitationsPage({
   groupId,
@@ -37,15 +43,12 @@ export function SendInvitationsPage({
 }: SendInvitationsPageProps) {
   const [guests, setGuests] = useState<Guest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<Tab>("compose");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isSending, setIsSending] = useState(false);
   const [sendResult, setSendResult] = useState<{
     sent: number;
     failed: number;
   } | null>(null);
-  const [remindingId, setRemindingId] = useState<string | null>(null);
-  const [remindedIds, setRemindedIds] = useState<Set<string>>(new Set());
   const [showAddEmails, setShowAddEmails] = useState(false);
   const [emailDrafts, setEmailDrafts] = useState<Record<string, string>>({});
   const [isSavingEmails, setIsSavingEmails] = useState(false);
@@ -55,7 +58,8 @@ export function SendInvitationsPage({
   const [newGuestPrintedName, setNewGuestPrintedName] = useState("");
   const [newGuestEmail, setNewGuestEmail] = useState("");
   const [isSavingGuest, setIsSavingGuest] = useState(false);
-  const [selectedSentGuestId, setSelectedSentGuestId] = useState<string | null>(null);
+  const [bodyMessage, setBodyMessage] = useState(DEFAULT_BODY);
+  const [bodySaved, setBodySaved] = useState(false);
 
   const loadGuests = useCallback(async () => {
     setLoading(true);
@@ -71,9 +75,32 @@ export function SendInvitationsPage({
       loadGuests();
       setSendResult(null);
       setSelectedIds(new Set());
-      setRemindedIds(new Set());
+      // Reason: Load any saved custom body so the textarea shows what's already persisted
+      getGroupById(groupId).then(({ data }) => {
+        if (data?.email_invite_message) {
+          setBodyMessage(data.email_invite_message);
+        }
+      });
     }
   }, [groupId, loadGuests]);
+
+  const handleSaveBody = async () => {
+    const trimmed = bodyMessage.trim();
+    // Reason: Don't save if it's the default — keeps the column NULL so the
+    // template renders the default copy via its own fallback.
+    const valueToSave = trimmed === DEFAULT_BODY.trim() ? null : trimmed;
+    try {
+      await fetch(`/api/v1/groups/${groupId}/event-details`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email_invite_message: valueToSave }),
+      });
+      setBodySaved(true);
+      setTimeout(() => setBodySaved(false), 1500);
+    } catch {
+      // Silently fail — user can retry
+    }
+  };
 
   // Reason: Filter guests with valid emails (not null, not empty, not NO_EMAIL_ prefix)
   const hasValidEmail = (guest: Guest) =>
@@ -92,21 +119,6 @@ export function SendInvitationsPage({
       guests.filter(
         (g) => !g.invitation_started_at && !hasValidEmail(g)
       ),
-    [guests]
-  );
-
-  const invitedGuests = useMemo(
-    () =>
-      guests
-        .filter((g) => g.invitation_started_at)
-        .sort((a, b) => {
-          // Pending first (actionable), then recipe added
-          const aHasRecipe = (a.recipes_received || 0) > 0;
-          const bHasRecipe = (b.recipes_received || 0) > 0;
-          if (aHasRecipe !== bHasRecipe) return aHasRecipe ? 1 : -1;
-          return new Date(b.invitation_started_at!).getTime() -
-            new Date(a.invitation_started_at!).getTime();
-        }),
     [guests]
   );
 
@@ -150,7 +162,6 @@ export function SendInvitationsPage({
         setTimeout(() => setSendResult(null), 4000);
         setSelectedIds(new Set());
         await loadGuests();
-        setActiveTab("sent");
       } else {
         setSendResult({ sent: 0, failed: selectedIds.size });
       }
@@ -158,32 +169,6 @@ export function SendInvitationsPage({
       setSendResult({ sent: 0, failed: selectedIds.size });
     } finally {
       setIsSending(false);
-    }
-  };
-
-  const handleRemind = async (guestId: string) => {
-    setRemindingId(guestId);
-    try {
-      const response = await fetch("/api/v1/guests/remind", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ guestId, groupId }),
-      });
-
-      if (response.ok) {
-        setRemindedIds((prev) => new Set(prev).add(guestId));
-        setTimeout(() => {
-          setRemindedIds((prev) => {
-            const next = new Set(prev);
-            next.delete(guestId);
-            return next;
-          });
-        }, 3000);
-      }
-    } catch {
-      // Silently fail — user can retry
-    } finally {
-      setRemindingId(null);
     }
   };
 
@@ -231,80 +216,7 @@ export function SendInvitationsPage({
     setNewGuestEmail("");
   };
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const emailSubject = `We need your recipe`;
-
-  // Reason: When user selects a guest in the Sent tab, the preview updates
-  // to show the exact email that would be sent to that guest on the next remind.
-  const selectedSentGuest = useMemo(
-    () => invitedGuests.find((g) => g.id === selectedSentGuestId) || null,
-    [invitedGuests, selectedSentGuestId]
-  );
-
-  const selectedGuestName = selectedSentGuest?.first_name || "there";
-
-  const previewEmailNumber = useMemo((): 1 | 2 | 3 | 4 => {
-    if (activeTab !== "sent" || !selectedSentGuest) return 1;
-    return Math.min((selectedSentGuest.emails_sent_count || 1) + 1, 4) as 1 | 2 | 3 | 4;
-  }, [activeTab, selectedSentGuest]);
-
-  const emailContent = useMemo(() => {
-    const content: Record<1 | 2 | 3 | 4, { subject: string; headerLabel: string; headerColor: string; body: React.ReactNode }> = {
-      1: {
-        subject: `We need your recipe.`,
-        headerLabel: "New Email",
-        headerColor: "bg-brand-charcoal",
-        body: (
-          <>
-            <p>We&apos;re making them a cookbook. A real one. With recipes from the people who matter most to them.</p>
-            <p>Send a recipe and you&apos;re in their kitchen.</p>
-            <p className="text-brand-charcoal font-medium">Doesn&apos;t have to be fancy. Just has to be yours.</p>
-          </>
-        ),
-      },
-      2: {
-        subject: "Still thinking what recipe to send?",
-        headerLabel: "Reminder 1 of 3",
-        headerColor: "bg-brand-honey",
-        body: (
-          <>
-            <p>Hi {selectedGuestName}, {coupleNames}&apos;s cookbook is coming together and your page is still open.</p>
-            <p className="text-brand-charcoal font-medium">Doesn&apos;t have to be fancy. Just has to be yours.</p>
-          </>
-        ),
-      },
-      3: {
-        subject: "There's still time",
-        headerLabel: "Reminder 2 of 3",
-        headerColor: "bg-brand-honey",
-        body: (
-          <>
-            <p>Hi {selectedGuestName}, we know life gets busy. {coupleNames}&apos;s recipe book is still open, and there&apos;s still room for yours.</p>
-            <p className="text-brand-charcoal font-medium">Five minutes. One recipe. A page in their kitchen.</p>
-          </>
-        ),
-      },
-      4: {
-        subject: `Last call for ${coupleNames}'s book`,
-        headerLabel: "Reminder 3 of 3 · Final",
-        headerColor: "bg-[hsl(var(--brand-warm-gray-light))]",
-        body: (
-          <>
-            <p>Hi {selectedGuestName}, this is our last reminder about {coupleNames}&apos;s recipe book.</p>
-            <p className="text-brand-charcoal font-medium">No hard feelings if not. But the door&apos;s still open.</p>
-          </>
-        ),
-      },
-    };
-    return content;
-  }, [coupleNames, selectedGuestName]);
+  const emailSubject = `Your recipe goes in ${coupleNames}'s cookbook`;
 
   return (
     <div>
@@ -383,10 +295,10 @@ export function SendInvitationsPage({
 
           {/* Email card container */}
           <div className="w-full max-w-[560px] rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.08)] overflow-hidden">
-            {/* Header bar — changes color for reminders */}
-            <div className={`${emailContent[previewEmailNumber].headerColor} text-center py-2.5`}>
+            {/* Header bar */}
+            <div className="bg-brand-charcoal text-center py-2.5">
               <span className="text-sm font-medium text-white tracking-wide">
-                {emailContent[previewEmailNumber].headerLabel}
+                New Email
               </span>
             </div>
 
@@ -401,7 +313,7 @@ export function SendInvitationsPage({
               <div className="px-6 py-2.5">
                 <p className="text-sm">
                   <span className="text-[hsl(var(--brand-warm-gray-light))]">Subject:</span>{" "}
-                  <span className="text-brand-charcoal">{emailContent[previewEmailNumber].subject}</span>
+                  <span className="text-brand-charcoal">{emailSubject}</span>
                 </p>
               </div>
             </div>
@@ -430,9 +342,35 @@ export function SendInvitationsPage({
                 </div>
               )}
 
-              {/* Body copy — changes based on which email is being previewed */}
-              <div className="text-[15px] text-[#666666] leading-relaxed max-w-[340px] mx-auto mb-10 space-y-4">
-                {emailContent[previewEmailNumber].body}
+              {/* Body copy — editable, auto-saves on blur */}
+              <div className="max-w-[380px] mx-auto mb-10">
+                <div className="relative group">
+                  <div className="absolute top-2 right-2 flex items-center gap-1 text-[10px] uppercase tracking-wider text-[hsl(var(--brand-warm-gray-light))] pointer-events-none">
+                    <Pencil size={10} />
+                    <span>Editable</span>
+                  </div>
+                  <textarea
+                    value={bodyMessage}
+                    onChange={(e) => setBodyMessage(e.target.value.slice(0, MAX_BODY_CHARS))}
+                    onBlur={handleSaveBody}
+                    rows={6}
+                    maxLength={MAX_BODY_CHARS}
+                    className="w-full text-[15px] text-[#666666] leading-relaxed text-center bg-[hsl(var(--brand-cream))] border border-dashed border-brand-sand hover:border-brand-honey/60 focus:border-brand-honey focus:bg-white resize-none focus:outline-none focus:ring-2 focus:ring-brand-honey/20 rounded-lg transition-all px-5 py-6"
+                    placeholder="Write a quick note to your guests..."
+                  />
+                </div>
+                <div className="flex items-center justify-between mt-2 px-2 text-[11px] text-[hsl(var(--brand-warm-gray-light))]">
+                  <span>
+                    {bodySaved ? (
+                      <span className="text-brand-honey inline-flex items-center gap-1">
+                        <Check size={10} /> Saved automatically
+                      </span>
+                    ) : (
+                      "Click anywhere in the box to edit"
+                    )}
+                  </span>
+                  <span>{bodyMessage.length}/{MAX_BODY_CHARS}</span>
+                </div>
               </div>
 
               {/* CTA button */}
@@ -523,38 +461,6 @@ export function SendInvitationsPage({
             )}
           </div>
 
-          {/* Tabs (hidden when adding emails or guests) */}
-          {!showAddEmails && !showAddGuest && (
-            <div className="px-6 lg:px-8 pt-3 lg:pt-5">
-              <div className="flex border-b border-brand-sand">
-                <button
-                  onClick={() => setActiveTab("compose")}
-                  className={`pb-3.5 px-1 mr-6 text-[15px] font-medium transition-colors border-b-2 ${
-                    activeTab === "compose"
-                      ? "border-brand-charcoal text-brand-charcoal"
-                      : "border-transparent text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal"
-                  }`}
-                >
-                  Invite ({uninvitedGuests.length})
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveTab("sent");
-                    // Reason: auto-select first pending guest so the preview updates immediately
-                    const firstPending = invitedGuests.find((g) => (g.recipes_received || 0) === 0);
-                    if (firstPending) setSelectedSentGuestId(firstPending.id);
-                  }}
-                  className={`pb-3.5 px-1 text-[15px] font-medium transition-colors border-b-2 ${
-                    activeTab === "sent"
-                      ? "border-brand-charcoal text-brand-charcoal"
-                      : "border-transparent text-[hsl(var(--brand-warm-gray-light))] hover:text-brand-charcoal"
-                  }`}
-                >
-                  Sent &amp; Reminders ({invitedGuests.length})
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Success toast */}
           {sendResult && sendResult.sent > 0 && (
@@ -668,15 +574,18 @@ export function SendInvitationsPage({
                   </div>
                 ))}
               </div>
-            ) : activeTab === "compose" ? (
-              /* ── Compose Tab ── */
+            ) : (
+              /* ── Compose ── */
               uninvitedGuests.length === 0 && guestsWithoutEmail.length === 0 ? (
-                <div className="text-center py-16">
+                <div className="text-center py-16 px-6">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                     <Check className="w-8 h-8 text-brand-honey" />
                   </div>
-                  <p className="text-[hsl(var(--brand-warm-gray-light))] text-sm">
+                  <p className="text-[hsl(var(--brand-warm-gray-light))] text-sm mb-3">
                     All guests have been invited.
+                  </p>
+                  <p className="text-[hsl(var(--brand-warm-gray-light))] text-xs leading-relaxed max-w-[240px] mx-auto">
+                    Want to nudge someone? Click <span className="font-medium text-brand-charcoal">Send Reminders</span> on the dashboard.
                   </p>
                 </div>
               ) : (
@@ -746,96 +655,6 @@ export function SendInvitationsPage({
                   </div>
                 </>
               )
-            ) : (
-              /* ── Sent Tab ── */
-              invitedGuests.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-                    <Send className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <p className="text-[hsl(var(--brand-warm-gray-light))] text-sm">
-                    No invitations sent yet.
-                  </p>
-                </div>
-              ) : (
-                <div>
-                  {invitedGuests.map((guest) => {
-                    const hasRecipe = (guest.recipes_received || 0) > 0;
-                    const isReminding = remindingId === guest.id;
-                    const justReminded = remindedIds.has(guest.id);
-                    const remindersSent = Math.max((guest.emails_sent_count || 1) - 1, 0);
-                    const allRemindersSent = (guest.emails_sent_count || 1) >= 4;
-                    const isSelected = selectedSentGuestId === guest.id;
-
-                    return (
-                      <div
-                        key={guest.id}
-                        onClick={() => !hasRecipe && setSelectedSentGuestId(guest.id)}
-                        className={`flex items-center gap-3 py-3.5 border-b border-[#F5F5F4] transition-colors ${
-                          !hasRecipe ? "cursor-pointer hover:bg-brand-warm-white-warm" : ""
-                        } ${isSelected ? "bg-brand-warm-white-warm border-l-2 border-l-brand-honey" : ""}`}
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-brand-charcoal truncate">
-                            {guest.first_name} {guest.last_name || ""}
-                          </p>
-                          <p className="text-xs text-[hsl(var(--brand-warm-gray-light))]">
-                            Invited{" "}
-                            {guest.invitation_started_at
-                              ? formatDate(guest.invitation_started_at)
-                              : ""}
-                            {remindersSent > 0 && (
-                              <span> · {remindersSent} reminder{remindersSent !== 1 ? "s" : ""} sent</span>
-                            )}
-                            {guest.last_email_sent_at && remindersSent > 0 && (
-                              <span> · Last: {formatDate(guest.last_email_sent_at)}</span>
-                            )}
-                          </p>
-                          {guest.email && !guest.email.startsWith("NO_EMAIL_") && (
-                            <p className="text-xs text-gray-400 truncate">{guest.email}</p>
-                          )}
-                        </div>
-
-                        {hasRecipe ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-brand-honey/10 text-brand-honey">
-                            <Check size={12} />
-                            Recipe added
-                          </span>
-                        ) : allRemindersSent ? (
-                          <span className="text-xs text-[hsl(var(--brand-warm-gray-light))] px-2.5 py-1">
-                            3 of 3 sent
-                          </span>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleRemind(guest.id); }}
-                              disabled={isReminding || justReminded}
-                              className="text-xs font-medium px-3 py-1.5 rounded-md border border-brand-sand text-brand-charcoal hover:border-brand-charcoal transition-colors disabled:opacity-50 disabled:cursor-default"
-                            >
-                              {isReminding ? (
-                                <span className="flex items-center gap-1">
-                                  <Loader2
-                                    size={12}
-                                    className="animate-spin"
-                                  />
-                                  Sending
-                                </span>
-                              ) : justReminded ? (
-                                <span className="flex items-center gap-1 text-brand-honey">
-                                  <Check size={12} />
-                                  Sent
-                                </span>
-                              ) : (
-                                `Remind`
-                              )}
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )
             )}
           </div>
 
@@ -894,7 +713,7 @@ export function SendInvitationsPage({
                 )}
               </button>
             </div>
-          ) : activeTab === "compose" && uninvitedGuests.length > 0 ? (
+          ) : uninvitedGuests.length > 0 ? (
             <div className="px-6 lg:px-8 py-6 border-t border-brand-sand bg-white">
               <button
                 onClick={handleSendInvitations}

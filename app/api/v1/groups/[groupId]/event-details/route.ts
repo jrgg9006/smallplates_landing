@@ -40,7 +40,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { event_date, event_time, event_location, event_venue, invite_title, invite_tagline, invite_message } = body;
+    const { event_date, event_time, event_location, event_venue, invite_title, invite_tagline, invite_message, email_invite_message, email_reminder_message } = body;
 
     const updateFields: Record<string, string | null> = {};
     if (event_date !== undefined) updateFields.event_date = event_date?.trim() || null;
@@ -50,6 +50,8 @@ export async function PATCH(
     if (invite_title !== undefined) updateFields.invite_title = invite_title?.trim() || null;
     if (invite_tagline !== undefined) updateFields.invite_tagline = invite_tagline?.trim() || null;
     if (invite_message !== undefined) updateFields.invite_message = invite_message?.trim() || null;
+    if (email_invite_message !== undefined) updateFields.email_invite_message = email_invite_message?.trim() || null;
+    if (email_reminder_message !== undefined) updateFields.email_reminder_message = email_reminder_message?.trim() || null;
 
     const { data, error: updateError } = await supabase
       .from('groups')
