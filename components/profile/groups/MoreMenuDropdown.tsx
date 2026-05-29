@@ -61,15 +61,6 @@ export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsO
             Send Invitations
           </button>
         )}
-        <button
-          onClick={() => {
-            onEditProfile();
-            onClose();
-          }}
-          className="w-full text-left px-4 py-2.5 text-sm text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-border))] rounded-lg transition-colors"
-        >
-          Edit Profile
-        </button>
         {onCloseBookClick && (
           <>
             <div className="my-1 border-t border-[hsl(var(--brand-border))]" />
@@ -80,7 +71,7 @@ export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsO
               }}
               className="w-full text-left px-4 py-2.5 text-sm text-[hsl(var(--brand-honey))] hover:bg-[hsl(var(--brand-border))] rounded-lg transition-colors"
             >
-              Close Book
+              Print Book
             </button>
           </>
         )}
