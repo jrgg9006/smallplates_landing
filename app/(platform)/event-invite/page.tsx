@@ -201,10 +201,13 @@ function EventInviteContent() {
   // event-invite preview design (couple photo + names + date + location + CTA)
   // so the recipient sees a real invitation, not a generic share. Inline styles
   // because email clients strip <style> tags.
+  // Reason: derive the recipe collection URL from the invite URL so the email
+  // can offer two distinct CTAs (View Invite + Share a Recipe).
+  const recipeUrl = inviteUrl.replace("/invite/", "/collect/") + "&from=event";
+
   const buildEmailHtml = (): string => {
     const photoUrl = group?.couple_image_url || "";
     const title = inviteTitle || coupleName;
-    const tagline = inviteTagline || "You're invited";
     const dateLine = eventDate
       ? `${formatEventDate(eventDate)}${eventTime ? ` · ${formatEventTime(eventTime)}` : ""}`
       : "";
@@ -220,18 +223,37 @@ function EventInviteContent() {
       ? `<img src="${photoUrl}" width="320" alt="${title}" style="display:block;width:320px;max-width:100%;height:320px;object-fit:cover;border-radius:12px;margin:0 auto 24px;" />`
       : "";
 
+    // Reason: Gmail/Outlook compose strip <a> with display:inline-block. Use
+    // table-based buttons (industry standard for transactional email).
+    const primaryButton = `
+<table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 12px;border-collapse:separate;">
+  <tr>
+    <td bgcolor="#D4A854" style="background-color:#D4A854;border-radius:999px;padding:14px 36px;text-align:center;">
+      <a href="${recipeUrl}" style="color:#FFFFFF;text-decoration:none;font-size:15px;font-family:Arial,Helvetica,sans-serif;"><b>Share a Recipe &rarr;</b></a>
+    </td>
+  </tr>
+</table>`;
+
+    const secondaryButton = `
+<table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;border-collapse:separate;">
+  <tr>
+    <td style="border:1px solid #2D2D2D;border-radius:999px;padding:13px 36px;text-align:center;">
+      <a href="${inviteUrl}" style="color:#2D2D2D;text-decoration:none;font-size:14px;font-family:Arial,Helvetica,sans-serif;"><b>View Invite</b></a>
+    </td>
+  </tr>
+</table>`;
+
     return `
 <div style="font-family:Georgia,'Times New Roman',serif;max-width:520px;margin:0 auto;color:#2D2D2D;line-height:1.5;text-align:center;">
-  <p style="font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:#6B6B6B;margin:0 0 8px;">You're invited</p>
-  <h2 style="font-size:28px;font-weight:500;margin:0 0 24px;color:#2D2D2D;">${title}</h2>
+  <p style="font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:#6B6B6B;margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;"><b>You're invited</b></p>
+  <h2 style="font-size:38px;line-height:1.15;margin:0 0 28px;color:#2D2D2D;font-family:Georgia,'Times New Roman',serif;"><b>${title}</b></h2>
   ${imgBlock}
-  ${dateLine ? `<p style="font-size:14px;letter-spacing:0.1em;text-transform:uppercase;color:#2D2D2D;font-weight:500;margin:0 0 32px;">${dateLine}</p>` : ""}
-  ${venue ? `<p style="font-size:14px;letter-spacing:0.1em;text-transform:uppercase;color:#2D2D2D;font-weight:500;margin:0 0 4px;">${venue}</p>` : ""}
-  ${location ? `<p style="font-size:14px;color:#6B6B6B;margin:0 0 32px;">${location}</p>` : ""}
-  <p style="font-size:15px;color:#6B6B6B;margin:0 0 28px;line-height:1.6;">${safeMessage}</p>
-  <p style="margin:0;">
-    <a href="${inviteUrl}" style="display:inline-block;background:#D4A854;color:#FFFFFF;padding:14px 32px;border-radius:999px;text-decoration:none;font-weight:600;font-size:15px;">View Invite &amp; Share a Recipe →</a>
-  </p>
+  ${dateLine ? `<p style="font-size:14px;letter-spacing:0.1em;text-transform:uppercase;color:#2D2D2D;margin:0 0 32px;font-family:Arial,Helvetica,sans-serif;"><b>${dateLine}</b></p>` : ""}
+  ${venue ? `<p style="font-size:14px;letter-spacing:0.1em;text-transform:uppercase;color:#2D2D2D;margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;"><b>${venue}</b></p>` : ""}
+  ${location ? `<p style="font-size:14px;color:#6B6B6B;margin:0 0 32px;font-family:Arial,Helvetica,sans-serif;">${location}</p>` : ""}
+  <p style="font-size:15px;color:#6B6B6B;margin:0 0 28px;line-height:1.6;font-family:Arial,Helvetica,sans-serif;">${safeMessage}</p>
+  ${primaryButton}
+  ${secondaryButton}
 </div>
     `.trim();
   };
@@ -249,7 +271,8 @@ function EventInviteContent() {
       "",
       inviteMessage,
       "",
-      `View invite: ${inviteUrl}`,
+      `Share a Recipe: ${recipeUrl}`,
+      `View Invite: ${inviteUrl}`,
     ].filter(Boolean);
     return parts.join("\n");
   };

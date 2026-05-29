@@ -602,6 +602,14 @@ export function SendInvitationsPage({
                     </button>
                   )}
 
+                  {/* Helper: explain who shows here so missing guests don't confuse */}
+                  {uninvitedGuests.length > 0 && (
+                    <div className="mb-3 px-3 py-2.5 rounded-lg bg-brand-warm-white-warm border border-brand-sand text-[12px] leading-relaxed text-[hsl(var(--brand-warm-gray-light))]">
+                      Only guests with an email who haven&apos;t been invited yet show here.
+                      Already invited? Use <span className="font-medium text-brand-charcoal">Send Reminders</span> on the dashboard.
+                    </div>
+                  )}
+
                   {/* Select all */}
                   {uninvitedGuests.length > 0 && (
                     <label className="flex items-center gap-4 cursor-pointer py-4 border-b border-brand-sand">
