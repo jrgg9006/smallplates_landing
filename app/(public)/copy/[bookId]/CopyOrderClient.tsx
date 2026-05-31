@@ -266,22 +266,28 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
 
             <div className="bg-white border border-[rgba(45,45,45,0.12)] rounded-[10px] px-[18px] py-[14px] mb-6 text-[13px] space-y-2">
               <div className="flex justify-between text-brand-charcoal">
-                <span>One copy</span>
-                <span>${ADDITIONAL_BOOK_PRICE}</span>
+                <span>
+                  {qty} {qty === 1 ? "copy" : "copies"}
+                  {qty > 1 && (
+                    <span className="text-[hsl(var(--brand-warm-gray))]"> · ${ADDITIONAL_BOOK_PRICE} per copy</span>
+                  )}
+                </span>
+                <span>${subtotal}</span>
               </div>
               <div className="flex justify-between text-brand-charcoal">
                 <span className="text-[hsl(var(--brand-warm-gray))]">Shipping</span>
                 <span>${EXTRA_COPIES_SHIPPING_COST}</span>
               </div>
-              <p className="text-[11px] text-[hsl(var(--brand-warm-gray))] pt-1">
-                ${ADDITIONAL_BOOK_PRICE} per copy. ${EXTRA_COPIES_SHIPPING_COST} shipping. That&apos;s it.
-              </p>
+              <div className="flex justify-between font-medium text-[15px] text-brand-charcoal pt-2 border-t border-[rgba(45,45,45,0.12)]">
+                <span>Total</span>
+                <span>${total}</span>
+              </div>
             </div>
 
             <p className="text-xs text-[hsl(var(--brand-warm-gray))] uppercase tracking-[0.08em] text-center mb-3">
               How many copies?
             </p>
-            <div className="flex items-center justify-center gap-6 mb-3">
+            <div className="flex items-center justify-center gap-6 mb-8">
               <button
                 onClick={() => setQty(Math.max(1, qty - 1))}
                 className="w-10 h-10 rounded-full border border-brand-sand flex items-center justify-center hover:bg-white transition-colors disabled:opacity-30"
@@ -300,10 +306,6 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
                 <Plus className="w-4 h-4 text-brand-charcoal" />
               </button>
             </div>
-            <p className="text-sm text-[hsl(var(--brand-warm-gray))] text-center mb-8">
-              Total: ${total} ({qty} {qty === 1 ? "copy" : "copies"} + ${EXTRA_COPIES_SHIPPING_COST} shipping)
-            </p>
-
             <div className="mb-6">
               <Label className="text-secondary-sm text-gray-500 mb-1 block">Your email</Label>
               <Input
