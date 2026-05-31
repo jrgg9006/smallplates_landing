@@ -17,6 +17,7 @@ import { RecipeDetailsModal } from "../recipes/RecipeDetailsModal";
 import { getMyGroups, getUserRoleInGroup, deleteGroup, exitGroup } from "@/lib/supabase/groups";
 import { getGroupRecipes, searchGroupRecipes, removeRecipeFromGroup } from "@/lib/supabase/groupRecipes";
 import { BookClosedStatus } from "./BookClosedStatus";
+import { MIN_RECIPES_TO_PRINT } from "@/lib/stripe/pricing";
 import type { GroupWithMembers, RecipeWithGuest } from "@/lib/types/database";
 
 interface GroupsSectionProps {
@@ -409,7 +410,7 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
       )}
 
       {/* Close Book Banner */}
-      {selectedGroup && !bookClosed && recipes.length >= 25 && onCloseBookClick && (
+      {selectedGroup && !bookClosed && recipes.length >= MIN_RECIPES_TO_PRINT && onCloseBookClick && (
         <div className="bg-[hsl(var(--brand-sand))]/50 rounded-xl px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
           <p className="text-sm text-[hsl(var(--brand-charcoal))]">
             {recipes.length} recipes in the book. That&apos;s enough for something real.

@@ -243,7 +243,7 @@ export function EditGroupModal({
           )}
         </div>
 
-        {/* Action Buttons — standardized modal footer (matches CloseBookModal) */}
+        {/* Action Buttons — standardized modal footer */}
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-3">
           <button
             type="button"

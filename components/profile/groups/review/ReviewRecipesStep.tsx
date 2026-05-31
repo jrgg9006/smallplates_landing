@@ -1,0 +1,140 @@
+"use client";
+
+import React, { useState, useEffect, useCallback } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ReviewRecipeCard } from "./ReviewRecipeCard";
+import { ReviewRecipeSidebar } from "./ReviewRecipeSidebar";
+import type { RecipeForReview } from "@/lib/types/database";
+
+interface ReviewRecipesStepProps {
+  recipes: RecipeForReview[];
+  loading: boolean;
+  error: string | null;
+  onSaveRecipe: (
+    recipeId: string,
+    data: { recipe_name: string; ingredients: string; instructions: string; note: string }
+  ) => Promise<void>;
+  onContinue: () => void;
+  // Reason: the next step (Quantity) is locked until the book has enough recipes.
+  // When locked, the in-step Continue is disabled and the container shows the
+  // "keep adding recipes" banner above the stepper.
+  continueDisabled?: boolean;
+}
+
+// Reason: Step 2 of the book-review flow. The recipe fetch + save live in the
+// container (BookReviewFlow); this component only renders the navigation and
+// cards. currentIndex stays local UI state. The old full-screen header, the
+// confirm modal, the mobile bottom bar and the print-details slide-over are gone
+// — the shared stepper chrome replaces them.
+export function ReviewRecipesStep({
+  recipes,
+  loading,
+  error,
+  onSaveRecipe,
+  onContinue,
+  continueDisabled = false,
+}: ReviewRecipesStepProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const goNext = useCallback(() => {
+    setCurrentIndex((i) => Math.min(i + 1, recipes.length - 1));
+  }, [recipes.length]);
+
+  const goPrev = useCallback(() => {
+    setCurrentIndex((i) => Math.max(i - 1, 0));
+  }, []);
+
+  // Reason: Keyboard navigation for convenience. Guard against arrow keys while
+  // editing a recipe's text fields.
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      if (e.key === "ArrowRight") goNext();
+      if (e.key === "ArrowLeft") goPrev();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [goNext, goPrev]);
+
+  const recipe = recipes[currentIndex];
+  const isLast = currentIndex === recipes.length - 1;
+
+  return (
+    <div className="flex flex-col">
+      {/* Control row — nav + continue */}
+      <div className="mb-4 flex items-center gap-3">
+        {!loading && recipes.length > 0 && (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={goPrev}
+              disabled={currentIndex === 0}
+              className="rounded-full bg-gray-100 p-2 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-30"
+              aria-label="Previous recipe"
+            >
+              <ChevronLeft className="h-5 w-5 text-brand-charcoal" />
+            </button>
+            <span className="min-w-[50px] text-center text-sm font-medium tabular-nums text-gray-600">
+              {currentIndex + 1} / {recipes.length}
+            </span>
+            <button
+              onClick={goNext}
+              disabled={isLast}
+              className="rounded-full bg-gray-100 p-2 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-30"
+              aria-label="Next recipe"
+            >
+              <ChevronRight className="h-5 w-5 text-brand-charcoal" />
+            </button>
+          </div>
+        )}
+
+        <div className="flex-1" />
+
+        <button
+          onClick={onContinue}
+          disabled={loading || recipes.length === 0 || continueDisabled}
+          className="btn btn-sm btn-dark"
+        >
+          Continue
+        </button>
+      </div>
+
+      {/* Content — sidebar + page. Tall near-viewport height; the card holds an
+          8x10 page proportion (centered) and scrolls internally. This is the main
+          review surface, so it should read like a real book page. */}
+      <div className="flex h-[calc(100vh-2rem)] min-h-[960px] gap-6">
+        {!loading && recipes.length > 0 && (
+          <ReviewRecipeSidebar
+            recipes={recipes}
+            currentIndex={currentIndex}
+            onSelect={setCurrentIndex}
+          />
+        )}
+
+        <div className="flex min-h-0 flex-1 flex-col">
+          {loading ? (
+            <div className="flex flex-1 items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-brand-honey" />
+            </div>
+          ) : error ? (
+            <div className="flex flex-1 items-center justify-center">
+              <p className="text-red-500">{error}</p>
+            </div>
+          ) : recipes.length === 0 ? (
+            <div className="flex flex-1 items-center justify-center">
+              <p className="font-serif text-gray-400">No recipes to review.</p>
+            </div>
+          ) : recipe ? (
+            <ReviewRecipeCard
+              key={recipe.id}
+              recipe={recipe}
+              index={currentIndex}
+              total={recipes.length}
+              onSave={onSaveRecipe}
+            />
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}

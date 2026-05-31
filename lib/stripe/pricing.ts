@@ -7,6 +7,13 @@ export const BASE_BOOK_PRICE = 169;
 export const ADDITIONAL_BOOK_PRICE = 129;
 
 /**
+ * Minimum number of recipes a book must have before it can be closed and sent
+ * to print. Gates the quantity + checkout steps of the book-review flow (client
+ * side) and is re-validated server-side in create-checkout-book-close-session.
+ */
+export const MIN_RECIPES_TO_PRINT = 25;
+
+/**
  * Flat shipping cost applied to every extra_copy order placed from
  * the dashboard (post-close "Get more copies" flow). Different from
  * the upsell-during-close flow where shipping is included in the

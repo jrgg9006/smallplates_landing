@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Check } from "lucide-react";
 import type { GroupWithMembers } from "@/lib/types/database";
 import { CaptainsDropdown } from "@/components/profile/groups/CaptainsDropdown";
+import { MIN_RECIPES_TO_PRINT } from "@/lib/stripe/pricing";
 
 interface DashboardChecklistProps {
   group: GroupWithMembers | null;
@@ -79,8 +80,8 @@ export function DashboardChecklist({
       ),
     },
     {
-      done: recipeCount >= 25,
-      content: <>Reach +25 recipes</>,
+      done: recipeCount >= MIN_RECIPES_TO_PRINT,
+      content: <>Reach +{MIN_RECIPES_TO_PRINT} recipes</>,
     },
     {
       done: !!group.book_closed_by_user,

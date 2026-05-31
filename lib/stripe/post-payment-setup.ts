@@ -740,7 +740,7 @@ export interface ExtraCopiesSetupFromSessionResult {
  * captain already exists and the group is already active.
  *
  * Shipping address snapshot is pulled from `shipping_addresses.group_id` —
- * StepShipping in PostCloseFlow persists it before the user redirects to Stripe.
+ * Stripe Checkout collects it natively; the webhook reads it from the session.
  * If the address is missing (shouldn't happen), logs loudly but still creates
  * the order — missing address is recoverable via support; a missing order is not.
  *

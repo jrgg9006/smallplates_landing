@@ -11,7 +11,7 @@ interface ReviewRecipeSidebarProps {
 
 export function ReviewRecipeSidebar({ recipes, currentIndex, onSelect }: ReviewRecipeSidebarProps) {
   return (
-    <div className="hidden md:block w-[340px] flex-shrink-0 border-r border-gray-100 bg-white overflow-y-auto">
+    <div className="hidden md:block w-[300px] flex-shrink-0 rounded-xl border border-gray-100 bg-white overflow-y-auto">
       <div className="py-6 px-5">
         <p className="text-xs uppercase tracking-[0.2em] text-gray-400 font-serif mb-6">
           {recipes.length} recipes

@@ -29,14 +29,11 @@ import { createShareURL, extractOgVersion } from "@/lib/utils/sharing";
 import type { Guest } from "@/lib/types/database";
 import { ImportGuestsModal } from "@/components/profile/guests/ImportGuestsModal";
 import { SendInvitationsPage } from "@/components/profile/guests/SendInvitationsPage";
-import { CloseBookModal } from "@/components/profile/groups/CloseBookModal";
-import { ReviewRecipesPage } from "@/components/profile/groups/review/ReviewRecipesPage";
-import { PostCloseFlow } from "@/components/profile/groups/PostCloseFlow";
+import { BookReviewFlow } from "@/components/profile/groups/review/BookReviewFlow";
 import BrandLoader from "@/components/ui/BrandLoader";
 import { InviteDropdown } from "@/components/dashboard/InviteDropdown";
 import { DashboardChecklist } from "@/components/dashboard/DashboardChecklist";
 import { BookPreviewPanel } from "@/components/profile/groups/BookPreviewPanel";
-// Reason: closeBook is now called inside PostCloseFlow, not from page.tsx
 
 // Reason: Format book_close_date as "Month Dth" with ordinal suffix (no year)
 function getDeadlineText(dateString: string): string {
@@ -69,13 +66,11 @@ export default function GroupsPage() {
   const [showGuestSheet, setShowGuestSheet] = useState(false);
   const [showGuestDetailsModal, setShowGuestDetailsModal] = useState(false);
   const [importSource, setImportSource] = useState<"zola" | "the_knot" | null>(null);
-  const [activeView, setActiveView] = useState<'book' | 'send-invitations' | 'review-recipes' | 'post-close'>('book');
+  const [activeView, setActiveView] = useState<'book' | 'send-invitations' | 'book-review'>('book');
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [collectionToken, setCollectionToken] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [showCloseBookModal, setShowCloseBookModal] = useState(false);
   const [showRemindersModal, setShowRemindersModal] = useState(false);
-  const [bookReviewed, setBookReviewed] = useState(false);
   
   // Profile state
   const [senderName, setSenderName] = useState<string | null>(null);
@@ -186,41 +181,11 @@ export default function GroupsPage() {
     setShowGuestSheet(true);
   };
 
-  const handleCloseBook = () => {
-    setShowCloseBookModal(true);
-  };
-
-  const handleReviewRecipes = () => {
-    setShowCloseBookModal(false);
-    setActiveView('review-recipes');
-  };
-
-  const handleMarkReviewed = () => {
-    setActiveView('book');
-    setBookReviewed(true);
-    setShowCloseBookModal(true);
-  };
-
-  // Reason: Book no longer closes from the modal. The PostCloseFlow handles
-  // closing after the full upsell → shipping → payment flow completes.
-  const handleStartCloseFlow = () => {
-    setShowCloseBookModal(false);
-    setBookReviewed(false);
-    setActiveView('post-close');
-  };
-
-  const handleCloseFlowDone = async () => {
-    // Reason: Refresh group data so book_closed_by_user is updated in state
-    if (groupsSectionRef.current) {
-      await groupsSectionRef.current.loadGroups(true);
-      setTimeout(() => {
-        const updatedGroup = groupsSectionRef.current?.selectedGroup;
-        if (updatedGroup && updatedGroup.id === selectedGroup?.id) {
-          setSelectedGroup(updatedGroup);
-        }
-      }, 100);
-    }
-    setActiveView('book');
+  // Reason: All three close-book CTAs now open the unified book-review stepper
+  // directly (no intermediate modal). The book only closes on confirmed Stripe
+  // payment, handled by the ?from=book-close-purchase effect on return.
+  const handleOpenBookReview = () => {
+    setActiveView('book-review');
   };
 
   const handleGroupChange = (group: GroupWithMembers | null) => {
@@ -621,8 +586,9 @@ export default function GroupsPage() {
         />
       )}
 
-      {/* Header — hidden during full-screen views */}
-      {activeView === 'book' && (
+      {/* Header — stays visible during the book-review stepper (Storyworth-style);
+          only the full-screen send-invitations view hides it. */}
+      {activeView !== 'send-invitations' && (
         <ProfileHeader
           onGroupSelect={handleGroupSelectFromNav}
           currentGroupId={selectedGroup?.id}
@@ -640,25 +606,14 @@ export default function GroupsPage() {
         />
       )}
 
-      {/* Review Recipes — full-screen view */}
-      {activeView === 'review-recipes' && selectedGroup && (
-        <ReviewRecipesPage
+      {/* Book Review — unified 4-step stepper (names/photo → recipes → quantity →
+          checkout). Renders under the persistent ProfileHeader, outside max-w main. */}
+      {activeView === 'book-review' && selectedGroup && (
+        <BookReviewFlow
           group={selectedGroup}
-          isOwner={selectedGroup?.created_by === user?.id}
-          onBack={() => setActiveView('book')}
-          onMarkReviewed={handleMarkReviewed}
-          onStartCloseFlow={() => {
-            setActiveView('post-close');
-          }}
-        />
-      )}
-
-      {/* Post-Close Flow — full-screen upsell + shipping + payment */}
-      {activeView === 'post-close' && selectedGroup && (
-        <PostCloseFlow
-          groupId={selectedGroup.id}
-          onDone={handleCloseFlowDone}
-          onBack={handleCloseFlowDone}
+          isOwner={selectedGroup.created_by === user.id}
+          recipeCount={recipeCount}
+          onExit={() => setActiveView('book')}
         />
       )}
 
@@ -730,7 +685,7 @@ export default function GroupsPage() {
                 onCreateEventInvite={() => router.push(`/event-invite?groupId=${selectedGroup?.id}`)}
                 onInviteCaptain={() => setShowAddCaptainModal(true)}
                 onAddRecipe={() => groupsSectionRef.current?.openAddNewRecipeModal()}
-                onPrintBook={handleCloseBook}
+                onPrintBook={handleOpenBookReview}
               />
 
             </div>{/* end left column */}
@@ -804,7 +759,7 @@ export default function GroupsPage() {
                     showAddGuestOption={isMobile}
                     showSendInvitationsOption={true}
                     onSendInvitationsClick={handleSendInvitations}
-                    onCloseBookClick={!selectedGroup?.book_closed_by_user ? handleCloseBook : undefined}
+                    onCloseBookClick={!selectedGroup?.book_closed_by_user ? handleOpenBookReview : undefined}
                   />
                   {/* Captains dropdown for mobile */}
                   <div className="sm:hidden">
@@ -823,7 +778,7 @@ export default function GroupsPage() {
                 onLoadingChange={handleGroupsLoadingChange}
                 onRecipeCountChange={handleRecipeCountChange}
                 onImportGuests={(source) => setImportSource(source)}
-                onCloseBookClick={!selectedGroup?.book_closed_by_user ? handleCloseBook : undefined}
+                onCloseBookClick={!selectedGroup?.book_closed_by_user ? handleOpenBookReview : undefined}
                 bookClosed={!!selectedGroup?.book_closed_by_user}
               />
             </div>
@@ -916,19 +871,6 @@ export default function GroupsPage() {
           }}
         />
       )}
-
-      {/* Close Book Modal */}
-      <CloseBookModal
-        isOpen={showCloseBookModal}
-        onClose={() => { setShowCloseBookModal(false); setBookReviewed(false); }}
-        onReview={handleReviewRecipes}
-        onStartCloseFlow={handleStartCloseFlow}
-        reviewed={bookReviewed}
-        isOwner={selectedGroup?.created_by === user?.id}
-        recipeCount={recipeCount}
-        uniqueContributors={uniqueContributors}
-      />
-
 
       {/* Guest Details Modal */}
       <GuestDetailsModal

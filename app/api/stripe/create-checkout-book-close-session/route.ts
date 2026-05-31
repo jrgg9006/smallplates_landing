@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe/client";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { ADDITIONAL_BOOK_PRICE } from "@/lib/stripe/pricing";
+import { ADDITIONAL_BOOK_PRICE, MIN_RECIPES_TO_PRINT } from "@/lib/stripe/pricing";
 
 // Reason: Countries we can ship to. Mirrors the list the old in-app shipping form
 // supported (US, MX, EU). Stripe collects the address natively for us now.
@@ -52,6 +52,25 @@ export async function POST(request: NextRequest) {
     }
     if (group.status !== "free_tier") {
       return NextResponse.json({ error: "Book is not eligible to be closed" }, { status: 409 });
+    }
+
+    // Reason: Defense in depth — the client gates the quantity/checkout steps at
+    // MIN_RECIPES_TO_PRINT, but re-check here so a crafted request can't create a
+    // paid session for a book below the print minimum. Count via group_recipes,
+    // the same join the review-recipes route reads.
+    const { count: recipeCount, error: countError } = await supabase
+      .from("group_recipes")
+      .select("recipe_id", { count: "exact", head: true })
+      .eq("group_id", groupId);
+
+    if (countError) {
+      return NextResponse.json({ error: "Failed to verify recipe count" }, { status: 500 });
+    }
+    if ((recipeCount ?? 0) < MIN_RECIPES_TO_PRINT) {
+      return NextResponse.json(
+        { error: `Your book needs at least ${MIN_RECIPES_TO_PRINT} recipes before it can be printed.` },
+        { status: 409 }
+      );
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
