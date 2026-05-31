@@ -605,7 +605,7 @@ export default function GroupsPage() {
 
       {/* Onboarding overlays — gated on group being fully set up (status='active').
           While the group is `pending_setup`, only the CoupleNamesModal should be visible. */}
-      {selectedGroup?.status === "active" && showWelcomeOverlay && (
+      {selectedGroup?.status === "active" && !selectedGroup?.book_closed_by_user && showWelcomeOverlay && (
         <WelcomeOverlay
           userName={user.email?.split('@')[0] || 'there'}
           onStart={handleWelcomeStart}
@@ -614,7 +614,7 @@ export default function GroupsPage() {
         />
       )}
 
-      {selectedGroup?.status === "active" && showFirstRecipeExperience && (
+      {selectedGroup?.status === "active" && !selectedGroup?.book_closed_by_user && showFirstRecipeExperience && (
         <FirstRecipeExperience
           onSubmit={handleFirstRecipeSubmit}
           onSkip={skipFirstRecipeExperience}

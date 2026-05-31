@@ -22,10 +22,10 @@ function ShareCopyLink({ groupId }: { groupId: string }) {
   };
 
   return (
-    <div>
+    <div className="w-full">
       <button
         onClick={handleCopy}
-        className="inline-flex items-center gap-1.5 px-4 py-2 border border-brand-sand text-brand-charcoal text-xs font-medium rounded-full hover:border-brand-honey hover:text-brand-honey transition-colors"
+        className="btn btn-sm btn-outline gap-1.5 w-full"
       >
         {copied ? (
           <>
@@ -458,10 +458,10 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
                   ? `${1 + extraCopiesCount} books`
                   : "1 book"}
               </p>
-              <div className="flex flex-wrap items-start gap-2 mt-3">
+              <div className="flex flex-col items-stretch gap-2 mt-3 max-w-[240px]">
                 <button
                   onClick={() => setShowPurchase(true)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-charcoal text-white text-xs font-medium rounded-full hover:bg-gray-800 transition-colors"
+                  className="btn btn-sm btn-dark gap-1.5 w-full"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Get more copies
@@ -627,7 +627,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
                 <button
                   onClick={validateAndSave}
                   disabled={saving}
-                  className="w-full bg-brand-charcoal text-white rounded-full py-3 text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors mt-2"
+                  className="btn btn-sm btn-dark w-full mt-2"
                 >
                   {saving ? "Saving..." : "Save shipping address"}
                 </button>
@@ -635,16 +635,16 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
             </div>
           )}
 
-          {/* Referral */}
-          <div className="border-t border-brand-sand my-6" />
-          <ReferralBox />
-
           {/* What happens next */}
           <div className="border-t border-brand-sand my-6" />
           <p className="text-xs uppercase tracking-[0.25em] text-brand-honey font-medium mb-4">
             What happens next
           </p>
           <TimelineSection bookStatus={group.book_status} />
+
+          {/* Referral */}
+          <div className="border-t border-brand-sand my-6" />
+          <ReferralBox />
 
           {/* Footer */}
           <div className="border-t border-brand-sand my-6" />

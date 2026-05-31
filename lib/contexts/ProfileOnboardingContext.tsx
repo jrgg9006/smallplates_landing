@@ -517,7 +517,12 @@ export function ProfileOnboardingProvider({ children }: ProfileOnboardingProvide
   const value: ProfileOnboardingContextType = {
     isFirstTimeUser,
     // When onboarding is paused, hide all onboarding UI elements
-    showWelcomeOverlay: ONBOARDING_PAUSED ? false : showWelcomeOverlay,
+    // Reason: WelcomeOverlay is retired in the new onboarding (DashboardChecklist
+    // replaces it). Force-hidden at the source so it can NEVER render — regardless
+    // of has_seen_welcome, ONBOARDING_PAUSED, or which group is selected. The
+    // showWelcome logic above is left intact for an easy one-line restore: revert
+    // to `ONBOARDING_PAUSED ? false : showWelcomeOverlay`.
+    showWelcomeOverlay: false,
     showOnboardingResume: ONBOARDING_PAUSED ? false : showOnboardingResume,
     showFirstRecipeExperience: ONBOARDING_PAUSED ? false : showFirstRecipeExperience,
     completedSteps,

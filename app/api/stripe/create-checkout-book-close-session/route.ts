@@ -105,7 +105,11 @@ export async function POST(request: NextRequest) {
         receipt_email: user.email || undefined,
         metadata: sharedMetadata,
       },
-      success_url: `${baseUrl}/profile/groups?from=book-close-purchase`,
+      // Reason: pass the just-closed group via ?group= so the dashboard deep-link
+      // effect re-selects IT on return. Without this, the page auto-selects the
+      // first NON-closed book (RedesignedGroupsSection picks `!book_closed_by_user`),
+      // landing the owner on the wrong book right after paying.
+      success_url: `${baseUrl}/profile/groups?from=book-close-purchase&group=${groupId}`,
       cancel_url: `${baseUrl}/profile/groups`,
     });
 
