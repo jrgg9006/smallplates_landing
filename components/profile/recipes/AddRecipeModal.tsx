@@ -14,7 +14,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { addRecipe, addUserRecipe, addRecipeWithFiles } from "@/lib/supabase/recipes";
 import { addRecipeToCookbook } from "@/lib/supabase/cookbooks";
 import { addRecipeToGroup } from "@/lib/supabase/groupRecipes";
@@ -912,25 +911,28 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
               {modalContent}
             </div>
 
-            {/* Sticky action bar — always visible, respects iPhone home bar */}
+            {/* Sticky action bar — always visible, respects iPhone home bar.
+                Mobile: full-width side-by-side, each flex-1, large tap targets. */}
             <div
-              className="flex-shrink-0 flex justify-end gap-3 border-t border-brand-sand bg-white px-6 pt-4"
+              className="flex-shrink-0 flex gap-3 border-t border-brand-sand bg-white px-6 pt-4"
               style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
             >
-              <Button
-                variant="outline"
+              <button
+                type="button"
                 onClick={onClose}
                 disabled={loading}
+                className="flex-1 rounded-full border border-[rgba(45,45,45,0.14)] py-3.5 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2 disabled:opacity-50"
               >
                 Cancel
-              </Button>
-              <Button
+              </button>
+              <button
+                type="button"
                 onClick={handleSave}
                 disabled={loading || (!isMyOwnRecipe && guests.length === 0)}
-                className="bg-black text-white hover:bg-gray-800"
+                className="flex-1 rounded-full bg-brand-charcoal py-3.5 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-50"
               >
                 {loading ? 'Saving...' : 'Save'}
-              </Button>
+              </button>
             </div>
           </SheetContent>
         </Sheet>
@@ -959,22 +961,25 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
             {desktopContent}
           </div>
           
-          {/* Action Buttons - Fixed position at bottom */}
+          {/* Action Buttons - Fixed position at bottom.
+              Desktop: right-aligned, auto width (modal is wide, so full-width would look off). */}
           <div className="flex justify-end gap-3 flex-shrink-0 bg-white px-8 py-4">
-            <Button 
-              variant="outline"
+            <button
+              type="button"
               onClick={onClose}
               disabled={loading}
+              className="rounded-full border border-[rgba(45,45,45,0.14)] px-8 py-3.5 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2 disabled:opacity-50"
             >
               Cancel
-            </Button>
-            <Button 
+            </button>
+            <button
+              type="button"
               onClick={handleSave}
               disabled={loading || (!isMyOwnRecipe && guests.length === 0)}
-              className="bg-black text-white hover:bg-gray-800"
+              className="rounded-full bg-brand-charcoal px-8 py-3.5 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-50"
             >
               {loading ? 'Saving...' : 'Save'}
-            </Button>
+            </button>
           </div>
         </DialogContent>
       </Dialog>

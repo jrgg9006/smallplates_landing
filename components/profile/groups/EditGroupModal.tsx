@@ -7,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateGroup } from "@/lib/supabase/groups";
@@ -244,22 +243,24 @@ export function EditGroupModal({
           )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-end gap-3">
-          <Button 
-            variant="outline"
+        {/* Action Buttons — standardized modal footer (matches CloseBookModal) */}
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-3">
+          <button
+            type="button"
             onClick={onClose}
             disabled={loading}
+            className="w-full rounded-full border border-[rgba(45,45,45,0.14)] py-3.5 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2 disabled:opacity-50 sm:flex-1"
           >
             Cancel
-          </Button>
-          <Button 
+          </button>
+          <button
+            type="button"
             onClick={handleSave}
             disabled={loading || !name.trim() || name.length > MAX_NAME_LENGTH}
-            className="bg-black text-white hover:bg-gray-800"
+            className="w-full rounded-full bg-brand-charcoal py-3.5 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-50 sm:flex-1"
           >
             {loading ? 'Saving...' : 'Save'}
-          </Button>
+          </button>
         </div>
       </DialogContent>
     </Dialog>
