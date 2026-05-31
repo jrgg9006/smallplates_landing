@@ -1,4 +1,4 @@
-# Free-Tier Event Platform — Design Spec
+2# Free-Tier Event Platform — Design Spec
 
 **Estado:** Draft v1 · 2026-05-26
 **Autor:** Ricardo García (founder) + Claude (brainstorm partner)
