@@ -1,0 +1,121 @@
+import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
+import { stripe } from "@/lib/stripe/client";
+import { createSupabaseServer } from "@/lib/supabase/server";
+import { ADDITIONAL_BOOK_PRICE } from "@/lib/stripe/pricing";
+
+// Reason: Countries we can ship to. Mirrors the list the old in-app shipping form
+// supported (US, MX, EU). Stripe collects the address natively for us now.
+const SHIPPING_ALLOWED_COUNTRIES: Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[] = [
+  "US", "MX",
+  "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU",
+  "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE",
+];
+
+export async function POST(request: NextRequest) {
+  try {
+    const { groupId, qty } = await request.json();
+
+    if (!groupId || typeof groupId !== "string") {
+      return NextResponse.json({ error: "Invalid groupId" }, { status: 400 });
+    }
+    if (!qty || !Number.isInteger(qty) || qty < 1 || qty > 6) {
+      return NextResponse.json({ error: "qty must be between 1 and 6" }, { status: 400 });
+    }
+
+    const supabase = await createSupabaseServer();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    // Reason: Only the captain (group.created_by) can close & pay for the book.
+    // We also guard against closing a book that is not in free_tier or is already
+    // closed, so we never double-charge for the base book.
+    const { data: group, error: groupError } = await supabase
+      .from("groups")
+      .select("id, created_by, status, book_closed_by_user")
+      .eq("id", groupId)
+      .single();
+
+    if (groupError || !group) {
+      return NextResponse.json({ error: "Group not found" }, { status: 404 });
+    }
+    if (group.created_by !== user.id) {
+      return NextResponse.json(
+        { error: "Only the owner of this book can close it. Please contact them directly." },
+        { status: 403 }
+      );
+    }
+    if (group.book_closed_by_user) {
+      return NextResponse.json({ error: "Book is already closed" }, { status: 409 });
+    }
+    if (group.status !== "free_tier") {
+      return NextResponse.json({ error: "Book is not eligible to be closed" }, { status: 409 });
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    if (!baseUrl) {
+      console.error("create-checkout-book-close-session: NEXT_PUBLIC_BASE_URL is not set");
+      return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
+    }
+
+    // Reason: Non-linear pricing ($169 base + $129 per additional). Same pattern as
+    // create-checkout-session: catalog Price for the base (so coupons can match it)
+    // + an inline price_data line for the additional copies.
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+      {
+        price: process.env.STRIPE_PRICE_ID_COOKBOOK!,
+        quantity: 1,
+      },
+    ];
+    if (qty > 1) {
+      lineItems.push({
+        price_data: {
+          currency: "usd",
+          product_data: { name: "Additional Cookbook Copy" },
+          unit_amount: ADDITIONAL_BOOK_PRICE * 100,
+        },
+        quantity: qty - 1,
+      });
+    }
+
+    // Reason: Stripe does NOT propagate Session metadata to the PaymentIntent.
+    // Copy it to payment_intent_data.metadata so the payment_intent.succeeded
+    // handler can early-return and let checkout.session.completed own this flow.
+    const sharedMetadata: Record<string, string> = {
+      type: "book_close_purchase",
+      groupId,
+      userId: user.id,
+      qty: String(qty),
+      email: user.email || "",
+    };
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      customer_email: user.email || undefined,
+      line_items: lineItems,
+      // Reason: Collect the shipping address inside Stripe Checkout instead of a
+      // separate in-app form. The webhook reads it back and persists it.
+      shipping_address_collection: { allowed_countries: SHIPPING_ALLOWED_COUNTRIES },
+      phone_number_collection: { enabled: true },
+      allow_promotion_codes: true,
+      metadata: sharedMetadata,
+      payment_intent_data: {
+        receipt_email: user.email || undefined,
+        metadata: sharedMetadata,
+      },
+      success_url: `${baseUrl}/profile/groups?from=book-close-purchase`,
+      cancel_url: `${baseUrl}/profile/groups`,
+    });
+
+    if (!session.url) {
+      return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 });
+    }
+
+    return NextResponse.json({ url: session.url });
+  } catch (error) {
+    console.error("create-checkout-book-close-session error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}

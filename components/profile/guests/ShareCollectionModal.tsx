@@ -681,10 +681,10 @@ export function ShareCollectionModal({
                   />
                   <Button
                     onClick={handleCopyLink}
-                    className={`flex-shrink-0 rounded-full px-5 py-2 text-sm font-medium transition-all ${
+                    className={`flex-shrink-0 rounded-full px-5 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 ${
                       copied
                         ? 'bg-[hsl(var(--brand-honey))] text-black hover:bg-[hsl(var(--brand-honey))]'
-                        : 'bg-black text-white hover:bg-gray-800'
+                        : 'bg-brand-charcoal text-brand-warm-white-warm hover:bg-gray-800'
                     }`}
                   >
                     {copied ? (
@@ -730,8 +730,9 @@ export function ShareCollectionModal({
                 {/* Add photo & message — honey filled to signal importance */}
                 <Button
                   onClick={handleShowMessageCustomization}
-                  className="min-h-[44px] w-full rounded-xl bg-[hsl(var(--brand-honey))] hover:bg-[hsl(var(--brand-honey-dark))] text-white transition-all font-medium"
+                  className="h-auto w-full rounded-full py-3.5 text-[15px] font-medium flex items-center justify-center gap-2 bg-[hsl(var(--brand-honey))] text-white hover:bg-[hsl(var(--brand-honey-dark))] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-honey-dark))] focus-visible:ring-offset-2"
                 >
+                  <ImageIcon className="w-4 h-4" />
                   Add photo & message
                 </Button>
               </div>
@@ -766,10 +767,10 @@ export function ShareCollectionModal({
 
                 <Button
                   onClick={handleCopyEmailBlock}
-                  className={`min-h-[40px] px-6 rounded-full transition-all ${
+                  className={`min-h-[44px] px-6 rounded-full text-[15px] font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 ${
                     emailCopied
                       ? 'bg-[hsl(var(--brand-honey))] text-black hover:bg-[hsl(var(--brand-honey))]'
-                      : 'bg-black text-white hover:bg-gray-800'
+                      : 'bg-brand-charcoal text-brand-warm-white-warm hover:bg-gray-800'
                   }`}
                 >
                   {emailCopied ? (
@@ -859,7 +860,7 @@ export function ShareCollectionModal({
                 <Button
                   onClick={handleDownloadQR}
                   disabled={!qrDataUrl}
-                  className="min-h-[44px] flex-1 flex items-center justify-center gap-3 rounded-xl bg-black text-white hover:bg-gray-800 disabled:opacity-50"
+                  className="min-h-[44px] flex-1 flex items-center justify-center gap-3 rounded-full text-[15px] font-medium bg-brand-charcoal text-brand-warm-white-warm hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-50"
                 >
                   <Download className="w-5 h-5" />
                   Download QR as PNG
@@ -929,7 +930,7 @@ export function ShareCollectionModal({
                                 size="sm"
                                 variant="outline"
                                 onClick={handleCancelCoupleReposition}
-                                className="min-h-[44px]"
+                                className="min-h-[44px] rounded-lg text-sm"
                               >
                                 Cancel
                               </Button>
@@ -938,7 +939,7 @@ export function ShareCollectionModal({
                                 size="sm"
                                 onClick={handleSaveCoupleReposition}
                                 disabled={isSavingCouplePosition}
-                                className="min-h-[44px] bg-black text-white hover:bg-gray-800"
+                                className="min-h-[44px] rounded-lg text-sm bg-brand-charcoal text-white hover:bg-gray-800"
                               >
                                 {isSavingCouplePosition ? 'Saving...' : 'Save'}
                               </Button>
@@ -970,7 +971,7 @@ export function ShareCollectionModal({
                                 handleDeleteImage();
                               }}
                               disabled={isUploadingImage}
-                              className="min-h-[44px] text-red-600 border-red-200 hover:bg-red-50"
+                              className="min-h-[44px] rounded-lg text-sm text-red-600 border-red-200 hover:bg-red-50"
                             >
                               <X className="w-4 h-4 mr-1" />
                               Remove
@@ -985,7 +986,7 @@ export function ShareCollectionModal({
                                 handleStartCoupleReposition();
                               }}
                               disabled={isUploadingImage}
-                              className="min-h-[44px]"
+                              className="min-h-[44px] rounded-lg text-sm"
                             >
                               <Move className="w-4 h-4 mr-1" />
                               Reposition
@@ -1000,7 +1001,7 @@ export function ShareCollectionModal({
                                 handleImageClick();
                               }}
                               disabled={isUploadingImage}
-                              className="min-h-[44px]"
+                              className="min-h-[44px] rounded-lg text-sm"
                             >
                               <Upload className="w-4 h-4 mr-1" />
                               Change
@@ -1078,7 +1079,7 @@ export function ShareCollectionModal({
                           variant="outline"
                           onClick={handleCancelEdit}
                           disabled={isSaving}
-                          className="flex-1 sm:flex-none min-h-[44px]"
+                          className="flex-1 sm:flex-none min-h-[44px] rounded-lg text-sm"
                         >
                           Cancel
                         </Button>
@@ -1087,7 +1088,7 @@ export function ShareCollectionModal({
                           variant="outline"
                           onClick={handleResetMessage}
                           disabled={isSaving}
-                          className="flex-1 sm:flex-none min-h-[44px]"
+                          className="flex-1 sm:flex-none min-h-[44px] rounded-lg text-sm"
                         >
                           Use default
                         </Button>
@@ -1095,7 +1096,7 @@ export function ShareCollectionModal({
                           size="sm"
                           onClick={handleSaveMessage}
                           disabled={isSaving || editingMessage.trim().length === 0}
-                          className="flex-1 sm:flex-none min-h-[44px] bg-black text-white hover:bg-gray-800"
+                          className="flex-1 sm:flex-none min-h-[44px] rounded-lg text-sm bg-brand-charcoal text-white hover:bg-gray-800"
                         >
                           Save
                         </Button>

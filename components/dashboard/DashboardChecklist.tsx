@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Check } from "lucide-react";
 import type { GroupWithMembers } from "@/lib/types/database";
+import { CaptainsDropdown } from "@/components/profile/groups/CaptainsDropdown";
 
 interface DashboardChecklistProps {
   group: GroupWithMembers | null;
@@ -25,9 +26,17 @@ export function DashboardChecklist({
   onAddRecipe,
   onPrintBook,
 }: DashboardChecklistProps) {
+  const [showCaptainsList, setShowCaptainsList] = useState(false);
+
   if (!group) return null;
 
-  const steps = [
+  const steps: Array<{
+    done: boolean;
+    content: React.ReactNode;
+    // Reason: trailing renders OUTSIDE the strikethrough wrapper so the
+    // "(view)" link stays underlined-without-strike when the step is done.
+    trailing?: React.ReactNode;
+  }> = [
     {
       done: hasEventInvite,
       content: (
@@ -39,6 +48,29 @@ export function DashboardChecklist({
       content: (
         <>Invite your <LinkText onClick={onInviteCaptain}>captains</LinkText></>
       ),
+      trailing: hasCaptains ? (
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setShowCaptainsList((v) => !v)}
+            className="text-sm text-[hsl(var(--brand-honey))] hover:text-[hsl(var(--brand-honey-dark))] hover:underline transition-colors"
+          >
+            (view)
+          </button>
+          {showCaptainsList && (
+            <CaptainsDropdown
+              isOpen={showCaptainsList}
+              selectedGroup={group}
+              onClose={() => setShowCaptainsList(false)}
+              onInviteCaptain={() => {
+                setShowCaptainsList(false);
+                onInviteCaptain();
+              }}
+              align="left"
+            />
+          )}
+        </div>
+      ) : undefined,
     },
     {
       done: recipeCount >= 1,
@@ -53,7 +85,7 @@ export function DashboardChecklist({
     {
       done: !!group.book_closed_by_user,
       content: (
-        <><LinkText onClick={onPrintBook}>Print</LinkText> your book</>
+        <><LinkText onClick={onPrintBook}>Print</LinkText> your book — $169</>
       ),
     },
   ];
@@ -84,6 +116,7 @@ export function DashboardChecklist({
             >
               {step.content}
             </span>
+            {step.trailing}
           </div>
         ))}
       </div>

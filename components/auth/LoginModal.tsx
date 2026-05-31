@@ -73,7 +73,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <h2 className="type-modal-title text-[hsl(var(--brand-charcoal))] mb-5">
               Check your email
             </h2>
-            <p className="text-sm text-gray-600 leading-relaxed mb-6">
+            <p className="text-base text-gray-600 leading-relaxed mb-6">
               We sent a login link to{" "}
               <span className="font-medium text-gray-900">{email}</span>.
             </p>
@@ -83,7 +83,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 href="https://mail.google.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn-dark w-full rounded-lg px-4 py-3 text-[15px] border border-transparent"
+                className="btn btn-dark w-full rounded-full px-4 py-3.5 text-[15px] border border-transparent"
               >
                 Open Gmail
               </a>
@@ -100,7 +100,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
             <button
               onClick={handleGoogle}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-[15px] font-medium text-gray-700"
+              className="w-full flex items-center justify-center gap-3 px-4 py-3.5 border border-gray-200 rounded-full hover:bg-gray-50 transition-colors text-[15px] font-medium text-gray-700"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -124,7 +124,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <h2 className="type-modal-title text-[hsl(var(--brand-charcoal))] mb-2">
               Log in
             </h2>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-base text-gray-600 leading-relaxed mb-6">
               We&apos;ll send you a link to log in. No password needed.
             </p>
 
@@ -148,7 +148,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               <button
                 type="submit"
                 disabled={status === "sending" || !email.trim()}
-                className="btn btn-honey w-full rounded-lg px-4 py-3 text-[15px] border border-transparent"
+                className="btn btn-honey w-full rounded-full px-4 py-3.5 text-[15px] border border-transparent"
               >
                 {status === "sending" ? "Sending..." : "Send login link"}
               </button>
@@ -166,7 +166,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <button
               onClick={handleGoogle}
               disabled={status === "sending"}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-[15px] font-medium text-gray-700"
+              className="w-full flex items-center justify-center gap-3 px-4 py-3.5 border border-gray-200 rounded-full hover:bg-gray-50 transition-colors text-[15px] font-medium text-gray-700"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />

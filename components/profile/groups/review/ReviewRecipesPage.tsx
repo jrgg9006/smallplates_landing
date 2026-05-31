@@ -8,17 +8,17 @@ import { ReviewRecipeSidebar } from "./ReviewRecipeSidebar";
 import { PrintDetailsWizard } from "./PrintDetailsWizard";
 import { PrintDetailsSidebar } from "./PrintDetailsSidebar";
 import { CloseBookModal } from "../CloseBookModal";
-import { closeBook } from "@/lib/supabase/groups";
 import type { RecipeForReview, GroupWithMembers } from "@/lib/types/database";
 
 interface ReviewRecipesPageProps {
   group: GroupWithMembers;
+  isOwner: boolean;
   onBack: () => void;
   onMarkReviewed: () => void;
   onStartCloseFlow: () => void;
 }
 
-export function ReviewRecipesPage({ group, onBack, onMarkReviewed, onStartCloseFlow }: ReviewRecipesPageProps) {
+export function ReviewRecipesPage({ group, isOwner, onBack, onMarkReviewed, onStartCloseFlow }: ReviewRecipesPageProps) {
   const groupId = group.id;
   const [showWizard, setShowWizard] = useState(!group.print_details_confirmed_at);
   const [printCoupleName, setPrintCoupleName] = useState(
@@ -30,7 +30,6 @@ export function ReviewRecipesPage({ group, onBack, onMarkReviewed, onStartCloseF
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
   const [showBookDetails, setShowBookDetails] = useState(false);
 
   useEffect(() => {
@@ -239,18 +238,14 @@ export function ReviewRecipesPage({ group, onBack, onMarkReviewed, onStartCloseF
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
         onReview={() => setShowConfirmModal(false)}
-        onStartCloseFlow={async () => {
-          setIsClosing(true);
-          const { error: closeError } = await closeBook(groupId);
-          if (closeError) {
-            console.error("Failed to close book:", closeError);
-            setIsClosing(false);
-            return;
-          }
+        onStartCloseFlow={() => {
+          // Reason: The book is no longer closed here. It closes only on confirmed
+          // payment (Stripe webhook). This just advances to the quantity + pay step.
           setShowConfirmModal(false);
           onStartCloseFlow();
         }}
         reviewed={true}
+        isOwner={isOwner}
         recipeCount={recipes.length}
         uniqueContributors={0}
       />

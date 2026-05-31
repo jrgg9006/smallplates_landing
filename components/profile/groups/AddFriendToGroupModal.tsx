@@ -122,10 +122,10 @@ export function AddFriendToGroupModal({
           <Button
             onClick={handleCopyLink}
             disabled={loadingToken || !inviteLink}
-            className={`w-full min-h-[44px] rounded-xl border-2 flex items-center justify-center gap-2 transition-all ${
+            className={`w-full h-auto rounded-full py-3.5 text-[15px] font-medium flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 ${
               linkCopied
-                ? "bg-[hsl(var(--brand-honey))] border-[hsl(var(--brand-honey))] text-black hover:bg-[hsl(var(--brand-honey))] hover:border-[hsl(var(--brand-honey))] hover:text-black"
-                : "bg-black text-white hover:bg-gray-800 border-black"
+                ? "bg-[hsl(var(--brand-honey))] text-black hover:bg-[hsl(var(--brand-honey))]"
+                : "bg-brand-charcoal text-brand-warm-white-warm hover:bg-gray-800"
             }`}
           >
             {loadingToken ? (

@@ -543,7 +543,11 @@ export default function GroupsPage() {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     const from = params.get("from");
-    if (from === "extras-purchase" || from === "dashboard-extras-purchase") {
+    if (
+      from === "extras-purchase" ||
+      from === "dashboard-extras-purchase" ||
+      from === "book-close-purchase"
+    ) {
       groupsSectionRef.current?.loadGroups(true);
       router.replace("/profile/groups");
     }
@@ -640,6 +644,7 @@ export default function GroupsPage() {
       {activeView === 'review-recipes' && selectedGroup && (
         <ReviewRecipesPage
           group={selectedGroup}
+          isOwner={selectedGroup?.created_by === user?.id}
           onBack={() => setActiveView('book')}
           onMarkReviewed={handleMarkReviewed}
           onStartCloseFlow={() => {
@@ -919,6 +924,7 @@ export default function GroupsPage() {
         onReview={handleReviewRecipes}
         onStartCloseFlow={handleStartCloseFlow}
         reviewed={bookReviewed}
+        isOwner={selectedGroup?.created_by === user?.id}
         recipeCount={recipeCount}
         uniqueContributors={uniqueContributors}
       />
