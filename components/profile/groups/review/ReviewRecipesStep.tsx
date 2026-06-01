@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ReviewRecipeCard } from "./ReviewRecipeCard";
 import { ReviewRecipeSidebar } from "./ReviewRecipeSidebar";
+import BrandLoader from "@/components/ui/BrandLoader";
 import type { RecipeForReview } from "@/lib/types/database";
 
 interface ReviewRecipesStepProps {
@@ -62,6 +63,13 @@ export function ReviewRecipesStep({
 
   return (
     <div className="flex flex-col">
+      {/* Short intro — same style as step 1. The big step title lives in the
+          container H1 above. */}
+      <p className="type-body-small mb-6 max-w-4xl text-pretty">
+        Review that everyone is here. We&apos;ll format every recipe and{" "}
+        <span className="font-medium text-brand-charcoal">create an image for each one</span>.
+      </p>
+
       {/* Control row — nav + continue */}
       <div className="mb-4 flex items-center gap-3">
         {!loading && recipes.length > 0 && (
@@ -114,7 +122,7 @@ export function ReviewRecipesStep({
         <div className="flex min-h-0 flex-1 flex-col">
           {loading ? (
             <div className="flex flex-1 items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-brand-honey" />
+              <BrandLoader message="Loading recipes…" />
             </div>
           ) : error ? (
             <div className="flex flex-1 items-center justify-center">

@@ -8,7 +8,8 @@ export type StepNumber = 1 | 2 | 3 | 4;
 interface StepBarProps {
   current: StepNumber;
   // Reason: the highest step the user is allowed to jump to. Steps above this
-  // (Quantity/Checkout before 25 recipes) render locked and are non-clickable.
+  // (Quantity/Checkout before the recipe minimum) render locked and are
+  // non-clickable.
   unlockedMax: StepNumber;
   onStepClick: (step: StepNumber) => void;
 }

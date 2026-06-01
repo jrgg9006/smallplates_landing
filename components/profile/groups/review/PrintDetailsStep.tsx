@@ -89,9 +89,8 @@ export function PrintDetailsStep({
   return (
     <div className="w-full">
       {/* Short intro — the big step title lives in the container H1 above. */}
-      <p className="type-body mb-10 max-w-4xl">
-        This is how the couple shows up in the book. Double-check the spelling. The
-        photo is optional, but it makes it real.
+      <p className="type-body-small mb-10 max-w-2xl text-pretty">
+        This is how the couple&apos;s name appears in print. The photo is optional.
       </p>
 
       <div className="grid max-w-4xl gap-x-16 gap-y-10 sm:grid-cols-2 sm:items-start">

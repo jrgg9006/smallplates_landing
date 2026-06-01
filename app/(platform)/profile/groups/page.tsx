@@ -508,13 +508,35 @@ export default function GroupsPage() {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     const from = params.get("from");
+    const closedGroupId = params.get("group");
     if (
       from === "extras-purchase" ||
       from === "dashboard-extras-purchase" ||
       from === "book-close-purchase"
     ) {
-      groupsSectionRef.current?.loadGroups(true);
-      router.replace("/profile/groups");
+      (async () => {
+        await groupsSectionRef.current?.loadGroups(true);
+        // Reason: after the reload, GroupsSection auto-selects the first NON-closed
+        // book. For a just-closed purchase that lands the owner on the wrong book
+        // (e.g. another open book). Re-select the book we just paid for so they see
+        // its BookClosedStatus. Poll briefly since loadGroups populates async.
+        if (closedGroupId) {
+          let attempts = 0;
+          const interval = setInterval(() => {
+            attempts += 1;
+            const groups = groupsSectionRef.current?.groups;
+            const found = groups?.find((g) => g.id === closedGroupId);
+            if (found) {
+              setSelectedGroup(found);
+              groupsSectionRef.current?.handleGroupChange(found);
+              clearInterval(interval);
+            } else if (attempts > 30) {
+              clearInterval(interval);
+            }
+          }, 100);
+        }
+        router.replace("/profile/groups");
+      })();
     }
   }, [router]);
 

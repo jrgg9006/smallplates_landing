@@ -462,6 +462,7 @@ export interface Database {
           book_notes: string | null;
           print_couple_name: string | null;
           print_details_confirmed_at: string | null;
+          owner_approved_at: string | null;
           pdf_url: string | null;
           status: GroupStatus;
           occasion: string | null;
@@ -510,6 +511,7 @@ export interface Database {
           book_notes?: string | null;
           print_couple_name?: string | null;
           print_details_confirmed_at?: string | null;
+          owner_approved_at?: string | null;
           pdf_url?: string | null;
           shipping_address_id?: string | null;
           status?: GroupStatus;
@@ -556,6 +558,7 @@ export interface Database {
           book_notes?: string | null;
           print_couple_name?: string | null;
           print_details_confirmed_at?: string | null;
+          owner_approved_at?: string | null;
           pdf_url?: string | null;
           shipping_address_id?: string | null;
           status?: GroupStatus;
