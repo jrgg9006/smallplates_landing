@@ -107,42 +107,45 @@ export function ReviewRecipesStep({
         </button>
       </div>
 
-      {/* Content — sidebar + page. Tall near-viewport height; the card holds an
-          8x10 page proportion (centered) and scrolls internally. This is the main
-          review surface, so it should read like a real book page. */}
-      <div className="flex h-[calc(100vh-2rem)] min-h-[960px] gap-6">
-        {!loading && recipes.length > 0 && (
+      {/* Loading / error / empty — short container centered near the top of the
+          viewport so the loader is visible. The tall book-page layout below is
+          only used once there's an actual recipe to render. */}
+      {loading ? (
+        <div className="flex justify-center pt-12">
+          <BrandLoader inline message="Loading recipes…" />
+        </div>
+      ) : error ? (
+        <div className="flex justify-center pt-12">
+          <p className="text-red-500">{error}</p>
+        </div>
+      ) : recipes.length === 0 ? (
+        <div className="flex justify-center pt-12">
+          <p className="font-serif text-gray-400">No recipes to review.</p>
+        </div>
+      ) : (
+        /* Content — sidebar + page. Tall near-viewport height; the card holds an
+           8x10 page proportion (centered) and scrolls internally. This is the main
+           review surface, so it should read like a real book page. */
+        <div className="flex h-[calc(100vh-2rem)] min-h-[960px] gap-6">
           <ReviewRecipeSidebar
             recipes={recipes}
             currentIndex={currentIndex}
             onSelect={setCurrentIndex}
           />
-        )}
 
-        <div className="flex min-h-0 flex-1 flex-col">
-          {loading ? (
-            <div className="flex flex-1 items-center justify-center">
-              <BrandLoader message="Loading recipes…" />
-            </div>
-          ) : error ? (
-            <div className="flex flex-1 items-center justify-center">
-              <p className="text-red-500">{error}</p>
-            </div>
-          ) : recipes.length === 0 ? (
-            <div className="flex flex-1 items-center justify-center">
-              <p className="font-serif text-gray-400">No recipes to review.</p>
-            </div>
-          ) : recipe ? (
-            <ReviewRecipeCard
-              key={recipe.id}
-              recipe={recipe}
-              index={currentIndex}
-              total={recipes.length}
-              onSave={onSaveRecipe}
-            />
-          ) : null}
+          <div className="flex min-h-0 flex-1 flex-col">
+            {recipe && (
+              <ReviewRecipeCard
+                key={recipe.id}
+                recipe={recipe}
+                index={currentIndex}
+                total={recipes.length}
+                onSave={onSaveRecipe}
+              />
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
