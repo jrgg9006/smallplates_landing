@@ -10,8 +10,6 @@ interface Step {
 
 const STEPS: Step[] = [
   {
-    image: "/images/onboarding/drawing_champaign_glasses.svg",
-    alt: "",
     text: "Set up your project and invite your people.",
   },
   {
@@ -25,7 +23,7 @@ const STEPS: Step[] = [
   },
 ];
 
-// Reason: icon centers sit at x≈42 (left) and x≈406 (right) within the 448px
+// Reason: icon centers sit at x≈120 (left) and x≈330 (right) within the 448px
 // (max-w-md) column. The connector curves from the current step's icon side to
 // the next step's icon side, producing the alternating "path" down the column.
 const PATH_FROM_LEFT = "M120,2 C120,34 330,14 330,46";
