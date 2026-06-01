@@ -177,6 +177,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               Continue with Google
             </button>
 
+            <p className="mt-5 text-[12px] text-gray-400 leading-relaxed text-center">
+              By continuing, you agree to our{" "}
+              <a href="/terms" target="_blank" rel="noreferrer" className="underline hover:text-gray-600">Terms of Service</a>
+              {" "}and{" "}
+              <a href="/privacy" target="_blank" rel="noreferrer" className="underline hover:text-gray-600">Privacy Policy</a>.
+            </p>
+
             {error && (
               <p className="mt-4 text-sm text-red-600">{error}</p>
             )}

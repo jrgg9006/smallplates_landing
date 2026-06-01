@@ -106,6 +106,13 @@ export default function SignInPage() {
           Continuar con Google
         </button>
 
+        <p className="type-caption mt-6 text-center">
+          Al continuar, aceptas nuestros{" "}
+          <a href="/terms" target="_blank" rel="noreferrer" className="underline hover:text-brand-charcoal">Términos de Servicio</a>
+          {" "}y nuestra{" "}
+          <a href="/privacy" target="_blank" rel="noreferrer" className="underline hover:text-brand-charcoal">Política de Privacidad</a>.
+        </p>
+
         {status === "error" && (
           <p className="mt-4 text-sm text-red-600">{errorMsg}</p>
         )}
