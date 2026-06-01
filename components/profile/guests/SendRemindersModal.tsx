@@ -42,6 +42,8 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
   const [sendResult, setSendResult] = useState<{ sent: number; failed: number } | null>(null);
   const [body, setBody] = useState<string>(DEFAULT_REMINDER_BODY);
   const [bodyLoaded, setBodyLoaded] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
 
   const hasValidEmail = (guest: Guest) =>
     guest.email &&
@@ -135,13 +137,16 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
     }
   };
 
-  const handleBodyBlur = async () => {
-    if (!bodyLoaded) return;
+  const handleSave = async () => {
+    if (!bodyLoaded || isSaving) return;
+    setIsSaving(true);
     await fetch(`/api/v1/groups/${groupId}/event-details`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email_reminder_message: body }),
     });
+    setIsSaving(false);
+    setJustSaved(true);
   };
 
   const handleSend = async () => {
@@ -199,10 +204,14 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
 
             <textarea
               value={body}
-              onChange={(e) => setBody(e.target.value)}
-              onBlur={handleBodyBlur}
+              onChange={(e) => {
+                setBody(e.target.value);
+                // Reason: once the text changes the saved state is stale,
+                // so drop the "Saved" confirmation until they save again.
+                if (justSaved) setJustSaved(false);
+              }}
               rows={6}
-              className="w-full p-4 bg-gray-50 border border-[hsl(var(--brand-border))] rounded-lg shadow-sm resize-none focus:outline-none focus:border-[hsl(var(--brand-honey))] focus:ring-1 focus:ring-[hsl(var(--brand-honey))] focus:bg-white text-sm text-[hsl(var(--brand-charcoal))] leading-relaxed transition-colors"
+              className="w-full p-4 bg-gray-50 border border-[hsl(var(--brand-border))] rounded-lg shadow-sm resize-none focus:outline-none focus:border-[hsl(var(--brand-honey))] focus:ring-1 focus:ring-[hsl(var(--brand-honey))] focus:bg-white text-base text-[hsl(var(--brand-charcoal))] leading-relaxed transition-colors"
               placeholder={DEFAULT_REMINDER_BODY}
             />
           </div>
@@ -307,26 +316,47 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
               </div>
             )}
 
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
               <button
                 type="button"
                 onClick={() => setView("recipients")}
-                className="text-sm text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] underline underline-offset-2 transition-colors"
+                className="text-sm text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] underline underline-offset-2 transition-colors text-center sm:text-left"
               >
                 Recipients ({selectedIds.size})
               </button>
-              <div className="flex items-center gap-3">
+              {/* Reason: stack full-width on mobile (Send on top), inline on desktop */}
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-full border border-[rgba(45,45,45,0.14)] px-6 py-3 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2"
+                  className="w-full sm:w-auto rounded-full border border-[rgba(45,45,45,0.14)] px-6 py-3 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2"
                 >
                   Cancel
                 </button>
                 <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-full border border-[rgba(45,45,45,0.22)] px-6 py-3 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Saving…
+                    </>
+                  ) : justSaved ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      Saved
+                    </>
+                  ) : (
+                    "Save"
+                  )}
+                </button>
+                <button
                   onClick={handleSend}
                   disabled={selectedIds.size === 0 || isSending}
-                  className="flex items-center gap-2 rounded-full bg-brand-charcoal px-6 py-3 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-full bg-brand-charcoal px-6 py-3 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {isSending ? (
                     <>
