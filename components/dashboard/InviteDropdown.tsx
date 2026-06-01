@@ -23,7 +23,9 @@ export function InviteDropdown({
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
 
-      <div className="absolute top-full left-0 mt-2 bg-[hsl(var(--brand-white))] rounded-2xl shadow-[0_4px_24px_rgba(45,45,45,0.12)] p-3 min-w-[280px] z-50 border border-[hsl(var(--brand-border))]">
+      {/* Reason: cap width to the viewport on mobile so the menu never overflows;
+          desktop keeps the exact min-w-[280px] auto sizing via sm:. */}
+      <div className="absolute top-full left-0 mt-2 bg-[hsl(var(--brand-white))] rounded-2xl shadow-[0_4px_24px_rgba(45,45,45,0.12)] p-3 w-[calc(100vw-1.5rem)] max-w-[300px] sm:w-auto sm:min-w-[280px] sm:max-w-none z-50 border border-[hsl(var(--brand-border))]">
         <button
           onClick={() => {
             onInviteToEvent();

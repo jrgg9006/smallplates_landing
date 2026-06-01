@@ -731,7 +731,7 @@ export default function GroupsPage() {
                 {/* PRIMARY - Invite dropdown (HONEY, ROUNDED) */}
                 <div className="relative">
                   <button
-                    className="btn btn-sm btn-honey gap-2 px-10 sm:px-14"
+                    className="btn btn-sm btn-honey gap-2 px-6 sm:px-14"
                     onClick={() => setShowInviteDropdown(!showInviteDropdown)}
                     disabled={!selectedGroup}
                   >

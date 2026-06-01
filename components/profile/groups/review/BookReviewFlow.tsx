@@ -195,7 +195,9 @@ export function BookReviewFlow({ group, isOwner, recipeCount, onExit }: BookRevi
             className="inline-flex flex-shrink-0 items-center gap-1.5 text-sm text-[hsl(var(--brand-warm-gray))] transition-colors hover:text-brand-charcoal"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to your book
+            {/* Reason: shorten to "Back" on mobile so it doesn't crowd the title */}
+            <span className="sm:hidden">Back</span>
+            <span className="hidden sm:inline">Back to your book</span>
           </button>
         </div>
 

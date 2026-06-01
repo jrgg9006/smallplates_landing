@@ -109,7 +109,7 @@ export function DashboardChecklist({
               <span className="w-6 h-6 rounded-full border-2 border-[hsl(var(--brand-border-button))] flex-shrink-0" />
             )}
             <span
-              className={`font-serif text-[18px] font-light ${
+              className={`font-serif text-[16px] sm:text-[18px] font-light ${
                 step.done
                   ? "text-[hsl(var(--brand-warm-gray))] line-through"
                   : "text-[hsl(var(--brand-charcoal))]"

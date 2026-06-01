@@ -404,7 +404,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
   }
 
   return (
-    <div className="min-h-[60vh] px-6 py-10">
+    <div className="min-h-[60vh] px-4 py-8 sm:px-6 sm:py-10">
       <div className="max-w-2xl mx-auto">
 
           {/* Header */}
@@ -421,7 +421,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
           )}
 
           {/* Details grid */}
-          <div className="mt-6 grid grid-cols-2 gap-5">
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
             {/* Printed as */}
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-1">Printed as</p>
@@ -579,7 +579,7 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
                     className={inputClasses}
                   />
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <div>
                     <Label className="text-secondary-sm text-gray-500 mb-1 block">City</Label>
                     <Input
