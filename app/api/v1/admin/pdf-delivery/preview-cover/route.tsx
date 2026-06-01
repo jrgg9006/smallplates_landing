@@ -96,31 +96,9 @@ export async function GET(request: NextRequest) {
           }}
         />
 
-        {/* Spine — left edge gradient */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: 12,
-            height: H,
-            background: 'linear-gradient(to right, rgba(0,0,0,0.20), transparent)',
-            display: 'flex',
-          }}
-        />
-
-        {/* Page-edge depth — right edge gradient */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            width: 20,
-            height: H,
-            background: 'linear-gradient(to left, rgba(0,0,0,0.08), transparent)',
-            display: 'flex',
-          }}
-        />
+        {/* Reason: flat front cover, no spine/page-edge gradients — straight
+            edges (Storyworth-style). External depth is handled by the shadow on
+            the BookPreviewPanel wrapper, not baked into the image. */}
 
         {/* Text layer */}
         <div
