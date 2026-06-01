@@ -92,6 +92,15 @@ export default function AboutYouPage() {
           priority
         />
       }
+      titleAccent={
+        <Image
+          src="/images/onboarding/drawing_champaign_glasses.svg"
+          alt=""
+          width={934}
+          height={697}
+          className="lg:hidden w-24 h-auto mt-1"
+        />
+      }
       backHref="/onboarding/book-date"
       onContinue={handleSubmit}
       continueDisabled={!canSubmit}

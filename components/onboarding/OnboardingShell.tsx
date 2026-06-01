@@ -9,6 +9,9 @@ interface OnboardingShellProps {
   imageUrl?: string;
   imageAlt?: string;
   rightContent?: ReactNode;
+  // Reason: small illustration shown beside the title (used on mobile, where the
+  // desktop right panel is hidden). Pages opt in per-step.
+  titleAccent?: ReactNode;
   onContinue?: () => void | Promise<void>;
   continueLabel?: string;
   continueDisabled?: boolean;
@@ -24,6 +27,7 @@ export function OnboardingShell({
   imageUrl = "/images/onboarding/onboarding_lemon.png",
   imageAlt = "Small Plates onboarding",
   rightContent,
+  titleAccent,
   onContinue,
   continueLabel = "Continue",
   continueDisabled,
@@ -60,25 +64,29 @@ export function OnboardingShell({
       )}
 
       {/* Content */}
-      <div className={`min-h-[calc(100vh-3.5rem)] sm:min-h-[calc(100vh-4rem)] flex items-start pt-8 lg:pt-24 pb-8 overflow-y-auto ${hasRightPanel ? "lg:mr-[40%]" : ""}`}>
+      <div className={`min-h-[calc(100vh-3.5rem)] sm:min-h-[calc(100vh-4rem)] flex items-start pt-8 lg:pt-24 pb-32 lg:pb-8 overflow-y-auto ${hasRightPanel ? "lg:mr-[40%]" : ""}`}>
         <div className={`w-full px-5 sm:px-8 lg:pl-28 lg:pr-12 ${hasRightPanel ? "max-w-2xl" : "max-w-4xl"}`}>
           {/* Title */}
-          <div className="text-left mb-6 lg:mb-8">
-            <h1 className="font-serif text-3xl sm:text-4xl lg:text-[46px] leading-tight font-light text-gray-900 mb-2">
-              {title}
-            </h1>
-            {subtitle && (
-              <p className="text-sm sm:text-base text-gray-500 mt-2 lg:mt-3">
-                {subtitle}
-              </p>
-            )}
+          <div className="mb-8 lg:mb-8 flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0 text-left">
+              <h1 className="font-serif text-4xl lg:text-[46px] leading-tight font-light text-gray-900 mb-2">
+                {title}
+              </h1>
+              {subtitle && (
+                <p className="text-sm sm:text-base text-gray-500 mt-2 lg:mt-3">
+                  {subtitle}
+                </p>
+              )}
+            </div>
+            {titleAccent && <div className="flex-none">{titleAccent}</div>}
           </div>
 
           {/* Content */}
           <div className="mb-8 lg:mb-10">{children}</div>
 
-          {/* Navigation */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-6">
+          {/* Navigation — fixed bottom bar on mobile/tablet so Continue is
+              always visible; reverts to inline flow on desktop (lg+). */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-6 fixed inset-x-0 bottom-0 z-40 bg-white border-t border-gray-100 px-5 py-4 sm:px-8 lg:static lg:z-auto lg:bg-transparent lg:border-0 lg:px-0 lg:py-0">
             {onContinue && (
               <button
                 onClick={onContinue}
@@ -88,11 +96,11 @@ export function OnboardingShell({
                 {continueLabel}
               </button>
             )}
-            <div className="flex items-center justify-between sm:contents order-2 sm:order-1">
+            <div className="flex items-center justify-center sm:contents order-2 sm:order-1">
               {backHref && (
                 <Link
                   href={backHref}
-                  className="px-4 sm:px-6 py-3 text-gray-600 font-medium hover:text-gray-900 transition-colors"
+                  className="px-4 sm:px-6 py-2 sm:py-3 text-sm font-normal text-gray-500 sm:text-base sm:font-medium sm:text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   Back
                 </Link>

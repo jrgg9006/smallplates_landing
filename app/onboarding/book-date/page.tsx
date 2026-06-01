@@ -97,7 +97,7 @@ export default function BookDatePage() {
 
   const saveTheDateCard = selectedDate && bookCloseDate ? (
     <div
-      className="bg-white border border-brand-sand rounded-2xl text-center py-12 px-16 w-full max-w-md"
+      className="bg-white border border-brand-sand rounded-2xl text-center py-10 px-8 sm:py-12 sm:px-16 w-full max-w-md"
       style={{
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
         animation: "cardIn 400ms ease-out forwards",
@@ -228,6 +228,12 @@ export default function BookDatePage() {
           <p className="text-sm text-[hsl(var(--brand-warm-gray-light))]">
             No problem. You can set this from your dashboard anytime.
           </p>
+        )}
+
+        {/* Mobile-only: the shell's right panel (where this card shows on
+            desktop) is hidden below lg, so render the card here too. */}
+        {selectedDate && bookCloseDate && (
+          <div className="lg:hidden mt-8">{saveTheDateCard}</div>
         )}
       </div>
     </OnboardingShell>
