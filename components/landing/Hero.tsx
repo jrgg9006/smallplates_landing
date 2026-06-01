@@ -59,8 +59,7 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
           >
-            For the wedding, the shower, the table after.
-            <span className="block mt-2">You set it up. We handle the rest.</span>
+            For the wedding, the shower, the table after. You set it up. We handle the rest.
           </motion.p>
           <motion.div
             className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4"
