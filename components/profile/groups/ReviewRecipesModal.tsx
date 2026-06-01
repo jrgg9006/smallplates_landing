@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { getGroupRecipes } from "@/lib/supabase/groupRecipes";
@@ -193,12 +192,13 @@ export function ReviewRecipesModal({
           </div>
 
           {/* Mark as Reviewed — right aligned */}
-          <Button
+          <button
+            type="button"
             onClick={onMarkReviewed}
-            className="bg-black text-white hover:bg-gray-800 rounded-full"
+            className="rounded-full bg-brand-charcoal px-6 py-3 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2"
           >
             Mark as Book Reviewed
-          </Button>
+          </button>
         </div>
       </DialogContent>
     </Dialog>

@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createGroup } from "@/lib/supabase/groups";
 import type { GroupFormData } from "@/lib/types/database";
@@ -165,13 +164,13 @@ export function CreateGroupModal({ isOpen, onClose, onGroupCreated }: CreateGrou
 
         {/* Footer Actions */}
         <div className="pt-6 border-t border-gray-200">
-          <Button
+          <button
             type="submit"
-            className="w-full bg-black text-white hover:bg-gray-800 py-3 rounded-full disabled:opacity-50"
+            className="w-full rounded-full bg-brand-charcoal py-3.5 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-50"
             disabled={loading || !formData.name.trim() || formData.name.length > MAX_NAME_LENGTH}
           >
             {loading ? 'Creating...' : 'Create New Book'}
-          </Button>
+          </button>
         </div>
       </form>
     </div>

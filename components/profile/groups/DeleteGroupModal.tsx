@@ -6,9 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { GroupWithMembers } from "@/lib/types/database";
 import { AlertTriangle } from "lucide-react";
 
@@ -39,7 +37,6 @@ export function DeleteGroupModal({
     ? "This action cannot be undone. The cookbook, all its recipes, and the shared cookbook will be permanently deleted for ALL members."
     : "You will no longer be a member of this cookbook and won't have access to its recipes and shared cookbook. You can be re-invited later.";
   const buttonText = canDelete ? "Delete Cookbook" : "Exit Cookbook";
-  const buttonVariant = canDelete ? "destructive" : "destructive";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -79,24 +76,25 @@ export function DeleteGroupModal({
           )}
         </div>
 
-        <DialogFooter className="flex gap-2">
-          <Button
-            variant="outline"
+        {/* Action Buttons — standardized modal footer */}
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-3">
+          <button
+            type="button"
             onClick={onClose}
             disabled={loading}
-            className="flex-1"
+            className="w-full rounded-full border border-[rgba(45,45,45,0.14)] py-3.5 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2 disabled:opacity-50 sm:flex-1"
           >
             Cancel
-          </Button>
-          <Button
-            variant={buttonVariant as "destructive"}
+          </button>
+          <button
+            type="button"
             onClick={onConfirm}
             disabled={loading}
-            className="flex-1"
+            className="w-full rounded-full bg-brand-charcoal py-3.5 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-50 sm:flex-1"
           >
             {loading ? (canDelete ? 'Deleting...' : 'Exiting...') : buttonText}
-          </Button>
-        </DialogFooter>
+          </button>
+        </div>
       </DialogContent>
     </Dialog>
   );

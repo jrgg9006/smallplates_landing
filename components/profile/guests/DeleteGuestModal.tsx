@@ -5,11 +5,9 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 
 interface DeleteGuestModalProps {
   isOpen: boolean;
@@ -32,23 +30,25 @@ export function DeleteGuestModal({ isOpen, guestName, onClose, onConfirm, loadin
             <span className="text-sm text-muted-foreground">The guest and their recipes will be archived but not permanently deleted</span>
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="flex-col gap-2 sm:flex-row sm:gap-4">
-          <Button
-            onClick={onConfirm}
-            disabled={loading}
-            className="order-1 sm:order-2 bg-black text-white hover:bg-gray-800 disabled:opacity-50"
-          >
-{loading ? 'Removing...' : 'Remove'}
-          </Button>
-          <Button
-            variant="outline"
+        {/* Action Buttons — standardized modal footer */}
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-3">
+          <button
+            type="button"
             onClick={onClose}
             disabled={loading}
-            className="order-2 sm:order-1"
+            className="w-full rounded-full border border-[rgba(45,45,45,0.14)] py-3.5 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2 disabled:opacity-50 sm:flex-1"
           >
             Cancel
-          </Button>
-        </DialogFooter>
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={loading}
+            className="w-full rounded-full bg-brand-charcoal py-3.5 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-50 sm:flex-1"
+          >
+            {loading ? 'Removing...' : 'Remove'}
+          </button>
+        </div>
       </DialogContent>
     </Dialog>
   );

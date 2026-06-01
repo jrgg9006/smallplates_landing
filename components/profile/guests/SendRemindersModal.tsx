@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { X, Loader2, Check, ChevronLeft } from "lucide-react";
+import { Loader2, Check, ChevronLeft } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { getGuestsByGroup } from "@/lib/supabase/guests";
 import { createSupabaseClient } from "@/lib/supabase/client";
 import type { Guest } from "@/lib/types/database";
@@ -173,47 +179,20 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
     setIsSending(false);
   };
 
-  if (!isOpen) return null;
-
   const allSelected = selectedIds.size === visibleGuests.length && visibleGuests.length > 0;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-6 ">
-          {view === "recipients" ? (
-            <button
-              onClick={() => setView("compose")}
-              className="flex items-center gap-1.5 text-sm text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] transition-colors"
-              type="button"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Back
-            </button>
-          ) : (
-            <h3 className="type-modal-title text-[hsl(var(--brand-charcoal))]">
-              Send an email reminder
-            </h3>
-          )}
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-700 transition-colors"
-            type="button"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="type-modal-title">
+            {view === "recipients" ? "Choose who to remind" : "Send an email reminder"}
+          </DialogTitle>
+        </DialogHeader>
 
         {/* Body */}
         {view === "compose" ? (
-          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+          <div className="flex-1 overflow-y-auto -mx-6 px-6 py-1 space-y-4">
             <p className="text-gray-600 text-base leading-relaxed">
               You can send an email reminder to everyone you&apos;ve invited who hasn&apos;t sent a recipe yet.
             </p>
@@ -228,7 +207,17 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
             />
           </div>
         ) : (
-          <div className="flex-1 min-h-[420px] px-6 py-5 flex flex-col">
+          <div className="flex-1 min-h-[420px] -mx-6 px-6 py-1 flex flex-col">
+            {/* Back to compose */}
+            <button
+              type="button"
+              onClick={() => setView("compose")}
+              className="flex items-center gap-1.5 text-sm text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] transition-colors mb-4 flex-shrink-0"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Back
+            </button>
+
             {loading ? (
               <div className="space-y-2">
                 {[1, 2, 3].map((i) => (
@@ -299,72 +288,70 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
         )}
 
         {/* Footer */}
-        <div className="px-6 py-4">
-          {view === "compose" ? (
-            <>
-              {sendResult && (
-                <div
-                  className={`mb-3 p-2.5 rounded-lg text-sm flex items-center gap-2 ${
-                    sendResult.failed === 0
-                      ? "bg-green-50 text-green-800"
-                      : "bg-amber-50 text-amber-800"
-                  }`}
-                >
-                  <Check className="w-4 h-4 flex-shrink-0" />
-                  <span>
-                    {sendResult.sent > 0 && `Sent ${sendResult.sent} reminder${sendResult.sent === 1 ? "" : "s"}`}
-                    {sendResult.sent > 0 && sendResult.failed > 0 && " · "}
-                    {sendResult.failed > 0 && `${sendResult.failed} failed`}
-                  </span>
-                </div>
-              )}
-
-              <div className="flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => setView("recipients")}
-                  className="text-sm text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] underline underline-offset-2 transition-colors"
-                >
-                  Recipients ({selectedIds.size})
-                </button>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="px-4 py-2 text-sm text-[hsl(var(--brand-charcoal))] hover:bg-gray-50 rounded-full transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSend}
-                    disabled={selectedIds.size === 0 || isSending}
-                    className="px-5 py-2 rounded-full bg-[hsl(var(--brand-honey))] hover:bg-[hsl(var(--brand-honey-dark))] text-white font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                  >
-                    {isSending ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Sending…
-                      </>
-                    ) : (
-                      "Send"
-                    )}
-                  </button>
-                </div>
+        {view === "compose" ? (
+          <div className="flex-shrink-0">
+            {sendResult && (
+              <div
+                className={`mb-3 p-2.5 rounded-lg text-sm flex items-center gap-2 ${
+                  sendResult.failed === 0
+                    ? "bg-green-50 text-green-800"
+                    : "bg-amber-50 text-amber-800"
+                }`}
+              >
+                <Check className="w-4 h-4 flex-shrink-0" />
+                <span>
+                  {sendResult.sent > 0 && `Sent ${sendResult.sent} reminder${sendResult.sent === 1 ? "" : "s"}`}
+                  {sendResult.sent > 0 && sendResult.failed > 0 && " · "}
+                  {sendResult.failed > 0 && `${sendResult.failed} failed`}
+                </span>
               </div>
-            </>
-          ) : (
-            <div className="flex justify-end">
+            )}
+
+            <div className="flex items-center justify-between gap-3">
               <button
                 type="button"
-                onClick={() => setView("compose")}
-                className="px-5 py-2 rounded-full bg-[hsl(var(--brand-charcoal))] hover:bg-black text-white font-medium text-sm transition-colors"
+                onClick={() => setView("recipients")}
+                className="text-sm text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] underline underline-offset-2 transition-colors"
               >
-                Done
+                Recipients ({selectedIds.size})
               </button>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="rounded-full border border-[rgba(45,45,45,0.14)] px-6 py-3 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSend}
+                  disabled={selectedIds.size === 0 || isSending}
+                  className="flex items-center gap-2 rounded-full bg-brand-charcoal px-6 py-3 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {isSending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Sending…
+                    </>
+                  ) : (
+                    "Send"
+                  )}
+                </button>
+              </div>
             </div>
-          )}
-        </div>
-      </div>
-    </div>
+          </div>
+        ) : (
+          <div className="flex justify-end flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setView("compose")}
+              className="rounded-full bg-brand-charcoal px-6 py-3 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2"
+            >
+              Done
+            </button>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { addGuest, checkGuestExists } from "@/lib/supabase/guests";
 import type { GuestFormData } from "@/lib/types/database";
 import { OnboardingBadge } from "@/components/onboarding/OnboardingBadge";
@@ -192,23 +191,24 @@ export function AddGuestModal({ isOpen, onClose, onGuestAdded, isFirstGuest = fa
           )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <Button
-            variant="outline"
+        {/* Action Buttons — standardized modal footer */}
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-3">
+          <button
+            type="button"
             onClick={onClose}
             disabled={loading}
-            className="w-full sm:w-auto min-h-[44px]"
+            className="w-full rounded-full border border-[rgba(45,45,45,0.14)] py-3.5 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2 disabled:opacity-50 sm:flex-1"
           >
             Cancel
-          </Button>
-          <Button
+          </button>
+          <button
+            type="button"
             onClick={handleSave}
             disabled={loading || !firstName.trim()}
-            className="w-full sm:w-auto min-h-[44px] bg-black text-white hover:bg-gray-800"
+            className="w-full rounded-full bg-brand-charcoal py-3.5 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-50 sm:flex-1"
           >
             {loading ? 'Saving...' : 'Save'}
-          </Button>
+          </button>
         </div>
       </DialogContent>
     </Dialog>
