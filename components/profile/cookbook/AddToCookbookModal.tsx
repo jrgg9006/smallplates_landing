@@ -5,11 +5,9 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getAllCookbooks, createCookbook, addRecipeToCookbook } from "@/lib/supabase/cookbooks";
@@ -302,18 +300,21 @@ export function AddToCookbookModal({
           )}
         </div>
 
-        <DialogFooter>
-          <Button
-            variant="outline"
+        {/* Action Buttons — standardized modal footer */}
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-3">
+          <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               handleClose();
             }}
             disabled={loading}
+            className="w-full rounded-full border border-[rgba(45,45,45,0.14)] py-3.5 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2 disabled:opacity-50 sm:flex-1"
           >
             Cancel
-          </Button>
-          <Button
+          </button>
+          <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               if (!isAdded) {
@@ -321,15 +322,13 @@ export function AddToCookbookModal({
               }
             }}
             disabled={loading || !selectedCookbookId || !recipe}
-            className={
-              isAdded 
-                ? "bg-green-600 text-white hover:bg-green-600" 
-                : "bg-black text-white hover:bg-gray-800"
-            }
+            className={`w-full rounded-full py-3.5 text-[15px] font-medium text-brand-warm-white-warm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-50 sm:flex-1 ${
+              isAdded ? "bg-green-600 hover:bg-green-600" : "bg-brand-charcoal hover:bg-gray-800"
+            }`}
           >
             {loading ? 'Adding...' : isAdded ? 'Added' : 'Add to Cookbook'}
-          </Button>
-        </DialogFooter>
+          </button>
+        </div>
       </DialogContent>
     </Dialog>
   );

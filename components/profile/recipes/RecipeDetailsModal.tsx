@@ -14,7 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Edit, Download } from "lucide-react";
 import Image from "next/image";
@@ -680,21 +679,22 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
             {/* Save/Cancel Buttons - Fixed bottom for mobile when in edit mode */}
             {isEditMode && (
               <div className="mt-4 pb-safe flex-shrink-0 border-t border-gray-200 pt-4 space-y-2">
-                <Button 
+                <button
+                  type="button"
                   onClick={handleSave}
                   disabled={loading}
-                  className="w-full bg-black text-white hover:bg-gray-800 py-3 rounded-full disabled:opacity-50"
+                  className="w-full rounded-full bg-brand-charcoal py-3.5 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-50"
                 >
                   {loading ? 'Saving...' : 'Save'}
-                </Button>
-                <Button 
+                </button>
+                <button
+                  type="button"
                   onClick={handleCancel}
                   disabled={loading}
-                  variant="outline"
-                  className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 py-3 rounded-full"
+                  className="w-full rounded-full border border-[rgba(45,45,45,0.14)] py-3.5 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2 disabled:opacity-50"
                 >
                   Cancel
-                </Button>
+                </button>
               </div>
             )}
           </div>
@@ -718,21 +718,22 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         {/* Action Buttons - Fixed position at bottom when in edit mode */}
           {isEditMode && (
           <div className="flex justify-end gap-3 flex-shrink-0 bg-white px-8 py-4 border-t border-gray-200">
-                <Button 
-              variant="outline"
+                <button
+                  type="button"
                   onClick={handleCancel}
                   disabled={loading}
-              className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-full"
+                  className="rounded-full border border-[rgba(45,45,45,0.14)] px-6 py-3 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2 disabled:opacity-50"
                 >
                   Cancel
-                </Button>
-                <Button 
+                </button>
+                <button
+                  type="button"
                   onClick={handleSave}
                   disabled={loading}
-              className="bg-black text-white hover:bg-gray-800 rounded-full disabled:opacity-50"
+                  className="rounded-full bg-brand-charcoal px-6 py-3 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-50"
                 >
                   {loading ? 'Saving...' : 'Save'}
-                </Button>
+                </button>
             </div>
           )}
       </DialogContent>

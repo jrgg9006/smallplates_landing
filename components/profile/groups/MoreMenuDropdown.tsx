@@ -26,8 +26,10 @@ export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsO
         onClick={onClose}
       />
       
-      {/* Dropdown */}
-      <div className="absolute top-full right-0 mt-2 bg-[hsl(var(--brand-white))] rounded-2xl shadow-[0_4px_24px_rgba(45,45,45,0.12)] p-3 min-w-[180px] z-50 border border-[hsl(var(--brand-border))]">
+      {/* Dropdown — Reason: the ⋯ trigger sits on the right, so on mobile anchor
+          the menu to the right + cap its width to the viewport so it doesn't clip
+          off-screen; desktop keeps the original left-0 min-w-[240px] via sm:. */}
+      <div className="absolute top-full right-0 sm:left-0 sm:right-auto mt-2 bg-[hsl(var(--brand-white))] rounded-2xl shadow-[0_4px_24px_rgba(45,45,45,0.12)] p-3 w-[calc(100vw-1.5rem)] max-w-[280px] sm:w-auto sm:min-w-[240px] sm:max-w-none z-50 border border-[hsl(var(--brand-border))]">
         {showCaptainsOption && onCaptainsClick && (
           <button
             onClick={() => {
@@ -58,18 +60,9 @@ export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsO
             }}
             className="w-full text-left px-4 py-2.5 text-sm text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-border))] rounded-lg transition-colors"
           >
-            Send Invitations
+            Send email invitations
           </button>
         )}
-        <button
-          onClick={() => {
-            onEditProfile();
-            onClose();
-          }}
-          className="w-full text-left px-4 py-2.5 text-sm text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-border))] rounded-lg transition-colors"
-        >
-          Edit Profile
-        </button>
         {onCloseBookClick && (
           <>
             <div className="my-1 border-t border-[hsl(var(--brand-border))]" />
@@ -80,7 +73,7 @@ export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsO
               }}
               className="w-full text-left px-4 py-2.5 text-sm text-[hsl(var(--brand-honey))] hover:bg-[hsl(var(--brand-border))] rounded-lg transition-colors"
             >
-              Close Book
+              Print Book
             </button>
           </>
         )}

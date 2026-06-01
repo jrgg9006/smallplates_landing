@@ -1,7 +1,10 @@
 /**
  * API Route - Verify & Accept Group Invitation
  * GET: Validates token, returns group + inviter info
- * POST: Accepts invitation (creates account if needed, adds to group)
+ * POST: Accepts invitation passwordlessly — clicking the emailed link proves
+ *       inbox ownership, so we auto-provision (or reuse) the account, add the
+ *       person to the group, and return a magic-link token_hash the client
+ *       redeems for an instant session. No password, no form.
  */
 
 import { NextResponse } from 'next/server';
@@ -141,7 +144,6 @@ export async function POST(
 ) {
   try {
     const { token } = await params;
-    const { password, fullName, email: providedEmail } = await request.json();
 
     if (!token) {
       return NextResponse.json({ error: 'Token is required' }, { status: 400 });
@@ -164,163 +166,117 @@ export async function POST(
 
     const invitation = result.invitation!;
     const group = invitation.groups as { id: string; name: string; description: string | null };
-    const email = invitation.email || providedEmail;
+    const email = (invitation.email || '').toLowerCase();
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    // Reason: Check existing users to determine create vs sign-in flow
-    const { data: { users } } = await supabaseAdmin.auth.admin.listUsers();
-    const existingUser = users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
-
+    // Reason: Find or create the auth user WITHOUT a password. We try to create
+    // first (email already confirmed since the invite proves inbox ownership);
+    // if the email is already registered, fall back to the existing profile id.
+    // Same passwordless pattern as /api/v1/groups/free.
     let userId: string;
     let isNewUser = false;
 
-    if (existingUser) {
-      userId = existingUser.id;
-
-      if (!password) {
-        return NextResponse.json(
-          { error: 'Password is required to verify your account' },
-          { status: 400 }
-        );
-      }
-
-      const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
-        email: email.toLowerCase(),
-        password,
-      });
-
-      if (signInError || !signInData.user) {
-        return NextResponse.json(
-          { error: 'Invalid password. Please check your password and try again.' },
-          { status: 401 }
-        );
-      }
-
-      if (signInData.user.id !== userId) {
-        await supabaseAdmin.auth.signOut();
-        return NextResponse.json({ error: 'Authentication error. Please try again.' }, { status: 401 });
-      }
-
-      // Reason: Sign out after verification — frontend creates its own session
-      await supabaseAdmin.auth.signOut();
-
-      const { data: existingMember } = await supabaseAdmin
-        .from('group_members')
-        .select('profile_id')
-        .eq('group_id', invitation.group_id)
-        .eq('profile_id', userId)
-        .single();
-
-      if (existingMember) {
-        await supabaseAdmin
-          .from('group_invitations')
-          .update({ status: 'accepted' as const })
-          .eq('token', token);
-
-        return NextResponse.json({
-          success: true,
-          message: 'You are already a member of this group',
-          data: {
-            userId,
-            isNewUser: false,
-            groupId: invitation.group_id,
-            groupName: group.name,
-            alreadyMember: true
-          }
-        });
-      }
-
-    } else {
-      if (!password) {
-        return NextResponse.json({ error: 'Password is required for new users' }, { status: 400 });
-      }
-
-      if (password.length < 8) {
-        return NextResponse.json(
-          { error: 'Password must be at least 8 characters long' },
-          { status: 400 }
-        );
-      }
-
-      if (!fullName?.trim()) {
-        return NextResponse.json({ error: 'Name is required' }, { status: 400 });
-      }
-
-      const { data: signUpData, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-        user_metadata: {
-          invited_from_group: true,
-          group_id: invitation.group_id,
-          group_name: group.name,
-          full_name: fullName.trim()
-        }
-      });
-
-      if (signUpError) {
-        if (signUpError.message?.includes('already registered')) {
-          // Reason: Handle race condition where user was created between check and create
-          const { data: { users: refreshed } } = await supabaseAdmin.auth.admin.listUsers();
-          const found = refreshed?.find(u => u.email?.toLowerCase() === email.toLowerCase());
-          if (found) {
-            userId = found.id;
-          } else {
-            return NextResponse.json({ error: 'Unable to create account. Please try again.' }, { status: 500 });
-          }
-        } else {
-          return NextResponse.json(
-            { error: signUpError.message || 'Failed to create account' },
-            { status: 500 }
-          );
-        }
-      } else if (!signUpData.user) {
-        return NextResponse.json({ error: 'Failed to create account' }, { status: 500 });
-      } else {
-        userId = signUpData.user.id;
-      }
-
-      isNewUser = true;
-    }
-
-    const { error: memberError } = await supabaseAdmin
-      .from('group_members')
-      .upsert({
+    const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      email_confirm: true,
+      user_metadata: {
+        full_name: invitation.name?.trim() || '',
+        invited_from_group: true,
         group_id: invitation.group_id,
-        profile_id: userId,
-        role: 'member',
-        invited_by: invitation.invited_by,
-        relationship_to_couple: invitation.relationship_to_couple
-      }, {
-        onConflict: 'group_id,profile_id'
-      });
+        group_name: group.name,
+      },
+    });
 
-    if (memberError) {
+    if (created?.user) {
+      userId = created.user.id;
+      isNewUser = true;
+    } else if (createError?.message?.includes('already been registered') || createError?.message?.includes('already registered')) {
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .single();
+      if (!profile) {
+        return NextResponse.json({ error: 'Could not find account' }, { status: 500 });
+      }
+      userId = profile.id;
+    } else {
       return NextResponse.json(
-        { error: 'Failed to add user to group: ' + memberError.message },
+        { error: createError?.message || 'Failed to create account' },
         { status: 500 }
       );
     }
 
-    // Reason: Mark invitation as accepted so it can't be reused
+    // Reason: Add to the group (idempotent). Detect prior membership so the UI
+    // can message "already a member" instead of treating it as a fresh join.
+    const { data: existingMember } = await supabaseAdmin
+      .from('group_members')
+      .select('profile_id')
+      .eq('group_id', invitation.group_id)
+      .eq('profile_id', userId)
+      .maybeSingle();
+
+    const alreadyMember = !!existingMember;
+
+    if (!alreadyMember) {
+      const { error: memberError } = await supabaseAdmin
+        .from('group_members')
+        .upsert({
+          group_id: invitation.group_id,
+          profile_id: userId,
+          role: 'member',
+          invited_by: invitation.invited_by,
+          relationship_to_couple: invitation.relationship_to_couple
+        }, {
+          onConflict: 'group_id,profile_id'
+        });
+
+      if (memberError) {
+        return NextResponse.json(
+          { error: 'Failed to add user to group: ' + memberError.message },
+          { status: 500 }
+        );
+      }
+    }
+
+    // Reason: Mark invitation as accepted so the single-use link can't be reused.
     await supabaseAdmin
       .from('group_invitations')
       .update({ status: 'accepted' as const })
       .eq('token', token);
 
+    // Reason: Generate a magic-link token_hash for an instant passwordless
+    // session (same mechanism the main onboarding uses). The client redeems it
+    // with verifyOtp, no password ever involved.
+    const origin = new URL(request.url).origin;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || origin;
+    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'magiclink',
+      email,
+      options: { redirectTo: `${baseUrl}/profile/groups?group=${invitation.group_id}` },
+    });
+
+    if (linkError || !linkData?.properties?.hashed_token) {
+      return NextResponse.json({ error: 'Could not establish a session. Please try again.' }, { status: 500 });
+    }
+
     return NextResponse.json({
       success: true,
-      message: isNewUser ? 'Account created and added to group' : 'Added to group',
+      message: alreadyMember
+        ? 'You are already a member of this group'
+        : (isNewUser ? 'Account created and added to group' : 'Added to group'),
       data: {
         userId,
         email,
         isNewUser,
+        alreadyMember,
         groupId: invitation.group_id,
         groupName: group.name,
-        groupDescription: group.description
+        groupDescription: group.description,
+        tokenHash: linkData.properties.hashed_token,
       }
     });
 

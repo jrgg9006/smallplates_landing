@@ -238,6 +238,37 @@ export async function findOrCreatePendingGroup(
   bookCloseDate: string | null
 ): Promise<{ groupId: string | null; groupCreated: boolean }> {
   let groupId: string | null = initialGroupId;
+
+  // Reason: If user started in free tier (created group via onboarding without paying),
+  // upgrade that group to pending_setup instead of creating a new one.
+  if (!groupId) {
+    const { data: freeTierGroup } = await supabaseAdmin
+      .from("groups")
+      .select("id")
+      .eq("created_by", userId)
+      .eq("status", "free_tier")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (freeTierGroup) {
+      const { error: upgradeError } = await supabaseAdmin
+        .from("groups")
+        .update({
+          status: "pending_setup",
+          gift_date: giftDate,
+          gift_date_undecided: giftDateUndecided,
+          book_close_date: bookCloseDate,
+        })
+        .eq("id", freeTierGroup.id);
+
+      if (!upgradeError) {
+        return { groupId: freeTierGroup.id, groupCreated: false };
+      }
+      console.error("findOrCreatePendingGroup: failed to upgrade free_tier group", upgradeError);
+    }
+  }
+
   if (!groupId) {
     const { data: existingGroup } = await supabaseAdmin
       .from("groups")
@@ -489,6 +520,211 @@ export async function runPostPaymentSetupFromSession(
   };
 }
 
+export interface BookClosePurchaseFromSessionResult {
+  orderCreated: boolean;
+}
+
+interface StripeShippingDetail {
+  name?: string | null;
+  phone?: string | null;
+  address?: {
+    line1?: string | null;
+    line2?: string | null;
+    city?: string | null;
+    state?: string | null;
+    postal_code?: string | null;
+    country?: string | null;
+  } | null;
+}
+
+// Reason: Stripe moved Checkout shipping from `session.shipping_details` to
+// `session.collected_information.shipping_details` in recent API versions. Read
+// the new location first, fall back to the legacy one — without using `any`.
+function extractShippingDetail(
+  session: Stripe.Checkout.Session
+): StripeShippingDetail | null {
+  const s = session as unknown as {
+    collected_information?: { shipping_details?: StripeShippingDetail | null } | null;
+    shipping_details?: StripeShippingDetail | null;
+  };
+  return s.collected_information?.shipping_details ?? s.shipping_details ?? null;
+}
+
+// Reason: shipping_addresses rows store a human-readable country (existing rows
+// say "United States"). Map the common Stripe 2-letter codes; fall back to the
+// raw code for everything else.
+const COUNTRY_CODE_TO_NAME: Record<string, string> = {
+  US: "United States",
+  MX: "Mexico",
+};
+
+/**
+ * Records the base-book purchase made at book-close time (free_tier → paid) and
+ * CLOSES the book. Unlike `runPostPaymentSetupFromSession`, the user, profile and
+ * group already exist — the organizer signed up passwordless and built her book
+ * in the free tier. This only:
+ *   - writes the `initial_purchase` order (status='paid', linked to the group),
+ *   - persists the shipping address Stripe Checkout collected,
+ *   - flips the group: status='active' + book_closed_by_user = now().
+ *
+ * The book is closed HERE (on confirmed payment), never before — if the organizer
+ * abandons Checkout the group stays `free_tier`, open and editable.
+ *
+ * status='active' (not 'pending_setup') intentionally skips CoupleNamesModal:
+ * names + photo were already confirmed in the review wizard.
+ *
+ * Idempotent via UNIQUE `orders.stripe_payment_intent` (23505 → skip + log warn).
+ */
+export async function runBookClosePurchaseFromSession(
+  input: { session: Stripe.Checkout.Session }
+): Promise<BookClosePurchaseFromSessionResult> {
+  const { session } = input;
+  const metadata = session.metadata || {};
+
+  const groupId = metadata.groupId;
+  const userId = metadata.userId;
+  const qty = parseInt(metadata.qty || "0", 10);
+
+  if (!groupId || !userId || !qty) {
+    throw new Error(
+      `runBookClosePurchaseFromSession: missing metadata in session ${session.id}`
+    );
+  }
+  if (metadata.type !== "book_close_purchase") {
+    throw new Error(
+      `runBookClosePurchaseFromSession: session ${session.id} metadata.type is '${metadata.type}', expected 'book_close_purchase'`
+    );
+  }
+
+  const paymentIntentId =
+    typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : session.payment_intent?.id ?? null;
+  if (!paymentIntentId) {
+    throw new Error(
+      `runBookClosePurchaseFromSession: no payment_intent in session ${session.id}`
+    );
+  }
+
+  const email = (
+    session.customer_details?.email ||
+    session.customer_email ||
+    ""
+  )
+    .trim()
+    .toLowerCase();
+
+  const supabaseAdmin = createSupabaseAdminClient();
+
+  // 1. Build the shipping snapshot from the address Stripe collected.
+  const shippingDetail = extractShippingDetail(session);
+  const addr = shippingDetail?.address;
+  const countryCode = addr?.country || "";
+  const shippingRow = addr
+    ? {
+        recipient_name: shippingDetail?.name?.trim() || "",
+        street_address: addr.line1?.trim() || "",
+        apartment_unit: addr.line2?.trim() || null,
+        city: addr.city?.trim() || "",
+        state: addr.state?.trim() || "",
+        postal_code: addr.postal_code?.trim() || "",
+        country: COUNTRY_CODE_TO_NAME[countryCode] || countryCode || "United States",
+        phone_number:
+          shippingDetail?.phone?.trim() ||
+          session.customer_details?.phone?.trim() ||
+          null,
+      }
+    : null;
+
+  // 2. Lookup the group (owner for the shipping row, display name for the order).
+  const { data: group } = await supabaseAdmin
+    .from("groups")
+    .select("created_by, name, print_couple_name")
+    .eq("id", groupId)
+    .maybeSingle();
+
+  // 3. Idempotent order INSERT. UNIQUE(stripe_payment_intent) breaks webhook-retry races.
+  const { data: inserted, error: insertError } = await supabaseAdmin
+    .from("orders")
+    .insert({
+      user_id: userId,
+      email,
+      stripe_payment_intent: paymentIntentId,
+      amount_total: session.amount_total,
+      book_quantity: qty,
+      shipping_address: shippingRow,
+      couple_name: group?.print_couple_name || group?.name || null,
+      user_type: "gift_giver",
+      onboarding_data: metadata,
+      status: "paid",
+      order_type: "initial_purchase",
+      group_id: groupId,
+    })
+    .select("id")
+    .maybeSingle();
+
+  let orderCreated = false;
+  if (insertError) {
+    if (insertError.code === "23505") {
+      console.warn(
+        "runBookClosePurchaseFromSession: order already exists (race), skipping insert",
+        { paymentIntentId }
+      );
+    } else {
+      console.error("runBookClosePurchaseFromSession: order insert failed", {
+        paymentIntentId,
+        err: insertError,
+      });
+      throw insertError;
+    }
+  } else {
+    orderCreated = !!inserted;
+  }
+
+  // 4. Persist shipping address for the closed-book view (best-effort, non-fatal).
+  //    The order above already carries the authoritative snapshot.
+  if (shippingRow && shippingRow.recipient_name && shippingRow.street_address) {
+    const { error: shippingError } = await supabaseAdmin
+      .from("shipping_addresses")
+      .upsert(
+        {
+          user_id: group?.created_by || userId,
+          group_id: groupId,
+          ...shippingRow,
+          is_default: false,
+        },
+        { onConflict: "group_id" }
+      );
+    if (shippingError) {
+      console.error(
+        "runBookClosePurchaseFromSession: shipping_addresses upsert failed (non-fatal)",
+        { groupId, err: shippingError }
+      );
+    }
+  } else {
+    console.error(
+      `runBookClosePurchaseFromSession: no usable shipping address in session ${session.id}`
+    );
+  }
+
+  // 5. Close the book: free_tier → active + stamp the close time.
+  const { error: closeError } = await supabaseAdmin
+    .from("groups")
+    .update({
+      status: "active",
+      book_closed_by_user: new Date().toISOString(),
+    })
+    .eq("id", groupId);
+  if (closeError) {
+    console.error("runBookClosePurchaseFromSession: failed to close group", {
+      groupId,
+      err: closeError,
+    });
+  }
+
+  return { orderCreated };
+}
+
 export interface ExtraCopiesSetupFromSessionInput {
   session: Stripe.Checkout.Session;
 }
@@ -504,7 +740,7 @@ export interface ExtraCopiesSetupFromSessionResult {
  * captain already exists and the group is already active.
  *
  * Shipping address snapshot is pulled from `shipping_addresses.group_id` —
- * StepShipping in PostCloseFlow persists it before the user redirects to Stripe.
+ * Stripe Checkout collects it natively; the webhook reads it from the session.
  * If the address is missing (shouldn't happen), logs loudly but still creates
  * the order — missing address is recoverable via support; a missing order is not.
  *

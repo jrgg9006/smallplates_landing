@@ -36,6 +36,8 @@ export async function GET(
     console.log('🔍 Fetching public group info:', groupId);
 
     // Fetch group from database - only public info
+    // Reason: include the group creator's name so the captain-join page can
+    // show "This captain invite was sent by {name}" as a trust signal.
     const { data: group, error } = await supabaseAdmin
       .from('groups')
       .select(`
@@ -43,10 +45,24 @@ export async function GET(
         name,
         description,
         couple_image_url,
-        created_at
+        created_at,
+        created_by
       `)
       .eq('id', groupId)
       .single();
+
+    let inviterName: string | null = null;
+    if (group?.created_by) {
+      const { data: creator } = await supabaseAdmin
+        .from('profiles')
+        .select('full_name')
+        .eq('id', group.created_by)
+        .single();
+      // Reason: pull just the first name to keep it conversational; full name
+      // can read weirdly in "sent by John Smith" copy.
+      const fullName = creator?.full_name?.trim() || '';
+      inviterName = fullName.split(' ')[0] || null;
+    }
 
     if (error || !group) {
       console.error('❌ Group not found:', error);
@@ -69,7 +85,8 @@ export async function GET(
         name: group.name,
         description: group.description,
         coupleImageUrl: group.couple_image_url,
-        createdAt: group.created_at
+        createdAt: group.created_at,
+        inviterName,
       }
     });
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { GroupJoinForm } from "@/components/groups/GroupJoinForm";
+import { CaptainJoinForm } from "@/components/groups/CaptainJoinForm";
 
 interface GroupData {
   id: string;
@@ -9,6 +9,7 @@ interface GroupData {
   description?: string;
   coupleImageUrl?: string | null;
   createdAt: string;
+  inviterName?: string | null;
 }
 
 interface GroupJoinPageProps {
@@ -16,7 +17,8 @@ interface GroupJoinPageProps {
 }
 
 export default function GroupJoinPage({ params }: GroupJoinPageProps) {
-  const [groupId, setGroupId] = useState<string>('');
+  const [groupId, setGroupId] = useState<string>("");
+  const [token, setToken] = useState<string>("");
   const [verifying, setVerifying] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [groupData, setGroupData] = useState<GroupData | null>(null);
@@ -25,6 +27,15 @@ export default function GroupJoinPage({ params }: GroupJoinPageProps) {
   useEffect(() => {
     params.then(({ id }) => setGroupId(id));
   }, [params]);
+
+  // Read the captain invite token from the URL.
+  // Reason: this URL is shared by Maria (the organizer); the token validates
+  // both that the visit was sanctioned and limits abuse (expiry + max uses).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const t = new URLSearchParams(window.location.search).get("token") || "";
+    setToken(t.trim());
+  }, []);
 
   // Verify group exists when group ID is available
   useEffect(() => {
@@ -35,10 +46,7 @@ export default function GroupJoinPage({ params }: GroupJoinPageProps) {
   }, [groupId]);
 
   const verifyGroup = async () => {
-    if (!groupId) {
-      return;
-    }
-    
+    if (!groupId) return;
     try {
       setVerifying(true);
       setError(null);
@@ -47,74 +55,46 @@ export default function GroupJoinPage({ params }: GroupJoinPageProps) {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setError(data.error || 'Group not found');
+        setError(data.error || "Group not found");
         return;
       }
 
       setGroupData(data.data);
-
     } catch (err) {
-      console.error('Error verifying group:', err);
-      setError('Failed to load group information');
+      console.error("Error verifying group:", err);
+      setError("Failed to load group information");
     } finally {
       setVerifying(false);
     }
   };
 
-  const handleJoin = async (formData: {
-    fullName: string;
-    email: string;
-    password: string;
-  }) => {
-    // Reason: forward inviter_id from URL so the API can record who invited
-    // this captain (group_members.invited_by). Server validates before
-    // persisting; an invalid value falls back to null silently.
-    const inviterId = typeof window !== 'undefined'
-      ? new URLSearchParams(window.location.search).get('inviter_id')
-      : null;
-
-    const response = await fetch(`/api/v1/groups/${groupId}/join`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ ...formData, inviter_id: inviterId })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return {
-        success: false,
-        error: data.error || 'Failed to join group',
-        data: data.data
-      };
-    }
-
-    return {
-      success: true,
-      data: data.data
-    };
-  };
+  // Missing-token state — show an inline error in the same visual frame as the
+  // form. Old URLs that used `?inviter_id=` (no token) land here.
+  const tokenMissing = !verifying && !error && !token;
+  const verifyError = error || (tokenMissing
+    ? "This invite link is no longer valid. Ask the organizer for a new link."
+    : null);
+  const errorTitle = tokenMissing ? "Invite link expired" : "Group Not Found";
 
   return (
-    <GroupJoinForm
-      title="Join the Cookbook"
-      subtitle=""
-      groupData={groupData ? {
-        id: groupData.id,
-        name: groupData.name,
-        description: groupData.description
-      } : null}
+    <CaptainJoinForm
+      groupId={groupId}
+      token={token}
+      groupData={
+        groupData && !tokenMissing
+          ? {
+              id: groupData.id,
+              name: groupData.name,
+              description: groupData.description,
+            }
+          : null
+      }
       coupleImageUrl={groupData?.coupleImageUrl || null}
-      onJoin={handleJoin}
+      senderName={groupData?.inviterName || null}
       verifying={verifying}
       verifyMessage="Loading cookbook information..."
-      verifyError={error}
-      errorTitle="Group Not Found"
-      footerText="Once you're in, add a recipe whenever you're ready."
-      autoFocus={true}
+      verifyError={verifyError}
+      errorTitle={errorTitle}
     />
   );
 }
-

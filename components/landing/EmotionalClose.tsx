@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { trackEvent } from "@/lib/analytics";
+import { isFreeTierEnabled } from "@/lib/feature-flags";
 
 /**
  * EMOTIONAL CLOSE SECTION — Small Plates Wedding Landing Page
@@ -42,7 +43,7 @@ export default function EmotionalClose() {
 
   const handleStartBook = () => {
     trackEvent('start_book_click', { cta_location: 'emotional_close_primary' });
-    router.push("/onboarding");
+    router.push(isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding");
   };
 
   return (

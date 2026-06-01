@@ -22,17 +22,18 @@ import { getWeddingDisplayText, type WeddingTimeline } from "@/lib/utils/dateFor
 import { getCurrentProfile } from "@/lib/supabase/profiles";
 import { ShareCollectionModal } from "@/components/profile/guests/ShareCollectionModal";
 import { GuestNavigationSheet } from "@/components/profile/guests/GuestNavigationSheet";
+import { SendRemindersModal } from "@/components/profile/guests/SendRemindersModal";
 import { GuestDetailsModal } from "@/components/profile/guests/GuestDetailsModal";
 import { getUserCollectionToken } from "@/lib/supabase/collection";
 import { createShareURL, extractOgVersion } from "@/lib/utils/sharing";
 import type { Guest } from "@/lib/types/database";
 import { ImportGuestsModal } from "@/components/profile/guests/ImportGuestsModal";
 import { SendInvitationsPage } from "@/components/profile/guests/SendInvitationsPage";
-import { CloseBookModal } from "@/components/profile/groups/CloseBookModal";
-import { ReviewRecipesPage } from "@/components/profile/groups/review/ReviewRecipesPage";
-import { PostCloseFlow } from "@/components/profile/groups/PostCloseFlow";
+import { BookReviewFlow } from "@/components/profile/groups/review/BookReviewFlow";
 import BrandLoader from "@/components/ui/BrandLoader";
-// Reason: closeBook is now called inside PostCloseFlow, not from page.tsx
+import { InviteDropdown } from "@/components/dashboard/InviteDropdown";
+import { DashboardChecklist } from "@/components/dashboard/DashboardChecklist";
+import { BookPreviewPanel } from "@/components/profile/groups/BookPreviewPanel";
 
 // Reason: Format book_close_date as "Month Dth" with ordinal suffix (no year)
 function getDeadlineText(dateString: string): string {
@@ -58,18 +59,18 @@ export default function GroupsPage() {
   const [uniqueContributors, setUniqueContributors] = useState(0);
   const [showCaptains, setShowCaptains] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showInviteDropdown, setShowInviteDropdown] = useState(false);
   const [showAddCaptainModal, setShowAddCaptainModal] = useState(false);
   const [invitationsRefreshTrigger, setInvitationsRefreshTrigger] = useState(0);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showGuestSheet, setShowGuestSheet] = useState(false);
   const [showGuestDetailsModal, setShowGuestDetailsModal] = useState(false);
   const [importSource, setImportSource] = useState<"zola" | "the_knot" | null>(null);
-  const [activeView, setActiveView] = useState<'book' | 'send-invitations' | 'review-recipes' | 'post-close'>('book');
+  const [activeView, setActiveView] = useState<'book' | 'send-invitations' | 'book-review'>('book');
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [collectionToken, setCollectionToken] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [showCloseBookModal, setShowCloseBookModal] = useState(false);
-  const [bookReviewed, setBookReviewed] = useState(false);
+  const [showRemindersModal, setShowRemindersModal] = useState(false);
   
   // Profile state
   const [senderName, setSenderName] = useState<string | null>(null);
@@ -180,41 +181,11 @@ export default function GroupsPage() {
     setShowGuestSheet(true);
   };
 
-  const handleCloseBook = () => {
-    setShowCloseBookModal(true);
-  };
-
-  const handleReviewRecipes = () => {
-    setShowCloseBookModal(false);
-    setActiveView('review-recipes');
-  };
-
-  const handleMarkReviewed = () => {
-    setActiveView('book');
-    setBookReviewed(true);
-    setShowCloseBookModal(true);
-  };
-
-  // Reason: Book no longer closes from the modal. The PostCloseFlow handles
-  // closing after the full upsell → shipping → payment flow completes.
-  const handleStartCloseFlow = () => {
-    setShowCloseBookModal(false);
-    setBookReviewed(false);
-    setActiveView('post-close');
-  };
-
-  const handleCloseFlowDone = async () => {
-    // Reason: Refresh group data so book_closed_by_user is updated in state
-    if (groupsSectionRef.current) {
-      await groupsSectionRef.current.loadGroups(true);
-      setTimeout(() => {
-        const updatedGroup = groupsSectionRef.current?.selectedGroup;
-        if (updatedGroup && updatedGroup.id === selectedGroup?.id) {
-          setSelectedGroup(updatedGroup);
-        }
-      }, 100);
-    }
-    setActiveView('book');
+  // Reason: All three close-book CTAs now open the unified book-review stepper
+  // directly (no intermediate modal). The book only closes on confirmed Stripe
+  // payment, handled by the ?from=book-close-purchase effect on return.
+  const handleOpenBookReview = () => {
+    setActiveView('book-review');
   };
 
   const handleGroupChange = (group: GroupWithMembers | null) => {
@@ -537,9 +508,35 @@ export default function GroupsPage() {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     const from = params.get("from");
-    if (from === "extras-purchase" || from === "dashboard-extras-purchase") {
-      groupsSectionRef.current?.loadGroups(true);
-      router.replace("/profile/groups");
+    const closedGroupId = params.get("group");
+    if (
+      from === "extras-purchase" ||
+      from === "dashboard-extras-purchase" ||
+      from === "book-close-purchase"
+    ) {
+      (async () => {
+        await groupsSectionRef.current?.loadGroups(true);
+        // Reason: after the reload, GroupsSection auto-selects the first NON-closed
+        // book. For a just-closed purchase that lands the owner on the wrong book
+        // (e.g. another open book). Re-select the book we just paid for so they see
+        // its BookClosedStatus. Poll briefly since loadGroups populates async.
+        if (closedGroupId) {
+          let attempts = 0;
+          const interval = setInterval(() => {
+            attempts += 1;
+            const groups = groupsSectionRef.current?.groups;
+            const found = groups?.find((g) => g.id === closedGroupId);
+            if (found) {
+              setSelectedGroup(found);
+              groupsSectionRef.current?.handleGroupChange(found);
+              clearInterval(interval);
+            } else if (attempts > 30) {
+              clearInterval(interval);
+            }
+          }, 100);
+        }
+        router.replace("/profile/groups");
+      })();
     }
   }, [router]);
 
@@ -595,7 +592,7 @@ export default function GroupsPage() {
 
       {/* Onboarding overlays — gated on group being fully set up (status='active').
           While the group is `pending_setup`, only the CoupleNamesModal should be visible. */}
-      {selectedGroup?.status === "active" && showWelcomeOverlay && (
+      {selectedGroup?.status === "active" && !selectedGroup?.book_closed_by_user && showWelcomeOverlay && (
         <WelcomeOverlay
           userName={user.email?.split('@')[0] || 'there'}
           onStart={handleWelcomeStart}
@@ -604,15 +601,16 @@ export default function GroupsPage() {
         />
       )}
 
-      {selectedGroup?.status === "active" && showFirstRecipeExperience && (
+      {selectedGroup?.status === "active" && !selectedGroup?.book_closed_by_user && showFirstRecipeExperience && (
         <FirstRecipeExperience
           onSubmit={handleFirstRecipeSubmit}
           onSkip={skipFirstRecipeExperience}
         />
       )}
 
-      {/* Header — hidden during full-screen views */}
-      {activeView === 'book' && (
+      {/* Header — stays visible during the book-review stepper (Storyworth-style);
+          only the full-screen send-invitations view hides it. */}
+      {activeView !== 'send-invitations' && (
         <ProfileHeader
           onGroupSelect={handleGroupSelectFromNav}
           currentGroupId={selectedGroup?.id}
@@ -625,206 +623,59 @@ export default function GroupsPage() {
           groupId={selectedGroup.id}
           coupleNames={selectedGroup.name}
           coupleImageUrl={selectedGroup.couple_image_url}
-          collectionUrl={collectionToken ? createShareURL(window.location.origin, collectionToken, {
-            groupId: selectedGroup.id,
-            imgVersion: extractOgVersion(selectedGroup.couple_image_og_url),
-          }) : null}
-          senderName={senderName}
           onBack={() => setActiveView('book')}
           onOpenGuestSheet={() => setShowGuestSheet(true)}
         />
       )}
 
-      {/* Review Recipes — full-screen view */}
-      {activeView === 'review-recipes' && selectedGroup && (
-        <ReviewRecipesPage
+      {/* Book Review — unified 4-step stepper (names/photo → recipes → quantity →
+          checkout). Renders under the persistent ProfileHeader, outside max-w main. */}
+      {activeView === 'book-review' && selectedGroup && (
+        <BookReviewFlow
           group={selectedGroup}
-          onBack={() => setActiveView('book')}
-          onMarkReviewed={handleMarkReviewed}
-          onStartCloseFlow={() => {
-            setActiveView('post-close');
-          }}
-        />
-      )}
-
-      {/* Post-Close Flow — full-screen upsell + shipping + payment */}
-      {activeView === 'post-close' && selectedGroup && (
-        <PostCloseFlow
-          groupId={selectedGroup.id}
-          onDone={handleCloseFlowDone}
-          onBack={handleCloseFlowDone}
+          isOwner={selectedGroup.created_by === user.id}
+          recipeCount={recipeCount}
+          onExit={() => setActiveView('book')}
         />
       )}
 
       {/* Main Content — book view (hidden but not unmounted during send-invitations) */}
-      <main className={`max-w-[1000px] mx-auto px-10 ${activeView !== 'book' ? 'hidden' : ''}`}>
+      <main className={`max-w-[1240px] mx-auto px-4 sm:px-8 ${activeView !== 'book' ? 'hidden' : ''}`}>
             {/* Reason: Hide dashboard/buttons when book is closed — BookClosedStatus in GroupsSection handles the view */}
             {selectedGroup?.book_closed_by_user ? null : (<>
-            {/* Hero Image */}
-            <div
-              ref={repositionContainerRef}
-              className={`relative w-full h-[200px] mt-6 rounded-2xl overflow-hidden group ${isRepositioning ? 'cursor-grab active:cursor-grabbing touch-none' : 'cursor-pointer'}`}
-              {...(isRepositioning ? {
-                onMouseDown: handleRepositionMouseDown,
-                onMouseMove: handleRepositionMouseMove,
-                onMouseUp: handleRepositionMouseUp,
-                onMouseLeave: handleRepositionMouseUp,
-                onTouchStart: handleRepositionMouseDown,
-                onTouchMove: handleRepositionMouseMove,
-                onTouchEnd: handleRepositionMouseUp,
-              } : {})}
-            >
-              {currentDashboardImage ? (
-                /* Show uploaded dashboard image */
-                <>
-                  <Image
-                    key={currentDashboardImage}
-                    src={currentDashboardImage}
-                    alt="Group dashboard image"
-                    fill
-                    className="object-cover select-none"
-                    sizes="1000px"
-                    draggable={false}
-                    style={{ objectPosition: `center ${isRepositioning ? tempPositionY : (selectedGroup?.dashboard_image_position_y ?? 50)}%` }}
-                  />
-                  {isRepositioning ? (
-                    /* Reposition mode overlay - always visible */
-                    <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center gap-3">
-                      <p className="text-white text-sm font-medium select-none">Drag to reposition</p>
-                      <div className="flex gap-3">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleCancelReposition();
-                          }}
-                          className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-charcoal))] text-[hsl(var(--brand-warm-white))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-warm-gray))] transition-all duration-200 shadow-sm z-10"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleSaveReposition();
-                          }}
-                          disabled={isSavingPosition}
-                          className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-warm-white))] text-[hsl(var(--brand-charcoal))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-honey))] hover:text-black transition-all duration-200 shadow-sm z-10"
-                        >
-                          {isSavingPosition ? 'Saving...' : 'Save'}
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    /* Normal mode - Hover on desktop, tap on mobile */
-                    <div
-                      className={`absolute inset-0 bg-black/30 transition-opacity flex items-center justify-center ${showImageControls ? 'opacity-100' : 'opacity-0 md:group-hover:opacity-100'}`}
-                      onClick={() => setShowImageControls(!showImageControls)}
-                    >
-                      <div className="flex gap-3">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setShowImageControls(false);
-                            handleDashboardImageClick();
-                          }}
-                          disabled={isUploadingDashboardImage}
-                          className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-warm-white))] text-[hsl(var(--brand-charcoal))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-honey))] hover:text-black transition-all duration-200 shadow-sm z-10"
-                        >
-                          <Upload size={16} />
-                          Change
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setShowImageControls(false);
-                            handleStartReposition();
-                          }}
-                          disabled={isUploadingDashboardImage}
-                          className="hidden md:flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-warm-white))] text-[hsl(var(--brand-charcoal))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-honey))] hover:text-black transition-all duration-200 shadow-sm z-10"
-                        >
-                          <Move size={16} />
-                          Reposition
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setShowImageControls(false);
-                            handleDeleteDashboardImage();
-                          }}
-                          disabled={isUploadingDashboardImage}
-                          className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--brand-charcoal))] text-[hsl(var(--brand-warm-white))] font-semibold text-sm rounded-lg hover:bg-[hsl(var(--brand-warm-gray))] transition-all duration-200 shadow-sm z-10"
-                        >
-                          <X size={16} />
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </>
-              ) : (
-                /* Show placeholder with upload prompt */
-                <>
-                  <Image
-                    src="/images/profile/Hero_Profile_2400.jpg"
-                    alt="Couple cooking together"
-                    fill
-                    className="object-cover"
-                    sizes="1000px"
-                  />
-                  {/* Clickable overlay */}
-                  <div
-                    className="absolute inset-0 bg-black/10 flex items-center justify-center cursor-pointer hover:bg-black/15 transition-colors"
-                    onClick={handleDashboardImageClick}
-                  >
-                    <div className="flex flex-col items-center text-white/70">
-                      {isUploadingDashboardImage ? (
-                        <>
-                          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white/50 mb-2"></div>
-                          <span className="text-[12px] mt-1.5 font-normal opacity-80">Uploading...</span>
-                        </>
-                      ) : (
-                        <>
-                          <ImageIcon size={40} strokeWidth={1} className="opacity-60" />
-                          <span className="text-[12px] mt-1.5 font-normal opacity-80">Click to add your photo</span>
-                        </>
-                      )}
-                    </div>
+            {/* Two-column layout: Title + Book Cover */}
+            <div className="mt-8 flex flex-col md:flex-row gap-8 items-start">
+
+            {/* Left column — Title, stats, action bar */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start gap-5">
+                {selectedGroup?.couple_image_url && (
+                  <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-[hsl(var(--brand-border))]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={selectedGroup.couple_image_url}
+                      alt="Couple"
+                      className="w-full h-full object-cover"
+                      style={{
+                        objectPosition: `${selectedGroup.couple_image_position_x ?? 50}% ${selectedGroup.couple_image_position_y ?? 50}%`,
+                      }}
+                    />
                   </div>
-                </>
-              )}
-
-              {/* Hidden file input */}
-              <input
-                id="dashboardImageInput"
-                type="file"
-                accept="image/jpeg,image/jpg,image/png,image/webp"
-                onChange={handleDashboardImageSelect}
-                className="hidden"
-              />
-            </div>
-
-            {/* Error Message */}
-            {dashboardImageError && (
-              <div className="mt-3 bg-red-50 border border-red-200 rounded-md p-3">
-                <p className="text-red-600 text-sm">{dashboardImageError}</p>
-              </div>
-            )}
-
-            {/* Title Section */}
-            <div className="mt-6">
-              <h1 className="cookbook-title mb-1.5">
-                {selectedGroup?.name || 'My Cookbook'}
-              </h1>
-              <p className="cookbook-metadata">
+                )}
+                <div className="min-w-0">
+                  <h1 className="cookbook-title">
+                    {selectedGroup?.name || 'My Cookbook'}
+                  </h1>
+              {/* Reason: plain flowing text (not flex) so the meta wraps naturally
+                  on mobile instead of each fragment becoming a squeezed flex item. */}
+              <div className="cookbook-metadata mt-1">
+                <button
+                  onClick={handleEditProfile}
+                  className="text-[hsl(var(--brand-honey))] hover:text-[hsl(var(--brand-honey-dark))] transition-colors"
+                >
+                  Edit Profile
+                </button>
+                <span className="mx-1.5 text-[hsl(var(--brand-border-button))]">·</span>
                 {selectedGroup?.book_close_date ? (
                   <>Recipes due {getDeadlineText(selectedGroup.book_close_date)}</>
                 ) : selectedGroup?.gift_date_undecided ? (
@@ -841,92 +692,107 @@ export default function GroupsPage() {
                     selectedGroup?.wedding_date_undecided || false,
                     null
                   )
-                )} · {recipeCount} recipes{uniqueContributors > 0 ? ` from ${uniqueContributors} people` : ''}
-              </p>
+                )} · {recipeCount} recipes{uniqueContributors > 0 && (<>{` from ${uniqueContributors} people `}<button
+                      onClick={() => setShowGuestSheet(true)}
+                      className="text-[hsl(var(--brand-honey))] hover:text-[hsl(var(--brand-honey-dark))] hover:underline transition-colors"
+                    >(view)</button></>)}
+              </div>
+                </div>{/* end title+stats wrapper */}
+              </div>{/* end avatar+content flex */}
+
+              {/* Gamified checklist */}
+              <DashboardChecklist
+                group={selectedGroup}
+                recipeCount={recipeCount}
+                hasCaptains={(selectedGroup?.group_members || []).some(m => m.role !== 'owner')}
+                hasEventInvite={!!(selectedGroup?.event_date && selectedGroup?.event_location)}
+                onCreateEventInvite={() => router.push(`/event-invite?groupId=${selectedGroup?.id}`)}
+                onInviteCaptain={() => setShowAddCaptainModal(true)}
+                onAddRecipe={() => groupsSectionRef.current?.openAddNewRecipeModal()}
+                onPrintBook={handleOpenBookReview}
+              />
+
+            </div>{/* end left column */}
+
+            {/* Right column — Book cover mockup */}
+            <div className="w-full md:w-[340px] flex-shrink-0 self-stretch">
+              <BookPreviewPanel
+                group={selectedGroup}
+                recipeCount={recipeCount}
+                onPreviewClick={() => groupsSectionRef.current?.onEditGroup()}
+              />
             </div>
 
-            {/* Action Bar */}
-            <div className="flex items-center gap-3 mt-5 pb-6 border-b border-[hsl(var(--brand-border))]">
-              {/* PRIMARY - Collect Recipes (HONEY, ROUNDED) */}
-              <button
-                className="btn btn-sm btn-honey"
-                onClick={handleCollectRecipes}
-                disabled={!selectedGroup}
-              >
-                Collect Recipes
-              </button>
+            </div>{/* end two-column layout */}
 
-              {/* SECONDARY - Add Your Own (OUTLINE, ROUNDED) */}
-              <button
-                className="btn btn-sm btn-outline"
-                onClick={() => groupsSectionRef.current?.openAddNewRecipeModal()}
-                disabled={!selectedGroup}
-              >
-                Add Recipes
-              </button>
+            {/* Action Bar — separate section below */}
+            <div className="mt-10 pt-6 border-t border-[hsl(var(--brand-border))]">
+              <div className="flex flex-wrap items-center gap-3">
+                {/* PRIMARY - Invite dropdown (HONEY, ROUNDED) */}
+                <div className="relative">
+                  <button
+                    className="btn btn-sm btn-honey gap-2 px-6 sm:px-14"
+                    onClick={() => setShowInviteDropdown(!showInviteDropdown)}
+                    disabled={!selectedGroup}
+                  >
+                    Invite
+                    <ChevronDown size={12} />
+                  </button>
+                  <InviteDropdown
+                    isOpen={showInviteDropdown}
+                    onClose={() => setShowInviteDropdown(false)}
+                    onInviteToEvent={() => router.push(`/event-invite?groupId=${selectedGroup?.id}`)}
+                    onSendCollectionLink={handleCollectRecipes}
+                    onInviteCaptain={() => setShowAddCaptainModal(true)}
+                  />
+                </div>
 
-              {/* Guests Button - Hidden on mobile */}
-              <button
-                className="btn btn-sm btn-outline hidden sm:block"
-                onClick={handleViewGuests}
-                disabled={!selectedGroup}
-              >
-                Guests
-              </button>
-
-              {/* Captains Dropdown - Hidden on mobile */}
-              <div className="relative hidden sm:block">
+                {/* SECONDARY - Add Your Own (OUTLINE, ROUNDED) */}
                 <button
-                  onClick={() => setShowCaptains(!showCaptains)}
-                  className="btn btn-subtle gap-1.5"
+                  className="btn btn-sm btn-outline"
+                  onClick={() => groupsSectionRef.current?.openAddNewRecipeModal()}
+                  disabled={!selectedGroup}
                 >
-                  Captains
-                  <ChevronDown size={10} />
+                  Add a Recipe
                 </button>
-                {showCaptains && <CaptainsDropdown isOpen={showCaptains} selectedGroup={selectedGroup} onClose={() => setShowCaptains(false)} onInviteCaptain={handleInviteCaptain} refreshTrigger={invitationsRefreshTrigger} />}
-              </div>
 
-              {/* More Menu */}
-              <div className="relative">
+                {/* Send Reminders */}
                 <button
-                  onClick={() => setShowMoreMenu(!showMoreMenu)}
-                  className="btn btn-subtle px-3.5"
+                  className="btn btn-sm btn-outline"
+                  onClick={() => setShowRemindersModal(true)}
+                  disabled={!selectedGroup}
                 >
-                  ⋯
+                  Send Reminders
                 </button>
-                <MoreMenuDropdown
-                  isOpen={showMoreMenu}
-                  onClose={() => setShowMoreMenu(false)}
-                  onEditProfile={handleEditProfile}
-                  showCaptainsOption={isMobile}
-                  onCaptainsClick={() => setShowCaptains(true)}
-                  onViewGuestsClick={handleViewGuests}
-                  showAddGuestOption={isMobile}
-                  showSendInvitationsOption={true}
-                  onSendInvitationsClick={handleSendInvitations}
-                  onCloseBookClick={!selectedGroup?.book_closed_by_user ? handleCloseBook : undefined}
-                />
-                {/* Captains dropdown for mobile */}
-                <div className="sm:hidden">
-                  {showCaptains && <CaptainsDropdown isOpen={showCaptains} selectedGroup={selectedGroup} onClose={() => setShowCaptains(false)} onInviteCaptain={handleInviteCaptain} refreshTrigger={invitationsRefreshTrigger} />}
+
+                {/* More Menu */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowMoreMenu(!showMoreMenu)}
+                    className="btn btn-subtle px-3.5"
+                  >
+                    ⋯
+                  </button>
+                  <MoreMenuDropdown
+                    isOpen={showMoreMenu}
+                    onClose={() => setShowMoreMenu(false)}
+                    onEditProfile={handleEditProfile}
+                    showCaptainsOption={isMobile}
+                    onCaptainsClick={() => setShowCaptains(true)}
+                    onViewGuestsClick={handleViewGuests}
+                    showAddGuestOption={isMobile}
+                    showSendInvitationsOption={true}
+                    onSendInvitationsClick={handleSendInvitations}
+                    onCloseBookClick={!selectedGroup?.book_closed_by_user ? handleOpenBookReview : undefined}
+                  />
+                  {/* Captains dropdown for mobile */}
+                  <div className="sm:hidden">
+                    {showCaptains && <CaptainsDropdown isOpen={showCaptains} selectedGroup={selectedGroup} onClose={() => setShowCaptains(false)} onInviteCaptain={handleInviteCaptain} refreshTrigger={invitationsRefreshTrigger} />}
+                  </div>
                 </div>
               </div>
             </div>
             </>)}
-
-            {/* Setup Checklist — drives new users toward the 5 highest-leverage actions */}
-            {selectedGroup && !selectedGroup.book_closed_by_user && (
-              <SetupChecklist
-                group={selectedGroup}
-                onOpenEditGroup={handleEditProfile}
-                onOpenInviteCaptain={handleInviteCaptain}
-                onOpenShareLink={handleCollectRecipesExpanded}
-                onOpenImportGuests={(source) => setImportSource(source)}
-                onOpenCouplePhoto={handleCollectRecipesExpanded}
-                autoOpen={shouldAutoOpenSetup}
-                onAutoOpenConsumed={() => setShouldAutoOpenSetup(false)}
-              />
-            )}
 
             {/* Recipe Grid */}
             <div className="mt-8 pb-16">
@@ -936,7 +802,7 @@ export default function GroupsPage() {
                 onLoadingChange={handleGroupsLoadingChange}
                 onRecipeCountChange={handleRecipeCountChange}
                 onImportGuests={(source) => setImportSource(source)}
-                onCloseBookClick={!selectedGroup?.book_closed_by_user ? handleCloseBook : undefined}
+                onCloseBookClick={!selectedGroup?.book_closed_by_user ? handleOpenBookReview : undefined}
                 bookClosed={!!selectedGroup?.book_closed_by_user}
               />
             </div>
@@ -988,6 +854,15 @@ export default function GroupsPage() {
         />
       )}
 
+      {/* Send Reminders modal */}
+      {selectedGroup && (
+        <SendRemindersModal
+          isOpen={showRemindersModal}
+          onClose={() => setShowRemindersModal(false)}
+          groupId={selectedGroup.id}
+        />
+      )}
+
       {/* Guest Navigation Sheet */}
       {selectedGroup && (
         <GuestNavigationSheet
@@ -1020,18 +895,6 @@ export default function GroupsPage() {
           }}
         />
       )}
-
-      {/* Close Book Modal */}
-      <CloseBookModal
-        isOpen={showCloseBookModal}
-        onClose={() => { setShowCloseBookModal(false); setBookReviewed(false); }}
-        onReview={handleReviewRecipes}
-        onStartCloseFlow={handleStartCloseFlow}
-        reviewed={bookReviewed}
-        recipeCount={recipeCount}
-        uniqueContributors={uniqueContributors}
-      />
-
 
       {/* Guest Details Modal */}
       <GuestDetailsModal

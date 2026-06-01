@@ -461,39 +461,42 @@ export function AddRecipesToCollectionModal({
           )}
         </div>
 
-        <div className="flex justify-end gap-3">
-          <Button
-            variant="outline"
+        {/* Action Buttons — standardized modal footer */}
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-3">
+          <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onClose();
             }}
             disabled={loading}
+            className="w-full rounded-full border border-[rgba(45,45,45,0.14)] py-3.5 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2 disabled:opacity-50 sm:flex-1"
           >
             Cancel
-          </Button>
-          <Button
+          </button>
+          <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               handleAddToCollection();
             }}
             disabled={loading || selectedRecipeIds.size === 0 || !collectionId || showAdded}
-            className={`${
-              showAdded && collectionType === "group" 
-                ? "bg-green-700 text-white hover:bg-green-700" 
-                : "bg-black text-white hover:bg-gray-800"
+            className={`w-full rounded-full py-3.5 text-[15px] font-medium text-brand-warm-white-warm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-50 sm:flex-1 ${
+              showAdded && collectionType === "group"
+                ? "bg-green-700 hover:bg-green-700"
+                : "bg-brand-charcoal hover:bg-gray-800"
             }`}
           >
             {collectionType === "cookbook"
-              ? (loading 
-                  ? `Adding ${selectedRecipeIds.size} plate${selectedRecipeIds.size === 1 ? '' : 's'}...` 
+              ? (loading
+                  ? `Adding ${selectedRecipeIds.size} plate${selectedRecipeIds.size === 1 ? '' : 's'}...`
                   : `Add ${selectedRecipeIds.size === 0 ? 'to' : selectedRecipeIds.size} ${selectedRecipeIds.size === 1 ? 'Plate' : 'Plates'} to this ${collectionName}`)
-              : (showAdded 
-                  ? 'Added!' 
+              : (showAdded
+                  ? 'Added!'
                   : (loading ? 'Adding...' : `Add ${selectedRecipeIds.size} Plate${selectedRecipeIds.size !== 1 ? 's' : ''}`)
                 )
             }
-          </Button>
+          </button>
         </div>
       </DialogContent>
     </Dialog>

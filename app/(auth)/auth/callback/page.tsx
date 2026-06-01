@@ -31,13 +31,18 @@ function CallbackContent() {
     async function handleAuth() {
       const supabase = createSupabaseClient();
 
+      // Reason: final destination passed by send-login-link as ?next=. Validate it
+      // is a relative path to avoid open-redirects; fall back to the dashboard.
+      const rawNext = searchParams.get("next");
+      const next = rawNext && rawNext.startsWith("/") ? rawNext : "/profile/groups";
+
       try {
         // Reason: PKCE flow — magic link with ?code= query param.
         const code = searchParams.get("code");
         if (code) {
           const { error } = await supabase.auth.exchangeCodeForSession(code);
           if (error) throw error;
-          if (!cancelled) router.replace("/profile/groups");
+          if (!cancelled) router.replace(next);
           return;
         }
 
@@ -54,7 +59,7 @@ function CallbackContent() {
               refresh_token: refreshToken,
             });
             if (error) throw error;
-            if (!cancelled) router.replace("/profile/groups");
+            if (!cancelled) router.replace(next);
             return;
           }
         }
@@ -63,7 +68,7 @@ function CallbackContent() {
         // if they landed here mid-flow). Check getSession and proceed.
         const { data: { session } } = await supabase.auth.getSession();
         if (session && !cancelled) {
-          router.replace("/profile/groups");
+          router.replace(next);
           return;
         }
 

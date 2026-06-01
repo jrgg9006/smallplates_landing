@@ -315,9 +315,11 @@ export function GuestDetailsModal({
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="flex justify-between items-center pt-2">
-          {/* Delete — left side, only for non-self guests */}
+        {/* Action Buttons — full-width stacked on mobile, row with Delete on the
+            left on desktop (flex-col-reverse keeps the primary actions on top on
+            mobile and the delete link at the bottom). */}
+        <div className="flex flex-col-reverse gap-4 pt-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+          {/* Delete — left side / bottom on mobile, only for non-self guests */}
           {!isSelf ? (
             <button
               onClick={() => setShowDeleteConfirm(true)}
@@ -327,35 +329,36 @@ export function GuestDetailsModal({
               Delete guest
             </button>
           ) : (
-            <div />
+            <div className="hidden sm:block" />
           )}
 
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">
             {isSelf ? (
-              <Button
-                variant="outline"
+              <button
+                type="button"
                 onClick={onClose}
-                className="border-[hsl(var(--brand-sand))] text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-warm-white))]"
+                className="w-full rounded-full border border-[rgba(45,45,45,0.14)] px-6 py-3 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2 sm:w-auto"
               >
                 Close
-              </Button>
+              </button>
             ) : (
               <>
-                <Button
-                  variant="outline"
+                <button
+                  type="button"
                   onClick={onClose}
                   disabled={loading}
-                  className="border-[hsl(var(--brand-sand))] text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-sand))]/30 hover:text-[hsl(var(--brand-charcoal))]"
+                  className="w-full rounded-full border border-[rgba(45,45,45,0.14)] px-6 py-3 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2 disabled:opacity-50 sm:w-auto"
                 >
                   Back
-                </Button>
-                <Button
+                </button>
+                <button
+                  type="button"
                   onClick={handleSave}
                   disabled={loading || !firstName.trim()}
-                  className="bg-[hsl(var(--brand-charcoal))] text-white hover:bg-[hsl(var(--brand-charcoal))]/90"
+                  className="w-full rounded-full bg-brand-charcoal px-6 py-3 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-50 sm:w-auto"
                 >
                   {loading ? 'Saving...' : 'Save'}
-                </Button>
+                </button>
               </>
             )}
           </div>

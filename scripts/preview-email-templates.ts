@@ -10,8 +10,6 @@ import * as path from 'path';
 import {
   invitationEmail1,
   invitationEmail2,
-  invitationEmail3,
-  invitationEmail4,
 } from '../lib/email/invitation-templates';
 
 // Sample data for preview
@@ -42,12 +40,10 @@ const sampleDataLowCount = {
   recipeCount: 5, // For Email 3 without social proof (< 10 hides count)
 };
 
-// Generate all 4 templates
+// Generate the 2 templates (invite + reminder)
 const templates = [
   { name: 'email-1-invitation', generator: invitationEmail1 },
-  { name: 'email-2-reminder-1', generator: invitationEmail2 },
-  { name: 'email-3-reminder-2', generator: invitationEmail3 },
-  { name: 'email-4-last-call', generator: invitationEmail4 },
+  { name: 'email-2-reminder', generator: invitationEmail2 },
 ];
 
 // Create output directory
@@ -60,7 +56,7 @@ if (!fs.existsSync(outputDir)) {
 templates.forEach(({ name, generator }) => {
   const { subject, html } = generator(sampleDataWithImage);
   const filePath = path.join(outputDir, `${name}.html`);
-  
+
   fs.writeFileSync(filePath, html);
   console.log(`✓ Generated: ${filePath}`);
   console.log(`  Subject: "${subject}"`);
@@ -73,15 +69,7 @@ fs.writeFileSync(placeholderFilePath, placeholderHtml);
 console.log(`✓ Generated: ${placeholderFilePath} (with placeholder image)`);
 console.log(`  Subject: "${placeholderSubject}"`);
 
-// Generate Email 3 without social proof (low recipe count)
-const { subject: lowCountSubject, html: lowCountHtml } = invitationEmail3(sampleDataLowCount);
-const lowCountFilePath = path.join(outputDir, 'email-3-reminder-2-no-social-proof.html');
-fs.writeFileSync(lowCountFilePath, lowCountHtml);
-console.log(`✓ Generated: ${lowCountFilePath} (without social proof - low recipe count)`);
-console.log(`  Subject: "${lowCountSubject}"`);
+// Suppress unused-var warning while keeping the sample for future tests
+void sampleDataLowCount;
 
 console.log(`\n🎉 Done! Open the files in email-previews/ folder to preview.`);
-console.log(`\nTip: Open in browser to see how they look!`);
-console.log(`\n📧 Email 3 generates two versions:`);
-console.log(`   • With social proof: when recipeCount ≥ 10`);
-console.log(`   • Without social proof: when recipeCount < 10`);

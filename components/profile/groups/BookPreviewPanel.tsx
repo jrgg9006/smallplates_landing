@@ -1,8 +1,6 @@
 "use client";
 
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Book } from "lucide-react";
 import type { GroupWithMembers } from "@/lib/types/database";
 
 interface BookPreviewPanelProps {
@@ -19,55 +17,40 @@ export function BookPreviewPanel({ group, recipeCount, onPreviewClick }: BookPre
           <div className="book-preview__title">Your Cookbook</div>
           <div className="book-preview__subtitle">Ready to get started</div>
         </div>
-        <div className="book-preview__progress">
-          <span className="book-preview__progress-count">0</span> recipes
-        </div>
       </div>
     );
   }
 
-  // Extract couple names from group name or use group name as-is
-  const bookTitle = group.name || "Your Cookbook";
-  const bookSubtitle = "A cookbook by everyone who loves you";
+  const coverUrl = `/api/v1/admin/pdf-delivery/preview-cover?group_id=${group.id}&v=${group.name?.length || 0}`;
 
   return (
-    <div className="book-preview">
-      {/* Book Cover */}
-      <div className="book-preview__cover">
-        <div className="book-preview__title">
-          {bookTitle}
-        </div>
-        <div className="h-4" /> {/* Spacer */}
-        <div className="book-preview__subtitle text-center">
-          {bookSubtitle}
-        </div>
-      </div>
+    <div className="flex items-start justify-center pt-2">
+      <div className="relative">
+        {/* Book shadow on surface — soft, sits under the flat cover */}
+        <div
+          className="absolute -bottom-3 left-1 right-3 h-5 rounded-[50%]"
+          style={{
+            background: "radial-gradient(ellipse, rgba(0,0,0,0.15) 0%, transparent 70%)",
+          }}
+        />
 
-      {/* Recipe Count & Progress */}
-      <div className="book-preview__progress">
-        <span className="book-preview__progress-count">{recipeCount}</span> 
-        {recipeCount === 1 ? " recipe" : " recipes"}
-      </div>
-
-      {/* Progress Bar (optional) */}
-      {recipeCount > 0 && (
-        <div className="mt-4 w-full bg-[hsl(var(--brand-sand))] rounded-full h-2">
-          <div 
-            className="bg-[hsl(var(--brand-honey))] h-2 rounded-full transition-all duration-300"
-            style={{ width: `${Math.min((recipeCount / 20) * 100, 100)}%` }}
+        {/* Book body — flat front, no 3D rotation, perfectly straight right edge */}
+        <div className="relative">
+          {/* Cover image */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={coverUrl}
+            alt={group.name || "Book cover"}
+            className="relative block w-full h-auto"
+            style={{
+              // Reason: Storyworth-style front shadow — falls down and to the left,
+              // no spine/box look.
+              boxShadow: "-8px 12px 24px rgba(0,0,0,0.12), -2px 4px 8px rgba(0,0,0,0.08)",
+              maxWidth: "280px",
+            }}
           />
         </div>
-      )}
-
-      {/* Preview Book Button */}
-      <Button
-        onClick={onPreviewClick}
-        variant="ghost" 
-        className="mt-6 text-[hsl(var(--brand-honey))] hover:text-[hsl(var(--brand-honey-dark))] hover:bg-transparent p-0 h-auto font-medium"
-      >
-        <Book className="w-4 h-4 mr-2" />
-        Preview Book
-      </Button>
+      </div>
     </div>
   );
 }

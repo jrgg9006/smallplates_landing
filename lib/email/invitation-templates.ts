@@ -15,6 +15,10 @@ interface InvitationTemplateParams {
   coupleImageUrl?: string;
   captainName?: string;
   recipeCount?: number;
+  // Reason: when set, replaces the hardcoded body copy with the organizer's
+  // edited message. Each newline becomes a paragraph break. Used for both the
+  // initial invite and the reminder.
+  customBody?: string;
 }
 
 // Base template wrapper with all styles
@@ -142,6 +146,28 @@ function coupleImageSection(coupleImageUrl: string | undefined, coupleDisplayNam
                       </table>`;
 }
 
+// Reason: render a user-edited custom body as paragraphs. Each blank line in
+// the source becomes a paragraph break. HTML is escaped to prevent injection.
+function customBodySection(body: string): string {
+  const escapeHtml = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const paragraphs = body
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => escapeHtml(p).replace(/\n/g, "<br/>"))
+    .map((p) => `<p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">${p}</p>`)
+    .join("\n                            ");
+  return `
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                          <td align="center" style="max-width: 340px; margin: 0 auto;">
+                            ${paragraphs}
+                          </td>
+                        </tr>
+                      </table>`;
+}
+
 // CTA Button — dark charcoal, uppercase tracking
 function ctaButton(link: string, text: string = "ADD YOUR RECIPE"): string {
   return `
@@ -211,16 +237,16 @@ function heroSection(coupleDisplayName: string): string {
 // EMAIL 1: Initial Invitation
 // ============================================
 export function invitationEmail1(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
-  const { coupleDisplayName, collectionLink, coupleImageUrl } = params;
+  const { coupleDisplayName, collectionLink, coupleImageUrl, customBody } = params;
 
-  const subject = `We need your recipe`;
+  const subject = `Your recipe goes in ${coupleDisplayName}'s cookbook`;
 
-  const content = `
-                      ${heroSection(coupleDisplayName)}
-
-                      ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
-
-                      <!-- Body Copy -->
+  // Reason: when the organizer edited a custom body, use it; otherwise fall back
+  // to the brand-default copy.
+  const bodySection = customBody?.trim()
+    ? customBodySection(customBody)
+    : `
+                      <!-- Body Copy (default) -->
                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                         <tr>
                           <td align="center" style="max-width: 340px; margin: 0 auto;">
@@ -235,17 +261,26 @@ export function invitationEmail1(params: InvitationTemplateParams): { subject: s
                             </p>
                           </td>
                         </tr>
-                      </table>
+                      </table>`;
+
+  const content = `
+                      ${heroSection(coupleDisplayName)}
+
+                      ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
+
+                      ${bodySection}
 
                       ${ctaButton(collectionLink)}`;
 
-  const text = `A wedding cookbook gift for ${coupleDisplayName}
-
-We're making them a cookbook. A real one. With recipes from the people who matter most to them.
+  const defaultText = `We're making them a cookbook. A real one. With recipes from the people who matter most to them.
 
 Send a recipe and you're in their kitchen.
 
-Doesn't have to be fancy. Just has to be yours.
+Doesn't have to be fancy. Just has to be yours.`;
+
+  const text = `A wedding cookbook gift for ${coupleDisplayName}
+
+${customBody?.trim() || defaultText}
 
 Add your recipe: ${collectionLink}
 
@@ -255,143 +290,192 @@ Add your recipe: ${collectionLink}
 }
 
 // ============================================
-// EMAIL 2: First Reminder
+// EMAIL 2: Reminder — plain text-style, intentionally different from
+// the visual invitation. Inline HTML (not baseTemplate) because the layout
+// is left-aligned with a top logo, which doesn't fit the email-1 frame.
 // ============================================
 export function invitationEmail2(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
-  const { coupleDisplayName, guestName, collectionLink, coupleImageUrl } = params;
+  const { coupleDisplayName, guestName, collectionLink, customBody } = params;
 
-  const subject = `Still thinking what recipe to send?`;
+  const subject = `Reminder: your recipe for ${coupleDisplayName}'s cookbook`;
 
-  const content = `
-                      ${heroSection(coupleDisplayName)}
+  // Reason: keep in sync with SendRemindersModal.DEFAULT_REMINDER_BODY so
+  // that "user kept the default → we save NULL → template uses this fallback"
+  // produces the same text the organizer saw in the modal.
+  const defaultBody = `Thanks to everyone who has already sent a recipe. The book is starting to come together.
 
-                      ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
+If you haven't yet, the page is still open and we'd love yours. It only takes 5 minutes. Doesn't have to be fancy. Just something you actually make.`;
 
-                      <!-- Body Copy -->
-                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                        <tr>
-                          <td align="center">
-                            <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-                              Hi ${guestName}, ${coupleDisplayName}'s cookbook is coming together and your page is still open.
-                            </p>
-                            <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #2D2D2D; font-weight: 600; line-height: 1.6; text-align: center;" class="darkmode-text">
-                              Send a recipe and you're in their kitchen.
-                            </p>
-                          </td>
-                        </tr>
-                      </table>
+  const bodyText = customBody?.trim() || defaultBody;
 
-                      ${ctaButton(collectionLink)}`;
+  const escapeHtml = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  // Reason: reminder paragraphs are left-aligned at 16px on a card layout —
+  // distinct from customBodySection which centers at 15px for email 1.
+  const bodyParagraphs = bodyText
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => escapeHtml(p).replace(/\n/g, "<br/>"))
+    .map((p) => `<p style="margin: 0 0 20px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #555555; line-height: 1.7;" class="darkmode-subtext">${p}</p>`)
+    .join("\n                  ");
+
+  const html = `<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>${subject} - Small Plates &amp; Co.</title>
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+    table { border-collapse: collapse !important; }
+    body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+    @media screen and (max-width: 600px) {
+      .mobile-padding { padding: 36px 24px !important; }
+    }
+    @media (prefers-color-scheme: dark) {
+      body, .darkmode-bg { background-color: #1a1a1a !important; }
+      .container-bg { background-color: #2d2d2d !important; }
+      .darkmode-text { color: #ffffff !important; }
+      .darkmode-subtext { color: #cccccc !important; }
+    }
+    .button-a { transition: all 100ms ease-in; }
+    .button-a:hover { background: #C19940 !important; }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; word-spacing: normal; background-color: #FAF7F2;" class="darkmode-bg">
+  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+    A quick reminder — your recipe for ${coupleDisplayName}'s cookbook is still pending.
+  </div>
+  <div role="article" aria-roledescription="email" lang="en">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" width="100%" style="border-collapse: collapse;">
+      <tr>
+        <td align="center" style="padding: 40px 20px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" width="100%" style="max-width: 560px; border-collapse: collapse;">
+            <tr>
+              <td style="background-color: #ffffff; border-radius: 12px; padding: 56px 44px;" class="container-bg mobile-padding">
+
+                <!-- Logo -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td align="left" style="padding-bottom: 36px;">
+                      <img src="https://smallplatesandcompany.com/images/SmallPlates_logo_horizontal1.png"
+                           alt="Small Plates &amp; Co."
+                           width="140"
+                           height="auto"
+                           style="display: block; max-width: 140px; height: auto;" />
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Greeting -->
+                <p style="margin: 0 0 20px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #2D2D2D; line-height: 1.7;" class="darkmode-text">
+                  Hi ${escapeHtml(guestName)},
+                </p>
+
+                <!-- Body (custom or default) -->
+                ${bodyParagraphs}
+
+                <!-- CTA Button -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding: 12px 0 14px;">
+                      <!--[if mso]>
+                      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${collectionLink}" style="height:48px;v-text-anchor:middle;width:200px;" arcsize="60%" stroke="f" fillcolor="#D4A854">
+                        <w:anchorlock/>
+                        <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:500;">Add Your Recipe</center>
+                      </v:roundrect>
+                      <![endif]-->
+                      <!--[if !mso]><!-->
+                      <a href="${collectionLink}" class="button-a"
+                         style="display: inline-block; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; font-weight: 500; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 999px; background-color: #D4A854;">
+                        Add Your Recipe
+                      </a>
+                      <!--<![endif]-->
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding-bottom: 36px;">
+                      <p style="margin: 6px 0 0 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #9A9590; line-height: 1.5;">
+                        Or copy this link:<br>
+                        <a href="${collectionLink}" style="color: #9A9590; text-decoration: underline; word-break: break-all;">${collectionLink}</a>
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Signature -->
+                <p style="margin: 0 0 4px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #555555; line-height: 1.7;" class="darkmode-subtext">
+                  Thanks,
+                </p>
+                <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #2D2D2D; line-height: 1.7;" class="darkmode-text">
+                  ${coupleDisplayName}
+                </p>
+
+                <!-- Disclaimer divider -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 40px;">
+                  <tr>
+                    <td style="border-top: 1px solid #F0EDE8; padding-top: 24px;">
+                      <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #9A9590; line-height: 1.6;">
+                        Something off? Just reply to this email.${params.captainName ? ` This reminder was sent by ${escapeHtml(params.captainName)} via Small Plates &amp; Co.` : ''}
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+          </table>
+
+          <!-- Outside-card credit -->
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" width="100%" style="max-width: 560px;">
+            <tr>
+              <td align="center" style="padding: 16px 20px 0;">
+                <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 11px; color: #B5AFA8; line-height: 1.5; text-align: center;">
+                  Sent via Small Plates &amp; Co. &nbsp;&middot;&nbsp;
+                  <a href="mailto:team@smallplatesandcompany.com" style="color: #B5AFA8; text-decoration: underline;">Contact us</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+
+        </td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>`;
 
   const text = `Hi ${guestName},
 
-${coupleDisplayName}'s cookbook is coming together and your page is still open.
-
-Send a recipe and you're in their kitchen.
+${bodyText}
 
 Add your recipe: ${collectionLink}
 
-5 minutes. That's it.\n\nSomething off? Just reply to this email.${params.captainName ? `\n\nThis invitation was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
+Thanks,
+${coupleDisplayName}
 
-  return { subject, html: baseTemplate(content, subject, params.captainName), text };
+—
+Something off? Just reply to this email.${params.captainName ? ` This reminder was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
+
+  return { subject, html, text };
 }
 
 // ============================================
 // EMAIL 3: Second Reminder with Social Proof
 // ============================================
-export function invitationEmail3(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
-  const { coupleDisplayName, guestName, collectionLink, coupleImageUrl, recipeCount } = params;
-
-  const showSocialProof = recipeCount && recipeCount >= 10;
-
-  const subject = showSocialProof
-    ? `${coupleDisplayName}'s cookbook is taking shape`
-    : `There's still time`;
-
-  const bodyContent = showSocialProof
-    ? `<p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-         Hi ${guestName}, ${recipeCount} people have already shared their recipes.
-       </p>
-       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #2D2D2D; font-weight: 600; line-height: 1.6; text-align: center;" class="darkmode-text">
-         There's still room for yours.
-       </p>`
-    : `<p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-         Hi ${guestName}, we know life gets busy. But if you've been meaning to add your recipe to ${coupleDisplayName}'s book, now's a good time.
-       </p>
-       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #2D2D2D; font-weight: 600; line-height: 1.6; text-align: center;" class="darkmode-text">
-         Five minutes. One recipe. A page in their kitchen.
-       </p>`;
-
-  const content = `
-                      ${heroSection(coupleDisplayName)}
-
-                      ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
-
-                      <!-- Body Copy -->
-                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                        <tr>
-                          <td align="center">
-                            ${bodyContent}
-                          </td>
-                        </tr>
-                      </table>
-
-                      ${ctaButton(collectionLink)}`;
-
-  const textBody = showSocialProof
-    ? `Hi ${guestName},\n\n${recipeCount} people have already shared their recipes.\n\nThere's still room for yours.`
-    : `Hi ${guestName},\n\nWe know life gets busy. But if you've been meaning to add your recipe to ${coupleDisplayName}'s book, now's a good time.\n\nFive minutes. One recipe. A page in their kitchen.`;
-
-  const text = `${textBody}\n\nAdd your recipe: ${collectionLink}\n\n5 minutes. That's it.\n\nSomething off? Just reply to this email.${params.captainName ? `\n\nThis invitation was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
-
-  return { subject, html: baseTemplate(content, subject, params.captainName), text };
-}
-
+// Templates 3 and 4 removed — single reminder (email2) is enough for MVP.
 // ============================================
-// EMAIL 4: Last Reminder
-// ============================================
-export function invitationEmail4(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
-  const { coupleDisplayName, guestName, collectionLink, coupleImageUrl } = params;
 
-  const subject = `Last call for ${coupleDisplayName}'s book`;
-
-  const content = `
-                      ${heroSection(coupleDisplayName)}
-
-                      ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
-
-                      <!-- Body Copy -->
-                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                        <tr>
-                          <td align="center">
-                            <p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #666666; line-height: 1.6; text-align: center;" class="darkmode-subtext">
-                              Hi ${guestName}, this is our last reminder about ${coupleDisplayName}'s recipe book.
-                            </p>
-                            <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 15px; color: #2D2D2D; font-weight: 600; line-height: 1.6; text-align: center;" class="darkmode-text">
-                              No hard feelings if not. But the door's still open.
-                            </p>
-                          </td>
-                        </tr>
-                      </table>
-
-                      ${ctaButton(collectionLink)}`;
-
-  const text = `Hi ${guestName},
-
-This is our last reminder about ${coupleDisplayName}'s recipe book.
-
-No hard feelings if not. But the door's still open.
-
-Add your recipe: ${collectionLink}
-
-5 minutes. That's it.\n\nSomething off? Just reply to this email.${params.captainName ? `\n\nThis invitation was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
-
-  return { subject, html: baseTemplate(content, subject, params.captainName), text };
-}
-
-// Helper to get template by number
+// Helper to get template by number — only 1 (invite) and 2 (reminder) supported.
 export function getInvitationTemplate(
-  emailNumber: 1 | 2 | 3 | 4,
+  emailNumber: 1 | 2,
   params: InvitationTemplateParams
 ): { subject: string; html: string; text: string } {
   switch (emailNumber) {
@@ -399,10 +483,6 @@ export function getInvitationTemplate(
       return invitationEmail1(params);
     case 2:
       return invitationEmail2(params);
-    case 3:
-      return invitationEmail3(params);
-    case 4:
-      return invitationEmail4(params);
     default:
       throw new Error(`Invalid email number: ${emailNumber}`);
   }

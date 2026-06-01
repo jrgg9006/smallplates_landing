@@ -50,7 +50,7 @@ export function ProfileHeader({ onGroupSelect, currentGroupId }: ProfileHeaderPr
     <>
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           {/* Logo - Aligned with content */}
           <Link href="/" className="hover:opacity-80 transition-opacity">
             <Image

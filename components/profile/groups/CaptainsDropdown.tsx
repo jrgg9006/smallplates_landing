@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import type { GroupWithMembers } from "@/lib/types/database";
 import { getGroupPendingInvitations, cancelGroupInvitation, type GroupInvitation } from "@/lib/supabase/groupInvitations";
 import { Clock, Trash2 } from "lucide-react";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 interface CaptainsDropdownProps {
   isOpen: boolean;
@@ -11,12 +12,28 @@ interface CaptainsDropdownProps {
   onClose: () => void;
   onInviteCaptain?: () => void;
   refreshTrigger?: number; // Trigger to refresh pending invitations
+  // Reason: defaults to right-aligned (drops to the left) so existing menu
+  // triggers keep working. Pass "left" when the anchor is on the left side
+  // of the screen so the dropdown expands rightward instead of clipping.
+  align?: "left" | "right";
 }
 
-export function CaptainsDropdown({ isOpen, selectedGroup, onClose, onInviteCaptain, refreshTrigger }: CaptainsDropdownProps) {
+export function CaptainsDropdown({ isOpen, selectedGroup, onClose, onInviteCaptain, refreshTrigger, align = "right" }: CaptainsDropdownProps) {
   const [pendingInvitations, setPendingInvitations] = useState<GroupInvitation[]>([]);
   const [loadingInvitations, setLoadingInvitations] = useState(false);
   const [cancelingId, setCancelingId] = useState<string | null>(null);
+  // Reason: on mobile render as a bottom sheet (anchored to the viewport, never
+  // clips); on desktop keep the anchored dropdown. Lazy-init from window since
+  // this only mounts after a user click (client-only), so no hydration flash.
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== "undefined" && window.innerWidth < 640
+  );
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   const loadPendingInvitations = useCallback(async () => {
     if (!selectedGroup?.id) return;
@@ -86,91 +103,112 @@ export function CaptainsDropdown({ isOpen, selectedGroup, onClose, onInviteCapta
     { name: "Ricardo García", role: "Captain", initial: "R" },
   ];
   
+  // Reason: shared content for both the mobile sheet and the desktop dropdown.
+  const body = (
+    <>
+      {captains.map((captain, idx) => (
+        <div key={idx} className="flex items-center gap-2 py-2">
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-medium flex-shrink-0 ${
+              captain.role === 'Creator'
+                ? 'bg-[hsl(var(--brand-charcoal))] text-[hsl(var(--brand-white))]'
+                : 'bg-[#E8E6E1] text-[hsl(var(--brand-warm-gray-dark))]'
+            }`}
+          >
+            {captain.initial}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm text-[hsl(var(--brand-charcoal))] mb-0 break-words">{captain.name}</p>
+            <p className="text-xs text-[hsl(var(--brand-warm-gray))] mb-0">{captain.role}</p>
+          </div>
+        </div>
+      ))}
+
+      {/* Pending Invitations Section */}
+      {pendingInvitations.length > 0 && (
+        <>
+          {/* Honey Divider */}
+          <div className="my-3 px-1">
+            <div className="h-px bg-gradient-to-r from-transparent via-[hsl(var(--brand-honey))] to-transparent opacity-30"></div>
+          </div>
+
+          {/* Waiting to Join Header */}
+          <div className="px-1 mb-2">
+            <p className="text-xs text-[hsl(var(--brand-warm-gray))] font-medium">Waiting to join</p>
+          </div>
+
+          {/* Pending Invitation Items */}
+          {pendingInvitations.map((invitation) => (
+            <div
+              key={invitation.id}
+              className="py-1.5 px-1 group flex items-center justify-between hover:bg-gray-50/50 rounded-lg transition-colors"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-[hsl(var(--brand-warm-gray))] mb-0 break-words">
+                  {invitation.name || invitation.email}
+                </p>
+                {invitation.name && invitation.email && (
+                  <p className="text-[10px] text-[hsl(var(--brand-warm-gray))]/60 mb-0 break-words">
+                    {invitation.email}
+                  </p>
+                )}
+              </div>
+
+              {/* Cancel Button — always visible on mobile (no hover), hover-reveal on desktop */}
+              <button
+                onClick={() => handleCancelInvitation(invitation.id, invitation.name || invitation.email)}
+                disabled={cancelingId === invitation.id}
+                className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 ml-2 p-1 rounded-md hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 flex-shrink-0"
+                title="Cancel invitation"
+              >
+                <Trash2
+                  className={`h-3 w-3 text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] transition-colors ${
+                    cancelingId === invitation.id ? 'animate-pulse' : ''
+                  }`}
+                />
+              </button>
+            </div>
+          ))}
+        </>
+      )}
+
+      <button
+        onClick={() => {
+          onInviteCaptain?.();
+          onClose();
+        }}
+        className="w-full mt-3 py-2.5 bg-transparent border border-dashed border-[hsl(var(--brand-border-button))] rounded-[20px] text-[13px] text-[hsl(var(--brand-warm-gray-dark))] hover:bg-[hsl(var(--brand-border))] transition-colors"
+      >
+        + Invite Captain
+      </button>
+    </>
+  );
+
+  // Mobile: bottom sheet anchored to the viewport — never clips off-screen.
+  if (isMobile) {
+    return (
+      <Sheet open onOpenChange={(open) => { if (!open) onClose(); }}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh] overflow-y-auto">
+          <SheetTitle className="type-modal-title text-center mb-4">
+            Captains
+          </SheetTitle>
+          {body}
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  // Desktop: anchored dropdown (respects the `align` prop).
   return (
     <>
       {/* Backdrop */}
-      <div 
-        className="fixed inset-0 z-40" 
+      <div
+        className="fixed inset-0 z-40"
         onClick={onClose}
       />
-      
-      {/* Dropdown */}
-      <div className="absolute top-full right-0 mt-2 bg-[hsl(var(--brand-white))] rounded-2xl shadow-[0_4px_24px_rgba(45,45,45,0.12)] p-3 min-w-[220px] z-50 border border-[hsl(var(--brand-border))]">
-        {captains.map((captain, idx) => (
-          <div key={idx} className="flex items-center gap-2 py-2">
-            <div 
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-medium ${
-                captain.role === 'Creator' 
-                  ? 'bg-[hsl(var(--brand-charcoal))] text-[hsl(var(--brand-white))]'
-                  : 'bg-[#E8E6E1] text-[hsl(var(--brand-warm-gray-dark))]'
-              }`}
-            >
-              {captain.initial}
-            </div>
-            <div>
-              <p className="text-sm text-[hsl(var(--brand-charcoal))] mb-0">{captain.name}</p>
-              <p className="text-xs text-[hsl(var(--brand-warm-gray))] mb-0">{captain.role}</p>
-            </div>
-          </div>
-        ))}
-        
-        {/* Pending Invitations Section */}
-        {pendingInvitations.length > 0 && (
-          <>
-            {/* Honey Divider */}
-            <div className="my-3 px-1">
-              <div className="h-px bg-gradient-to-r from-transparent via-[hsl(var(--brand-honey))] to-transparent opacity-30"></div>
-            </div>
-            
-            {/* Waiting to Join Header */}
-            <div className="px-1 mb-2">
-              <p className="text-xs text-[hsl(var(--brand-warm-gray))] font-medium">Waiting to join</p>
-            </div>
-            
-            {/* Pending Invitation Items */}
-            {pendingInvitations.map((invitation) => (
-              <div 
-                key={invitation.id} 
-                className="py-1.5 px-1 group flex items-center justify-between hover:bg-gray-50/50 rounded-lg transition-colors"
-              >
-                <div className="flex-1">
-                  <p className="text-xs text-[hsl(var(--brand-warm-gray))] mb-0">
-                    {invitation.name || invitation.email}
-                  </p>
-                  {invitation.name && invitation.email && (
-                    <p className="text-[10px] text-[hsl(var(--brand-warm-gray))]/60 mb-0">
-                      {invitation.email}
-                    </p>
-                  )}
-                </div>
-                
-                {/* Cancel Button - appears on hover */}
-                <button
-                  onClick={() => handleCancelInvitation(invitation.id, invitation.name || invitation.email)}
-                  disabled={cancelingId === invitation.id}
-                  className="opacity-0 group-hover:opacity-100 ml-2 p-1 rounded-md hover:bg-gray-50 transition-all duration-200 disabled:opacity-50"
-                  title="Cancel invitation"
-                >
-                  <Trash2 
-                    className={`h-3 w-3 text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] transition-colors ${
-                      cancelingId === invitation.id ? 'animate-pulse' : ''
-                    }`} 
-                  />
-                </button>
-              </div>
-            ))}
-          </>
-        )}
-        
-        <button 
-          onClick={() => {
-            onInviteCaptain?.();
-            onClose();
-          }}
-          className="w-full mt-3 py-2.5 bg-transparent border border-dashed border-[hsl(var(--brand-border-button))] rounded-[20px] text-[13px] text-[hsl(var(--brand-warm-gray-dark))] hover:bg-[hsl(var(--brand-border))] transition-colors"
-        >
-          + Invite Captain
-        </button>
+
+      <div className={`absolute top-full mt-2 ${align === "left" ? "left-0" : "right-0"} min-w-[220px] bg-[hsl(var(--brand-white))] rounded-2xl shadow-[0_4px_24px_rgba(45,45,45,0.12)] p-3 z-50 border border-[hsl(var(--brand-border))]`}>
+        {body}
       </div>
     </>
   );

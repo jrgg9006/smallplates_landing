@@ -5,6 +5,7 @@ import {
   runExtraCopiesSetupFromSession,
   runDashboardExtrasSetupFromSession,
   runCopyOrderSetupFromSession,
+  runBookClosePurchaseFromSession,
   emitPostPaymentAutoLogin,
 } from '@/lib/stripe/post-payment-setup';
 import { sendCopyOrderConfirmation } from '@/lib/postmark';
@@ -43,6 +44,8 @@ export async function POST(request: NextRequest) {
       await handleDashboardExtrasPurchase(session);
     } else if (metadataType === 'copy_order_purchase') {
       await handleCopyOrderPurchase(session);
+    } else if (metadataType === 'book_close_purchase') {
+      await handleBookClosePurchase(session);
     }
     // Reason: Ignore unknown types silently — future flows may add their own.
   }
@@ -75,6 +78,20 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       buyerName,
       wasExisting: setup.wasExisting,
     });
+  }
+}
+
+async function handleBookClosePurchase(session: Stripe.Checkout.Session) {
+  // Reason: Free-tier book is paid for AND closed here, atomically on confirmed
+  // payment. Creates the initial_purchase order, persists Stripe's shipping
+  // address, and flips the group to active + book_closed_by_user. No welcome
+  // email — the organizer already has a session. Stripe sends the receipt.
+  const result = await runBookClosePurchaseFromSession({ session });
+  if (!result.orderCreated) {
+    console.warn(
+      'handleBookClosePurchase: order was not created (likely idempotency hit)',
+      { sessionId: session.id }
+    );
   }
 }
 

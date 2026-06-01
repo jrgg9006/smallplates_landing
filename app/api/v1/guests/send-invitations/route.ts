@@ -96,10 +96,10 @@ export async function POST(request: NextRequest) {
     // Reason: Only process up to what's left in the daily and monthly allowance
     const safeGuestIds = guestIds.slice(0, Math.min(guestIds.length, remaining, monthlyRemaining));
 
-    // Fetch group data for email template
+    // Fetch group data for email template (incl. organizer's custom body)
     const { data: group } = await supabase
       .from('groups')
-      .select('name, couple_first_name, partner_first_name, couple_image_url, created_by')
+      .select('name, couple_first_name, partner_first_name, couple_image_url, created_by, email_invite_message')
       .eq('id', groupId)
       .single();
 
@@ -189,6 +189,7 @@ export async function POST(request: NextRequest) {
         coupleImageUrl: group.couple_image_url || undefined,
         captainName: senderProfile?.full_name || undefined,
         emailNumber: 1,
+        customBody: group.email_invite_message || undefined,
       });
 
       if (result.success) {

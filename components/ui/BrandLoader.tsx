@@ -21,18 +21,24 @@ interface BrandLoaderProps {
   // Reason: fixed=true renders as a full-screen overlay (z-50) for in-page loading
   // states layered above existing content. Default is the standalone min-h-screen page.
   fixed?: boolean;
+  // Reason: inline=true drops the min-h-screen/background so the loader sits where
+  // it's placed (e.g. just below a control row) instead of centering in the viewport.
+  inline?: boolean;
 }
 
 export default function BrandLoader({
   message = "One moment",
   fixed = false,
+  inline = false,
 }: BrandLoaderProps) {
   const containerClass = fixed
     ? "fixed inset-0 z-50 flex flex-col items-center justify-center gap-4"
+    : inline
+    ? "flex flex-col items-center justify-center gap-4"
     : "min-h-screen flex flex-col items-center justify-center gap-4";
 
   return (
-    <div className={containerClass} style={{ background: "#FAF8F4" }}>
+    <div className={containerClass} style={inline ? undefined : { background: "#FAF8F4" }}>
       <Image
         src="/images/SmallPlates_logo_horizontal.png"
         alt="Small Plates & Co."

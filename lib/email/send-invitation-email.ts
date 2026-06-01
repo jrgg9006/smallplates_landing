@@ -12,8 +12,9 @@ export interface SendGuestInvitationParams {
   collectionLink: string;
   coupleImageUrl?: string;
   captainName?: string;
-  emailNumber: 1 | 2 | 3 | 4;
+  emailNumber: 1 | 2;
   recipeCount?: number;
+  customBody?: string;
 }
 
 export async function sendGuestInvitationEmail({
@@ -26,6 +27,7 @@ export async function sendGuestInvitationEmail({
   captainName,
   emailNumber,
   recipeCount,
+  customBody,
 }: SendGuestInvitationParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
     // Use coupleName if provided, otherwise use coupleDisplayName for backward compatibility
@@ -39,6 +41,7 @@ export async function sendGuestInvitationEmail({
       coupleImageUrl,
       captainName,
       recipeCount,
+      customBody,
     });
 
     // Send email via Postmark
