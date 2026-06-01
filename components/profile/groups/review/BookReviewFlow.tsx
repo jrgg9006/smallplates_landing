@@ -187,7 +187,7 @@ export function BookReviewFlow({ group, isOwner, recipeCount, onExit }: BookRevi
       <section className="mx-auto w-full max-w-[1100px] px-4 py-6 sm:px-8 sm:py-8">
         {/* Title + back on one row — back aligned right to save vertical space */}
         <div className="mb-6 flex items-center justify-between gap-4">
-          <h1 className="font-serif text-[40px] leading-tight text-brand-charcoal">
+          <h1 className="font-serif text-[28px] leading-tight text-brand-charcoal sm:text-[40px]">
             {STEP_TITLES[step]}
           </h1>
           <button

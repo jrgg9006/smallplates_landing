@@ -640,7 +640,7 @@ export default function GroupsPage() {
       )}
 
       {/* Main Content — book view (hidden but not unmounted during send-invitations) */}
-      <main className={`max-w-[1240px] mx-auto px-8 ${activeView !== 'book' ? 'hidden' : ''}`}>
+      <main className={`max-w-[1240px] mx-auto px-4 sm:px-8 ${activeView !== 'book' ? 'hidden' : ''}`}>
             {/* Reason: Hide dashboard/buttons when book is closed — BookClosedStatus in GroupsSection handles the view */}
             {selectedGroup?.book_closed_by_user ? null : (<>
             {/* Two-column layout: Title + Book Cover */}
@@ -666,14 +666,16 @@ export default function GroupsPage() {
                   <h1 className="cookbook-title">
                     {selectedGroup?.name || 'My Cookbook'}
                   </h1>
-              <div className="flex items-center gap-3 cookbook-metadata">
+              {/* Reason: plain flowing text (not flex) so the meta wraps naturally
+                  on mobile instead of each fragment becoming a squeezed flex item. */}
+              <div className="cookbook-metadata mt-1">
                 <button
                   onClick={handleEditProfile}
                   className="text-[hsl(var(--brand-honey))] hover:text-[hsl(var(--brand-honey-dark))] transition-colors"
                 >
                   Edit Profile
                 </button>
-                <span className="text-[hsl(var(--brand-border-button))]">·</span>
+                <span className="mx-1.5 text-[hsl(var(--brand-border-button))]">·</span>
                 {selectedGroup?.book_close_date ? (
                   <>Recipes due {getDeadlineText(selectedGroup.book_close_date)}</>
                 ) : selectedGroup?.gift_date_undecided ? (
@@ -725,11 +727,11 @@ export default function GroupsPage() {
 
             {/* Action Bar — separate section below */}
             <div className="mt-10 pt-6 border-t border-[hsl(var(--brand-border))]">
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 {/* PRIMARY - Invite dropdown (HONEY, ROUNDED) */}
                 <div className="relative">
                   <button
-                    className="btn btn-sm btn-honey gap-2 px-14"
+                    className="btn btn-sm btn-honey gap-2 px-10 sm:px-14"
                     onClick={() => setShowInviteDropdown(!showInviteDropdown)}
                     disabled={!selectedGroup}
                   >

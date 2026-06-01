@@ -186,6 +186,31 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
 
   const allSelected = selectedIds.size === visibleGuests.length && visibleGuests.length > 0;
 
+  // Reason: Save/Send button contents (with their loading/saved states) are reused
+  // by both the mobile and desktop footer layouts, so the logic lives in one place.
+  const saveLabel = isSaving ? (
+    <>
+      <Loader2 className="w-4 h-4 animate-spin" />
+      Saving…
+    </>
+  ) : justSaved ? (
+    <>
+      <Check className="w-4 h-4" />
+      Saved
+    </>
+  ) : (
+    "Save"
+  );
+
+  const sendLabel = isSending ? (
+    <>
+      <Loader2 className="w-4 h-4 animate-spin" />
+      Sending…
+    </>
+  ) : (
+    "Send"
+  );
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col">
@@ -316,20 +341,20 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
               </div>
             )}
 
-            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {/* Mobile: Send as the one big button, secondary actions as text links */}
+            <div className="sm:hidden space-y-4">
               <button
-                type="button"
-                onClick={() => setView("recipients")}
-                className="text-sm text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] underline underline-offset-2 transition-colors text-center sm:text-left"
+                onClick={handleSend}
+                disabled={selectedIds.size === 0 || isSending}
+                className="w-full flex items-center justify-center gap-2 rounded-full bg-brand-charcoal px-6 py-3 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Recipients ({selectedIds.size})
+                {sendLabel}
               </button>
-              {/* Reason: stack full-width on mobile (Send on top), inline on desktop */}
-              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
+              <div className="flex items-center justify-center gap-6 text-sm">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-full sm:w-auto rounded-full border border-[rgba(45,45,45,0.14)] px-6 py-3 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2"
+                  className="text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] transition-colors"
                 >
                   Cancel
                 </button>
@@ -337,35 +362,51 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
                   type="button"
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-full border border-[rgba(45,45,45,0.22)] px-6 py-3 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex items-center gap-1.5 text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] transition-colors disabled:opacity-40"
                 >
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Saving…
-                    </>
-                  ) : justSaved ? (
-                    <>
-                      <Check className="w-4 h-4" />
-                      Saved
-                    </>
-                  ) : (
-                    "Save"
-                  )}
+                  {saveLabel}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setView("recipients")}
+                  className="text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] underline underline-offset-2 transition-colors"
+                >
+                  Recipients ({selectedIds.size})
+                </button>
+              </div>
+            </div>
+
+            {/* Desktop: Recipients link on the left, buttons on the right */}
+            <div className="hidden sm:flex sm:items-center sm:justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => setView("recipients")}
+                className="text-sm text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] underline underline-offset-2 transition-colors"
+              >
+                Recipients ({selectedIds.size})
+              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="rounded-full border border-[rgba(45,45,45,0.14)] px-6 py-3 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="flex items-center justify-center gap-2 rounded-full border border-[rgba(45,45,45,0.22)] px-6 py-3 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {saveLabel}
                 </button>
                 <button
                   onClick={handleSend}
                   disabled={selectedIds.size === 0 || isSending}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-full bg-brand-charcoal px-6 py-3 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 rounded-full bg-brand-charcoal px-6 py-3 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {isSending ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Sending…
-                    </>
-                  ) : (
-                    "Send"
-                  )}
+                  {sendLabel}
                 </button>
               </div>
             </div>

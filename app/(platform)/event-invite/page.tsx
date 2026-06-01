@@ -661,7 +661,9 @@ function EventInviteContent() {
 
   return shell(
     <div className="flex-1 bg-white">
-      <div className="max-w-[1400px] mx-auto px-4 py-10 flex flex-col lg:flex-row gap-6 items-start">
+      {/* Reason: on mobile show the "Your invite is ready" share section above the
+          preview (flex-col-reverse); on desktop keep preview-left, share-right. */}
+      <div className="max-w-[1400px] mx-auto px-4 py-10 flex flex-col-reverse lg:flex-row gap-6 items-start">
 
         {/* Left — Preview */}
         <div className="flex-1 flex flex-col items-center">

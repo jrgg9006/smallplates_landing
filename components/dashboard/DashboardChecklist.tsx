@@ -94,12 +94,12 @@ export function DashboardChecklist({
   const completedCount = steps.filter((s) => s.done).length;
 
   return (
-    <div className="mt-6 max-w-[580px] bg-white rounded-2xl border border-[hsl(var(--brand-border))] p-5 shadow-sm">
+    <div className="mt-6 max-w-[580px] bg-white rounded-2xl border border-[hsl(var(--brand-border))] p-4 sm:p-5 shadow-sm">
       <div className="space-y-1">
         {steps.map((step, i) => (
           <div
             key={i}
-            className="flex items-center gap-3.5 px-4 py-1.5 rounded-xl"
+            className="flex items-center gap-3 sm:gap-3.5 px-2 sm:px-4 py-1.5 rounded-xl"
           >
             {step.done ? (
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[hsl(var(--brand-honey))] flex-shrink-0">

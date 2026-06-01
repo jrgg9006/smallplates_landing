@@ -379,7 +379,7 @@ body > div.pac-container ~ div:not([id]):not([class]) {
     @apply font-medium text-xs leading-normal text-[hsl(var(--brand-warm-gray))];
   }
   .cookbook-title {
-    @apply font-serif text-[44px] font-normal text-[hsl(var(--brand-charcoal))];
+    @apply font-serif text-[32px] sm:text-[44px] font-normal text-[hsl(var(--brand-charcoal))];
   }
   .cookbook-metadata {
     @apply text-sm font-normal text-[hsl(var(--brand-warm-gray))];

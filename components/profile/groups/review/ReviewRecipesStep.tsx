@@ -126,7 +126,7 @@ export function ReviewRecipesStep({
         /* Content — sidebar + page. Tall near-viewport height; the card holds an
            8x10 page proportion (centered) and scrolls internally. This is the main
            review surface, so it should read like a real book page. */
-        <div className="flex h-[calc(100vh-2rem)] min-h-[960px] gap-6">
+        <div className="flex h-[calc(100vh-2rem)] gap-6 md:min-h-[960px]">
           <ReviewRecipeSidebar
             recipes={recipes}
             currentIndex={currentIndex}

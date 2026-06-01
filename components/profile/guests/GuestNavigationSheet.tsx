@@ -144,10 +144,11 @@ export function GuestNavigationSheet({
           : "w-[85%] sm:w-[400px] p-0 overflow-hidden bg-white [&_button[data-radix-dialog-close]]:focus:outline-none [&_button[data-radix-dialog-close]]:focus:ring-0 [&_button[data-radix-dialog-close]]:focus:ring-offset-0"
         }
       >
-        {/* Mobile visual handle */}
-        {isMobile && <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300" />}
-
         <div className={`h-full flex flex-col ${isMobile ? 'pt-2' : ''}`}>
+          {/* Mobile visual handle — inside the flex column so its height is
+              subtracted from the content area instead of overflowing the sheet
+              (which was clipping the footer's Add Guest button). */}
+          {isMobile && <div className="mx-auto mb-2 h-1.5 w-12 rounded-full bg-gray-300 flex-shrink-0" />}
           {/* Header */}
           <SheetHeader className={`${isMobile ? 'px-6 py-4' : 'px-8 py-6'} border-b border-gray-100`}>
             <SheetTitle className="type-modal-title text-[hsl(var(--brand-charcoal))]">
@@ -197,7 +198,7 @@ export function GuestNavigationSheet({
           </div>
           
           {/* Content */}
-          <div className={`flex-1 overflow-y-auto ${isMobile ? 'px-4 py-4' : 'p-6'}`}>
+          <div className={`flex-1 min-h-0 overflow-y-auto ${isMobile ? 'px-4 py-4' : 'p-6'}`}>
             {loading ? (
               <div className="space-y-3">
                 {[1, 2, 3, 4, 5].map((i) => (
