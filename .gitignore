@@ -48,3 +48,6 @@ coverage/
 
 # TypeScript build cache (auto-generated)
 tsconfig.tsbuildinfo
+
+# Local QA / smoke test scripts (not part of the app)
+smoke-test-qa.sh
