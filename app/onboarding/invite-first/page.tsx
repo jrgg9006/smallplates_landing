@@ -4,7 +4,8 @@ import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
 import { createSupabaseClient } from "@/lib/supabase/client";
-import { Check } from "lucide-react";
+import { Check, MessageCircle, Mail, QrCode, Download } from "lucide-react";
+import QRCode from "qrcode";
 
 function InviteFirstContent() {
   const router = useRouter();
@@ -25,6 +26,8 @@ function InviteFirstContent() {
   const [emailError, setEmailError] = useState("");
   const [showEmailPreview, setShowEmailPreview] = useState(false);
   const [previewTab, setPreviewTab] = useState<"whatsapp" | "sms" | "guest">("whatsapp");
+  const [activeShare, setActiveShare] = useState<"none" | "email" | "qr">("none");
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!groupId) return;
@@ -109,6 +112,29 @@ function InviteFirstContent() {
       setEmailError("Something went wrong");
     }
     setEmailSending(false);
+  }
+
+  // Reason: generate the QR lazily when the QR sub-view opens (qrcode dep is
+  // already used by ShareCollectionModal — no new dependency).
+  useEffect(() => {
+    if (activeShare !== "qr" || !collectionLink) return;
+    let cancelled = false;
+    QRCode.toDataURL(collectionLink, {
+      width: 600,
+      margin: 2,
+      color: { dark: "#2D2D2D", light: "#FFFFFF" },
+    }).then((url) => { if (!cancelled) setQrDataUrl(url); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [activeShare, collectionLink]);
+
+  function handleDownloadQR() {
+    if (!qrDataUrl) return;
+    const a = document.createElement("a");
+    a.href = qrDataUrl;
+    a.download = "small-plates-recipe-qr.png";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
   const previewMessage = shareMessage || (coupleName
@@ -266,79 +292,135 @@ function InviteFirstContent() {
       onContinue={() => router.push("/profile/groups")}
       continueLabel="Go to dashboard"
     >
-      <div className="max-w-4xl">
+      <div className="max-w-xl">
+        <p className="text-base text-gray-600 leading-relaxed mb-6">
+          Send this link to everyone you want in the cookbook. They&apos;ll get a simple form to share their recipe.
+        </p>
 
-        {/* Section 1: Copy link */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-8 mb-8 border-b border-[hsl(var(--brand-sand))]">
-          <div>
-            <p className="text-base font-medium text-gray-900">Invite via link</p>
-            <p className="text-sm text-gray-500">Great for sending over text or social media.</p>
-          </div>
+        {/* Copy link — pill (matches ShareCollectionModal) */}
+        <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-full pl-4 pr-1 py-1">
+          <input
+            type="text"
+            value={collectionLink}
+            readOnly
+            onFocus={(e) => e.target.select()}
+            className="flex-1 bg-transparent text-sm text-gray-700 outline-none truncate min-w-0"
+          />
           <button
             onClick={handleCopy}
             disabled={!collectionLink}
-            className="btn btn-sm btn-outline shrink-0 w-full sm:w-auto sm:min-w-[160px]"
+            className={`flex-shrink-0 rounded-full px-5 py-2 text-sm font-medium transition-colors ${
+              copied
+                ? "bg-[hsl(var(--brand-honey))] text-black"
+                : "bg-brand-charcoal text-white hover:bg-gray-800"
+            }`}
           >
-            {copied ? "Copied!" : "Copy invite link"}
+            {copied ? (
+              <span className="flex items-center gap-1.5"><Check className="w-4 h-4" />Copied</span>
+            ) : (
+              "Copy link"
+            )}
           </button>
         </div>
 
-        {/* Section 2: WhatsApp */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-8 mb-8 border-b border-[hsl(var(--brand-sand))]">
-          <div>
-            <p className="text-base font-medium text-gray-900">Share via WhatsApp</p>
-            <p className="text-sm text-gray-500">Opens WhatsApp with a pre-written message.</p>
-          </div>
+        {/* Quick share row — WhatsApp / Email / QR */}
+        <div className="grid grid-cols-3 gap-3 pt-4">
           <a
             href={`https://wa.me/?text=${encodeURIComponent(whatsappText)}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn btn-sm shrink-0 inline-flex items-center gap-2 text-white w-full sm:w-auto sm:min-w-[160px] justify-center"
-            style={{ backgroundColor: "#25D366" }}
+            className="flex flex-col items-center justify-center gap-2 py-3 rounded-xl hover:bg-gray-50 transition-colors"
           >
-            Send via WhatsApp
+            <MessageCircle className="w-6 h-6 text-[#25D366]" />
+            <span className="text-xs text-gray-700 font-medium">WhatsApp</span>
           </a>
+          <button
+            type="button"
+            onClick={() => setActiveShare(activeShare === "email" ? "none" : "email")}
+            className={`flex flex-col items-center justify-center gap-2 py-3 rounded-xl transition-colors ${
+              activeShare === "email" ? "bg-gray-100" : "hover:bg-gray-50"
+            }`}
+          >
+            <Mail className="w-6 h-6 text-gray-700" />
+            <span className="text-xs text-gray-700 font-medium">Email</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveShare(activeShare === "qr" ? "none" : "qr")}
+            className={`flex flex-col items-center justify-center gap-2 py-3 rounded-xl transition-colors ${
+              activeShare === "qr" ? "bg-gray-100" : "hover:bg-gray-50"
+            }`}
+          >
+            <QrCode className="w-6 h-6 text-gray-700" />
+            <span className="text-xs text-gray-700 font-medium">QR Code</span>
+          </button>
         </div>
 
-        {/* Section 3: Email */}
-        <div className="pb-2 bg-[hsl(var(--brand-warm-white-warm))] -mx-5 px-5 py-5 rounded-xl">
-          <div className="flex items-baseline justify-between mb-1">
-            <p className="text-base font-medium text-gray-900">Invite via email</p>
+        {/* Email sub-view — we send the invite for them */}
+        {activeShare === "email" && (
+          <div className="mt-5 pt-5 border-t border-[hsl(var(--brand-sand))]">
+            <div className="flex items-baseline justify-between mb-3">
+              <p className="text-sm font-semibold text-gray-900">We&apos;ll send the invite for you</p>
+              <button
+                type="button"
+                onClick={() => setShowEmailPreview(true)}
+                className="text-[13px] text-gray-500 hover:text-gray-700 underline transition-colors"
+              >
+                Preview invite email
+              </button>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="text"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                className="input-field flex-1"
+                placeholder="Name"
+              />
+              <input
+                type="email"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                className="input-field flex-1"
+                placeholder="Email"
+              />
+              <button
+                onClick={handleEmailInvite}
+                disabled={emailSending || !guestName.trim() || !guestEmail.trim()}
+                className="btn btn-sm btn-outline shrink-0 w-full sm:w-auto"
+              >
+                {emailSending ? "Sending..." : emailSent ? (
+                  <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Sent!</span>
+                ) : "Send"}
+              </button>
+            </div>
+            {emailError && <p className="text-sm text-red-600 mt-2">{emailError}</p>}
+          </div>
+        )}
+
+        {/* QR sub-view */}
+        {activeShare === "qr" && (
+          <div className="mt-5 pt-5 border-t border-[hsl(var(--brand-sand))] flex flex-col items-center gap-3">
+            <p className="text-sm text-gray-500 text-center max-w-xs">
+              Print this for your event. Guests scan it with their phone and add a recipe right there.
+            </p>
+            <div className="bg-white border border-gray-200 rounded-2xl p-4">
+              {qrDataUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={qrDataUrl} alt="Recipe collection QR code" className="w-40 h-40" />
+              ) : (
+                <div className="w-40 h-40 flex items-center justify-center text-gray-400 text-sm">Generating…</div>
+              )}
+            </div>
             <button
-              type="button"
-              onClick={() => setShowEmailPreview(true)}
-              className="text-sm text-gray-500 hover:text-gray-700 underline transition-colors"
+              onClick={handleDownloadQR}
+              disabled={!qrDataUrl}
+              className="btn btn-sm btn-outline inline-flex items-center gap-2"
             >
-              Preview invite email
+              <Download className="w-4 h-4" /> Download QR
             </button>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <input
-              type="text"
-              value={guestName}
-              onChange={(e) => setGuestName(e.target.value)}
-              className="input-field flex-1"
-              placeholder="Name"
-            />
-            <input
-              type="email"
-              value={guestEmail}
-              onChange={(e) => setGuestEmail(e.target.value)}
-              className="input-field flex-1"
-              placeholder="Email"
-            />
-            <button
-              onClick={handleEmailInvite}
-              disabled={emailSending || !guestName.trim() || !guestEmail.trim()}
-              className="btn btn-sm btn-outline shrink-0 w-full sm:w-auto"
-            >
-              {emailSending ? "Sending..." : emailSent ? (
-                <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Sent!</span>
-              ) : "Send"}
-            </button>
-          </div>
-          {emailError && <p className="text-sm text-red-600 mt-2">{emailError}</p>}
-        </div>
+        )}
 
         {/* Email preview modal */}
         {showEmailPreview && (
