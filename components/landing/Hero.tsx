@@ -59,7 +59,8 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
           >
-            You set it up. We handle the rest.
+            For the wedding, the shower, the table after.
+            <span className="block mt-2">You set it up. We handle the rest.</span>
           </motion.p>
           <motion.div
             className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4"
@@ -75,11 +76,8 @@ export default function Hero() {
                 className="btn btn-lg btn-honey"
                 data-cta="hero-primary"
               >
-                Start the Book
+                Start your book for free
               </button>
-              <p className="type-eyebrow text-white/80">
-                Starts at $169
-              </p>
             </div>
 
             {/* Secondary CTA */}
