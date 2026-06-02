@@ -196,7 +196,7 @@ export default function BooksPrinted() {
               className="btn btn-lg btn-honey"
               data-cta="proof-primary"
             >
-              Start Their Book
+              Start their book for free
             </button>
           </motion.div>
         </div>

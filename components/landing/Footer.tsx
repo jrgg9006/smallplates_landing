@@ -155,7 +155,7 @@ export default function Footer() {
               onClick={() => trackEvent('start_book_click', { cta_location: 'footer_card' })}
               className="btn btn-sm btn-honey"
             >
-              Start the Book
+              Start their book for free
             </Link>
           </div>
         </div>

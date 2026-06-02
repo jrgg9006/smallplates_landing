@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import SpecsGrid from "@/components/landing/TheBook/SpecsGrid";
-import HandmadeCallout from "@/components/landing/TheBook/HandmadeCallout";
+// import HandmadeCallout from "@/components/landing/TheBook/HandmadeCallout"; // Hidden from flow; component kept for reuse
 import DetailStrip from "@/components/landing/TheBook/DetailStrip";
 import { trackEvent } from "@/lib/analytics";
 import { isFreeTierEnabled } from "@/lib/feature-flags";
@@ -202,8 +202,8 @@ export default function TheBook() {
         {/* Part 3: Specs Grid */}
         <SpecsGrid />
 
-        {/* Part 4: Handmade Callout */}
-        <HandmadeCallout />
+        {/* Part 4: Handmade Callout — hidden; section talks about the book enough by here. Component kept for reuse */}
+        {/* <HandmadeCallout /> */}
 
         {/* Part 5: Detail Strip */}
         <DetailStrip />
@@ -231,7 +231,7 @@ export default function TheBook() {
               className="btn btn-lg btn-honey"
               data-cta="the-book-primary"
             >
-              Start the Book
+              Start their book for free
             </button>
           </div>
 

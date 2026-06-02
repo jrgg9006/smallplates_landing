@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <>
-      <Banner />
+      <Banner theme="light" />
       <main className="min-h-screen bg-brand-warm-white-warm">
-        <section className="pt-20 pb-16 md:pt-28 md:pb-20">
+        <section className="pt-32 pb-16 md:pt-44 md:pb-20">
           <div className="mx-auto max-w-xl px-6 md:px-8">
             <div className="text-center mb-12">
               <h1 className="type-heading mb-6">

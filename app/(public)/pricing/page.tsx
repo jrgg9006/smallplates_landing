@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function Pricing() {
   return (
     <>
-      <Banner />
+      <Banner theme="light" />
       <PricingPage />
       <Footer />
       <WhatsAppFAB />
