@@ -12,6 +12,7 @@ export default function AboutYouPage() {
   const { occasion, bookDate, bookDateUndecided, reset } = useOnboardingState();
   const [coupleFirstName, setCoupleFirstName] = useState("");
   const [partnerFirstName, setPartnerFirstName] = useState("");
+  const [cookbookTitle, setCookbookTitle] = useState("");
   const [yourName, setYourName] = useState("");
   const [email, setEmail] = useState("");
   const [isAuthed, setIsAuthed] = useState(false);
@@ -42,6 +43,7 @@ export default function AboutYouPage() {
           yourName,
           coupleFirstName,
           partnerFirstName,
+          cookbookTitle,
           occasion,
           bookDate,
           bookDateUndecided,
@@ -73,9 +75,18 @@ export default function AboutYouPage() {
     }
   }
 
+  // Reason: weddings, bridal showers and anniversaries are about a couple → ask
+  // for both names. Birthdays / "Other" are not, so we ask for a single cookbook
+  // title instead (e.g. a recipe book for grandma).
+  const isCoupleOccasion =
+    occasion === "wedding" || occasion === "bridal_shower" || occasion === "anniversary";
+
+  const bookForValid = isCoupleOccasion
+    ? coupleFirstName.trim() !== "" && partnerFirstName.trim() !== ""
+    : cookbookTitle.trim() !== "";
+
   const canSubmit = !submitting
-    && coupleFirstName.trim() !== ""
-    && partnerFirstName.trim() !== ""
+    && bookForValid
     && (isAuthed || (yourName.trim() !== "" && email.trim() !== ""));
 
   return (
@@ -104,28 +115,44 @@ export default function AboutYouPage() {
       backHref="/onboarding/book-date"
       onContinue={handleSubmit}
       continueDisabled={!canSubmit}
+      error={error}
     >
       <div className="space-y-5 max-w-lg">
-        {/* Couple names */}
-        <div>
-          <label className="input-label">Who&apos;s the book for?</label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {isCoupleOccasion ? (
+          /* Couple names — weddings, bridal showers, anniversaries */
+          <div>
+            <label className="input-label">Who&apos;s the book for?</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input
+                type="text"
+                value={coupleFirstName}
+                onChange={(e) => setCoupleFirstName(e.target.value)}
+                className="input-field"
+                placeholder="First name"
+              />
+              <input
+                type="text"
+                value={partnerFirstName}
+                onChange={(e) => setPartnerFirstName(e.target.value)}
+                className="input-field"
+                placeholder="Partner's first name"
+              />
+            </div>
+          </div>
+        ) : (
+          /* Single title — birthdays, other */
+          <div>
+            <label htmlFor="cookbook-title" className="input-label">Name your cookbook</label>
             <input
+              id="cookbook-title"
               type="text"
-              value={coupleFirstName}
-              onChange={(e) => setCoupleFirstName(e.target.value)}
+              value={cookbookTitle}
+              onChange={(e) => setCookbookTitle(e.target.value)}
               className="input-field"
-              placeholder="First name"
-            />
-            <input
-              type="text"
-              value={partnerFirstName}
-              onChange={(e) => setPartnerFirstName(e.target.value)}
-              className="input-field"
-              placeholder="Partner's first name"
+              placeholder="Grandma's recipes"
             />
           </div>
-        </div>
+        )}
 
         {/* Only show name + email for new users */}
         {!isAuthed && (
@@ -162,8 +189,6 @@ export default function AboutYouPage() {
             </p>
           </>
         )}
-
-        {error && <p className="text-sm text-red-600">{error}</p>}
       </div>
     </OnboardingShell>
   );

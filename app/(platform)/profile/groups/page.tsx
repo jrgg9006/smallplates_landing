@@ -18,7 +18,6 @@ import { FirstRecipeExperience } from "@/components/onboarding/FirstRecipeExperi
 import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
 import { FirstRecipeModal, RecipeData } from "@/components/profile/FirstRecipeModal";
 import { addUserRecipe, UserRecipeData } from "@/lib/supabase/recipes";
-import { getWeddingDisplayText, type WeddingTimeline } from "@/lib/utils/dateFormatting";
 import { getCurrentProfile } from "@/lib/supabase/profiles";
 import { ShareCollectionModal } from "@/components/profile/guests/ShareCollectionModal";
 import { GuestNavigationSheet } from "@/components/profile/guests/GuestNavigationSheet";
@@ -49,6 +48,22 @@ function getDeadlineText(dateString: string): string {
   }
 }
 
+// Reason: the recipe deadline is occasion-neutral (works for weddings, birthdays,
+// gifts alike). Prefer book_close_date; if a legacy / in-progress group only has
+// gift_date or wedding_date, derive it as that date minus 12 days — the same rule
+// used by EditGroupModal and the free-tier route.
+function getRecipeDeadline(
+  group: { book_close_date?: string | null; gift_date?: string | null; wedding_date?: string | null } | null
+): string | null {
+  if (!group) return null;
+  if (group.book_close_date) return group.book_close_date;
+  const base = group.gift_date || group.wedding_date;
+  if (!base) return null;
+  const d = new Date(base + 'T00:00:00');
+  d.setDate(d.getDate() - 12);
+  return d.toISOString().split('T')[0];
+}
+
 export default function GroupsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -69,7 +84,6 @@ export default function GroupsPage() {
   const [activeView, setActiveView] = useState<'book' | 'send-invitations' | 'book-review'>('book');
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [collectionToken, setCollectionToken] = useState<string | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
   const [showRemindersModal, setShowRemindersModal] = useState(false);
   
   // Profile state
@@ -465,18 +479,6 @@ export default function GroupsPage() {
   // Derive dashboard image directly from selectedGroup to avoid sync issues
   const currentDashboardImage = selectedGroup?.image_group_dashboard || null;
 
-  // Check if mobile on mount and window resize
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640); // sm breakpoint in Tailwind
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
   // Fetch senderName (full_name) for invitation signatures.
   useEffect(() => {
     const loadProfile = async () => {
@@ -676,22 +678,15 @@ export default function GroupsPage() {
                   Edit Profile
                 </button>
                 <span className="mx-1.5 text-[hsl(var(--brand-border-button))]">·</span>
-                {selectedGroup?.book_close_date ? (
-                  <>Recipes due {getDeadlineText(selectedGroup.book_close_date)}</>
-                ) : selectedGroup?.gift_date_undecided ? (
-                  <a
-                    href="#"
-                    onClick={(e) => { e.preventDefault(); /* TODO: open date edit flow */ }}
+                {getRecipeDeadline(selectedGroup) ? (
+                  <>Recipes due {getDeadlineText(getRecipeDeadline(selectedGroup)!)}</>
+                ) : (
+                  <button
+                    onClick={handleEditProfile}
                     className="hover:underline"
                   >
-                    No deadline set
-                  </a>
-                ) : (
-                  getWeddingDisplayText(
-                    selectedGroup?.wedding_date || null,
-                    selectedGroup?.wedding_date_undecided || false,
-                    null
-                  )
+                    Set a deadline
+                  </button>
                 )} · {recipeCount} recipes{uniqueContributors > 0 && (<>{` from ${uniqueContributors} people `}<button
                       onClick={() => setShowGuestSheet(true)}
                       className="text-[hsl(var(--brand-honey))] hover:text-[hsl(var(--brand-honey-dark))] hover:underline transition-colors"
@@ -727,11 +722,15 @@ export default function GroupsPage() {
 
             {/* Action Bar — separate section below */}
             <div className="mt-10 pt-6 border-t border-[hsl(var(--brand-border))]">
-              <div className="flex flex-wrap items-center gap-3">
-                {/* PRIMARY - Invite dropdown (HONEY, ROUNDED) */}
-                <div className="relative">
+              {/* Reason: on mobile the primary CTA (Invite) goes full-width on top
+                  and the 3 secondary actions sit in a row below; on desktop (sm+)
+                  the secondary wrapper becomes `contents` so all four flow inline
+                  exactly as before. */}
+              <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
+                {/* PRIMARY - Invite dropdown (HONEY, ROUNDED) — full width on mobile */}
+                <div className="relative w-full sm:w-auto">
                   <button
-                    className="btn btn-sm btn-honey gap-2 px-6 sm:px-14"
+                    className="btn btn-honey gap-2 w-full px-6 py-3.5 text-base sm:w-auto sm:px-14 sm:py-3 sm:text-sm"
                     onClick={() => setShowInviteDropdown(!showInviteDropdown)}
                     disabled={!selectedGroup}
                   >
@@ -747,9 +746,11 @@ export default function GroupsPage() {
                   />
                 </div>
 
-                {/* SECONDARY - Add Your Own (OUTLINE, ROUNDED) */}
+                {/* SECONDARY actions — row below Invite on mobile, inline on desktop */}
+                <div className="flex items-center gap-3 sm:contents">
+                {/* Add Your Own (OUTLINE, ROUNDED) */}
                 <button
-                  className="btn btn-sm btn-outline"
+                  className="btn btn-outline flex-1 sm:flex-none min-w-0 px-3 py-3 text-sm sm:px-6"
                   onClick={() => groupsSectionRef.current?.openAddNewRecipeModal()}
                   disabled={!selectedGroup}
                 >
@@ -758,15 +759,16 @@ export default function GroupsPage() {
 
                 {/* Send Reminders */}
                 <button
-                  className="btn btn-sm btn-outline"
+                  className="btn btn-outline flex-1 sm:flex-none min-w-0 px-3 py-3 text-sm sm:px-6"
                   onClick={() => setShowRemindersModal(true)}
                   disabled={!selectedGroup}
                 >
-                  Send Reminders
+                  <span className="sm:hidden">Reminders</span>
+                  <span className="hidden sm:inline">Send Reminders</span>
                 </button>
 
                 {/* More Menu */}
-                <div className="relative">
+                <div className="relative flex-none">
                   <button
                     onClick={() => setShowMoreMenu(!showMoreMenu)}
                     className="btn btn-subtle px-3.5"
@@ -777,18 +779,17 @@ export default function GroupsPage() {
                     isOpen={showMoreMenu}
                     onClose={() => setShowMoreMenu(false)}
                     onEditProfile={handleEditProfile}
-                    showCaptainsOption={isMobile}
+                    showCaptainsOption={true}
                     onCaptainsClick={() => setShowCaptains(true)}
                     onViewGuestsClick={handleViewGuests}
-                    showAddGuestOption={isMobile}
+                    showAddGuestOption={true}
                     showSendInvitationsOption={true}
                     onSendInvitationsClick={handleSendInvitations}
                     onCloseBookClick={!selectedGroup?.book_closed_by_user ? handleOpenBookReview : undefined}
                   />
-                  {/* Captains dropdown for mobile */}
-                  <div className="sm:hidden">
-                    {showCaptains && <CaptainsDropdown isOpen={showCaptains} selectedGroup={selectedGroup} onClose={() => setShowCaptains(false)} onInviteCaptain={handleInviteCaptain} refreshTrigger={invitationsRefreshTrigger} />}
-                  </div>
+                  {/* Captains — bottom sheet on mobile, anchored dropdown on desktop */}
+                  {showCaptains && <CaptainsDropdown isOpen={showCaptains} selectedGroup={selectedGroup} onClose={() => setShowCaptains(false)} onInviteCaptain={handleInviteCaptain} refreshTrigger={invitationsRefreshTrigger} />}
+                </div>
                 </div>
               </div>
             </div>

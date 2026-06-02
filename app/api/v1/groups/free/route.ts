@@ -8,18 +8,30 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Free tier not enabled" }, { status: 404 });
   }
 
-  const { email, yourName, coupleFirstName, partnerFirstName, occasion, bookDate, bookDateUndecided } = await request.json();
+  const { email, yourName, coupleFirstName, partnerFirstName, cookbookTitle, occasion, bookDate, bookDateUndecided } = await request.json();
 
   if (!email || typeof email !== "string") {
     return NextResponse.json({ error: "Email required" }, { status: 400 });
   }
-  if (!coupleFirstName || !partnerFirstName) {
-    return NextResponse.json({ error: "Couple names required" }, { status: 400 });
+
+  // Reason: weddings, bridal showers and anniversaries are about a couple (two
+  // names → "A & B"). Birthdays / "Other" use a single cookbook title instead.
+  const isCoupleOccasion =
+    occasion === "wedding" || occasion === "bridal_shower" || occasion === "anniversary";
+
+  if (isCoupleOccasion) {
+    if (!coupleFirstName || !partnerFirstName) {
+      return NextResponse.json({ error: "Couple names required" }, { status: 400 });
+    }
+  } else if (!cookbookTitle || typeof cookbookTitle !== "string" || !cookbookTitle.trim()) {
+    return NextResponse.json({ error: "Cookbook title required" }, { status: 400 });
   }
 
   const supabaseAdmin = createSupabaseAdminClient();
   const normalizedEmail = email.trim().toLowerCase();
-  const bookName = `${coupleFirstName.trim()} & ${partnerFirstName.trim()}`;
+  const bookName = isCoupleOccasion
+    ? `${coupleFirstName.trim()} & ${partnerFirstName.trim()}`
+    : cookbookTitle.trim();
 
   try {
     // 1. Find or create the auth user.
@@ -54,12 +66,27 @@ export async function POST(request: NextRequest) {
     //    B) Existing user re-doing free tier: has a free_tier group → update it.
     //    C) Existing user with paid books wanting another: no free_tier → create new one.
     //    NEVER touch active/pending_setup groups.
+
+    // Reason: book_close_date = gift_date - 12 days (same rule as EditGroupModal),
+    // so the dashboard shows "Recipes due X" for free-tier groups too.
+    let bookCloseDate: string | null = null;
+    if (bookDate) {
+      const d = new Date(bookDate + "T00:00:00");
+      d.setDate(d.getDate() - 12);
+      bookCloseDate = d.toISOString().split("T")[0];
+    }
+
     const freeTierFields = {
       name: bookName,
       status: "free_tier" as const,
-      couple_first_name: coupleFirstName.trim(),
-      partner_first_name: partnerFirstName.trim(),
+      // Reason: couple occasions store both names (cover/emails build "A & B").
+      // Non-couple occasions clear the names and put the title in
+      // couple_display_name so the cover/PDF print the title verbatim.
+      couple_first_name: isCoupleOccasion ? coupleFirstName.trim() : null,
+      partner_first_name: isCoupleOccasion ? partnerFirstName.trim() : null,
+      couple_display_name: isCoupleOccasion ? null : bookName,
       ...(bookDate ? { gift_date: bookDate } : {}),
+      ...(bookCloseDate ? { book_close_date: bookCloseDate } : {}),
       gift_date_undecided: bookDateUndecided || false,
       ...(occasion ? { occasion } : {}),
     };

@@ -18,6 +18,9 @@ interface OnboardingShellProps {
   skipHref?: string;
   skipLabel?: string;
   backHref?: string;
+  // Reason: rendered inside the fixed bottom bar next to Continue so an error is
+  // always visible at the point of action — never scrolled off-screen on mobile.
+  error?: string;
 }
 
 export function OnboardingShell({
@@ -34,6 +37,7 @@ export function OnboardingShell({
   skipHref,
   skipLabel = "Skip for now",
   backHref,
+  error,
 }: OnboardingShellProps) {
   const hasRightPanel = !!imageUrl || !!rightContent;
 
@@ -85,8 +89,15 @@ export function OnboardingShell({
           <div className="mb-8 lg:mb-10">{children}</div>
 
           {/* Navigation — fixed bottom bar on mobile/tablet so Continue is
-              always visible; reverts to inline flow on desktop (lg+). */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-6 fixed inset-x-0 bottom-0 z-40 bg-white border-t border-gray-100 px-5 py-4 sm:px-8 lg:static lg:z-auto lg:bg-transparent lg:border-0 lg:px-0 lg:py-0">
+              always visible; reverts to inline flow on desktop (lg+). Errors
+              render inside this bar so they're always visible next to Continue. */}
+          <div className="fixed inset-x-0 bottom-0 z-40 bg-white border-t border-gray-100 px-5 py-4 sm:px-8 lg:static lg:z-auto lg:bg-transparent lg:border-0 lg:px-0 lg:py-0">
+            {error && (
+              <p role="alert" className="text-sm text-red-600 mb-3 lg:mb-4">
+                {error}
+              </p>
+            )}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-6">
             {onContinue && (
               <button
                 onClick={onContinue}
@@ -113,6 +124,7 @@ export function OnboardingShell({
                   {skipLabel}
                 </Link>
               )}
+            </div>
             </div>
           </div>
         </div>
