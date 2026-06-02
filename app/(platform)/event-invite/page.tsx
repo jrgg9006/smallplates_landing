@@ -40,6 +40,10 @@ function EventInviteContent() {
   const [previewMode, setPreviewMode] = useState<"mobile" | "desktop" | "whatsapp">("desktop");
   const [dateTimeModalOpen, setDateTimeModalOpen] = useState(false);
   const [locationModalOpen, setLocationModalOpen] = useState(false);
+  // Reason: snapshot venue/address on open so Cancel can revert (fields no longer save onBlur)
+  const [locationSnapshot, setLocationSnapshot] = useState({ venue: "", location: "" });
+  // Reason: snapshot date/time on open so Cancel can revert (saved atomically on Done)
+  const [dateTimeSnapshot, setDateTimeSnapshot] = useState({ date: "", time: "" });
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
@@ -165,6 +169,7 @@ function EventInviteContent() {
         body: JSON.stringify({
           event_date: eventDate,
           event_time: eventTime,
+          event_venue: eventVenue,
           event_location: eventLocation,
         }),
       });
@@ -182,6 +187,38 @@ function EventInviteContent() {
     if (!eventLocation.trim()) return;
     await saveEventDetails();
     setStep(3);
+  };
+
+  const openLocationModal = () => {
+    setLocationSnapshot({ venue: eventVenue, location: eventLocation });
+    setLocationModalOpen(true);
+  };
+
+  const cancelLocationModal = () => {
+    setEventVenue(locationSnapshot.venue);
+    setEventLocation(locationSnapshot.location);
+    setLocationModalOpen(false);
+  };
+
+  const openDateTimeModal = () => {
+    setDateTimeSnapshot({ date: eventDate, time: eventTime });
+    setDateTimeModalOpen(true);
+  };
+
+  const cancelDateTimeModal = () => {
+    setEventDate(dateTimeSnapshot.date);
+    setSelectedDate(dateTimeSnapshot.date ? parse(dateTimeSnapshot.date, "yyyy-MM-dd", new Date()) : undefined);
+    setEventTime(dateTimeSnapshot.time);
+    setDateTimeModalOpen(false);
+    setCalendarOpen(false);
+    setTimePickerOpen(false);
+  };
+
+  const saveDateTime = () => {
+    saveField({ event_date: eventDate, event_time: eventTime });
+    setDateTimeModalOpen(false);
+    setCalendarOpen(false);
+    setTimePickerOpen(false);
   };
 
   const handleCopyLink = async () => {
@@ -501,21 +538,32 @@ function EventInviteContent() {
     return shell(
       <OnboardingShell
         title="Where is it?"
-        subtitle="The address or place name for the event."
+        subtitle="The place name and address for the event."
         onContinue={handleStep2Continue}
         continueDisabled={!eventLocation.trim() || saving}
         continueLabel={saving ? "Saving..." : "Continue"}
         imageUrl=""
       >
         <div>
-          <label htmlFor="event-location" className="input-label">Location</label>
+          <label htmlFor="event-venue" className="input-label">Venue Name (optional)</label>
+          <input
+            id="event-venue"
+            type="text"
+            value={eventVenue}
+            onChange={(e) => setEventVenue(e.target.value)}
+            className="input-field"
+            placeholder="Lilian's House"
+          />
+        </div>
+        <div className="mt-4">
+          <label htmlFor="event-location" className="input-label">Address</label>
           <input
             id="event-location"
             type="text"
             value={eventLocation}
             onChange={(e) => setEventLocation(e.target.value)}
             className="input-field"
-            placeholder="Maria's house, 123 Main St, City"
+            placeholder="123 Main St, City"
           />
         </div>
         <button
@@ -570,18 +618,31 @@ function EventInviteContent() {
           <div className="w-full h-px bg-[hsl(var(--brand-charcoal))]/20 my-10" />
 
           <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--brand-warm-gray))] mb-2">When</p>
-          <EditableField
-            value={eventDate ? `${formatEventDate(eventDate)}${eventTime ? ` · ${formatEventTime(eventTime)}` : ""}` : ""}
-            onClick={() => setDateTimeModalOpen(true)}
-            className="text-[14px] text-[hsl(var(--brand-charcoal))] font-medium uppercase tracking-wide"
-            readOnly
-          />
+          <div
+            onClick={openDateTimeModal}
+            className="cursor-pointer rounded px-2 py-0.5 transition-colors hover:bg-[hsl(var(--brand-honey))]/10"
+          >
+            {eventDate ? (
+              <p className="text-[14px] text-[hsl(var(--brand-charcoal))] font-medium uppercase tracking-wide">
+                {formatEventDate(eventDate)}
+              </p>
+            ) : (
+              <p className="text-[14px] italic opacity-50 text-[hsl(var(--brand-charcoal))]">
+                Add date
+              </p>
+            )}
+            {eventTime && (
+              <p className="text-[14px] text-[hsl(var(--brand-charcoal))] font-medium uppercase tracking-wide">
+                {formatEventTime(eventTime)}
+              </p>
+            )}
+          </div>
 
           <div className="my-10" />
 
           <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--brand-warm-gray))] mb-2">Where</p>
           <div
-            onClick={() => setLocationModalOpen(true)}
+            onClick={openLocationModal}
             className="cursor-pointer rounded px-2 py-0.5 transition-colors hover:bg-[hsl(var(--brand-honey))]/10"
           >
             {eventVenue && (
@@ -1002,7 +1063,7 @@ function EventInviteContent() {
       {locationModalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm"
-          onClick={() => setLocationModalOpen(false)}
+          onClick={cancelLocationModal}
         >
           <div
             className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
@@ -1019,7 +1080,6 @@ function EventInviteContent() {
                   type="text"
                   value={eventVenue}
                   onChange={(e) => setEventVenue(e.target.value)}
-                  onBlur={() => saveField({ event_venue: eventVenue })}
                   className="input-field"
                   placeholder="Maria's House, Casa Lilyth..."
                 />
@@ -1030,20 +1090,25 @@ function EventInviteContent() {
                   type="text"
                   value={eventLocation}
                   onChange={(e) => setEventLocation(e.target.value)}
-                  onBlur={() => saveField({ event_location: eventLocation })}
                   className="input-field"
                   placeholder="455 E Waterside Dr, Chicago, IL"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end mt-6">
+            <div className="flex gap-3 mt-8">
+              <button
+                onClick={cancelLocationModal}
+                className="btn btn-md btn-outline flex-1"
+              >
+                Cancel
+              </button>
               <button
                 onClick={() => {
                   saveField({ event_venue: eventVenue, event_location: eventLocation });
                   setLocationModalOpen(false);
                 }}
-                className="btn btn-sm btn-honey"
+                className="btn btn-md btn-honey flex-1"
               >
                 Done
               </button>
@@ -1056,7 +1121,7 @@ function EventInviteContent() {
       {dateTimeModalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm"
-          onClick={() => { setDateTimeModalOpen(false); setCalendarOpen(false); setTimePickerOpen(false); }}
+          onClick={cancelDateTimeModal}
         >
           <div
             className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
@@ -1106,7 +1171,6 @@ function EventInviteContent() {
                           if (date) {
                             const formatted = format(date, "yyyy-MM-dd");
                             setEventDate(formatted);
-                            saveField({ event_date: formatted });
                             setCalendarOpen(false);
                           }
                         }}
@@ -1165,7 +1229,7 @@ function EventInviteContent() {
                           <button
                             key={slot.value}
                             type="button"
-                            onClick={() => { setEventTime(slot.value); saveField({ event_time: slot.value }); setTimePickerOpen(false); }}
+                            onClick={() => { setEventTime(slot.value); setTimePickerOpen(false); }}
                             className={`text-left px-3 py-2 rounded-lg text-[14px] transition-colors ${
                               eventTime === slot.value
                                 ? "bg-[hsl(var(--brand-honey))] text-white font-medium"
@@ -1182,10 +1246,16 @@ function EventInviteContent() {
               </div>
             </div>
 
-            <div className="flex justify-end mt-6">
+            <div className="flex gap-3 mt-8">
               <button
-                onClick={() => { setDateTimeModalOpen(false); setCalendarOpen(false); setTimePickerOpen(false); }}
-                className="btn btn-sm btn-honey"
+                onClick={cancelDateTimeModal}
+                className="btn btn-md btn-outline flex-1"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveDateTime}
+                className="btn btn-md btn-honey flex-1"
               >
                 Done
               </button>
