@@ -71,17 +71,18 @@ export default function TheSolution() {
               A cookbook made by everyone who showed up.
             </h2>
 
-            {/* Body copy */}
-            <div className="mt-8 space-y-6">
+            {/* Body copy — capped width so the spec line wraps before crowding the image */}
+            <div className="mt-8 max-w-lg">
+              {/* The anaphora is the emotional core — it carries the weight */}
               <p className="type-body">
                 Every guest owns a page.
                 <span className="block">Every page holds a recipe, a note, a name.</span>
-                <span className="block">Every name stays in their kitchen — forever.</span>
+                <span className="block">Every name stays in their kitchen.</span>
               </p>
 
-              <p className="type-body">
-                Hardcover. Professionally designed.
-                <span className="block">Made to get stained and opened on a Tuesday night.</span>
+              {/* Spec line, same weight as the anaphora — kept to one line so it reads tight */}
+              <p className="type-body mt-6">
+                Hardcover. Professionally designed. Made to get stained on a Tuesday night.
               </p>
             </div>
 
