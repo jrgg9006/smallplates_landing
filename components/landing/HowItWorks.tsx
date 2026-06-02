@@ -10,7 +10,7 @@ const steps = [
   {
     number: "01",
     title: "You invite.",
-    description: "Add your guests. Share one link.",
+    description: "However you reach your people: a link, an email, a QR code, or an event invite.",
     image: "/images/HowitWorks_images/collect_iphone_mockup.png",
     imageAlt: "Invitation shared via phone",
     imageClass: "object-cover",
@@ -19,7 +19,7 @@ const steps = [
   {
     number: "02",
     title: "They send recipes.",
-    description: "Their favorites. Their stories. We send the reminders.",
+    description: "They type it or snap a photo. Five minutes, no app. We turn every recipe into an image.",
     image: "/images/HowitWorks_images/sucess_iphone_mockup.png",
     imageAlt: "Guest submitting a recipe",
     imageClass: "object-cover",
@@ -28,7 +28,7 @@ const steps = [
   {
     number: "03",
     title: "We make the book.",
-    description: "Designed. Printed. Hardcover. Delivered.",
+    description: "Designed, printed hardcover, shipped to the door. You only pay when it's ready.",
     caption: "Start to delivery, around four weeks.",
     image: "/images/HowitWorks_images/book_in_hand_whitebackgound.png",
     imageAlt: "The finished hardcover cookbook",
