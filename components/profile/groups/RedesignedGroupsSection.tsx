@@ -477,6 +477,7 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
         onClose={() => setEditModalOpen(false)}
         group={selectedGroup}
         onGroupUpdated={handleGroupUpdated}
+        onImageChange={() => loadGroups(true)}
       />
 
       <DeleteGroupModal

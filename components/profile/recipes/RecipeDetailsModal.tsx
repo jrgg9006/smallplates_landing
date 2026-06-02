@@ -621,7 +621,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         value={recipeNotes}
         onChange={(e) => setRecipeNotes(e.target.value)}
         placeholder="Add a personal note..."
-        className="w-full text-base italic text-gray-500 font-serif leading-relaxed bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 placeholder:not-italic resize-none min-h-[60px] transition-all duration-200"
+        className="w-full text-base italic text-gray-500 font-serif leading-relaxed bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 placeholder:not-italic resize-vertical min-h-[140px] transition-all duration-200"
       />
 
       {/* Stacked Layout for Mobile */}
@@ -634,7 +634,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
             value={recipeIngredients}
             onChange={(e) => setRecipeIngredients(e.target.value)}
             placeholder="Pecorino, not parmesan. Good eggs. The real guanciale."
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[100px] bg-white font-serif transition-all duration-200 placeholder:text-gray-400"
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[140px] bg-white font-serif transition-all duration-200 placeholder:text-gray-400"
           />
         </div>
 
@@ -665,9 +665,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     return (
       <Sheet open={isOpen} onOpenChange={onClose}>
         <SheetContent side="bottom" className="!h-[85vh] !max-h-[85vh] rounded-t-[20px] flex flex-col overflow-hidden p-0">
-          <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-gray-300" />
-          
-          <div className="px-6 pt-4 pb-6 flex flex-col h-full overflow-hidden">
+          <div className="px-6 pt-6 pb-6 flex flex-col h-full overflow-hidden">
             <SheetHeader className="px-0 flex-shrink-0 mb-4">
               <SheetTitle className="type-modal-title">Recipe Details</SheetTitle>
             </SheetHeader>
@@ -676,24 +674,25 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
               {isEditMode ? mobileEditContent : mobileContent}
             </div>
             
-            {/* Save/Cancel Buttons - Fixed bottom for mobile when in edit mode */}
+            {/* Save/Cancel Buttons - Fixed bottom for mobile when in edit mode.
+                Side-by-side (each flex-1) to free up vertical space for typing — matches AddRecipeModal. */}
             {isEditMode && (
-              <div className="mt-4 pb-safe flex-shrink-0 border-t border-gray-200 pt-4 space-y-2">
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={loading}
-                  className="w-full rounded-full bg-brand-charcoal py-3.5 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-50"
-                >
-                  {loading ? 'Saving...' : 'Save'}
-                </button>
+              <div className="mt-4 pb-safe flex-shrink-0 flex gap-3 border-t border-gray-200 pt-4">
                 <button
                   type="button"
                   onClick={handleCancel}
                   disabled={loading}
-                  className="w-full rounded-full border border-[rgba(45,45,45,0.14)] py-3.5 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2 disabled:opacity-50"
+                  className="flex-1 rounded-full border border-[rgba(45,45,45,0.14)] py-3.5 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2 disabled:opacity-50"
                 >
                   Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={loading}
+                  className="flex-1 rounded-full bg-brand-charcoal py-3.5 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-50"
+                >
+                  {loading ? 'Saving...' : 'Save'}
                 </button>
               </div>
             )}

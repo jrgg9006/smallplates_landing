@@ -64,8 +64,9 @@ const SheetContent = React.forwardRef<
       className={cn(sheetVariants({ side }), className)}
       {...props}
     >
-      <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-secondary">
-        <X className="h-4 w-4" />
+      {/* Reason: 44px touch target — the bare 16px icon was almost impossible to tap on mobile */}
+      <SheetPrimitive.Close className="absolute right-2 top-2 z-10 flex h-11 w-11 items-center justify-center rounded-full opacity-70 transition-opacity hover:opacity-100 hover:bg-black/5 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-secondary">
+        <X className="h-5 w-5" />
         <span className="sr-only">Close</span>
       </SheetPrimitive.Close>
       {children}

@@ -898,11 +898,8 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
       <>
         <Sheet open={isOpen} onOpenChange={onClose}>
           <SheetContent side="bottom" className="!h-[92dvh] !max-h-[92dvh] rounded-t-[20px] flex flex-col overflow-hidden p-0 bg-white">
-            {/* Drag handle */}
-            <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-gray-300 flex-shrink-0" />
-
             {/* Header */}
-            <SheetHeader className="flex-shrink-0 px-6 pt-4 pb-3">
+            <SheetHeader className="flex-shrink-0 px-6 pt-6 pb-3">
               <SheetTitle className="type-modal-title">Add a new Recipe</SheetTitle>
             </SheetHeader>
 
