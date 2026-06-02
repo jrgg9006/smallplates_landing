@@ -115,7 +115,7 @@ export function PrintDetailsStep({
           <p className="type-eyebrow mb-3">Photo of the couple</p>
           {imageUrl ? (
             <div className="flex flex-col items-start">
-              <div className="relative aspect-square w-full max-w-[240px] overflow-hidden rounded-2xl border-4 border-white shadow-lg">
+              <div className="relative aspect-square w-full sm:max-w-[240px] overflow-hidden rounded-2xl border-4 border-white shadow-lg">
                 <Image
                   src={imageUrl}
                   alt="Couple photo"
@@ -145,7 +145,7 @@ export function PrintDetailsStep({
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="flex aspect-square w-full max-w-[240px] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-300 bg-white/50 transition-colors hover:border-brand-honey"
+              className="flex aspect-square w-full sm:max-w-[240px] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-300 bg-white/50 transition-colors hover:border-brand-honey"
             >
               {uploading ? (
                 <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-brand-honey" />
@@ -178,7 +178,7 @@ export function PrintDetailsStep({
         type="button"
         onClick={handleContinue}
         disabled={!name.trim() || saving}
-        className="btn btn-md btn-dark mt-10 ml-auto block w-full max-w-xs"
+        className="btn btn-md btn-dark mt-10 mx-auto sm:ml-auto sm:mr-0 block w-full max-w-xs"
       >
         {saving ? "Saving…" : "Looks good, continue"}
       </button>

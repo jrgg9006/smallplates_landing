@@ -651,18 +651,38 @@ export default function GroupsPage() {
             {/* Left column — Title, stats, action bar */}
             <div className="flex-1 min-w-0">
               <div className="flex items-start gap-5">
-                {selectedGroup?.couple_image_url && (
-                  <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-[hsl(var(--brand-border))]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={selectedGroup.couple_image_url}
-                      alt="Couple"
-                      className="w-full h-full object-cover"
-                      style={{
-                        objectPosition: `${selectedGroup.couple_image_position_x ?? 50}% ${selectedGroup.couple_image_position_y ?? 50}%`,
-                      }}
-                    />
-                  </div>
+                {selectedGroup && (
+                  <button
+                    type="button"
+                    onClick={handleEditProfile}
+                    aria-label="Edit couple photo"
+                    className="group relative w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-[hsl(var(--brand-border))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-honey))] focus-visible:ring-offset-2"
+                  >
+                    {selectedGroup.couple_image_url ? (
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={selectedGroup.couple_image_url}
+                          alt="Couple"
+                          className="w-full h-full object-cover"
+                          style={{
+                            objectPosition: `${selectedGroup.couple_image_position_x ?? 50}% ${selectedGroup.couple_image_position_y ?? 50}%`,
+                          }}
+                        />
+                        {/* Hover hint that the photo is editable */}
+                        <span className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/40">
+                          <span className="text-xs font-medium text-white opacity-0 transition-opacity group-hover:opacity-100">
+                            Change
+                          </span>
+                        </span>
+                      </>
+                    ) : (
+                      <span className="flex h-full w-full flex-col items-center justify-center gap-1 bg-gray-50 text-gray-400 transition-colors hover:bg-gray-100">
+                        <ImageIcon className="h-6 w-6" />
+                        <span className="text-[11px] font-medium">Add photo</span>
+                      </span>
+                    )}
+                  </button>
                 )}
                 <div className="min-w-0">
                   <h1 className="cookbook-title">

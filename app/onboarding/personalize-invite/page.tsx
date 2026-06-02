@@ -145,7 +145,7 @@ function PersonalizeInviteContent() {
         </div>
 
         <div>
-          <label className="input-label">Photo (optional)</label>
+          <label className="input-label">Photo of the couple (optional)</label>
           {photoPreview ? (
             <div className="relative">
               <img

@@ -8,6 +8,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { getGuestsByGroup } from "@/lib/supabase/guests";
 import { createSupabaseClient } from "@/lib/supabase/client";
 import type { Guest } from "@/lib/types/database";
@@ -34,6 +40,15 @@ function daysAgo(dateString: string | null): string {
 }
 
 export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersModalProps) {
+  // Responsive hook to detect mobile — drives Sheet (mobile) vs Dialog (desktop)
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640); // sm breakpoint
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const [view, setView] = useState<"compose" | "recipients">("compose");
   const [guests, setGuests] = useState<Guest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -211,19 +226,16 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
     "Send"
   );
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="type-modal-title">
-            {view === "recipients" ? "Choose who to remind" : "Send an email reminder"}
-          </DialogTitle>
-        </DialogHeader>
+  const titleText = view === "recipients" ? "Choose who to remind" : "Send an email reminder";
 
+  // Body + footer are identical across mobile (Sheet) and desktop (Dialog);
+  // only the surrounding container changes, so build them once here.
+  const bodyContent = (
+    <>
         {/* Body */}
         {view === "compose" ? (
-          <div className="flex-1 overflow-y-auto -mx-6 px-6 py-1 space-y-4">
-            <p className="text-gray-600 text-base leading-relaxed">
+          <div className="flex-1 min-h-0 overflow-y-auto -mx-6 px-6 py-1 flex flex-col gap-4">
+            <p className="text-gray-600 text-base leading-relaxed flex-shrink-0">
               You can send an email reminder to everyone you&apos;ve invited who hasn&apos;t sent a recipe yet.
             </p>
 
@@ -235,8 +247,7 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
                 // so drop the "Saved" confirmation until they save again.
                 if (justSaved) setJustSaved(false);
               }}
-              rows={6}
-              className="w-full p-4 bg-gray-50 border border-[hsl(var(--brand-border))] rounded-lg shadow-sm resize-none focus:outline-none focus:border-[hsl(var(--brand-honey))] focus:ring-1 focus:ring-[hsl(var(--brand-honey))] focus:bg-white text-base text-[hsl(var(--brand-charcoal))] leading-relaxed transition-colors"
+              className="w-full flex-1 min-h-[200px] p-4 bg-gray-50 border border-[hsl(var(--brand-border))] rounded-lg shadow-sm resize-none focus:outline-none focus:border-[hsl(var(--brand-honey))] focus:ring-1 focus:ring-[hsl(var(--brand-honey))] focus:bg-white text-base text-[hsl(var(--brand-charcoal))] leading-relaxed transition-colors"
               placeholder={DEFAULT_REMINDER_BODY}
             />
           </div>
@@ -320,7 +331,11 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
             )}
           </div>
         )}
+    </>
+  );
 
+  const footerContent = (
+    <>
         {/* Footer */}
         {view === "compose" ? (
           <div className="flex-shrink-0">
@@ -422,6 +437,43 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
             </button>
           </div>
         )}
+    </>
+  );
+
+  // Mobile: Sheet that slides up from the bottom — matches other dashboard modals
+  if (isMobile) {
+    return (
+      <Sheet open={isOpen} onOpenChange={onClose}>
+        <SheetContent
+          side="bottom"
+          className="!h-[90vh] !max-h-[90vh] rounded-t-[20px] flex flex-col overflow-hidden p-0"
+        >
+          <div className="px-6 pt-6 pb-6 flex flex-col h-full overflow-hidden">
+            <SheetHeader className="px-0 flex-shrink-0 mb-3 text-left">
+              <SheetTitle className="type-modal-title">{titleText}</SheetTitle>
+            </SheetHeader>
+            <div className="flex-1 flex flex-col overflow-hidden">{bodyContent}</div>
+            <div
+              className="flex-shrink-0 pt-4"
+              style={{ paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}
+            >
+              {footerContent}
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  // Desktop: centered Dialog popup
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="type-modal-title">{titleText}</DialogTitle>
+        </DialogHeader>
+        {bodyContent}
+        {footerContent}
       </DialogContent>
     </Dialog>
   );
