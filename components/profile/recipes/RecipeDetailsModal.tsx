@@ -634,7 +634,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
             value={recipeIngredients}
             onChange={(e) => setRecipeIngredients(e.target.value)}
             placeholder="Pecorino, not parmesan. Good eggs. The real guanciale."
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[140px] bg-white font-serif transition-all duration-200 placeholder:text-gray-400"
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[180px] bg-white font-serif transition-all duration-200 placeholder:text-gray-400"
           />
         </div>
 
@@ -646,7 +646,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
             value={recipeInstructions}
             onChange={(e) => setRecipeInstructions(e.target.value)}
             placeholder="Start with cold pan. Trust the process. Save the pasta water—you will need it."
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[140px] bg-white font-serif transition-all duration-200 placeholder:text-gray-400"
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[220px] bg-white font-serif transition-all duration-200 placeholder:text-gray-400"
           />
         </div>
 
