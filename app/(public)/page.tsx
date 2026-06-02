@@ -5,7 +5,7 @@ import Banner from '@/components/landing/Banner'
 import Hero from '@/components/landing/Hero'
 import TheProblem from '@/components/landing/TheProblem'
 import TheSolution from '@/components/landing/TheSolution'
-import YourTools from '@/components/landing/YourTools'
+// import YourTools from '@/components/landing/YourTools' // Removed from flow: redundant 2nd card grid after HowItWorks; component kept for later reuse
 import EmotionalClose from '@/components/landing/EmotionalClose'
 import BooksPrinted from '@/components/landing/BooksPrinted'
 import HowItWorks from '@/components/landing/HowItWorks'
@@ -27,7 +27,7 @@ export default function Home() {
         <TheProblem />
         <TheSolution />
         <HowItWorks />
-        <YourTools />
+        {/* <YourTools /> — removed from flow; see import note */}
         <RegistryInterlude />
         <BooksPrinted />
         <PersonalNotes />

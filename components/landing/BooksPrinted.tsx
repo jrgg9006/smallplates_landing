@@ -32,139 +32,106 @@ export default function BooksPrinted() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Book data for the gallery - expanded to 16 items for carousel
+  // Book data for the gallery — updated imagery, 12 items for carousel
   const books = [
-    // First set (original)
+    // First set
     {
       id: 1,
-      title: "Banana Bread",
-      author: "Shared by Irene and Pepe",
+      title: "Chili",
+      author: "Shared by Karla Acosta",
       color: "bg-emerald-700",
-      thumbnail: "/images/BooksPrinted/recipe_thumb_1.jpg",
-      fullSpread: "/images/BooksPrinted/recipe_modal_1.png",
+      thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_1.png",
+      fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_1.png",
     },
     {
       id: 2,
-      title: "Spaguetti a la bolonaise",
-      author: "Shared by Cris and Ric",
+      title: "Pandemic Tuna Tostadas",
+      author: "Shared by Jerry",
       color: "bg-stone-200",
-      thumbnail: "/images/BooksPrinted/recipe_thumb_2.jpg",
-      fullSpread: "/images/BooksPrinted/recipe_modal_2.png",
+      thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_2.png",
+      fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_2.png",
     },
     {
       id: 3,
-      title: "Foil-Baked Salmon",
-      author: "Shared by Cristina Rojas",
+      title: "Birthday Carrot Cake",
+      author: "Shared by Gabriela Ramírez",
       color: "bg-slate-500",
-      thumbnail: "/images/BooksPrinted/recipe_thumb_3.jpg",
-      fullSpread: "/images/BooksPrinted/recipe_modal_3.png",
+      thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_3.png",
+      fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_3.png",
     },
     {
       id: 4,
-      title: "Pasta Cacio y Pepe",
-      author: "Shared by Henry and Patita",
+      title: "Easy, Delicious Turkey",
+      author: "Shared by Ale Velasco",
       color: "bg-red-800",
-      thumbnail: "/images/BooksPrinted/recipe_thumb_4.jpg",
-      fullSpread: "/images/BooksPrinted/recipe_modal_4.png",
+      thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_4.png",
+      fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_4.png",
     },
     // Second set
     {
       id: 5,
-      title: "Honey Soy Garlic Salmon",
-      author: "Shared by Mo Abdelhamid",
+      title: "Matcha Pound Cake",
+      author: "Shared by Ber and Pat",
       color: "bg-amber-700",
-      thumbnail: "/images/BooksPrinted/recipe_thumb_5.jpg",
-      fullSpread: "/images/BooksPrinted/recipe_modal_5.png",
+      thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_5.png",
+      fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_5.png",
     },
     {
       id: 6,
-      title: "Sopa Azteca",
-      author: "Shared by Alma Orozco",
+      title: "Salmon with Olives",
+      author: "Shared by Verónica Zorrilla",
       color: "bg-indigo-600",
-      thumbnail: "/images/BooksPrinted/recipe_thumb_6.jpg",
-      fullSpread: "/images/BooksPrinted/recipe_modal_6.png",
+      thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_6.png",
+      fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_6.png",
     },
     {
       id: 7,
-      title: "Tapas to Get You Out of Trouble",
-      author: "Shared by Frida",
+      title: "Spice Bars",
+      author: "Shared by Stephanie Balcázar",
       color: "bg-rose-600",
-      thumbnail: "/images/BooksPrinted/recipe_thumb_7.jpg",
-      fullSpread: "/images/BooksPrinted/recipe_modal_7.png",
+      thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_7.png",
+      fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_7.png",
     },
     {
       id: 8,
-      title: "Double Chocolate Cookies with Sea Salt",
+      title: "The Best Salmon Tacos",
       author: "Shared by Barbs and Albert",
       color: "bg-teal-700",
-      thumbnail: "/images/BooksPrinted/recipe_thumb_8.jpg",
-      fullSpread: "/images/BooksPrinted/recipe_modal_8.png",
+      thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_8.png",
+      fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_8.png",
     },
     // Third set
     {
       id: 9,
-      title: "Blue Cheese Salad (Perfect for Summer)",
-      author: "Shared by Nikki and Jorge",
+      title: "Tres Leches Cake",
+      author: "Shared by Patricia García",
       color: "bg-purple-700",
-      thumbnail: "/images/BooksPrinted/recipe_thumb_9.jpg",
-      fullSpread: "/images/BooksPrinted/recipe_modal_9.png",
+      thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_9.png",
+      fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_9.png",
     },
     {
       id: 10,
-      title: "Cheesecake",
-      author: "Shared by Laura and Dany",
+      title: "Mom's Recipe",
+      author: "Shared by Rosy Carasín",
       color: "bg-orange-700",
-      thumbnail: "/images/BooksPrinted/recipe_thumb_10.jpg",
-      fullSpread: "/images/BooksPrinted/recipe_modal_10.png",
+      thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_10.png",
+      fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_10.png",
     },
     {
       id: 11,
-      title: "Waffle Sandwiches",
-      author: "Shared by Chochos",
+      title: "Banana Bread",
+      author: "Shared by Isabel Balcázar",
       color: "bg-green-700",
-      thumbnail: "/images/BooksPrinted/recipe_thumb_11.jpg",
-      fullSpread: "/images/BooksPrinted/recipe_modal_11.png",
+      thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_11.png",
+      fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_11.png",
     },
     {
       id: 12,
-      title: "Pork Ramen",
-      author: "Shared by Fany",
+      title: "Cilantro Fish",
+      author: "Shared by Pau Berber de Cabelo",
       color: "bg-blue-700",
-      thumbnail: "/images/BooksPrinted/recipe_thumb_12.jpg",
-          fullSpread: "/images/BooksPrinted/recipe_modal_12.png",
-    },
-    // Fourth set
-    {
-      id: 13,
-      title: "Rigatoni a la Carbonara",
-      author: "Shared by Juanpis",
-      color: "bg-yellow-700",
-      thumbnail: "/images/BooksPrinted/recipe_thumb_13.jpg",
-      fullSpread: "/images/BooksPrinted/recipe_modal_13.png",
-    },
-    {
-      id: 14,
-      title: "Lentil Soup",
-      author: "Shared by Cris and Ric",
-      color: "bg-lime-700",
-      thumbnail: "/images/BooksPrinted/recipe_thumb_14.jpg",
-      fullSpread: "/images/BooksPrinted/recipe_modal_14.png",
-    },
-    {
-      id: 15,
-      title: "Yellow Rice",
-      author: "Shared by Jorge Llaca",
-      color: "bg-pink-600",
-      thumbnail: "/images/BooksPrinted/recipe_thumb_15.jpg",
-      fullSpread: "/images/BooksPrinted/recipe_modal_15.png",
-    },
-    {
-      id: 16,
-      title: "Leftovers: Lobster Risotto Cakes with Fried Egg",
-      author: "Shared by Santi Creixell",
-      color: "bg-gray-700",
-      thumbnail: "/images/BooksPrinted/recipe_thumb_16.jpg",
-      fullSpread: "/images/BooksPrinted/recipe_modal_16.png",
+      thumbnail: "/images/regalo-usa-landing/books_printed_US/recipe_thumb_12.png",
+      fullSpread: "/images/regalo-usa-landing/books_printed_US/recipe_modal_12.png",
     },
   ];
 
@@ -258,7 +225,7 @@ export default function BooksPrinted() {
                     {/* Recipe thumbnail image */}
                     <Image
                       src={book.thumbnail}
-                      alt={`${book.title} recipe preview`}
+                      alt={book.title}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
@@ -274,10 +241,10 @@ export default function BooksPrinted() {
                   
                   {/* Book Info Below */}
                   <div className="text-center">
-                    <h3 className="font-medium text-gray-900 mb-1">
+                    <h3 className="type-subheading text-lg md:text-xl mb-1">
                       {book.title}
                     </h3>
-                    <p className="text-sm text-gray-600">
+                    <p className="type-caption text-brand-charcoal/60">
                       {book.author}
                     </p>
                     </div>
@@ -298,7 +265,7 @@ export default function BooksPrinted() {
                       {/* Recipe thumbnail image */}
                       <Image
                         src={book.thumbnail}
-                        alt={`${book.title} recipe preview`}
+                        alt={book.title}
                         fill
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
@@ -314,10 +281,10 @@ export default function BooksPrinted() {
                     
                     {/* Book Info Below */}
                     <div className="text-center">
-                      <h3 className="font-medium text-gray-900 mb-1">
+                      <h3 className="type-subheading text-lg md:text-xl mb-1">
                         {book.title}
                       </h3>
-                      <p className="text-sm text-gray-600">
+                      <p className="type-caption text-brand-charcoal/60">
                         {book.author}
                       </p>
                     </div>
