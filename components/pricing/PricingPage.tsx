@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { BASE_BOOK_PRICE, ADDITIONAL_BOOK_PRICE } from "@/lib/stripe/pricing";
 import { trackEvent } from "@/lib/analytics";
+import { isFreeTierEnabled } from "@/lib/feature-flags";
 
 /**
  * PRICING PAGE — Single product, editorial layout.
@@ -18,7 +19,7 @@ export default function PricingPage() {
 
   const handleStartBook = () => {
     trackEvent('start_book_click', { cta_location: 'pricing_card_primary' });
-    router.push("/onboarding");
+    router.push(isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding");
   };
 
   const handleContact = () => {
@@ -28,7 +29,7 @@ export default function PricingPage() {
   return (
     <main className="min-h-screen bg-[hsl(var(--brand-warm-white))]">
       {/* Header */}
-      <section className="pt-24 pb-6 md:pt-32 md:pb-10">
+      <section className="pt-32 pb-6 md:pt-44 md:pb-10">
         <div className="mx-auto max-w-3xl px-6 text-center">
           <motion.h1
             className="type-heading font-normal"

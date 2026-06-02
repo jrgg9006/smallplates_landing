@@ -4,75 +4,61 @@ import { motion } from "framer-motion";
 
 const VIEWPORT = { once: true, margin: "-80px" } as const;
 
-const observations = [
-  "The flowers lasted three days.",
-  "The registry became Venmo transfers.",
-  "The photos live on a phone nobody opens.",
-];
-
 export default function TheProblem() {
   return (
     <section
-      className="bg-brand-warm-white-warm py-20 md:py-28 lg:py-32"
-      aria-labelledby="problem-heading"
+      className="bg-brand-warm-white-warm py-24 md:py-32 lg:py-40"
+      aria-labelledby="belief-heading"
     >
-      <div className="mx-auto max-w-3xl px-6 md:px-8 text-center md:text-left">
+      <div className="mx-auto max-w-3xl px-6 md:px-8 text-center">
 
         <motion.div
-          className="w-8 h-0.5 bg-brand-honey mb-6 mx-auto md:mx-0"
+          className="w-10 h-0.5 bg-brand-honey mb-8 mx-auto"
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           viewport={VIEWPORT}
-          style={{ transformOrigin: "left" }}
+          style={{ transformOrigin: "center" }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         />
 
         <motion.h2
-          id="problem-heading"
-          className="type-heading"
+          id="belief-heading"
+          className="type-heading leading-[1.27]"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={VIEWPORT}
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
-          The wedding is the easy part.
+          {/* Reason: intentional 4-line stack for vertical rhythm and personality,
+              keeping the break stable across widths instead of letting it wrap */}
+          The people
+          <br />
+          who love you
+          <br />
+          should <span className="italic text-brand-honey">stay</span>
+          <br />
+          in your life.
         </motion.h2>
 
-        <div className="mt-8 md:mt-10 space-y-4">
-          {observations.map((line, i) => (
-            <motion.p
-              key={line}
-              className="type-statement"
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={VIEWPORT}
-              transition={{ duration: 0.6, delay: 0.15 + i * 0.15, ease: "easeOut" }}
-            >
-              {line}
-            </motion.p>
-          ))}
-        </div>
+        <motion.p
+          className="type-body mt-8 mx-auto max-w-xl"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={VIEWPORT}
+          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+        >
+          Not just on the big days. In the ordinary ones too.
+        </motion.p>
 
-        <div className="mt-12 md:mt-16">
-          <motion.p
-            className="type-accent-large"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={VIEWPORT}
-            transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
-          >
-            Eighty people came to yours.
-          </motion.p>
-          <motion.p
-            className="type-accent-large mt-2"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={VIEWPORT}
-            transition={{ duration: 0.7, delay: 0.6, ease: "easeOut" }}
-          >
-            How many of them left something that still exists?
-          </motion.p>
-        </div>
+        <motion.p
+          className="type-accent mt-8 text-xl md:text-2xl"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={VIEWPORT}
+          transition={{ duration: 0.7, delay: 0.45, ease: "easeOut" }}
+        >
+          That&rsquo;s what a kitchen is for.
+        </motion.p>
 
       </div>
     </section>

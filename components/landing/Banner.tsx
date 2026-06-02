@@ -9,21 +9,43 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { trackEvent } from "@/lib/analytics";
 import { isFreeTierEnabled } from "@/lib/feature-flags";
 
-export default function Banner() {
+// theme="dark" (default): white logo/text, meant to overlay the dark hero.
+// theme="light": charcoal logo/text, for light-background pages (e.g. pricing).
+export default function Banner({ theme = "dark" }: { theme?: "dark" | "light" } = {}) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user } = useAuth();
   const onboardingHref = isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding";
 
+  const isLight = theme === "light";
+  const stripBorder = isLight ? "border-brand-charcoal/15" : "border-white/20";
+  const stripText = isLight ? "text-brand-charcoal" : "text-white";
+  const logoClass = isLight ? "" : "brightness-0 invert";
+  const loginText = isLight
+    ? "font-medium text-brand-charcoal/70 hover:text-brand-charcoal transition-colors"
+    : "font-medium text-white/80 hover:text-white transition-colors";
+  const burgerClass = isLight
+    ? "lg:hidden p-2 rounded-md text-brand-charcoal hover:text-brand-charcoal/80 transition-colors"
+    : "lg:hidden p-2 rounded-md text-white hover:text-white/80 transition-colors";
+  const navPill = isLight
+    ? "inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold border border-brand-charcoal/30 text-brand-charcoal hover:bg-brand-charcoal/5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-charcoal focus-visible:ring-offset-2"
+    : "inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold border border-white/60 text-white hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2";
+  const mobileProfile = isLight
+    ? "block w-full text-center py-3 px-4 rounded-full border border-brand-charcoal/30 text-brand-charcoal font-semibold hover:bg-brand-charcoal/5 transition-colors"
+    : "block w-full text-center py-3 px-4 rounded-full border border-white/60 text-white font-semibold hover:bg-white/10 transition-colors";
+  const mobilePill = isLight
+    ? "block w-full text-center py-3 px-4 rounded-full border border-brand-charcoal/30 bg-white text-brand-charcoal font-semibold hover:bg-brand-charcoal/5 transition-colors"
+    : "block w-full text-center py-3 px-4 rounded-full border border-white/60 bg-black/70 text-white font-semibold hover:bg-black/90 transition-colors";
+
   return (
     <>
       <div className="absolute top-0 left-0 right-0 z-50">
         {/* Shipping announcement strip */}
-        <div className="py-2.5 text-center border-b border-white/20">
-          <span className="sm:hidden font-sans text-[11px] font-medium tracking-[0.15em] uppercase text-white">
+        <div className={`py-2.5 text-center border-b ${stripBorder}`}>
+          <span className={`sm:hidden font-sans text-[11px] font-medium tracking-[0.15em] uppercase ${stripText}`}>
             Ships to US, MX &amp; EU
           </span>
-          <span className="hidden sm:inline font-sans text-[11px] font-medium tracking-[0.15em] uppercase text-white">
+          <span className={`hidden sm:inline font-sans text-[11px] font-medium tracking-[0.15em] uppercase ${stripText}`}>
             Ships free to United States, Mexico, and European Union.
           </span>
         </div>
@@ -42,7 +64,7 @@ export default function Banner() {
                   width={200}
                   height={40}
                   priority
-                  className="brightness-0 invert"
+                  className={logoClass}
                 />
               </Link>
             </div>
@@ -52,7 +74,7 @@ export default function Banner() {
               {user ? (
                 <Link
                   href="/profile/groups"
-                  className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold border border-white/60 text-white hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+                  className={navPill}
                 >
                   Go to Profile
                 </Link>
@@ -60,16 +82,16 @@ export default function Banner() {
                 <>
                   <button
                     onClick={() => setIsLoginModalOpen(true)}
-                    className="font-medium text-white/80 hover:text-white transition-colors"
+                    className={loginText}
                   >
                     Login
                   </button>
                   <Link
                     href={onboardingHref}
                     onClick={() => trackEvent("start_book_click", { cta_location: "header_nav_desktop" })}
-                    className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold border border-white/60 text-white hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+                    className={navPill}
                   >
-                    Start the Book
+                    Start their book for free
                   </Link>
                 </>
               )}
@@ -78,7 +100,7 @@ export default function Banner() {
             {/* Mobile burger */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 rounded-md text-white hover:text-white/80 transition-colors"
+              className={burgerClass}
               aria-label="Toggle mobile menu"
             >
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -95,7 +117,7 @@ export default function Banner() {
               {user ? (
                 <Link
                   href="/profile/groups"
-                  className="block w-full text-center py-3 px-4 rounded-full border border-white/60 text-white font-semibold hover:bg-white/10 transition-colors"
+                  className={mobileProfile}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Go to Profile
@@ -107,19 +129,19 @@ export default function Banner() {
                       setIsLoginModalOpen(true);
                       setIsMobileMenuOpen(false);
                     }}
-                    className="block w-full text-center py-3 px-4 rounded-full border border-white/60 bg-black/70 text-white font-semibold hover:bg-black/90 transition-colors"
+                    className={mobilePill}
                   >
                     Login
                   </button>
                   <Link
                     href={onboardingHref}
-                    className="block w-full text-center py-3 px-4 rounded-full border border-white/60 bg-black/70 text-white font-semibold hover:bg-black/90 transition-colors"
+                    className={mobilePill}
                     onClick={() => {
                       trackEvent("start_book_click", { cta_location: "header_nav_mobile" });
                       setIsMobileMenuOpen(false);
                     }}
                   >
-                    Start the Book
+                    Start their book for free
                   </Link>
                 </>
               )}

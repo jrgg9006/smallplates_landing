@@ -44,7 +44,7 @@ export default function AboutUs() {
               </h1>
               <div className="w-24 h-px bg-brand-honey mx-auto mb-8"></div>
               <h2 className="type-accent text-2xl md:text-3xl text-brand-charcoal/70 font-light">
-                wedding gifts should matter.
+                the people you love shouldn&apos;t disappear from your life.
               </h2>
             </motion.div>
           </div>
@@ -60,19 +60,19 @@ export default function AboutUs() {
               className="space-y-8"
             >
               <p className="type-body text-brand-charcoal first-letter:text-6xl first-letter:font-serif first-letter:float-left first-letter:mr-3 first-letter:mt-1">
-                Wedding registries are broken. Another blender gathering dust. Another set of towels that gets returned. Another gift that says nothing about the giver or the life being celebrated.
+                But they do. Not in some dramatic way. They just drift. You stop texting back, the group chat goes quiet, a year turns into three. The people who were everything slowly become people you used to know.
               </p>
 
               <p className="type-body text-brand-charcoal">
-                We believe food is how families really connect. Not in fancy dining rooms, but in kitchens on Tuesday nights. A recipe isn&apos;t just instructions&mdash;it&apos;s presence. It&apos;s your grandmother&apos;s hands guiding yours. It&apos;s love you can taste.
+                The big days are never the problem. Everyone shows up for those: the wedding, the birthday, the anniversary. A whole room, all there for you. Then it ends, and everyone scatters back into their own lives.
               </p>
 
               <p className="type-body text-brand-charcoal">
-                That&apos;s why we created wedding cookbooks. Not keepsakes that sit on shelves, but kitchen books that get stained. Every page holds a name, a story, a piece of someone who was there. It&apos;s the kind of gift that matters&mdash;not because it&apos;s expensive, but because it&apos;s real and authentic.
+                That&apos;s why we created Small Plates &amp; Co. We think food is how people really stay close. It&apos;s how we say I love you without saying it. How we say I&apos;m sorry. How we say I miss you.
               </p>
 
               <p className="type-body text-brand-charcoal">
-                Because the best wedding gift isn&apos;t something from a store. It&apos;s something from the heart, bound between covers, meant to be opened every time they&apos;re hungry and wondering what to make for dinner.
+                So we make a cookbook written by the people who showed up: their recipes, their notes, their handwriting. You open it on a Tuesday, and they&apos;re back in the kitchen with you. The day ends. The people stay.
               </p>
             </motion.div>
 

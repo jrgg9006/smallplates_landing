@@ -75,7 +75,7 @@ export default function Hero() {
                 className="btn btn-lg btn-honey"
                 data-cta="hero-primary"
               >
-                Start your book for free
+                Start their book for free
               </button>
             </div>
 
