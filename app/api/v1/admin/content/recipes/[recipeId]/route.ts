@@ -66,10 +66,20 @@ export async function PATCH(
     const supabase = createSupabaseAdminClient();
 
     const body = await req.json();
-    const { recipe_name, ingredients, instructions, comments, note_clean, edit_reason, target } = body;
-    const editTarget: 'original' | 'print_ready' = target === 'print_ready' ? 'print_ready' : 'original';
+    const { recipe_name, ingredients, instructions, note_clean, edit_reason, target } = body;
 
-    if (editTarget === 'print_ready') {
+    // Editing the guest's original submission is PERMANENTLY disabled. Reason: the original
+    // is the source of truth and must NEVER be mutated — only the print-ready (clean) version
+    // may be edited. Anything that isn't an explicit print_ready edit is rejected here, so the
+    // original cannot be changed even by a direct/erroneous API call.
+    if (target !== 'print_ready') {
+      return NextResponse.json(
+        { error: 'Editing the original recipe is disabled. Only the print-ready (clean) version can be edited.' },
+        { status: 403 }
+      );
+    }
+
+    {
       // Editing the print-ready version
       const { data: current } = await supabase
         .from('recipe_print_ready')
@@ -120,66 +130,6 @@ export async function PATCH(
 
       return NextResponse.json({ success: true, target: 'print_ready' });
     }
-
-    // Editing the original (guest_recipes)
-    const { data: current, error: fetchError } = await supabase
-      .from('guest_recipes')
-      .select('recipe_name, ingredients, instructions, comments')
-      .eq('id', recipeId)
-      .single();
-
-    if (fetchError || !current) {
-      return NextResponse.json({ error: 'Recipe not found' }, { status: 404 });
-    }
-
-    // Audit trail
-    const { error: historyError } = await supabase
-      .from('recipe_edit_history')
-      .insert({
-        recipe_id: recipeId,
-        edited_by: admin.id,
-        edit_target: 'original',
-        recipe_name_before: current.recipe_name,
-        ingredients_before: current.ingredients,
-        instructions_before: current.instructions,
-        comments_before: current.comments,
-        recipe_name_after: recipe_name,
-        ingredients_after: ingredients,
-        instructions_after: instructions,
-        comments_after: comments || null,
-        edit_reason: edit_reason || null,
-      });
-
-    if (historyError) {
-      return NextResponse.json({ error: historyError.message }, { status: 500 });
-    }
-
-    // Update original
-    const { data: updated, error: updateError } = await supabase
-      .from('guest_recipes')
-      .update({
-        recipe_name,
-        ingredients,
-        instructions,
-        comments: comments || null,
-      })
-      .eq('id', recipeId)
-      .select()
-      .single();
-
-    if (updateError) {
-      return NextResponse.json({ error: updateError.message }, { status: 500 });
-    }
-
-    // Mark needs_review in production status (upsert)
-    await supabase
-      .from('recipe_production_status')
-      .upsert(
-        { recipe_id: recipeId, needs_review: true },
-        { onConflict: 'recipe_id' }
-      );
-
-    return NextResponse.json(updated);
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Unauthorized' },

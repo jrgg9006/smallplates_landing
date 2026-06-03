@@ -9,6 +9,7 @@ import { RecipeOperationsTable } from './components/RecipeOperationsTable';
 import { ArchiveRecipeModal } from '../books/components/ArchiveRecipeModal';
 import Image from 'next/image';
 import PromptEvaluationSection from './components/PromptEvaluationSection';
+import RecipeCompareModal from './components/RecipeCompareModal';
 
 interface RecipeWithProductionStatus {
   id: string;
@@ -49,6 +50,7 @@ interface RecipeWithProductionStatus {
     operations_notes: string | null;
     production_completed_at: string | null;
     needs_review: boolean;
+    needs_review_reason?: string | null;
     manually_cleared: boolean;
   } | null;
   calculated_status: 'no_action' | 'in_progress' | 'ready_to_print';
@@ -80,6 +82,7 @@ interface RecipeWithProductionStatus {
     recipe_name_clean: string;
     ingredients_clean: string;
     instructions_clean: string;
+    note_clean?: string | null;
     detected_language: string | null;
     cleaning_version: number | null;
   } | null;
@@ -132,16 +135,21 @@ export default function OperationsPage() {
   const [showOriginalName, setShowOriginalName] = useState(false);
   const [showOriginalIngredients, setShowOriginalIngredients] = useState(false);
   const [showOriginalInstructions, setShowOriginalInstructions] = useState(false);
-  
+  const [showOriginalNotes, setShowOriginalNotes] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [compareOpen, setCompareOpen] = useState(false);
+
   // Edit states for recipe_print_ready
   const [isEditingText, setIsEditingText] = useState(false);
   const [editedIngredients, setEditedIngredients] = useState('');
   const [editedInstructions, setEditedInstructions] = useState('');
+  const [editedNotes, setEditedNotes] = useState('');
   const [savingEdits, setSavingEdits] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [changesSummary, setChangesSummary] = useState<{
     ingredients?: { before: string; after: string };
     instructions?: { before: string; after: string };
+    notes?: { before: string; after: string };
   } | null>(null);
   
   // Filters
@@ -1127,8 +1135,10 @@ ${instructions}`;
     // Initialize edited values from print_ready or fallback to original
     const ingredients = selectedRecipe.recipe_print_ready?.ingredients_clean || selectedRecipe.ingredients || '';
     const instructions = selectedRecipe.recipe_print_ready?.instructions_clean || selectedRecipe.instructions || '';
+    const notes = selectedRecipe.recipe_print_ready?.note_clean || selectedRecipe.comments || '';
     setEditedIngredients(ingredients);
     setEditedInstructions(instructions);
+    setEditedNotes(notes);
     setIsEditingText(true);
   };
 
@@ -1138,8 +1148,10 @@ ${instructions}`;
     if (selectedRecipe) {
       const ingredients = selectedRecipe.recipe_print_ready?.ingredients_clean || selectedRecipe.ingredients || '';
       const instructions = selectedRecipe.recipe_print_ready?.instructions_clean || selectedRecipe.instructions || '';
+      const notes = selectedRecipe.recipe_print_ready?.note_clean || selectedRecipe.comments || '';
       setEditedIngredients(ingredients);
       setEditedInstructions(instructions);
+      setEditedNotes(notes);
     }
   };
 
@@ -1149,7 +1161,8 @@ ${instructions}`;
     // Get original values
     const originalIngredients = selectedRecipe.recipe_print_ready?.ingredients_clean || selectedRecipe.ingredients || '';
     const originalInstructions = selectedRecipe.recipe_print_ready?.instructions_clean || selectedRecipe.instructions || '';
-    
+    const originalNotes = selectedRecipe.recipe_print_ready?.note_clean || selectedRecipe.comments || '';
+
     // Calculate changes
     const changes: typeof changesSummary = {};
     if (editedIngredients !== originalIngredients) {
@@ -1158,9 +1171,12 @@ ${instructions}`;
     if (editedInstructions !== originalInstructions) {
       changes.instructions = { before: originalInstructions, after: editedInstructions };
     }
-    
+    if (editedNotes !== originalNotes) {
+      changes.notes = { before: originalNotes, after: editedNotes };
+    }
+
     // If no changes, just exit edit mode
-    if (!changes.ingredients && !changes.instructions) {
+    if (!changes.ingredients && !changes.instructions && !changes.notes) {
       setIsEditingText(false);
       return;
     }
@@ -1183,6 +1199,7 @@ ${instructions}`;
           printReady: {
             ingredients_clean: editedIngredients,
             instructions_clean: editedInstructions,
+            note_clean: editedNotes,
           },
           markNeedsReview: true,
         }),
@@ -1201,11 +1218,13 @@ ${instructions}`;
             recipe_name_clean: prev.recipe_name || '',
             ingredients_clean: '',
             instructions_clean: '',
+            note_clean: null,
             detected_language: null,
             cleaning_version: null,
           }),
           ingredients_clean: editedIngredients,
           instructions_clean: editedInstructions,
+          note_clean: editedNotes,
         },
         production_status: {
           ...(prev.production_status || {
@@ -1453,7 +1472,7 @@ ${instructions}`;
             />
             
             {/* Sheet */}
-            <div className="fixed right-0 top-0 h-full w-[80%] max-w-7xl bg-white shadow-2xl z-50 overflow-y-auto">
+            <div className="fixed right-0 top-0 h-full w-[88%] max-w-[1600px] bg-white shadow-2xl z-50 overflow-y-auto">
               {/* Sticky Header */}
               <div className="sticky top-0 bg-white border-b border-gray-200 z-10 shadow-sm">
                 <div className="px-10 py-4">
@@ -1497,6 +1516,19 @@ ${instructions}`;
                       </button>
                     </div>
                     <div className="flex items-center gap-3">
+                      {/* Compare Button — side-by-side clean vs original */}
+                      {!isEditingText && (
+                        <button
+                          onClick={() => setCompareOpen(true)}
+                          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                          title="Compare clean vs original side-by-side and edit the clean version"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                          </svg>
+                          <span>Compare</span>
+                        </button>
+                      )}
                       {/* Edit Text Button */}
                       {!isEditingText ? (
                         <button
@@ -1507,7 +1539,7 @@ ${instructions}`;
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
-                          <span>Edit text</span>
+                          <span>Edit</span>
                         </button>
                       ) : (
                         <div className="flex items-center gap-2">
@@ -1567,7 +1599,7 @@ ${instructions}`;
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
-                          <span>Remove from book</span>
+                          <span>Remove</span>
                         </button>
                       )}
                       <button
@@ -1587,7 +1619,7 @@ ${instructions}`;
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                             </svg>
-                            <span>Copy Entire Recipe</span>
+                            <span>Copy Recipe</span>
                           </>
                         )}
                       </button>
@@ -1640,6 +1672,16 @@ ${instructions}`;
                       />
                       <span>Needs Review</span>
                     </label>
+                    {/* Clear, intern-friendly reason when the recipe was flagged for review */}
+                    {selectedRecipe.production_status?.needs_review &&
+                     selectedRecipe.production_status?.needs_review_reason && (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold bg-red-100 text-red-700 rounded">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4a2 2 0 00-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z" />
+                        </svg>
+                        {selectedRecipe.production_status.needs_review_reason}
+                      </span>
+                    )}
                     {/* Reason: Show "Manually Cleared" only when recipe has no cleaned text,
                         allowing admin to bypass the cleaning requirement */}
                     {!selectedRecipe.recipe_print_ready?.ingredients_clean?.trim() &&
@@ -1658,7 +1700,69 @@ ${instructions}`;
                       </label>
                     )}
                   </div>
+                  <button
+                    onClick={() => setShowDetails(!showDetails)}
+                    className="ml-auto px-3 py-1 text-xs font-medium text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors flex items-center gap-1.5"
+                    title="Show database IDs"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                    </svg>
+                    {showDetails ? 'Hide details' : 'Show details'}
+                  </button>
                 </div>
+                {/* Database IDs panel — for quick SQL lookups */}
+                {showDetails && (
+                  <div className="px-10 py-4 bg-slate-50 border-t border-slate-200">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-2">
+                      {[
+                        { label: 'Recipe ID', value: selectedRecipe.id, key: 'id-recipe' },
+                        { label: 'Group ID', value: selectedRecipe.group?.id || selectedRecipe.archived_from_group?.id || null, key: 'id-group' },
+                        { label: 'Guest ID', value: selectedRecipe.guests?.id || null, key: 'id-guest' },
+                        { label: 'Uploader (user) ID', value: selectedRecipe.profiles?.id || null, key: 'id-user' },
+                        { label: 'Production status ID', value: selectedRecipe.production_status?.id || null, key: 'id-prodstatus' },
+                      ].map(({ label, value, key }) => (
+                        <div key={key} className="flex items-center gap-2 text-sm min-w-0">
+                          <span className="font-medium text-gray-600 w-40 flex-shrink-0">{label}:</span>
+                          <code className="flex-1 text-xs text-gray-800 bg-white border border-gray-200 rounded px-2 py-1 font-mono select-all truncate">
+                            {value || '— none —'}
+                          </code>
+                          {value && (
+                            <button
+                              onClick={() => copyToClipboard(value, key)}
+                              className="p-1.5 text-gray-400 hover:text-gray-700 rounded hover:bg-gray-200 transition-colors flex-shrink-0"
+                              title="Copy ID"
+                            >
+                              {copiedSection === key ? (
+                                <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                              ) : (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <p className="mt-3 text-xs text-gray-500">
+                      Edit history lives in <code className="font-mono bg-white border border-gray-200 rounded px-1">recipe_edit_history</code> — there&apos;s no single ID; query it by <code className="font-mono bg-white border border-gray-200 rounded px-1">recipe_id</code> (one row per edit).
+                    </p>
+                  </div>
+                )}
+                {/* Edit-mode banner: makes it unmistakable what gets edited */}
+                {isEditingText && (
+                  <div className="px-10 py-3 bg-amber-50 border-t border-amber-200 flex items-start gap-3">
+                    <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-sm text-amber-800 leading-relaxed">
+                      You&apos;re editing the <span className="font-semibold">print-ready version</span> of this recipe — the cleaned, final text that goes into the printed book. The guest&apos;s <span className="font-semibold">original submission stays untouched</span>.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Content */}
@@ -1726,51 +1830,49 @@ ${instructions}`;
                 {/* Notes Section */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-semibold text-gray-900">
-                      Notes
-                    </h3>
-                    <button
-                      onClick={() => copyToClipboard(selectedRecipe.comments || '', 'notes')}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
-                      title="Copy to clipboard"
-                    >
-                      {copiedSection === 'notes' ? (
-                        <>
-                          <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          <span className="text-green-600">Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                          <span>Copy</span>
-                        </>
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-xl font-semibold text-gray-900">
+                        Notes
+                      </h3>
+                      {!isEditingText && (
+                        selectedRecipe.recipe_print_ready?.note_clean ? (
+                          <>
+                            {showOriginalNotes ? (
+                              <span className="text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded font-medium">
+                                Showing ORIGINAL (uncleaned) text
+                              </span>
+                            ) : (
+                              <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded font-medium">
+                                ✓ Showing cleaned version
+                              </span>
+                            )}
+                            <button
+                              onClick={() => setShowOriginalNotes(!showOriginalNotes)}
+                              className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                              title={showOriginalNotes ? 'Show cleaned version' : 'Show original version'}
+                            >
+                              {showOriginalNotes ? 'Show Clean' : 'Show Original'}
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded font-medium">
+                            Not cleaned yet — original only
+                          </span>
+                        )
                       )}
-                    </button>
-                  </div>
-                  <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg shadow-sm">
-                    <div className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed select-text font-sans">
-                      {selectedRecipe.comments || 'No notes provided'}
                     </div>
-                  </div>
-                </div>
-
-                {/* Midjourney Prompt Section */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-semibold text-gray-900">
-                      Midjourney Prompt
-                    </h3>
-                    {selectedRecipe.midjourney_prompts && (
+                    {!isEditingText && (
                       <button
-                        onClick={() => copyToClipboard(selectedRecipe.midjourney_prompts!.generated_prompt, 'midjourney-prompt')}
+                        onClick={() => {
+                          const notesToCopy = showOriginalNotes || !selectedRecipe.recipe_print_ready?.note_clean
+                            ? (selectedRecipe.comments || '')
+                            : selectedRecipe.recipe_print_ready.note_clean;
+                          copyToClipboard(notesToCopy, 'notes');
+                        }}
                         className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
                         title="Copy to clipboard"
                       >
-                        {copiedSection === 'midjourney-prompt' ? (
+                        {copiedSection === 'notes' ? (
                           <>
                             <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -1789,13 +1891,18 @@ ${instructions}`;
                     )}
                   </div>
                   <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg shadow-sm">
-                    {selectedRecipe.midjourney_prompts ? (
-                      <div className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed select-text font-sans">
-                        {selectedRecipe.midjourney_prompts.generated_prompt}
-                      </div>
+                    {isEditingText ? (
+                      <textarea
+                        value={editedNotes}
+                        onChange={(e) => setEditedNotes(e.target.value)}
+                        className="w-full min-h-[120px] px-3 py-2 text-sm text-gray-800 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent font-sans resize-y"
+                        placeholder="Enter notes..."
+                      />
                     ) : (
-                      <div className="text-sm text-gray-500 italic">
-                        No Midjourney prompt generated yet for this recipe.
+                      <div className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed select-text font-sans">
+                        {showOriginalNotes || !selectedRecipe.recipe_print_ready?.note_clean
+                          ? (selectedRecipe.comments || 'No notes provided')
+                          : selectedRecipe.recipe_print_ready.note_clean}
                       </div>
                     )}
                   </div>
@@ -1968,16 +2075,6 @@ ${instructions}`;
                   </div>
                 </div>
 
-                {/* Prompt Evaluation Section */}
-                <PromptEvaluationSection
-                  recipeId={selectedRecipe.id}
-                  promptText={selectedRecipe.midjourney_prompts?.generated_prompt || null}
-                  midjourneyImageUrl={selectedRecipe.generated_image_url || null}
-                  dishCategory={selectedRecipe.midjourney_prompts?.agent_metadata?.food_type || null}
-                  agentMetadata={selectedRecipe.midjourney_prompts?.agent_metadata || null}
-                  onEvaluationSaved={() => handleStatusUpdate()}
-                />
-
                 {/* Ingredients Section */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -1985,19 +2082,31 @@ ${instructions}`;
                       <h3 className="text-xl font-semibold text-gray-900">
                         Ingredients
                       </h3>
-                      {!isEditingText && selectedRecipe.recipe_print_ready?.ingredients_clean && (
-                        <>
-                          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded font-medium">
-                            Cleaned
+                      {!isEditingText && (
+                        selectedRecipe.recipe_print_ready?.ingredients_clean ? (
+                          <>
+                            {showOriginalIngredients ? (
+                              <span className="text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded font-medium">
+                                Showing ORIGINAL (uncleaned) text
+                              </span>
+                            ) : (
+                              <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded font-medium">
+                                ✓ Showing cleaned version
+                              </span>
+                            )}
+                            <button
+                              onClick={() => setShowOriginalIngredients(!showOriginalIngredients)}
+                              className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                              title={showOriginalIngredients ? 'Show cleaned version' : 'Show original version'}
+                            >
+                              {showOriginalIngredients ? 'Show Clean' : 'Show Original'}
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded font-medium">
+                            Not cleaned yet — original only
                           </span>
-                          <button
-                            onClick={() => setShowOriginalIngredients(!showOriginalIngredients)}
-                            className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
-                            title={showOriginalIngredients ? 'Show cleaned version' : 'Show original version'}
-                          >
-                            {showOriginalIngredients ? 'Show Clean' : 'Show Original'}
-                          </button>
-                        </>
+                        )
                       )}
                     </div>
                     {!isEditingText && (
@@ -2054,19 +2163,31 @@ ${instructions}`;
                       <h3 className="text-xl font-semibold text-gray-900">
                         Steps
                       </h3>
-                      {!isEditingText && selectedRecipe.recipe_print_ready?.instructions_clean && (
-                        <>
-                          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded font-medium">
-                            Cleaned
+                      {!isEditingText && (
+                        selectedRecipe.recipe_print_ready?.instructions_clean ? (
+                          <>
+                            {showOriginalInstructions ? (
+                              <span className="text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded font-medium">
+                                Showing ORIGINAL (uncleaned) text
+                              </span>
+                            ) : (
+                              <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded font-medium">
+                                ✓ Showing cleaned version
+                              </span>
+                            )}
+                            <button
+                              onClick={() => setShowOriginalInstructions(!showOriginalInstructions)}
+                              className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                              title={showOriginalInstructions ? 'Show cleaned version' : 'Show original version'}
+                            >
+                              {showOriginalInstructions ? 'Show Clean' : 'Show Original'}
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded font-medium">
+                            Not cleaned yet — original only
                           </span>
-                          <button
-                            onClick={() => setShowOriginalInstructions(!showOriginalInstructions)}
-                            className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
-                            title={showOriginalInstructions ? 'Show cleaned version' : 'Show original version'}
-                          >
-                            {showOriginalInstructions ? 'Show Clean' : 'Show Original'}
-                          </button>
-                        </>
+                        )
                       )}
                     </div>
                     {!isEditingText && (
@@ -2115,6 +2236,59 @@ ${instructions}`;
                     )}
                   </div>
                 </div>
+
+                {/* Midjourney Prompt Section */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-xl font-semibold text-gray-900">
+                      Midjourney Prompt
+                    </h3>
+                    {selectedRecipe.midjourney_prompts && (
+                      <button
+                        onClick={() => copyToClipboard(selectedRecipe.midjourney_prompts!.generated_prompt, 'midjourney-prompt')}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                        title="Copy to clipboard"
+                      >
+                        {copiedSection === 'midjourney-prompt' ? (
+                          <>
+                            <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span className="text-green-600">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            <span>Copy</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg shadow-sm">
+                    {selectedRecipe.midjourney_prompts ? (
+                      <div className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed select-text font-sans">
+                        {selectedRecipe.midjourney_prompts.generated_prompt}
+                      </div>
+                    ) : (
+                      <div className="text-sm text-gray-500 italic">
+                        No Midjourney prompt generated yet for this recipe.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Prompt Evaluation Section */}
+                <PromptEvaluationSection
+                  recipeId={selectedRecipe.id}
+                  promptText={selectedRecipe.midjourney_prompts?.generated_prompt || null}
+                  midjourneyImageUrl={selectedRecipe.generated_image_url || null}
+                  dishCategory={selectedRecipe.midjourney_prompts?.agent_metadata?.food_type || null}
+                  agentMetadata={selectedRecipe.midjourney_prompts?.agent_metadata || null}
+                  onEvaluationSaved={() => handleStatusUpdate()}
+                />
               </div>
             </div>
           </>
@@ -2129,6 +2303,48 @@ ${instructions}`;
           onConfirm={handleArchiveConfirm}
           loading={archiveLoading}
         />
+
+        {/* Compare & Edit Modal — side-by-side clean vs original */}
+        {compareOpen && selectedRecipe && (
+          <RecipeCompareModal
+            key={selectedRecipe.id}
+            recipe={selectedRecipe}
+            onClose={() => setCompareOpen(false)}
+            onSaved={(cleaned) => {
+              // Reason: mirror handleConfirmSave so the sheet reflects the new clean version + needs_review
+              setSelectedRecipe(prev => prev ? {
+                ...prev,
+                recipe_print_ready: {
+                  ...(prev.recipe_print_ready || {
+                    recipe_name_clean: prev.recipe_name || '',
+                    ingredients_clean: '',
+                    instructions_clean: '',
+                    note_clean: null,
+                    detected_language: null,
+                    cleaning_version: null,
+                  }),
+                  ingredients_clean: cleaned.ingredients_clean,
+                  instructions_clean: cleaned.instructions_clean,
+                  note_clean: cleaned.note_clean,
+                },
+                production_status: {
+                  ...(prev.production_status || {
+                    id: '',
+                    text_finalized_in_indesign: false,
+                    image_generated: false,
+                    image_placed_in_indesign: false,
+                    operations_notes: null,
+                    production_completed_at: null,
+                    needs_review: false,
+                    manually_cleared: false,
+                  }),
+                  needs_review: true,
+                },
+              } : prev);
+              handleStatusUpdate();
+            }}
+          />
+        )}
 
         {/* Confirmation Modal */}
         {showConfirmModal && changesSummary && (
@@ -2181,6 +2397,26 @@ ${instructions}`;
                           <div className="text-secondary-sm font-medium text-gray-500 mb-1">After:</div>
                           <div className="bg-green-50 border border-green-200 p-4 rounded-lg text-sm text-gray-800 whitespace-pre-wrap font-sans">
                             {changesSummary.instructions.after || '(empty)'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {changesSummary.notes && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Notes</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="text-secondary-sm font-medium text-gray-500 mb-1">Before:</div>
+                          <div className="bg-gray-100 border border-gray-200 p-4 rounded-lg text-sm text-gray-800 whitespace-pre-wrap font-sans">
+                            {changesSummary.notes.before || '(empty)'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-secondary-sm font-medium text-gray-500 mb-1">After:</div>
+                          <div className="bg-green-50 border border-green-200 p-4 rounded-lg text-sm text-gray-800 whitespace-pre-wrap font-sans">
+                            {changesSummary.notes.after || '(empty)'}
                           </div>
                         </div>
                       </div>

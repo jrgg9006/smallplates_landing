@@ -441,7 +441,7 @@ export default function BookReviewOverlay({
                   />
                 ) : displayNote ? (
                   <p className="text-sm italic text-gray-500 font-serif mb-6">
-                    &ldquo;{displayNote}&rdquo;
+                    {displayNote}
                   </p>
                 ) : null}
                 <div className="border-t border-gray-200 my-6" />
@@ -504,7 +504,7 @@ export default function BookReviewOverlay({
                   </h1>
                   {originalNote && (
                     <p className="text-sm italic text-gray-500 font-serif mb-6">
-                      &ldquo;{originalNote}&rdquo;
+                      {originalNote}
                     </p>
                   )}
                   <div className="border-t border-gray-200 my-6" />

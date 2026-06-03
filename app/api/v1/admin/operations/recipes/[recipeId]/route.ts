@@ -17,6 +17,7 @@ interface PatchRequestBody extends RecipeProductionStatusUpdate {
   printReady?: {
     ingredients_clean?: string;
     instructions_clean?: string;
+    note_clean?: string;
   };
   markNeedsReview?: boolean;
 }
@@ -283,6 +284,9 @@ export async function PATCH(
     }
     if (body.needs_review !== undefined) {
       productionStatusUpdates.needs_review = body.needs_review;
+      // Reason: an explicit admin toggle supersedes the auto "Guest edited the original"
+      // reason — clear it so the badge doesn't linger misleadingly after a human acts on it.
+      productionStatusUpdates.needs_review_reason = null;
     }
     if (body.manually_cleared !== undefined) {
       productionStatusUpdates.manually_cleared = body.manually_cleared;
@@ -309,6 +313,7 @@ export async function PATCH(
         recipe_id: string;
         ingredients_clean?: string;
         instructions_clean?: string;
+        note_clean?: string | null;
         recipe_name_clean?: string;
         detected_language?: string | null;
         cleaning_version?: number | null;
@@ -324,6 +329,17 @@ export async function PATCH(
       if (body.printReady.instructions_clean !== undefined) {
         updateData.instructions_clean = body.printReady.instructions_clean;
       }
+      if (body.printReady.note_clean !== undefined) {
+        updateData.note_clean = body.printReady.note_clean;
+      }
+
+      // Snapshot the "before" state for the audit trail. Reason: prefer the
+      // existing clean version; if none exists yet, fall back to the guest's
+      // original — that's what the editor was shown as the starting point.
+      let beforeName = existingPrintReady?.recipe_name_clean || '';
+      let beforeIngredients = existingPrintReady?.ingredients_clean ?? '';
+      let beforeInstructions = existingPrintReady?.instructions_clean ?? '';
+      let beforeNotes: string | null = existingPrintReady?.note_clean ?? null;
 
       // Preserve existing fields if they exist
       if (existingPrintReady) {
@@ -331,16 +347,21 @@ export async function PATCH(
         updateData.detected_language = existingPrintReady.detected_language;
         updateData.cleaning_version = existingPrintReady.cleaning_version;
       } else {
-        // If no existing record, get recipe_name from guest_recipes
+        // If no existing record, seed from the guest's original recipe
         const { data: recipe } = await supabase
           .from('guest_recipes')
-          .select('recipe_name')
+          .select('recipe_name, ingredients, instructions, comments')
           .eq('id', recipeId)
           .single();
-        
+
         updateData.recipe_name_clean = recipe?.recipe_name || '';
         updateData.detected_language = null;
         updateData.cleaning_version = null;
+
+        beforeName = recipe?.recipe_name || '';
+        beforeIngredients = recipe?.ingredients || '';
+        beforeInstructions = recipe?.instructions || '';
+        beforeNotes = recipe?.comments || null;
       }
 
       const { data: printReadyResult, error: printReadyError } = await supabase
@@ -353,6 +374,47 @@ export async function PATCH(
         return NextResponse.json({ error: printReadyError.message }, { status: 500 });
       }
       printReadyData = printReadyResult;
+
+      // Audit trail: record the edit in recipe_edit_history (edit_target = 'print_ready').
+      // Reason: mirrors the Content editor so Operations edits are traceable too.
+      const afterIngredients = body.printReady.ingredients_clean !== undefined
+        ? body.printReady.ingredients_clean
+        : beforeIngredients;
+      const afterInstructions = body.printReady.instructions_clean !== undefined
+        ? body.printReady.instructions_clean
+        : beforeInstructions;
+      const afterNotes: string | null = body.printReady.note_clean !== undefined
+        ? body.printReady.note_clean
+        : beforeNotes;
+
+      const hasChanges =
+        afterIngredients !== beforeIngredients ||
+        afterInstructions !== beforeInstructions ||
+        afterNotes !== beforeNotes;
+
+      if (hasChanges) {
+        const { error: historyError } = await supabase
+          .from('recipe_edit_history')
+          .insert({
+            recipe_id: recipeId,
+            edited_by: admin.id,
+            edit_target: 'print_ready',
+            recipe_name_before: beforeName,
+            ingredients_before: beforeIngredients,
+            instructions_before: beforeInstructions,
+            comments_before: beforeNotes,
+            recipe_name_after: updateData.recipe_name_clean,
+            ingredients_after: afterIngredients,
+            instructions_after: afterInstructions,
+            comments_after: afterNotes,
+            edit_reason: 'Edited in Operations',
+          });
+
+        if (historyError) {
+          console.error('Error writing recipe_edit_history:', historyError);
+          // Reason: audit logging is best-effort — don't fail the edit if it errors
+        }
+      }
 
       // If markNeedsReview is true, update production_status to mark as needing review
       if (body.markNeedsReview) {
@@ -374,6 +436,9 @@ export async function PATCH(
           .upsert({
             recipe_id: recipeId,
             needs_review: true,
+            // Reason: this review is now due to an Operations edit (tracked in operations_notes),
+            // so clear any stale "Guest edited the original" auto-reason.
+            needs_review_reason: null,
             operations_notes: newNote,
             updated_at: new Date().toISOString(),
           }, { onConflict: 'recipe_id' });

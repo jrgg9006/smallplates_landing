@@ -21,10 +21,12 @@ function VisualTextarea({
   value,
   onChange,
   className = '',
+  readOnly = false,
 }: {
   value: string;
   onChange: (val: string) => void;
   className?: string;
+  readOnly?: boolean;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -35,7 +37,7 @@ function VisualTextarea({
     }
   }, [isEditing]);
 
-  if (isEditing) {
+  if (isEditing && !readOnly) {
     return (
       <textarea
         ref={textareaRef}
@@ -51,11 +53,11 @@ function VisualTextarea({
 
   return (
     <div
-      onClick={() => setIsEditing(true)}
-      className={`${className} cursor-text overflow-y-auto`}
+      onClick={() => { if (!readOnly) setIsEditing(true); }}
+      className={`${className} ${readOnly ? 'cursor-default bg-gray-50 text-gray-600' : 'cursor-text'} overflow-y-auto`}
     >
       {!value ? (
-        <span className="text-gray-400 italic">Click to edit...</span>
+        <span className="text-gray-400 italic">{readOnly ? '(empty)' : 'Click to edit...'}</span>
       ) : (
         lines.map((line, i) =>
           line.trim() === '' ? (
@@ -178,10 +180,12 @@ export default function RecipeEditor({ recipeId, recipeIds = [], onClose, onSave
   };
 
   const handleSave = async () => {
-    const isOriginal = activeTarget === 'original';
-    const name = isOriginal ? recipeName : prRecipeName;
-    const ing = isOriginal ? ingredients : prIngredients;
-    const inst = isOriginal ? instructions : prInstructions;
+    // Reason: editing the original is permanently disabled — only the print-ready (clean)
+    // version can be saved. Guard here in addition to the locked UI and the backend.
+    if (activeTarget !== 'print_ready') return;
+    const name = prRecipeName;
+    const ing = prIngredients;
+    const inst = prInstructions;
 
     if (!recipeId || !name.trim() || !ing.trim() || !inst.trim()) {
       setError('Recipe name, ingredients, and instructions are required');
@@ -198,14 +202,9 @@ export default function RecipeEditor({ recipeId, recipeIds = [], onClose, onSave
         ingredients: ing,
         instructions: inst,
         edit_reason: editReason || null,
-        target: activeTarget,
+        target: 'print_ready',
+        note_clean: prNoteClean || null,
       };
-
-      if (isOriginal) {
-        payload.comments = comments || null;
-      } else {
-        payload.note_clean = prNoteClean || null;
-      }
 
       const res = await fetch(`/api/v1/admin/content/recipes/${recipeId}`, {
         method: 'PATCH',
@@ -286,6 +285,14 @@ export default function RecipeEditor({ recipeId, recipeIds = [], onClose, onSave
             {/* LEFT: Main form area */}
             <div className="flex-1 flex flex-col gap-3 min-h-0 min-w-0">
               {/* Alerts */}
+              {isOriginal && (
+                <div className="flex items-center gap-2 p-2.5 bg-gray-100 border border-gray-300 rounded-lg text-sm text-gray-600 flex-shrink-0">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>
+                    The <span className="font-semibold">original</span> is read-only and can never be edited. To make changes, switch to <span className="font-semibold">Print Ready</span> — only the clean version gets edited.
+                  </span>
+                </div>
+              )}
               {!isOriginal && !hasPrintReady && (
                 <div className="flex items-center gap-2 p-2.5 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700 flex-shrink-0">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -311,8 +318,9 @@ export default function RecipeEditor({ recipeId, recipeIds = [], onClose, onSave
                     <Label className="text-sm font-medium">Recipe Name</Label>
                     <Input
                       value={isOriginal ? recipeName : prRecipeName}
-                      onChange={(e) => isOriginal ? setRecipeName(e.target.value) : setPrRecipeName(e.target.value)}
-                      className="mt-1"
+                      onChange={(e) => { if (!isOriginal) setPrRecipeName(e.target.value); }}
+                      readOnly={isOriginal}
+                      className={`mt-1 ${isOriginal ? 'bg-gray-50 text-gray-600 cursor-default' : ''}`}
                     />
                   </div>
 
@@ -321,7 +329,8 @@ export default function RecipeEditor({ recipeId, recipeIds = [], onClose, onSave
                     <Label className="text-sm font-medium">{isOriginal ? 'Comments' : 'Note (clean)'}</Label>
                     <VisualTextarea
                       value={isOriginal ? comments : prNoteClean}
-                      onChange={(val) => isOriginal ? setComments(val) : setPrNoteClean(val)}
+                      onChange={(val) => { if (!isOriginal) setPrNoteClean(val); }}
+                      readOnly={isOriginal}
                       className="mt-1 w-full min-h-[80px] max-h-[150px] rounded-md border border-gray-300 px-3 py-2 text-sm"
                     />
                   </div>
@@ -332,7 +341,8 @@ export default function RecipeEditor({ recipeId, recipeIds = [], onClose, onSave
                       <Label className="text-sm font-medium flex-shrink-0">Ingredients</Label>
                       <VisualTextarea
                         value={isOriginal ? ingredients : prIngredients}
-                        onChange={(val) => isOriginal ? setIngredients(val) : setPrIngredients(val)}
+                        onChange={(val) => { if (!isOriginal) setPrIngredients(val); }}
+                        readOnly={isOriginal}
                         className="mt-1 w-full flex-1 min-h-0 rounded-md border border-gray-300 px-3 py-2 text-sm"
                       />
                     </div>
@@ -340,7 +350,8 @@ export default function RecipeEditor({ recipeId, recipeIds = [], onClose, onSave
                       <Label className="text-sm font-medium flex-shrink-0">Instructions</Label>
                       <VisualTextarea
                         value={isOriginal ? instructions : prInstructions}
-                        onChange={(val) => isOriginal ? setInstructions(val) : setPrInstructions(val)}
+                        onChange={(val) => { if (!isOriginal) setPrInstructions(val); }}
+                        readOnly={isOriginal}
                         className="mt-1 w-full flex-1 min-h-0 rounded-md border border-gray-300 px-3 py-2 text-sm"
                       />
                     </div>
@@ -364,7 +375,7 @@ export default function RecipeEditor({ recipeId, recipeIds = [], onClose, onSave
                 >
                   Original
                   <span className="block text-xs font-normal opacity-70">
-                    What the user sees
+                    Read-only · locked
                   </span>
                 </button>
                 <button
@@ -416,8 +427,8 @@ export default function RecipeEditor({ recipeId, recipeIds = [], onClose, onSave
               {/* Spacer */}
               <div className="flex-1" />
 
-              {/* Edit Reason + Save — pinned to bottom */}
-              {(isOriginal || hasPrintReady) && (
+              {/* Edit Reason + Save — pinned to bottom. Only for print-ready; original is locked. */}
+              {!isOriginal && hasPrintReady && (
                 <div className="space-y-2">
                   <div>
                     <Label className="text-xs font-medium">Edit Reason</Label>

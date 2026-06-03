@@ -78,6 +78,7 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
         recipe_name_clean,
         ingredients_clean,
         instructions_clean,
+        note_clean,
         detected_language,
         cleaning_version
       )

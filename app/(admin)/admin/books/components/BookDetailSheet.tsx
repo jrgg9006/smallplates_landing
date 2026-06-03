@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Pencil, Check, X, Loader2, ChevronDown, ChevronRight, Download } from 'lucide-react';
+import { Pencil, Check, X, Loader2, ChevronDown, ChevronRight, Download, Upload } from 'lucide-react';
 import type { BookStatus } from '@/lib/types/database';
 import type { BookSummary } from './BookCard';
 import RecipePreviewCard from './RecipePreviewCard';
@@ -129,6 +129,38 @@ interface BookDetailSheetProps {
   onStatusChange: () => void;
 }
 
+// Reason: judge print quality off the shorter edge (the conservative dimension).
+// ~1800px short edge ≈ 6in at 300dpi — safe for a cover photo. Below ~1200px
+// the photo will look soft in print, so flag it to request the original.
+function getPhotoPrintQuality(dims: { width: number; height: number }): {
+  tone: 'good' | 'warn' | 'bad';
+  label: string;
+  hint: string;
+} {
+  const shortEdge = Math.min(dims.width, dims.height);
+  if (shortEdge >= 1800) {
+    return { tone: 'good', label: 'Print-ready', hint: 'Good resolution for print.' };
+  }
+  if (shortEdge >= 1200) {
+    return {
+      tone: 'warn',
+      label: 'Low for print',
+      hint: 'Usable at small size. Request the original if you can.',
+    };
+  }
+  return {
+    tone: 'bad',
+    label: 'Too small for print',
+    hint: 'Will look soft. Ask for the original file (sent as a document, not a photo).',
+  };
+}
+
+const PHOTO_QUALITY_TONE: Record<'good' | 'warn' | 'bad', string> = {
+  good: 'bg-green-50 text-green-700 border-green-200',
+  warn: 'bg-amber-50 text-amber-700 border-amber-200',
+  bad: 'bg-red-50 text-red-700 border-red-200',
+};
+
 export default function BookDetailSheet({ book, open, onOpenChange, onStatusChange }: BookDetailSheetProps) {
   const [detail, setDetail] = useState<BookDetail | null>(null);
   const [loading, setLoading] = useState(false);
@@ -149,6 +181,12 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
   const [reviewStartIndex, setReviewStartIndex] = useState<number | undefined>(undefined);
   // Reason: cache-busting for images — Supabase storage URLs stay the same after re-upload
   const [fetchTimestamp, setFetchTimestamp] = useState(Date.now());
+
+  const coupleImageInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingCoupleImage, setUploadingCoupleImage] = useState(false);
+  // Reason: measure the couple photo's real pixel size so the admin can judge
+  // print quality before the book goes out — WhatsApp photos arrive downscaled.
+  const [coupleImageDims, setCoupleImageDims] = useState<{ width: number; height: number } | null>(null);
 
   const fetchDetail = useCallback(async (groupId: string) => {
     setLoading(true);
@@ -175,6 +213,29 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
       setDetail(null);
     }
   }, [open, book, fetchDetail]);
+
+  // Reason: load the couple image off-screen to read its natural pixel size.
+  // Keyed on the URL (which carries a cache-buster on re-upload), so it re-measures
+  // whenever the photo changes.
+  const coupleImageUrl = detail?.group.couple_image_url || null;
+  useEffect(() => {
+    if (!coupleImageUrl) {
+      setCoupleImageDims(null);
+      return;
+    }
+    let cancelled = false;
+    const img = new window.Image();
+    img.onload = () => {
+      if (!cancelled) setCoupleImageDims({ width: img.naturalWidth, height: img.naturalHeight });
+    };
+    img.onerror = () => {
+      if (!cancelled) setCoupleImageDims(null);
+    };
+    img.src = coupleImageUrl;
+    return () => {
+      cancelled = true;
+    };
+  }, [coupleImageUrl]);
 
   const patchBook = async (body: Record<string, unknown>) => {
     if (!book) return;
@@ -219,6 +280,34 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
 
   const changeStatus = async (newStatus: BookStatus) => {
     await patchBook({ book_status: newStatus });
+  };
+
+  // Reason: admin uploads the couple photo on the user's behalf (sent via
+  // WhatsApp). Posts to the admin route, which writes couple_image_url just like
+  // the user flow would.
+  const handleCoupleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file
+    if (!file || !book) return;
+
+    setUploadingCoupleImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch(`/api/v1/admin/books/${book.id}`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.ok) {
+        await fetchDetail(book.id);
+        onStatusChange();
+      } else {
+        const data = await res.json().catch(() => null);
+        alert(data?.error || 'Failed to upload photo');
+      }
+    } finally {
+      setUploadingCoupleImage(false);
+    }
   };
 
   const currentStatus = detail?.group.book_status || 'active';
@@ -324,23 +413,54 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                     </p>
                   )}
                   <div className="flex items-start gap-4">
-                    {/* Couple photo */}
+                    {/* Couple photo — admin can upload/replace on the user's behalf */}
                     <div className="shrink-0">
-                      {detail.group.couple_image_url ? (
-                        <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
-                          <Image
-                            src={detail.group.couple_image_url}
-                            alt="Couple photo"
-                            fill
-                            className="object-cover"
-                            sizes="80px"
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center">
-                          <span className="text-[10px] text-gray-400 text-center leading-tight">No<br />photo</span>
-                        </div>
-                      )}
+                      <input
+                        ref={coupleImageInputRef}
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        className="hidden"
+                        onChange={handleCoupleImageUpload}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => coupleImageInputRef.current?.click()}
+                        disabled={uploadingCoupleImage}
+                        title={detail.group.couple_image_url ? 'Replace photo' : 'Upload photo'}
+                        className="group relative w-20 h-20 rounded-lg overflow-hidden block disabled:opacity-60"
+                      >
+                        {detail.group.couple_image_url ? (
+                          <div className="relative w-20 h-20 border border-gray-200 rounded-lg overflow-hidden">
+                            <Image
+                              src={detail.group.couple_image_url}
+                              alt="Couple photo"
+                              fill
+                              className="object-cover"
+                              sizes="80px"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center">
+                            <span className="text-[10px] text-gray-400 text-center leading-tight">No<br />photo</span>
+                          </div>
+                        )}
+                        {/* Hover/upload overlay */}
+                        <span className="absolute inset-0 flex items-center justify-center bg-black/45 text-white opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
+                          {uploadingCoupleImage ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                          ) : (
+                            <Upload className="w-5 h-5" />
+                          )}
+                        </span>
+                        {uploadingCoupleImage && (
+                          <span className="absolute inset-0 flex items-center justify-center bg-black/45 text-white rounded-lg">
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                          </span>
+                        )}
+                      </button>
+                      <p className="mt-1 text-center text-[10px] text-gray-400">
+                        {detail.group.couple_image_url ? 'Click to replace' : 'Click to upload'}
+                      </p>
                     </div>
                     {/* Name for print */}
                     <div className="flex-1 min-w-0">
@@ -356,6 +476,21 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                       )}
                     </div>
                   </div>
+
+                  {/* Photo print-quality check — flags low-res photos before the
+                      book is sent to print (WhatsApp photos arrive downscaled). */}
+                  {detail.group.couple_image_url && coupleImageDims && (() => {
+                    const q = getPhotoPrintQuality(coupleImageDims);
+                    return (
+                      <div className={`flex items-center gap-2 rounded-md border px-3 py-2 ${PHOTO_QUALITY_TONE[q.tone]}`}>
+                        <span className="text-xs font-semibold">{q.label}</span>
+                        <span className="text-[11px] tabular-nums opacity-80">
+                          {coupleImageDims.width} × {coupleImageDims.height}px
+                        </span>
+                        <span className="text-[11px] opacity-90">— {q.hint}</span>
+                      </div>
+                    );
+                  })()}
                 </div>
               </Section>
 
