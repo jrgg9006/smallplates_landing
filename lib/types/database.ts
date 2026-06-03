@@ -407,6 +407,7 @@ export interface Database {
           operations_notes: string | null;
           production_completed_at: string | null;
           needs_review: boolean;
+          needs_review_reason: string | null;
           manually_cleared: boolean;
           created_at: string;
           updated_at: string;
@@ -420,6 +421,7 @@ export interface Database {
           operations_notes?: string | null;
           production_completed_at?: string | null;
           needs_review?: boolean;
+          needs_review_reason?: string | null;
           manually_cleared?: boolean;
         };
         Update: {
@@ -429,6 +431,7 @@ export interface Database {
           operations_notes?: string | null;
           production_completed_at?: string | null;
           needs_review?: boolean;
+          needs_review_reason?: string | null;
           manually_cleared?: boolean;
         };
       };
