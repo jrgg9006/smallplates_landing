@@ -57,7 +57,7 @@ export function HowItWorksStepper({ className = "" }: { className?: string }) {
                   />
                 )}
               </div>
-              <p className="font-serif text-[17px] leading-relaxed text-gray-800 max-w-[14rem]">
+              <p className="font-serif text-[17px] lg:text-[19px] leading-relaxed text-gray-800 max-w-[14rem]">
                 {step.text}
               </p>
             </div>
