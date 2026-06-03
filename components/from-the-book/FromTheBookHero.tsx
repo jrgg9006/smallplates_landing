@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { trackEvent } from "@/lib/analytics";
+import { isFreeTierEnabled } from "@/lib/feature-flags";
 
 interface FromTheBookHeroProps {
   bookId?: string;
@@ -24,7 +25,8 @@ export default function FromTheBookHero({ bookId }: FromTheBookHeroProps) {
       utm_campaign: "from_the_book",
       ...(bookId ? { b: bookId } : {}),
     });
-    router.push(`/onboarding?${params.toString()}`);
+    const basePath = isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding";
+    router.push(`${basePath}?${params.toString()}`);
   };
 
   return (
@@ -55,7 +57,7 @@ export default function FromTheBookHero({ bookId }: FromTheBookHeroProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           >
-            You saw it open at a wedding.
+            You saw it open.
             <br />
             Here&apos;s how one gets made.
           </motion.h1>
@@ -66,7 +68,7 @@ export default function FromTheBookHero({ bookId }: FromTheBookHeroProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
           >
-            A cookbook written by everyone who comes to the wedding. One recipe each. Ready to live in a kitchen.
+            A cookbook written by everyone who comes to the event. One recipe each. Ready to live in a kitchen.
           </motion.p>
 
           <motion.div
@@ -81,12 +83,8 @@ export default function FromTheBookHero({ bookId }: FromTheBookHeroProps) {
               className="btn btn-lg btn-honey"
               data-cta="from-the-book-hero-primary"
             >
-              Start your book
+              Start your book for free
             </button>
-
-            <span className="text-white/90 text-lg font-light px-2 py-1">
-              15% off at checkout — only through this link.
-            </span>
           </motion.div>
 
         </div>

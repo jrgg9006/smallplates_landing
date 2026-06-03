@@ -6,14 +6,14 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+import { isFreeTierEnabled } from "@/lib/feature-flags";
 
 /**
  * Header for /from-the-book.
  * Reason: copy idéntico al Banner principal (`components/landing/Banner.tsx`)
  * pero sin los botones de Login — el visitante de esta landing entra desde
- * el QR del libro físico y no necesita autenticarse aquí. El CTA "Start the
- * Book" se conserva pero con UTMs preservados para que el cupón BOOK15 se
- * aplique en checkout.
+ * el QR del libro físico y no necesita autenticarse aquí. El CTA lleva al
+ * onboarding free-tier con los UTMs y el bookId preservados.
  */
 export default function FromTheBookHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -27,7 +27,8 @@ export default function FromTheBookHeader() {
       utm_campaign: "from_the_book",
       ...(bookId ? { b: bookId } : {}),
     });
-    return `/onboarding?${params.toString()}`;
+    const basePath = isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding";
+    return `${basePath}?${params.toString()}`;
   })();
 
   return (
@@ -73,7 +74,7 @@ export default function FromTheBookHeader() {
               }
               className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold border border-white/60 text-white hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
             >
-              Start your book
+              Start your book for free
             </Link>
           </div>
 
@@ -105,7 +106,7 @@ export default function FromTheBookHeader() {
                 setIsMobileMenuOpen(false);
               }}
             >
-              Start your book
+              Start your book for free
             </Link>
           </div>
         </div>

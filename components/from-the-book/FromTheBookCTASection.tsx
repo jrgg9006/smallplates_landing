@@ -4,6 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { trackEvent } from "@/lib/analytics";
+import { isFreeTierEnabled } from "@/lib/feature-flags";
 
 interface FromTheBookCTASectionProps {
   bookId?: string;
@@ -23,7 +24,8 @@ export default function FromTheBookCTASection({ bookId }: FromTheBookCTASectionP
       utm_campaign: "from_the_book",
       ...(bookId ? { b: bookId } : {}),
     });
-    router.push(`/onboarding?${params.toString()}`);
+    const basePath = isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding";
+    router.push(`${basePath}?${params.toString()}`);
   };
 
   return (
@@ -56,7 +58,7 @@ export default function FromTheBookCTASection({ bookId }: FromTheBookCTASectionP
             className="btn btn-lg btn-honey"
             data-cta="from-the-book-final-cta"
           >
-            Start your book
+            Start your book for free
           </button>
         </motion.div>
       </div>
