@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminAuth } from '@/lib/auth/admin';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import {
+  uploadGroupCoupleImageWithClient,
+  deleteGroupCoupleImage,
+} from '@/lib/supabase/storage';
+import {
+  generateCoupleImageOgBuffer,
+  uploadCoupleImageOgWithClient,
+} from '@/lib/supabase/og-image-processor';
 import type { BookStatus, BookReviewStatus } from '@/lib/types/database';
 
 export async function GET(
@@ -456,6 +464,95 @@ export async function PATCH(
     }
 
     return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Unauthorized' },
+      { status: 401 }
+    );
+  }
+}
+
+/**
+ * POST /api/v1/admin/books/[groupId]
+ * Admin-uploads the couple photo on behalf of the user (e.g. they sent it over
+ * WhatsApp). Writes to the same couple_image_url column as the user flow, so the
+ * book treats it as if the couple had uploaded it themselves.
+ */
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ groupId: string }> }
+) {
+  try {
+    await requireAdminAuth();
+    const { groupId } = await params;
+    // Reason: service-role client — the admin is not a member of the couple's
+    // group, so the membership-gated user endpoint would 403.
+    const supabase = createSupabaseAdminClient();
+
+    const formData = await request.formData();
+    const file = formData.get('image') as File | null;
+
+    if (!file) {
+      return NextResponse.json({ error: 'No image file provided' }, { status: 400 });
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      return NextResponse.json(
+        { error: 'Invalid file type. Only JPEG, PNG, and WebP are allowed.' },
+        { status: 400 }
+      );
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      return NextResponse.json(
+        { error: 'File too large. Maximum size is 10MB.' },
+        { status: 400 }
+      );
+    }
+
+    const { url, error: uploadError } = await uploadGroupCoupleImageWithClient(
+      supabase,
+      groupId,
+      file
+    );
+
+    if (uploadError || !url) {
+      return NextResponse.json(
+        { error: uploadError || 'Failed to upload image' },
+        { status: 500 }
+      );
+    }
+
+    // Reason: pre-build the OG version (centered focal point) so share previews
+    // work. Non-fatal — the upload already succeeded if this throws.
+    let ogUrl: string | null = null;
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const ogBuffer = await generateCoupleImageOgBuffer(Buffer.from(arrayBuffer), 50, 50);
+      const ogResult = await uploadCoupleImageOgWithClient(supabase, groupId, ogBuffer);
+      if (!ogResult.error) ogUrl = ogResult.url;
+    } catch (ogErr) {
+      console.error('Admin couple-image OG generation failed (non-fatal):', ogErr);
+    }
+
+    const { error: updateError } = await supabase
+      .from('groups')
+      .update({
+        couple_image_url: url,
+        couple_image_og_url: ogUrl,
+        couple_image_position_y: 50,
+        couple_image_position_x: 50,
+      })
+      .eq('id', groupId);
+
+    if (updateError) {
+      // Roll back the storage upload if the DB write fails.
+      await deleteGroupCoupleImage(groupId);
+      return NextResponse.json({ error: 'Failed to save image reference' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, url });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Unauthorized' },
