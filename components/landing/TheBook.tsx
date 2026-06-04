@@ -60,7 +60,7 @@ export default function TheBook() {
             className="type-heading font-normal text-brand-charcoal"
             style={{ letterSpacing: "-0.02em" }}
           >
-            What shows up at her door.
+            What shows up at their door.
           </h2>
           <p className="mt-5 type-body-small text-[hsl(var(--brand-warm-gray-light))] max-w-[520px] mx-auto">
             Every book is hardcover and full color. Because what&apos;s
