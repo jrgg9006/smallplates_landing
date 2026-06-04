@@ -43,7 +43,7 @@ export default function Hero() {
 
       {/* Content */}
       <div className="relative z-10 w-full px-6 md:px-12 lg:px-16 pt-28 md:pt-32 pb-16 md:pb-24">
-        <div className="max-w-3xl">
+        <div className="max-w-2xl">
           <motion.h1 
             id="hero-title" 
             className="type-display text-white leading-[1.1]"
@@ -51,7 +51,7 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           >
-            A cookbook made by their guests.
+            A cookbook made by all the guests.
           </motion.h1>
           <motion.p
             className="type-body mt-6 sm:text-xl md:text-2xl text-white/90 max-w-2xl"
@@ -59,7 +59,7 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
           >
-            Weddings, anniversaries, birthdays, graduations. You set it up. We handle the rest.
+            A gift for weddings, anniversaries, birthdays, showers, graduations. You set it up. We handle the rest.
           </motion.p>
           <motion.div
             className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4"
