@@ -120,7 +120,7 @@ export default function PricingPage() {
 
               {/* Context note */}
               <p className="text-center font-serif italic text-[hsl(var(--brand-warm-gray-light))] text-base mb-10">
-                Most people order 2–3. One for the couple, one for each family.
+                Most people order 2–3.
               </p>
 
               {/* Honey rule */}
@@ -158,9 +158,6 @@ export default function PricingPage() {
 
             {/* CTA strip at bottom of card */}
             <div className="bg-[#FDFCFA] border-t border-brand-sand px-8 py-8 md:px-12 text-center">
-              <p className="font-serif italic text-brand-charcoal text-lg mb-5">
-                Bride cries. You win.
-              </p>
               <button
                 onClick={handleStartBook}
                 className="inline-flex items-center justify-center rounded-full bg-brand-honey hover:bg-brand-honey-dark text-white px-10 py-4 text-lg font-medium shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-honey"
