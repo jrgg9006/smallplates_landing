@@ -3,7 +3,8 @@
 import React from "react";
 import Banner from '@/components/landing/Banner'
 import Hero from '@/components/landing/Hero'
-import TheProblem from '@/components/landing/TheProblem'
+import TestimonialBar from '@/components/landing/TestimonialBar'
+// import TheProblem from '@/components/landing/TheProblem' // Hidden from flow: standalone text-only "belief" beat was a speed bump before the product. Component kept for later reuse.
 import TheSolution from '@/components/landing/TheSolution'
 // import YourTools from '@/components/landing/YourTools' // Removed from flow: redundant 2nd card grid after HowItWorks; component kept for later reuse
 import EmotionalClose from '@/components/landing/EmotionalClose'
@@ -24,7 +25,8 @@ export default function Home() {
       <Banner />
       <main className="min-h-screen">
         <Hero />
-        <TheProblem />
+        <TestimonialBar />
+        {/* <TheProblem /> — hidden from flow; see import note */}
         <TheSolution />
         <HowItWorks />
         {/* <YourTools /> — removed from flow; see import note */}

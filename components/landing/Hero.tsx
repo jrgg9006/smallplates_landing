@@ -43,15 +43,15 @@ export default function Hero() {
 
       {/* Content */}
       <div className="relative z-10 w-full px-6 md:px-12 lg:px-16 pt-28 md:pt-32 pb-16 md:pb-24">
-        <div className="max-w-2xl">
-          <motion.h1 
-            id="hero-title" 
-            className="type-display text-white leading-[1.1]"
+        <div className="max-w-4xl">
+          <motion.h1
+            id="hero-title"
+            className="type-display text-white leading-[1.1] text-balance"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           >
-            A cookbook made by all the guests.
+            A cookbook made by everyone who loves them.
           </motion.h1>
           <motion.p
             className="type-body mt-6 sm:text-xl md:text-2xl text-white/90 max-w-2xl"
