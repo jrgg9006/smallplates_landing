@@ -83,7 +83,7 @@ export default function TheSolution() {
           The recipe, the photo, the note. Together on one page.
         </h2>
 
-        <p className="type-body mx-auto mt-6 max-w-xl">
+        <p className="type-body mx-auto mt-6 max-w-2xl">
           Each recipe comes with a photo we make of the dish, and a note from
           the person who sent it. The people who love them never quite leave the
           kitchen.

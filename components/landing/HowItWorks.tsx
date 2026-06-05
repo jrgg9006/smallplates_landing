@@ -10,7 +10,7 @@ const steps = [
   {
     number: "01",
     title: "You invite.",
-    description: "However you reach your people: a link, an email, a QR code, or an event invite.",
+    description: "Share a link, an email, or a QR code, or build a simple event invite. Whatever reaches your people. The ask for a recipe comes built in.",
     image: "/images/HowitWorks_images/collect_iphone_mockup.png",
     imageAlt: "Invitation shared via phone",
     imageClass: "object-cover",
@@ -18,8 +18,8 @@ const steps = [
   },
   {
     number: "02",
-    title: "They send recipes.",
-    description: "They type it or snap a photo. Five minutes, no app. We turn every recipe into an image.",
+    title: "They send a recipe.",
+    description: "They type it out or snap a photo. Five minutes, no app, no account. A recipe and a note, in their words.",
     image: "/images/HowitWorks_images/sucess_iphone_mockup.png",
     imageAlt: "Guest submitting a recipe",
     imageClass: "object-cover",
@@ -28,8 +28,8 @@ const steps = [
   {
     number: "03",
     title: "We make the book.",
-    description: "Designed, printed hardcover, shipped to the door. You only pay when it's ready.",
-    caption: "Start to delivery, around four weeks.",
+    description: "We make an image for every recipe, then design and print the hardcover, shipped to your door. You only pay when it's ready.",
+    caption: "Start to delivery, about four weeks.",
     image: "/images/HowitWorks_images/book_in_hand_whitebackgound.png",
     imageAlt: "The finished hardcover cookbook",
     imageClass: "object-cover",
@@ -97,10 +97,10 @@ export default function HowItWorks() {
           transition={{ duration: 0.5, ease: easeOut }}
         >
           <h2 id="how-it-works-heading" className="type-heading">
-            Here&apos;s how it happens.
+            Send the invite. The recipes come to you.
           </h2>
           <p className="mt-4 type-body text-brand-charcoal/60">
-            Three steps. Easier than you think.
+            Then we turn them into a hardcover. Three steps, that&rsquo;s it.
           </p>
         </motion.div>
 
