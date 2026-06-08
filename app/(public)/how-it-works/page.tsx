@@ -211,6 +211,55 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
+        {/* El wedge / la magia — antes (texto crudo) → después (página diseñada) */}
+        <section className="px-2 py-6 md:px-3 md:py-8">
+          <div
+            id="the-magic"
+            className="mx-auto max-w-7xl rounded-[2rem] bg-brand-cream px-5 py-16 md:px-10 md:py-24"
+          >
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="type-eyebrow text-brand-honey">THE MAGIC</p>
+              <h2 className="type-subheading mt-4">We make it look good. But how?</h2>
+              <p className="type-body-small mt-4 text-brand-charcoal/70">
+                You send the real stuff — a text, a photo, a voice note. We make it a book.
+              </p>
+            </div>
+
+            <div className="mt-14 grid grid-cols-1 items-center gap-8 md:grid-cols-2">
+              {/* Antes: mensaje crudo */}
+              <div>
+                <p className="type-caption mb-3 text-center text-brand-charcoal/50">
+                  What they send
+                </p>
+                <div className="rounded-2xl bg-brand-white p-6">
+                  <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-brand-warm-white-warm px-4 py-3 shadow-sm">
+                    <p className="type-body-small text-brand-charcoal/80">
+                      weeknight salmon — pat it dry, salt, 400&deg; for 12 min, big squeeze
+                      of lemon. don&rsquo;t overthink it
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Después: página diseñada */}
+              <div>
+                <p className="type-caption mb-3 text-center text-brand-charcoal/50">
+                  What we make
+                </p>
+                <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-brand-white shadow-md">
+                  <Image
+                    src="/images/how_it_works_profilesection/recipe_example_salmon.png"
+                    alt="The same recipe, designed as a book page"
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 768px) 100vw, 400px"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* 3. Objeción #1 */}
         <section className="px-4 py-16 md:px-6 md:py-24">
           <motion.div
