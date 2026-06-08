@@ -219,7 +219,7 @@ export default function HowItWorksPage() {
           >
             <div className="mx-auto max-w-2xl text-center">
               <p className="type-eyebrow text-brand-honey">THE MAGIC</p>
-              <h2 className="type-heading mt-4">We make it look good. But how?</h2>
+              <h2 className="type-heading mt-4">We make a real, professional cookbook. But how?</h2>
               <p className="type-body-small mt-4 text-brand-charcoal/70">
                 You send the real stuff: a text, a photo, a voice note. We make it a book.
               </p>
