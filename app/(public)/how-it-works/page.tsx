@@ -237,7 +237,7 @@ export default function HowItWorksPage() {
                   <div>
                     <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Recipe title</p>
                     <div className="rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
-                      <p className="type-body-small text-brand-charcoal">Honey Soy Garlic Salmon</p>
+                      <p className="type-caption text-brand-charcoal">Honey Soy Garlic Salmon</p>
                     </div>
                   </div>
                   <div>
