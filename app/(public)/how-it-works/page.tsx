@@ -225,7 +225,7 @@ export default function HowItWorksPage() {
               </p>
             </div>
 
-            <div className="mx-auto mt-10 max-w-4xl">
+            <div className="mx-auto mt-10 max-w-6xl">
               {/* Antes: la receta llenándose como un formulario, dos columnas */}
               <p className="type-caption mb-4 text-center text-brand-charcoal/50">
                 What they send
@@ -237,13 +237,13 @@ export default function HowItWorksPage() {
                   <div>
                     <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Recipe title</p>
                     <div className="rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
-                      <p className="type-body text-brand-charcoal">Honey Soy Garlic Salmon</p>
+                      <p className="type-body-small text-brand-charcoal">Honey Soy Garlic Salmon</p>
                     </div>
                   </div>
                   <div>
                     <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Ingredients</p>
                     <div className="rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
-                      <p className="type-body-small text-brand-charcoal/80">
+                      <p className="type-caption text-brand-charcoal/80">
                         2-4 salmon fillets, 1/4 cup soy sauce, 1/4 cup honey, butter,
                         garlic, salt, pepper, chili powder
                       </p>
@@ -252,7 +252,7 @@ export default function HowItWorksPage() {
                   <div>
                     <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Notes</p>
                     <div className="rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
-                      <p className="type-body-small text-brand-charcoal/80">
+                      <p className="type-caption text-brand-charcoal/80">
                         Serve with white rice.
                       </p>
                     </div>
@@ -263,7 +263,7 @@ export default function HowItWorksPage() {
                 <div className="flex flex-col">
                   <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Steps</p>
                   <div className="flex-1 rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
-                    <p className="type-body-small text-brand-charcoal/80">
+                    <p className="type-caption text-brand-charcoal/80">
                       Sear the salmon skin-side down. Add butter and garlic, then honey
                       and soy. Baste until glazy.
                       <span className="ml-1 inline-block h-4 w-0.5 animate-pulse bg-brand-honey align-middle" />
