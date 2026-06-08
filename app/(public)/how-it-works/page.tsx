@@ -18,19 +18,19 @@ const steps: JourneyStepData[] = [
     number: "01",
     title: "Gather the recipes. Three ways.",
     description:
-      "You add them, share a link, or invite a few people to collect with you. No app, no account for your people — they send a recipe in about five minutes, from their phone.",
+      "You add them, share a link, or invite a few people to collect with you. No app, no account for your people. They send a recipe in about five minutes, from their phone.",
   },
   {
     number: "02",
     title: "They snap a photo. We do the rest.",
     description:
-      "No retyping, no forms. Your people photograph the handwritten recipe — grandma's card, the back of an envelope, coffee stains and all — and we turn it into clean text and a designed page. Or they type it, if they'd rather.",
+      "No retyping, no forms. Your people photograph the handwritten recipe (grandma's card, the back of an envelope, coffee stains and all) and we turn it into clean text and a designed page. Or they type it, if they'd rather.",
   },
   {
     number: "03",
     title: "See who's in. Nudge the rest in one tap.",
     description:
-      "Import your guest list, and watch the recipes land in one place. See who's sent theirs and who hasn't — then remind everyone still missing with a single tap, or send a nicer personalized email when you want. You stay in control, without texting anyone one by one.",
+      "Import your guest list, and watch the recipes land in one place. See who's sent theirs and who hasn't, then remind everyone still missing with a single tap, or send a nicer personalized email when you want. You stay in control, without texting anyone one by one.",
   },
   {
     number: "04",
@@ -91,7 +91,7 @@ export default function HowItWorksPage() {
       <div className="absolute -left-3 -top-4 w-32 rotate-[-6deg] rounded-lg bg-brand-cream p-3 shadow-lg ring-1 ring-brand-sand md:w-36">
         <p className="type-caption mb-1 text-brand-charcoal/45">snapshot from a guest</p>
         <p className="type-caption leading-snug text-brand-charcoal/75">
-          3 ripe bananas, 1 cup sugar, 1½ cups flour, 350° ~1hr — Abuela
+          3 ripe bananas, 1 cup sugar, 1½ cups flour, 350° ~1hr. Abuela
         </p>
       </div>
     </div>,
@@ -147,8 +147,8 @@ export default function HowItWorksPage() {
             <p className="type-eyebrow text-brand-warm-gray">OPTIONAL</p>
             <h3 className="type-subheading mt-3">Need an invite? Make a digital one.</h3>
             <p className="type-body-small mt-3 text-brand-charcoal/70">
-              Build an invite for the shower, the anniversary, the wedding — photo,
-              date, address — with the recipe ask built right in. Most people just
+              Build an invite for the shower, the anniversary, the wedding (photo,
+              date, address) with the recipe ask built right in. Most people just
               share a link. This is here if you want it.
             </p>
           </div>
@@ -193,7 +193,7 @@ export default function HowItWorksPage() {
             </h1>
             <p className="type-body mt-5 text-brand-charcoal/70">
               From the first &ldquo;send me your recipe&rdquo; to the hardcover on your
-              counter — here&rsquo;s the whole thing.
+              counter. Here&rsquo;s the whole thing.
             </p>
           </motion.div>
         </section>
@@ -219,9 +219,9 @@ export default function HowItWorksPage() {
           >
             <div className="mx-auto max-w-2xl text-center">
               <p className="type-eyebrow text-brand-honey">THE MAGIC</p>
-              <h2 className="type-subheading mt-4">We make it look good. But how?</h2>
+              <h2 className="type-heading mt-4">We make it look good. But how?</h2>
               <p className="type-body-small mt-4 text-brand-charcoal/70">
-                You send the real stuff — a text, a photo, a voice note. We make it a book.
+                You send the real stuff: a text, a photo, a voice note. We make it a book.
               </p>
             </div>
 
@@ -234,7 +234,7 @@ export default function HowItWorksPage() {
                 <div className="rounded-2xl bg-brand-white p-6">
                   <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-brand-warm-white-warm px-4 py-3 shadow-sm">
                     <p className="type-body-small text-brand-charcoal/80">
-                      weeknight salmon — pat it dry, salt, 400&deg; for 12 min, big squeeze
+                      weeknight salmon: pat it dry, salt, 400&deg; for 12 min, big squeeze
                       of lemon. don&rsquo;t overthink it
                     </p>
                   </div>
@@ -305,7 +305,7 @@ export default function HowItWorksPage() {
               Free to start. You only pay when the book is ready.
             </p>
             <p className="type-body-small mt-4 text-brand-charcoal/70">
-              Build the whole thing for free. Pay for the book when you order it —
+              Build the whole thing for free. Pay for the book when you order it,
               backed by our guarantee.
             </p>
             <Link
