@@ -12,6 +12,7 @@ import BooksPrinted from '@/components/landing/BooksPrinted'
 import HowItWorks from '@/components/landing/HowItWorks'
 import RegistryInterlude from '@/components/landing/RegistryInterlude'
 import PersonalNotes from '@/components/landing/PersonalNotes'
+import PricingBlock from '@/components/landing/PricingBlock'
 import TheBook from '@/components/landing/TheBook'
 import TestimonialsSection from '@/components/landing/TestimonialsSection'
 import FAQ from '@/components/landing/FAQ'
@@ -31,6 +32,7 @@ export default function Home() {
         <HowItWorks />
         {/* <YourTools /> — removed from flow; see import note */}
         <RegistryInterlude />
+        <PricingBlock />
         <BooksPrinted />
         <PersonalNotes />
         <TheBook />
