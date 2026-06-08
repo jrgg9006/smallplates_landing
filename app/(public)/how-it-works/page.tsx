@@ -66,7 +66,8 @@ function StepImage({
 export default function HowItWorksPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const handleStart = () => router.push(user ? "/profile/groups" : "/onboarding");
+  // Reason: nunca mandar al onboarding viejo (/onboarding). Logged-out → nuevo flow.
+  const handleStart = () => router.push(user ? "/profile/groups" : "/onboarding/welcome");
 
   // Visuals alineados 1:1 con `steps`.
   // TODO (imágenes reales): paso 1 → mockup de "collect link"; paso 2 → foto real
