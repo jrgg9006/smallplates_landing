@@ -2,14 +2,14 @@
 
 import React from "react";
 import { Minus, Plus, Info, Lock } from "lucide-react";
-import { ADDITIONAL_BOOK_PRICE } from "@/lib/stripe/pricing";
 import { OrderCart } from "./OrderCart";
 import type { GroupWithMembers } from "@/lib/types/database";
 
-// Reason: 1 base book + up to 5 extra copies. The base is required (the book is
-// being printed); extras are optional. Tiered pricing ($169 + $129/extra) is why
-// quantity lives on our screen, not in Stripe's native quantity selector.
-export const MAX_COPIES = 6;
+// Reason: 1 base book + up to 9 extra copies. The base is required (the book is
+// being printed); extras are optional. Declining per-copy pricing (see
+// calculateSubtotal) is why quantity lives on our screen, not in Stripe's native
+// quantity selector.
+export const MAX_COPIES = 10;
 
 interface QuantityStepProps {
   qty: number;
@@ -40,8 +40,8 @@ export function QuantityStep({
       {/* Left — quantity picker */}
       <div className="flex flex-col">
         <p className="type-body-small mb-8 max-w-xl text-pretty">
-          One copy is yours. Add more if other people should have their own. Same
-          book, same hardcover, ${ADDITIONAL_BOOK_PRICE} each.
+          One copy is yours. Add one for everyone else who should have their own —
+          same book, same hardcover. The more you add, the less each one costs.
         </p>
 
         <div className="flex flex-col items-center pt-6 text-center">

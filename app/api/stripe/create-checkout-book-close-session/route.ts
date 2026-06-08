@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe/client";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { ADDITIONAL_BOOK_PRICE, MIN_RECIPES_TO_PRINT } from "@/lib/stripe/pricing";
+import { calculateExtrasAmount, MIN_RECIPES_TO_PRINT } from "@/lib/stripe/pricing";
 
 // Reason: Countries we can ship to. Mirrors the list the old in-app shipping form
 // supported (US, MX, EU). Stripe collects the address natively for us now.
@@ -19,8 +19,8 @@ export async function POST(request: NextRequest) {
     if (!groupId || typeof groupId !== "string") {
       return NextResponse.json({ error: "Invalid groupId" }, { status: 400 });
     }
-    if (!qty || !Number.isInteger(qty) || qty < 1 || qty > 6) {
-      return NextResponse.json({ error: "qty must be between 1 and 6" }, { status: 400 });
+    if (!qty || !Number.isInteger(qty) || qty < 1 || qty > 10) {
+      return NextResponse.json({ error: "qty must be between 1 and 10" }, { status: 400 });
     }
 
     const supabase = await createSupabaseServer();
@@ -79,23 +79,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
     }
 
-    // Reason: Non-linear pricing ($169 base + $129 per additional). Same pattern as
-    // create-checkout-session: catalog Price for the base (so coupons can match it)
-    // + an inline price_data line for the additional copies.
+    // Reason: Declining group pricing — the per-copy price steps down as the group
+    // grows, so the additional copies are NOT a uniform quantity × unit_amount.
+    // We express them as a SINGLE inline line item priced at calculateExtrasAmount
+    // (the whole amount beyond the base), keeping the catalog Price for the base
+    // so coupons can still match it. Total == calculateSubtotal(qty).
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
       {
         price: process.env.STRIPE_PRICE_ID_COOKBOOK!,
         quantity: 1,
       },
     ];
-    if (qty > 1) {
+    const extrasAmount = calculateExtrasAmount(qty);
+    if (extrasAmount > 0) {
+      const extraCopies = qty - 1;
       lineItems.push({
         price_data: {
           currency: "usd",
-          product_data: { name: "Additional Cookbook Copy" },
-          unit_amount: ADDITIONAL_BOOK_PRICE * 100,
+          product_data: {
+            name: `${extraCopies} additional ${extraCopies === 1 ? "copy" : "copies"}`,
+          },
+          unit_amount: extrasAmount * 100,
         },
-        quantity: qty - 1,
+        quantity: 1,
       });
     }
 

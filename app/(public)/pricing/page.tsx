@@ -7,13 +7,13 @@ import WhatsAppFAB from "@/components/landing/WhatsAppFAB";
 export const metadata: Metadata = {
   title: "Pricing — Small Plates & Co.",
   description:
-    "One book. Everything included. First book $169, additional copies $129 each.",
+    "One book. Or one for everyone. Each person who chips in gets their own copy — the more you print, the less each one costs.",
 };
 
 export default function Pricing() {
   return (
     <>
-      <Banner theme="light" />
+      <Banner theme="light" showShippingStrip={false} />
       <PricingPage />
       <Footer />
       <WhatsAppFAB />

@@ -66,7 +66,7 @@ export default function PricingPage() {
 
       {/* Pricing Card — the centerpiece */}
       <section className="pb-16 md:pb-20">
-        <div className="mx-auto max-w-2xl px-6">
+        <div className="mx-auto max-w-3xl px-6">
           <motion.div
             className="relative bg-white rounded-2xl shadow-xl border border-brand-honey/20 overflow-hidden"
             initial={{ opacity: 0, y: 30 }}
@@ -105,13 +105,21 @@ export default function PricingPage() {
                   visible instead of hidden behind a counter. Each row IS the
                   selector. Numbers come from pricing.ts, so the table always
                   matches what checkout charges. */}
-              <div className="mb-10">
-                <p className="font-sans text-xs font-medium tracking-[0.15em] text-[hsl(var(--brand-warm-gray-light))] uppercase mb-5 text-center">
+              <div className="mb-8">
+                <p className="mb-3 text-center font-sans text-xs font-medium uppercase tracking-[0.15em] text-brand-honey">
+                  Free to start · Pay only when it&rsquo;s ready to print
+                </p>
+                <p className="font-serif text-2xl md:text-3xl text-brand-charcoal mb-6 text-center">
                   How many copies?
                 </p>
 
-                {/* The table (1–6) — each row is a radio option */}
-                <div role="radiogroup" aria-label="Number of copies" className="space-y-2">
+                {/* The table (1–6) — one consolidated list, hairline dividers,
+                    each row a single-line radio option. */}
+                <div
+                  role="radiogroup"
+                  aria-label="Number of copies"
+                  className="overflow-hidden rounded-xl border border-brand-sand divide-y divide-brand-sand"
+                >
                   {TABLE_COPIES.map((n) => {
                     const selected = qty === n;
                     return (
@@ -121,10 +129,8 @@ export default function PricingPage() {
                         role="radio"
                         aria-checked={selected}
                         onClick={() => setQty(n)}
-                        className={`flex w-full items-center justify-between rounded-xl border px-5 py-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-honey ${
-                          selected
-                            ? "border-brand-honey bg-brand-honey/5"
-                            : "border-brand-sand hover:border-brand-honey/40"
+                        className={`flex w-full items-baseline justify-between gap-3 px-6 py-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-honey ${
+                          selected ? "bg-brand-honey/10" : "hover:bg-brand-sand/30"
                         }`}
                       >
                         <span className="flex items-baseline gap-2">
@@ -132,20 +138,20 @@ export default function PricingPage() {
                             {n === 1 ? "1 copy" : `${n} copies`}
                           </span>
                           {n === 6 && (
-                            <span className="text-xs text-brand-honey">best price</span>
+                            <span className="text-[11px] text-brand-honey">best price</span>
                           )}
                         </span>
-                        <span className="text-right">
-                          <span className="block font-serif text-2xl md:text-3xl leading-none tabular-nums text-brand-charcoal">
+                        <span className="flex items-baseline gap-2 tabular-nums">
+                          <span className="font-serif text-xl text-brand-charcoal">
                             ${pricePerCopy(n)}
                             {n > 1 && (
-                              <span className="ml-1 font-sans text-xs text-[hsl(var(--brand-warm-gray-light))]">
+                              <span className="ml-0.5 font-sans text-[11px] text-[hsl(var(--brand-warm-gray-light))]">
                                 /person
                               </span>
                             )}
                           </span>
-                          <span className="mt-1 block text-sm tabular-nums text-[hsl(var(--brand-warm-gray-light))]">
-                            {n === 1 ? "shipping included" : `$${calculateSubtotal(n)} total`}
+                          <span className="text-xs text-[hsl(var(--brand-warm-gray-light))]">
+                            {n === 1 ? "shipping included" : `· $${calculateSubtotal(n)} total`}
                           </span>
                         </span>
                       </button>
@@ -155,29 +161,27 @@ export default function PricingPage() {
 
                 {/* 7+ — the edge case, kept quiet and subordinate to the table */}
                 <div
-                  className={`mt-3 flex items-center justify-between rounded-xl border px-5 py-4 transition-colors ${
-                    qty >= 7 ? "border-brand-honey bg-brand-honey/5" : "border-brand-sand"
+                  className={`mt-2.5 flex items-center justify-between gap-3 rounded-xl border px-6 py-4 transition-colors ${
+                    qty >= 7 ? "border-brand-honey bg-brand-honey/10" : "border-brand-sand"
                   }`}
                 >
-                  <span className="text-left">
-                    <span className="block font-serif text-base text-brand-charcoal">
-                      More than 6?
-                    </span>
-                    <span className="mt-1 block text-sm tabular-nums text-[hsl(var(--brand-warm-gray-light))]" aria-live="polite">
+                  <span className="flex items-baseline gap-2">
+                    <span className="font-serif text-base text-brand-charcoal">More than 6?</span>
+                    <span className="text-xs tabular-nums text-[hsl(var(--brand-warm-gray-light))]" aria-live="polite">
                       $89 each{qty >= 7 ? ` · $${calculateSubtotal(qty)} total` : ""}
                     </span>
                   </span>
-                  <span className="flex items-center gap-4">
+                  <span className="flex items-center gap-2.5">
                     <button
                       type="button"
                       onClick={() => setQty((q) => Math.max(6, q - 1))}
                       disabled={qty <= 6}
                       aria-label="Fewer copies"
-                      className="flex h-9 w-9 items-center justify-center rounded-full border-[1.5px] border-brand-charcoal/15 text-brand-charcoal transition-colors hover:border-brand-honey disabled:opacity-25 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-honey"
+                      className="flex h-8 w-8 items-center justify-center rounded-full border-[1.5px] border-brand-charcoal/15 text-brand-charcoal transition-colors hover:border-brand-honey disabled:opacity-25 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-honey"
                     >
                       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M5 12h14" /></svg>
                     </button>
-                    <span className="min-w-[1.5rem] text-center font-serif text-xl tabular-nums text-brand-charcoal">
+                    <span className="min-w-[1.25rem] text-center font-serif text-base tabular-nums text-brand-charcoal">
                       {qty >= 7 ? qty : 7}
                     </span>
                     <button
@@ -185,7 +189,7 @@ export default function PricingPage() {
                       onClick={() => setQty((q) => Math.min(MAX_COPIES, Math.max(7, q + 1)))}
                       disabled={qty >= MAX_COPIES}
                       aria-label="More copies"
-                      className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-honey text-white transition-colors hover:bg-brand-honey-dark disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-honey"
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-honey text-white transition-colors hover:bg-brand-honey-dark disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-honey"
                     >
                       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
                     </button>
@@ -193,21 +197,9 @@ export default function PricingPage() {
                 </div>
 
                 {/* Footer line under the selector */}
-                <p className="mt-4 text-center text-xs text-[hsl(var(--brand-warm-gray-light))]">
+                <p className="mt-3 text-center text-xs text-[hsl(var(--brand-warm-gray-light))]">
                   Ships to one address · shipping included
                 </p>
-              </div>
-
-              {/* Context note */}
-              <p className="text-center font-serif italic text-[hsl(var(--brand-warm-gray-light))] text-base mb-10">
-                The price stops dropping at six.
-              </p>
-
-              {/* Honey rule */}
-              <div className="flex items-center gap-4 mb-10">
-                <div className="flex-1 h-px bg-brand-sand" />
-                <div className="w-1.5 h-1.5 rounded-full bg-brand-honey" />
-                <div className="flex-1 h-px bg-brand-sand" />
               </div>
 
               {/* What's included */}
