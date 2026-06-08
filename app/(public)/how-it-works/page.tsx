@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import Banner from "@/components/landing/Banner";
+import TheProblem from "@/components/landing/TheProblem";
 import WhatsAppFAB from "@/components/landing/WhatsAppFAB";
 import JourneyTimeline from "./_components/JourneyTimeline";
 import JourneyStep, { type JourneyStepData } from "./_components/JourneyStep";
@@ -288,6 +289,9 @@ export default function HowItWorksPage() {
             </div>
           </div>
         </section>
+
+        {/* Respiro emocional — beat de marca (reusa TheProblem del landing) */}
+        <TheProblem />
 
         {/* 4. Lo que recibes (tarjeta) */}
         <section className="px-2 py-6 md:px-3 md:py-8">
