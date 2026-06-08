@@ -140,9 +140,9 @@ export default function HowItWorksPage() {
 
       <main className="bg-brand-white">
         {/* 1. Hero */}
-        <section className="px-6 pt-32 pb-12 md:px-10 md:pt-44 md:pb-16">
+        <section className="px-4 pt-32 pb-12 md:px-6 md:pt-44 md:pb-16">
           <motion.div
-            className="mx-auto max-w-4xl text-center"
+            className="mx-auto max-w-5xl text-center"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: easeOut }}
@@ -156,17 +156,17 @@ export default function HowItWorksPage() {
         </section>
 
         {/* 2. Timeline de 5 pasos (tarjeta) */}
-        <section className="px-4 py-8 md:px-6 md:py-10">
-          <div className="mx-auto max-w-6xl rounded-[2rem] bg-brand-warm-white-warm px-6 py-16 md:px-16 md:py-24">
+        <section className="px-2 py-6 md:px-3 md:py-8">
+          <div className="mx-auto max-w-7xl rounded-[2rem] bg-brand-warm-white-warm px-5 py-16 md:px-10 md:py-24">
             <JourneyTimeline steps={steps} visuals={visuals} />
           </div>
         </section>
 
         {/* 3. El wedge / la magia (tarjeta) */}
-        <section className="px-4 py-8 md:px-6 md:py-10">
+        <section className="px-2 py-6 md:px-3 md:py-8">
           <div
             id="the-magic"
-            className="mx-auto max-w-6xl rounded-[2rem] bg-brand-cream px-6 py-16 md:px-16 md:py-24"
+            className="mx-auto max-w-7xl rounded-[2rem] bg-brand-cream px-5 py-16 md:px-10 md:py-24"
           >
             <div className="mx-auto max-w-2xl text-center">
               <p className="type-eyebrow text-brand-honey">THE MAGIC</p>
@@ -213,7 +213,7 @@ export default function HowItWorksPage() {
         </section>
 
         {/* 4. Objeción #1 */}
-        <section className="px-6 py-16 md:px-10 md:py-24">
+        <section className="px-4 py-16 md:px-6 md:py-24">
           <motion.div
             className="mx-auto max-w-3xl text-center"
             initial={{ opacity: 0, y: 16 }}
@@ -231,8 +231,8 @@ export default function HowItWorksPage() {
         </section>
 
         {/* 5. Lo que recibes (tarjeta) */}
-        <section className="px-4 py-8 md:px-6 md:py-10">
-          <div className="mx-auto max-w-6xl rounded-[2rem] bg-brand-sand px-6 py-16 text-center md:px-16 md:py-24">
+        <section className="px-2 py-6 md:px-3 md:py-8">
+          <div className="mx-auto max-w-7xl rounded-[2rem] bg-brand-sand px-5 py-16 text-center md:px-10 md:py-24">
             <h2 className="type-subheading">What shows up at your door</h2>
             <p className="type-body-small mx-auto mt-4 max-w-xl text-brand-charcoal/70">
               A full-color hardcover, around 80 pages. It lives in the kitchen. It gets
@@ -251,7 +251,7 @@ export default function HowItWorksPage() {
         </section>
 
         {/* 6. Ancla de precio */}
-        <section className="px-6 py-16 md:px-10 md:py-20">
+        <section className="px-4 py-16 md:px-6 md:py-20">
           <div className="mx-auto max-w-3xl text-center">
             <p className="type-subheading">
               Free to start. You only pay when the book is ready.
@@ -270,8 +270,8 @@ export default function HowItWorksPage() {
         </section>
 
         {/* 7. CTA de cierre (tarjeta oscura) */}
-        <section className="px-4 pb-16 md:px-6 md:pb-24">
-          <div className="mx-auto max-w-6xl rounded-[2rem] bg-brand-charcoal px-6 py-16 text-center md:px-16 md:py-20">
+        <section className="px-2 pb-16 md:px-3 md:pb-24">
+          <div className="mx-auto max-w-7xl rounded-[2rem] bg-brand-charcoal px-5 py-16 text-center md:px-10 md:py-20">
             <h2 className="type-subheading text-brand-warm-white-warm">
               Ready to start your book?
             </h2>
