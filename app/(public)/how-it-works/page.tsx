@@ -281,7 +281,7 @@ export default function HowItWorksPage() {
               backed by our guarantee.
             </p>
             <Link
-              href="/#pricing"
+              href="/#pricing-heading"
               className="type-body-small mt-5 inline-flex items-center gap-1 text-brand-charcoal underline underline-offset-4 transition-colors hover:text-brand-honey"
             >
               See pricing <span aria-hidden>→</span>
