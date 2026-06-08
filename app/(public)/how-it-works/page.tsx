@@ -9,38 +9,32 @@ import { Button } from "@/components/ui/button";
 import Banner from "@/components/landing/Banner";
 import WhatsAppFAB from "@/components/landing/WhatsAppFAB";
 import JourneyTimeline from "./_components/JourneyTimeline";
-import { type JourneyStepData } from "./_components/JourneyStep";
+import JourneyStep, { type JourneyStepData } from "./_components/JourneyStep";
 
 const easeOut: [number, number, number, number] = [0.23, 1, 0.32, 1];
 
 const steps: JourneyStepData[] = [
   {
     number: "01",
-    title: "Start your book. Free.",
+    title: "Gather the recipes. Three ways.",
     description:
-      "Set it up in two minutes — a wedding, an anniversary, a birthday, a regular Tuesday. Nothing to pay to begin.",
+      "You add them, share a link, or invite a few people to collect with you. No app, no account for your people. The part everyone loves: they just snap a photo of the handwritten recipe — grandma's card, the back of an envelope — or type it out. We turn the photo into clean text.",
   },
   {
     number: "02",
-    title: "Gather the recipes. Three ways.",
+    title: "See who's in. Nudge the rest in one tap.",
     description:
-      "You add them yourself, share a link, or invite a few people to collect alongside you. Your people don't need an app or an account — they type it or snap a photo in five minutes.",
+      "Import your guest list, and watch the recipes land in one place. See who's sent theirs and who hasn't — then remind everyone still missing with a single tap, or send a nicer personalized email when you want. You stay in control, without texting anyone one by one.",
   },
   {
     number: "03",
-    title: "We chase the stragglers. You don't.",
-    description:
-      "Reminders go out until the recipes are in. You never have to nag anyone.",
-  },
-  {
-    number: "04",
     title: "Every recipe becomes a page.",
     description:
-      "We make a photo for each recipe and design the page. The messy text message becomes something that belongs on a shelf.",
+      "Photos, handwriting, typos and all — we turn each one into a clean, designed page with its own photo. The messy text message becomes something that belongs on a shelf.",
     cta: { label: "See a recipe page", href: "#the-magic" },
   },
   {
-    number: "05",
+    number: "04",
     title: "We print it. It ships to your door.",
     description:
       "A full-color hardcover, about four weeks start to finish. You only pay when it's ready.",
@@ -75,63 +69,95 @@ export default function HowItWorksPage() {
   const { user } = useAuth();
   const handleStart = () => router.push(user ? "/profile/groups" : "/onboarding");
 
-  // Visuals alineados 1:1 con `steps`. Pasos 3 (recordatorio) y el "antes" del
-  // wedge se renderizan como UI on-brand en markup — no requieren assets nuevos.
+  // Visuals alineados 1:1 con `steps`. El paso 2 (dashboard de quién mandó /
+  // quién falta) se renderiza como UI on-brand en markup. TODO: cambiar el
+  // visual del paso 1 por una imagen real de "foto de receta a mano → texto".
   const visuals = [
     <StepImage
       key="s1"
-      src="/images/how_it_works_profilesection/add_a_recipe.png"
-      alt="Setting up a new book"
-      bg="bg-brand-cream"
+      src="/images/HowitWorks_images/collect_iphone_mockup.png"
+      alt="Snap a photo of a recipe, or type it in"
     />,
-    <div key="s2" className="space-y-5">
-      <StepImage
-        src="/images/HowitWorks_images/collect_iphone_mockup.png"
-        alt="Collecting recipes on a phone"
-      />
-      <div className="flex flex-wrap gap-3">
-        {["You add them", "Share a link", "Invite people"].map((c) => (
-          <span
-            key={c}
-            className="type-caption rounded-full border border-brand-sand bg-brand-white px-4 py-2 text-brand-charcoal/80"
-          >
-            {c}
-          </span>
-        ))}
+    <div key="s2" className="rounded-2xl bg-brand-warm-white-warm p-6 md:p-8">
+      <div className="mb-5 flex items-center justify-between">
+        <span className="type-body-small font-medium text-brand-charcoal">
+          12 of 18 recipes in
+        </span>
+        <span className="rounded-full bg-brand-honey px-4 py-1.5 type-caption text-brand-white">
+          Send reminder
+        </span>
       </div>
-    </div>,
-    <div key="s3" className="rounded-2xl bg-brand-warm-white-warm p-6 md:p-8">
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {[
-          "Reminder sent to 3 guests",
-          "Reminder sent to 1 guest",
-          "Everyone's in",
-        ].map((t, i) => (
+          { n: "María", sent: true },
+          { n: "Tía Lupe", sent: true },
+          { n: "John", sent: false },
+          { n: "Abuela Carmen", sent: true },
+          { n: "Carlos", sent: false },
+        ].map((g) => (
           <div
-            key={t}
-            className={`flex items-center gap-3 rounded-xl bg-brand-white px-4 py-3 ${
-              i === 2 ? "ring-1 ring-brand-honey" : ""
-            }`}
+            key={g.n}
+            className="flex items-center justify-between rounded-xl bg-brand-white px-4 py-3"
           >
-            <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full bg-brand-honey" />
-            <span className="type-body-small text-brand-charcoal/80">{t}</span>
+            <span className="type-body-small text-brand-charcoal/80">{g.n}</span>
+            <span
+              className={`type-caption ${
+                g.sent ? "text-brand-honey" : "text-brand-charcoal/40"
+              }`}
+            >
+              {g.sent ? "Sent" : "Pending"}
+            </span>
           </div>
         ))}
       </div>
     </div>,
     <StepImage
-      key="s4"
+      key="s3"
       src="/images/how_it_works_profilesection/recipe_example_banana.png"
       alt="A designed recipe page"
       bg="bg-brand-cream"
     />,
     <StepImage
-      key="s5"
+      key="s4"
       src="/images/HowitWorks_images/book_in_hand_whitebackgound.png"
       alt="The finished hardcover cookbook"
       bg="bg-brand-cream"
     />,
   ];
+
+  // Tarjeta opcional (sin número, no es un paso del riel) entre el paso 1 y 2.
+  // TODO: reemplazar el preview falso por screenshots reales del builder.
+  const optionalInvite = (
+    <div className="lg:pl-16">
+      <div className="overflow-hidden rounded-2xl border border-dashed border-brand-sand bg-brand-white/70">
+        <div className="grid grid-cols-1 items-center gap-6 p-6 md:grid-cols-2 md:gap-10 md:p-8">
+          <div>
+            <p className="type-eyebrow text-brand-warm-gray">OPTIONAL</p>
+            <h3 className="type-subheading mt-3">Need an invite? Make a digital one.</h3>
+            <p className="type-body-small mt-3 text-brand-charcoal/70">
+              Build an invite for the shower, the anniversary, the wedding — photo,
+              date, address — with the recipe ask built right in. Most people just
+              share a link. This is here if you want it.
+            </p>
+          </div>
+
+          {/* Preview falso de la invitación */}
+          <div className="overflow-hidden rounded-2xl bg-brand-white shadow-sm">
+            <div className="aspect-[5/3] bg-brand-sand" />
+            <div className="space-y-1 p-5">
+              <p className="type-subheading">Ana &amp; Rich</p>
+              <p className="type-caption text-brand-charcoal/60">
+                Saturday, Oct 12 · 4pm · Napa, CA
+              </p>
+              <span className="mt-2 inline-block rounded-full bg-brand-cream px-3 py-1 type-caption text-brand-charcoal/70">
+                + Send us your recipe
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -139,7 +165,7 @@ export default function HowItWorksPage() {
       <Banner theme="light" showShippingStrip={false} />
 
       <main className="bg-brand-white">
-        {/* 1. Hero */}
+        {/* 1. Hero — el wedge en grande */}
         <section className="px-4 pt-32 pb-12 md:px-6 md:pt-44 md:pb-16">
           <motion.div
             className="mx-auto max-w-5xl text-center"
@@ -147,18 +173,27 @@ export default function HowItWorksPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: easeOut }}
           >
-            <h1 className="type-heading">How it works.</h1>
+            <p className="type-eyebrow text-brand-honey">HOW IT WORKS</p>
+            <h1 className="type-heading mt-4">
+              You don&rsquo;t write this book. The people who show up do.
+            </h1>
             <p className="type-body mt-5 text-brand-charcoal/70">
-              Everyone who shows up sends a recipe. We turn them into a hardcover.
-              Here&rsquo;s the whole thing, step by step.
+              From the first &ldquo;send me your recipe&rdquo; to the hardcover on your
+              counter — here&rsquo;s the whole thing.
             </p>
           </motion.div>
         </section>
 
-        {/* 2. Timeline de 5 pasos (tarjeta) */}
+        {/* 2. Timeline (tarjeta) */}
         <section className="px-2 py-6 md:px-3 md:py-8">
           <div className="mx-auto max-w-7xl rounded-[2rem] bg-brand-warm-white-warm px-5 py-16 md:px-10 md:py-24">
-            <JourneyTimeline steps={steps} visuals={visuals} />
+            <JourneyTimeline>
+              <JourneyStep step={steps[0]} index={0} visual={visuals[0]} />
+              {optionalInvite}
+              <JourneyStep step={steps[1]} index={1} visual={visuals[1]} />
+              <JourneyStep step={steps[2]} index={2} visual={visuals[2]} />
+              <JourneyStep step={steps[3]} index={3} visual={visuals[3]} />
+            </JourneyTimeline>
           </div>
         </section>
 
@@ -223,8 +258,8 @@ export default function HowItWorksPage() {
           >
             <h2 className="type-subheading">But what if people don&rsquo;t send anything?</h2>
             <p className="type-body mt-5 text-brand-charcoal/70">
-              We send the reminders, so you&rsquo;re not the one texting everyone twice.
-              And you can always add recipes yourself. Most books fill up faster than
+              You see exactly who&rsquo;s in and who&rsquo;s missing, and remind them in a
+              tap. And you can always add recipes yourself. Most books fill up faster than
               people expect.
             </p>
           </motion.div>
