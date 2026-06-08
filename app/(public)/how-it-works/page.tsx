@@ -289,24 +289,6 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
-        {/* 3. Objeción #1 */}
-        <section className="px-4 py-16 md:px-6 md:py-24">
-          <motion.div
-            className="mx-auto max-w-3xl text-center"
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.5, ease: easeOut }}
-          >
-            <h2 className="type-subheading">But what if people don&rsquo;t send anything?</h2>
-            <p className="type-body mt-5 text-brand-charcoal/70">
-              You see exactly who&rsquo;s in and who&rsquo;s missing, and remind them in a
-              tap. And you can always add recipes yourself. Most books fill up faster than
-              people expect.
-            </p>
-          </motion.div>
-        </section>
-
         {/* 4. Lo que recibes (tarjeta) */}
         <section className="px-2 py-6 md:px-3 md:py-8">
           <div className="mx-auto max-w-7xl rounded-[2rem] bg-brand-sand px-5 py-16 text-center md:px-10 md:py-24">
