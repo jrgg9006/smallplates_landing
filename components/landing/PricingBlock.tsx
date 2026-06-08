@@ -18,13 +18,14 @@ import { BASE_BOOK_PRICE } from "@/lib/stripe/pricing";
  * framing is the hero of this section.
  */
 
-// Placeholder gallery — swap for real product photography later.
 const GALLERY = [
-  { src: "/images/books_printed/recipe_modal_9.png", alt: "A recipe spread inside the book" },
-  { src: "/images/books_printed/recipe_modal_1.png", alt: "A recipe with its photo" },
-  { src: "/images/books_printed/recipe_modal_3.png", alt: "A recipe and a note from a guest" },
-  { src: "/images/books_printed/recipe_modal_6.png", alt: "A full-color dish inside the book" },
-  { src: "/images/books_printed/recipe_modal_8.png", alt: "A recipe page" },
+  { src: "/images/PricingBlock/pricingblock_4.jpg", alt: "The hardcover cookbook, cover up" },
+  { src: "/images/PricingBlock/pricingblock_7.jpg", alt: "Handing over the finished book" },
+  { src: "/images/PricingBlock/pricingblock_3.jpg", alt: "Reading the book at the table" },
+  { src: "/images/PricingBlock/pricingblock_1.jpg", alt: "Showing a recipe from the book" },
+  { src: "/images/PricingBlock/pricingblock_5.jpg", alt: "A dessert recipe spread inside the book" },
+  { src: "/images/PricingBlock/pricingblock_2.jpg", alt: "A plate of food beside its recipe" },
+  { src: "/images/PricingBlock/pricingblock_6.jpg", alt: "A recipe spread for Oreo truffles" },
 ];
 
 const INCLUDES = [
@@ -76,6 +77,10 @@ export default function PricingBlock() {
     trackEvent("start_book_click", { cta_location: "pricing_block_primary" });
     router.push(isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding");
   };
+
+  const showPrev = () =>
+    setActive((a) => (a - 1 + GALLERY.length) % GALLERY.length);
+  const showNext = () => setActive((a) => (a + 1) % GALLERY.length);
 
   return (
     <section
@@ -134,6 +139,28 @@ export default function PricingBlock() {
                     priority={i === 0}
                   />
                 ))}
+
+                {/* Nav arrows */}
+                <button
+                  type="button"
+                  onClick={showPrev}
+                  aria-label="Previous image"
+                  className="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/70 text-brand-charcoal shadow-sm backdrop-blur-sm transition hover:bg-white"
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={showNext}
+                  aria-label="Next image"
+                  className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/70 text-brand-charcoal shadow-sm backdrop-blur-sm transition hover:bg-white"
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
               </div>
             </div>
           </motion.div>
