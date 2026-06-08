@@ -1,7 +1,12 @@
 "use client";
 
 import React from "react";
-import { BASE_BOOK_PRICE, ADDITIONAL_BOOK_PRICE, calculateSubtotal } from "@/lib/stripe/pricing";
+import {
+  BASE_BOOK_PRICE,
+  calculateSubtotal,
+  calculateExtrasAmount,
+  pricePerCopy,
+} from "@/lib/stripe/pricing";
 import { BookPreviewPanel } from "../BookPreviewPanel";
 import type { GroupWithMembers } from "@/lib/types/database";
 
@@ -22,6 +27,8 @@ interface OrderCartProps {
 export function OrderCart({ qty, group, recipeCount, children }: OrderCartProps) {
   const total = calculateSubtotal(qty);
   const extras = qty - 1;
+  const extrasAmount = calculateExtrasAmount(qty);
+  const perPerson = pricePerCopy(qty);
 
   return (
     <div className="rounded-2xl border border-[hsl(var(--brand-border))] bg-white p-6 sm:p-7">
@@ -57,12 +64,10 @@ export function OrderCart({ qty, group, recipeCount, children }: OrderCartProps)
                 {extras} extra {extras === 1 ? "copy" : "copies"}
               </p>
               <p className="text-xs text-[hsl(var(--brand-warm-gray))]">
-                ${ADDITIONAL_BOOK_PRICE} each
+                One for everyone who chips in
               </p>
             </div>
-            <span className="tabular-nums text-brand-charcoal">
-              ${extras * ADDITIONAL_BOOK_PRICE}
-            </span>
+            <span className="tabular-nums text-brand-charcoal">${extrasAmount}</span>
           </div>
         )}
 
@@ -76,6 +81,12 @@ export function OrderCart({ qty, group, recipeCount, children }: OrderCartProps)
         <span className="font-medium text-brand-charcoal">Total</span>
         <span className="font-serif text-2xl tabular-nums text-brand-charcoal">${total}</span>
       </div>
+
+      {extras > 0 && (
+        <p className="mt-1.5 text-right text-xs text-[hsl(var(--brand-warm-gray))]">
+          ${perPerson} per person if you split it
+        </p>
+      )}
 
       {children}
     </div>

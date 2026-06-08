@@ -11,7 +11,12 @@ import { isFreeTierEnabled } from "@/lib/feature-flags";
 
 // theme="dark" (default): white logo/text, meant to overlay the dark hero.
 // theme="light": charcoal logo/text, for light-background pages (e.g. pricing).
-export default function Banner({ theme = "dark" }: { theme?: "dark" | "light" } = {}) {
+// showShippingStrip=false hides only the top "Ships free…" strip, keeping the
+// header/nav (used on /pricing where the strip is redundant).
+export default function Banner({
+  theme = "dark",
+  showShippingStrip = true,
+}: { theme?: "dark" | "light"; showShippingStrip?: boolean } = {}) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user } = useAuth();
@@ -41,16 +46,22 @@ export default function Banner({ theme = "dark" }: { theme?: "dark" | "light" } 
     <>
       <div className="absolute top-0 left-0 right-0 z-50">
         {/* Shipping announcement strip */}
-        <div className={`py-2.5 text-center border-b ${stripBorder}`}>
-          <span className={`sm:hidden font-sans text-[11px] font-medium tracking-[0.15em] uppercase ${stripText}`}>
-            Ships to US, MX &amp; EU
-          </span>
-          <span className={`hidden sm:inline font-sans text-[11px] font-medium tracking-[0.15em] uppercase ${stripText}`}>
-            Ships free to United States, Mexico, and European Union.
-          </span>
-        </div>
+        {showShippingStrip && (
+          <div className={`py-2.5 text-center border-b ${stripBorder}`}>
+            <span className={`sm:hidden font-sans text-[11px] font-medium tracking-[0.15em] uppercase ${stripText}`}>
+              Ships to US, MX &amp; EU
+            </span>
+            <span className={`hidden sm:inline font-sans text-[11px] font-medium tracking-[0.15em] uppercase ${stripText}`}>
+              Ships free to United States, Mexico, and European Union.
+            </span>
+          </div>
+        )}
 
-        <header role="banner" aria-label="Top banner">
+        <header
+          role="banner"
+          aria-label="Top banner"
+          className={!showShippingStrip ? `bg-white border-b ${stripBorder}` : undefined}
+        >
           <div className="mx-auto max-w-7xl px-6 md:px-8 h-16 flex items-center justify-between">
             {/* Mobile: empty div for centering logo */}
             <div className="lg:hidden w-10"></div>
