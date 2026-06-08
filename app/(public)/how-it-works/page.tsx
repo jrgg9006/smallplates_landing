@@ -272,13 +272,8 @@ export default function HowItWorksPage() {
                 </div>
               </div>
 
-              {/* Flecha */}
-              <div className="my-6 flex justify-center" aria-hidden>
-                <span className="type-subheading text-brand-honey">↓</span>
-              </div>
-
               {/* Después: página diseñada */}
-              <p className="type-caption mb-3 text-center text-brand-charcoal/50">
+              <p className="type-caption mb-3 mt-10 text-center text-brand-charcoal/50">
                 Generated Recipe Page
               </p>
               <div className="relative mx-auto aspect-[4/3] w-full max-w-2xl overflow-hidden rounded-2xl bg-brand-white shadow-md">
