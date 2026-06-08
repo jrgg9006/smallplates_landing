@@ -178,7 +178,7 @@ export default function BooksPrinted() {
               Real recipes. Real people. Real books.
             </h2>
             <p className="type-body text-brand-charcoal/70 max-w-3xl">
-              They send the recipe. We create an image for every single one.
+              Every one of these came from someone&rsquo;s kitchen. Tap any to look inside.
             </p>
           </motion.div>
           
@@ -234,7 +234,7 @@ export default function BooksPrinted() {
                     {/* Hover overlay */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
                       <span className="text-white font-semibold text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        View Recipe
+                        Look inside
                       </span>
                     </div>
                   </div>
@@ -274,7 +274,7 @@ export default function BooksPrinted() {
                       {/* Hover overlay */}
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
                         <span className="text-white font-semibold text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          View Recipe
+                          Look inside
                         </span>
                       </div>
                     </div>
