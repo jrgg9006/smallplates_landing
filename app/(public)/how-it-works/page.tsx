@@ -225,57 +225,55 @@ export default function HowItWorksPage() {
               </p>
             </div>
 
-            <div className="mt-10">
-              {/* Antes: la receta llenándose como un formulario (ancho completo) */}
+            <div className="mx-auto mt-10 max-w-4xl">
+              {/* Antes: la receta llenándose como un formulario, dos columnas */}
               <p className="type-caption mb-4 text-center text-brand-charcoal/50">
                 What they send
               </p>
 
-              <div className="space-y-6">
-                {/* Campo: título */}
-                <div>
-                  <p className="type-eyebrow mb-2 text-brand-warm-gray">Recipe title</p>
-                  <div className="rounded-xl border border-brand-sand bg-brand-white px-5 py-4">
-                    <p className="type-subheading">Honey Soy Garlic Salmon</p>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {/* Izquierda: title, ingredients, notes apilados */}
+                <div className="space-y-4">
+                  <div>
+                    <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Recipe title</p>
+                    <div className="rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
+                      <p className="type-body text-brand-charcoal">Honey Soy Garlic Salmon</p>
+                    </div>
                   </div>
-                </div>
-
-                {/* Campos: ingredients (izq) + steps (der) */}
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                  <div className="flex flex-col">
-                    <p className="type-eyebrow mb-2 text-brand-warm-gray">Ingredients</p>
-                    <div className="flex-1 rounded-xl border border-brand-sand bg-brand-white px-5 py-4">
+                  <div>
+                    <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Ingredients</p>
+                    <div className="rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
                       <p className="type-body-small text-brand-charcoal/80">
                         2-4 salmon fillets, 1/4 cup soy sauce, 1/4 cup honey, butter,
                         garlic, salt, pepper, chili powder
                       </p>
                     </div>
                   </div>
-                  <div className="flex flex-col">
-                    <p className="type-eyebrow mb-2 text-brand-warm-gray">Steps</p>
-                    <div className="flex-1 rounded-xl border border-brand-sand bg-brand-white px-5 py-4">
+                  <div>
+                    <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Notes</p>
+                    <div className="rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
                       <p className="type-body-small text-brand-charcoal/80">
-                        Sear the salmon skin-side down. Add butter and garlic, then honey
-                        and soy. Baste until glazy.
-                        <span className="ml-1 inline-block h-4 w-0.5 animate-pulse bg-brand-honey align-middle" />
+                        Serve with white rice.
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Campo: notes */}
-                <div>
-                  <p className="type-eyebrow mb-2 text-brand-warm-gray">Notes</p>
-                  <div className="rounded-xl border border-brand-sand bg-brand-white px-5 py-4">
+                {/* Derecha: steps, ocupa todo el alto */}
+                <div className="flex flex-col">
+                  <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Steps</p>
+                  <div className="flex-1 rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
                     <p className="type-body-small text-brand-charcoal/80">
-                      Serve with white rice.
+                      Sear the salmon skin-side down. Add butter and garlic, then honey
+                      and soy. Baste until glazy.
+                      <span className="ml-1 inline-block h-4 w-0.5 animate-pulse bg-brand-honey align-middle" />
                     </p>
                   </div>
                 </div>
               </div>
 
               {/* Flecha */}
-              <div className="my-7 flex justify-center" aria-hidden>
+              <div className="my-6 flex justify-center" aria-hidden>
                 <span className="type-subheading text-brand-honey">↓</span>
               </div>
 
@@ -283,13 +281,13 @@ export default function HowItWorksPage() {
               <p className="type-caption mb-3 text-center text-brand-charcoal/50">
                 Generated Recipe Page
               </p>
-              <div className="relative mx-auto aspect-[4/3] w-full max-w-3xl overflow-hidden rounded-2xl bg-brand-white shadow-md">
+              <div className="relative mx-auto aspect-[4/3] w-full max-w-2xl overflow-hidden rounded-2xl bg-brand-white shadow-md">
                 <Image
                   src="/images/how_it_works_profilesection/recipe_example_salmon.png"
                   alt="The recipe, designed as a finished book page"
                   fill
                   className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 768px"
+                  sizes="(max-width: 768px) 100vw, 672px"
                 />
               </div>
             </div>
