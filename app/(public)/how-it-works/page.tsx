@@ -225,29 +225,33 @@ export default function HowItWorksPage() {
               </p>
             </div>
 
-            <div className="mx-auto mt-10 max-w-xl">
-              {/* Antes: receta cruda, estructurada */}
+            <div className="mx-auto mt-10 max-w-3xl">
+              {/* Antes: receta cruda, estructurada en dos columnas */}
               <p className="type-caption mb-3 text-center text-brand-charcoal/50">
                 What they send
               </p>
-              <div className="rounded-2xl bg-brand-white p-6 text-left shadow-sm md:p-7">
+              <div className="rounded-2xl bg-brand-white p-6 text-left shadow-sm md:p-8">
                 <p className="type-subheading">Honey Soy Garlic Salmon</p>
-                <div className="mt-4 space-y-4">
-                  <div>
-                    <p className="type-eyebrow text-brand-warm-gray">Ingredients</p>
-                    <p className="type-body-small mt-1 text-brand-charcoal/80">
-                      2-4 salmon fillets, 1/4 cup soy sauce, 1/4 cup honey, butter,
-                      garlic, salt, pepper, chili powder
-                    </p>
+                <div className="mt-5 grid grid-cols-1 gap-x-10 gap-y-5 md:grid-cols-3">
+                  {/* Izquierda: ingredients + steps */}
+                  <div className="space-y-5 md:col-span-2">
+                    <div>
+                      <p className="type-eyebrow text-brand-warm-gray">Ingredients</p>
+                      <p className="type-body-small mt-1 text-brand-charcoal/80">
+                        2-4 salmon fillets, 1/4 cup soy sauce, 1/4 cup honey, butter,
+                        garlic, salt, pepper, chili powder
+                      </p>
+                    </div>
+                    <div>
+                      <p className="type-eyebrow text-brand-warm-gray">Steps</p>
+                      <p className="type-body-small mt-1 text-brand-charcoal/80">
+                        Sear the salmon skin-side down. Add butter and garlic, then honey
+                        and soy. Baste until glazy.
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="type-eyebrow text-brand-warm-gray">Steps</p>
-                    <p className="type-body-small mt-1 text-brand-charcoal/80">
-                      Sear the salmon skin-side down. Add butter and garlic, then honey
-                      and soy. Baste until glazy.
-                    </p>
-                  </div>
-                  <div>
+                  {/* Derecha: notes */}
+                  <div className="md:col-span-1">
                     <p className="type-eyebrow text-brand-warm-gray">Notes</p>
                     <p className="type-body-small mt-1 text-brand-charcoal/80">
                       Serve with white rice.
@@ -263,15 +267,15 @@ export default function HowItWorksPage() {
 
               {/* Después: página diseñada */}
               <p className="type-caption mb-3 text-center text-brand-charcoal/50">
-                What we make
+                Generated Recipe Page
               </p>
               <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-brand-white shadow-md">
                 <Image
                   src="/images/how_it_works_profilesection/recipe_example_salmon.png"
-                  alt="The same recipe, designed as a book page"
+                  alt="The recipe, designed as a finished book page"
                   fill
                   className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 576px"
+                  sizes="(max-width: 768px) 100vw, 768px"
                 />
               </div>
             </div>
