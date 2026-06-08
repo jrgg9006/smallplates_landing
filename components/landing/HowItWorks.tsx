@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 
 const easeOut: [number, number, number, number] = [0.23, 1, 0.32, 1];
@@ -108,6 +109,15 @@ export default function HowItWorks() {
           {steps.map((step, i) => (
             <StepCard key={step.number} step={step} index={i} />
           ))}
+        </div>
+
+        <div className="mt-12 text-center md:mt-16">
+          <Link
+            href="/how-it-works"
+            className="type-body-small inline-flex items-center gap-1 text-brand-charcoal underline underline-offset-4 transition-colors hover:text-brand-honey"
+          >
+            See the whole thing, step by step <span aria-hidden>→</span>
+          </Link>
         </div>
 
       </div>
