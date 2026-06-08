@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import Banner from "@/components/landing/Banner";
 import WhatsAppFAB from "@/components/landing/WhatsAppFAB";
-import JourneyStep, { type JourneyStepData } from "./_components/JourneyStep";
+import JourneyTimeline from "./_components/JourneyTimeline";
+import { type JourneyStepData } from "./_components/JourneyStep";
 
 const easeOut: [number, number, number, number] = [0.23, 1, 0.32, 1];
 
@@ -91,14 +93,14 @@ export default function HowItWorksPage() {
         {["You add them", "Share a link", "Invite people"].map((c) => (
           <span
             key={c}
-            className="type-caption rounded-full border border-brand-sand bg-brand-warm-white-warm px-4 py-2 text-brand-charcoal/80"
+            className="type-caption rounded-full border border-brand-sand bg-brand-white px-4 py-2 text-brand-charcoal/80"
           >
             {c}
           </span>
         ))}
       </div>
     </div>,
-    <div key="s3" className="rounded-2xl bg-brand-cream p-6 md:p-8">
+    <div key="s3" className="rounded-2xl bg-brand-warm-white-warm p-6 md:p-8">
       <div className="space-y-3">
         {[
           "Reminder sent to 3 guests",
@@ -127,70 +129,48 @@ export default function HowItWorksPage() {
       key="s5"
       src="/images/HowitWorks_images/book_in_hand_whitebackgound.png"
       alt="The finished hardcover cookbook"
-      bg="bg-brand-white"
+      bg="bg-brand-cream"
     />,
   ];
 
   return (
     <>
-      {/* Header con logo centrado */}
-      <header
-        role="banner"
-        aria-label="Top banner"
-        className="w-full border-b border-brand-sand bg-brand-warm-white-warm"
-      >
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-center px-6 md:px-8">
-          <Link href="/" className="flex-shrink-0">
-            <Image
-              src="/images/SmallPlates_logo_horizontal.png"
-              alt="Small Plates & Company"
-              width={180}
-              height={36}
-              priority
-              className="transition-opacity duration-300 hover:opacity-70"
-            />
-          </Link>
-        </div>
-      </header>
+      {/* Banner real del sitio (con login), sin el strip de shipping */}
+      <Banner theme="light" showShippingStrip={false} />
 
-      <main className="bg-brand-warm-white-warm">
+      <main className="bg-brand-white">
         {/* 1. Hero */}
-        <section className="px-6 pt-20 pb-16 md:px-10 md:pt-28 md:pb-20">
+        <section className="px-6 pt-28 pb-12 md:px-10 md:pt-36 md:pb-16">
           <motion.div
-            className="mx-auto max-w-3xl text-center"
+            className="mx-auto max-w-4xl text-center"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: easeOut }}
           >
-            <h1 className="type-display">How it works.</h1>
-            <p className="type-body mt-6 text-brand-charcoal/70">
+            <h1 className="type-heading">How it works.</h1>
+            <p className="type-body mt-5 text-brand-charcoal/70">
               Everyone who shows up sends a recipe. We turn them into a hardcover.
               Here&rsquo;s the whole thing, step by step.
             </p>
           </motion.div>
         </section>
 
-        {/* 2. Timeline de 5 pasos */}
-        <section className="px-6 pb-24 md:px-10 md:pb-32">
-          <div className="relative mx-auto max-w-5xl">
-            <div
-              className="absolute left-0 top-2 bottom-2 hidden w-px bg-brand-charcoal/15 lg:block"
-              aria-hidden
-            />
-            <div className="space-y-20 md:space-y-28">
-              {steps.map((step, i) => (
-                <JourneyStep key={step.number} step={step} index={i} visual={visuals[i]} />
-              ))}
-            </div>
+        {/* 2. Timeline de 5 pasos (tarjeta) */}
+        <section className="px-4 py-8 md:px-6 md:py-10">
+          <div className="mx-auto max-w-6xl rounded-[2rem] bg-brand-warm-white-warm px-6 py-16 md:px-16 md:py-24">
+            <JourneyTimeline steps={steps} visuals={visuals} />
           </div>
         </section>
 
-        {/* 3. El wedge / la magia */}
-        <section id="the-magic" className="bg-brand-cream px-6 py-24 md:px-10 md:py-32">
-          <div className="mx-auto max-w-5xl">
+        {/* 3. El wedge / la magia (tarjeta) */}
+        <section className="px-4 py-8 md:px-6 md:py-10">
+          <div
+            id="the-magic"
+            className="mx-auto max-w-6xl rounded-[2rem] bg-brand-cream px-6 py-16 md:px-16 md:py-24"
+          >
             <div className="mx-auto max-w-2xl text-center">
               <p className="type-eyebrow text-brand-honey">THE MAGIC</p>
-              <h2 className="type-heading mt-4">We make it look good. But how?</h2>
+              <h2 className="type-subheading mt-4">We make it look good. But how?</h2>
               <p className="type-body-small mt-4 text-brand-charcoal/70">
                 You send the real stuff — a text, a photo, a voice note. We make it a book.
               </p>
@@ -202,8 +182,8 @@ export default function HowItWorksPage() {
                 <p className="type-caption mb-3 text-center text-brand-charcoal/50">
                   What they send
                 </p>
-                <div className="rounded-2xl bg-brand-warm-white-warm p-6">
-                  <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-brand-white px-4 py-3 shadow-sm">
+                <div className="rounded-2xl bg-brand-white p-6">
+                  <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-brand-warm-white-warm px-4 py-3 shadow-sm">
                     <p className="type-body-small text-brand-charcoal/80">
                       grandma&rsquo;s banana bread — 3 very ripe bananas, 1 cup sugar,
                       1½ cups flour, melt some butter, 350 for about an hour. she never
@@ -233,15 +213,15 @@ export default function HowItWorksPage() {
         </section>
 
         {/* 4. Objeción #1 */}
-        <section className="px-6 py-24 md:px-10 md:py-32">
+        <section className="px-6 py-16 md:px-10 md:py-24">
           <motion.div
-            className="mx-auto max-w-2xl text-center"
+            className="mx-auto max-w-3xl text-center"
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.5, ease: easeOut }}
           >
-            <h2 className="type-heading">But what if people don&rsquo;t send anything?</h2>
+            <h2 className="type-subheading">But what if people don&rsquo;t send anything?</h2>
             <p className="type-body mt-5 text-brand-charcoal/70">
               We send the reminders, so you&rsquo;re not the one texting everyone twice.
               And you can always add recipes yourself. Most books fill up faster than
@@ -250,29 +230,29 @@ export default function HowItWorksPage() {
           </motion.div>
         </section>
 
-        {/* 5. Lo que recibes */}
-        <section className="bg-brand-sand px-6 py-24 md:px-10 md:py-32">
-          <div className="mx-auto max-w-5xl text-center">
-            <h2 className="type-heading">What shows up at your door</h2>
+        {/* 5. Lo que recibes (tarjeta) */}
+        <section className="px-4 py-8 md:px-6 md:py-10">
+          <div className="mx-auto max-w-6xl rounded-[2rem] bg-brand-sand px-6 py-16 text-center md:px-16 md:py-24">
+            <h2 className="type-subheading">What shows up at your door</h2>
             <p className="type-body-small mx-auto mt-4 max-w-xl text-brand-charcoal/70">
               A full-color hardcover, around 80 pages. It lives in the kitchen. It gets
               stained. That&rsquo;s the point.
             </p>
-            <div className="relative mx-auto mt-12 aspect-[16/10] max-w-3xl overflow-hidden rounded-2xl bg-brand-white shadow-md">
+            <div className="relative mx-auto mt-12 aspect-[16/10] max-w-4xl overflow-hidden rounded-2xl bg-brand-white shadow-md">
               <Image
                 src="/images/HowitWorks_images/book_in_hand_whitebackgound.png"
                 alt="The finished hardcover cookbook"
                 fill
                 className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 768px"
+                sizes="(max-width: 1024px) 100vw, 896px"
               />
             </div>
           </div>
         </section>
 
         {/* 6. Ancla de precio */}
-        <section className="px-6 py-20 md:px-10 md:py-24">
-          <div className="mx-auto max-w-2xl text-center">
+        <section className="px-6 py-16 md:px-10 md:py-20">
+          <div className="mx-auto max-w-3xl text-center">
             <p className="type-subheading">
               Free to start. You only pay when the book is ready.
             </p>
@@ -289,10 +269,10 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
-        {/* 7. CTA de cierre */}
-        <section className="bg-brand-charcoal px-6 py-20 md:px-10 md:py-24">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="type-heading text-brand-warm-white-warm">
+        {/* 7. CTA de cierre (tarjeta oscura) */}
+        <section className="px-4 pb-16 md:px-6 md:pb-24">
+          <div className="mx-auto max-w-6xl rounded-[2rem] bg-brand-charcoal px-6 py-16 text-center md:px-16 md:py-20">
+            <h2 className="type-subheading text-brand-warm-white-warm">
               Ready to start your book?
             </h2>
             <div className="mt-8">

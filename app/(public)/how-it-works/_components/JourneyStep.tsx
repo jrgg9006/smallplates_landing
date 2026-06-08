@@ -40,7 +40,7 @@ export default function JourneyStep({
           transition={{ duration: 0.5, delay: index * 0.05, ease: easeOut }}
         >
           <p className="type-eyebrow text-brand-honey">STEP {step.number}</p>
-          <h3 className="type-heading mt-3">{step.title}</h3>
+          <h3 className="type-subheading mt-3">{step.title}</h3>
           <p className="type-body-small mt-4 text-brand-charcoal/70">{step.description}</p>
           {step.cta && (
             <a
