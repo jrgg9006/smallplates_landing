@@ -215,7 +215,7 @@ export default function HowItWorksPage() {
         <section className="px-2 py-6 md:px-3 md:py-8">
           <div
             id="the-magic"
-            className="mx-auto max-w-7xl rounded-[2rem] bg-brand-cream px-5 py-16 md:px-10 md:py-24"
+            className="mx-auto max-w-7xl rounded-[2rem] bg-brand-cream px-5 py-12 md:px-10 md:py-16"
           >
             <div className="mx-auto max-w-2xl text-center">
               <p className="type-eyebrow text-brand-honey">THE MAGIC</p>
@@ -225,36 +225,54 @@ export default function HowItWorksPage() {
               </p>
             </div>
 
-            <div className="mt-14 grid grid-cols-1 items-center gap-8 md:grid-cols-2">
-              {/* Antes: mensaje crudo */}
-              <div>
-                <p className="type-caption mb-3 text-center text-brand-charcoal/50">
-                  What they send
-                </p>
-                <div className="rounded-2xl bg-brand-white p-6">
-                  <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-brand-warm-white-warm px-4 py-3 shadow-sm">
-                    <p className="type-body-small text-brand-charcoal/80">
-                      weeknight salmon: pat it dry, salt, 400&deg; for 12 min, big squeeze
-                      of lemon. don&rsquo;t overthink it
+            <div className="mx-auto mt-10 max-w-xl">
+              {/* Antes: receta cruda, estructurada */}
+              <p className="type-caption mb-3 text-center text-brand-charcoal/50">
+                What they send
+              </p>
+              <div className="rounded-2xl bg-brand-white p-6 text-left shadow-sm md:p-7">
+                <p className="type-subheading">Honey Soy Garlic Salmon</p>
+                <div className="mt-4 space-y-4">
+                  <div>
+                    <p className="type-eyebrow text-brand-warm-gray">Ingredients</p>
+                    <p className="type-body-small mt-1 text-brand-charcoal/80">
+                      2-4 salmon fillets, 1/4 cup soy sauce, 1/4 cup honey, butter,
+                      garlic, salt, pepper, chili powder
+                    </p>
+                  </div>
+                  <div>
+                    <p className="type-eyebrow text-brand-warm-gray">Steps</p>
+                    <p className="type-body-small mt-1 text-brand-charcoal/80">
+                      Sear the salmon skin-side down. Add butter and garlic, then honey
+                      and soy. Baste until glazy.
+                    </p>
+                  </div>
+                  <div>
+                    <p className="type-eyebrow text-brand-warm-gray">Notes</p>
+                    <p className="type-body-small mt-1 text-brand-charcoal/80">
+                      Serve with white rice.
                     </p>
                   </div>
                 </div>
               </div>
 
+              {/* Flecha */}
+              <div className="my-5 flex justify-center" aria-hidden>
+                <span className="type-subheading text-brand-honey">↓</span>
+              </div>
+
               {/* Después: página diseñada */}
-              <div>
-                <p className="type-caption mb-3 text-center text-brand-charcoal/50">
-                  What we make
-                </p>
-                <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-brand-white shadow-md">
-                  <Image
-                    src="/images/how_it_works_profilesection/recipe_example_salmon.png"
-                    alt="The same recipe, designed as a book page"
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 768px) 100vw, 400px"
-                  />
-                </div>
+              <p className="type-caption mb-3 text-center text-brand-charcoal/50">
+                What we make
+              </p>
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-brand-white shadow-md">
+                <Image
+                  src="/images/how_it_works_profilesection/recipe_example_salmon.png"
+                  alt="The same recipe, designed as a book page"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 576px"
+                />
               </div>
             </div>
           </div>
