@@ -32,7 +32,7 @@ export default function JourneyStep({
         aria-hidden
       />
 
-      <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-14">
+      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2 lg:gap-14">
         {/* texto (siempre a la izquierda, pegado al riel) */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
