@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { BASE_BOOK_PRICE, ADDITIONAL_BOOK_PRICE } from "@/lib/stripe/pricing";
+import { calculateSubtotal, pricePerCopy } from "@/lib/stripe/pricing";
 import { trackEvent } from "@/lib/analytics";
 import { isFreeTierEnabled } from "@/lib/feature-flags";
 
@@ -14,8 +15,20 @@ import { isFreeTierEnabled } from "@/lib/feature-flags";
  * Features listed with honey accent dots.
  */
 
+// Reason: mirror the checkout cap (QuantityStep MAX_COPIES) so the selector
+// never previews a quantity the close flow can't actually order.
+const MAX_COPIES = 10;
+
+// Reason: the price table shows the full volume curve (1–6); 7+ is the flat-$89
+// edge case handled by a subordinate stepper, not extra rows.
+const TABLE_COPIES = [1, 2, 3, 4, 5, 6];
+
 export default function PricingPage() {
   const router = useRouter();
+
+  // Reason: default to 3 so the card loads with a row already selected, showing
+  // a real group price ($113/person · $339 total) instead of the pricier single.
+  const [qty, setQty] = useState(3);
 
   const handleStartBook = () => {
     trackEvent('start_book_click', { cta_location: 'pricing_card_primary' });
@@ -38,7 +51,7 @@ export default function PricingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            One book. Everything included.
+            One book. Or one for everyone.
           </motion.h1>
           <motion.p
             className="mt-4 type-body-small text-[hsl(var(--brand-warm-gray-light))]"
@@ -46,7 +59,7 @@ export default function PricingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            No tiers. No packages. Just the book.
+            Everyone who chips in gets their own copy. The more you print, the less each one costs.
           </motion.p>
         </div>
       </section>
@@ -87,40 +100,107 @@ export default function PricingPage() {
             </div>
 
             <div className="px-8 py-10 md:px-12 md:py-14">
-              {/* Two prices side by side */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-0 sm:divide-x sm:divide-brand-sand mb-10">
-                {/* First book */}
-                <div className="text-center sm:pr-8">
-                  <p className="font-sans text-xs font-medium tracking-[0.15em] text-[hsl(var(--brand-warm-gray-light))] uppercase mb-3">
-                    Your first book
-                  </p>
-                  <div className="flex items-baseline justify-center">
-                    <span className="font-serif text-3xl md:text-4xl text-brand-charcoal/50">$</span>
-                    <span className="font-serif text-6xl md:text-7xl text-brand-charcoal leading-none">
-                      {BASE_BOOK_PRICE}
-                    </span>
-                  </div>
-                  <p className="mt-2 text-sm text-[hsl(var(--brand-warm-gray-light))]">shipping included</p>
+              {/* Copy-count selector — a price table that shows the whole volume
+                  curve at once, so the per-person drop (our group mechanic) is
+                  visible instead of hidden behind a counter. Each row IS the
+                  selector. Numbers come from pricing.ts, so the table always
+                  matches what checkout charges. */}
+              <div className="mb-10">
+                <p className="font-sans text-xs font-medium tracking-[0.15em] text-[hsl(var(--brand-warm-gray-light))] uppercase mb-5 text-center">
+                  How many copies?
+                </p>
+
+                {/* The table (1–6) — each row is a radio option */}
+                <div role="radiogroup" aria-label="Number of copies" className="space-y-2">
+                  {TABLE_COPIES.map((n) => {
+                    const selected = qty === n;
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        onClick={() => setQty(n)}
+                        className={`flex w-full items-center justify-between rounded-xl border px-5 py-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-honey ${
+                          selected
+                            ? "border-brand-honey bg-brand-honey/5"
+                            : "border-brand-sand hover:border-brand-honey/40"
+                        }`}
+                      >
+                        <span className="flex items-baseline gap-2">
+                          <span className="font-serif text-base text-brand-charcoal">
+                            {n === 1 ? "1 copy" : `${n} copies`}
+                          </span>
+                          {n === 6 && (
+                            <span className="text-xs text-brand-honey">best price</span>
+                          )}
+                        </span>
+                        <span className="text-right">
+                          <span className="block font-serif text-2xl md:text-3xl leading-none tabular-nums text-brand-charcoal">
+                            ${pricePerCopy(n)}
+                            {n > 1 && (
+                              <span className="ml-1 font-sans text-xs text-[hsl(var(--brand-warm-gray-light))]">
+                                /person
+                              </span>
+                            )}
+                          </span>
+                          <span className="mt-1 block text-sm tabular-nums text-[hsl(var(--brand-warm-gray-light))]">
+                            {n === 1 ? "shipping included" : `$${calculateSubtotal(n)} total`}
+                          </span>
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
 
-                {/* Additional copies */}
-                <div className="text-center sm:pl-8">
-                  <p className="font-sans text-xs font-medium tracking-[0.15em] text-[hsl(var(--brand-warm-gray-light))] uppercase mb-3">
-                    Each additional copy
-                  </p>
-                  <div className="flex items-baseline justify-center">
-                    <span className="font-serif text-3xl md:text-4xl text-brand-charcoal/50">$</span>
-                    <span className="font-serif text-6xl md:text-7xl text-brand-charcoal leading-none">
-                      {ADDITIONAL_BOOK_PRICE}
+                {/* 7+ — the edge case, kept quiet and subordinate to the table */}
+                <div
+                  className={`mt-3 flex items-center justify-between rounded-xl border px-5 py-4 transition-colors ${
+                    qty >= 7 ? "border-brand-honey bg-brand-honey/5" : "border-brand-sand"
+                  }`}
+                >
+                  <span className="text-left">
+                    <span className="block font-serif text-base text-brand-charcoal">
+                      More than 6?
                     </span>
-                  </div>
-                  <p className="mt-2 text-sm text-[hsl(var(--brand-warm-gray-light))]">same book, same quality</p>
+                    <span className="mt-1 block text-sm tabular-nums text-[hsl(var(--brand-warm-gray-light))]" aria-live="polite">
+                      $89 each{qty >= 7 ? ` · $${calculateSubtotal(qty)} total` : ""}
+                    </span>
+                  </span>
+                  <span className="flex items-center gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setQty((q) => Math.max(6, q - 1))}
+                      disabled={qty <= 6}
+                      aria-label="Fewer copies"
+                      className="flex h-9 w-9 items-center justify-center rounded-full border-[1.5px] border-brand-charcoal/15 text-brand-charcoal transition-colors hover:border-brand-honey disabled:opacity-25 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-honey"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M5 12h14" /></svg>
+                    </button>
+                    <span className="min-w-[1.5rem] text-center font-serif text-xl tabular-nums text-brand-charcoal">
+                      {qty >= 7 ? qty : 7}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setQty((q) => Math.min(MAX_COPIES, Math.max(7, q + 1)))}
+                      disabled={qty >= MAX_COPIES}
+                      aria-label="More copies"
+                      className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-honey text-white transition-colors hover:bg-brand-honey-dark disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-honey"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+                    </button>
+                  </span>
                 </div>
+
+                {/* Footer line under the selector */}
+                <p className="mt-4 text-center text-xs text-[hsl(var(--brand-warm-gray-light))]">
+                  Ships to one address · shipping included
+                </p>
               </div>
 
               {/* Context note */}
               <p className="text-center font-serif italic text-[hsl(var(--brand-warm-gray-light))] text-base mb-10">
-                Most people order 2–3.
+                The price stops dropping at six.
               </p>
 
               {/* Honey rule */}
