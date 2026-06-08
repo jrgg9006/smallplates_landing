@@ -140,7 +140,7 @@ export default function HowItWorksPage() {
 
       <main className="bg-brand-white">
         {/* 1. Hero */}
-        <section className="px-6 pt-28 pb-12 md:px-10 md:pt-36 md:pb-16">
+        <section className="px-6 pt-32 pb-12 md:px-10 md:pt-44 md:pb-16">
           <motion.div
             className="mx-auto max-w-4xl text-center"
             initial={{ opacity: 0, y: 16 }}
