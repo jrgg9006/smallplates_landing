@@ -18,20 +18,19 @@ const steps: JourneyStepData[] = [
     number: "01",
     title: "Gather the recipes. Three ways.",
     description:
-      "You add them, share a link, or invite a few people to collect with you. No app, no account for your people. The part everyone loves: they just snap a photo of the handwritten recipe — grandma's card, the back of an envelope — or type it out. We turn the photo into clean text.",
+      "You add them, share a link, or invite a few people to collect with you. No app, no account for your people — they send a recipe in about five minutes, from their phone.",
   },
   {
     number: "02",
-    title: "See who's in. Nudge the rest in one tap.",
+    title: "They snap a photo. We do the rest.",
     description:
-      "Import your guest list, and watch the recipes land in one place. See who's sent theirs and who hasn't — then remind everyone still missing with a single tap, or send a nicer personalized email when you want. You stay in control, without texting anyone one by one.",
+      "No retyping, no forms. Your people photograph the handwritten recipe — grandma's card, the back of an envelope, coffee stains and all — and we turn it into clean text and a designed page. Or they type it, if they'd rather.",
   },
   {
     number: "03",
-    title: "Every recipe becomes a page.",
+    title: "See who's in. Nudge the rest in one tap.",
     description:
-      "Photos, handwriting, typos and all — we turn each one into a clean, designed page with its own photo. The messy text message becomes something that belongs on a shelf.",
-    cta: { label: "See a recipe page", href: "#the-magic" },
+      "Import your guest list, and watch the recipes land in one place. See who's sent theirs and who hasn't — then remind everyone still missing with a single tap, or send a nicer personalized email when you want. You stay in control, without texting anyone one by one.",
   },
   {
     number: "04",
@@ -69,16 +68,35 @@ export default function HowItWorksPage() {
   const { user } = useAuth();
   const handleStart = () => router.push(user ? "/profile/groups" : "/onboarding");
 
-  // Visuals alineados 1:1 con `steps`. El paso 2 (dashboard de quién mandó /
-  // quién falta) se renderiza como UI on-brand en markup. TODO: cambiar el
-  // visual del paso 1 por una imagen real de "foto de receta a mano → texto".
+  // Visuals alineados 1:1 con `steps`.
+  // TODO (imágenes reales): paso 1 → mockup de "collect link"; paso 2 → foto real
+  // de una receta a mano junto a la página diseñada (hoy: página + snapshot falso).
   const visuals = [
     <StepImage
       key="s1"
       src="/images/HowitWorks_images/collect_iphone_mockup.png"
-      alt="Snap a photo of a recipe, or type it in"
+      alt="Share a link so your people can send recipes"
     />,
-    <div key="s2" className="rounded-2xl bg-brand-warm-white-warm p-6 md:p-8">
+    // Paso 2 — antes/después: la página diseñada + un "snapshot" de la receta a mano.
+    <div key="s2" className="relative mx-auto max-w-sm md:mx-0">
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-brand-white shadow-md">
+        <Image
+          src="/images/how_it_works_profilesection/recipe_example_banana.png"
+          alt="A handwritten recipe, redesigned as a clean book page"
+          fill
+          className="object-contain"
+          sizes="(max-width: 1024px) 100vw, 40vw"
+        />
+      </div>
+      <div className="absolute -left-3 -top-4 w-32 rotate-[-6deg] rounded-lg bg-brand-cream p-3 shadow-lg ring-1 ring-brand-sand md:w-36">
+        <p className="type-caption mb-1 text-brand-charcoal/45">snapshot from a guest</p>
+        <p className="type-caption leading-snug text-brand-charcoal/75">
+          3 ripe bananas, 1 cup sugar, 1½ cups flour, 350° ~1hr — Abuela
+        </p>
+      </div>
+    </div>,
+    // Paso 3 — dashboard de quién mandó / quién falta (markup on-brand).
+    <div key="s3" className="rounded-2xl bg-brand-warm-white-warm p-6 md:p-8">
       <div className="mb-5 flex items-center justify-between">
         <span className="type-body-small font-medium text-brand-charcoal">
           12 of 18 recipes in
@@ -111,12 +129,6 @@ export default function HowItWorksPage() {
         ))}
       </div>
     </div>,
-    <StepImage
-      key="s3"
-      src="/images/how_it_works_profilesection/recipe_example_banana.png"
-      alt="A designed recipe page"
-      bg="bg-brand-cream"
-    />,
     <StepImage
       key="s4"
       src="/images/HowitWorks_images/book_in_hand_whitebackgound.png"
@@ -197,57 +209,7 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
-        {/* 3. El wedge / la magia (tarjeta) */}
-        <section className="px-2 py-6 md:px-3 md:py-8">
-          <div
-            id="the-magic"
-            className="mx-auto max-w-7xl rounded-[2rem] bg-brand-cream px-5 py-16 md:px-10 md:py-24"
-          >
-            <div className="mx-auto max-w-2xl text-center">
-              <p className="type-eyebrow text-brand-honey">THE MAGIC</p>
-              <h2 className="type-subheading mt-4">We make it look good. But how?</h2>
-              <p className="type-body-small mt-4 text-brand-charcoal/70">
-                You send the real stuff — a text, a photo, a voice note. We make it a book.
-              </p>
-            </div>
-
-            <div className="mt-14 grid grid-cols-1 items-center gap-8 md:grid-cols-2">
-              {/* Antes: mensaje crudo (markup, sin asset) */}
-              <div>
-                <p className="type-caption mb-3 text-center text-brand-charcoal/50">
-                  What they send
-                </p>
-                <div className="rounded-2xl bg-brand-white p-6">
-                  <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-brand-warm-white-warm px-4 py-3 shadow-sm">
-                    <p className="type-body-small text-brand-charcoal/80">
-                      grandma&rsquo;s banana bread — 3 very ripe bananas, 1 cup sugar,
-                      1½ cups flour, melt some butter, 350 for about an hour. she never
-                      measured anything
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Después: página diseñada */}
-              <div>
-                <p className="type-caption mb-3 text-center text-brand-charcoal/50">
-                  What we make
-                </p>
-                <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-brand-white shadow-md">
-                  <Image
-                    src="/images/how_it_works_profilesection/recipe_example_banana.png"
-                    alt="The same recipe, designed as a book page"
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 768px) 100vw, 400px"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 4. Objeción #1 */}
+        {/* 3. Objeción #1 */}
         <section className="px-4 py-16 md:px-6 md:py-24">
           <motion.div
             className="mx-auto max-w-3xl text-center"
@@ -265,7 +227,7 @@ export default function HowItWorksPage() {
           </motion.div>
         </section>
 
-        {/* 5. Lo que recibes (tarjeta) */}
+        {/* 4. Lo que recibes (tarjeta) */}
         <section className="px-2 py-6 md:px-3 md:py-8">
           <div className="mx-auto max-w-7xl rounded-[2rem] bg-brand-sand px-5 py-16 text-center md:px-10 md:py-24">
             <h2 className="type-subheading">What shows up at your door</h2>
@@ -285,7 +247,7 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
-        {/* 6. Ancla de precio */}
+        {/* 5. Ancla de precio */}
         <section className="px-4 py-16 md:px-6 md:py-20">
           <div className="mx-auto max-w-3xl text-center">
             <p className="type-subheading">
@@ -304,7 +266,7 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
-        {/* 7. CTA de cierre (tarjeta oscura) */}
+        {/* 6. CTA de cierre (tarjeta oscura) */}
         <section className="px-2 pb-16 md:px-3 md:pb-24">
           <div className="mx-auto max-w-7xl rounded-[2rem] bg-brand-charcoal px-5 py-16 text-center md:px-10 md:py-20">
             <h2 className="type-subheading text-brand-warm-white-warm">
