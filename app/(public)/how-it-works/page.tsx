@@ -186,8 +186,10 @@ export default function HowItWorksPage() {
             transition={{ duration: 0.6, ease: easeOut }}
           >
             <p className="type-eyebrow text-brand-honey">HOW IT WORKS</p>
-            <h1 className="type-heading mt-4">
-              You don&rsquo;t write this book. The people who show up do.
+            <h1 className="type-heading mt-4 [text-wrap:balance]">
+              You don&rsquo;t write this book.
+              <br className="hidden md:block" />{" "}
+              The people who show up do.
             </h1>
             <p className="type-body mt-5 text-brand-charcoal/70">
               From the first &ldquo;send me your recipe&rdquo; to the hardcover on your
