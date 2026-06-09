@@ -23,6 +23,10 @@ interface ShareCollectionModalProps {
   onStepComplete?: () => void;
   groupId?: string | null;
   coupleNames?: string | null;
+  // Reason: drives occasion-aware copy. Weddings/bridal showers say "wedding
+  // cookbook"; non-couple occasions (birthday/other) use a neutral phrasing since
+  // coupleNames holds a book title, not people's names.
+  occasion?: string | null;
   currentCoupleImage?: string | null;
   currentCoupleImagePositionY?: number;
   currentCoupleImagePositionX?: number;
@@ -48,6 +52,7 @@ export function ShareCollectionModal({
   onStepComplete,
   groupId = null,
   coupleNames = null,
+  occasion = null,
   currentCoupleImage = null,
   currentCoupleImagePositionY = 50,
   currentCoupleImagePositionX = 50,
@@ -113,9 +118,19 @@ export function ShareCollectionModal({
     }
   };
 
+  // Reason: weddings/bridal showers (and legacy groups with no occasion) say
+  // "wedding cookbook"; anniversaries say "cookbook"; non-couple occasions
+  // (birthday/other) hold a book title in coupleNames, so they use a neutral
+  // "this cookbook" phrasing instead of a possessive.
+  const isCoupleOccasion =
+    occasion === 'wedding' || occasion === 'bridal_shower' || occasion === 'anniversary' || !occasion;
+  const isWeddingOccasion = occasion === 'wedding' || occasion === 'bridal_shower' || !occasion;
+
   // Default message using brand voice
-  const coupleDisplayName = coupleNames || 'your friends';
-  const defaultMessage = `You're adding a recipe to ${coupleDisplayName}'s wedding cookbook. Doesn't have to be fancy—just something you actually make.`;
+  const coupleDisplayName = coupleNames || 'this cookbook';
+  const defaultMessage = isCoupleOccasion
+    ? `You're adding a recipe to ${coupleDisplayName}'s ${isWeddingOccasion ? 'wedding cookbook' : 'cookbook'}. Doesn't have to be fancy—just something you actually make.`
+    : `You're adding a recipe to this cookbook. Doesn't have to be fancy—just something you actually make.`;
   
   const shareMessage = customMessage || defaultMessage;
 
@@ -174,8 +189,11 @@ export function ShareCollectionModal({
   };
 
   const buildEmailPlainText = (): string => {
-    const couple = coupleNames || "your friends";
-    return `${couple} wants you to share a recipe for their wedding cookbook.\n\n${shareMessage}\n\nAdd your recipe: ${collectionUrl}`;
+    const couple = coupleNames || "this cookbook";
+    const intro = isCoupleOccasion
+      ? `${couple} wants you to share a recipe for their ${isWeddingOccasion ? 'wedding cookbook' : 'cookbook'}.`
+      : `You're invited to add a recipe to ${couple}.`;
+    return `${intro}\n\n${shareMessage}\n\nAdd your recipe: ${collectionUrl}`;
   };
 
   const handleCopyEmailBlock = async () => {

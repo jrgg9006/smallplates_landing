@@ -852,6 +852,7 @@ export default function GroupsPage() {
           userName={user?.email?.split('@')[0] || null}
           groupId={selectedGroup.id}
           coupleNames={selectedGroup.name || null}
+          occasion={selectedGroup.occasion}
           currentCoupleImage={selectedGroup.couple_image_url}
           currentCoupleImagePositionY={selectedGroup.couple_image_position_y ?? 50}
           currentCoupleImagePositionX={selectedGroup.couple_image_position_x ?? 50}

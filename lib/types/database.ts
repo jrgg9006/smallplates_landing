@@ -1123,6 +1123,9 @@ export interface CollectionTokenInfo {
   custom_share_message: string | null;
   custom_share_signature: string | null;
   couple_names: string | null;
+  // Reason: drives occasion-aware copy on the collect page (eyebrow "Wedding
+  // Cookbook" vs "Cookbook", and possessive vs neutral note). Mirrors groups.occasion.
+  occasion: string | null;
   couple_first_name: string | null;
   partner_first_name: string | null;
   couple_image_url: string | null;

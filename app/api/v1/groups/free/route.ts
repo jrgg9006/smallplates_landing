@@ -149,7 +149,10 @@ export async function POST(request: NextRequest) {
       ? `${baseUrl}/collect/${collectionToken}?group=${groupId}`
       : `${baseUrl}/profile/groups`;
 
-    const coupleName = `${coupleFirstName.trim()} & ${partnerFirstName.trim()}`;
+    // Reason: non-couple occasions (birthday/other) have no "A & B" pair — using
+    // the couple-name template would email a literal " & ". bookName already holds
+    // the right label ("A & B" for couples, the cookbook title otherwise).
+    const coupleName = bookName;
     const firstName = yourName?.trim().split(" ")[0] || "";
 
     // Reason: format bookDate for the email (e.g. "July 4, 2026") if provided.
