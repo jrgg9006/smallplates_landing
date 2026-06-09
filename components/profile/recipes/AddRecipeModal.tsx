@@ -78,11 +78,17 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]); // Reason: loadGuests/loadUserProfile are stable functions, only run on modal open
 
-  // Set preselected guest when modal opens with a preselected guest
+  // Set the "Who's sharing this?" default when the modal opens.
+  // Reason: with a preselected guest, pick that guest; otherwise default to the
+  // main user ("It is mine") so they don't have to select themselves every time.
   useEffect(() => {
-    if (isOpen && preselectedGuestId) {
+    if (!isOpen) return;
+    if (preselectedGuestId) {
       setSelectedGuestId(preselectedGuestId);
-      setIsMyOwnRecipe(false); // Ensure "My Own Plate" is unchecked when preselecting a guest
+      setIsMyOwnRecipe(false);
+    } else {
+      setIsMyOwnRecipe(true);
+      setSelectedGuestId('');
     }
   }, [isOpen, preselectedGuestId]);
 
@@ -134,11 +140,6 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
       }
       
       setGuests(guestsData || []);
-      
-      // Auto-select first guest if only one exists
-      if (guestsData && guestsData.length === 1) {
-        setSelectedGuestId(guestsData[0].id);
-      }
     } catch (err) {
       console.error('Error loading guests:', err);
       setError('Failed to load guests');
