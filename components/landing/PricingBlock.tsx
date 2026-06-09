@@ -88,10 +88,40 @@ export default function PricingBlock() {
       aria-labelledby="pricing-heading"
     >
       <div className="mx-auto max-w-7xl px-6 md:px-10 lg:px-16">
-        <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
+        <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-x-14 lg:gap-y-0">
+          {/* Offer — top (heading + price + risk-reversal). On mobile this sits
+              above the gallery; on desktop it's the top of the right column. */}
+          <motion.div
+            className="lg:col-start-2 lg:row-start-1"
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+          >
+            <p className="type-eyebrow mb-4">The book</p>
+
+            <h2 id="pricing-heading" className="type-subheading md:text-4xl">
+              Free to start. Pay when it&rsquo;s ready.
+            </h2>
+
+            {/* Price — per-person range. It's a group gift, so the cost splits
+                across everyone who chips in; the full curve lives on /pricing. */}
+            <div className="mt-3 flex items-baseline gap-2.5">
+              <span className="font-sans text-xl font-semibold text-brand-charcoal tabular-nums">
+                ${pricePerCopy(6)}&ndash;${pricePerCopy(1)}
+              </span>
+              <span className="type-caption">per person, shipping included</span>
+            </div>
+
+            <p className="type-body-small mt-5 max-w-md text-sm text-brand-charcoal/70 md:text-[15px]">
+              No card up front. You only pay once the book is printed and on its
+              way, so there&rsquo;s nothing to risk.
+            </p>
+          </motion.div>
+
           {/* Gallery — vertical thumbnail rail + main image */}
           <motion.div
-            className="self-start"
+            className="self-start lg:col-start-1 lg:row-start-1 lg:row-span-2"
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -165,35 +195,18 @@ export default function PricingBlock() {
             </div>
           </motion.div>
 
-          {/* Offer */}
+          {/* Offer — bottom (what's included + CTA + trust). On mobile this sits
+              below the gallery; on desktop it's the bottom of the right column. */}
           <motion.div
+            className="lg:col-start-2 lg:row-start-2"
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+            transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
           >
-            <p className="type-eyebrow mb-4">The book</p>
-
-            <h2 id="pricing-heading" className="type-subheading md:text-4xl">
-              Free to start. Pay when it&rsquo;s ready.
-            </h2>
-
-            {/* Price — per-person range. It's a group gift, so the cost splits
-                across everyone who chips in; the full curve lives on /pricing. */}
-            <div className="mt-3 flex items-baseline gap-2.5">
-              <span className="font-sans text-xl font-semibold text-brand-charcoal tabular-nums">
-                ${pricePerCopy(6)}&ndash;${pricePerCopy(1)}
-              </span>
-              <span className="type-caption">per person, shipping included</span>
-            </div>
-
-            <p className="type-body-small mt-5 max-w-md text-sm text-brand-charcoal/70 md:text-[15px]">
-              No card up front. You only pay once the book is printed and on its
-              way, so there&rsquo;s nothing to risk.
-            </p>
-
-            {/* What's included — single list */}
-            <p className="type-eyebrow mb-4 mt-8">Every book includes</p>
+            {/* What's included — single list. mt only on desktop: on mobile the
+                grid gap handles separation from the gallery above. */}
+            <p className="type-eyebrow mb-4 lg:mt-8">Every book includes</p>
             <ul className="space-y-2.5">
               {INCLUDES.map((item) => (
                 <li key={item} className="flex items-start gap-2.5">
