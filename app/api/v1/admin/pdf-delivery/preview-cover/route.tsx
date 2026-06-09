@@ -1,8 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
-import fs from 'fs';
-import path from 'path';
 
 export const runtime = 'nodejs';
 
@@ -16,13 +14,19 @@ let paellaData: string | undefined;
 let logoData: string | undefined;
 let ampData: string | undefined;
 
-function readFont(filename: string): ArrayBuffer {
-  const buf = fs.readFileSync(path.join(process.cwd(), 'public', 'fonts', filename));
-  return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
+// Reason: fetch assets from the deployment's own static origin instead of
+// reading them off disk. fs.readFileSync(process.cwd()/public/...) made Next's
+// output file tracing bundle all of public/ (~250 MB) into this serverless
+// function, exceeding Vercel's 250 MB limit. Fetching over HTTP (same pattern
+// as the showcase/preview route) keeps the function bundle tiny.
+async function readFont(origin: string, filename: string): Promise<ArrayBuffer> {
+  const res = await fetch(new URL(`/fonts/${filename}`, origin));
+  return res.arrayBuffer();
 }
 
-function readImage(relPath: string): string {
-  const buf = fs.readFileSync(path.join(process.cwd(), 'public', relPath));
+async function readImage(origin: string, relPath: string): Promise<string> {
+  const res = await fetch(new URL(`/${relPath}`, origin));
+  const buf = Buffer.from(await res.arrayBuffer());
   const mime = relPath.endsWith('.png') ? 'image/png' : 'image/jpeg';
   return `data:${mime};base64,${buf.toString('base64')}`;
 }
@@ -55,12 +59,13 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Load resources once per instance
-  if (!fontRegular) fontRegular = readFont('MinionPro-Regular.otf');
-  if (!fontDisplay) fontDisplay = readFont('MinionPro-Display.otf');
-  if (!paellaData) paellaData = readImage('images/email-pdf/paella_transparent_sm.png');
-  if (!logoData) logoData = readImage('images/SmallPlates_logo_horizontal.png');
-  if (!ampData) ampData = readImage('images/email-pdf/ampestrand_gold_transparent.png');
+  // Load resources once per instance (fetched from this deployment's origin)
+  const origin = url.origin;
+  if (!fontRegular) fontRegular = await readFont(origin, 'MinionPro-Regular.otf');
+  if (!fontDisplay) fontDisplay = await readFont(origin, 'MinionPro-Display.otf');
+  if (!paellaData) paellaData = await readImage(origin, 'images/email-pdf/paella_transparent_sm.png');
+  if (!logoData) logoData = await readImage(origin, 'images/SmallPlates_logo_horizontal.png');
+  if (!ampData) ampData = await readImage(origin, 'images/email-pdf/ampestrand_gold_transparent.png');
 
   const ampIdx = coupleNamePlain.indexOf('&');
   const hasAmp = ampIdx > -1;
