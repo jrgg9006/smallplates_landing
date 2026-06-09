@@ -301,41 +301,55 @@ export default function HowItWorksPage() {
                 What they send
               </p>
 
+              {/* Encabezado: autor + título + nota personal (full width, como en la imagen) */}
+              <div className="mb-4">
+                <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Recipe title</p>
+                <div className="rounded-lg border border-brand-sand bg-brand-white px-4 py-3">
+                  <p className="type-eyebrow text-brand-warm-gray">Cazmier Tymoch</p>
+                  <p className="type-body-small mt-1 text-brand-charcoal">A Creamy Orzo Bake</p>
+                  <p className="type-caption mt-2 italic text-brand-charcoal/65">
+                    I&rsquo;m so grateful to share a signature recipe in our household with
+                    you both. Whether you make this a lot or a little, I hope that it brings
+                    you warmth and comfort and reminds you of our shared time together. I
+                    have profound appreciation and love for you guys!
+                  </p>
+                </div>
+              </div>
+
+              {/* Ingredients (izq) + Steps (der) */}
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                {/* Izquierda: title, ingredients, notes apilados */}
-                <div className="space-y-4">
-                  <div>
-                    <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Recipe title</p>
-                    <div className="rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
-                      <p className="type-caption text-brand-charcoal">Honey Soy Garlic Salmon</p>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Ingredients</p>
-                    <div className="rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
-                      <p className="type-caption text-brand-charcoal/80">
-                        2-4 salmon fillets, 1/4 cup soy sauce, 1/4 cup honey, butter,
-                        garlic, salt, pepper, chili powder
-                      </p>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Notes</p>
-                    <div className="rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
-                      <p className="type-caption text-brand-charcoal/80">
-                        Serve with white rice.
-                      </p>
-                    </div>
+                <div className="flex flex-col">
+                  <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Ingredients</p>
+                  <div className="flex-1 rounded-lg border border-brand-sand bg-brand-white px-4 py-3">
+                    <ul className="space-y-1.5">
+                      {[
+                        "1 lb of orzo",
+                        "32 oz of broth of choice (I like chicken)",
+                        "Cheese!!! Garlic and herb Boursin and parmesan",
+                        "Sun-dried tomatoes (recommended you don't manually sun-dry them)",
+                        "Protein of choice (chicken, Italian sausage, or even... chicken sausage)",
+                        "Spinach (more than you'd think)",
+                        "As much garlic as you'd like",
+                        "Seasonings of choice (I'd recommend oregano, red pepper, salt, pepper)",
+                      ].map((ing) => (
+                        <li key={ing} className="type-caption text-brand-charcoal/80">
+                          {ing}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
-
-                {/* Derecha: steps, ocupa todo el alto */}
                 <div className="flex flex-col">
                   <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Steps</p>
-                  <div className="flex-1 rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
+                  <div className="flex-1 rounded-lg border border-brand-sand bg-brand-white px-4 py-3">
                     <p className="type-caption text-brand-charcoal/80">
-                      Sear the salmon skin-side down. Add butter and garlic, then honey
-                      and soy. Baste until glazy.
+                      In an oven-safe dish (Le Creuset for clout), place Boursin in the
+                      middle of the dish. Add orzo, sun-dried tomatoes (including its oil),
+                      and seasonings around the cheese. Pour in all the broth. Cover and
+                      bake at 425&deg;F for about 30 minutes. Cook the protein of your
+                      choosing; pan-fried or baking is great. Remove from oven and mix the
+                      Boursin into the cooked rice. Add spinach and parmesan to thicken.
+                      Simmer on the stovetop to thicken. Bone apple tea!
                       <span className="ml-1 inline-block h-4 w-0.5 animate-pulse bg-brand-honey align-middle" />
                     </p>
                   </div>
@@ -346,12 +360,12 @@ export default function HowItWorksPage() {
               <p className="type-caption mb-3 mt-10 text-center text-brand-charcoal/50">
                 Generated Recipe Page
               </p>
-              <div className="relative mx-auto aspect-[4/3] w-full max-w-2xl overflow-hidden rounded-2xl bg-brand-white shadow-md">
+              <div className="relative mx-auto aspect-[742/714] w-full max-w-2xl overflow-hidden rounded-2xl bg-brand-white shadow-md">
                 <Image
-                  src="/images/how_it_works_profilesection/recipe_example_salmon.png"
-                  alt="The recipe, designed as a finished book page"
+                  src="/images/how_it_works_profilesection/recipe_example_orzo.png"
+                  alt="A Creamy Orzo Bake, designed as a finished book page"
                   fill
-                  className="object-cover"
+                  className="object-contain"
                   sizes="(max-width: 768px) 100vw, 672px"
                 />
               </div>
