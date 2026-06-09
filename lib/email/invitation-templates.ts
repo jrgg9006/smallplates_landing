@@ -19,6 +19,23 @@ interface InvitationTemplateParams {
   // edited message. Each newline becomes a paragraph break. Used for both the
   // initial invite and the reminder.
   customBody?: string;
+  // Reason: drives occasion-aware copy. Weddings/bridal showers say "wedding
+  // cookbook"; non-couple occasions (birthday/other) carry a book title in
+  // coupleDisplayName, so they drop the "gift for {person}" framing and possessive.
+  occasion?: string | null;
+}
+
+// Reason: couples (wedding/bridal/anniversary, plus legacy groups with no
+// occasion) are framed as a gift "for" people; weddings/bridal showers say
+// "wedding cookbook". Non-couple occasions hold a book title, not a person.
+function occasionCopy(occasion: string | null | undefined): { isCouple: boolean; isWedding: boolean; heroLabel: string } {
+  const isCouple = !occasion || occasion === 'wedding' || occasion === 'bridal_shower' || occasion === 'anniversary';
+  const isWedding = !occasion || occasion === 'wedding' || occasion === 'bridal_shower';
+  // Reason: only weddings/bridal showers keep the "wedding ... for {couple}"
+  // framing. Everything else (anniversary, birthday, other) uses the neutral
+  // "A cookbook gift" with the name/title on its own line — no "for", no "wedding".
+  const heroLabel = isWedding ? 'A wedding cookbook gift for' : 'A cookbook gift';
+  return { isCouple, isWedding, heroLabel };
 }
 
 // Base template wrapper with all styles
@@ -213,15 +230,15 @@ function ctaButton(link: string, text: string = "ADD YOUR RECIPE"): string {
                       </table>`;
 }
 
-// Hero section — label + couple names + gold line
-function heroSection(coupleDisplayName: string): string {
+// Hero section — label + couple/book name + gold line
+function heroSection(coupleDisplayName: string, heroLabel: string): string {
   return `
                       <!-- Hero: Couple Names -->
                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                         <tr>
                           <td align="center">
                             <p style="margin: 0 0 12px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #9A9590; text-align: center;">
-                              A wedding cookbook gift for
+                              ${heroLabel}
                             </p>
                             <h1 style="margin: 0 0 12px 0; font-family: Georgia, 'Times New Roman', serif; font-size: 36px; font-weight: 400; color: #2D2D2D; line-height: 1.2; text-align: center;" class="darkmode-text hero-name">
                               ${coupleDisplayName}
@@ -238,8 +255,13 @@ function heroSection(coupleDisplayName: string): string {
 // ============================================
 export function invitationEmail1(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
   const { coupleDisplayName, collectionLink, coupleImageUrl, customBody } = params;
+  const { isCouple, isWedding, heroLabel } = occasionCopy(params.occasion);
 
-  const subject = `Your recipe goes in ${coupleDisplayName}'s cookbook`;
+  // Reason: people's names take a possessive ("Ana & Pedro's cookbook"); a book
+  // title ("Grandma's recipes") doesn't, so it stands alone.
+  const subject = isCouple
+    ? `Your recipe goes in ${coupleDisplayName}'s cookbook`
+    : `Your recipe goes in ${coupleDisplayName}`;
 
   // Reason: when the organizer edited a custom body, use it; otherwise fall back
   // to the brand-default copy.
@@ -264,7 +286,7 @@ export function invitationEmail1(params: InvitationTemplateParams): { subject: s
                       </table>`;
 
   const content = `
-                      ${heroSection(coupleDisplayName)}
+                      ${heroSection(coupleDisplayName, heroLabel)}
 
                       ${coupleImageSection(coupleImageUrl, coupleDisplayName)}
 
@@ -278,7 +300,7 @@ Send a recipe and you're in their kitchen.
 
 Doesn't have to be fancy. Just has to be yours.`;
 
-  const text = `A wedding cookbook gift for ${coupleDisplayName}
+  const text = `${isWedding ? `${heroLabel} ${coupleDisplayName}` : coupleDisplayName}
 
 ${customBody?.trim() || defaultText}
 
@@ -296,8 +318,11 @@ Add your recipe: ${collectionLink}
 // ============================================
 export function invitationEmail2(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
   const { coupleDisplayName, guestName, collectionLink, customBody } = params;
+  const { isCouple } = occasionCopy(params.occasion);
 
-  const subject = `Reminder: your recipe for ${coupleDisplayName}'s cookbook`;
+  const subject = isCouple
+    ? `Reminder: your recipe for ${coupleDisplayName}'s cookbook`
+    : `Reminder: your recipe for ${coupleDisplayName}`;
 
   // Reason: keep in sync with SendRemindersModal.DEFAULT_REMINDER_BODY so
   // that "user kept the default → we save NULL → template uses this fallback"

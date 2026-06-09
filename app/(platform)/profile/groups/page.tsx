@@ -624,6 +624,7 @@ export default function GroupsPage() {
         <SendInvitationsPage
           groupId={selectedGroup.id}
           coupleNames={selectedGroup.name}
+          occasion={selectedGroup.occasion}
           coupleImageUrl={selectedGroup.couple_image_url}
           onBack={() => setActiveView('book')}
           onOpenGuestSheet={() => setShowGuestSheet(true)}

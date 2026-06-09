@@ -14,6 +14,8 @@ function InviteFirstContent() {
   const [copied, setCopied] = useState(false);
   const [collectionLink, setCollectionLink] = useState("");
   const [coupleName, setCoupleName] = useState("");
+  const [occasion, setOccasion] = useState<string | null>(null);
+  const [namesArePeople, setNamesArePeople] = useState(false);
   const [shareMessage, setShareMessage] = useState("");
   const [coupleImageUrl, setCoupleImageUrl] = useState<string | null>(null);
   const [inviterName, setInviterName] = useState("");
@@ -63,16 +65,18 @@ function InviteFirstContent() {
         });
     });
 
-    // Fetch couple names + image
+    // Fetch the book name (single source of truth for the title), occasion + image
     supabase
       .from("groups")
-      .select("couple_first_name, partner_first_name, couple_image_url")
+      .select("name, occasion, couple_first_name, partner_first_name, couple_image_url")
       .eq("id", groupId)
       .single()
       .then(({ data }) => {
-        if (data?.couple_first_name && data?.partner_first_name) {
-          setCoupleName(`${data.couple_first_name} & ${data.partner_first_name}`);
-        }
+        if (data?.name) setCoupleName(data.name);
+        setOccasion(data?.occasion ?? null);
+        // Reason: people's names allow a possessive ("Maria's cookbook"); a book
+        // title ("Grandma's recipes") doesn't, so the copy drops the possessive.
+        setNamesArePeople(Boolean(data?.couple_first_name || data?.partner_first_name));
         if (data?.couple_image_url) setCoupleImageUrl(data.couple_image_url);
       });
   }, [groupId]);
@@ -137,8 +141,17 @@ function InviteFirstContent() {
     document.body.removeChild(a);
   }
 
+  // Reason: occasion-aware labels (same rule as the collect page). Weddings/bridal
+  // showers keep "WEDDING COOKBOOK"; everything else is just "COOKBOOK". Legacy
+  // groups with no occasion but real couple names are still treated as weddings.
+  const isWeddingOccasion = occasion === "wedding" || occasion === "bridal_shower";
+  const treatAsWedding = isWeddingOccasion || (!occasion && namesArePeople);
+  const cookbookEyebrow = treatAsWedding ? "WEDDING COOKBOOK" : "COOKBOOK";
+
   const previewMessage = shareMessage || (coupleName
-    ? `You're adding a recipe to ${coupleName}'s cookbook. Doesn't have to be fancy — just something you actually make.`
+    ? (namesArePeople
+        ? `You're adding a recipe to ${coupleName}'s cookbook. Doesn't have to be fancy — just something you actually make.`
+        : `You're adding a recipe to this cookbook. Doesn't have to be fancy — just something you actually make.`)
     : "");
 
   const shortLink = collectionLink
@@ -247,8 +260,8 @@ function InviteFirstContent() {
               className="w-full h-[170px] object-cover"
             />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-3 pb-3 pt-12">
-              <p className="text-[6px] tracking-[2px] uppercase text-white/60 mb-0.5">WEDDING COOKBOOK</p>
-              <p className="font-serif text-[16px] text-white font-medium leading-tight">{coupleName || "the couple"}</p>
+              <p className="text-[6px] tracking-[2px] uppercase text-white/60 mb-0.5">{cookbookEyebrow}</p>
+              <p className="font-serif text-[16px] text-white font-medium leading-tight">{coupleName || "your cookbook"}</p>
             </div>
           </div>
 

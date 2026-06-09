@@ -37,6 +37,8 @@ export async function GET(request: Request) {
         *,
         group:groups!inner (
           id,
+          name,
+          occasion,
           couple_first_name,
           partner_first_name,
           couple_image_url,
@@ -137,11 +139,11 @@ export async function GET(request: Request) {
           continue;
         }
 
-        // Build couple name
-        const coupleName = [
-          guest.group.couple_first_name,
-          guest.group.partner_first_name
-        ].filter(Boolean).join(' & ') || 'The Couple';
+        // Build the title — Book name (groups.name) is the source of truth:
+        // "A & B" for couples, the cookbook title otherwise.
+        const coupleName = guest.group.name
+          || [guest.group.couple_first_name, guest.group.partner_first_name].filter(Boolean).join(' & ')
+          || 'The Couple';
 
         // Build collection link with group_id parameter
         const inviterParam = guest.group.created_by ? `&inviter_id=${encodeURIComponent(guest.group.created_by)}` : '';
@@ -156,6 +158,7 @@ export async function GET(request: Request) {
           collectionLink,
           coupleImageUrl: guest.group.couple_image_url || undefined,
           emailNumber: emailToSend,
+          occasion: guest.group.occasion,
         });
 
         if (result.success) {
