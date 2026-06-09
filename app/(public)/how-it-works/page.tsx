@@ -368,7 +368,7 @@ export default function HowItWorksPage() {
                     posiciones en % atadas a esta imagen — ajustables con top/left) */}
                 <div className="pointer-events-none absolute inset-0 hidden md:block">
                   {[
-                    { label: "Title", top: 22, left: 31 },
+                    { label: "Title", top: 14, left: 24 },
                     { label: "Note", top: 33, left: 30 },
                     { label: "Ingredients", top: 55, left: 9 },
                     { label: "Photo", top: 48, left: 76 },
