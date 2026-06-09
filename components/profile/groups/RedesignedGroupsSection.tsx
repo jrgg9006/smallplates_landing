@@ -434,6 +434,7 @@ export const RedesignedGroupsSection = forwardRef<GroupsSectionRef, GroupsSectio
             onRemoveRecipe={handleRemoveRecipe}
             searchValue={searchValue}
             onImportGuests={onImportGuests}
+            onAddRecipe={() => setAddNewRecipeModalOpen(true)}
           />
         </div>
       )}

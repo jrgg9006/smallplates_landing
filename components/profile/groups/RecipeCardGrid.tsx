@@ -10,6 +10,7 @@ interface RecipeCardGridProps {
   onRemoveRecipe: (recipe: RecipeWithGuest) => void;
   searchValue?: string;
   onImportGuests?: (source: "zola" | "the_knot") => void;
+  onAddRecipe?: () => void;
 }
 
 export function RecipeCardGrid({
@@ -18,7 +19,8 @@ export function RecipeCardGrid({
   onEditRecipe,
   onRemoveRecipe,
   searchValue = "",
-  onImportGuests
+  onImportGuests,
+  onAddRecipe
 }: RecipeCardGridProps) {
   // Filter recipes based on search
   const filteredRecipes = searchValue 
@@ -43,8 +45,16 @@ export function RecipeCardGrid({
     return (
       <div className="text-center py-12">
         <p className="text-sm text-[hsl(var(--brand-warm-gray))]">
-          No recipes yet. That&rsquo;s about to change.
+          No recipes yet. Be the first.
         </p>
+        {onAddRecipe && (
+          <button
+            onClick={onAddRecipe}
+            className="btn btn-outline mt-4 px-6 py-2.5 text-sm"
+          >
+            Add a recipe
+          </button>
+        )}
         {onImportGuests && (
           <p className="hidden sm:flex text-sm text-[hsl(var(--brand-warm-gray))] mt-4 items-center justify-center gap-2">
             Import guests from

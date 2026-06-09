@@ -113,6 +113,7 @@ export default function GroupsPage() {
     skipFirstRecipeExperience,
     completeStep,
     markSharedToWhatsapp,
+    getSharedToWhatsappAt,
   } = useProfileOnboarding();
 
   // Reason: after dismissing the WelcomeOverlay, trigger SetupChecklist to auto-open
@@ -723,9 +724,10 @@ export default function GroupsPage() {
                 recipeCount={recipeCount}
                 hasCaptains={(selectedGroup?.group_members || []).some(m => m.role !== 'owner')}
                 hasEventInvite={!!(selectedGroup?.event_date && selectedGroup?.event_location)}
+                hasShared={!!(selectedGroup && getSharedToWhatsappAt(selectedGroup.id))}
                 onCreateEventInvite={() => router.push(`/event-invite?groupId=${selectedGroup?.id}`)}
                 onInviteCaptain={() => setShowAddCaptainModal(true)}
-                onAddRecipe={() => groupsSectionRef.current?.openAddNewRecipeModal()}
+                onShareLink={handleCollectRecipesExpanded}
                 onPrintBook={handleOpenBookReview}
               />
 

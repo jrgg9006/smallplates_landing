@@ -11,9 +11,10 @@ interface DashboardChecklistProps {
   recipeCount: number;
   hasCaptains: boolean;
   hasEventInvite: boolean;
+  hasShared: boolean;
   onCreateEventInvite: () => void;
   onInviteCaptain: () => void;
-  onAddRecipe: () => void;
+  onShareLink: () => void;
   onPrintBook: () => void;
 }
 
@@ -22,9 +23,10 @@ export function DashboardChecklist({
   recipeCount,
   hasCaptains,
   hasEventInvite,
+  hasShared,
   onCreateEventInvite,
   onInviteCaptain,
-  onAddRecipe,
+  onShareLink,
   onPrintBook,
 }: DashboardChecklistProps) {
   const [showCaptainsList, setShowCaptainsList] = useState(false);
@@ -74,9 +76,11 @@ export function DashboardChecklist({
       ) : undefined,
     },
     {
-      done: recipeCount >= 1,
+      // Reason: done once they've shared the link (per-group) OR recipes have
+      // already started coming in — no point nagging to share after that.
+      done: hasShared || recipeCount >= 1,
       content: (
-        <>Get your <LinkText onClick={onAddRecipe}>first recipe</LinkText></>
+        <>Share your <LinkText onClick={onShareLink}>recipe link</LinkText></>
       ),
     },
     {
