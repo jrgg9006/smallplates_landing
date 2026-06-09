@@ -368,21 +368,29 @@ export default function HowItWorksPage() {
                     posiciones en % atadas a esta imagen — ajustables con top/left) */}
                 <div className="pointer-events-none absolute inset-0 hidden md:block">
                   {[
-                    { label: "Title", top: 14, left: 24 },
-                    { label: "Note", top: 33, left: 30 },
-                    { label: "Ingredients", top: 55, left: 9 },
+                    { label: "Title", top: 7, left: 12 },
+                    { label: "Note", top: 15, left: 30 },
+                    { label: "Ingredients", top: 45, left: 6 },
+                    { label: "Instructions", top: 35, left: 36
+                     },
                     { label: "Photo", top: 48, left: 76 },
                   ].map((pin, i) => (
                     <motion.div
                       key={pin.label}
                       className="absolute flex items-center gap-1.5 rounded-full border border-brand-sand bg-brand-white/95 px-3 py-1.5 shadow-md backdrop-blur-sm"
                       style={{ top: `${pin.top}%`, left: `${pin.left}%` }}
-                      initial={{ opacity: 0, scale: 0.8, y: 6 }}
+                      initial={{ opacity: 0, scale: 0.9, y: 8 }}
                       whileInView={{ opacity: 1, scale: 1, y: 0 }}
                       viewport={{ once: true, margin: "-80px" }}
-                      transition={{ duration: 0.4, delay: 0.25 + i * 0.18, ease: easeOut }}
+                      transition={{ duration: 0.45, delay: 0.2 + i * 0.09, ease: easeOut }}
                     >
-                      <span className="h-2 w-2 flex-shrink-0 rounded-full bg-brand-honey" />
+                      <span className="relative flex h-2 w-2 flex-shrink-0">
+                        <span
+                          className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-honey opacity-60 motion-reduce:hidden"
+                          style={{ animationDelay: `${i * 0.35}s` }}
+                        />
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-honey" />
+                      </span>
                       <span className="type-caption whitespace-nowrap text-brand-charcoal">
                         {pin.label}
                       </span>
