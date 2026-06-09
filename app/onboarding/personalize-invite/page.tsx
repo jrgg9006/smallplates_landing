@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
 import { updateGroupShareMessage } from "@/lib/supabase/groups";
 import { createSupabaseClient } from "@/lib/supabase/client";
+import { compressImageForUpload } from "@/lib/image";
 import { Upload, X } from "lucide-react";
 
 function PersonalizeInviteContent() {
@@ -66,11 +67,26 @@ function PersonalizeInviteContent() {
 
   const nextHref = `/onboarding/invite-first?groupId=${groupId}`;
 
-  function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
+  // Reason: compress every image client-side (Canvas → JPEG) before we hold it.
+  // iPhone hands us HEIC from the photo picker, which the couple-image endpoint
+  // rejects; normalizing to JPEG here is the only thing that makes phone uploads
+  // work. On a decode failure (HEIC on a non-Safari browser) we tell the user
+  // instead of silently keeping a file the server will reject.
+  async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setPhoto(file);
-    setPhotoPreview(URL.createObjectURL(file));
+    setError("");
+    try {
+      const compressed = await compressImageForUpload(file);
+      setPhoto(compressed);
+      if (photoPreview) URL.revokeObjectURL(photoPreview);
+      setPhotoPreview(URL.createObjectURL(compressed));
+    } catch {
+      setError(
+        "Couldn't read that image. iPhone HEIC photos aren't supported on all browsers — try saving it as a JPEG first, or use a different image."
+      );
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   }
 
   function handleRemovePhoto() {
@@ -93,10 +109,19 @@ function PersonalizeInviteContent() {
       if (photo) {
         const formData = new FormData();
         formData.append("image", photo);
-        await fetch(`/api/v1/groups/${groupId}/couple-image`, {
+        // Reason: fetch only rejects on network failure — a 400/500 from the
+        // server resolves normally. Without this check we'd push to the next
+        // step as if the photo saved when it didn't, which is exactly the
+        // "looks fine but nothing saved, no error" bug.
+        const response = await fetch(`/api/v1/groups/${groupId}/couple-image`, {
           method: "POST",
           body: formData,
         });
+        if (!response.ok) {
+          setError("We couldn't save that photo. Try a different one, or skip it for now.");
+          setSubmitting(false);
+          return;
+        }
       }
 
       router.push(nextHref);
@@ -154,7 +179,7 @@ function PersonalizeInviteContent() {
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/jpg,image/png,image/webp"
         onChange={handlePhotoSelect}
         className="hidden"
       />
@@ -214,7 +239,7 @@ function PersonalizeInviteContent() {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
             onChange={handlePhotoSelect}
             className="hidden"
           />
