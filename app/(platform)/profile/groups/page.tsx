@@ -625,6 +625,7 @@ export default function GroupsPage() {
           groupId={selectedGroup.id}
           coupleNames={selectedGroup.name}
           occasion={selectedGroup.occasion}
+          namesArePeople={Boolean(selectedGroup.couple_first_name || selectedGroup.partner_first_name)}
           coupleImageUrl={selectedGroup.couple_image_url}
           onBack={() => setActiveView('book')}
           onOpenGuestSheet={() => setShowGuestSheet(true)}

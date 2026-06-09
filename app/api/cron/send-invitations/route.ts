@@ -159,6 +159,7 @@ export async function GET(request: Request) {
           coupleImageUrl: guest.group.couple_image_url || undefined,
           emailNumber: emailToSend,
           occasion: guest.group.occasion,
+          namesArePeople: Boolean(guest.group.couple_first_name || guest.group.partner_first_name),
         });
 
         if (result.success) {

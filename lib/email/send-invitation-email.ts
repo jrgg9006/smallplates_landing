@@ -17,6 +17,9 @@ export interface SendGuestInvitationParams {
   customBody?: string;
   // Reason: drives occasion-aware copy in the templates (wedding vs neutral).
   occasion?: string | null;
+  // Reason: when the heading is a real person, non-wedding occasions still get
+  // the "gift for {name}" framing + possessive subject.
+  namesArePeople?: boolean;
 }
 
 export async function sendGuestInvitationEmail({
@@ -31,6 +34,7 @@ export async function sendGuestInvitationEmail({
   recipeCount,
   customBody,
   occasion,
+  namesArePeople,
 }: SendGuestInvitationParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
     // Use coupleName if provided, otherwise use coupleDisplayName for backward compatibility
@@ -46,6 +50,7 @@ export async function sendGuestInvitationEmail({
       recipeCount,
       customBody,
       occasion,
+      namesArePeople,
     });
 
     // Send email via Postmark

@@ -145,6 +145,7 @@ export async function POST(request: NextRequest) {
       captainName: senderProfile?.full_name || undefined,
       emailNumber: 2,
       customBody: group.email_reminder_message || undefined,
+      namesArePeople: Boolean(group.couple_first_name || group.partner_first_name),
     });
 
     if (!result.success) {

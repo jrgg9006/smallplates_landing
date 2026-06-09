@@ -28,6 +28,10 @@ interface SendInvitationsPageProps {
   // Reason: drives occasion-aware copy so the preview matches the actual email
   // (wedding vs neutral). Mirrors groups.occasion.
   occasion?: string | null;
+  // Reason: when the heading is a real person (first names captured), non-wedding
+  // occasions still get the "gift for {name}" framing + possessive. Mirrors the
+  // email template's namesArePeople gating.
+  namesArePeople?: boolean;
   coupleImageUrl?: string | null;
   collectionUrl?: string | null;
   senderName?: string | null;
@@ -39,6 +43,7 @@ export function SendInvitationsPage({
   groupId,
   coupleNames,
   occasion = null,
+  namesArePeople = false,
   coupleImageUrl,
   collectionUrl,
   senderName,
@@ -221,16 +226,17 @@ export function SendInvitationsPage({
   };
 
   // Reason: keep this preview in sync with the actual email (invitation-templates.ts).
-  // Couples (wedding/bridal/anniversary, plus legacy groups with no occasion) take a
-  // possessive and a "gift for {people}" framing; weddings/bridal showers say "wedding
-  // cookbook". Non-couple occasions hold a book title, so they drop both.
-  const isCouple =
-    !occasion || occasion === 'wedding' || occasion === 'bridal_shower' || occasion === 'anniversary';
+  // Weddings/bridal showers (and legacy no-occasion) say "wedding cookbook". The
+  // "gift for {name}" framing + possessive apply whenever the heading is a real
+  // person; a book title (no first names) stays neutral.
   const isWedding = !occasion || occasion === 'wedding' || occasion === 'bridal_shower';
-  // Reason: only weddings/bridal showers keep "... for {couple}"; everything else
-  // uses the neutral "A cookbook gift" with the name/title on its own line.
-  const heroLabel = isWedding ? 'A wedding cookbook gift for' : 'A cookbook gift';
-  const emailSubject = isCouple
+  const isPerson = isWedding || namesArePeople;
+  const heroLabel = isWedding
+    ? 'A wedding cookbook gift for'
+    : isPerson
+      ? 'A cookbook gift for'
+      : 'A cookbook gift';
+  const emailSubject = isPerson
     ? `Your recipe goes in ${coupleNames}'s cookbook`
     : `Your recipe goes in ${coupleNames}`;
 

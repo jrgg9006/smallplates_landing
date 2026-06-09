@@ -23,19 +23,31 @@ interface InvitationTemplateParams {
   // cookbook"; non-couple occasions (birthday/other) carry a book title in
   // coupleDisplayName, so they drop the "gift for {person}" framing and possessive.
   occasion?: string | null;
+  // Reason: when the heading is a real person (first names captured) we keep the
+  // "gift for {name}" framing + possessive even on non-wedding occasions. A book
+  // title stays neutral.
+  namesArePeople?: boolean;
 }
 
 // Reason: couples (wedding/bridal/anniversary, plus legacy groups with no
 // occasion) are framed as a gift "for" people; weddings/bridal showers say
 // "wedding cookbook". Non-couple occasions hold a book title, not a person.
-function occasionCopy(occasion: string | null | undefined): { isCouple: boolean; isWedding: boolean; heroLabel: string } {
-  const isCouple = !occasion || occasion === 'wedding' || occasion === 'bridal_shower' || occasion === 'anniversary';
+function occasionCopy(
+  occasion: string | null | undefined,
+  namesArePeople: boolean,
+): { isPerson: boolean; isWedding: boolean; heroLabel: string } {
   const isWedding = !occasion || occasion === 'wedding' || occasion === 'bridal_shower';
-  // Reason: only weddings/bridal showers keep the "wedding ... for {couple}"
-  // framing. Everything else (anniversary, birthday, other) uses the neutral
-  // "A cookbook gift" with the name/title on its own line — no "for", no "wedding".
-  const heroLabel = isWedding ? 'A wedding cookbook gift for' : 'A cookbook gift';
-  return { isCouple, isWedding, heroLabel };
+  // Reason: the "gift for {name}" framing + possessive subject only make sense
+  // when the heading is a real person. Weddings are always people; other
+  // occasions depend on whether first names were captured. A book title
+  // ("Grandma's recipes") stays neutral — no "for", no possessive.
+  const isPerson = isWedding || namesArePeople;
+  const heroLabel = isWedding
+    ? 'A wedding cookbook gift for'
+    : isPerson
+      ? 'A cookbook gift for'
+      : 'A cookbook gift';
+  return { isPerson, isWedding, heroLabel };
 }
 
 // Base template wrapper with all styles
@@ -255,11 +267,11 @@ function heroSection(coupleDisplayName: string, heroLabel: string): string {
 // ============================================
 export function invitationEmail1(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
   const { coupleDisplayName, collectionLink, coupleImageUrl, customBody } = params;
-  const { isCouple, isWedding, heroLabel } = occasionCopy(params.occasion);
+  const { isPerson, heroLabel } = occasionCopy(params.occasion, !!params.namesArePeople);
 
   // Reason: people's names take a possessive ("Ana & Pedro's cookbook"); a book
   // title ("Grandma's recipes") doesn't, so it stands alone.
-  const subject = isCouple
+  const subject = isPerson
     ? `Your recipe goes in ${coupleDisplayName}'s cookbook`
     : `Your recipe goes in ${coupleDisplayName}`;
 
@@ -300,7 +312,7 @@ Send a recipe and you're in their kitchen.
 
 Doesn't have to be fancy. Just has to be yours.`;
 
-  const text = `${isWedding ? `${heroLabel} ${coupleDisplayName}` : coupleDisplayName}
+  const text = `${isPerson ? `${heroLabel} ${coupleDisplayName}` : coupleDisplayName}
 
 ${customBody?.trim() || defaultText}
 
@@ -318,9 +330,9 @@ Add your recipe: ${collectionLink}
 // ============================================
 export function invitationEmail2(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
   const { coupleDisplayName, guestName, collectionLink, customBody } = params;
-  const { isCouple } = occasionCopy(params.occasion);
+  const { isPerson } = occasionCopy(params.occasion, !!params.namesArePeople);
 
-  const subject = isCouple
+  const subject = isPerson
     ? `Reminder: your recipe for ${coupleDisplayName}'s cookbook`
     : `Reminder: your recipe for ${coupleDisplayName}`;
 

@@ -156,17 +156,23 @@ function InviteFirstContent() {
   // possessive subject; non-couple occasions drop it. Name fallback is "The Couple"
   // to match the sent email (groups.name is set in real sends).
   const emailIsWedding = !occasion || isWeddingOccasion;
-  const emailIsCouple = emailIsWedding || occasion === "anniversary";
+  // Reason: people's names keep the "gift for {name}" framing + possessive on any
+  // occasion; only book-title occasions (no first names) stay neutral.
+  const emailIsPerson = emailIsWedding || namesArePeople;
   const emailName = coupleName || "The Couple";
-  const emailSubject = emailIsCouple
+  const emailSubject = emailIsPerson
     ? `Your recipe goes in ${emailName}'s cookbook`
     : `Your recipe goes in ${emailName}`;
-  const emailHeroLabel = emailIsWedding ? "A wedding cookbook gift for" : "A cookbook gift";
+  const emailHeroLabel = emailIsWedding
+    ? "A wedding cookbook gift for"
+    : emailIsPerson
+      ? "A cookbook gift for"
+      : "A cookbook gift";
 
   const previewMessage = shareMessage || (coupleName
     ? (namesArePeople
-        ? `You're adding a recipe to ${coupleName}'s cookbook. Doesn't have to be fancy — just something you actually make.`
-        : `You're adding a recipe to this cookbook. Doesn't have to be fancy — just something you actually make.`)
+        ? `You're adding a recipe to ${coupleName}'s cookbook. Doesn't have to be fancy, just something you actually make.`
+        : `You're adding a recipe to this cookbook. Doesn't have to be fancy, just something you actually make.`)
     : "");
 
   const shortLink = collectionLink
@@ -430,7 +436,7 @@ function InviteFirstContent() {
         {activeShare === "qr" && (
           <div className="mt-5 pt-5 border-t border-[hsl(var(--brand-sand))] flex flex-col items-center gap-3">
             <p className="text-sm text-gray-500 text-center max-w-xs">
-              Print this for your event. Guests scan it with their phone and add a recipe right there.
+              Guests scan it with their phone and add a recipe right there. Print this for your event.
             </p>
             <div className="bg-white border border-gray-200 rounded-2xl p-4">
               {qrDataUrl ? (

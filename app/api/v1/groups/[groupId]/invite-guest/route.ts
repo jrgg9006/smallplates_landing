@@ -96,6 +96,7 @@ export async function POST(
       captainName,
       emailNumber: 1,
       occasion: group.occasion,
+      namesArePeople: Boolean(group.couple_first_name || group.partner_first_name),
     });
 
     return NextResponse.json({ success: true, guestId: guest.id });

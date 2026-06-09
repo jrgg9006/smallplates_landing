@@ -48,7 +48,7 @@ function PersonalizeInviteContent() {
               ? `${data.couple_first_name}'s cookbook`
               : "the cookbook";
         setMessage(
-          `You're adding a recipe to ${subject}. Doesn't have to be fancy — just something you actually make.`
+          `You're adding a recipe to ${subject}. Doesn't have to be fancy, just something you actually make.`
         );
         setOccasion(data?.occasion ?? null);
         setNamesArePeople(hasNames);

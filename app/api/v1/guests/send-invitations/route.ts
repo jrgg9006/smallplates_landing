@@ -193,6 +193,7 @@ export async function POST(request: NextRequest) {
         emailNumber: 1,
         customBody: group.email_invite_message || undefined,
         occasion: group.occasion,
+        namesArePeople: Boolean(group.couple_first_name || group.partner_first_name),
       });
 
       if (result.success) {
