@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { trackEvent } from "@/lib/analytics";
 import { isFreeTierEnabled } from "@/lib/feature-flags";
-import { BASE_BOOK_PRICE } from "@/lib/stripe/pricing";
+import { pricePerCopy } from "@/lib/stripe/pricing";
 
 /**
  * PRICING BLOCK — the commercial "what you get + price" beat both Storyworth
@@ -178,12 +178,13 @@ export default function PricingBlock() {
               Free to start. Pay when it&rsquo;s ready.
             </h2>
 
-            {/* Price — compact, sits right under the title */}
+            {/* Price — per-person range. It's a group gift, so the cost splits
+                across everyone who chips in; the full curve lives on /pricing. */}
             <div className="mt-3 flex items-baseline gap-2.5">
-              <span className="font-sans text-xl font-semibold text-brand-charcoal">
-                ${BASE_BOOK_PRICE}
+              <span className="font-sans text-xl font-semibold text-brand-charcoal tabular-nums">
+                ${pricePerCopy(6)}&ndash;${pricePerCopy(1)}
               </span>
-              <span className="type-caption">per book, shipping included</span>
+              <span className="type-caption">per person, shipping included</span>
             </div>
 
             <p className="type-body-small mt-5 max-w-md text-sm text-brand-charcoal/70 md:text-[15px]">
