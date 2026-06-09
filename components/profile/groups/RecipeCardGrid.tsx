@@ -43,36 +43,39 @@ export function RecipeCardGrid({
 
   if (filteredRecipes.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-sm text-[hsl(var(--brand-warm-gray))]">
+      <div className="flex flex-col items-center text-center py-20">
+        <p className="text-base text-[hsl(var(--brand-charcoal))]">
           No recipes yet. Be the first.
         </p>
         {onAddRecipe && (
           <button
             onClick={onAddRecipe}
-            className="btn btn-outline mt-4 px-6 py-2.5 text-sm"
+            className="btn btn-outline mt-7 px-8 py-2.5 text-sm"
           >
             Add a recipe
           </button>
         )}
         {onImportGuests && (
-          <p className="hidden sm:flex text-sm text-[hsl(var(--brand-warm-gray))] mt-4 items-center justify-center gap-2">
-            Import guests from
-            <button
-              onClick={() => onImportGuests("zola")}
-              className="opacity-40 hover:opacity-70 transition-opacity"
-            >
-              <img src="/images/guest_modal/Zola_Logo.png" alt="Zola" className="h-3.5 object-contain grayscale" />
-            </button>
-            or
-            <button
-              onClick={() => onImportGuests("the_knot")}
-              className="opacity-40 hover:opacity-70 transition-opacity"
-            >
-              <img src="/images/guest_modal/knot_logo.png" alt="The Knot" className="h-3.5 object-contain grayscale" />
-            </button>
-            — we&rsquo;ll send the invite.
-          </p>
+          <div className="mt-14 flex flex-col items-center">
+            <div className="w-full max-w-sm border-t border-[hsl(var(--brand-border))]" />
+            <p className="hidden sm:flex whitespace-nowrap mt-8 text-[13px] text-[hsl(var(--brand-warm-gray))] items-center justify-center gap-2.5">
+              Import guests from
+              <button
+                onClick={() => onImportGuests("zola")}
+                className="opacity-40 hover:opacity-70 transition-opacity"
+              >
+                <img src="/images/guest_modal/Zola_Logo.png" alt="Zola" className="h-3.5 object-contain grayscale" />
+              </button>
+              or
+              <button
+                onClick={() => onImportGuests("the_knot")}
+                className="opacity-40 hover:opacity-70 transition-opacity"
+              >
+                <img src="/images/guest_modal/knot_logo.png" alt="The Knot" className="h-3.5 object-contain grayscale" />
+              </button>
+              — we&rsquo;ll send the invite.
+            </p>
+          </div>
         )}
       </div>
     );

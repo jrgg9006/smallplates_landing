@@ -39,11 +39,12 @@ async function readImage(origin: string, relPath: string): Promise<string> {
 function titleFontSize(maxPartLen: number): number {
   if (maxPartLen <= 7) return 80;
   if (maxPartLen <= 10) return 72;
-  if (maxPartLen <= 14) return 64;
-  if (maxPartLen <= 18) return 58;
-  if (maxPartLen <= 24) return 52;
-  if (maxPartLen <= 30) return 46;
-  return 40;
+  if (maxPartLen <= 14) return 70;
+  if (maxPartLen <= 18) return 68;
+  if (maxPartLen <= 22) return 66;
+  if (maxPartLen <= 27) return 64;
+  if (maxPartLen <= 33) return 56;
+  return 48;
 }
 
 export async function GET(request: NextRequest) {
@@ -159,8 +160,12 @@ export async function GET(request: NextRequest) {
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'center',
-              paddingLeft: 48,
-              paddingRight: 48,
+              // Reason: tighter side padding gives long names (e.g. "Mom Lilyth
+              // Fieston Loco!") more room so the font stays larger instead of
+              // shrinking to fit a narrow center column. Short names are centered
+              // and unaffected.
+              paddingLeft: 6,
+              paddingRight: 6,
             }}
           >
             <span
