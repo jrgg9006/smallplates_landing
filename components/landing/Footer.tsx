@@ -64,12 +64,13 @@ export default function Footer() {
                 </h3>
                 <ul className="space-y-3">
                   <li>
-                    <Link
-                      href="/how-it-works"
-                      className="font-sans font-light text-base text-white/70 hover:text-white transition-colors"
+                    {/* TODO: re-enable cuando /how-it-works esté lista */}
+                    <span
+                      aria-disabled="true"
+                      className="font-sans font-light text-base text-white/30 cursor-not-allowed"
                     >
                       How It Works
-                    </Link>
+                    </span>
                   </li>
                   <li>
                     <Link
