@@ -35,8 +35,8 @@ export default function Home() {
         <PricingBlock />
         <BooksPrinted />
         <PersonalNotes />
-        <TheBook />
         <TestimonialsSection />
+        <TheBook />
         <EmotionalClose />
         <FAQ />
         <NewsletterSignup />
