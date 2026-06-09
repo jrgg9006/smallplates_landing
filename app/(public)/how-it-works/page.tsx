@@ -18,7 +18,7 @@ const steps: JourneyStepData[] = [
     number: "01",
     title: "Gather the recipes. Three ways.",
     description:
-      "You add them, share a link, or invite a few people to collect with you. No app, no account for your people. They send a recipe in about five minutes, from their phone.",
+      "Pick whichever way fits. No app, no account for your people. They send a recipe in about five minutes, from their phone.",
   },
   {
     number: "02",
@@ -73,11 +73,22 @@ export default function HowItWorksPage() {
   // TODO (imágenes reales): paso 1 → mockup de "collect link"; paso 2 → foto real
   // de una receta a mano junto a la página diseñada (hoy: página + snapshot falso).
   const visuals = [
-    <StepImage
-      key="s1"
-      src="/images/HowitWorks_images/collect_iphone_mockup.png"
-      alt="Share a link so your people can send recipes"
-    />,
+    <div key="s1" className="space-y-5">
+      <StepImage
+        src="/images/HowitWorks_images/collect_iphone_mockup.png"
+        alt="Share a link so your people can send recipes"
+      />
+      <div className="flex flex-wrap gap-3">
+        {["Add them yourself", "Share a link", "Invite collaborators"].map((c) => (
+          <span
+            key={c}
+            className="type-caption rounded-full border border-brand-sand bg-brand-white px-4 py-2 text-brand-charcoal/80"
+          >
+            {c}
+          </span>
+        ))}
+      </div>
+    </div>,
     // Paso 2 — antes/después: la página diseñada + un "snapshot" de la receta a mano.
     <div key="s2" className="relative mx-auto max-w-sm md:mx-0">
       <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-brand-white shadow-md">
