@@ -301,47 +301,42 @@ export default function HowItWorksPage() {
                 What they send
               </p>
 
-              {/* Encabezado: autor + título + nota personal (full width, como en la imagen) */}
-              <div className="mb-4">
-                <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Recipe title</p>
-                <div className="rounded-lg border border-brand-sand bg-brand-white px-4 py-3">
-                  <p className="type-eyebrow text-brand-warm-gray">Cazmier Tymoch</p>
-                  <p className="type-body-small mt-1 text-brand-charcoal">A Creamy Orzo Bake</p>
-                  <p className="type-caption mt-2 italic text-brand-charcoal/65">
-                    I&rsquo;m so grateful to share a signature recipe in our household with
-                    you both. Whether you make this a lot or a little, I hope that it brings
-                    you warmth and comfort and reminds you of our shared time together. I
-                    have profound appreciation and love for you guys!
-                  </p>
-                </div>
-              </div>
-
-              {/* Ingredients (izq) + Steps (der) */}
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="flex flex-col">
-                  <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Ingredients</p>
-                  <div className="flex-1 rounded-lg border border-brand-sand bg-brand-white px-4 py-3">
-                    <ul className="space-y-1.5">
-                      {[
-                        "1 lb of orzo",
-                        "32 oz of broth of choice (I like chicken)",
-                        "Cheese!!! Garlic and herb Boursin and parmesan",
-                        "Sun-dried tomatoes (recommended you don't manually sun-dry them)",
-                        "Protein of choice (chicken, Italian sausage, or even... chicken sausage)",
-                        "Spinach (more than you'd think)",
-                        "As much garlic as you'd like",
-                        "Seasonings of choice (I'd recommend oregano, red pepper, salt, pepper)",
-                      ].map((ing) => (
-                        <li key={ing} className="type-caption text-brand-charcoal/80">
-                          {ing}
-                        </li>
-                      ))}
-                    </ul>
+                {/* Izquierda: title, ingredients, notes apilados */}
+                <div className="space-y-4">
+                  <div>
+                    <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Recipe title</p>
+                    <div className="rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
+                      <p className="type-caption text-brand-charcoal">A Creamy Orzo Bake</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Ingredients</p>
+                    <div className="rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
+                      <p className="type-caption text-brand-charcoal/80">
+                        1 lb of orzo, 32 oz of broth (I like chicken), garlic and herb
+                        Boursin and parmesan, sun-dried tomatoes, protein of choice
+                        (chicken, Italian sausage, or chicken sausage), spinach (more than
+                        you&rsquo;d think), as much garlic as you&rsquo;d like, seasonings
+                        (oregano, red pepper, salt, pepper)
+                      </p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Notes</p>
+                    <div className="rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
+                      <p className="type-caption text-brand-charcoal/80">
+                        I&rsquo;m so grateful to share a signature recipe with you both. I
+                        hope it brings you warmth and comfort. Love you guys!
+                      </p>
+                    </div>
                   </div>
                 </div>
+
+                {/* Derecha: steps, ocupa todo el alto */}
                 <div className="flex flex-col">
                   <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Steps</p>
-                  <div className="flex-1 rounded-lg border border-brand-sand bg-brand-white px-4 py-3">
+                  <div className="flex-1 rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
                     <p className="type-caption text-brand-charcoal/80">
                       In an oven-safe dish (Le Creuset for clout), place Boursin in the
                       middle of the dish. Add orzo, sun-dried tomatoes (including its oil),
