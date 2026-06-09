@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     // Fetch pdf_url and verify book is printed
     const { data: group, error: groupErr } = await supabase
       .from('groups')
-      .select('pdf_url, book_status, couple_display_name')
+      .select('pdf_url, book_status, print_couple_name, couple_display_name')
       .eq('id', group_id)
       .single();
 
@@ -65,7 +65,9 @@ export async function POST(request: NextRequest) {
     const pdfBuffer = await pdfResponse.arrayBuffer();
     const pdfBase64 = Buffer.from(pdfBuffer).toString('base64');
 
-    const coupleNamePlain = couple_name || group.couple_display_name || 'The couple';
+    // Reason: match the name that was confirmed for print (print_couple_name) so
+    // the delivery email greeting equals what's on the printed cover.
+    const coupleNamePlain = couple_name || group.print_couple_name || group.couple_display_name || 'The couple';
     const coupleNameHtml = coupleNamePlain.replace(/&/g, '&amp;');
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://smallplatesandcompany.com';

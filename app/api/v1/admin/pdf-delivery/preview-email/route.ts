@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     const { data: group } = await supabase
       .from('groups')
-      .select('id, couple_display_name, name')
+      .select('id, print_couple_name, couple_display_name, name')
       .eq('id', groupId)
       .single();
 
@@ -34,7 +34,9 @@ export async function GET(request: NextRequest) {
     const totalRecipes = recipes?.length ?? 0;
     const totalContributors = new Set(recipes?.map(r => r.guest_id) ?? []).size;
 
-    const coupleNamePlain = group.couple_display_name || group.name || 'The couple';
+    // Reason: mirror the delivery email — prefer the confirmed print name so the
+    // preview matches what the customer actually receives.
+    const coupleNamePlain = group.print_couple_name || group.couple_display_name || group.name || 'The couple';
     const coupleNameHtml = coupleNamePlain.replace(/&/g, '&amp;');
 
     // Reason: in browser preview we pass a real URL; in actual email sends this becomes a CID attachment

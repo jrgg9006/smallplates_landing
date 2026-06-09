@@ -249,6 +249,13 @@ export async function updateGroup(groupId: string, updates: GroupFormData) {
     partner_first_name: updates.partner_first_name,
     partner_last_name: updates.partner_last_name,
     relationship_to_couple: updates.relationship_to_couple,
+    // Reason: the cookbook name drives the cover. When it changes, the caller
+    // syncs couple_display_name and clears the print confirmation so the final
+    // printed name gets reconfirmed in Review. undefined keys are omitted by
+    // supabase-js; null is applied intentionally.
+    couple_display_name: updates.couple_display_name,
+    print_couple_name: updates.print_couple_name,
+    print_details_confirmed_at: updates.print_details_confirmed_at,
     gift_date: updates.gift_date,
     gift_date_undecided: updates.gift_date_undecided,
     book_close_date: updates.book_close_date,

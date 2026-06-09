@@ -1068,6 +1068,8 @@ export interface GroupFormData {
   partner_last_name?: string | null;
   relationship_to_couple?: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
   couple_display_name?: string | null;
+  print_couple_name?: string | null;
+  print_details_confirmed_at?: string | null;
   gift_date?: string | null;
   gift_date_undecided?: boolean;
   book_close_date?: string | null;

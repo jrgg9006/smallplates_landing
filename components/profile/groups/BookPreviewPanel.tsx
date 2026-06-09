@@ -21,7 +21,15 @@ export function BookPreviewPanel({ group, recipeCount, onPreviewClick }: BookPre
     );
   }
 
-  const coverUrl = `/api/v1/admin/pdf-delivery/preview-cover?group_id=${group.id}&v=${group.name?.length || 0}`;
+  // Reason: bust the cover cache on the actual title that will render (matches the
+  // priority in the preview-cover route), so editing the cookbook name refreshes
+  // the image. Keying on name.length missed same-length edits.
+  const coverTitle =
+    (group.print_details_confirmed_at && group.print_couple_name) ||
+    group.couple_display_name ||
+    group.name ||
+    "";
+  const coverUrl = `/api/v1/admin/pdf-delivery/preview-cover?group_id=${group.id}&v=${encodeURIComponent(coverTitle)}`;
 
   return (
     <div className="flex items-start justify-center pt-2">

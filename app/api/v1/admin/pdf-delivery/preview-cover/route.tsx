@@ -51,11 +51,16 @@ export async function GET(request: NextRequest) {
     const supabase = createSupabaseAdminClient();
     const { data: group } = await supabase
       .from('groups')
-      .select('couple_display_name, name')
+      .select('print_couple_name, print_details_confirmed_at, couple_display_name, name')
       .eq('id', groupId)
       .single();
     if (group) {
-      coupleNamePlain = group.couple_display_name || group.name || 'The couple';
+      // Reason: once the owner confirms the final printed name in Review, that's
+      // the source of truth. Before confirmation, fall back to the editable
+      // cookbook name (couple_display_name is kept in sync with it; name is the
+      // last resort for legacy rows).
+      const confirmed = group.print_details_confirmed_at && group.print_couple_name;
+      coupleNamePlain = confirmed || group.couple_display_name || group.name || 'The couple';
     }
   }
 
