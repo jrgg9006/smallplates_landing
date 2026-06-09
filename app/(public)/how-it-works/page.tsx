@@ -1,571 +1,452 @@
 "use client";
 
-import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import WhatsAppFAB from "@/components/landing/WhatsAppFAB";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Mail, Share2, Plus, Users } from "lucide-react";
+import Banner from "@/components/landing/Banner";
+import Footer from "@/components/landing/Footer";
+import WhatsAppFAB from "@/components/landing/WhatsAppFAB";
+import JourneyTimeline from "./_components/JourneyTimeline";
+import JourneyStep, { type JourneyStepData } from "./_components/JourneyStep";
+
+const easeOut: [number, number, number, number] = [0.23, 1, 0.32, 1];
+
+const steps: JourneyStepData[] = [
+  {
+    number: "01",
+    title: "Gather the recipes. Three ways.",
+    description:
+      "Pick whichever way fits. No app, no account for your people. They send a recipe in about five minutes, from their phone.",
+  },
+  {
+    number: "02",
+    title: "They snap a photo. We do the rest.",
+    description:
+      "No retyping, no forms. Your people photograph the handwritten recipe (grandma's card, the back of an envelope, coffee stains and all) and we turn it into clean text and a designed page. Or they type it, if they'd rather.",
+  },
+  {
+    number: "03",
+    title: "See who's in. Nudge the rest in one tap.",
+    description:
+      "Import your guest list, and watch the recipes land in one place. See who's sent theirs and who hasn't, then remind everyone still missing with a single tap, or send a nicer personalized email when you want. You stay in control, without texting anyone one by one.",
+  },
+  {
+    number: "04",
+    title: "You don't do this alone. Add captains.",
+    description:
+      "Invite as many people as you want. Each captain gets the same dashboard you do, and gathers recipes right alongside you. The work spreads out, so it never sits on one person.",
+  },
+];
+
+function StepImage({
+  src,
+  alt,
+  bg = "bg-brand-sand",
+}: {
+  src: string;
+  alt: string;
+  bg?: string;
+}) {
+  return (
+    <div className={`relative aspect-[4/3] w-full overflow-hidden rounded-2xl ${bg}`}>
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        className="object-cover"
+        sizes="(max-width: 1024px) 100vw, 50vw"
+      />
+    </div>
+  );
+}
 
 export default function HowItWorksPage() {
   const router = useRouter();
   const { user } = useAuth();
+  // Reason: nunca mandar al onboarding viejo (/onboarding). Logged-out → nuevo flow.
+  const handleStart = () => router.push(user ? "/profile/groups" : "/onboarding/welcome");
 
-  // Recipe examples for carousel
-  const recipeExamples = [
-    { id: 1, src: "/images/how-it-works/recipe-examples/example1.jpg", alt: "Handwritten recipe note" },
-    { id: 2, src: "/images/how-it-works/recipe-examples/example2.jpg", alt: "Phone photo of homemade meal" },
-    { id: 3, src: "/images/how-it-works/recipe-examples/example3.jpg", alt: "Voice memo transcription" },
+  // Visuals alineados 1:1 con `steps`.
+  // TODO (imágenes reales): paso 1 → mockup de "collect link"; paso 2 → foto real
+  // de una receta a mano junto a la página diseñada (hoy: página + snapshot falso).
+  const visuals = [
+    <StepImage
+      key="s1"
+      src="/images/HowitWorks_images/collect_iphone_mockup.png"
+      alt="Share a link so your people can send recipes"
+    />,
+    // Paso 2 — antes/después: la página diseñada + un "snapshot" de la receta a mano.
+    <div key="s2" className="relative mx-auto max-w-sm md:mx-0">
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-brand-white shadow-md">
+        <Image
+          src="/images/how_it_works_profilesection/recipe_example_banana.png"
+          alt="A handwritten recipe, redesigned as a clean book page"
+          fill
+          className="object-contain"
+          sizes="(max-width: 1024px) 100vw, 40vw"
+        />
+      </div>
+      <div className="absolute -left-3 -top-4 w-32 rotate-[-6deg] rounded-lg bg-brand-cream p-3 shadow-lg ring-1 ring-brand-sand md:w-36">
+        <p className="type-caption mb-1 text-brand-charcoal/45">snapshot from a guest</p>
+        <p className="type-caption leading-snug text-brand-charcoal/75">
+          3 ripe bananas, 1 cup sugar, 1½ cups flour, 350° ~1hr. Abuela
+        </p>
+      </div>
+    </div>,
+    // Paso 3 — dashboard de quién mandó / quién falta (markup on-brand).
+    <div key="s3" className="rounded-2xl bg-brand-warm-white-warm p-6 md:p-8">
+      <div className="mb-5 flex items-center justify-between">
+        <span className="type-body-small font-medium text-brand-charcoal">
+          12 of 18 recipes in
+        </span>
+        <span className="rounded-full bg-brand-honey px-4 py-1.5 type-caption text-brand-white">
+          Send reminder
+        </span>
+      </div>
+      <div className="space-y-2.5">
+        {[
+          { n: "María", sent: true },
+          { n: "Tía Lupe", sent: true },
+          { n: "John", sent: false },
+          { n: "Abuela Carmen", sent: true },
+          { n: "Carlos", sent: false },
+        ].map((g) => (
+          <div
+            key={g.n}
+            className="flex items-center justify-between rounded-xl bg-brand-white px-4 py-3"
+          >
+            <span className="type-body-small text-brand-charcoal/80">{g.n}</span>
+            <span
+              className={`type-caption ${
+                g.sent ? "text-brand-honey" : "text-brand-charcoal/40"
+              }`}
+            >
+              {g.sent ? "Sent" : "Pending"}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>,
+    // Paso 4 — dashboard de captains (markup on-brand).
+    <div key="s4" className="rounded-2xl bg-brand-warm-white-warm p-6 md:p-8">
+      <div className="mb-5 flex items-center justify-between">
+        <span className="type-body-small font-medium text-brand-charcoal">Captains</span>
+        <span className="rounded-full bg-brand-honey px-4 py-1.5 type-caption text-brand-white">
+          + Invite captain
+        </span>
+      </div>
+      <div className="space-y-2.5">
+        {[
+          { n: "You", tag: "Organizer" },
+          { n: "Sofía", tag: "Captain" },
+          { n: "Marcos", tag: "Captain" },
+          { n: "Lucía", tag: "Captain" },
+        ].map((p) => (
+          <div
+            key={p.n}
+            className="flex items-center gap-3 rounded-xl bg-brand-white px-4 py-3"
+          >
+            <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-brand-sand type-caption text-brand-charcoal/70">
+              {p.n[0]}
+            </span>
+            <span className="type-body-small text-brand-charcoal/80">{p.n}</span>
+            <span className="ml-auto type-caption text-brand-charcoal/40">{p.tag}</span>
+          </div>
+        ))}
+      </div>
+      <p className="type-caption mt-4 text-brand-charcoal/50">Invite as many as you want.</p>
+    </div>,
   ];
 
-  // Before/After examples
-  const beforeAfterExamples = [
-    {
-      id: 1,
-      before: "/images/how-it-works/before-after/before1.jpg",
-      after: "/images/how-it-works/before-after/after1.jpg",
-      alt: "Recipe transformation example 1"
-    },
-    {
-      id: 2,
-      before: "/images/how-it-works/before-after/before2.jpg",
-      after: "/images/how-it-works/before-after/after2.jpg",
-      alt: "Recipe transformation example 2"
-    },
-  ];
+  // Las 3 formas del paso 1, debajo del copy (no de la imagen).
+  const stepOneWays = (
+    <div className="mt-6 flex flex-wrap gap-3">
+      {["Add them yourself", "Share a link", "Invite captains"].map((c) => (
+        <span
+          key={c}
+          className="type-caption rounded-full border border-brand-sand bg-brand-white px-4 py-2 text-brand-charcoal/80"
+        >
+          {c}
+        </span>
+      ))}
+    </div>
+  );
 
-  const handleAddRecipe = () => {
-    if (user) {
-      router.push("/profile/recipes");
-    } else {
-      router.push("/onboarding");
-    }
-  };
+  // Tarjeta opcional (sin número, no es un paso del riel) entre el paso 1 y 2.
+  // TODO: reemplazar el preview falso por screenshots reales del builder.
+  const optionalInvite = (
+    <div className="lg:pl-16">
+      <div className="overflow-hidden rounded-2xl border border-dashed border-brand-sand bg-brand-white/70">
+        <div className="grid grid-cols-1 items-center gap-6 p-6 md:grid-cols-2 md:gap-10 md:p-8">
+          <div>
+            <p className="type-eyebrow text-brand-warm-gray">OPTIONAL</p>
+            <h3 className="type-subheading mt-3">Need an invite? Make a digital one.</h3>
+            <p className="type-body-small mt-3 text-brand-charcoal/70">
+              Build an invite for the shower, the anniversary, the wedding (photo,
+              date, address) with the recipe ask built right in. Most people just
+              share a link. This is here if you want it.
+            </p>
+          </div>
 
-  const handleInviteCollaborators = () => {
-    if (user) {
-      router.push("/profile/groups");
-    } else {
-      router.push("/onboarding");
-    }
-  };
-
-  const handleStartCookbook = () => {
-    if (user) {
-      router.push("/profile/groups");
-    } else {
-      router.push("/onboarding");
-    }
-  };
+          {/* Preview falso de la invitación */}
+          <div className="overflow-hidden rounded-2xl bg-brand-white shadow-sm">
+            <div className="aspect-[5/3] bg-brand-sand" />
+            <div className="space-y-1 p-5">
+              <p className="type-subheading">Ana &amp; Rich</p>
+              <p className="type-caption text-brand-charcoal/60">
+                Saturday, Oct 12 · 4pm · Napa, CA
+              </p>
+              <span className="mt-2 inline-block rounded-full bg-brand-cream px-3 py-1 type-caption text-brand-charcoal/70">
+                + Send us your recipe
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
-      {/* Top Banner with Centered Logo */}
-      <header
-        role="banner"
-        aria-label="Top banner"
-        className="w-full bg-white border-b border-gray-200"
-      >
-        <div className="mx-auto max-w-7xl px-6 md:px-8 h-20 flex items-center justify-center">
-          <Link href="/" className="flex-shrink-0">
-            <Image
-              src="/images/SmallPlates_logo_horizontal.png"
-              alt="Small Plates & Company"
-              width={180}
-              height={36}
-              priority
-              className="hover:opacity-70 transition-opacity duration-300"
-            />
-          </Link>
-        </div>
-      </header>
+      {/* Banner real del sitio (con login), sin el strip de shipping */}
+      <Banner theme="light" showShippingStrip={false} />
 
-      <main className="min-h-screen bg-white">
-        {/* 1. Hero Section */}
-        <section className="pt-20 pb-16 md:pt-32 md:pb-24">
-          <div className="mx-auto max-w-5xl px-6 md:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="text-center"
-            >
-              <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight text-gray-900 mb-8">
-                How it works!
-              </h1>
-              <div className="w-24 h-px bg-gray-300 mx-auto mb-8"></div>
-              <h2 className="font-serif text-2xl md:text-3xl text-gray-700 font-light italic">
-                Everything you need to create your book — beautifully, easily, and with the people you love.
-              </h2>
-            </motion.div>
+      <main className="bg-brand-white">
+        {/* 1. Hero — el wedge en grande */}
+        <section className="px-4 pt-32 pb-12 md:px-6 md:pt-44 md:pb-16">
+          <motion.div
+            className="mx-auto max-w-5xl text-center"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: easeOut }}
+          >
+            <p className="type-eyebrow text-brand-honey">HOW IT WORKS</p>
+            <h1 className="type-heading mt-4 [text-wrap:balance]">
+              You don&rsquo;t write this book.
+              <br className="hidden md:block" />{" "}
+              The people who show up do.
+            </h1>
+            <p className="type-body mt-5 text-brand-charcoal/70">
+              From the first &ldquo;send me your recipe&rdquo; to the hardcover on your
+              counter. Here&rsquo;s the whole thing.
+            </p>
+          </motion.div>
+        </section>
+
+        {/* 2. Timeline (tarjeta) */}
+        <section className="px-2 py-6 md:px-3 md:py-8">
+          <div className="mx-auto max-w-7xl rounded-[2rem] bg-brand-warm-white-warm px-5 py-16 md:px-10 md:py-24">
+            <JourneyTimeline>
+              <JourneyStep step={steps[0]} index={0} visual={visuals[0]} extra={stepOneWays} />
+              {optionalInvite}
+              <JourneyStep step={steps[1]} index={1} visual={visuals[1]} />
+              <JourneyStep step={steps[2]} index={2} visual={visuals[2]} />
+              <JourneyStep step={steps[3]} index={3} visual={visuals[3]} />
+            </JourneyTimeline>
           </div>
         </section>
 
-        {/* 2. North Star Section */}
-        <section className="pt-24 md:pt-32 pb-24 md:pb-32">
-          <div className="mx-auto max-w-3xl px-6 md:px-8">
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1, delay: 0.2 }}
-              className="space-y-8"
-            >
-              <div className="relative aspect-[16/9] mb-8 rounded-lg overflow-hidden bg-gray-100">
-                <Image
-                  src="/images/how-it-works/lifestyle-photo.jpg"
-                  alt="Family cooking together"
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 800px"
-                />
-              </div>
-              
-              <div className="text-center space-y-6">
-                <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light">
-                  You&apos;re here to create a one-of-a-kind book that will live in your kitchen forever.
-                </p>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* 3. Expectations Section */}
-        <section className="pt-24 md:pt-32 pb-24 md:pb-32 bg-gray-50">
-          <div className="mx-auto max-w-7xl px-6 md:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-              <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="space-y-6"
-              >
-                <h2 className="font-serif text-4xl md:text-5xl font-medium text-gray-900 mb-6">
-                  This isn&apos;t a professional book — it&apos;s a real one.
-                </h2>
-                <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light">
-                  Real breakfasts. Real dinners. Real drinks. Real stories.
-                </p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-                className="relative"
-              >
-                <Carousel className="w-full">
-                  <CarouselContent>
-                    {recipeExamples.map((example) => (
-                      <CarouselItem key={example.id}>
-                        <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-gray-100">
-                          <Image
-                            src={example.src}
-                            alt={example.alt}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 1024px) 100vw, 50vw"
-                          />
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="hidden lg:flex -left-12" />
-                  <CarouselNext className="hidden lg:flex -right-12" />
-                </Carousel>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* 4. Three Paths Section */}
-        <section className="pt-24 md:pt-32 pb-24 md:pb-32">
-          <div className="mx-auto max-w-7xl px-6 md:px-8">
-            <div className="space-y-24">
-              {/* Introductory Overview - 3 Ways to Add Recipes */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="text-center space-y-12 mb-16"
-              >
-                <h2 className="font-serif text-4xl md:text-5xl font-medium text-gray-900">
-                  3 ways to get plates
-                </h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-                  <div className="flex flex-col items-center space-y-3 p-6 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
-                    <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                      <Plus className="h-6 w-6 text-gray-700" />
-                    </div>
-                    <span className="text-lg font-medium text-gray-900">Add them yourself</span>
-                  </div>
-                  
-                  <div className="flex flex-col items-center space-y-3 p-6 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
-                    <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                      <Share2 className="h-6 w-6 text-gray-700" />
-                    </div>
-                    <span className="text-lg font-medium text-gray-900">Collection Link</span>
-                  </div>
-                  
-                  <div className="flex flex-col items-center space-y-3 p-6 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
-                    <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                      <Users className="h-6 w-6 text-gray-700" />
-                    </div>
-                    <span className="text-lg font-medium text-gray-900">Shared Cookbooks</span>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* 4.1 Add Your Own Recipes */}
-              <div className="text-center mb-3">
-                <span className="text-normal font-medium tracking-widest uppercase text-gray-600">
-                  1: ADD THEM YOURSELF
-                </span>
-              </div>
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="text-center space-y-8"
-              >
-                <div className="max-w-3xl mx-auto space-y-6">
-                  <h2 className="font-serif text-4xl md:text-5xl font-medium text-gray-900">
-                    Simply add your own plates.
-                  </h2>
-                </div>
-                
-                <div className="max-w-4xl mx-auto mt-12">
-                  <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-gray-100 shadow-2xl">
-                    <Image
-                      src="/images/how_it_works_profilesection/add_a_recipe.png"
-                      alt="Add Recipe Modal"
-                      fill
-                      className="object-contain"
-                      sizes="(max-width: 768px) 100vw, 1200px"
-                    />
-                  </div>
-                </div>
-
-                <Button
-                  onClick={handleAddRecipe}
-                  size="lg"
-                  className="mt-8 bg-gray-900 text-white hover:bg-gray-800 rounded-lg px-8 py-6 text-lg font-medium"
-                >
-                  <Plus className="mr-2 h-5 w-5" />
-                  {user ? "Add a plate" : "Get started"}
-                </Button>
-              </motion.div>
-
-              {/* 4.2A Recipe Collection Link */}
-              <div className="text-center mb-3">
-                <span className="text-normal font-medium tracking-widest uppercase text-gray-600">
-                  2: COLLECTION LINK
-                </span>
-              </div>
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center"
-              >
-                <div className="space-y-6">
-                  <h2 className="font-serif text-4xl md:text-5xl font-medium text-gray-900">
-                    Send a link — no signup needeed.
-                  </h2>
-                  <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light">
-                    They can upload a plate by text, photo, or even a quick audio message.
-                  </p>
-                  <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-medium">
-                    Share the link with one click via SMS, WhatsApp, or email.
-                  </p>
-
-                  <div className="flex flex-wrap gap-4 mt-8">
-                    <Button variant="outline" size="lg" className="rounded-lg">
-                      <MessageSquare className="mr-2 h-5 w-5" />
-                      Share via SMS
-                    </Button>
-                    <Button variant="outline" size="lg" className="rounded-lg">
-                      <Share2 className="mr-2 h-5 w-5" />
-                      Share via WhatsApp
-                    </Button>
-                    <Button variant="outline" size="lg" className="rounded-lg">
-                      <Mail className="mr-2 h-5 w-5" />
-                      Share via Email
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
-                    <Image
-                      src="/images/how-it-works/guest-submission-flow.gif"
-                      alt="Guest submitting a recipe"
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 1024px) 100vw, 50vw"
-                    />
-                  </div>
-                  <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
-                    <Image
-                      src="/images/how-it-works/guest-submission-page.jpg"
-                      alt="Guest submission page screenshot"
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 1024px) 100vw, 50vw"
-                    />
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* 4.2B Cookbook Collaboration */}
-              <div className="text-center mb-3">
-                <span className="text-normal font-medium tracking-widest uppercase text-gray-600">
-                  3: SHARED COOKBOOKS
-                </span>
-              </div>
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center"
-              >
-                <div className="space-y-6 order-2 lg:order-1">
-                  <h2 className="font-serif text-4xl md:text-5xl font-medium text-gray-900">
-                    Build your book in groups
-                  </h2>
-                  <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light">
-                    Invite your people to join your book as collaborators.
-                  </p>
-                  <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light">
-                    Everyone can add their own recipes — and collect recipes from their friends and family.
-                  </p>
-
-                  <Button
-                    onClick={handleInviteCollaborators}
-                    size="lg"
-                    className="mt-8 bg-gray-900 text-white hover:bg-gray-800 rounded-lg px-8 py-6 text-lg font-medium"
-                  >
-                    <Users className="mr-2 h-5 w-5" />
-                    {user ? "Invite collaborators" : "Get started"}
-                  </Button>
-                </div>
-
-                <div className="space-y-6 order-1 lg:order-2">
-                  <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
-                    <Image
-                      src="/images/how-it-works/collaboration-dashboard.jpg"
-                      alt="Collaboration dashboard"
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 1024px) 100vw, 50vw"
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* 5. The Magic Section */}
-        <section className="pt-24 md:pt-32 pb-24 md:pb-32 bg-gray-50">
-          <div className="mx-auto max-w-7xl px-6 md:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="text-center space-y-12"
-            >
-              <div className="max-w-3xl mx-auto space-y-6">
-                <h2 className="font-serif text-4xl md:text-5xl font-medium text-gray-900">
-                  We turn every recipe into a beautiful, professionally designed page.
-                </h2>
-                <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light">
-                  You send us the real stuff — the texts, photos, audios — and we turn it into something that looks amazing.
-                </p>
-              </div>
-
-              <div className="mt-12">
-                <Carousel className="w-full max-w-5xl mx-auto">
-                  <CarouselContent>
-                    {beforeAfterExamples.map((example) => (
-                      <CarouselItem key={example.id}>
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <p className="text-sm font-medium text-gray-600 text-center">Before</p>
-                              <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-gray-100">
-                                <Image
-                                  src={example.before}
-                                  alt={`${example.alt} - before`}
-                                  fill
-                                  className="object-cover"
-                                  sizes="(max-width: 1024px) 50vw, 400px"
-                                />
-                              </div>
-                            </div>
-                            <div className="space-y-2">
-                              <p className="text-sm font-medium text-gray-600 text-center">After</p>
-                              <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-gray-100">
-                                <Image
-                                  src={example.after}
-                                  alt={`${example.alt} - after`}
-                                  fill
-                                  className="object-cover"
-                                  sizes="(max-width: 1024px) 50vw, 400px"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="hidden lg:flex -left-12" />
-                  <CarouselNext className="hidden lg:flex -right-12" />
-                </Carousel>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* 6. Recipe Count Recommendation */}
-        <section className="pt-24 md:pt-32 pb-24 md:pb-32">
-          <div className="mx-auto max-w-7xl px-6 md:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="text-center space-y-12"
-            >
-              <div className="max-w-3xl mx-auto space-y-6">
-                <h2 className="font-serif text-4xl md:text-5xl font-medium text-gray-900">
-                  For a beautiful hardcover cookbook, aim for 25+ recipes.
-                </h2>
-                <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light">
-                  With around 25–35 recipes, your cookbook becomes an ~80-page book that feels full, substantial, and meaningful.
-                </p>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* 7. Final Result Section */}
-        <section className="pt-24 md:pt-32 pb-24 md:pb-32 bg-gray-50">
-          <div className="mx-auto max-w-7xl px-6 md:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="text-center space-y-12"
-            >
-              <div className="max-w-3xl mx-auto space-y-6">
-                <h2 className="font-serif text-4xl md:text-5xl font-medium text-gray-900">
-                  Here&apos;s what you&apos;ll receive:
-                </h2>
-                <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-light">
-                  A printed, hardcover, beautifully designed cookbook filled with the recipes and stories that make your life feel full.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mt-12">
-                <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-lg">
-                  <Image
-                    src="/images/how-it-works/book-cover.jpg"
-                    alt="Cookbook cover"
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                </div>
-                <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-gray-100 shadow-lg">
-                  <Image
-                    src="/images/how-it-works/book-spread.jpg"
-                    alt="Cookbook open spread"
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                </div>
-                <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-lg">
-                  <Image
-                    src="/images/how-it-works/book-spine.jpg"
-                    alt="Cookbook spine"
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                </div>
-              </div>
-
-              <div className="relative aspect-[16/9] max-w-4xl mx-auto mt-12 rounded-lg overflow-hidden bg-gray-100 shadow-lg">
-                <Image
-                  src="/images/how-it-works/book-lifestyle.jpg"
-                  alt="Cookbook on kitchen table"
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 1200px"
-                />
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* 8. Call to Action Section */}
-        <section className="pt-24 md:pt-32 pb-16 md:pb-20 bg-gray-900">
-          <div className="mx-auto max-w-3xl px-6 md:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="text-center space-y-8"
-            >
-              <h2 className="font-serif text-3xl md:text-4xl font-medium text-white mb-6">
-                Ready to start gathering?
-              </h2>
-              
+        {/* Respiro emocional — tarjeta compacta con CTA (bloque de aire) */}
+        <section className="px-2 py-6 md:px-3 md:py-8">
+          <motion.div
+            className="mx-auto max-w-7xl rounded-[2rem] bg-brand-charcoal px-6 py-12 text-center shadow-xl md:px-10 md:py-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6, ease: easeOut }}
+          >
+            <div className="mx-auto mb-7 h-0.5 w-10 bg-brand-honey" />
+            <h2 className="type-heading leading-[1.27] text-brand-warm-white-warm">
+              The people who love you
+              <br />
+              should <span className="italic text-brand-honey">stay</span> in your life.
+            </h2>
+            <p className="type-body mt-6 text-brand-warm-white-warm/70">
+              Not just on the big days. In the ordinary ones too.
+            </p>
+            <p className="type-accent mt-4 text-brand-warm-white-warm/90">
+              That&rsquo;s what a kitchen is for.
+            </p>
+            <div className="mt-9">
               <Button
-                onClick={handleStartCookbook}
-                size="lg"
-                className="bg-white text-gray-900 hover:bg-gray-100 rounded-lg px-12 py-6 text-xl font-medium transition-colors duration-200"
+                onClick={handleStart}
+                className="rounded-full bg-brand-honey px-10 py-6 text-lg text-brand-white hover:bg-brand-honey-dark"
               >
-                {user ? "Start your cookbook" : "Get started"}
+                Start your book
               </Button>
+            </div>
+          </motion.div>
+        </section>
 
-              <div className="pt-8">
-                <Link 
-                  href="/"
-                  className="text-gray-400 hover:text-white transition-colors duration-200 text-sm"
-                >
-                  ← Back to home
-                </Link>
+        {/* El wedge / la magia — antes (texto crudo) → después (página diseñada) */}
+        <section className="px-2 py-6 md:px-3 md:py-8">
+          <div
+            id="the-magic"
+            className="mx-auto max-w-7xl rounded-[2rem] bg-brand-cream px-5 py-12 md:px-10 md:py-16"
+          >
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="type-eyebrow text-brand-honey">THE MAGIC</p>
+              <h2 className="type-heading mt-4">We make a real, professional cookbook. But how?</h2>
+              <p className="type-body-small mt-4 text-brand-charcoal/70">
+                You send the real stuff: a text, a photo, a voice note. We make it a book.
+              </p>
+            </div>
+
+            <div className="mx-auto mt-10 max-w-6xl">
+              {/* Antes: la receta llenándose como un formulario, dos columnas */}
+              <p className="type-caption mb-4 text-center text-brand-charcoal/50">
+                What they send
+              </p>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {/* Izquierda: title, ingredients, notes apilados */}
+                <div className="space-y-4">
+                  <div>
+                    <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Recipe title</p>
+                    <div className="rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
+                      <p className="type-caption text-brand-charcoal">A Creamy Orzo Bake</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Ingredients</p>
+                    <div className="rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
+                      <p className="type-caption text-brand-charcoal/80">
+                        1 lb of orzo, 32 oz of broth (I like chicken), garlic and herb
+                        Boursin and parmesan, sun-dried tomatoes, protein of choice
+                        (chicken, Italian sausage, or chicken sausage), spinach (more than
+                        you&rsquo;d think), as much garlic as you&rsquo;d like, seasonings
+                        (oregano, red pepper, salt, pepper)
+                      </p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Notes</p>
+                    <div className="rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
+                      <p className="type-caption text-brand-charcoal/80">
+                        I&rsquo;m so grateful to share a signature recipe with you both. I
+                        hope it brings you warmth and comfort. Love you guys!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Derecha: steps, ocupa todo el alto */}
+                <div className="flex flex-col">
+                  <p className="type-eyebrow mb-1.5 text-brand-warm-gray">Steps</p>
+                  <div className="flex-1 rounded-lg border border-brand-sand bg-brand-white px-4 py-2.5">
+                    <p className="type-caption text-brand-charcoal/80">
+                      In an oven-safe dish (Le Creuset for clout), place Boursin in the
+                      middle of the dish. Add orzo, sun-dried tomatoes (including its oil),
+                      and seasonings around the cheese. Pour in all the broth. Cover and
+                      bake at 425&deg;F for about 30 minutes. Cook the protein of your
+                      choosing; pan-fried or baking is great. Remove from oven and mix the
+                      Boursin into the cooked rice. Add spinach and parmesan to thicken.
+                      Simmer on the stovetop to thicken. Bone apple tea!
+                      <span className="ml-1 inline-block h-4 w-0.5 animate-pulse bg-brand-honey align-middle" />
+                    </p>
+                  </div>
+                </div>
               </div>
-            </motion.div>
+
+              {/* Después: página diseñada */}
+              <p className="type-caption mb-3 mt-10 text-center text-brand-charcoal/50">
+                Generated Recipe Page
+              </p>
+              <div className="relative mx-auto aspect-[16/10] w-full max-w-5xl overflow-hidden rounded-2xl bg-brand-white shadow-md">
+                <Image
+                  src="/images/how_it_works_profilesection/SmallPlates_Creamy_Orzo.png"
+                  alt="A Creamy Orzo Bake, designed as a finished book page"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 1024px"
+                />
+
+                {/* Pins anotando de qué campo salió cada parte (solo desktop;
+                    posiciones en % atadas a esta imagen — ajustables con top/left) */}
+                <div className="pointer-events-none absolute inset-0 hidden md:block">
+                  {[
+                    { label: "Title", top: 7, left: 12 },
+                    { label: "Note", top: 15, left: 30 },
+                    { label: "Ingredients", top: 45, left: 6 },
+                    { label: "Instructions", top: 35, left: 36
+                     },
+                    { label: "Photo", top: 48, left: 76 },
+                  ].map((pin, i) => (
+                    <motion.div
+                      key={pin.label}
+                      className="absolute flex items-center gap-1.5 rounded-full border border-brand-sand bg-brand-white/95 px-3 py-1.5 shadow-md backdrop-blur-sm"
+                      style={{ top: `${pin.top}%`, left: `${pin.left}%` }}
+                      initial={{ opacity: 0, scale: 0.9, y: 8 }}
+                      whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                      viewport={{ once: true, margin: "-80px" }}
+                      transition={{ duration: 0.45, delay: 0.2 + i * 0.09, ease: easeOut }}
+                    >
+                      <span className="relative flex h-2 w-2 flex-shrink-0">
+                        <span
+                          className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-honey opacity-60 motion-reduce:hidden"
+                          style={{ animationDelay: `${i * 0.35}s` }}
+                        />
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-honey" />
+                      </span>
+                      <span className="type-caption whitespace-nowrap text-brand-charcoal">
+                        {pin.label}
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 5. Ancla de precio */}
+        <section className="px-4 py-16 md:px-6 md:py-20">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="type-subheading">
+              Free to start. You only pay when the book is ready.
+            </p>
+            <p className="type-body-small mt-4 text-brand-charcoal/70">
+              Build the whole thing for free. Pay for the book when you order it,
+              backed by our guarantee.
+            </p>
+            <Link
+              href="/pricing"
+              className="type-body-small mt-5 inline-flex items-center gap-1 text-brand-charcoal underline underline-offset-4 transition-colors hover:text-brand-honey"
+            >
+              See pricing <span aria-hidden>→</span>
+            </Link>
+          </div>
+        </section>
+
+        {/* 6. CTA de cierre (tarjeta oscura) */}
+        <section className="px-2 pb-16 md:px-3 md:pb-24">
+          <div className="mx-auto max-w-7xl rounded-[2rem] bg-brand-charcoal px-5 py-16 text-center md:px-10 md:py-20">
+            <h2 className="type-subheading text-brand-warm-white-warm">
+              Ready to start your book?
+            </h2>
+            <div className="mt-8">
+              <Button
+                onClick={handleStart}
+                className="rounded-full bg-brand-honey px-10 py-6 text-lg text-brand-white hover:bg-brand-honey-dark"
+              >
+                Start your book
+              </Button>
+            </div>
+            <Link
+              href="/"
+              className="type-caption mt-8 inline-block text-brand-warm-white-warm/60 transition-colors hover:text-brand-warm-white-warm"
+            >
+              ← Back to home
+            </Link>
           </div>
         </section>
       </main>
+
+      <Footer />
       <WhatsAppFAB />
     </>
   );
 }
-

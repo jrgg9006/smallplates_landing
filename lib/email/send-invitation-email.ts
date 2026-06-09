@@ -15,6 +15,8 @@ export interface SendGuestInvitationParams {
   emailNumber: 1 | 2;
   recipeCount?: number;
   customBody?: string;
+  // Reason: drives occasion-aware copy in the templates (wedding vs neutral).
+  occasion?: string | null;
 }
 
 export async function sendGuestInvitationEmail({
@@ -28,6 +30,7 @@ export async function sendGuestInvitationEmail({
   emailNumber,
   recipeCount,
   customBody,
+  occasion,
 }: SendGuestInvitationParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
     // Use coupleName if provided, otherwise use coupleDisplayName for backward compatibility
@@ -42,6 +45,7 @@ export async function sendGuestInvitationEmail({
       captainName,
       recipeCount,
       customBody,
+      occasion,
     });
 
     // Send email via Postmark

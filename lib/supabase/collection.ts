@@ -52,6 +52,7 @@ export async function validateCollectionToken(token: string, groupId?: string | 
     let customShareMessage: string | null = null;
     let customShareSignature: string | null = null;
     let coupleNames: string | null = null;
+    let occasion: string | null = null;
     let coupleFirstName: string | null = null;
     let partnerFirstName: string | null = null;
     let coupleImageUrl: string | null = null;
@@ -66,21 +67,23 @@ export async function validateCollectionToken(token: string, groupId?: string | 
       // Get group info for couple names and image
       const { data: group } = await supabase
         .from('groups')
-        .select('couple_first_name, partner_first_name, couple_image_url, couple_image_og_url, couple_image_position_y, couple_image_position_x, book_close_date, book_closed_by_user')
+        .select('couple_first_name, partner_first_name, couple_display_name, name, occasion, couple_image_url, couple_image_og_url, couple_image_position_y, couple_image_position_x, book_close_date, book_closed_by_user')
         .eq('id', groupId)
         .single();
 
       if (group) {
         coupleFirstName = group.couple_first_name ?? null;
         partnerFirstName = group.partner_first_name ?? null;
-        if (group.couple_first_name && group.partner_first_name) {
-          coupleNames = `${group.couple_first_name} & ${group.partner_first_name}`;
-        } else if (group.couple_first_name) {
-          coupleNames = group.couple_first_name;
-        } else if (group.partner_first_name) {
-          coupleNames = group.partner_first_name;
-        }
-        
+        occasion = group.occasion ?? null;
+        // Reason: the Book name (groups.name) is the single source of truth for the
+        // collect page title. It's auto-built as "A & B" for couples and holds the
+        // cookbook title for other occasions, and the organizer can edit it from the
+        // dashboard — so it always wins. couple_display_name is only a defensive
+        // fallback in the unlikely case name is empty. couple_first_name /
+        // partner_first_name are still read, but only to drive the eyebrow label
+        // and the possessive in the note copy, not the title.
+        coupleNames = group.name || group.couple_display_name || null;
+
         // Set couple image URL and position if available
         coupleImageUrl = group.couple_image_url;
         coupleImageOgUrl = group.couple_image_og_url ?? null;
@@ -116,7 +119,7 @@ export async function validateCollectionToken(token: string, groupId?: string | 
       // auto-resolve when there's exactly one group for this profile.
       const { data: userGroups } = await supabase
         .from('group_members')
-        .select('group_id, groups!inner(id, name, book_closed_by_user, couple_first_name, partner_first_name)')
+        .select('group_id, groups!inner(id, name, book_closed_by_user, couple_first_name, partner_first_name, couple_display_name, occasion)')
         .eq('profile_id', profile.id);
 
       if (userGroups && userGroups.length > 0) {
@@ -148,16 +151,13 @@ export async function validateCollectionToken(token: string, groupId?: string | 
             return g.id === resolvedGroupId;
           });
           if (resolvedGroupData) {
-            const g = resolvedGroupData.groups as unknown as { couple_first_name?: string | null; partner_first_name?: string | null };
+            const g = resolvedGroupData.groups as unknown as { name?: string | null; couple_first_name?: string | null; partner_first_name?: string | null; couple_display_name?: string | null; occasion?: string | null };
             coupleFirstName = g.couple_first_name ?? null;
             partnerFirstName = g.partner_first_name ?? null;
-            if (g.couple_first_name && g.partner_first_name) {
-              coupleNames = `${g.couple_first_name} & ${g.partner_first_name}`;
-            } else if (g.couple_first_name) {
-              coupleNames = g.couple_first_name;
-            } else if (g.partner_first_name) {
-              coupleNames = g.partner_first_name;
-            }
+            occasion = g.occasion ?? null;
+            // Reason: Book name (groups.name) is the single source of truth for the
+            // title (see groupId branch above). couple_display_name is a fallback only.
+            coupleNames = g.name || g.couple_display_name || null;
           }
         }
         // Reason: If multiple groups, we can't auto-resolve — the UI should show a selector.
@@ -173,6 +173,7 @@ export async function validateCollectionToken(token: string, groupId?: string | 
         custom_share_message: customShareMessage,
         custom_share_signature: customShareSignature,
         couple_names: coupleNames,
+        occasion,
         couple_first_name: coupleFirstName,
         partner_first_name: partnerFirstName,
         couple_image_url: coupleImageUrl,

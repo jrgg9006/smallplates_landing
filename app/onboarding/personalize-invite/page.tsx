@@ -14,13 +14,15 @@ function PersonalizeInviteContent() {
 
   const [message, setMessage] = useState("");
   const [messageLoaded, setMessageLoaded] = useState(false);
+  const [occasion, setOccasion] = useState<string | null>(null);
+  const [namesArePeople, setNamesArePeople] = useState(false);
 
   useEffect(() => {
     if (!groupId || messageLoaded) return;
     const supabase = createSupabaseClient();
     supabase
       .from("groups")
-      .select("couple_first_name, partner_first_name, couple_image_url")
+      .select("occasion, couple_first_name, partner_first_name, couple_image_url")
       .eq("id", groupId)
       .single()
       .then(({ data }) => {
@@ -30,6 +32,8 @@ function PersonalizeInviteContent() {
         setMessage(
           `You're adding a recipe to ${couple}'s cookbook. Doesn't have to be fancy — just something you actually make.`
         );
+        setOccasion(data?.occasion ?? null);
+        setNamesArePeople(Boolean(data?.couple_first_name || data?.partner_first_name));
         if (data?.couple_image_url) {
           setPhotoPreview(data.couple_image_url);
         }
@@ -84,13 +88,31 @@ function PersonalizeInviteContent() {
     }
   }
 
+  // Reason: occasion-aware photo label (same rule as invite-first/collect).
+  // Weddings, bridal showers and anniversaries are a couple; legacy groups with
+  // no occasion but real names are treated as a couple too. Birthdays name the
+  // person; anything else (Other/unsure) stays neutral so it never says "couple".
+  const treatAsCouple =
+    occasion === "wedding" ||
+    occasion === "bridal_shower" ||
+    occasion === "anniversary" ||
+    (!occasion && namesArePeople);
+  const photoSubject = treatAsCouple
+    ? "the couple"
+    : occasion === "birthday"
+      ? "the birthday person"
+      : null;
+  const photoLabel = photoSubject
+    ? `Photo of ${photoSubject} (optional)`
+    : "Photo (optional)";
+
   const photoPanel = (
     <div className="flex flex-col items-center gap-3">
       {photoPreview ? (
         <div className="relative">
           <img
             src={photoPreview}
-            alt="Couple"
+            alt="Preview"
             className="w-72 h-72 object-cover rounded-2xl border border-[hsl(var(--brand-sand))] shadow-sm"
           />
           <button
@@ -108,7 +130,7 @@ function PersonalizeInviteContent() {
           className="w-40 h-40 sm:w-52 sm:h-52 flex flex-col items-center justify-center gap-3 border-2 border-dashed border-[hsl(var(--brand-sand))] rounded-2xl text-gray-400 hover:border-[hsl(var(--brand-honey))] hover:text-gray-500 transition-colors"
         >
           <Upload className="w-6 h-6" />
-          <span className="text-sm">Upload a photo<br /><span className="text-xs">of the couple</span></span>
+          <span className="text-sm">Upload a photo{photoSubject && <br />}{photoSubject && <span className="text-xs">of {photoSubject}</span>}</span>
         </button>
       )}
       <input
@@ -145,12 +167,12 @@ function PersonalizeInviteContent() {
         </div>
 
         <div>
-          <label className="input-label">Photo of the couple (optional)</label>
+          <label className="input-label">{photoLabel}</label>
           {photoPreview ? (
             <div className="relative">
               <img
                 src={photoPreview}
-                alt="Couple"
+                alt="Preview"
                 className="w-full md:w-56 h-64 md:h-56 object-cover rounded-xl border border-[hsl(var(--brand-sand))] shadow-sm"
               />
               <button
@@ -168,7 +190,7 @@ function PersonalizeInviteContent() {
               className="w-full md:w-44 h-48 md:h-44 flex flex-col items-center justify-center gap-2 border border-dashed border-[hsl(var(--brand-sand))] rounded-xl text-gray-400 hover:border-[hsl(var(--brand-honey))] hover:text-gray-500 transition-colors"
             >
               <Upload className="w-5 h-5" />
-              <span className="text-xs text-center">Upload a photo<br />of the couple</span>
+              <span className="text-xs text-center">Upload a photo{photoSubject && <><br />of {photoSubject}</>}</span>
             </button>
           )}
           <input

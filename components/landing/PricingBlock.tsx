@@ -19,8 +19,8 @@ import { BASE_BOOK_PRICE } from "@/lib/stripe/pricing";
  */
 
 const GALLERY = [
-  { src: "/images/PricingBlock/pricingblock_4.jpg", alt: "The hardcover cookbook, cover up" },
   { src: "/images/PricingBlock/pricingblock_7.jpg", alt: "Handing over the finished book" },
+  { src: "/images/PricingBlock/pricingblock_4.jpg", alt: "The hardcover cookbook, cover up" },
   { src: "/images/PricingBlock/pricingblock_3.jpg", alt: "Reading the book at the table" },
   { src: "/images/PricingBlock/pricingblock_1.jpg", alt: "Showing a recipe from the book" },
   { src: "/images/PricingBlock/pricingblock_5.jpg", alt: "A dessert recipe spread inside the book" },

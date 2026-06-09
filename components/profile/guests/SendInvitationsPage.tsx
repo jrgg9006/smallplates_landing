@@ -25,6 +25,9 @@ const MAX_BODY_CHARS = 500;
 interface SendInvitationsPageProps {
   groupId: string;
   coupleNames: string;
+  // Reason: drives occasion-aware copy so the preview matches the actual email
+  // (wedding vs neutral). Mirrors groups.occasion.
+  occasion?: string | null;
   coupleImageUrl?: string | null;
   collectionUrl?: string | null;
   senderName?: string | null;
@@ -35,6 +38,7 @@ interface SendInvitationsPageProps {
 export function SendInvitationsPage({
   groupId,
   coupleNames,
+  occasion = null,
   coupleImageUrl,
   collectionUrl,
   senderName,
@@ -216,7 +220,19 @@ export function SendInvitationsPage({
     setNewGuestEmail("");
   };
 
-  const emailSubject = `Your recipe goes in ${coupleNames}'s cookbook`;
+  // Reason: keep this preview in sync with the actual email (invitation-templates.ts).
+  // Couples (wedding/bridal/anniversary, plus legacy groups with no occasion) take a
+  // possessive and a "gift for {people}" framing; weddings/bridal showers say "wedding
+  // cookbook". Non-couple occasions hold a book title, so they drop both.
+  const isCouple =
+    !occasion || occasion === 'wedding' || occasion === 'bridal_shower' || occasion === 'anniversary';
+  const isWedding = !occasion || occasion === 'wedding' || occasion === 'bridal_shower';
+  // Reason: only weddings/bridal showers keep "... for {couple}"; everything else
+  // uses the neutral "A cookbook gift" with the name/title on its own line.
+  const heroLabel = isWedding ? 'A wedding cookbook gift for' : 'A cookbook gift';
+  const emailSubject = isCouple
+    ? `Your recipe goes in ${coupleNames}'s cookbook`
+    : `Your recipe goes in ${coupleNames}`;
 
   return (
     <div>
@@ -322,7 +338,7 @@ export function SendInvitationsPage({
             <div className="bg-white px-8 lg:px-14 py-12 lg:py-16 text-center">
               {/* Couple names — the hero */}
               <p className="text-xs tracking-[0.25em] uppercase text-[hsl(var(--brand-warm-gray-light))] mb-3">
-                A wedding cookbook gift for
+                {heroLabel}
               </p>
               <h2 className="font-serif text-3xl lg:text-4xl text-brand-charcoal leading-tight mb-3">
                 {coupleNames}

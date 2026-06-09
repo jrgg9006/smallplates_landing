@@ -14,6 +14,8 @@ function InviteFirstContent() {
   const [copied, setCopied] = useState(false);
   const [collectionLink, setCollectionLink] = useState("");
   const [coupleName, setCoupleName] = useState("");
+  const [occasion, setOccasion] = useState<string | null>(null);
+  const [namesArePeople, setNamesArePeople] = useState(false);
   const [shareMessage, setShareMessage] = useState("");
   const [coupleImageUrl, setCoupleImageUrl] = useState<string | null>(null);
   const [inviterName, setInviterName] = useState("");
@@ -63,16 +65,18 @@ function InviteFirstContent() {
         });
     });
 
-    // Fetch couple names + image
+    // Fetch the book name (single source of truth for the title), occasion + image
     supabase
       .from("groups")
-      .select("couple_first_name, partner_first_name, couple_image_url")
+      .select("name, occasion, couple_first_name, partner_first_name, couple_image_url")
       .eq("id", groupId)
       .single()
       .then(({ data }) => {
-        if (data?.couple_first_name && data?.partner_first_name) {
-          setCoupleName(`${data.couple_first_name} & ${data.partner_first_name}`);
-        }
+        if (data?.name) setCoupleName(data.name);
+        setOccasion(data?.occasion ?? null);
+        // Reason: people's names allow a possessive ("Maria's cookbook"); a book
+        // title ("Grandma's recipes") doesn't, so the copy drops the possessive.
+        setNamesArePeople(Boolean(data?.couple_first_name || data?.partner_first_name));
         if (data?.couple_image_url) setCoupleImageUrl(data.couple_image_url);
       });
   }, [groupId]);
@@ -137,8 +141,32 @@ function InviteFirstContent() {
     document.body.removeChild(a);
   }
 
+  // Reason: occasion-aware labels (same rule as the collect page). Weddings/bridal
+  // showers keep "WEDDING COOKBOOK"; everything else is just "COOKBOOK". Legacy
+  // groups with no occasion but real couple names are still treated as weddings.
+  const isWeddingOccasion = occasion === "wedding" || occasion === "bridal_shower";
+  const treatAsWedding = isWeddingOccasion || (!occasion && namesArePeople);
+  const cookbookEyebrow = treatAsWedding ? "WEDDING COOKBOOK" : "COOKBOOK";
+
+  // Reason: this modal is a 1:1 preview of the real invite, so it mirrors
+  // invitationEmail1 + occasionCopy (lib/email/invitation-templates) and the
+  // From display name from send-invitation-email exactly. Weddings/bridal showers
+  // (and legacy no-occasion) say "A wedding cookbook gift for"; anniversary +
+  // non-couple occasions use the neutral "A cookbook gift". Couples keep the
+  // possessive subject; non-couple occasions drop it. Name fallback is "The Couple"
+  // to match the sent email (groups.name is set in real sends).
+  const emailIsWedding = !occasion || isWeddingOccasion;
+  const emailIsCouple = emailIsWedding || occasion === "anniversary";
+  const emailName = coupleName || "The Couple";
+  const emailSubject = emailIsCouple
+    ? `Your recipe goes in ${emailName}'s cookbook`
+    : `Your recipe goes in ${emailName}`;
+  const emailHeroLabel = emailIsWedding ? "A wedding cookbook gift for" : "A cookbook gift";
+
   const previewMessage = shareMessage || (coupleName
-    ? `You're adding a recipe to ${coupleName}'s cookbook. Doesn't have to be fancy — just something you actually make.`
+    ? (namesArePeople
+        ? `You're adding a recipe to ${coupleName}'s cookbook. Doesn't have to be fancy — just something you actually make.`
+        : `You're adding a recipe to this cookbook. Doesn't have to be fancy — just something you actually make.`)
     : "");
 
   const shortLink = collectionLink
@@ -247,8 +275,8 @@ function InviteFirstContent() {
               className="w-full h-[170px] object-cover"
             />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-3 pb-3 pt-12">
-              <p className="text-[6px] tracking-[2px] uppercase text-white/60 mb-0.5">WEDDING COOKBOOK</p>
-              <p className="font-serif text-[16px] text-white font-medium leading-tight">{coupleName || "the couple"}</p>
+              <p className="text-[6px] tracking-[2px] uppercase text-white/60 mb-0.5">{cookbookEyebrow}</p>
+              <p className="font-serif text-[16px] text-white font-medium leading-tight">{coupleName || "your cookbook"}</p>
             </div>
           </div>
 
@@ -431,7 +459,7 @@ function InviteFirstContent() {
                 <div className="space-y-1.5 text-[13px]">
                   <div className="flex gap-2">
                     <span className="text-gray-400 w-14 shrink-0">From:</span>
-                    <span className="text-gray-700">{coupleName || "Small Plates & Co."}</span>
+                    <span className="text-gray-700">{emailName}</span>
                   </div>
                   <div className="flex gap-2">
                     <span className="text-gray-400 w-14 shrink-0">To:</span>
@@ -439,7 +467,7 @@ function InviteFirstContent() {
                   </div>
                   <div className="flex gap-2">
                     <span className="text-gray-400 w-14 shrink-0">Subject:</span>
-                    <span className="text-gray-700">Can you send a recipe for {coupleName || "the couple"}&apos;s cookbook?</span>
+                    <span className="text-gray-700">{emailSubject}</span>
                   </div>
                 </div>
               </div>
@@ -448,10 +476,10 @@ function InviteFirstContent() {
               {/* Hero */}
               <div className="text-center mb-6">
                 <p className="text-[11px] tracking-[3px] uppercase text-gray-400 mb-2">
-                  A cookbook gift for
+                  {emailHeroLabel}
                 </p>
                 <h2 className="font-serif text-3xl font-normal text-gray-900 mb-3">
-                  {coupleName || "the couple"}
+                  {emailName}
                 </h2>
                 <div className="w-12 h-px bg-brand-honey mx-auto" />
               </div>

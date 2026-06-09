@@ -35,7 +35,7 @@ export async function POST(
     // Fetch group data
     const { data: group } = await supabaseAdmin
       .from("groups")
-      .select("couple_first_name, partner_first_name, couple_image_url, created_by")
+      .select("name, occasion, couple_first_name, partner_first_name, couple_image_url, created_by")
       .eq("id", groupId)
       .single();
 
@@ -43,9 +43,11 @@ export async function POST(
       return NextResponse.json({ error: "Group not found" }, { status: 404 });
     }
 
-    const coupleName = [group.couple_first_name, group.partner_first_name]
-      .filter(Boolean)
-      .join(" & ") || "The Couple";
+    // Reason: Book name (groups.name) is the source of truth — "A & B" for couples,
+    // the cookbook title otherwise.
+    const coupleName = group.name
+      || [group.couple_first_name, group.partner_first_name].filter(Boolean).join(" & ")
+      || "The Couple";
 
     // Get collection link token
     const { data: creatorProfile } = await supabaseAdmin
@@ -93,6 +95,7 @@ export async function POST(
       coupleImageUrl: group.couple_image_url || undefined,
       captainName,
       emailNumber: 1,
+      occasion: group.occasion,
     });
 
     return NextResponse.json({ success: true, guestId: guest.id });

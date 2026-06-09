@@ -176,9 +176,21 @@ export default function CollectionForm() {
     );
   }
 
+  // Reason: occasion-aware labels. Weddings/bridal showers keep "Wedding Cookbook";
+  // anniversaries, birthdays and "other" are just "Cookbook". Legacy wedding groups
+  // (null occasion but real couple names) are still treated as weddings.
+  const isWeddingOccasion =
+    tokenInfo?.occasion === 'wedding' || tokenInfo?.occasion === 'bridal_shower';
+  // Reason: when the heading is people's names we can use a possessive ("Maria's
+  // cookbook"); when it's a book title ("Grandma's recipes") we can't, so we say
+  // "this cookbook" instead.
+  const namesArePeople = Boolean(tokenInfo?.couple_first_name || tokenInfo?.partner_first_name);
+  const treatAsWedding = isWeddingOccasion || (!tokenInfo?.occasion && namesArePeople);
+  const cookbookEyebrow = treatAsWedding ? 'Wedding Cookbook' : 'Cookbook';
+
   // Reason: Show closed state when book_closed_by_user is set — no recipes can be added
   if (tokenInfo?.book_closed_by_user) {
-    const coupleDisplayName = tokenInfo.couple_names || 'the couple';
+    const coupleDisplayName = tokenInfo.couple_names || 'this cookbook';
     return (
       <div className="min-h-screen bg-brand-warm-white-airy">
         <div className="bg-brand-warm-white-airy border-b border-gray-200">
@@ -205,7 +217,9 @@ export default function CollectionForm() {
               This book has been closed.
             </h1>
             <p className="text-gray-600 text-base lg:text-lg leading-relaxed mb-2">
-              {coupleDisplayName}&apos;s cookbook is being created and will be delivered soon.
+              {namesArePeople
+                ? `${coupleDisplayName}'s cookbook is being created and will be delivered soon.`
+                : 'This cookbook is being created and will be delivered soon.'}
             </p>
             <p className="text-gray-500 text-sm">Thank you for being part of it.</p>
           </div>
@@ -214,9 +228,14 @@ export default function CollectionForm() {
     );
   }
 
-  const coupleDisplayName = tokenInfo?.couple_names || 'your friends';
+  const coupleDisplayName = tokenInfo?.couple_names || 'this cookbook';
   const deadlineFormatted = tokenInfo?.book_close_date ? formatDeadlineDate(tokenInfo.book_close_date) : null;
-  const defaultNote = `You're adding a recipe to ${coupleDisplayName}'s wedding cookbook. Doesn't have to be fancy, just something you actually make.`;
+  // Reason: people's names get a possessive ("Maria's cookbook"); a book title
+  // can't ("Grandma's recipes's cookbook" reads wrong), so it falls back to
+  // "this cookbook". Only weddings/bridal showers say "wedding cookbook".
+  const defaultNote = namesArePeople
+    ? `You're adding a recipe to ${coupleDisplayName}'s ${treatAsWedding ? 'wedding cookbook' : 'cookbook'}. Doesn't have to be fancy, just something you actually make.`
+    : `You're adding a recipe to this cookbook. Doesn't have to be fancy, just something you actually make.`;
   const hasPhoto = Boolean(tokenInfo?.couple_image_url);
 
   return (
@@ -251,7 +270,7 @@ export default function CollectionForm() {
             transition={{ duration: reduceMotion ? 0 : 0.55, ease: EASE_OUT_QUART, delay: reduceMotion ? 0 : 0.15 }}
           >
             <p className="text-[11px] tracking-[0.22em] uppercase text-white/65 font-medium mb-1.5">
-              Wedding Cookbook
+              {cookbookEyebrow}
             </p>
             <h1 className="font-serif text-[2.1rem] font-semibold text-white leading-tight">
               {coupleDisplayName}
@@ -299,7 +318,7 @@ export default function CollectionForm() {
                 {/* Couple names heading — desktop always visible, mobile only when no photo */}
                 <div className={`mb-6 ${hasPhoto ? 'hidden lg:block' : ''}`}>
                   <p className="text-xs tracking-[0.22em] uppercase text-brand-charcoal/50 font-medium mb-2">
-                    Wedding Cookbook
+                    {cookbookEyebrow}
                   </p>
                   <h1 className="font-serif text-3xl lg:text-4xl font-semibold text-brand-charcoal leading-tight mb-4">
                     {coupleDisplayName}

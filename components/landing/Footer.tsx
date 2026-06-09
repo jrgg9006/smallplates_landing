@@ -64,11 +64,12 @@ export default function Footer() {
                 </h3>
                 <ul className="space-y-3">
                   <li>
-                    <span 
-                      className="font-sans font-light text-base text-white/30 cursor-not-allowed"
+                    <Link
+                      href="/how-it-works"
+                      className="font-sans font-light text-base text-white/70 hover:text-white transition-colors"
                     >
                       How It Works
-                    </span>
+                    </Link>
                   </li>
                   <li>
                     <Link

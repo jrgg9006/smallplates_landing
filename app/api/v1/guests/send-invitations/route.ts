@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     // Fetch group data for email template (incl. organizer's custom body)
     const { data: group } = await supabase
       .from('groups')
-      .select('name, couple_first_name, partner_first_name, couple_image_url, created_by, email_invite_message')
+      .select('name, occasion, couple_first_name, partner_first_name, couple_image_url, created_by, email_invite_message')
       .eq('id', groupId)
       .single();
 
@@ -107,9 +107,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Group not found' }, { status: 404 });
     }
 
-    const coupleNames = [group.couple_first_name, group.partner_first_name]
-      .filter(Boolean)
-      .join(' & ') || group.name || 'The Couple';
+    // Reason: the Book name (groups.name) is the source of truth for the title —
+    // it's "A & B" for couples and the cookbook title otherwise, and stays editable.
+    const coupleNames = group.name
+      || [group.couple_first_name, group.partner_first_name].filter(Boolean).join(' & ')
+      || 'The Couple';
 
     // Get collection token from the group creator's profile
     const { data: creatorProfile } = await supabase
@@ -190,6 +192,7 @@ export async function POST(request: NextRequest) {
         captainName: senderProfile?.full_name || undefined,
         emailNumber: 1,
         customBody: group.email_invite_message || undefined,
+        occasion: group.occasion,
       });
 
       if (result.success) {

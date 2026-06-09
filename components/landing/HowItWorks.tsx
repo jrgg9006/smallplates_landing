@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 
 const easeOut: [number, number, number, number] = [0.23, 1, 0.32, 1];
@@ -108,6 +109,15 @@ export default function HowItWorks() {
           {steps.map((step, i) => (
             <StepCard key={step.number} step={step} index={i} />
           ))}
+        </div>
+
+        <div className="mt-12 text-center md:mt-16">
+          <Link
+            href="/how-it-works"
+            className="btn btn-lg btn-dark"
+          >
+            Learn More
+          </Link>
         </div>
 
       </div>
