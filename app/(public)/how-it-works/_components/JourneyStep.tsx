@@ -16,10 +16,12 @@ export default function JourneyStep({
   step,
   index,
   visual,
+  extra,
 }: {
   step: JourneyStepData;
   index: number;
   visual: ReactNode;
+  extra?: ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
@@ -50,6 +52,7 @@ export default function JourneyStep({
               {step.cta.label} <span aria-hidden>→</span>
             </a>
           )}
+          {extra}
         </motion.div>
 
         {/* visual (siempre a la derecha) */}

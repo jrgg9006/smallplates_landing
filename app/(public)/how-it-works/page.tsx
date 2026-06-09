@@ -72,22 +72,11 @@ export default function HowItWorksPage() {
   // TODO (imágenes reales): paso 1 → mockup de "collect link"; paso 2 → foto real
   // de una receta a mano junto a la página diseñada (hoy: página + snapshot falso).
   const visuals = [
-    <div key="s1" className="space-y-5">
-      <StepImage
-        src="/images/HowitWorks_images/collect_iphone_mockup.png"
-        alt="Share a link so your people can send recipes"
-      />
-      <div className="flex flex-wrap gap-3">
-        {["Add them yourself", "Share a link", "Invite captains"].map((c) => (
-          <span
-            key={c}
-            className="type-caption rounded-full border border-brand-sand bg-brand-white px-4 py-2 text-brand-charcoal/80"
-          >
-            {c}
-          </span>
-        ))}
-      </div>
-    </div>,
+    <StepImage
+      key="s1"
+      src="/images/HowitWorks_images/collect_iphone_mockup.png"
+      alt="Share a link so your people can send recipes"
+    />,
     // Paso 2 — antes/después: la página diseñada + un "snapshot" de la receta a mano.
     <div key="s2" className="relative mx-auto max-w-sm md:mx-0">
       <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-brand-white shadow-md">
@@ -171,6 +160,20 @@ export default function HowItWorksPage() {
     </div>,
   ];
 
+  // Las 3 formas del paso 1, debajo del copy (no de la imagen).
+  const stepOneWays = (
+    <div className="mt-6 flex flex-wrap gap-3">
+      {["Add them yourself", "Share a link", "Invite captains"].map((c) => (
+        <span
+          key={c}
+          className="type-caption rounded-full border border-brand-sand bg-brand-white px-4 py-2 text-brand-charcoal/80"
+        >
+          {c}
+        </span>
+      ))}
+    </div>
+  );
+
   // Tarjeta opcional (sin número, no es un paso del riel) entre el paso 1 y 2.
   // TODO: reemplazar el preview falso por screenshots reales del builder.
   const optionalInvite = (
@@ -236,7 +239,7 @@ export default function HowItWorksPage() {
         <section className="px-2 py-6 md:px-3 md:py-8">
           <div className="mx-auto max-w-7xl rounded-[2rem] bg-brand-warm-white-warm px-5 py-16 md:px-10 md:py-24">
             <JourneyTimeline>
-              <JourneyStep step={steps[0]} index={0} visual={visuals[0]} />
+              <JourneyStep step={steps[0]} index={0} visual={visuals[0]} extra={stepOneWays} />
               {optionalInvite}
               <JourneyStep step={steps[1]} index={1} visual={visuals[1]} />
               <JourneyStep step={steps[2]} index={2} visual={visuals[2]} />
