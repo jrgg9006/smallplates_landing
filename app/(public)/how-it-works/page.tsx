@@ -355,13 +355,13 @@ export default function HowItWorksPage() {
               <p className="type-caption mb-3 mt-10 text-center text-brand-charcoal/50">
                 Generated Recipe Page
               </p>
-              <div className="relative mx-auto aspect-[742/714] w-full max-w-2xl overflow-hidden rounded-2xl bg-brand-white shadow-md">
+              <div className="relative mx-auto aspect-[16/10] w-full max-w-3xl overflow-hidden rounded-2xl bg-brand-white shadow-md">
                 <Image
-                  src="/images/how_it_works_profilesection/recipe_example_orzo.png"
+                  src="/images/how_it_works_profilesection/SmallPlates_Creamy_Orzo.png"
                   alt="A Creamy Orzo Bake, designed as a finished book page"
                   fill
-                  className="object-contain"
-                  sizes="(max-width: 768px) 100vw, 672px"
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 768px"
                 />
               </div>
             </div>
