@@ -315,7 +315,7 @@ export function CaptainJoinForm({
                     ) : (
                       <p className="text-brand-warm-gray-light text-sm">You&apos;ve been invited to join:</p>
                     )}
-                    <h3 className="font-serif text-xl md:text-2xl font-medium text-brand-charcoal mt-1 leading-tight">
+                    <h3 className="type-heading mt-1">
                       {groupData.name}
                     </h3>
                     <p className="text-gray-600 text-base leading-relaxed mt-8">
@@ -365,13 +365,22 @@ export function CaptainJoinForm({
                   </div>
                 )}
 
-                <Button
+                <button
                   type="submit"
-                  className="w-full bg-brand-honey text-white hover:bg-brand-honey-dark py-3 text-sm font-semibold mt-2"
+                  className="btn btn-md btn-honey w-full mt-2"
                   disabled={loading}
                 >
                   {loading ? "Joining..." : "Join the Cookbook"}
-                </Button>
+                </button>
+
+                {/* Reason: this form creates an account for new users, so surface
+                    the same terms/privacy consent shown on the onboarding signup. */}
+                <p className="text-[12px] text-gray-400 leading-relaxed text-center pt-1">
+                  By joining, you agree to our{" "}
+                  <a href="/terms" target="_blank" rel="noreferrer" className="underline hover:text-gray-600">terms of service</a>
+                  {" "}and{" "}
+                  <a href="/privacy" target="_blank" rel="noreferrer" className="underline hover:text-gray-600">privacy policy</a>.
+                </p>
               </form>
 
               <div className="mt-6 text-center space-y-1">
