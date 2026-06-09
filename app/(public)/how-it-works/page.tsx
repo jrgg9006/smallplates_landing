@@ -245,6 +245,38 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
+        {/* Respiro emocional — tarjeta compacta con CTA (bloque de aire) */}
+        <section className="px-2 py-6 md:px-3 md:py-8">
+          <motion.div
+            className="mx-auto max-w-7xl rounded-[2rem] bg-brand-charcoal px-6 py-12 text-center shadow-xl md:px-10 md:py-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6, ease: easeOut }}
+          >
+            <div className="mx-auto mb-7 h-0.5 w-10 bg-brand-honey" />
+            <h2 className="type-heading leading-[1.27] text-brand-warm-white-warm">
+              The people who love you
+              <br />
+              should <span className="italic text-brand-honey">stay</span> in your life.
+            </h2>
+            <p className="type-body mt-6 text-brand-warm-white-warm/70">
+              Not just on the big days. In the ordinary ones too.
+            </p>
+            <p className="type-accent mt-4 text-brand-warm-white-warm/90">
+              That&rsquo;s what a kitchen is for.
+            </p>
+            <div className="mt-9">
+              <Button
+                onClick={handleStart}
+                className="rounded-full bg-brand-honey px-10 py-6 text-lg text-brand-white hover:bg-brand-honey-dark"
+              >
+                Start your book
+              </Button>
+            </div>
+          </motion.div>
+        </section>
+
         {/* El wedge / la magia — antes (texto crudo) → después (página diseñada) */}
         <section className="px-2 py-6 md:px-3 md:py-8">
           <div
@@ -321,38 +353,6 @@ export default function HowItWorksPage() {
               </div>
             </div>
           </div>
-        </section>
-
-        {/* Respiro emocional — tarjeta compacta con CTA (bloque de aire) */}
-        <section className="px-2 py-6 md:px-3 md:py-8">
-          <motion.div
-            className="mx-auto max-w-7xl rounded-[2rem] bg-brand-charcoal px-6 py-12 text-center shadow-xl md:px-10 md:py-16"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.6, ease: easeOut }}
-          >
-            <div className="mx-auto mb-7 h-0.5 w-10 bg-brand-honey" />
-            <h2 className="type-heading leading-[1.27] text-brand-warm-white-warm">
-              The people who love you
-              <br />
-              should <span className="italic text-brand-honey">stay</span> in your life.
-            </h2>
-            <p className="type-body mt-6 text-brand-warm-white-warm/70">
-              Not just on the big days. In the ordinary ones too.
-            </p>
-            <p className="type-accent mt-4 text-brand-warm-white-warm/90">
-              That&rsquo;s what a kitchen is for.
-            </p>
-            <div className="mt-9">
-              <Button
-                onClick={handleStart}
-                className="rounded-full bg-brand-honey px-10 py-6 text-lg text-brand-white hover:bg-brand-honey-dark"
-              >
-                Start your book
-              </Button>
-            </div>
-          </motion.div>
         </section>
 
         {/* 4. Lo que recibes (tarjeta) */}
