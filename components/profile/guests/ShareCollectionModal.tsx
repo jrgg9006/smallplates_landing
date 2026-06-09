@@ -91,6 +91,9 @@ export function ShareCollectionModal({
     }
     if (!isOpen) {
       setShowMessageCustomization(false);
+      // Reason: clear edit state on close so the next open re-runs
+      // loadCustomMessage (gated by !isEditingMessage) and reseeds the textarea.
+      setIsEditingMessage(false);
     }
   }, [isOpen, openExpanded]);
 
@@ -100,17 +103,30 @@ export function ShareCollectionModal({
       // If no groupId, we can't load custom message - use default
       if (!groupId) {
         setCustomMessage(null);
+        // Reason: opened expanded with no group → still seed the textarea with
+        // the default so it isn't blank.
+        if (openExpanded) {
+          setEditingMessage(defaultMessage);
+          setIsEditingMessage(true);
+        }
         return;
       }
 
       // Always try to load custom message from group_members when groupId exists
       const { data: groupData, error: groupError } = await getGroupShareMessage(groupId);
-      
-      if (!groupError && groupData?.custom_share_message) {
-        setCustomMessage(groupData.custom_share_message);
-      } else {
-        // No custom message found or error occurred - use default
-        setCustomMessage(null);
+
+      const loaded = !groupError && groupData?.custom_share_message
+        ? groupData.custom_share_message
+        : null;
+      setCustomMessage(loaded);
+
+      // Reason: when the modal opens directly in the expanded view (checklist /
+      // setup), seed the textarea with the resolved message (custom or default).
+      // The "Add photo & message" button seeds via handleShowMessageCustomization,
+      // but the openExpanded shortcut bypasses that, leaving the box blank.
+      if (openExpanded) {
+        setEditingMessage(loaded || defaultMessage);
+        setIsEditingMessage(true);
       }
     } catch (err) {
       console.error('Error loading custom message:', err);

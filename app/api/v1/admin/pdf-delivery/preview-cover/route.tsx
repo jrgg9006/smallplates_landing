@@ -31,13 +31,19 @@ async function readImage(origin: string, relPath: string): Promise<string> {
   return `data:${mime};base64,${buf.toString('base64')}`;
 }
 
-// Scale title font size down for long names so it fits on one line
+// Scale title font size down for long names so it fits on one line.
+// Reason: the cover is 900px wide with 48px padding each side (~804px usable),
+// so there's room to keep the font larger for medium-long names. Finer buckets +
+// a higher floor stop names like "Mom Lilyth Fieston Loco!" from shrinking to a
+// cramped 46px.
 function titleFontSize(maxPartLen: number): number {
   if (maxPartLen <= 7) return 80;
   if (maxPartLen <= 10) return 72;
-  if (maxPartLen <= 14) return 62;
-  if (maxPartLen <= 18) return 54;
-  return 46;
+  if (maxPartLen <= 14) return 64;
+  if (maxPartLen <= 18) return 58;
+  if (maxPartLen <= 24) return 52;
+  if (maxPartLen <= 30) return 46;
+  return 40;
 }
 
 export async function GET(request: NextRequest) {
