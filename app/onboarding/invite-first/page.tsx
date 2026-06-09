@@ -148,6 +148,21 @@ function InviteFirstContent() {
   const treatAsWedding = isWeddingOccasion || (!occasion && namesArePeople);
   const cookbookEyebrow = treatAsWedding ? "WEDDING COOKBOOK" : "COOKBOOK";
 
+  // Reason: this modal is a 1:1 preview of the real invite, so it mirrors
+  // invitationEmail1 + occasionCopy (lib/email/invitation-templates) and the
+  // From display name from send-invitation-email exactly. Weddings/bridal showers
+  // (and legacy no-occasion) say "A wedding cookbook gift for"; anniversary +
+  // non-couple occasions use the neutral "A cookbook gift". Couples keep the
+  // possessive subject; non-couple occasions drop it. Name fallback is "The Couple"
+  // to match the sent email (groups.name is set in real sends).
+  const emailIsWedding = !occasion || isWeddingOccasion;
+  const emailIsCouple = emailIsWedding || occasion === "anniversary";
+  const emailName = coupleName || "The Couple";
+  const emailSubject = emailIsCouple
+    ? `Your recipe goes in ${emailName}'s cookbook`
+    : `Your recipe goes in ${emailName}`;
+  const emailHeroLabel = emailIsWedding ? "A wedding cookbook gift for" : "A cookbook gift";
+
   const previewMessage = shareMessage || (coupleName
     ? (namesArePeople
         ? `You're adding a recipe to ${coupleName}'s cookbook. Doesn't have to be fancy — just something you actually make.`
@@ -444,7 +459,7 @@ function InviteFirstContent() {
                 <div className="space-y-1.5 text-[13px]">
                   <div className="flex gap-2">
                     <span className="text-gray-400 w-14 shrink-0">From:</span>
-                    <span className="text-gray-700">{coupleName || "Small Plates & Co."}</span>
+                    <span className="text-gray-700">{emailName}</span>
                   </div>
                   <div className="flex gap-2">
                     <span className="text-gray-400 w-14 shrink-0">To:</span>
@@ -452,7 +467,7 @@ function InviteFirstContent() {
                   </div>
                   <div className="flex gap-2">
                     <span className="text-gray-400 w-14 shrink-0">Subject:</span>
-                    <span className="text-gray-700">Can you send a recipe for {coupleName || "the couple"}&apos;s cookbook?</span>
+                    <span className="text-gray-700">{emailSubject}</span>
                   </div>
                 </div>
               </div>
@@ -461,10 +476,10 @@ function InviteFirstContent() {
               {/* Hero */}
               <div className="text-center mb-6">
                 <p className="text-[11px] tracking-[3px] uppercase text-gray-400 mb-2">
-                  A cookbook gift for
+                  {emailHeroLabel}
                 </p>
                 <h2 className="font-serif text-3xl font-normal text-gray-900 mb-3">
-                  {coupleName || "the couple"}
+                  {emailName}
                 </h2>
                 <div className="w-12 h-px bg-brand-honey mx-auto" />
               </div>

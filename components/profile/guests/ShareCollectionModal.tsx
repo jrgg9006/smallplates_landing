@@ -134,6 +134,15 @@ export function ShareCollectionModal({
   
   const shareMessage = customMessage || defaultMessage;
 
+  // Reason: occasion-aware photo label. Couples (wedding/bridal/anniversary +
+  // legacy no-occasion) say "of the couple"; birthdays name the person; anything
+  // else (Other/unsure) stays neutral so it never says "couple".
+  const photoUploadLabel = isCoupleOccasion
+    ? "Add a photo of the couple"
+    : occasion === "birthday"
+      ? "Add a photo of the birthday person"
+      : "Add a photo";
+
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(collectionUrl);
@@ -620,6 +629,7 @@ export function ShareCollectionModal({
                     positionY={currentCoupleImagePositionY}
                     onChange={onImageChange}
                     onError={setError}
+                    uploadLabel={photoUploadLabel}
                     className="order-1 lg:order-2"
                   />
                 )}

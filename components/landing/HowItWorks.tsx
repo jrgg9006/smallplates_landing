@@ -114,9 +114,9 @@ export default function HowItWorks() {
         <div className="mt-12 text-center md:mt-16">
           <Link
             href="/how-it-works"
-            className="type-body-small inline-flex items-center gap-1 text-brand-charcoal underline underline-offset-4 transition-colors hover:text-brand-honey"
+            className="btn btn-lg btn-dark"
           >
-            See the whole thing, step by step <span aria-hidden>→</span>
+            Learn More
           </Link>
         </div>
 

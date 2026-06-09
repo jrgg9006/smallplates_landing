@@ -75,6 +75,10 @@ interface CoupleImageEditorProps {
   // Reason: in Edit Cookbook the photo is secondary, so a full-bleed square is
   // overwhelming. Compact renders a small thumbnail + side buttons instead.
   compact?: boolean;
+  // Reason: occasion-aware empty-state label. Weddings say "of the couple",
+  // birthdays "of the birthday person", non-couple occasions just "Add a photo".
+  // Defaults to the couple wording so existing call sites are unchanged.
+  uploadLabel?: string;
 }
 
 /**
@@ -91,6 +95,7 @@ export function CoupleImageEditor({
   onError,
   className,
   compact = false,
+  uploadLabel = "Add a photo of the couple",
 }: CoupleImageEditorProps) {
   const [coupleImage, setCoupleImage] = useState<string | null>(imageUrl);
   const [coupleImagePositionY, setCoupleImagePositionY] = useState(positionY ?? 50);
@@ -486,7 +491,7 @@ export function CoupleImageEditor({
           >
             <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
             <p className="text-sm text-gray-600 mb-1 font-medium">
-              Add a photo of the couple
+              {uploadLabel}
             </p>
             <p className="text-secondary-sm text-gray-500">
               Click to upload (JPEG, PNG, WebP • max 5MB)
