@@ -8,14 +8,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Free tier not enabled" }, { status: 404 });
   }
 
-  const { email, yourName, coupleFirstName, partnerFirstName, cookbookTitle, occasion, bookDate, bookDateUndecided } = await request.json();
+  const { email, yourName, coupleFirstName, partnerFirstName, honoreeName, occasion, bookDate, bookDateUndecided } = await request.json();
 
   if (!email || typeof email !== "string") {
     return NextResponse.json({ error: "Email required" }, { status: 400 });
   }
 
   // Reason: weddings, bridal showers and anniversaries are about a couple (two
-  // names → "A & B"). Birthdays / "Other" use a single cookbook title instead.
+  // names → "A & B"). Birthdays / "Other" honour one person, captured by name.
   const isCoupleOccasion =
     occasion === "wedding" || occasion === "bridal_shower" || occasion === "anniversary";
 
@@ -23,15 +23,15 @@ export async function POST(request: NextRequest) {
     if (!coupleFirstName || !partnerFirstName) {
       return NextResponse.json({ error: "Couple names required" }, { status: 400 });
     }
-  } else if (!cookbookTitle || typeof cookbookTitle !== "string" || !cookbookTitle.trim()) {
-    return NextResponse.json({ error: "Cookbook title required" }, { status: 400 });
+  } else if (!honoreeName || typeof honoreeName !== "string" || !honoreeName.trim()) {
+    return NextResponse.json({ error: "Name required" }, { status: 400 });
   }
 
   const supabaseAdmin = createSupabaseAdminClient();
   const normalizedEmail = email.trim().toLowerCase();
   const bookName = isCoupleOccasion
     ? `${coupleFirstName.trim()} & ${partnerFirstName.trim()}`
-    : cookbookTitle.trim();
+    : honoreeName.trim();
 
   try {
     // 1. Find or create the auth user.
@@ -80,9 +80,10 @@ export async function POST(request: NextRequest) {
       name: bookName,
       status: "free_tier" as const,
       // Reason: couple occasions store both names (cover/emails build "A & B").
-      // Non-couple occasions clear the names and put the title in
-      // couple_display_name so the cover/PDF print the title verbatim.
-      couple_first_name: isCoupleOccasion ? coupleFirstName.trim() : null,
+      // Non-couple occasions store the honoree in couple_first_name (so later
+      // messages/emails can address them by name) and mirror it into
+      // couple_display_name so the cover prints "...who love {name}" verbatim.
+      couple_first_name: isCoupleOccasion ? coupleFirstName.trim() : honoreeName.trim(),
       partner_first_name: isCoupleOccasion ? partnerFirstName.trim() : null,
       couple_display_name: isCoupleOccasion ? null : bookName,
       ...(bookDate ? { gift_date: bookDate } : {}),

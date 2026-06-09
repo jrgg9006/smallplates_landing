@@ -171,15 +171,15 @@ xmlns:o="urn:schemas-microsoft-com:office:office">
                     <td align="left" style="padding-bottom: 24px; padding-left: 12px;">
                       <p style="margin: 0 0 8px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
                         font-size: 16px; color: #555555; font-weight: 300; line-height: 1.7; text-align: left;" class="darkmode-body">
-                        <span style="color: #2D2D2D;" class="darkmode-heading">&bull;</span>&nbsp;&nbsp;The couple's parents
+                        <span style="color: #2D2D2D;" class="darkmode-heading">&bull;</span>&nbsp;&nbsp;Family who'll actually reply
                       </p>
                       <p style="margin: 0 0 8px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
                         font-size: 16px; color: #555555; font-weight: 300; line-height: 1.7; text-align: left;" class="darkmode-body">
-                        <span style="color: #2D2D2D;" class="darkmode-heading">&bull;</span>&nbsp;&nbsp;A sibling or cousin from each side
+                        <span style="color: #2D2D2D;" class="darkmode-heading">&bull;</span>&nbsp;&nbsp;A friend from each part of their life
                       </p>
                       <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
                         font-size: 16px; color: #555555; font-weight: 300; line-height: 1.7; text-align: left;" class="darkmode-body">
-                        <span style="color: #2D2D2D;" class="darkmode-heading">&bull;</span>&nbsp;&nbsp;Their closest friends
+                        <span style="color: #2D2D2D;" class="darkmode-heading">&bull;</span>&nbsp;&nbsp;Whoever's already in the group chat
                       </p>
                     </td>
                   </tr>

@@ -12,7 +12,7 @@ export default function AboutYouPage() {
   const { occasion, bookDate, bookDateUndecided, reset } = useOnboardingState();
   const [coupleFirstName, setCoupleFirstName] = useState("");
   const [partnerFirstName, setPartnerFirstName] = useState("");
-  const [cookbookTitle, setCookbookTitle] = useState("");
+  const [honoreeName, setHonoreeName] = useState("");
   const [yourName, setYourName] = useState("");
   const [email, setEmail] = useState("");
   const [isAuthed, setIsAuthed] = useState(false);
@@ -43,7 +43,7 @@ export default function AboutYouPage() {
           yourName,
           coupleFirstName,
           partnerFirstName,
-          cookbookTitle,
+          honoreeName,
           occasion,
           bookDate,
           bookDateUndecided,
@@ -76,14 +76,25 @@ export default function AboutYouPage() {
   }
 
   // Reason: weddings, bridal showers and anniversaries are about a couple → ask
-  // for both names. Birthdays / "Other" are not, so we ask for a single cookbook
-  // title instead (e.g. a recipe book for grandma).
+  // for both names. Everything else (birthday / "Other") honours one person, so
+  // we ask for that single name. We always capture a name (never a free title)
+  // because the name is what powers personalization later — the cover reads
+  // "...who love {name}" and reminders/messages address them by name.
   const isCoupleOccasion =
     occasion === "wedding" || occasion === "bridal_shower" || occasion === "anniversary";
 
+  // Occasion-aware prompt for the single-honoree case. The placeholder shows a
+  // few examples — a person, a family, a couple — so it's clear the book can
+  // honour a group, not just one name. Each reads well as "{x}'s cookbook" and
+  // on the cover ("...who love {x}").
+  const honoreeLabel =
+    occasion === "birthday" ? "Whose birthday is it?" : "Who's the book for?";
+  const honoreePlaceholder =
+    occasion === "birthday" ? "Maria, Grandma, Dad" : "Maria, the Garcías, Mom & Dad";
+
   const bookForValid = isCoupleOccasion
     ? coupleFirstName.trim() !== "" && partnerFirstName.trim() !== ""
-    : cookbookTitle.trim() !== "";
+    : honoreeName.trim() !== "";
 
   const canSubmit = !submitting
     && bookForValid
@@ -140,16 +151,16 @@ export default function AboutYouPage() {
             </div>
           </div>
         ) : (
-          /* Single title — birthdays, other */
+          /* Single honoree — birthdays, other */
           <div>
-            <label htmlFor="cookbook-title" className="input-label">Name your cookbook</label>
+            <label htmlFor="honoree-name" className="input-label">{honoreeLabel}</label>
             <input
-              id="cookbook-title"
+              id="honoree-name"
               type="text"
-              value={cookbookTitle}
-              onChange={(e) => setCookbookTitle(e.target.value)}
+              value={honoreeName}
+              onChange={(e) => setHonoreeName(e.target.value)}
               className="input-field"
-              placeholder="Grandma's recipes"
+              placeholder={honoreePlaceholder}
             />
           </div>
         )}

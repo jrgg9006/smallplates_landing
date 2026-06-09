@@ -26,14 +26,32 @@ function PersonalizeInviteContent() {
       .eq("id", groupId)
       .single()
       .then(({ data }) => {
-        const couple = data?.couple_first_name && data?.partner_first_name
-          ? `${data.couple_first_name} & ${data.partner_first_name}`
-          : "the couple";
+        // Reason: same occasion rule as the photo label below — only weddings/
+        // bridal/anniversaries (or legacy name-only groups) are "the couple".
+        // Birthdays name the person; everything else stays neutral.
+        const hasNames = Boolean(data?.couple_first_name || data?.partner_first_name);
+        const isCouple =
+          data?.occasion === "wedding" ||
+          data?.occasion === "bridal_shower" ||
+          data?.occasion === "anniversary" ||
+          (!data?.occasion && hasNames);
+        const bothNames = Boolean(data?.couple_first_name && data?.partner_first_name);
+        const subject = isCouple
+          ? bothNames
+            ? `${data!.couple_first_name} & ${data!.partner_first_name}'s cookbook`
+            : "the couple's cookbook"
+          : data?.occasion === "birthday"
+            ? data?.couple_first_name
+              ? `${data.couple_first_name}'s cookbook`
+              : "the birthday cookbook"
+            : data?.couple_first_name
+              ? `${data.couple_first_name}'s cookbook`
+              : "the cookbook";
         setMessage(
-          `You're adding a recipe to ${couple}'s cookbook. Doesn't have to be fancy — just something you actually make.`
+          `You're adding a recipe to ${subject}. Doesn't have to be fancy — just something you actually make.`
         );
         setOccasion(data?.occasion ?? null);
-        setNamesArePeople(Boolean(data?.couple_first_name || data?.partner_first_name));
+        setNamesArePeople(hasNames);
         if (data?.couple_image_url) {
           setPhotoPreview(data.couple_image_url);
         }
