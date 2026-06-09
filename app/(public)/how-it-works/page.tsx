@@ -34,10 +34,9 @@ const steps: JourneyStepData[] = [
   },
   {
     number: "04",
-    title: "We print it. It ships to your door.",
+    title: "You don't do this alone. Add captains.",
     description:
-      "A full-color hardcover, about four weeks start to finish. You only pay when it's ready.",
-    cta: { label: "See inside a book", href: "/from-the-book" },
+      "Invite as many people as you want. Each captain gets the same dashboard you do, and gathers recipes right alongside you. The work spreads out, so it never sits on one person.",
   },
 ];
 
@@ -79,7 +78,7 @@ export default function HowItWorksPage() {
         alt="Share a link so your people can send recipes"
       />
       <div className="flex flex-wrap gap-3">
-        {["Add them yourself", "Share a link", "Invite collaborators"].map((c) => (
+        {["Add them yourself", "Share a link", "Invite captains"].map((c) => (
           <span
             key={c}
             className="type-caption rounded-full border border-brand-sand bg-brand-white px-4 py-2 text-brand-charcoal/80"
@@ -141,12 +140,35 @@ export default function HowItWorksPage() {
         ))}
       </div>
     </div>,
-    <StepImage
-      key="s4"
-      src="/images/HowitWorks_images/book_in_hand_whitebackgound.png"
-      alt="The finished hardcover cookbook"
-      bg="bg-brand-cream"
-    />,
+    // Paso 4 — dashboard de captains (markup on-brand).
+    <div key="s4" className="rounded-2xl bg-brand-warm-white-warm p-6 md:p-8">
+      <div className="mb-5 flex items-center justify-between">
+        <span className="type-body-small font-medium text-brand-charcoal">Captains</span>
+        <span className="rounded-full bg-brand-honey px-4 py-1.5 type-caption text-brand-white">
+          + Invite captain
+        </span>
+      </div>
+      <div className="space-y-2.5">
+        {[
+          { n: "You", tag: "Organizer" },
+          { n: "Sofía", tag: "Captain" },
+          { n: "Marcos", tag: "Captain" },
+          { n: "Lucía", tag: "Captain" },
+        ].map((p) => (
+          <div
+            key={p.n}
+            className="flex items-center gap-3 rounded-xl bg-brand-white px-4 py-3"
+          >
+            <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-brand-sand type-caption text-brand-charcoal/70">
+              {p.n[0]}
+            </span>
+            <span className="type-body-small text-brand-charcoal/80">{p.n}</span>
+            <span className="ml-auto type-caption text-brand-charcoal/40">{p.tag}</span>
+          </div>
+        ))}
+      </div>
+      <p className="type-caption mt-4 text-brand-charcoal/50">Invite as many as you want.</p>
+    </div>,
   ];
 
   // Tarjeta opcional (sin número, no es un paso del riel) entre el paso 1 y 2.
@@ -341,6 +363,12 @@ export default function HowItWorksPage() {
               A full-color hardcover, around 80 pages. It lives in the kitchen. It gets
               stained. That&rsquo;s the point.
             </p>
+            <Link
+              href="/from-the-book"
+              className="type-body-small mt-5 inline-flex items-center gap-1 text-brand-charcoal underline underline-offset-4 transition-colors hover:text-brand-honey"
+            >
+              See inside a book <span aria-hidden>→</span>
+            </Link>
             <div className="relative mx-auto mt-12 aspect-[16/10] max-w-4xl overflow-hidden rounded-2xl bg-brand-white shadow-md">
               <Image
                 src="/images/HowitWorks_images/book_in_hand_whitebackgound.png"
