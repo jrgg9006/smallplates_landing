@@ -93,9 +93,13 @@ function EventInviteContent() {
 
     if (data) {
       setGroup(data as GroupWithMembers);
-      if (data.event_date) {
-        setEventDate(data.event_date);
-        setSelectedDate(parse(data.event_date, "yyyy-MM-dd", new Date()));
+      // Reason: default the event date to gift_date (chosen in onboarding) so the
+      // organizer isn't asked again. Editing here saves to event_date only, leaving
+      // gift_date untouched.
+      const defaultDate = data.event_date || data.gift_date;
+      if (defaultDate) {
+        setEventDate(defaultDate);
+        setSelectedDate(parse(defaultDate, "yyyy-MM-dd", new Date()));
       }
       if (data.event_time) setEventTime(data.event_time);
       if (data.event_location) setEventLocation(data.event_location);
@@ -104,7 +108,7 @@ function EventInviteContent() {
         setStep(3);
       }
       const name = data.couple_display_name || data.name || "the couple";
-      setInviteTitle(data.invite_title || "Let's Shower the Bride!");
+      setInviteTitle(data.invite_title || "Let's Celebrate Together");
       const ownerMember = (data.group_members || []).find((m: { role: string; profiles?: { full_name?: string | null } | null }) => m.role === "owner");
       const ownerName = (ownerMember?.profiles as { full_name?: string | null } | null)?.full_name || "";
       setInviteTagline(data.invite_tagline || ownerName || "The Family");
@@ -620,7 +624,7 @@ function EventInviteContent() {
           <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--brand-warm-gray))] mb-2">When</p>
           <div
             onClick={openDateTimeModal}
-            className="cursor-pointer rounded px-2 py-0.5 transition-colors hover:bg-[hsl(var(--brand-honey))]/10"
+            className="cursor-pointer rounded px-2 py-0.5 transition-colors bg-[hsl(var(--brand-honey))]/[0.07] outline-dashed outline-1 outline-offset-2 outline-[hsl(var(--brand-honey))]/30 hover:bg-[hsl(var(--brand-honey))]/[0.16] hover:outline-[hsl(var(--brand-honey))]/60"
           >
             {eventDate ? (
               <p className="text-[14px] text-[hsl(var(--brand-charcoal))] font-medium uppercase tracking-wide">
@@ -643,7 +647,7 @@ function EventInviteContent() {
           <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--brand-warm-gray))] mb-2">Where</p>
           <div
             onClick={openLocationModal}
-            className="cursor-pointer rounded px-2 py-0.5 transition-colors hover:bg-[hsl(var(--brand-honey))]/10"
+            className="cursor-pointer rounded px-2 py-0.5 transition-colors bg-[hsl(var(--brand-honey))]/[0.07] outline-dashed outline-1 outline-offset-2 outline-[hsl(var(--brand-honey))]/30 hover:bg-[hsl(var(--brand-honey))]/[0.16] hover:outline-[hsl(var(--brand-honey))]/60"
           >
             {eventVenue && (
               <p className="text-[14px] text-[hsl(var(--brand-charcoal))] font-medium uppercase tracking-wide">
@@ -755,7 +759,7 @@ function EventInviteContent() {
           {/* Mobile / Desktop preview */}
           {previewMode !== "whatsapp" && (
             <div
-              className={`bg-gray-100 rounded-2xl overflow-hidden shadow-lg border border-gray-200 transition-all duration-300 flex flex-col max-h-[80vh] relative ${
+              className={`bg-gray-100 rounded-2xl overflow-hidden shadow-lg border border-gray-200 transition-all duration-300 flex flex-col lg:max-h-[80vh] relative ${
                 previewMode === "mobile" ? "w-[360px]" : "w-full"
               }`}
             >
@@ -764,7 +768,9 @@ function EventInviteContent() {
                 <span className="w-2.5 h-2.5 rounded-full bg-gray-400" />
                 <span className="w-2.5 h-2.5 rounded-full bg-gray-400" />
               </div>
-              <div className="flex-1 overflow-y-auto">
+              {/* Reason: on mobile let the preview flow in the page scroll (no nested
+                  scroll trap); on desktop keep it as a contained, scrollable device. */}
+              <div className="flex-1 overflow-visible lg:overflow-y-auto">
                 {invitePreview}
               </div>
             </div>
@@ -1403,7 +1409,7 @@ function EditableField({
   return (
     <p
       onClick={handleClick}
-      className={`${className} cursor-pointer rounded px-2 py-0.5 transition-colors hover:bg-[hsl(var(--brand-honey))]/10 ${isPlaceholder ? "italic opacity-50" : ""}`}
+      className={`${className} cursor-pointer rounded px-2 py-0.5 transition-colors bg-[hsl(var(--brand-honey))]/[0.07] outline-dashed outline-1 outline-offset-2 outline-[hsl(var(--brand-honey))]/30 hover:bg-[hsl(var(--brand-honey))]/[0.16] hover:outline-[hsl(var(--brand-honey))]/60 ${isPlaceholder ? "italic opacity-50" : ""}`}
     >
       {displayValue}
     </p>

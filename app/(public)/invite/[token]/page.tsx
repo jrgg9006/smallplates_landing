@@ -18,15 +18,26 @@ async function getEventData(token: string, groupId: string | null) {
   const supabase = createSupabaseAdminClient();
   const { data: group } = await supabase
     .from("groups")
-    .select("name, couple_display_name, event_date, event_time, event_location, event_venue, invite_title, invite_tagline, invite_message, couple_image_url, couple_image_position_x, couple_image_position_y")
+    .select("name, couple_display_name, event_date, event_time, event_location, event_venue, invite_title, invite_tagline, invite_message, couple_image_url, couple_image_position_x, couple_image_position_y, group_members(role, profiles!group_members_profile_id_fkey(full_name))")
     .eq("id", resolvedGroupId)
     .single();
 
   if (!group) return null;
 
+  // Reason: default the "Hosted by" tagline to the organizer's name when they
+  // haven't set one manually, mirroring the editor. The editor doesn't persist
+  // this default, so the public page must derive it too — otherwise it falls
+  // back to a generic "You're invited".
+  const ownerMember = (group.group_members || []).find(
+    (m: { role: string }) => m.role === "owner"
+  );
+  const ownerName =
+    (ownerMember?.profiles as { full_name?: string | null } | null)?.full_name || "";
+
   return {
     tokenInfo,
     group,
+    ownerName,
     groupId: resolvedGroupId,
     token,
   };
@@ -83,8 +94,12 @@ export default async function InvitePage({ params, searchParams }: PageProps) {
   }
 
   const coupleName = data.group.invite_title || data.group.couple_display_name || data.group.name || "the couple";
-  const tagline = data.group.invite_tagline || "You're invited";
-  const message = data.group.invite_message || `${coupleName} invites you to share your favorite recipe with them!`;
+  const tagline = data.group.invite_tagline || data.ownerName || "You're invited";
+  // Reason: keep the default message identical to the editor preview
+  // (event-invite/page.tsx). The editor derives the name from couple_display_name
+  // (NOT invite_title), so mirror that here to avoid a divergent fallback.
+  const messageName = data.group.couple_display_name || data.group.name || "the couple";
+  const message = data.group.invite_message || `${messageName} invites you to share your favorite recipe with them! They will print a cookbook with recipes from family and friends.`;
   const collectionUrl = `/collect/${data.token}?group=${data.groupId}&from=event`;
 
   return (
