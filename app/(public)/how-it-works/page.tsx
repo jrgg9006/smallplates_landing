@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import Banner from "@/components/landing/Banner";
+import Footer from "@/components/landing/Footer";
 import WhatsAppFAB from "@/components/landing/WhatsAppFAB";
 import JourneyTimeline from "./_components/JourneyTimeline";
 import JourneyStep, { type JourneyStepData } from "./_components/JourneyStep";
@@ -401,6 +402,7 @@ export default function HowItWorksPage() {
         </section>
       </main>
 
+      <Footer />
       <WhatsAppFAB />
     </>
   );
