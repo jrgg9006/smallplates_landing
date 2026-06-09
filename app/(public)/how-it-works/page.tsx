@@ -368,10 +368,10 @@ export default function HowItWorksPage() {
                     posiciones en % atadas a esta imagen — ajustables con top/left) */}
                 <div className="pointer-events-none absolute inset-0 hidden md:block">
                   {[
-                    { label: "Title", top: 14, left: 24 },
-                    { label: "Note", top: 30, left: 27 },
-                    { label: "Ingredients", top: 52, left: 23 },
-                    { label: "Photo", top: 18, left: 70 },
+                    { label: "Title", top: 22, left: 31 },
+                    { label: "Note", top: 33, left: 30 },
+                    { label: "Ingredients", top: 55, left: 9 },
+                    { label: "Photo", top: 48, left: 76 },
                   ].map((pin, i) => (
                     <motion.div
                       key={pin.label}
