@@ -363,6 +363,32 @@ export default function HowItWorksPage() {
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 1024px"
                 />
+
+                {/* Pins anotando de qué campo salió cada parte (solo desktop;
+                    posiciones en % atadas a esta imagen — ajustables con top/left) */}
+                <div className="pointer-events-none absolute inset-0 hidden md:block">
+                  {[
+                    { label: "Title", top: 14, left: 24 },
+                    { label: "Note", top: 30, left: 27 },
+                    { label: "Ingredients", top: 52, left: 23 },
+                    { label: "Photo", top: 18, left: 70 },
+                  ].map((pin, i) => (
+                    <motion.div
+                      key={pin.label}
+                      className="absolute flex items-center gap-1.5 rounded-full border border-brand-sand bg-brand-white/95 px-3 py-1.5 shadow-md backdrop-blur-sm"
+                      style={{ top: `${pin.top}%`, left: `${pin.left}%` }}
+                      initial={{ opacity: 0, scale: 0.8, y: 6 }}
+                      whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                      viewport={{ once: true, margin: "-80px" }}
+                      transition={{ duration: 0.4, delay: 0.25 + i * 0.18, ease: easeOut }}
+                    >
+                      <span className="h-2 w-2 flex-shrink-0 rounded-full bg-brand-honey" />
+                      <span className="type-caption whitespace-nowrap text-brand-charcoal">
+                        {pin.label}
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
