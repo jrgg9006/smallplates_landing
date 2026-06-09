@@ -118,14 +118,25 @@ export default function PersonalNotes() {
           <div className="order-1 lg:order-2 lg:pl-8 relative z-10">
             {/* Headline */}
             <motion.h2
-              className="type-heading text-center lg:text-left mb-6"
+              className="type-heading text-center lg:text-left mb-4"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, ease: "easeOut" }}
             >
-              Not just recipes. It&apos;s what they write.
+              A recipe tells you how. What they write tells you who.
             </motion.h2>
+
+            {/* Subhead — anchors the note to the physical book */}
+            <motion.p
+              className="type-body-small text-center lg:text-left text-brand-charcoal/70 mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+            >
+              A line or two, printed under every recipe in the book.
+            </motion.p>
 
             {/* Subtle divider */}
             <div className="flex justify-center lg:justify-start mb-10 md:mb-12">
