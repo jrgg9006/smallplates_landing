@@ -358,32 +358,6 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
-        {/* 4. Lo que recibes (tarjeta) */}
-        <section className="px-2 py-6 md:px-3 md:py-8">
-          <div className="mx-auto max-w-7xl rounded-[2rem] bg-brand-sand px-5 py-16 text-center md:px-10 md:py-24">
-            <h2 className="type-subheading">What shows up at your door</h2>
-            <p className="type-body-small mx-auto mt-4 max-w-xl text-brand-charcoal/70">
-              A full-color hardcover, around 80 pages. It lives in the kitchen. It gets
-              stained. That&rsquo;s the point.
-            </p>
-            <Link
-              href="/from-the-book"
-              className="type-body-small mt-5 inline-flex items-center gap-1 text-brand-charcoal underline underline-offset-4 transition-colors hover:text-brand-honey"
-            >
-              See inside a book <span aria-hidden>→</span>
-            </Link>
-            <div className="relative mx-auto mt-12 aspect-[16/10] max-w-4xl overflow-hidden rounded-2xl bg-brand-white shadow-md">
-              <Image
-                src="/images/HowitWorks_images/book_in_hand_whitebackgound.png"
-                alt="The finished hardcover cookbook"
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 896px"
-              />
-            </div>
-          </div>
-        </section>
-
         {/* 5. Ancla de precio */}
         <section className="px-4 py-16 md:px-6 md:py-20">
           <div className="mx-auto max-w-3xl text-center">
