@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
 import { createSupabaseClient } from "@/lib/supabase/client";
+import { extractOgVersion } from "@/lib/utils/sharing";
 import { Check, MessageCircle, Mail, QrCode, Download } from "lucide-react";
 import QRCode from "qrcode";
 
@@ -13,6 +14,8 @@ function InviteFirstContent() {
   const groupId = params.get("groupId");
   const [copied, setCopied] = useState(false);
   const [collectionLink, setCollectionLink] = useState("");
+  const [collectionToken, setCollectionToken] = useState("");
+  const [ogVersion, setOgVersion] = useState<string | null>(null);
   const [coupleName, setCoupleName] = useState("");
   const [occasion, setOccasion] = useState<string | null>(null);
   const [namesArePeople, setNamesArePeople] = useState(false);
@@ -47,9 +50,7 @@ function InviteFirstContent() {
         .single()
         .then(({ data: profile }) => {
           if (profile?.collection_link_token) {
-            setCollectionLink(
-              `${window.location.origin}/collect/${profile.collection_link_token}?group=${groupId}`
-            );
+            setCollectionToken(profile.collection_link_token);
           }
         });
 
@@ -68,7 +69,7 @@ function InviteFirstContent() {
     // Fetch the book name (single source of truth for the title), occasion + image
     supabase
       .from("groups")
-      .select("name, occasion, couple_first_name, partner_first_name, couple_image_url")
+      .select("name, occasion, couple_first_name, partner_first_name, couple_image_url, couple_image_og_url")
       .eq("id", groupId)
       .single()
       .then(({ data }) => {
@@ -78,12 +79,29 @@ function InviteFirstContent() {
         // title ("Grandma's recipes") doesn't, so the copy drops the possessive.
         setNamesArePeople(Boolean(data?.couple_first_name || data?.partner_first_name));
         if (data?.couple_image_url) setCoupleImageUrl(data.couple_image_url);
+        setOgVersion(extractOgVersion(data?.couple_image_og_url));
       });
   }, [groupId]);
 
-  const whatsappText = coupleName
-    ? `I'm putting together a cookbook for ${coupleName} — can you send one recipe? Takes about 5 min: ${collectionLink}`
-    : `I'm putting together a cookbook — can you send one recipe? Takes about 5 min: ${collectionLink}`;
+  // Reason: rebuild the share link with &v=<og_ts> once the OG version loads.
+  // WhatsApp caches link previews per exact URL with no retry — the version param
+  // is the only thing that forces a fresh crawl after the couple photo changes.
+  // The dashboard share (ShareCollectionModal) already does this; onboarding
+  // shipped the bare link, so previews went stale here.
+  useEffect(() => {
+    if (!collectionToken || !groupId) return;
+    const base = `${window.location.origin}/collect/${collectionToken}?group=${groupId}`;
+    setCollectionLink(ogVersion ? `${base}&v=${ogVersion}` : base);
+  }, [collectionToken, groupId, ogVersion]);
+
+  // Reason: use the message the organizer personalized in the previous step
+  // (custom_share_message) as the actual WhatsApp/SMS body, so what they wrote is
+  // what gets sent. Fall back to the generic hook only when they left it blank.
+  const whatsappText = shareMessage
+    ? `${shareMessage} ${collectionLink}`
+    : coupleName
+      ? `I'm putting together a cookbook for ${coupleName} — can you send one recipe? Takes about 5 min: ${collectionLink}`
+      : `I'm putting together a cookbook — can you send one recipe? Takes about 5 min: ${collectionLink}`;
 
   function handleCopy() {
     navigator.clipboard.writeText(collectionLink);
