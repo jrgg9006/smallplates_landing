@@ -96,9 +96,20 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
 
   // Get the cookbook creator's name for personalization
   const isPreviewMode = typeof window !== 'undefined' && sessionStorage?.getItem('isPreviewMode') === 'true';
-  const creatorName = isPreviewMode 
-    ? '[Your Name]' 
+  const creatorName = isPreviewMode
+    ? '[Your Name]'
     : (tokenInfo.custom_share_signature || tokenInfo.user_name.split(' ')[0] || 'the cookbook creator');
+
+  // Reason: occasion-aware note recipient, mirrors CollectionForm. Weddings/bridal
+  // showers (and legacy null-occasion groups with people names) say "the couple";
+  // other occasions use the recipient's first name; book-title groups (e.g.
+  // "Grandma's recipes") get no recipient at all.
+  const namesArePeople = Boolean(tokenInfo.couple_first_name || tokenInfo.partner_first_name);
+  const isWeddingOccasion = tokenInfo.occasion === 'wedding' || tokenInfo.occasion === 'bridal_shower';
+  const treatAsWedding = isWeddingOccasion || (!tokenInfo.occasion && namesArePeople);
+  const noteRecipient = treatAsWedding
+    ? 'the couple'
+    : (tokenInfo.couple_first_name || tokenInfo.partner_first_name || null);
 
   const getImageUrl = () => {
     // Use couple image if available, otherwise use lemon image for all steps
@@ -900,6 +911,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
               onChange={(value) => setRecipeData(prev => ({ ...prev, personalNote: value }))}
               userName={creatorName}
               coupleImageUrl={tokenInfo.couple_image_url}
+              noteRecipient={noteRecipient}
             />
           </motion.div>
         )}

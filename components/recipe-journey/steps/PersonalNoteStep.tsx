@@ -8,11 +8,14 @@ interface PersonalNoteStepProps {
   onChange: (value: string) => void;
   userName: string;
   coupleImageUrl?: string | null;
+  // Reason: "the couple" for weddings, recipient first name for other
+  // occasions, null when the group is a book title (no person to address).
+  noteRecipient?: string | null;
 }
 
 const MAX_CHARACTERS = 500;
 
-export default function PersonalNoteStep({ personalNote, onChange, userName, coupleImageUrl }: PersonalNoteStepProps) {
+export default function PersonalNoteStep({ personalNote, onChange, userName, coupleImageUrl, noteRecipient }: PersonalNoteStepProps) {
   const characterCount = personalNote.length;
   const isNearLimit = characterCount > MAX_CHARACTERS * 0.8; // 80% of limit
   const isOverLimit = characterCount > MAX_CHARACTERS;
@@ -43,7 +46,7 @@ export default function PersonalNoteStep({ personalNote, onChange, userName, cou
         
         <div className="space-y-2 text-center">
           <h2 className="font-serif text-3xl md:text-4xl font-semibold text-brand-charcoal">
-            Add a note for the couple
+            {noteRecipient ? `Add a note for ${noteRecipient}` : 'Add a note'}
           </h2>
         </div>
 
@@ -52,7 +55,11 @@ export default function PersonalNoteStep({ personalNote, onChange, userName, cou
             <textarea
               value={personalNote}
               onChange={(e) => onChange(e.target.value)}
-              placeholder="A note for the couple. A story about this recipe. When to make it. Why it's special. Whatever you want to share."
+              placeholder={
+                noteRecipient
+                  ? `A note for ${noteRecipient}. A story about this recipe. When to make it. Whatever you want to share.`
+                  : 'A story about this recipe. When to make it. Who taught it to you. Whatever you want to share.'
+              }
               rows={6}
               className={`w-full px-4 py-3 border rounded-xl text-base bg-white focus:outline-none focus:ring-2 focus:ring-brand-honey focus:border-transparent resize-none ${
                 isOverLimit ? 'border-red-300' : 'border-gray-300'
