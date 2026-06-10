@@ -90,7 +90,7 @@ export function DashboardChecklist({
     {
       done: !!group.book_closed_by_user,
       content: (
-        <><LinkText onClick={onPrintBook}>Review and Print</LinkText> — $169</>
+        <><LinkText onClick={onPrintBook}>Review and Print</LinkText></>
       ),
     },
   ];
