@@ -50,6 +50,9 @@ export const metadata: Metadata = {
     description: 'A wedding cookbook made by everyone who matters. Not a keepsake—a kitchen book.',
     images: ['/images/landing_hero_image2.jpg'],
   },
+  other: {
+    'facebook-domain-verification': 'rjdmwi75tq7t5gloyvq4kvtjmn4wz1',
+  },
 }
 
 export default function RootLayout({
