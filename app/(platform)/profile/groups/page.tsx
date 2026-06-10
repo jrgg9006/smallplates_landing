@@ -9,7 +9,7 @@ import { CaptainsDropdown } from "@/components/profile/groups/CaptainsDropdown";
 import { MoreMenuDropdown } from "@/components/profile/groups/MoreMenuDropdown";
 import { AddFriendToGroupModal } from "@/components/profile/groups/AddFriendToGroupModal";
 import { CoupleNamesModal } from "@/components/profile/groups/CoupleNamesModal";
-import { ChevronDown, Image as ImageIcon, Upload, X, Move } from "lucide-react";
+import { Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 import type { GroupWithMembers } from "@/lib/types/database";
 import { useProfileOnboarding, OnboardingSteps } from "@/lib/contexts/ProfileOnboardingContext";
@@ -30,7 +30,6 @@ import { ImportGuestsModal } from "@/components/profile/guests/ImportGuestsModal
 import { SendInvitationsPage } from "@/components/profile/guests/SendInvitationsPage";
 import { BookReviewFlow } from "@/components/profile/groups/review/BookReviewFlow";
 import BrandLoader from "@/components/ui/BrandLoader";
-import { InviteDropdown } from "@/components/dashboard/InviteDropdown";
 import { DashboardChecklist } from "@/components/dashboard/DashboardChecklist";
 import { BookPreviewPanel } from "@/components/profile/groups/BookPreviewPanel";
 
@@ -74,7 +73,6 @@ export default function GroupsPage() {
   const [uniqueContributors, setUniqueContributors] = useState(0);
   const [showCaptains, setShowCaptains] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
-  const [showInviteDropdown, setShowInviteDropdown] = useState(false);
   const [showAddCaptainModal, setShowAddCaptainModal] = useState(false);
   const [invitationsRefreshTrigger, setInvitationsRefreshTrigger] = useState(0);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -749,24 +747,14 @@ export default function GroupsPage() {
                   the secondary wrapper becomes `contents` so all four flow inline
                   exactly as before. */}
               <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
-                {/* PRIMARY - Invite dropdown (HONEY, ROUNDED) — full width on mobile */}
-                <div className="relative w-full sm:w-auto">
-                  <button
-                    className="btn btn-honey gap-2 w-full px-6 py-3.5 text-base sm:w-auto sm:px-14 sm:py-3 sm:text-sm"
-                    onClick={() => setShowInviteDropdown(!showInviteDropdown)}
-                    disabled={!selectedGroup}
-                  >
-                    Invite
-                    <ChevronDown size={12} />
-                  </button>
-                  <InviteDropdown
-                    isOpen={showInviteDropdown}
-                    onClose={() => setShowInviteDropdown(false)}
-                    onInviteToEvent={() => router.push(`/event-invite?groupId=${selectedGroup?.id}`)}
-                    onSendCollectionLink={handleCollectRecipes}
-                    onInviteCaptain={() => setShowAddCaptainModal(true)}
-                  />
-                </div>
+                {/* PRIMARY - Collect Recipes (HONEY, ROUNDED) — full width on mobile */}
+                <button
+                  className="btn btn-honey w-full px-6 py-3.5 text-base sm:w-auto sm:px-14 sm:py-3 sm:text-sm"
+                  onClick={handleCollectRecipes}
+                  disabled={!selectedGroup}
+                >
+                  Collect Recipes
+                </button>
 
                 {/* SECONDARY actions — row below Invite on mobile, inline on desktop */}
                 <div className="flex items-center gap-3 sm:contents">
@@ -807,6 +795,7 @@ export default function GroupsPage() {
                     showAddGuestOption={true}
                     showSendInvitationsOption={true}
                     onSendInvitationsClick={handleSendInvitations}
+                    onCreateEventInvitationClick={() => router.push(`/event-invite?groupId=${selectedGroup?.id}`)}
                     onCloseBookClick={!selectedGroup?.book_closed_by_user ? handleOpenBookReview : undefined}
                   />
                   {/* Captains — bottom sheet on mobile, anchored dropdown on desktop */}

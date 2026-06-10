@@ -13,10 +13,11 @@ interface MoreMenuDropdownProps {
   onViewGuestsClick?: () => void;
   showSendInvitationsOption?: boolean;
   onSendInvitationsClick?: () => void;
+  onCreateEventInvitationClick?: () => void;
   onCloseBookClick?: () => void;
 }
 
-export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsOption, onCaptainsClick, showAddGuestOption, onViewGuestsClick, showSendInvitationsOption, onSendInvitationsClick, onCloseBookClick }: MoreMenuDropdownProps) {
+export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsOption, onCaptainsClick, showAddGuestOption, onViewGuestsClick, showSendInvitationsOption, onSendInvitationsClick, onCreateEventInvitationClick, onCloseBookClick }: MoreMenuDropdownProps) {
   // Reason: on mobile render as a bottom sheet (anchored to the viewport, never
   // clips off-screen); on desktop keep the anchored dropdown. Lazy-init from
   // window since this only mounts after a user click (client-only) — no flash.
@@ -66,6 +67,17 @@ export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsO
           className="w-full text-left px-4 py-2.5 text-sm text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-border))] rounded-lg transition-colors"
         >
           Send email invitations
+        </button>
+      )}
+      {onCreateEventInvitationClick && (
+        <button
+          onClick={() => {
+            onCreateEventInvitationClick();
+            onClose();
+          }}
+          className="w-full text-left px-4 py-2.5 text-sm text-[hsl(var(--brand-charcoal))] hover:bg-[hsl(var(--brand-border))] rounded-lg transition-colors"
+        >
+          Create Event Invitation
         </button>
       )}
       {onCloseBookClick && (
