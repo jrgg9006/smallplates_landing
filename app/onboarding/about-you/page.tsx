@@ -6,6 +6,13 @@ import Image from "next/image";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
 import { useOnboardingState } from "@/components/onboarding/onboardingState";
 import { createSupabaseClient } from "@/lib/supabase/client";
+import {
+  EVENTS,
+  META_EVENTS,
+  trackEvent,
+  trackMetaEvent,
+  getLandingUtms,
+} from "@/lib/analytics";
 
 export default function AboutYouPage() {
   const router = useRouter();
@@ -57,7 +64,38 @@ export default function AboutYouPage() {
         return;
       }
 
-      const { groupId, tokenHash } = await res.json();
+      const { groupId, tokenHash, isNewUser } = await res.json();
+
+      trackEvent(EVENTS.BOOK_CREATED, {
+        flow: "free_tier",
+        occasion: occasion ?? undefined,
+        is_new_user: String(Boolean(isNewUser)),
+      });
+
+      // Reason: sign_up only for genuinely new accounts (the API rescues
+      // existing users), deduped per session so a re-submit can't double-fire
+      // the Meta CompleteRegistration conversion.
+      let signupAlreadyTracked = false;
+      try {
+        signupAlreadyTracked = Boolean(sessionStorage.getItem("sp_signup_tracked"));
+        if (isNewUser && !signupAlreadyTracked) {
+          sessionStorage.setItem("sp_signup_tracked", "1");
+        }
+      } catch {
+        // Storage unavailable (private mode) — fire anyway.
+      }
+      if (isNewUser && !signupAlreadyTracked) {
+        trackEvent(EVENTS.SIGN_UP, {
+          method: "free_tier_onboarding",
+          flow: "free_tier",
+          occasion: occasion ?? undefined,
+          ...getLandingUtms(),
+        });
+        trackMetaEvent(META_EVENTS.COMPLETE_REGISTRATION, {
+          content_name: "free_tier",
+          status: "true",
+        });
+      }
 
       if (!isAuthed) {
         const supabase = createSupabaseClient();

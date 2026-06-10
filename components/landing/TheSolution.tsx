@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
-import { trackEvent } from "@/lib/analytics";
+import { trackStartBookClick } from "@/lib/analytics";
 import { isFreeTierEnabled } from "@/lib/feature-flags";
 
 /**
@@ -57,7 +57,7 @@ export default function TheSolution() {
   const reduced = useReducedMotion();
 
   const handleStartBook = () => {
-    trackEvent("start_book_click", { cta_location: "solution_primary" });
+    trackStartBookClick("solution_primary");
     router.push(isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding");
   };
 

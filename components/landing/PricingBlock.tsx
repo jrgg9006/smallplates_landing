@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { trackEvent } from "@/lib/analytics";
+import { trackStartBookClick } from "@/lib/analytics";
 import { isFreeTierEnabled } from "@/lib/feature-flags";
 import { pricePerCopy } from "@/lib/stripe/pricing";
 
@@ -74,7 +74,7 @@ export default function PricingBlock() {
   const [active, setActive] = useState(0);
 
   const handleStartBook = () => {
-    trackEvent("start_book_click", { cta_location: "pricing_block_primary" });
+    trackStartBookClick("pricing_block_primary");
     router.push(isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding");
   };
 

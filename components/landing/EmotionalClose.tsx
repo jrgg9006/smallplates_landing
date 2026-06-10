@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { trackEvent } from "@/lib/analytics";
+import { trackStartBookClick } from "@/lib/analytics";
 import { isFreeTierEnabled } from "@/lib/feature-flags";
 
 /**
@@ -42,7 +42,7 @@ export default function EmotionalClose() {
   const router = useRouter();
 
   const handleStartBook = () => {
-    trackEvent('start_book_click', { cta_location: 'emotional_close_primary' });
+    trackStartBookClick('emotional_close_primary');
     router.push(isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding");
   };
 
