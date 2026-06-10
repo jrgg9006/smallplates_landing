@@ -164,7 +164,14 @@ function InviteFirstContent() {
   // groups with no occasion but real couple names are still treated as weddings.
   const isWeddingOccasion = occasion === "wedding" || occasion === "bridal_shower";
   const treatAsWedding = isWeddingOccasion || (!occasion && namesArePeople);
-  const cookbookEyebrow = treatAsWedding ? "WEDDING COOKBOOK" : "COOKBOOK";
+  // Reason: keep the eyebrow consistent with the collect page — bridal showers get
+  // their own label; weddings (incl. legacy no-occasion couples) say "WEDDING
+  // COOKBOOK"; everything else just "COOKBOOK".
+  const cookbookEyebrow = occasion === "bridal_shower"
+    ? "BRIDAL SHOWER COOKBOOK"
+    : treatAsWedding
+      ? "WEDDING COOKBOOK"
+      : "COOKBOOK";
 
   // Reason: this modal is a 1:1 preview of the real invite, so it mirrors
   // invitationEmail1 + occasionCopy (lib/email/invitation-templates) and the

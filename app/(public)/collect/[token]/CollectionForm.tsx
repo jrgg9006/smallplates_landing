@@ -186,13 +186,17 @@ export default function CollectionForm() {
   // "this cookbook" instead.
   const namesArePeople = Boolean(tokenInfo?.couple_first_name || tokenInfo?.partner_first_name);
   const treatAsWedding = isWeddingOccasion || (!tokenInfo?.occasion && namesArePeople);
-  // Reason: mirror the invite email's hero label. The "gift for {name}" framing
-  // applies whenever the heading is a real person; a book title stays neutral.
-  const cookbookEyebrow = treatAsWedding
-    ? 'A wedding cookbook gift for'
-    : namesArePeople
-      ? 'A cookbook gift for'
-      : 'A cookbook gift';
+  // Reason: the eyebrow labels the *kind* of cookbook, not the person — this sits
+  // above the hero name, so "A cookbook gift for" + a book title ("Richi's
+  // Birthday!") read awkwardly. Weddings (incl. legacy no-occasion couples via
+  // treatAsWedding) say "Wedding Cookbook", bridal showers "Bridal Shower
+  // Cookbook", everything else just "Cookbook". CSS uppercases it.
+  const cookbookEyebrow =
+    tokenInfo?.occasion === 'bridal_shower'
+      ? 'Bridal Shower Cookbook'
+      : treatAsWedding
+        ? 'Wedding Cookbook'
+        : 'Cookbook';
 
   // Reason: Show closed state when book_closed_by_user is set — no recipes can be added
   if (tokenInfo?.book_closed_by_user) {
