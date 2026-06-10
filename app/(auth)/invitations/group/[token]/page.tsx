@@ -14,7 +14,6 @@ interface GroupInvitationData {
     id: string;
     name: string;
     description?: string | null;
-    namesArePeople?: boolean;
   };
   inviter: {
     name: string;
@@ -149,13 +148,12 @@ export default function GroupInvitationPage() {
               </h1>
               <p className="text-lg font-light text-gray-700 leading-relaxed mb-2">
                 {invitation.inviter.name} invited you to help with{" "}
-                <span className="text-gray-900">
-                  {/* Reason: a person's name takes a possessive + "cookbook"
-                      ("Mom's cookbook"); a book title is used as-is. */}
-                  {invitation.group.namesArePeople
-                    ? `${invitation.group.name}'s cookbook`
-                    : invitation.group.name}
-                </span>.
+                {/* Reason: "a cookbook titled X" reads right for both a couple's
+                    name ("Ana & Rich") and a renamed book title ("The Best
+                    Recipes…"), avoiding the possessive that breaks after an
+                    Edit Book rename ("The Best Recipes's cookbook"). */}
+                a cookbook titled{" "}
+                <span className="text-gray-900">&ldquo;{invitation.group.name}&rdquo;</span>.
               </p>
               <p className="text-base font-light text-gray-500 leading-relaxed mb-8">
                 You&apos;ll be a captain, with full access to the dashboard to invite people,
