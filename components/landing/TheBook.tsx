@@ -7,7 +7,7 @@ import Image from "next/image";
 import SpecsGrid from "@/components/landing/TheBook/SpecsGrid";
 // import HandmadeCallout from "@/components/landing/TheBook/HandmadeCallout"; // Hidden from flow; component kept for reuse
 import DetailStrip from "@/components/landing/TheBook/DetailStrip";
-import { trackEvent } from "@/lib/analytics";
+import { trackStartBookClick } from "@/lib/analytics";
 import { isFreeTierEnabled } from "@/lib/feature-flags";
 
 /**
@@ -37,7 +37,7 @@ export default function TheBook() {
   const [isBookHovered, setIsBookHovered] = useState(false);
 
   const handleCTA = () => {
-    trackEvent('start_book_click', { cta_location: 'the_book_primary' });
+    trackStartBookClick('the_book_primary');
     router.push(isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding");
   };
 

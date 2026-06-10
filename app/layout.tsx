@@ -24,6 +24,7 @@ import { AuthProvider } from '@/lib/contexts/AuthContext'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import MetaPixel from '@/components/analytics/MetaPixel'
+import { UtmCapture } from '@/components/analytics/OnboardingStepTracker'
 
 export const metadata: Metadata = {
   title: 'Small Plates & Company — Finally, a wedding gift people actually use',
@@ -88,6 +89,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-white text-gray-900">
         <MetaPixel />
+        <UtmCapture />
         <AuthProvider>
           {children}
         </AuthProvider>

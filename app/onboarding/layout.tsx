@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { OnboardingHeaderClient } from "@/components/onboarding/OnboardingHeader";
+import { OnboardingStepTracker } from "@/components/analytics/OnboardingStepTracker";
 
 export default function OnboardingLayout({ children }: { children: React.ReactNode }) {
   if (!isFreeTierEnabled()) {
@@ -27,6 +28,7 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
         </div>
       </header>
       <div className="pt-14 sm:pt-16">
+        <OnboardingStepTracker />
         {children}
       </div>
     </>

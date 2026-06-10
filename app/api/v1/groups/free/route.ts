@@ -179,6 +179,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       groupId,
       tokenHash: linkData.properties.hashed_token,
+      isNewUser,
     });
   } catch (err) {
     return NextResponse.json(

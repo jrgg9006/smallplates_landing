@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
 import { createSupabaseClient } from "@/lib/supabase/client";
 import { extractOgVersion } from "@/lib/utils/sharing";
+import { EVENTS, META_EVENTS, trackEvent, trackMetaEvent } from "@/lib/analytics";
 import { Check, MessageCircle, Mail, QrCode, Download } from "lucide-react";
 import QRCode from "qrcode";
 
@@ -105,6 +106,11 @@ function InviteFirstContent() {
 
   function handleCopy() {
     navigator.clipboard.writeText(collectionLink);
+    trackEvent(EVENTS.SHARE, {
+      method: "copy_link",
+      content_type: "collection_link",
+      flow: "free_tier",
+    });
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   }
@@ -126,6 +132,11 @@ function InviteFirstContent() {
         setEmailSending(false);
         return;
       }
+      trackEvent(EVENTS.SHARE, {
+        method: "email",
+        content_type: "collection_link",
+        flow: "free_tier",
+      });
       setEmailSent(true);
       setGuestName("");
       setGuestEmail("");
@@ -151,6 +162,11 @@ function InviteFirstContent() {
 
   function handleDownloadQR() {
     if (!qrDataUrl) return;
+    trackEvent(EVENTS.SHARE, {
+      method: "qr_download",
+      content_type: "collection_link",
+      flow: "free_tier",
+    });
     const a = document.createElement("a");
     a.href = qrDataUrl;
     a.download = "small-plates-recipe-qr.png";
@@ -348,7 +364,11 @@ function InviteFirstContent() {
       imageUrl=""
       rightContent={messagePreview}
       backHref={`/onboarding/personalize-invite?groupId=${groupId}`}
-      onContinue={() => router.push("/profile/groups")}
+      onContinue={() => {
+        trackEvent(EVENTS.ONBOARDING_COMPLETED, { flow: "free_tier" });
+        trackMetaEvent(META_EVENTS.ONBOARDING_COMPLETED, {}, { custom: true });
+        router.push("/profile/groups");
+      }}
       continueLabel="Go to dashboard"
     >
       <div className="max-w-xl">
@@ -388,6 +408,13 @@ function InviteFirstContent() {
             href={`https://wa.me/?text=${encodeURIComponent(whatsappText)}`}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() =>
+              trackEvent(EVENTS.SHARE, {
+                method: "whatsapp",
+                content_type: "collection_link",
+                flow: "free_tier",
+              })
+            }
             className="flex flex-col items-center justify-center gap-2 py-3 rounded-xl hover:bg-gray-50 transition-colors"
           >
             <MessageCircle className="w-6 h-6 text-[#25D366]" />

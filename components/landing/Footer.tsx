@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { isFreeTierEnabled } from '@/lib/feature-flags';
 import BookDetailsModal from './BookDetailsModal';
 import RegistryHowToModal from './RegistryHowToModal';
-import { trackEvent } from '@/lib/analytics';
+import { EVENTS, trackEvent, trackStartBookClick } from '@/lib/analytics';
 
 const WA_URL = `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '526142256589'}?text=${encodeURIComponent('Hi, I have a question about Small Plates & Co.')}`;
 
@@ -75,7 +75,7 @@ export default function Footer() {
                   <li>
                     <Link
                       href={onboardingHref}
-                      onClick={() => trackEvent('start_book_click', { cta_location: 'footer_nav' })}
+                      onClick={() => trackStartBookClick('footer_nav')}
                       className="font-sans font-light text-base text-white/70 hover:text-white transition-colors"
                     >
                       Get Started
@@ -135,7 +135,7 @@ export default function Footer() {
                       href={WA_URL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      onClick={() => trackEvent('whatsapp_click', { cta_location: 'footer' })}
+                      onClick={() => trackEvent(EVENTS.WHATSAPP_CLICKED, { cta_location: 'footer' })}
                       className="inline-flex items-center gap-1.5 font-sans font-light text-base text-white/70 hover:text-white transition-colors"
                     >
                       <WhatsAppIcon />
@@ -154,7 +154,7 @@ export default function Footer() {
             </h3>
             <Link
               href={onboardingHref}
-              onClick={() => trackEvent('start_book_click', { cta_location: 'footer_card' })}
+              onClick={() => trackStartBookClick('footer_card')}
               className="btn btn-sm btn-honey"
             >
               Start their book for free

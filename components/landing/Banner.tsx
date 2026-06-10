@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import LoginModal from "@/components/auth/LoginModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { trackEvent } from "@/lib/analytics";
+import { trackStartBookClick } from "@/lib/analytics";
 import { isFreeTierEnabled } from "@/lib/feature-flags";
 
 // theme="dark" (default): white logo/text, meant to overlay the dark hero.
@@ -99,7 +99,7 @@ export default function Banner({
                   </button>
                   <Link
                     href={onboardingHref}
-                    onClick={() => trackEvent("start_book_click", { cta_location: "header_nav_desktop" })}
+                    onClick={() => trackStartBookClick("header_nav_desktop")}
                     className={navPill}
                   >
                     Start their book for free
@@ -148,7 +148,7 @@ export default function Banner({
                     href={onboardingHref}
                     className={mobilePill}
                     onClick={() => {
-                      trackEvent("start_book_click", { cta_location: "header_nav_mobile" });
+                      trackStartBookClick("header_nav_mobile");
                       setIsMobileMenuOpen(false);
                     }}
                   >

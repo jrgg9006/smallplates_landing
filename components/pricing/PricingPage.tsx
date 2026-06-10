@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { calculateSubtotal, pricePerCopy } from "@/lib/stripe/pricing";
-import { trackEvent } from "@/lib/analytics";
+import { trackStartBookClick } from "@/lib/analytics";
 import { isFreeTierEnabled } from "@/lib/feature-flags";
 
 /**
@@ -31,7 +31,7 @@ export default function PricingPage() {
   const [qty, setQty] = useState(3);
 
   const handleStartBook = () => {
-    trackEvent('start_book_click', { cta_location: 'pricing_card_primary' });
+    trackStartBookClick('pricing_card_primary');
     router.push(isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding");
   };
 

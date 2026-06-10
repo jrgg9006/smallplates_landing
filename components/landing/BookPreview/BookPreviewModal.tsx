@@ -10,7 +10,8 @@ import {
 import { useRouter } from "next/navigation";
 import Book from "./Book";
 import BookDetailsModal from "../BookDetailsModal";
-import { trackEvent } from "@/lib/analytics";
+import { trackStartBookClick } from "@/lib/analytics";
+import { isFreeTierEnabled } from "@/lib/feature-flags";
 
 interface BookPreviewModalProps {
   isOpen: boolean;
@@ -25,8 +26,8 @@ export default function BookPreviewModal({
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   const handleCreateCookbook = () => {
-    trackEvent('start_book_click', { cta_location: 'book_preview_modal' });
-    router.push("/onboarding");
+    trackStartBookClick('book_preview_modal');
+    router.push(isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding");
   };
 
   const handleViewProductDetails = () => {
