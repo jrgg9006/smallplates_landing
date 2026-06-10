@@ -10,9 +10,7 @@ interface DashboardChecklistProps {
   group: GroupWithMembers | null;
   recipeCount: number;
   hasCaptains: boolean;
-  hasEventInvite: boolean;
   hasShared: boolean;
-  onCreateEventInvite: () => void;
   onInviteCaptain: () => void;
   onShareLink: () => void;
   onPrintBook: () => void;
@@ -22,9 +20,7 @@ export function DashboardChecklist({
   group,
   recipeCount,
   hasCaptains,
-  hasEventInvite,
   hasShared,
-  onCreateEventInvite,
   onInviteCaptain,
   onShareLink,
   onPrintBook,
@@ -40,12 +36,6 @@ export function DashboardChecklist({
     // "(view)" link stays underlined-without-strike when the step is done.
     trailing?: React.ReactNode;
   }> = [
-    {
-      done: hasEventInvite,
-      content: (
-        <>Create your <LinkText onClick={onCreateEventInvite}>event invite</LinkText></>
-      ),
-    },
     {
       done: hasCaptains,
       content: (

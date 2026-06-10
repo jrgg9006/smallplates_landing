@@ -723,9 +723,7 @@ export default function GroupsPage() {
                 group={selectedGroup}
                 recipeCount={recipeCount}
                 hasCaptains={(selectedGroup?.group_members || []).some(m => m.role !== 'owner')}
-                hasEventInvite={!!(selectedGroup?.event_date && selectedGroup?.event_location)}
                 hasShared={!!(selectedGroup && getSharedToWhatsappAt(selectedGroup.id))}
-                onCreateEventInvite={() => router.push(`/event-invite?groupId=${selectedGroup?.id}`)}
                 onInviteCaptain={() => setShowAddCaptainModal(true)}
                 onShareLink={handleCollectRecipesExpanded}
                 onPrintBook={handleOpenBookReview}
