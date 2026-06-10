@@ -32,6 +32,8 @@ async function validateInvitation(token: string) {
         name,
         description,
         couple_image_url,
+        couple_first_name,
+        partner_first_name,
         created_at
       ),
       inviter:profiles!group_invitations_invited_by_fkey (
@@ -107,7 +109,7 @@ export async function GET(
     }
 
     const invitation = result.invitation!;
-    const group = invitation.groups as { id: string; name: string; description: string | null; couple_image_url: string | null; created_at: string };
+    const group = invitation.groups as { id: string; name: string; description: string | null; couple_image_url: string | null; couple_first_name: string | null; partner_first_name: string | null; created_at: string };
     const inviter = invitation.inviter as { id: string; full_name: string | null; email: string } | null;
 
     return NextResponse.json({
@@ -122,6 +124,10 @@ export async function GET(
           name: group.name,
           description: group.description,
           coupleImageUrl: group.couple_image_url,
+          // Reason: lets the join page decide between a possessive ("Mom's
+          // cookbook") for a person's name vs. a book title used as-is
+          // ("Grandma's Recipes") — same rule the rest of the app applies.
+          namesArePeople: Boolean(group.couple_first_name || group.partner_first_name),
         },
         inviter: {
           name: inviter?.full_name || inviter?.email || 'Someone',

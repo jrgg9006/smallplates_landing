@@ -14,6 +14,7 @@ interface GroupInvitationData {
     id: string;
     name: string;
     description?: string | null;
+    namesArePeople?: boolean;
   };
   inviter: {
     name: string;
@@ -148,7 +149,13 @@ export default function GroupInvitationPage() {
               </h1>
               <p className="text-lg font-light text-gray-700 leading-relaxed mb-2">
                 {invitation.inviter.name} invited you to help with{" "}
-                <span className="text-gray-900">{invitation.group.name}</span>.
+                <span className="text-gray-900">
+                  {/* Reason: a person's name takes a possessive + "cookbook"
+                      ("Mom's cookbook"); a book title is used as-is. */}
+                  {invitation.group.namesArePeople
+                    ? `${invitation.group.name}'s cookbook`
+                    : invitation.group.name}
+                </span>.
               </p>
               <p className="text-base font-light text-gray-500 leading-relaxed mb-8">
                 You&apos;ll be a captain, with full access to the dashboard to invite people,
@@ -167,6 +174,15 @@ export default function GroupInvitationPage() {
 
               <p className="text-[13px] text-gray-400 mt-6">
                 No password needed. We&apos;ll sign you in automatically.
+              </p>
+
+              {/* Reason: joining creates an account for new users, so surface the
+                  same terms/privacy consent shown on the other captain join form. */}
+              <p className="text-[12px] text-gray-400 leading-relaxed mt-2">
+                By joining, you agree to our{" "}
+                <a href="/terms" target="_blank" rel="noreferrer" className="underline hover:text-gray-600">terms of service</a>
+                {" "}and{" "}
+                <a href="/privacy" target="_blank" rel="noreferrer" className="underline hover:text-gray-600">privacy policy</a>.
               </p>
             </>
           ) : null}
