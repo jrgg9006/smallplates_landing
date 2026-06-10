@@ -353,6 +353,15 @@ export function ShareCollectionModal({
     }
   };
 
+  // Reason: from the expanded "personalize" view there was no visible way to
+  // share — only the small "Back to share" link. This copies the link AND drops
+  // the user back into the share view so the action is obvious (esp. when the
+  // checklist opens this modal straight into the expanded state).
+  const handleCopyLinkAndShare = async () => {
+    await handleCopyLink();
+    setShowMessageCustomization(false);
+  };
+
   const handleCancelEdit = () => {
     setIsEditingMessage(false);
     setEditingMessage('');
@@ -670,14 +679,19 @@ export function ShareCollectionModal({
                       placeholder="Your message to guests..."
                       maxLength={300}
                     />
-                    <div className="space-y-2 sm:space-y-0 sm:flex sm:justify-between sm:items-center">
-                      <div className="flex gap-2">
+                    <div className="space-y-2">
+                      <div className="flex justify-end">
+                        <span className={`text-xs ${editingMessage.length > 280 ? 'text-red-500' : 'text-gray-400'}`}>
+                          {editingMessage.length}/300
+                        </span>
+                      </div>
+                      <div className="flex gap-2 w-full">
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={handleCancelEdit}
                           disabled={isSaving}
-                          className="flex-1 sm:flex-none min-h-[44px] rounded-lg text-sm"
+                          className="flex-1 min-h-[44px] rounded-lg text-sm"
                         >
                           Cancel
                         </Button>
@@ -686,7 +700,7 @@ export function ShareCollectionModal({
                           variant="outline"
                           onClick={handleResetMessage}
                           disabled={isSaving}
-                          className="flex-1 sm:flex-none min-h-[44px] rounded-lg text-sm"
+                          className="flex-1 min-h-[44px] rounded-lg text-sm"
                         >
                           Use default
                         </Button>
@@ -694,26 +708,40 @@ export function ShareCollectionModal({
                           size="sm"
                           onClick={handleSaveMessage}
                           disabled={isSaving || editingMessage.trim().length === 0}
-                          className="flex-1 sm:flex-none min-h-[44px] rounded-lg text-sm bg-brand-charcoal text-white hover:bg-gray-800"
+                          className="flex-1 min-h-[44px] rounded-lg text-sm bg-brand-charcoal text-white hover:bg-gray-800"
                         >
                           Save
                         </Button>
                       </div>
-                      <span className={`text-xs ${editingMessage.length > 280 ? 'text-red-500' : 'text-gray-400'}`}>
-                        {editingMessage.length}/300
-                      </span>
                     </div>
                   </div>
 
                 </div>
               </div>
 
-              {/* Back to share — bottom left of expanded view */}
-              <div className="pt-2">
+              {/* Footer — full-width action bar below both columns. Reason: the
+                  share action belongs to the whole modal, not to either edit
+                  column, so it sits in its own divided footer to read as the
+                  final step. */}
+              <div className="border-t border-gray-100 pt-4 space-y-3">
+                <Button
+                  onClick={handleCopyLinkAndShare}
+                  className={`w-full min-h-[48px] rounded-full text-[15px] font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 ${
+                    copied
+                      ? 'bg-[hsl(var(--brand-honey))] text-black hover:bg-[hsl(var(--brand-honey))]'
+                      : 'bg-brand-charcoal text-brand-warm-white-warm hover:bg-gray-800'
+                  }`}
+                >
+                  {copied ? (
+                    <span className="flex items-center gap-1.5"><Check className="w-4 h-4" />Copied</span>
+                  ) : (
+                    'Copy link & share'
+                  )}
+                </Button>
                 <button
                   type="button"
                   onClick={() => setShowMessageCustomization(false)}
-                  className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                  className="w-full flex items-center justify-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   Back to share
