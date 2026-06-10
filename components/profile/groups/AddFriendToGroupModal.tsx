@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Copy, Check, Loader2, RefreshCw } from "lucide-react";
+import { Copy, Check, Loader2 } from "lucide-react";
 import type { GroupWithMembers } from "@/lib/types/database";
 
 interface AddFriendToGroupModalProps {
@@ -28,7 +28,6 @@ export function AddFriendToGroupModal({
   const [error, setError] = useState<string | null>(null);
   const [inviteLink, setInviteLink] = useState("");
   const [loadingToken, setLoadingToken] = useState(false);
-  const [regenerating, setRegenerating] = useState(false);
 
   const buildInviteLink = (token: string): string => {
     const baseUrl =
@@ -77,32 +76,12 @@ export function AddFriendToGroupModal({
       await navigator.clipboard.writeText(inviteLink);
       setLinkCopied(true);
       onInviteSent?.();
-      setTimeout(() => setLinkCopied(false), 2000);
+      // Reason: the copied state now carries a next-step instruction, so give
+      // the user time to read it.
+      setTimeout(() => setLinkCopied(false), 4000);
     } catch {
       setError("Failed to copy link");
       setTimeout(() => setError(null), 3000);
-    }
-  };
-
-  const handleRegenerate = async () => {
-    if (!group?.id || regenerating) return;
-    setRegenerating(true);
-    setError(null);
-    setLinkCopied(false);
-    try {
-      const res = await fetch(`/api/v1/groups/${group.id}/captain-token`, {
-        method: "POST",
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.token) {
-        setError(data?.error || "Could not regenerate link");
-        return;
-      }
-      setInviteLink(buildInviteLink(data.token));
-    } catch {
-      setError("Could not regenerate link");
-    } finally {
-      setRegenerating(false);
     }
   };
 
@@ -110,12 +89,12 @@ export function AddFriendToGroupModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="type-modal-title">Invite a Captain</DialogTitle>
+          <DialogTitle className="type-modal-title">Captain Link</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           <p className="text-gray-600 text-base leading-relaxed">
-            Captains have full access to this book and can help collect recipes. Anyone with this link becomes a captain. Only share it with people you trust. The link expires in 14 days and works for up to 10 captains.
+            A captain can see everything in this book and helps collect recipes. Anyone with this link becomes one, so share it with people you trust.
           </p>
 
           {/* Copy button */}
@@ -136,7 +115,7 @@ export function AddFriendToGroupModal({
             ) : linkCopied ? (
               <>
                 <Check className="h-4 w-4" />
-                Copied
+                Copied. Now paste it in a text or WhatsApp
               </>
             ) : (
               <>
@@ -145,31 +124,6 @@ export function AddFriendToGroupModal({
               </>
             )}
           </Button>
-
-          {/* Regenerate */}
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={handleRegenerate}
-              disabled={loadingToken || regenerating}
-              className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 transition-colors disabled:opacity-50"
-            >
-              {regenerating ? (
-                <>
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  Regenerating…
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="h-3 w-3" />
-                  Regenerate link
-                </>
-              )}
-            </button>
-            <p className="text-[11px] text-gray-400 mt-1">
-              Old links stop working immediately.
-            </p>
-          </div>
 
           {error && <p className="text-sm text-red-600 text-center">{error}</p>}
         </div>
