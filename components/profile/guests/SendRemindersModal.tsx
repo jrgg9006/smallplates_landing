@@ -49,7 +49,9 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const [view, setView] = useState<"compose" | "recipients">("compose");
+  const [view, setView] = useState<"compose" | "preview" | "recipients">("compose");
+  const [coupleName, setCoupleName] = useState("The Couple");
+  const [emailSubject, setEmailSubject] = useState("");
   const [guests, setGuests] = useState<Guest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -98,11 +100,30 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
     const supabase = createSupabaseClient();
     const { data } = await supabase
       .from("groups")
-      .select("email_reminder_message")
+      .select("email_reminder_message, couple_first_name, partner_first_name, name, occasion")
       .eq("id", groupId)
       .single();
     if (data?.email_reminder_message) {
       setBody(data.email_reminder_message);
+    }
+    // Reason: same fallback the /remind route uses to build the signature, so
+    // the preview's "Thanks, X" matches the real email exactly.
+    if (data) {
+      const names = [data.couple_first_name, data.partner_first_name]
+        .filter(Boolean)
+        .join(" & ") || data.name || "The Couple";
+      setCoupleName(names);
+
+      // Reason: mirror invitationEmail2()'s occasion-aware subject so the
+      // preview's Subject line matches what actually lands in the inbox.
+      const namesArePeople = Boolean(data.couple_first_name || data.partner_first_name);
+      const isWedding = !data.occasion || data.occasion === "wedding" || data.occasion === "bridal_shower";
+      const isPerson = isWedding || namesArePeople;
+      setEmailSubject(
+        isPerson
+          ? `Reminder: your recipe for ${names}'s cookbook`
+          : `Reminder: your recipe for ${names}`
+      );
     }
     setBodyLoaded(true);
   }, [groupId]);
@@ -226,7 +247,19 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
     "Send"
   );
 
-  const titleText = view === "recipients" ? "Choose who to remind" : "Send an email reminder";
+  const titleText =
+    view === "recipients"
+      ? "Choose who to remind"
+      : view === "preview"
+        ? "Email preview"
+        : "Send an email reminder";
+
+  // Reason: split the live textarea on blank lines the same way invitationEmail2
+  // does, so the preview paragraphs match the real email.
+  const previewParagraphs = (body.trim() || DEFAULT_REMINDER_BODY)
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
 
   // Body + footer are identical across mobile (Sheet) and desktop (Dialog);
   // only the surrounding container changes, so build them once here.
@@ -250,6 +283,78 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
               className="w-full flex-1 min-h-[200px] p-4 bg-gray-50 border border-[hsl(var(--brand-border))] rounded-lg shadow-sm resize-none focus:outline-none focus:border-[hsl(var(--brand-honey))] focus:ring-1 focus:ring-[hsl(var(--brand-honey))] focus:bg-white text-base text-[hsl(var(--brand-charcoal))] leading-relaxed transition-colors"
               placeholder={DEFAULT_REMINDER_BODY}
             />
+          </div>
+        ) : view === "preview" ? (
+          <div className="flex-1 min-h-0 overflow-y-auto -mx-6 px-6 py-1 flex flex-col">
+            {/* Back to compose */}
+            <button
+              type="button"
+              onClick={() => setView("compose")}
+              className="flex items-center gap-1.5 text-sm text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] transition-colors mb-4 flex-shrink-0"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Back
+            </button>
+
+            {/* Email preview card — mirrors invitationEmail2() layout so the
+                organizer sees exactly what lands in the inbox, with their live
+                body. From/Subject header matches the Send Invitations preview. */}
+            <div className="bg-[hsl(var(--brand-cream))] rounded-xl p-4 sm:p-6 flex justify-center">
+              <div className="w-full max-w-[460px] rounded-xl overflow-hidden shadow-[0_4px_24px_rgba(45,45,45,0.08)] text-left">
+                {/* Header bar */}
+                <div className="bg-brand-charcoal text-center py-2.5">
+                  <span className="text-sm font-medium text-white tracking-wide">New Email</span>
+                </div>
+
+                {/* From / Subject rows */}
+                <div className="bg-white border-b border-brand-sand">
+                  <div className="px-5 py-2.5 border-b border-brand-sand">
+                    <p className="text-sm">
+                      <span className="text-[hsl(var(--brand-warm-gray-light))]">From:</span>{" "}
+                      <span className="text-brand-charcoal">{coupleName}</span>
+                    </p>
+                  </div>
+                  <div className="px-5 py-2.5">
+                    <p className="text-sm">
+                      <span className="text-[hsl(var(--brand-warm-gray-light))]">Subject:</span>{" "}
+                      <span className="text-brand-charcoal">{emailSubject}</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Body */}
+                <div className="bg-white p-6 sm:p-9">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="https://smallplatesandcompany.com/images/SmallPlates_logo_horizontal1.png"
+                    alt="Small Plates & Co."
+                    className="h-4 w-auto mb-7"
+                  />
+                  <p className="text-[15px] text-[hsl(var(--brand-charcoal))] leading-[1.7] mb-5">
+                    Hello,
+                  </p>
+                  {previewParagraphs.map((p, i) => (
+                    <p
+                      key={i}
+                      className="text-[15px] text-[#555555] leading-[1.7] mb-5 whitespace-pre-line"
+                    >
+                      {p}
+                    </p>
+                  ))}
+                  <span className="inline-block bg-[hsl(var(--brand-honey))] text-white text-sm font-medium px-7 py-3 rounded-full mt-1 mb-2">
+                    Add Your Recipe
+                  </span>
+                  <p className="text-[12px] text-[#9A9590] leading-[1.5] mb-7">Or copy this link</p>
+                  <p className="text-[15px] text-[#555555] leading-[1.7] mb-1">Thanks,</p>
+                  <p className="text-[15px] text-[hsl(var(--brand-charcoal))] leading-[1.7]">{coupleName}</p>
+                  <div className="border-t border-[#F0EDE8] mt-9 pt-5">
+                    <p className="text-[12px] text-[#9A9590] leading-[1.6]">
+                      Something off? Just reply to this email.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="flex-1 min-h-[420px] -mx-6 px-6 py-1 flex flex-col">
@@ -365,7 +470,7 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
               >
                 {sendLabel}
               </button>
-              <div className="flex items-center justify-center gap-6 text-sm">
+              <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
                 <button
                   type="button"
                   onClick={onClose}
@@ -383,6 +488,13 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
                 </button>
                 <button
                   type="button"
+                  onClick={() => setView("preview")}
+                  className="text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] underline underline-offset-2 transition-colors"
+                >
+                  Preview
+                </button>
+                <button
+                  type="button"
                   onClick={() => setView("recipients")}
                   className="text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] underline underline-offset-2 transition-colors"
                 >
@@ -393,13 +505,22 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
 
             {/* Desktop: Recipients link on the left, buttons on the right */}
             <div className="hidden sm:flex sm:items-center sm:justify-between gap-3">
-              <button
-                type="button"
-                onClick={() => setView("recipients")}
-                className="text-sm text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] underline underline-offset-2 transition-colors"
-              >
-                Recipients ({selectedIds.size})
-              </button>
+              <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => setView("preview")}
+                  className="text-sm text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] underline underline-offset-2 transition-colors"
+                >
+                  Preview
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setView("recipients")}
+                  className="text-sm text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] underline underline-offset-2 transition-colors"
+                >
+                  Recipients ({selectedIds.size})
+                </button>
+              </div>
               <div className="flex items-center gap-3">
                 <button
                   type="button"

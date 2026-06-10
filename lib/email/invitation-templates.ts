@@ -329,7 +329,7 @@ Add your recipe: ${collectionLink}
 // is left-aligned with a top logo, which doesn't fit the email-1 frame.
 // ============================================
 export function invitationEmail2(params: InvitationTemplateParams): { subject: string; html: string; text: string } {
-  const { coupleDisplayName, guestName, collectionLink, customBody } = params;
+  const { coupleDisplayName, collectionLink, customBody } = params;
   const { isPerson } = occasionCopy(params.occasion, !!params.namesArePeople);
 
   const subject = isPerson
@@ -413,7 +413,7 @@ If you haven't yet, the page is still open and we'd love yours. It only takes 5 
 
                 <!-- Greeting -->
                 <p style="margin: 0 0 20px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #2D2D2D; line-height: 1.7;" class="darkmode-text">
-                  Hi ${escapeHtml(guestName)},
+                  Hello,
                 </p>
 
                 <!-- Body (custom or default) -->
@@ -489,7 +489,7 @@ If you haven't yet, the page is still open and we'd love yours. It only takes 5 
 </body>
 </html>`;
 
-  const text = `Hi ${guestName},
+  const text = `Hello,
 
 ${bodyText}
 
