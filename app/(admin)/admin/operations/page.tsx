@@ -1675,11 +1675,23 @@ ${instructions}`;
                     {/* Clear, intern-friendly reason when the recipe was flagged for review */}
                     {selectedRecipe.production_status?.needs_review &&
                      selectedRecipe.production_status?.needs_review_reason && (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold bg-red-100 text-red-700 rounded">
+                      <span className="relative group inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold bg-red-100 text-red-700 rounded cursor-help">
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4a2 2 0 00-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z" />
                         </svg>
                         {selectedRecipe.production_status.needs_review_reason}
+                        <svg className="w-3.5 h-3.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {/* Hover explainer — written for an intern with zero context */}
+                        <span className="pointer-events-none absolute left-0 top-full mt-2 z-50 hidden group-hover:block w-80 rounded-lg bg-gray-900 p-3 text-xs font-normal normal-case leading-relaxed text-white shadow-xl">
+                          <span className="block font-semibold mb-1">What happened?</span>
+                          The guest went back and edited their ORIGINAL recipe — AFTER our clean version was made.
+                          <span className="block font-semibold mt-2 mb-1">What does it mean?</span>
+                          The clean version is now OUTDATED. The original is the newest text — treat it as the source of truth.
+                          <span className="block font-semibold mt-2 mb-1">What do I do?</span>
+                          Open Compare. Read the original (right side) carefully, update the clean version (left side) to match it, and save. When you&apos;re done, untick &quot;Needs Review&quot;.
+                        </span>
                       </span>
                     )}
                     {/* Reason: Show "Manually Cleared" only when recipe has no cleaned text,
@@ -2323,6 +2335,7 @@ ${instructions}`;
                     detected_language: null,
                     cleaning_version: null,
                   }),
+                  recipe_name_clean: cleaned.recipe_name_clean,
                   ingredients_clean: cleaned.ingredients_clean,
                   instructions_clean: cleaned.instructions_clean,
                   note_clean: cleaned.note_clean,

@@ -20,7 +20,7 @@ interface RecipeCompareModalProps {
   recipe: CompareRecipe;
   onClose: () => void;
   // Reason: lets the parent update selectedRecipe + refresh the list after a save
-  onSaved: (cleaned: { ingredients_clean: string; instructions_clean: string; note_clean: string }) => void;
+  onSaved: (cleaned: { recipe_name_clean: string; ingredients_clean: string; instructions_clean: string; note_clean: string }) => void;
 }
 
 export default function RecipeCompareModal({ recipe, onClose, onSaved }: RecipeCompareModalProps) {
@@ -35,10 +35,12 @@ export default function RecipeCompareModal({ recipe, onClose, onSaved }: RecipeC
     recipe.recipe_print_ready?.instructions_clean ||
     recipe.recipe_print_ready?.note_clean
   );
+  const initialTitle = recipe.recipe_print_ready?.recipe_name_clean || recipe.recipe_name || '';
   const initialNotes = recipe.recipe_print_ready?.note_clean || originalNotes;
   const initialIngredients = recipe.recipe_print_ready?.ingredients_clean || originalIngredients;
   const initialInstructions = recipe.recipe_print_ready?.instructions_clean || originalInstructions;
 
+  const [title, setTitle] = useState(initialTitle);
   const [notes, setNotes] = useState(initialNotes);
   const [ingredients, setIngredients] = useState(initialIngredients);
   const [instructions, setInstructions] = useState(initialInstructions);
@@ -46,6 +48,7 @@ export default function RecipeCompareModal({ recipe, onClose, onSaved }: RecipeC
   const [error, setError] = useState<string | null>(null);
 
   const hasChanges =
+    title !== initialTitle ||
     notes !== initialNotes ||
     ingredients !== initialIngredients ||
     instructions !== initialInstructions;
@@ -65,6 +68,7 @@ export default function RecipeCompareModal({ recipe, onClose, onSaved }: RecipeC
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           printReady: {
+            recipe_name_clean: title,
             ingredients_clean: ingredients,
             instructions_clean: instructions,
             note_clean: notes,
@@ -76,7 +80,7 @@ export default function RecipeCompareModal({ recipe, onClose, onSaved }: RecipeC
         const data = await res.json();
         throw new Error(data.error || 'Failed to save changes');
       }
-      onSaved({ ingredients_clean: ingredients, instructions_clean: instructions, note_clean: notes });
+      onSaved({ recipe_name_clean: title, ingredients_clean: ingredients, instructions_clean: instructions, note_clean: notes });
       onClose();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to save changes');
@@ -85,7 +89,6 @@ export default function RecipeCompareModal({ recipe, onClose, onSaved }: RecipeC
     }
   };
 
-  const cleanTitle = recipe.recipe_print_ready?.recipe_name_clean || recipe.recipe_name || 'Untitled Recipe';
   const originalTitle = recipe.recipe_name || 'Untitled Recipe';
 
   return (
@@ -149,7 +152,16 @@ export default function RecipeCompareModal({ recipe, onClose, onSaved }: RecipeC
               </span>
             )}
           </div>
-          <h3 className="text-2xl font-serif text-gray-900">{cleanTitle}</h3>
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Title</div>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full px-3 py-2 text-2xl font-serif text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+              placeholder="Recipe title..."
+            />
+          </div>
 
           <div>
             <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Notes</div>

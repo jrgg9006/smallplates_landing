@@ -15,6 +15,7 @@ interface PatchRequestBody extends RecipeProductionStatusUpdate {
   archive?: boolean;         // When true, soft-archives recipe from a specific group (mirrors removeRecipeFromGroup)
   archiveGroupId?: string;   // Required when archive=true
   printReady?: {
+    recipe_name_clean?: string;
     ingredients_clean?: string;
     instructions_clean?: string;
     note_clean?: string;
@@ -367,6 +368,11 @@ export async function PATCH(
         beforeNotes = recipe?.comments || null;
       }
 
+      // Reason: an explicit title from the editor wins over the preserved/seeded one
+      if (body.printReady.recipe_name_clean !== undefined) {
+        updateData.recipe_name_clean = body.printReady.recipe_name_clean;
+      }
+
       const { data: printReadyResult, error: printReadyError } = await supabase
         .from('recipe_print_ready')
         .upsert(updateData, { onConflict: 'recipe_id' })
@@ -391,6 +397,7 @@ export async function PATCH(
         : beforeNotes;
 
       const hasChanges =
+        updateData.recipe_name_clean !== beforeName ||
         afterIngredients !== beforeIngredients ||
         afterInstructions !== beforeInstructions ||
         afterNotes !== beforeNotes;
