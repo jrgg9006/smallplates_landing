@@ -317,9 +317,12 @@ export async function PATCH(
         recipe_name_clean?: string;
         detected_language?: string | null;
         cleaning_version?: number | null;
+        needs_regeneration?: boolean;
         updated_at?: string;
       } = {
         recipe_id: recipeId,
+        // Reason: a manual Operations edit IS the re-clean — clear the stale flag
+        needs_regeneration: false,
         updated_at: new Date().toISOString(),
       };
 

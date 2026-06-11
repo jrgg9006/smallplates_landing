@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
             note_clean: printReady.note || null,             // v2 field name
             detected_language: printReady.language,          // v2 field name
             cleaning_version: 2,  // Mark as v2
+            needs_regeneration: false,  // Fresh clean — clear the stale flag
             agent_metadata: printReady,
             updated_at: new Date().toISOString(),
           }, {

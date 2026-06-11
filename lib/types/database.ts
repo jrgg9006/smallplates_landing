@@ -226,6 +226,7 @@ export interface Database {
           showcase_image_url?: string | null;
         };
         Update: {
+          guest_id?: string;
           recipe_name?: string;
           ingredients?: string;
           instructions?: string;
@@ -684,8 +685,10 @@ export interface Database {
           ingredients_clean: string;
           instructions_clean: string;
           note_clean: string | null;
+          guest_name_clean: string | null;
           detected_language: string | null;
           cleaning_version: number;
+          needs_regeneration: boolean;
           agent_metadata: Record<string, unknown> | null;
           updated_at: string;
         };
@@ -694,8 +697,10 @@ export interface Database {
           ingredients_clean?: string;
           instructions_clean?: string;
           note_clean?: string | null;
+          guest_name_clean?: string | null;
           detected_language?: string | null;
           cleaning_version?: number;
+          needs_regeneration?: boolean;
           agent_metadata?: Record<string, unknown> | null;
         };
       };

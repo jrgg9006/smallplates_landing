@@ -315,6 +315,147 @@ export async function updateRecipe(recipeId: string, updates: GuestRecipeUpdate)
 }
 
 /**
+ * Reassign a recipe to a different guest.
+ *
+ * Moves the submitted-recipe counter from the old guest to the new one by hand.
+ * Reason: the recipes_received triggers only fire on INSERT/DELETE, not on an
+ * UPDATE of guest_id, so without this both guests' counters and statuses lie.
+ */
+export async function changeRecipeGuest(recipeId: string, newGuestId: string) {
+  const supabase = createSupabaseClient();
+
+  const { data: recipe, error: fetchError } = await supabase
+    .from('guest_recipes')
+    .select('id, guest_id, submission_status')
+    .eq('id', recipeId)
+    .maybeSingle();
+
+  if (fetchError) {
+    return { data: null, error: fetchError.message };
+  }
+  if (!recipe) {
+    return { data: null, error: 'Recipe not found' };
+  }
+  if (recipe.guest_id === newGuestId) {
+    return { data: null, error: null };
+  }
+
+  const { data, error: updateError } = await supabase
+    .from('guest_recipes')
+    .update({ guest_id: newGuestId })
+    .eq('id', recipeId)
+    .select()
+    .single();
+
+  if (updateError) {
+    return { data: null, error: updateError.message };
+  }
+
+  // Best-effort counter move, mirroring deleteRecipe: a failure here leaves a
+  // counter off by 1 (display issue only, not destructive).
+  if (recipe.submission_status === 'submitted') {
+    const nowIso = new Date().toISOString();
+
+    const { data: oldGuest } = await supabase
+      .from('guests')
+      .select('recipes_received, number_of_recipes, status')
+      .eq('id', recipe.guest_id)
+      .maybeSingle();
+
+    if (oldGuest) {
+      const newReceived = Math.max((oldGuest.recipes_received || 0) - 1, 0);
+      const expected = oldGuest.number_of_recipes || 0;
+      const newStatus = newReceived < expected ? 'responded' : oldGuest.status;
+
+      const { error: oldGuestError } = await supabase
+        .from('guests')
+        .update({
+          recipes_received: newReceived,
+          status: newStatus,
+          updated_at: nowIso,
+        })
+        .eq('id', recipe.guest_id);
+
+      if (oldGuestError) {
+        console.error('changeRecipeGuest: failed to decrement old guest counter', oldGuestError);
+      }
+    }
+
+    const { data: newGuest } = await supabase
+      .from('guests')
+      .select('recipes_received, number_of_recipes')
+      .eq('id', newGuestId)
+      .maybeSingle();
+
+    if (newGuest) {
+      const newReceived = (newGuest.recipes_received || 0) + 1;
+      const guestUpdates: {
+        recipes_received: number;
+        status: string;
+        updated_at: string;
+        number_of_recipes?: number;
+      } = {
+        recipes_received: newReceived,
+        status: 'submitted',
+        updated_at: nowIso,
+      };
+      // Same rule as addRecipe: expected count grows to fit what was received
+      if (newReceived > (newGuest.number_of_recipes || 0)) {
+        guestUpdates.number_of_recipes = newReceived;
+      }
+
+      const { error: newGuestError } = await supabase
+        .from('guests')
+        .update(guestUpdates)
+        .eq('id', newGuestId);
+
+      if (newGuestError) {
+        console.error('changeRecipeGuest: failed to increment new guest counter', newGuestError);
+      }
+    }
+  }
+
+  return { data, error: null };
+}
+
+/**
+ * Record a user-side edit in recipe_edit_history (who, when, before/after).
+ * Requires the authenticated-insert RLS policy on recipe_edit_history.
+ */
+export async function logRecipeEdit(entry: {
+  recipeId: string;
+  before: { recipe_name: string; ingredients: string; instructions: string; comments: string | null };
+  after: { recipe_name: string; ingredients: string; instructions: string; comments: string | null };
+  editReason?: string | null;
+}) {
+  const supabase = createSupabaseClient();
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { error: 'User not authenticated' };
+  }
+
+  const { error } = await supabase
+    .from('recipe_edit_history')
+    .insert({
+      recipe_id: entry.recipeId,
+      edited_by: user.id,
+      recipe_name_before: entry.before.recipe_name,
+      ingredients_before: entry.before.ingredients,
+      instructions_before: entry.before.instructions,
+      comments_before: entry.before.comments,
+      recipe_name_after: entry.after.recipe_name,
+      ingredients_after: entry.after.ingredients,
+      instructions_after: entry.after.instructions,
+      comments_after: entry.after.comments,
+      edit_reason: entry.editReason || null,
+      edit_target: 'original' as const,
+    });
+
+  return { error: error?.message || null };
+}
+
+/**
  * Submit a recipe (mark as submitted)
  */
 export async function submitRecipe(recipeId: string) {

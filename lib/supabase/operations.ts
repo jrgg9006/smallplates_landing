@@ -80,7 +80,8 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
         instructions_clean,
         note_clean,
         detected_language,
-        cleaning_version
+        cleaning_version,
+        needs_regeneration
       )
     `)
     .order('created_at', { ascending: false });

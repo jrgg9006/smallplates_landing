@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { RecipeWithGuest } from "@/lib/types/database";
+import { RecipeWithGuest, Guest } from "@/lib/types/database";
 import {
   Sheet,
   SheetContent,
@@ -15,12 +15,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Edit, Download } from "lucide-react";
+import { Edit, Download, ChevronDown, Plus } from "lucide-react";
 import Image from "next/image";
-import { updateRecipe } from "@/lib/supabase/recipes";
+import { updateRecipe, changeRecipeGuest, logRecipeEdit } from "@/lib/supabase/recipes";
+import { getGuests } from "@/lib/supabase/guests";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { getRecipeGroups } from "@/lib/supabase/groupRecipes";
 import { isGroupMember } from "@/lib/supabase/groupMembers";
+import { AddGuestModal } from "@/components/profile/guests/AddGuestModal";
 
 interface RecipeDetailsModalProps {
   recipe: RecipeWithGuest | null;
@@ -53,6 +55,14 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   const [loadingGroups, setLoadingGroups] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
 
+  // Guest selector state (edit mode) — mirrors AddRecipeModal's dropdown
+  const [guests, setGuests] = useState<Guest[]>([]);
+  const [guestsLoading, setGuestsLoading] = useState(false);
+  const [selectedGuestId, setSelectedGuestId] = useState<string>('');
+  const [showGuestDropdown, setShowGuestDropdown] = useState(false);
+  const [showAddGuestModal, setShowAddGuestModal] = useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
   // Update local recipe when prop changes
   useEffect(() => {
     if (recipe) {
@@ -80,6 +90,8 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     if (!isOpen) {
       setIsEditMode(false);
       setError(null);
+      setShowGuestDropdown(false);
+      setShowAddGuestModal(false);
     } else {
       // Set edit mode based on initialEditMode when modal opens
       setIsEditMode(initialEditMode);
@@ -93,9 +105,56 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       setRecipeIngredients(localRecipe.ingredients || '');
       setRecipeInstructions(localRecipe.instructions || '');
       setRecipeNotes(localRecipe.comments || '');
+      setSelectedGuestId(localRecipe.guest_id);
       setError(null);
     }
   }, [localRecipe, isEditMode]);
+
+  // Load guests for the selector when entering edit mode
+  useEffect(() => {
+    if (!isEditMode || !localRecipe) return;
+    const loadGuests = async () => {
+      setGuestsLoading(true);
+      try {
+        // Reason: group recipes carry group_id; fall back to the recipe's group
+        // association so the dropdown shows the same people as AddRecipeModal.
+        const groupId = localRecipe.group_id || recipeGroups[0]?.group_id;
+        const { data: guestsData } = await getGuests(groupId || undefined, false);
+        setGuests(guestsData || []);
+      } catch (err) {
+        console.error('Error loading guests:', err);
+      } finally {
+        setGuestsLoading(false);
+      }
+    };
+    loadGuests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditMode, localRecipe?.id, recipeGroups]);
+
+  // Close guest dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowGuestDropdown(false);
+      }
+    };
+    if (showGuestDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showGuestDropdown]);
+
+  const handleGuestAdded = async (newGuestId?: string) => {
+    const groupId = localRecipe?.group_id || recipeGroups[0]?.group_id;
+    const { data: guestsData } = await getGuests(groupId || undefined, false);
+    setGuests(guestsData || []);
+    if (newGuestId) {
+      setSelectedGuestId(newGuestId);
+    }
+    setShowAddGuestModal(false);
+  };
 
   // Load groups and check permissions when modal opens
   useEffect(() => {
@@ -171,14 +230,38 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     setError(null);
 
     try {
-      const updates = {
+      const guestChanged = Boolean(selectedGuestId) && selectedGuestId !== localRecipe.guest_id;
+      const newGuest = guestChanged ? guests.find(g => g.id === selectedGuestId) : undefined;
+
+      const before = {
+        recipe_name: localRecipe.recipe_name || '',
+        ingredients: localRecipe.ingredients || '',
+        instructions: localRecipe.instructions || '',
+        comments: localRecipe.comments,
+      };
+      const after = {
         recipe_name: recipeTitle.trim(),
         ingredients: recipeIngredients.trim(),
         instructions: recipeInstructions.trim(),
         comments: recipeNotes.trim() || null,
       };
+      const textChanged =
+        before.recipe_name !== after.recipe_name ||
+        before.ingredients !== after.ingredients ||
+        before.instructions !== after.instructions ||
+        (before.comments || null) !== after.comments;
 
-      const { error: updateError } = await updateRecipe(localRecipe.id, updates);
+      // Reassign the guest first — it also moves the recipes_received counters
+      if (guestChanged) {
+        const { error: guestChangeError } = await changeRecipeGuest(localRecipe.id, selectedGuestId);
+        if (guestChangeError) {
+          setError(guestChangeError);
+          setLoading(false);
+          return;
+        }
+      }
+
+      const { error: updateError } = await updateRecipe(localRecipe.id, after);
 
       if (updateError) {
         setError(updateError);
@@ -186,24 +269,58 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         return;
       }
 
-      // Mark Midjourney prompt as needing regeneration (if content changed)
-      const supabase = (await import('@/lib/supabase/client')).createSupabaseClient();
-      await supabase
-        .from('midjourney_prompts')
-        .update({ needs_regeneration: true })
-        .eq('recipe_id', localRecipe.id);
+      // Flag the print-ready (cleaned) version as stale so Operations shows
+      // a re-clean badge. Best-effort: RLS only lets users touch this column.
+      if (textChanged || guestChanged) {
+        const supabase = (await import('@/lib/supabase/client')).createSupabaseClient();
+        const { error: staleError } = await supabase
+          .from('recipe_print_ready')
+          .update({ needs_regeneration: true })
+          .eq('recipe_id', localRecipe.id);
+        if (staleError) {
+          console.error('Failed to flag print-ready as stale:', staleError);
+        }
+      }
+
+      // Audit trail — best-effort: a failure here must not block the edit itself
+      if (textChanged || guestChanged) {
+        const oldGuestLabel = localRecipe.guests
+          ? `${localRecipe.guests.first_name} ${localRecipe.guests.last_name || ''}`.trim()
+          : 'Unknown';
+        const newGuestLabel = newGuest
+          ? `${newGuest.first_name} ${newGuest.last_name || ''}`.trim()
+          : selectedGuestId;
+
+        const { error: historyError } = await logRecipeEdit({
+          recipeId: localRecipe.id,
+          before,
+          after,
+          editReason: guestChanged ? `Guest changed: ${oldGuestLabel} → ${newGuestLabel}` : null,
+        });
+        if (historyError) {
+          console.error('Failed to log recipe edit:', historyError);
+        }
+      }
 
       // Success! Update local recipe state immediately
       setLocalRecipe({
         ...localRecipe,
-        recipe_name: recipeTitle.trim(),
-        ingredients: recipeIngredients.trim(),
-        instructions: recipeInstructions.trim(),
-        comments: recipeNotes.trim() || null,
+        ...after,
+        guest_id: guestChanged ? selectedGuestId : localRecipe.guest_id,
+        guests: guestChanged && newGuest
+          ? {
+              first_name: newGuest.first_name,
+              last_name: newGuest.last_name || '',
+              printed_name: newGuest.printed_name,
+              email: newGuest.email || '',
+              is_self: newGuest.is_self ?? false,
+              source: newGuest.source,
+            }
+          : localRecipe.guests,
       });
-      
+
       setIsEditMode(false);
-      
+
       // Refresh parent component if callback provided
       if (onRecipeUpdated) {
         onRecipeUpdated();
@@ -228,6 +345,87 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   const sourceLabel = localRecipe.guests?.source === 'collection'
     ? 'Collected from link'
     : 'Added manually';
+
+  // Guest selector (edit mode) — same control as AddRecipeModal, minus "It is mine"
+  const getGuestDisplayName = (g: Guest) => {
+    if (g.printed_name && g.printed_name.trim()) {
+      return `${g.printed_name} (${g.first_name} ${g.last_name || ''})`.trim();
+    }
+    return `${g.first_name} ${g.last_name || ''}`.trim();
+  };
+
+  const selectedGuestOption = guests.find(g => g.id === selectedGuestId);
+  // Reason: the recipe's current guest may not be in the dropdown list (e.g. a
+  // self-guest), so fall back to the name already shown in view mode.
+  const guestTriggerLabel = selectedGuestOption
+    ? getGuestDisplayName(selectedGuestOption)
+    : guestsLoading
+      ? 'Loading…'
+      : guestName;
+
+  const guestSelector = (
+    <div className="mb-4 max-w-sm">
+      <Label className="text-sm font-medium text-gray-700 mb-2 block">
+        Who&apos;s sharing this?
+      </Label>
+      <div className="relative" ref={dropdownRef}>
+        <button
+          type="button"
+          onClick={() => setShowGuestDropdown(!showGuestDropdown)}
+          disabled={guestsLoading}
+          className="w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 border-brand-sand bg-brand-sand/40 text-sm transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none"
+        >
+          <span className="text-brand-charcoal font-medium">{guestTriggerLabel}</span>
+          <ChevronDown
+            className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
+              showGuestDropdown ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
+
+        {showGuestDropdown && (
+          <>
+            <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl max-h-[320px] overflow-auto">
+              {guests.map((g) => (
+                <button
+                  key={g.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedGuestId(g.id);
+                    setShowGuestDropdown(false);
+                  }}
+                  className={`w-full px-4 py-3 text-left text-sm transition-colors duration-200 ${
+                    selectedGuestId === g.id
+                      ? 'bg-brand-sand/40 text-brand-charcoal font-medium'
+                      : 'text-gray-700 hover:bg-brand-warm-white-warm'
+                  }`}
+                >
+                  {getGuestDisplayName(g)}
+                </button>
+              ))}
+              <div className="border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowGuestDropdown(false);
+                    setShowAddGuestModal(true);
+                  }}
+                  className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-brand-warm-white-warm flex items-center gap-2 transition-colors duration-200"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add new guest
+                </button>
+              </div>
+            </div>
+            <div
+              className="fixed inset-0 z-[5]"
+              onClick={() => setShowGuestDropdown(false)}
+            ></div>
+          </>
+        )}
+      </div>
+    </div>
+  );
 
   const isPdfUrl = (url: string) =>
     url.toLowerCase().endsWith('.pdf') || url.toLowerCase().includes('application/pdf');
@@ -536,10 +734,8 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   // Edit content component for desktop - reusing AddRecipeModal styling patterns
   const desktopEditContent = (
     <div className="flex-1 flex flex-col min-w-0">
-      {/* Guest name — small caps */}
-      <p className="text-sm uppercase tracking-[0.2em] text-gray-400 font-serif mb-1">
-        {guestName}
-      </p>
+      {/* Guest selector — lets the user reassign the recipe */}
+      {guestSelector}
 
       {/* Recipe Title - Editable */}
       <input
@@ -599,10 +795,8 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   // Edit content component for mobile - reusing AddRecipeModal styling patterns
   const mobileEditContent = (
     <div className="flex-1 overflow-y-auto flex flex-col">
-      {/* Guest name — small caps */}
-      <p className="text-sm uppercase tracking-[0.2em] text-gray-400 font-serif mb-1">
-        {guestName}
-      </p>
+      {/* Guest selector — lets the user reassign the recipe */}
+      {guestSelector}
 
       {/* Recipe Title - Editable */}
       <input
@@ -663,6 +857,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   // Mobile version - Sheet that slides up from bottom
   if (isMobile) {
     return (
+      <>
       <Sheet open={isOpen} onOpenChange={onClose}>
         <SheetContent side="bottom" className="!h-[85vh] !max-h-[85vh] rounded-t-[20px] flex flex-col overflow-hidden p-0">
           <div className="px-6 pt-6 pb-6 flex flex-col h-full overflow-hidden">
@@ -699,11 +894,21 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Nested AddGuestModal */}
+      <AddGuestModal
+        isOpen={showAddGuestModal}
+        onClose={() => setShowAddGuestModal(false)}
+        onGuestAdded={handleGuestAdded}
+        groupId={localRecipe.group_id || recipeGroups[0]?.group_id || undefined}
+      />
+      </>
     );
   }
 
   // Desktop version - Dialog popup (centered)
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl w-[95vw] h-[90vh] max-h-[90vh] flex flex-col overflow-hidden p-0 gap-0 bg-white">
         <DialogHeader className="flex-shrink-0 px-8 pt-6 pb-2">
@@ -737,6 +942,15 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           )}
       </DialogContent>
     </Dialog>
+
+    {/* Nested AddGuestModal */}
+    <AddGuestModal
+      isOpen={showAddGuestModal}
+      onClose={() => setShowAddGuestModal(false)}
+      onGuestAdded={handleGuestAdded}
+      groupId={localRecipe.group_id || recipeGroups[0]?.group_id || undefined}
+    />
+    </>
   );
 }
 

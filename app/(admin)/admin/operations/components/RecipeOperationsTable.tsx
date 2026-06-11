@@ -73,6 +73,7 @@ interface RecipeWithProductionStatus {
     instructions_clean: string;
     detected_language: string | null;
     cleaning_version: number | null;
+    needs_regeneration?: boolean | null;
   } | null;
 }
 
@@ -381,6 +382,14 @@ export function RecipeOperationsTable({
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex items-center gap-2">
                     {getStatusBadge(recipe.calculated_status, productionStatus?.needs_review || false)}
+                    {recipe.recipe_print_ready?.needs_regeneration && (
+                      <span
+                        className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 font-medium"
+                        title="The original recipe was edited after cleaning — the print version is stale"
+                      >
+                        ✏️ Re-clean
+                      </span>
+                    )}
                     {productionStatus?.needs_review && (
                       <button
                         onClick={(e) => {
