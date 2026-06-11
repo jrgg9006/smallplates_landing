@@ -99,7 +99,7 @@ export async function getProfileById(userId: string) {
  * Update personal information (name, phone, printed_name)
  * Also updates the associated guest record where is_self = true
  */
-export async function updatePersonalInfo(updates: { full_name?: string; phone_number?: string | null; printed_name?: string }) {
+export async function updatePersonalInfo(updates: { full_name?: string; phone_number?: string | null; printed_name?: string | null }) {
   const supabase = createSupabaseClient();
 
   const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -132,7 +132,7 @@ export async function updatePersonalInfo(updates: { full_name?: string; phone_nu
   // Also update the guest record where is_self = true
   const hasGuestUpdates = updates.full_name !== undefined || updates.printed_name !== undefined;
   if (hasGuestUpdates) {
-    const guestUpdates: { first_name?: string; last_name?: string; printed_name?: string } = {};
+    const guestUpdates: { first_name?: string; last_name?: string; printed_name?: string | null } = {};
     // Reason: Guest table uses separate first/last columns — split full_name for sync
     if (updates.full_name !== undefined) {
       const parts = updates.full_name.trim().split(' ');
@@ -150,6 +150,37 @@ export async function updatePersonalInfo(updates: { full_name?: string; phone_nu
   }
 
   return { data, error: null };
+}
+
+/**
+ * Reconcile the auth email into public tables.
+ * Reason: Supabase no longer allows triggers on auth.users (postgres role
+ * lost ownership), so after a confirmed email change the app syncs
+ * profiles.email and the self guest record on the next session event.
+ */
+export async function syncEmailFromAuth(user: { id: string; email?: string | null }) {
+  if (!user.email) return;
+
+  const supabase = createSupabaseClient();
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('email')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (!profile || profile.email === user.email) return;
+
+  await supabase
+    .from('profiles')
+    .update({ email: user.email })
+    .eq('id', user.id);
+
+  await supabase
+    .from('guests')
+    .update({ email: user.email })
+    .eq('user_id', user.id)
+    .eq('is_self', true);
 }
 
 /**

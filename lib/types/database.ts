@@ -67,7 +67,6 @@ export interface Database {
           collection_enabled: boolean;
           user_type: 'couple' | 'gift_giver';
           onboarding_state: any;
-          pending_email: string | null;
           notification_emails_opt_out: boolean;
           created_at: string;
           updated_at: string;
@@ -81,7 +80,6 @@ export interface Database {
           collection_enabled?: boolean;
           user_type?: 'couple' | 'gift_giver';
           onboarding_state?: any;
-          pending_email?: string | null;
           notification_emails_opt_out?: boolean;
         };
         Update: {
@@ -92,7 +90,6 @@ export interface Database {
           collection_enabled?: boolean;
           user_type?: 'couple' | 'gift_giver';
           onboarding_state?: any;
-          pending_email?: string | null;
           notification_emails_opt_out?: boolean;
         };
       };

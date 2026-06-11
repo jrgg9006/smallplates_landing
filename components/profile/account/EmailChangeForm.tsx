@@ -1,15 +1,15 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { updateEmail } from '@/lib/supabase/profiles';
 import { useAuth } from '@/lib/contexts/AuthContext';
-import { CheckCircle, AlertCircle, Loader2, Shield } from 'lucide-react';
+import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 export function EmailChangeForm() {
   const { user } = useAuth();
+  const [editing, setEditing] = useState(false);
   const [newEmail, setNewEmail] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -38,11 +38,6 @@ export function EmailChangeForm() {
       return false;
     }
 
-    if (currentPassword.length < 6) {
-      setError('Password must be at least 6 characters long');
-      return false;
-    }
-
     return true;
   };
 
@@ -65,6 +60,7 @@ export function EmailChangeForm() {
       }
 
       setVerificationSent(true);
+      setEditing(false);
       setNewEmail('');
       setCurrentPassword('');
     } catch (err) {
@@ -75,113 +71,117 @@ export function EmailChangeForm() {
   };
 
   const handleCancel = () => {
+    setEditing(false);
     setNewEmail('');
     setCurrentPassword('');
     setError(null);
-    setVerificationSent(false);
   };
 
   return (
-    <div className="space-y-6">
-      {/* Current Email Display */}
+    <div className="space-y-4">
+      {/* Current email + change action */}
       <div>
-        <Label className="block text-sm font-medium text-gray-700 mb-1">
-          Current Email
+        <Label className="mb-1.5 block text-sm font-medium text-[hsl(var(--brand-charcoal))]">
+          Email
         </Label>
-        <div className="w-full p-3 bg-gray-50 border border-gray-200 rounded-md text-gray-700">
-          {user?.email}
+        <div className="flex items-center justify-between gap-4">
+          <p className="truncate text-[hsl(var(--brand-charcoal))]">{user?.email}</p>
+          {!editing && (
+            <button
+              type="button"
+              className="text-link flex-shrink-0"
+              onClick={() => {
+                setEditing(true);
+                setVerificationSent(false);
+              }}
+            >
+              Change email
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Verification Success Message */}
+      {/* Verification sent notice */}
       {verificationSent && (
-        <div className="flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 rounded-md border border-green-200 bg-green-50 p-4">
+          <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600" />
           <div>
-            <p className="text-sm font-medium text-green-900 mb-1">Verification email sent</p>
+            <p className="mb-1 text-sm font-medium text-green-900">Two confirmation emails sent</p>
             <p className="text-sm text-green-700">
-              Check your inbox and click the link to confirm the change. Your current email stays
-              active until then.
+              One went to your current address, one to the new one. Click the link in both to
+              finish the change. Your current email stays active until then.
             </p>
           </div>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* New Email */}
-        <div>
-          <Label htmlFor="newEmail" className="block text-sm font-medium text-gray-700 mb-1">
-            New Email Address *
-          </Label>
-          <Input
-            id="newEmail"
-            type="email"
-            value={newEmail}
-            onChange={(e) => setNewEmail(e.target.value)}
-            className="w-full"
-            placeholder="Enter your new email address"
-            required
-            disabled={loading || verificationSent}
-          />
-        </div>
-
-        {/* Current Password Confirmation */}
-        <div>
-          <Label htmlFor="currentPasswordEmail" className="block text-sm font-medium text-gray-700 mb-1">
-            Current Password *
-          </Label>
-          <Input
-            id="currentPasswordEmail"
-            type="password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            className="w-full"
-            placeholder="Enter your current password"
-            required
-            disabled={loading || verificationSent}
-          />
-          <div className="flex items-center gap-1.5 mt-1">
-            <Shield className="h-3 w-3 text-gray-400" />
-            <p className="text-sm text-gray-500">Required to confirm your identity</p>
+      {/* Change form — only when editing */}
+      {editing && (
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 rounded-lg border border-[hsl(var(--brand-border))] bg-[hsl(var(--brand-warm-white-warm))] p-4"
+        >
+          <div>
+            <Label
+              htmlFor="newEmail"
+              className="mb-1.5 block text-sm font-medium text-[hsl(var(--brand-charcoal))]"
+            >
+              New email
+            </Label>
+            <Input
+              id="newEmail"
+              type="email"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              className="w-full bg-white"
+              required
+              disabled={loading}
+            />
           </div>
-        </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
-            <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
-            <p className="text-sm text-red-600">{error}</p>
+          <div>
+            <Label
+              htmlFor="currentPasswordEmail"
+              className="mb-1.5 block text-sm font-medium text-[hsl(var(--brand-charcoal))]"
+            >
+              Current password
+            </Label>
+            <Input
+              id="currentPasswordEmail"
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full bg-white"
+              required
+              disabled={loading}
+            />
+            <p className="mt-1.5 text-sm text-gray-500">Just to confirm it&apos;s you.</p>
           </div>
-        )}
 
-        {/* Form Actions */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleCancel}
-            disabled={loading}
-          >
-            {verificationSent ? 'Close' : 'Cancel'}
-          </Button>
-          <Button
-            type="submit"
-            disabled={loading || verificationSent}
-            className="bg-gray-900 text-white hover:bg-gray-800 min-w-[130px]"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Sending...
-              </>
-            ) : verificationSent ? (
-              'Sent'
-            ) : (
-              'Change Email'
-            )}
-          </Button>
-        </div>
-      </form>
+          {error && (
+            <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-3">
+              <AlertCircle className="h-4 w-4 flex-shrink-0 text-red-600" />
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-3">
+            <button type="button" className="btn btn-subtle" onClick={handleCancel} disabled={loading}>
+              Cancel
+            </button>
+            <button type="submit" className="btn btn-sm btn-dark min-w-[140px]" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                'Change email'
+              )}
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   );
 }

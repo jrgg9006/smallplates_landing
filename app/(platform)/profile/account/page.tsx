@@ -30,7 +30,7 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-gray-700">
+    <div className="min-h-screen bg-[hsl(var(--brand-background))] text-gray-700">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -66,7 +66,7 @@ export default function AccountPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-8 pb-20">
         {/* Back Navigation - Hidden on mobile */}
         <div className="mb-6 hidden md:block">
           <button

@@ -1,22 +1,70 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { updatePassword } from '@/lib/supabase/profiles';
 import { CheckCircle, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 
+const REQUIREMENTS = [
+  { label: 'At least 8 characters', test: (pw: string) => pw.length >= 8 },
+  { label: 'One uppercase letter', test: (pw: string) => /[A-Z]/.test(pw) },
+  { label: 'One lowercase letter', test: (pw: string) => /[a-z]/.test(pw) },
+  { label: 'One number', test: (pw: string) => /\d/.test(pw) },
+];
+
+interface PasswordFieldProps {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  disabled: boolean;
+}
+
+function PasswordField({ id, label, value, onChange, disabled }: PasswordFieldProps) {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <div>
+      <Label
+        htmlFor={id}
+        className="mb-1.5 block text-sm font-medium text-[hsl(var(--brand-charcoal))]"
+      >
+        {label}
+      </Label>
+      <div className="relative">
+        <Input
+          id={id}
+          type={visible ? 'text' : 'password'}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full bg-white pr-10"
+          required
+          disabled={disabled}
+        />
+        <button
+          type="button"
+          onClick={() => setVisible(!visible)}
+          aria-label={visible ? 'Hide password' : 'Show password'}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+        >
+          {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function PasswordChangeForm() {
+  const [editing, setEditing] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const metRequirements = REQUIREMENTS.filter((r) => r.test(newPassword)).length;
 
   const validateForm = () => {
     if (!currentPassword.trim()) {
@@ -24,29 +72,8 @@ export function PasswordChangeForm() {
       return false;
     }
 
-    if (!newPassword.trim()) {
-      setError('Please enter a new password');
-      return false;
-    }
-
-    if (newPassword.length < 8) {
-      setError('New password must be at least 8 characters long');
-      return false;
-    }
-
-    // Password strength validation
-    const hasUppercase = /[A-Z]/.test(newPassword);
-    const hasLowercase = /[a-z]/.test(newPassword);
-    const hasNumbers = /\d/.test(newPassword);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
-
-    if (!hasUppercase || !hasLowercase || !hasNumbers) {
-      setError('Password must contain at least one uppercase letter, one lowercase letter, and one number');
-      return false;
-    }
-
-    if (!confirmPassword.trim()) {
-      setError('Please confirm your new password');
+    if (metRequirements < REQUIREMENTS.length) {
+      setError('Your new password doesn’t meet all the requirements yet');
       return false;
     }
 
@@ -63,39 +90,15 @@ export function PasswordChangeForm() {
     return true;
   };
 
-  const getPasswordStrength = (password: string) => {
-    let strength = 0;
-    if (password.length >= 8) strength++;
-    if (/[A-Z]/.test(password)) strength++;
-    if (/[a-z]/.test(password)) strength++;
-    if (/\d/.test(password)) strength++;
-    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
-
-    return strength;
-  };
-
-  const getStrengthColor = (strength: number) => {
-    if (strength < 2) return 'bg-red-500';
-    if (strength < 4) return 'bg-yellow-500';
-    return 'bg-green-500';
-  };
-
-  const getStrengthText = (strength: number) => {
-    if (strength < 2) return 'Weak';
-    if (strength < 4) return 'Medium';
-    return 'Strong';
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setLoading(true);
     setError(null);
-    setSuccess(false);
 
     try {
       const { error } = await updatePassword(currentPassword, newPassword);
@@ -105,10 +108,11 @@ export function PasswordChangeForm() {
         return;
       }
 
-      setSuccess(true);
+      setEditing(false);
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      setSuccess(true);
       setTimeout(() => setSuccess(false), 5000);
     } catch (err) {
       setError('Failed to update password. Please try again.');
@@ -118,177 +122,126 @@ export function PasswordChangeForm() {
   };
 
   const handleCancel = () => {
+    setEditing(false);
     setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
     setError(null);
-    setSuccess(false);
   };
 
-  const passwordStrength = getPasswordStrength(newPassword);
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Current Password */}
+    <div className="space-y-4">
+      {/* Current state + change action */}
       <div>
-        <Label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
-          Current Password *
+        <Label className="mb-1.5 block text-sm font-medium text-[hsl(var(--brand-charcoal))]">
+          Password
         </Label>
-        <div className="relative">
-          <Input
-            id="currentPassword"
-            type={showCurrentPassword ? "text" : "password"}
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            className="w-full pr-10"
-            placeholder="Enter your current password"
-            required
-            disabled={loading}
-          />
-          <button
-            type="button"
-            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-          >
-            {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
-        </div>
-      </div>
-
-      {/* New Password */}
-      <div>
-        <Label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
-          New Password *
-        </Label>
-        <div className="relative">
-          <Input
-            id="newPassword"
-            type={showNewPassword ? "text" : "password"}
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="w-full pr-10"
-            placeholder="Enter your new password"
-            required
-            disabled={loading}
-          />
-          <button
-            type="button"
-            onClick={() => setShowNewPassword(!showNewPassword)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-          >
-            {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
-        </div>
-        
-        {/* Password Strength Indicator */}
-        {newPassword && (
-          <div className="mt-2">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="flex-1 bg-gray-200 rounded-full h-2">
-                <div 
-                  className={`h-2 rounded-full transition-all duration-300 ${getStrengthColor(passwordStrength)}`}
-                  style={{ width: `${(passwordStrength / 5) * 100}%` }}
-                ></div>
-              </div>
-              <span className={`text-xs font-medium ${
-                passwordStrength < 2 ? 'text-red-600' : 
-                passwordStrength < 4 ? 'text-yellow-600' : 'text-green-600'
-              }`}>
-                {getStrengthText(passwordStrength)}
-              </span>
-            </div>
-          </div>
-        )}
-        
-        <div className="text-sm text-gray-500 mt-1 space-y-1">
-          <p>Password must contain:</p>
-          <ul className="list-disc list-inside space-y-0.5 ml-2">
-            <li className={newPassword.length >= 8 ? 'text-green-600' : 'text-gray-500'}>
-              At least 8 characters
-            </li>
-            <li className={/[A-Z]/.test(newPassword) ? 'text-green-600' : 'text-gray-500'}>
-              One uppercase letter
-            </li>
-            <li className={/[a-z]/.test(newPassword) ? 'text-green-600' : 'text-gray-500'}>
-              One lowercase letter
-            </li>
-            <li className={/\d/.test(newPassword) ? 'text-green-600' : 'text-gray-500'}>
-              One number
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Confirm New Password */}
-      <div>
-        <Label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-          Confirm New Password *
-        </Label>
-        <div className="relative">
-          <Input
-            id="confirmPassword"
-            type={showConfirmPassword ? "text" : "password"}
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full pr-10"
-            placeholder="Confirm your new password"
-            required
-            disabled={loading}
-          />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-          >
-            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
-        </div>
-        {confirmPassword && newPassword !== confirmPassword && (
-          <p className="text-xs text-red-600 mt-1">Passwords do not match</p>
-        )}
-      </div>
-
-      {/* Error Message */}
-      {error && (
-        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
-          <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
-          <p className="text-sm text-red-600">{error}</p>
-        </div>
-      )}
-
-      {/* Success Message */}
-      {success && (
-        <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-md">
-          <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-          <p className="text-sm text-green-600">Password updated successfully!</p>
-        </div>
-      )}
-
-      {/* Form Actions */}
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleCancel}
-          disabled={loading}
-        >
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          disabled={loading}
-          className="bg-gray-900 text-white hover:bg-gray-800 min-w-[130px]"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Updating...
-            </>
-          ) : (
-            'Update Password'
+        <div className="flex items-center justify-between gap-4">
+          <p className="tracking-widest text-[hsl(var(--brand-charcoal))]">••••••••</p>
+          {!editing && (
+            <button
+              type="button"
+              className="text-link flex-shrink-0"
+              onClick={() => {
+                setEditing(true);
+                setSuccess(false);
+              }}
+            >
+              Change password
+            </button>
           )}
-        </Button>
+        </div>
       </div>
-    </form>
+
+      {/* Success notice */}
+      {success && (
+        <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 p-3">
+          <CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
+          <p className="text-sm text-green-700">Password updated.</p>
+        </div>
+      )}
+
+      {/* Change form — only when editing */}
+      {editing && (
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 rounded-lg border border-[hsl(var(--brand-border))] bg-[hsl(var(--brand-warm-white-warm))] p-4"
+        >
+          <PasswordField
+            id="currentPassword"
+            label="Current password"
+            value={currentPassword}
+            onChange={setCurrentPassword}
+            disabled={loading}
+          />
+
+          <div className="space-y-2">
+            <PasswordField
+              id="newPassword"
+              label="New password"
+              value={newPassword}
+              onChange={setNewPassword}
+              disabled={loading}
+            />
+
+            {/* Requirements — only once the user starts typing */}
+            {newPassword && (
+              <ul className="space-y-0.5 text-sm">
+                {REQUIREMENTS.map((req) => {
+                  const met = req.test(newPassword);
+                  return (
+                    <li
+                      key={req.label}
+                      className={`flex items-center gap-1.5 ${met ? 'text-green-600' : 'text-gray-500'}`}
+                    >
+                      <CheckCircle
+                        className={`h-3.5 w-3.5 ${met ? 'text-green-600' : 'text-[hsl(var(--brand-border-button))]'}`}
+                      />
+                      {req.label}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+
+          <div>
+            <PasswordField
+              id="confirmPassword"
+              label="Confirm new password"
+              value={confirmPassword}
+              onChange={setConfirmPassword}
+              disabled={loading}
+            />
+            {confirmPassword && newPassword !== confirmPassword && (
+              <p className="mt-1 text-xs text-red-600">Passwords do not match</p>
+            )}
+          </div>
+
+          {error && (
+            <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-3">
+              <AlertCircle className="h-4 w-4 flex-shrink-0 text-red-600" />
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-3">
+            <button type="button" className="btn btn-subtle" onClick={handleCancel} disabled={loading}>
+              Cancel
+            </button>
+            <button type="submit" className="btn btn-sm btn-dark min-w-[160px]" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                'Update password'
+              )}
+            </button>
+          </div>
+        </form>
+      )}
+    </div>
   );
 }

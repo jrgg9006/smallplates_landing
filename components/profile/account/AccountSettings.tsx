@@ -4,43 +4,61 @@ import React from 'react';
 import { PersonalInfoForm } from './PersonalInfoForm';
 import { EmailChangeForm } from './EmailChangeForm';
 import { PasswordChangeForm } from './PasswordChangeForm';
-import { SetupGuidePreferences } from './SetupGuidePreferences';
 import { DangerZone } from './DangerZone';
+
+interface SettingsSectionProps {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}
+
+function SettingsSection({ title, description, children }: SettingsSectionProps) {
+  return (
+    <section className="grid gap-6 py-10 md:grid-cols-[220px_1fr] md:gap-12">
+      <div>
+        <h3 className="font-serif text-2xl font-medium tracking-tight text-[hsl(var(--brand-charcoal))]">
+          {title}
+        </h3>
+        {description && <p className="mt-1.5 text-sm text-gray-500">{description}</p>}
+      </div>
+      <div className="max-w-xl">{children}</div>
+    </section>
+  );
+}
 
 export function AccountSettings() {
   return (
-    <div className="space-y-6">
+    <div>
       {/* Header */}
-      <div className="border-b border-gray-200 pb-4">
-        <h2 className="text-2xl font-bold text-gray-900">Account Settings</h2>
-        <p className="text-gray-600 mt-1">Manage your personal information and preferences</p>
+      <div className="pb-10">
+        <h1 className="font-serif text-4xl md:text-5xl font-medium tracking-tight text-[hsl(var(--brand-charcoal))]">
+          Your account
+        </h1>
+        <p className="mt-3 text-gray-600">
+          Your name, your email, your password. That&apos;s it.
+        </p>
       </div>
 
-      {/* Personal Information Card */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
-        <PersonalInfoForm />
-      </div>
+      <div className="divide-y divide-[hsl(var(--brand-border))] border-t border-[hsl(var(--brand-border))]">
+        <SettingsSection
+          title="Your details"
+          description="Your name here, and how it appears in the book."
+        >
+          <PersonalInfoForm />
+        </SettingsSection>
 
-      {/* Email Management Card */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Email Address</h3>
-        <EmailChangeForm />
-      </div>
+        <SettingsSection title="Email" description="Where we reach you.">
+          <EmailChangeForm />
+        </SettingsSection>
 
-      {/* Password Management Card */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Password & Security</h3>
-        <PasswordChangeForm />
-      </div>
+        <SettingsSection title="Password">
+          <PasswordChangeForm />
+        </SettingsSection>
 
-      {/* Setup Guide preferences — restore hidden setup checklists */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <SetupGuidePreferences />
+        <SettingsSection title="Delete account">
+          <DangerZone />
+        </SettingsSection>
       </div>
-
-      {/* Account Deletion */}
-      <DangerZone />
     </div>
   );
 }

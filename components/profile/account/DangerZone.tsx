@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { deleteAccount } from '@/lib/supabase/profiles';
-import { AlertTriangle, Trash2, Loader2, X, CheckCircle } from 'lucide-react';
+import { AlertTriangle, Loader2, X, CheckCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+
+const CONFIRMATION_TEXT = 'DELETE MY ACCOUNT';
 
 export function DangerZone() {
   const router = useRouter();
@@ -17,7 +18,27 @@ export function DangerZone() {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const CONFIRMATION_TEXT = 'DELETE MY ACCOUNT';
+  const handleCancel = () => {
+    setShowDeleteModal(false);
+    setCurrentPassword('');
+    setConfirmationText('');
+    setError(null);
+  };
+
+  // Close on Escape while the confirmation modal is open
+  useEffect(() => {
+    if (!showDeleteModal) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !loading) {
+        handleCancel();
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showDeleteModal, loading]);
 
   const validateDeletion = () => {
     if (!currentPassword.trim()) {
@@ -63,54 +84,51 @@ export function DangerZone() {
     }
   };
 
-  const handleCancel = () => {
-    setShowDeleteModal(false);
-    setCurrentPassword('');
-    setConfirmationText('');
-    setError(null);
-  };
-
   return (
-    <div className="space-y-6">
-      {/* Danger Zone Section */}
-      <div className="border border-red-200 rounded-lg p-6">
-        <div className="flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">Delete account</h3>
-            <p className="text-sm text-gray-600 mb-1">
-              Once deleted, this can&apos;t be undone. If you have existing books or recipes, your
-              account will be deactivated and data preserved. Otherwise it&apos;s permanently
-              removed.
-            </p>
+    <div>
+      <p className="text-sm text-gray-600">
+        Once deleted, this can&apos;t be undone. If you have books or recipes, your account is
+        deactivated and the data stays. Otherwise it&apos;s permanently removed.
+      </p>
 
-            <Button
-              onClick={() => setShowDeleteModal(true)}
-              variant="destructive"
-              size="sm"
-              className="mt-4 bg-red-600 hover:bg-red-700"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete Account
-            </Button>
-          </div>
-        </div>
-      </div>
+      <button
+        type="button"
+        onClick={() => setShowDeleteModal(true)}
+        className="btn mt-4 px-6 py-2.5 text-sm border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
+      >
+        Delete account
+      </button>
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6 space-y-6">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !loading) handleCancel();
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-account-title"
+            className="w-full max-w-md space-y-6 rounded-lg bg-white p-6"
+          >
             {/* Modal Header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-red-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Delete Account</h3>
+                <h3
+                  id="delete-account-title"
+                  className="font-serif text-xl font-medium text-[hsl(var(--brand-charcoal))]"
+                >
+                  Delete account
+                </h3>
               </div>
               <button
                 onClick={handleCancel}
                 className="text-gray-400 hover:text-gray-600"
                 disabled={loading}
+                aria-label="Close"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -118,14 +136,14 @@ export function DangerZone() {
 
             {/* Success state */}
             {successMessage ? (
-              <div className="flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <div className="flex items-start gap-3 rounded-lg border border-green-200 bg-green-50 p-4">
+                <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600" />
                 <p className="text-sm text-green-800">{successMessage} Redirecting...</p>
               </div>
             ) : (
               <>
                 {/* Warning */}
-                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="rounded-lg border border-red-200 bg-red-50 p-4">
                   <p className="text-sm text-red-800">
                     This action is irreversible. All your data will be deleted and cannot be
                     recovered.
@@ -137,9 +155,9 @@ export function DangerZone() {
                   <div>
                     <Label
                       htmlFor="deletePassword"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      className="mb-1.5 block text-sm font-medium text-[hsl(var(--brand-charcoal))]"
                     >
-                      Enter your password *
+                      Your password
                     </Label>
                     <Input
                       id="deletePassword"
@@ -147,7 +165,6 @@ export function DangerZone() {
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       className="w-full"
-                      placeholder="Current password"
                       required
                       disabled={loading}
                     />
@@ -157,9 +174,9 @@ export function DangerZone() {
                   <div>
                     <Label
                       htmlFor="confirmText"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      className="mb-1.5 block text-sm font-medium text-[hsl(var(--brand-charcoal))]"
                     >
-                      Type &quot;{CONFIRMATION_TEXT}&quot; to confirm *
+                      Type &quot;{CONFIRMATION_TEXT}&quot; to confirm
                     </Label>
                     <Input
                       id="confirmText"
@@ -175,39 +192,40 @@ export function DangerZone() {
 
                   {/* Error Message */}
                   {error && (
-                    <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
-                      <AlertTriangle className="h-4 w-4 text-red-600 flex-shrink-0" />
+                    <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-3">
+                      <AlertTriangle className="h-4 w-4 flex-shrink-0 text-red-600" />
                       <p className="text-sm text-red-600">{error}</p>
                     </div>
                   )}
                 </div>
 
                 {/* Modal Actions */}
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-                  <Button onClick={handleCancel} variant="outline" disabled={loading}>
+                <div className="flex items-center justify-end gap-3 border-t border-[hsl(var(--brand-border))] pt-4">
+                  <button
+                    type="button"
+                    className="btn btn-subtle"
+                    onClick={handleCancel}
+                    disabled={loading}
+                  >
                     Cancel
-                  </Button>
-                  <Button
+                  </button>
+                  <button
+                    type="button"
                     onClick={handleDeleteAccount}
                     disabled={
-                      loading ||
-                      !currentPassword ||
-                      confirmationText !== CONFIRMATION_TEXT
+                      loading || !currentPassword || confirmationText !== CONFIRMATION_TEXT
                     }
-                    className="bg-red-600 text-white hover:bg-red-700 min-w-[150px]"
+                    className="btn px-6 py-2.5 text-sm min-w-[150px] bg-red-600 text-white hover:bg-red-700 transition-colors"
                   >
                     {loading ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Deleting...
                       </>
                     ) : (
-                      <>
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete Forever
-                      </>
+                      'Delete forever'
                     )}
-                  </Button>
+                  </button>
                 </div>
               </>
             )}

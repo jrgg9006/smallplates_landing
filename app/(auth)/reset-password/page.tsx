@@ -18,7 +18,7 @@ export default function ResetPasswordPage() {
   const [resendLoading, setResendLoading] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
 
-  const isFormValid = password.length >= 6 && password === confirmPassword;
+  const isFormValid = password.length >= 8 && password === confirmPassword;
 
   // Handle session exchange when component mounts
   useEffect(() => {
@@ -174,7 +174,7 @@ export default function ResetPasswordPage() {
     }
     
     if (!isFormValid) {
-      setError("Please ensure passwords match and are at least 6 characters long");
+      setError("Please ensure passwords match and are at least 8 characters long");
       return;
     }
 
@@ -411,9 +411,9 @@ export default function ResetPasswordPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all"
               placeholder="Enter your new password"
-              minLength={6}
+              minLength={8}
             />
-            <p className="text-secondary-sm text-gray-500 mt-1">Must be at least 6 characters long</p>
+            <p className="text-secondary-sm text-gray-500 mt-1">Must be at least 8 characters long</p>
           </div>
 
           <div>
@@ -428,7 +428,7 @@ export default function ResetPasswordPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all"
               placeholder="Confirm your new password"
-              minLength={6}
+              minLength={8}
             />
             {confirmPassword && password !== confirmPassword && (
               <p className="text-xs text-red-500 mt-1">Passwords do not match</p>

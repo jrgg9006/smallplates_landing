@@ -1,23 +1,21 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { getCurrentProfile, updatePersonalInfo, getSelfGuestPrintedName } from '@/lib/supabase/profiles';
-import { useAuth } from '@/lib/contexts/AuthContext';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 export function PersonalInfoForm() {
-  const { user } = useAuth();
   const [fullName, setFullName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
   const [printedName, setPrintedName] = useState('');
-  const [original, setOriginal] = useState({ fullName: '', phoneNumber: '', printedName: '' });
+  const [original, setOriginal] = useState({ fullName: '', printedName: '' });
   const [loading, setLoading] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  const isDirty = fullName !== original.fullName || printedName !== original.printedName;
 
   // Load current profile data
   useEffect(() => {
@@ -31,20 +29,13 @@ export function PersonalInfoForm() {
           return;
         }
 
-        if (profile) {
-          setFullName(profile.full_name || '');
-          setPhoneNumber(profile.phone_number || '');
-        }
-
         // Load printed_name from guest record
         const { data: guestPrintedName } = await getSelfGuestPrintedName();
-        if (guestPrintedName) {
-          setPrintedName(guestPrintedName);
-        }
 
+        setFullName(profile?.full_name || '');
+        setPrintedName(guestPrintedName || '');
         setOriginal({
           fullName: profile?.full_name || '',
-          phoneNumber: profile?.phone_number || '',
           printedName: guestPrintedName || '',
         });
       } catch (err) {
@@ -57,25 +48,11 @@ export function PersonalInfoForm() {
     loadProfile();
   }, []);
 
-  const validateForm = () => {
-    if (!fullName.trim()) {
-      setError('Please enter your name');
-      return false;
-    }
-
-    // Basic phone validation (optional field)
-    if (phoneNumber.trim() && !/^[\+]?[1-9][\d]{0,15}$/.test(phoneNumber.replace(/[\s\-\(\)]/g, ''))) {
-      setError('Please enter a valid phone number');
-      return false;
-    }
-
-    return true;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
+
+    if (!fullName.trim()) {
+      setError('Please enter your name');
       return;
     }
 
@@ -86,8 +63,8 @@ export function PersonalInfoForm() {
     try {
       const { error } = await updatePersonalInfo({
         full_name: fullName.trim(),
-        phone_number: phoneNumber.trim() || undefined,
-        printed_name: printedName.trim() || undefined,
+        // Reason: null clears the value in DB so the book falls back to the real name; undefined would skip the update
+        printed_name: printedName.trim() || null,
       });
 
       if (error) {
@@ -95,8 +72,9 @@ export function PersonalInfoForm() {
         return;
       }
 
+      setOriginal({ fullName: fullName.trim(), printedName: printedName.trim() });
       setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      setTimeout(() => setSuccess(false), 4000);
     } catch (err) {
       setError('Failed to update profile. Please try again.');
     } finally {
@@ -106,7 +84,6 @@ export function PersonalInfoForm() {
 
   const handleCancel = () => {
     setFullName(original.fullName);
-    setPhoneNumber(original.phoneNumber);
     setPrintedName(original.printedName);
     setError(null);
     setSuccess(false);
@@ -114,13 +91,11 @@ export function PersonalInfoForm() {
 
   if (loadingProfile) {
     return (
-      <div className="space-y-4">
-        <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-10 bg-gray-200 rounded"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-10 bg-gray-200 rounded"></div>
-        </div>
+      <div className="animate-pulse space-y-4">
+        <div className="h-4 w-1/4 rounded bg-[hsl(var(--brand-sand))]/60"></div>
+        <div className="h-10 rounded bg-[hsl(var(--brand-sand))]/60"></div>
+        <div className="h-4 w-1/4 rounded bg-[hsl(var(--brand-sand))]/60"></div>
+        <div className="h-10 rounded bg-[hsl(var(--brand-sand))]/60"></div>
       </div>
     );
   }
@@ -129,106 +104,86 @@ export function PersonalInfoForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Name */}
       <div>
-        <Label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
-          Name *
+        <Label
+          htmlFor="fullName"
+          className="mb-1.5 block text-sm font-medium text-[hsl(var(--brand-charcoal))]"
+        >
+          Name
         </Label>
         <Input
           id="fullName"
           type="text"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
-          className="w-full"
-          placeholder="Your name"
+          className="w-full bg-white"
           required
         />
       </div>
 
-      {/* Phone Number */}
-      <div>
-        <Label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
-          Phone Number
-        </Label>
-        <Input
-          id="phoneNumber"
-          type="tel"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          className="w-full"
-          placeholder="+1 (555) 123-4567"
-        />
-        <p className="text-sm text-gray-500 mt-1">Optional - used for order notifications</p>
-      </div>
-
       {/* Printed Name */}
       <div>
-        <Label htmlFor="printedName" className="block text-sm font-medium text-gray-700 mb-1">
-          Printed Name
+        <Label
+          htmlFor="printedName"
+          className="mb-1.5 block text-sm font-medium text-[hsl(var(--brand-charcoal))]"
+        >
+          Name in the book
         </Label>
         <Input
           id="printedName"
           type="text"
           value={printedName}
           onChange={(e) => setPrintedName(e.target.value)}
-          className="w-full"
+          className="w-full bg-white"
           placeholder="e.g. Rich G."
         />
-        <p className="text-sm text-gray-500 mt-1">How your name appears in printed cookbooks</p>
-      </div>
-
-      {/* Email Display (Read-only) */}
-      <div>
-        <Label className="block text-sm font-medium text-gray-700 mb-1">
-          Email Address
-        </Label>
-        <div className="w-full p-3 bg-gray-50 border border-gray-200 rounded-md text-gray-700">
-          {user?.email}
-        </div>
-        <p className="text-sm text-gray-500 mt-1">
-          To change your email, use the Email Change section below
+        <p className="mt-1.5 text-sm text-gray-500">
+          {printedName.trim() ? (
+            <>
+              Printed next to your recipes as{' '}
+              <span className="font-medium text-[hsl(var(--brand-charcoal))]">
+                {printedName.trim()}
+              </span>
+            </>
+          ) : (
+            'How your name appears next to your recipes. Leave blank to use your name.'
+          )}
         </p>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
-          <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
+        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-3">
+          <AlertCircle className="h-4 w-4 flex-shrink-0 text-red-600" />
           <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
 
       {/* Success Message */}
       {success && (
-        <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-md">
-          <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-          <p className="text-sm text-green-600">Personal information updated successfully!</p>
+        <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 p-3">
+          <CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
+          <p className="text-sm text-green-700">Saved.</p>
         </div>
       )}
 
-      {/* Form Actions */}
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleCancel}
-          disabled={loading}
-        >
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          disabled={loading}
-          className="bg-gray-900 text-white hover:bg-gray-800 min-w-[110px]"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            'Save Changes'
-          )}
-        </Button>
-      </div>
+      {/* Form Actions — only shown once something changed */}
+      {isDirty && (
+        <div className="flex items-center justify-end gap-3">
+          <button type="button" className="btn btn-subtle" onClick={handleCancel} disabled={loading}>
+            Cancel
+          </button>
+          <button type="submit" className="btn btn-sm btn-dark min-w-[120px]" disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              'Save changes'
+            )}
+          </button>
+        </div>
+      )}
     </form>
   );
 }
