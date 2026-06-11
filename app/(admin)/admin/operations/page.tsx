@@ -85,6 +85,7 @@ interface RecipeWithProductionStatus {
     note_clean?: string | null;
     detected_language: string | null;
     cleaning_version: number | null;
+    needs_regeneration?: boolean | null;
   } | null;
 }
 

@@ -13,6 +13,7 @@ interface CompareRecipe {
     ingredients_clean: string;
     instructions_clean: string;
     note_clean?: string | null;
+    needs_regeneration?: boolean | null;
   } | null;
 }
 
@@ -128,15 +129,28 @@ export default function RecipeCompareModal({ recipe, onClose, onSaved }: RecipeC
         </div>
       </div>
 
-      {/* Explainer banner — makes it unmistakable for interns what this does */}
-      <div className="px-6 py-3 bg-amber-50 border-b border-amber-200 flex items-start gap-3 flex-shrink-0">
-        <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <p className="text-sm text-amber-800 leading-relaxed">
-          You&apos;re creating/updating the <span className="font-semibold">clean version</span> (left) — the final text that gets printed in the book. The guest&apos;s <span className="font-semibold">original (right) stays untouched</span>. Use the original as your reference while you fix the clean version.
-        </p>
-      </div>
+      {/* Explainer banner — makes it unmistakable for interns what this does.
+          When the original was edited after cleaning, escalate: saving here is
+          what clears the stale flag, so the reviewer must check ALL fields. */}
+      {recipe.recipe_print_ready?.needs_regeneration ? (
+        <div className="px-6 py-3 bg-red-50 border-b border-red-200 flex items-start gap-3 flex-shrink-0">
+          <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4a2 2 0 00-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z" />
+          </svg>
+          <p className="text-sm text-red-800 leading-relaxed">
+            <span className="font-semibold">The guest edited the original AFTER this clean version was made.</span> The original (right) is the newest text — the clean version (left) may be outdated. Review <span className="font-semibold">ALL fields</span> against the original and update the clean version. When you&apos;re done, untick &quot;Needs Review&quot; — that&apos;s what clears the flag.
+          </p>
+        </div>
+      ) : (
+        <div className="px-6 py-3 bg-amber-50 border-b border-amber-200 flex items-start gap-3 flex-shrink-0">
+          <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p className="text-sm text-amber-800 leading-relaxed">
+            You&apos;re creating/updating the <span className="font-semibold">clean version</span> (left) — the final text that gets printed in the book. The guest&apos;s <span className="font-semibold">original (right) stays untouched</span>. Use the original as your reference while you fix the clean version.
+          </p>
+        </div>
+      )}
 
       {/* Two columns */}
       <div className="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2">

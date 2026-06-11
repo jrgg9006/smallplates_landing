@@ -289,6 +289,18 @@ export async function PATCH(
       // reason — clear it so the badge doesn't linger misleadingly after a human acts on it.
       productionStatusUpdates.needs_review_reason = null;
     }
+    // Unticking "Needs Review" is the ONE human sign-off that also clears the
+    // stale print-ready flag. Reason: the amber "Re-clean" badge must never
+    // disappear without an explicit human action.
+    if (body.needs_review === false) {
+      const { error: staleClearError } = await supabase
+        .from('recipe_print_ready')
+        .update({ needs_regeneration: false })
+        .eq('recipe_id', recipeId);
+      if (staleClearError) {
+        console.error('Failed to clear needs_regeneration:', staleClearError);
+      }
+    }
     if (body.manually_cleared !== undefined) {
       productionStatusUpdates.manually_cleared = body.manually_cleared;
     }
@@ -318,12 +330,11 @@ export async function PATCH(
         recipe_name_clean?: string;
         detected_language?: string | null;
         cleaning_version?: number | null;
-        needs_regeneration?: boolean;
         updated_at?: string;
       } = {
         recipe_id: recipeId,
-        // Reason: a manual Operations edit IS the re-clean — clear the stale flag
-        needs_regeneration: false,
+        // Note: needs_regeneration is intentionally NOT cleared here — only
+        // unticking "Needs Review" (or a fresh AI clean) clears the stale flag.
         updated_at: new Date().toISOString(),
       };
 
