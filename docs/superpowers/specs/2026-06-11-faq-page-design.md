@@ -1,7 +1,7 @@
 # FAQ Page (`/faq`) — Design Spec
 
 **Date:** 2026-06-11
-**Status:** Draft — pending Ricardo's review
+**Status:** Reviewed with Ricardo 2026-06-11 — all fact flags resolved
 **Inspiration:** Remento's FAQ page (structure, depth, patience with non-technical readers) — translated to Small Plates voice and the free-tier model.
 
 ---
@@ -46,7 +46,7 @@ A dedicated `/faq` page that answers, in one organized place, everything a not-v
 
 Voice rules applied: tone-of-voice.md (specific, dry, direct, warm without performing), no banned words, no specific guest counts, no pressure language, dignity protected. Facts pulled from `lib/stripe/pricing.ts`, the free-tier spec, and existing site copy.
 
-> ⚠️ = fact Ricardo must confirm before this answer ships.
+> All facts below were confirmed with Ricardo on 2026-06-11.
 
 ### About Small Plates
 
@@ -85,7 +85,7 @@ Everything except the printed book: the event page, the collection link, reminde
 That's how the price is built. The book is usually a group gift — several people chip in and each keeps a copy. The per-person number you see is exactly what each person puts in. One person checks out; the group settles up however it normally does.
 
 **What if we collect recipes and never print?**
-Then you pay nothing. The recipes stay saved in your account in case you change your mind later. ⚠️ (confirm: no auto-deletion of free-tier events)
+Then you pay nothing. The recipes stay saved in your account in case you change your mind later.
 
 **Can I order more copies after the book is printed?**
 Yes. Single copies later are $129 plus $14 shipping. It's cheaper to order them with the main print run, where copies drop to as low as $89 each.
@@ -99,10 +99,10 @@ They tap a link, type the recipe and a short note, and they're done. About five 
 Even better. They can send the takeout order they'd defend with their life, or the sandwich they get every single time. It's not about being a chef — it's about being in the book.
 
 **What if people don't send their recipes?**
-Some won't on the first ask. That's normal, not a reflection on you. Your dashboard shows who's in, and you can send a reminder with one click. Most books fill up after the second nudge. ⚠️ (confirm the "second nudge" claim feels right)
+Some won't on the first ask. That's normal, not a reflection on you. Your dashboard shows who's in, and you can send a reminder to everyone who hasn't with one click. You can also import your guest list straight from Zola or The Knot, so nobody gets left out.
 
 **How many recipes do we need?**
-At least 25 to print. Most books land between 30 and 50. If you invite everyone who'd want to be in it, you'll get there.
+At least 25 to print, and 50 are included in the price. Most books land between 30 and 50. If your group goes over, you can add more.
 
 **Can recipes be in other languages?**
 Yes, any language. Abuela's recipe stays in Spanish if that's how she wrote it.
@@ -111,15 +111,18 @@ Yes, any language. Abuela's recipe stays in Spanish if that's how she wrote it.
 No. Just the recipe. We create every image in the book — that's what makes it look like one book instead of fifty screenshots.
 
 **Can I add recipes myself?**
-Yes. If someone hands you a recipe at dinner or texts it to you, you can add it for them from your dashboard. ⚠️ (confirm organizer can add on behalf of guests in free-tier)
+Yes. If someone hands you a recipe at dinner or texts it to you, you can add it for them from your dashboard.
 
 **Can I fix typos or edit recipes before printing?**
-Yes. You review every recipe before the book prints, and you can edit anything. Nothing goes to print until you've seen it. ⚠️ (confirm editing scope in review step)
+We do the clean-up — amounts, steps, typos — before anything reaches the book. In the review step you see every page; if something looks off, flag it and we'll fix it before it prints.
 
 ### The book
 
 **What does the finished book look like?**
-A hardcover, professionally printed in full color. Every recipe gets its own page with the contributor's name and note, plus an image we create for it. Built to live on a counter, not a shelf. ⚠️ (add exact size/specs if you want them public)
+A hardcover, 8″ × 10″, printed in full color on heavy satin paper, with a matte cover. Every recipe gets its own page with the contributor's name and note, plus an image we create for it. Built to live on a counter, not a shelf.
+
+**Can I personalize the book?**
+Yes. The cover has two lines you can make yours: the headline — ours says "Recipes from the people who love you," but you can write your own — and the title, usually the couple's names, though it can say whatever the book is for. You can also add one photo of your own, printed inside the book.
 
 **Who designs it?**
 We do. Recipes arrive messy — half-remembered amounts, "a pinch of this." We clean them up and lay them out so the whole thing reads like one book, without flattening how each person actually talks.
@@ -142,7 +145,7 @@ The shower, the bachelorette, the rehearsal dinner — any moment where the peop
 Give yourself six to eight weeks before the day you want to hand it over. Collecting takes a few weeks — people need a nudge or two — and printing and shipping take the rest. Starting earlier never hurts.
 
 **Can we keep it a surprise from the couple?**
-Yes. The link goes to the guests, not the couple. Whether you tell her is up to you — plenty of groups keep it quiet until the shower. ⚠️ (confirm nothing in the flow emails the couple)
+Yes. The link goes to the guests, not the couple. Whether it's a surprise is your call — plenty of groups keep it quiet until the shower.
 
 ### Shipping & delivery
 
@@ -150,7 +153,7 @@ Yes. The link goes to the guests, not the couple. Whether you tell her is up to 
 United States, all of the European Union, and Mexico.
 
 **How long does the whole thing take?**
-From the first invite to the hardcover in hand, four to six weeks. Most of that is collecting — printing and shipping happen at the end. ⚠️ (confirm print+ship portion if you want to state it separately)
+Collecting is up to you — most groups give it a few weeks. Once you close the book, pay, and send it to print, it's at your door in about three weeks.
 
 **How much is shipping?**
 Included for the main order, shipped to one address. Single copies ordered later ship for $14.
@@ -161,13 +164,13 @@ Included for the main order, shipped to one address. Single copies ordered later
 Only your group. The book isn't public, there's no feed, and we don't post anything. The only people who ever see it are the ones you invited.
 
 **What do you do with guests' emails?**
-We use them to send the invitation and reminders for your book. That's it. No newsletter, no marketing. ⚠️ (confirm this matches actual email behavior)
+We use them to send the invitation and reminders for your book. That's it. No newsletter, no marketing.
 
 **Can I delete my event and everything in it?**
-Yes. Write to us and we'll delete the event and all its recipes. ⚠️ (confirm process — manual via support?)
+Yes. Write to us and we'll delete the event and all its recipes.
 
 **What if I need help?**
-Email team@smallplatesandcompany.com. A person answers. ⚠️ (add response-time claim only if you want to commit to one)
+Email team@smallplatesandcompany.com. A person answers.
 
 ## 5. Technical design
 
