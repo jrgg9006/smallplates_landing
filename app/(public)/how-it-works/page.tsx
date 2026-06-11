@@ -70,30 +70,90 @@ export default function HowItWorksPage() {
   const handleStart = () => router.push(user ? "/profile/groups" : "/onboarding/welcome");
 
   // Visuals alineados 1:1 con `steps`.
-  // TODO (imágenes reales): paso 1 → mockup de "collect link"; paso 2 → foto real
-  // de una receta a mano junto a la página diseñada (hoy: página + snapshot falso).
+  // TODO (imágenes reales): paso 1 → mockup de "collect link".
   const visuals = [
     <StepImage
       key="s1"
       src="/images/HowitWorks_images/collect_iphone_mockup.png"
       alt="Share a link so your people can send recipes"
     />,
-    // Paso 2 — antes/después: la página diseñada + un "snapshot" de la receta a mano.
-    <div key="s2" className="relative mx-auto max-w-sm md:mx-0">
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-brand-white shadow-md">
+    // Paso 2 — foto real de receta manuscrita + iPhone (CSS) encima con la misma
+    // receta ya tipeada en el layout del collection journey. El match caligrafía →
+    // texto limpio es el producto. Tipografías raw (text-[7px] etc.): miniatura de UI.
+    <div key="s2" className="relative mx-auto max-w-md pb-16 md:mx-0">
+      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-brand-sand">
         <Image
-          src="/images/how_it_works_profilesection/recipe_example_banana.png"
-          alt="A handwritten recipe, redesigned as a clean book page"
+          src="/images/howitworks_page/Karla_Machado_FRANGO_COM_MANDIOCA.jpeg"
+          alt="A handwritten recipe for frango com mandioca, in an old spiral notebook"
           fill
-          className="object-contain"
+          className="object-cover"
           sizes="(max-width: 1024px) 100vw, 40vw"
         />
       </div>
-      <div className="absolute -left-3 -top-4 w-32 rotate-[-6deg] rounded-lg bg-brand-cream p-3 shadow-lg ring-1 ring-brand-sand md:w-36">
-        <p className="type-caption mb-1 text-brand-charcoal/45">snapshot from a guest</p>
-        <p className="type-caption leading-snug text-brand-charcoal/75">
-          3 ripe bananas, 1 cup sugar, 1½ cups flour, 350° ~1hr. Abuela
-        </p>
+      {/* iPhone con proporciones reales (~9:19), pantalla completa del journey */}
+      <div className="absolute -bottom-12 -right-3 w-52 rotate-[3deg] md:-right-8 md:w-60">
+        <div className="flex aspect-[9/19] flex-col overflow-hidden rounded-[2.4rem] border-[7px] border-brand-charcoal bg-brand-white shadow-xl">
+          <div className="flex justify-center pt-2.5">
+            <div className="h-4 w-20 rounded-full bg-brand-charcoal" />
+          </div>
+          {/* Pantalla = review step real del collection journey (SummaryStep) */}
+          <div className="flex flex-1 flex-col pb-4 pt-2.5">
+            <p className="border-b border-brand-sand/60 pb-2 text-center text-[9px] font-medium tracking-wide text-brand-charcoal">
+              Small Plates <span className="text-brand-charcoal/50">&amp; Co.</span>
+            </p>
+
+            <div className="flex flex-1 flex-col px-4 pt-2.5">
+              <div className="flex items-center justify-between">
+                <p className="text-[8px] text-brand-charcoal">Review your recipe</p>
+                <span className="rounded-full border border-brand-sand px-2 py-0.5 text-[7px] text-brand-charcoal/70">
+                  &#9998; Edit
+                </span>
+              </div>
+
+              <p className="mt-3 text-[7px] uppercase tracking-[0.15em] text-brand-warm-gray">
+                Karla Machado
+              </p>
+              <p className="mt-1 font-serif text-[15px] font-medium leading-snug text-brand-charcoal">
+                Frango c/ mandioca
+              </p>
+
+              <p className="mt-3 border-t border-brand-sand/60 pt-2 text-[7px] uppercase tracking-[0.15em] text-brand-charcoal/60">
+                Ingredients
+              </p>
+              <p className="mt-1 font-serif text-[8px] leading-relaxed text-brand-charcoal/90">
+                mandioca cozida ½ kilo até derreter, amassada e misturada c/
+                manteiga
+                <br />
+                forrar o pirex
+              </p>
+
+              <p className="mt-2.5 text-[7px] uppercase tracking-[0.15em] text-brand-charcoal/60">
+                Instructions
+              </p>
+              <p className="mt-1 font-serif text-[8px] leading-relaxed text-brand-charcoal/90">
+                1. cozinhar o peito de frango, desfiar e dourar c/ cebola ralada,
+                manteiga, sal, molho de tomate
+                <br />
+                2. joga o molho por cima da massa
+                <br />
+                3. diluir um copo de requeijão com leite
+                <br />
+                4. cobre tudo e um pouco de queijo parmesão
+                <br />
+                5. põe pra assar em forno pré-aquecido
+              </p>
+
+              <div className="mt-auto flex items-center gap-2 pt-3">
+                <span className="rounded-full border border-brand-sand px-3 py-1.5 text-[8px] text-brand-charcoal/70">
+                  Back
+                </span>
+                <span className="flex-1 rounded-full bg-brand-honey py-1.5 text-center text-[8px] font-medium text-brand-white">
+                  Add my creation
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>,
     // Paso 3 — dashboard de quién mandó / quién falta + el recordatorio que sale
@@ -134,7 +194,7 @@ export default function HowItWorksPage() {
       </div>
       {/* Mini ventana de email — el header oscuro replica el "New Email" del producto real.
           El "To:" nombra a los Pending del dashboard: el sistema ya sabe quién falta. */}
-      <div className="absolute -bottom-2 right-3 w-60 rotate-2 md:right-6 md:w-64">
+      <div className="absolute -bottom-2 right-3 w-72 rotate-2 md:right-6 md:w-80">
         <div className="overflow-hidden rounded-xl bg-brand-white shadow-lg ring-1 ring-brand-sand">
           <div className="bg-brand-charcoal px-4 py-2 text-center">
             <span className="type-caption text-brand-warm-white-warm/90">New Email</span>
