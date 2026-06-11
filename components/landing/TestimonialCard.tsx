@@ -81,7 +81,9 @@ export function TestimonialCard({ t }: { t: Testimonial }) {
         {/* Photo — top on mobile (first in DOM), right on desktop (order-last) */}
         <div
           className={`md:order-last relative md:h-full w-full md:w-1/2 flex-shrink-0 overflow-hidden ${
-            t.screenshot ? "h-[360px]" : "h-[180px]"
+            // Mobile: photo grows to absorb the card's leftover height (cards
+            // stretch to the tallest in the row); screenshots keep a fixed crop
+            t.screenshot ? "h-[360px]" : "min-h-[200px] grow md:grow-0"
           }`}
         >
           <Image
