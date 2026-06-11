@@ -96,54 +96,78 @@ export default function HowItWorksPage() {
         </p>
       </div>
     </div>,
-    // Paso 3 — dashboard de quién mandó / quién falta (markup on-brand).
-    <div key="s3" className="rounded-2xl bg-brand-warm-white-warm p-6 md:p-8">
-      <div className="mb-5 flex items-center justify-between">
-        <span className="type-body-small font-medium text-brand-charcoal">
-          12 of 18 recipes in
-        </span>
-        <span className="rounded-full bg-brand-honey px-4 py-1.5 type-caption text-brand-white">
-          Send reminder
-        </span>
-      </div>
-      <div className="space-y-2.5">
-        {[
-          { n: "María", sent: true },
-          { n: "Tía Lupe", sent: true },
-          { n: "John", sent: false },
-          { n: "Abuela Carmen", sent: true },
-          { n: "Carlos", sent: false },
-        ].map((g) => (
-          <div
-            key={g.n}
-            className="flex items-center justify-between rounded-xl bg-brand-white px-4 py-3"
-          >
-            <span className="type-body-small text-brand-charcoal/80">{g.n}</span>
-            <span
-              className={`type-caption ${
-                g.sent ? "text-brand-honey" : "text-brand-charcoal/40"
-              }`}
+    // Paso 3 — dashboard de quién mandó / quién falta + el recordatorio que sale
+    // (causa: botón "Send reminder" → efecto: tarjetita del email, sin honey).
+    <div key="s3" className="relative pb-12">
+      <div className="rounded-2xl bg-brand-warm-white-warm p-6 md:p-8">
+        <div className="mb-5 flex items-center justify-between">
+          <span className="type-body-small font-medium text-brand-charcoal">
+            12 of 18 recipes in
+          </span>
+          <span className="rounded-full bg-brand-honey px-4 py-1.5 type-caption text-brand-white">
+            Send reminder
+          </span>
+        </div>
+        <div className="space-y-2.5">
+          {[
+            { n: "María", sent: true },
+            { n: "Tía Lupe", sent: true },
+            { n: "John", sent: false },
+            { n: "Abuela Carmen", sent: true },
+            { n: "Carlos", sent: false },
+          ].map((g) => (
+            <div
+              key={g.n}
+              className="flex items-center justify-between rounded-xl bg-brand-white px-4 py-3"
             >
-              {g.sent ? "Sent" : "Pending"}
-            </span>
+              <span className="type-body-small text-brand-charcoal/80">{g.n}</span>
+              <span
+                className={`type-caption ${
+                  g.sent ? "text-brand-honey" : "text-brand-charcoal/40"
+                }`}
+              >
+                {g.sent ? "Sent" : "Pending"}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Mini ventana de email — el header oscuro replica el "New Email" del producto real.
+          El "To:" nombra a los Pending del dashboard: el sistema ya sabe quién falta. */}
+      <div className="absolute -bottom-2 right-3 w-60 rotate-2 md:right-6 md:w-64">
+        <div className="overflow-hidden rounded-xl bg-brand-white shadow-lg ring-1 ring-brand-sand">
+          <div className="bg-brand-charcoal px-4 py-2 text-center">
+            <span className="type-caption text-brand-warm-white-warm/90">New Email</span>
           </div>
-        ))}
+          <div className="p-4">
+            <p className="type-caption text-brand-charcoal/45">
+              From: <span className="text-brand-charcoal/75">You</span>
+            </p>
+            <p className="type-caption mt-0.5 text-brand-charcoal/45">
+              To: <span className="text-brand-charcoal/75">John, Carlos</span>
+            </p>
+            <p className="type-caption mt-1 border-t border-brand-sand pt-1 font-medium leading-snug text-brand-charcoal">
+              Reminder: your recipe for Ana &amp; Rich&rsquo;s book
+            </p>
+            <p className="type-caption mt-1.5 italic leading-snug text-brand-charcoal/60">
+              &ldquo;The page is still open. It only takes five minutes.&rdquo;
+            </p>
+          </div>
+        </div>
+        <p className="type-caption mt-1.5 pr-1 text-right text-brand-charcoal/50">
+          Sent with one tap
+        </p>
       </div>
     </div>,
-    // Paso 4 — dashboard de captains (markup on-brand).
+    // Paso 4 — dashboard de captains, fiel al producto real:
+    // estado "Waiting to join" + botón dashed de invitar (sin honey, ya gastado en el paso 3).
     <div key="s4" className="rounded-2xl bg-brand-warm-white-warm p-6 md:p-8">
-      <div className="mb-5 flex items-center justify-between">
-        <span className="type-body-small font-medium text-brand-charcoal">Captains</span>
-        <span className="rounded-full bg-brand-honey px-4 py-1.5 type-caption text-brand-white">
-          + Invite captain
-        </span>
-      </div>
+      <p className="type-body-small mb-5 font-medium text-brand-charcoal">Captains</p>
       <div className="space-y-2.5">
         {[
           { n: "You", tag: "Organizer" },
           { n: "Sofía", tag: "Captain" },
           { n: "Marcos", tag: "Captain" },
-          { n: "Lucía", tag: "Captain" },
         ].map((p) => (
           <div
             key={p.n}
@@ -156,8 +180,19 @@ export default function HowItWorksPage() {
             <span className="ml-auto type-caption text-brand-charcoal/40">{p.tag}</span>
           </div>
         ))}
+        <div className="flex items-center gap-3 rounded-xl bg-brand-white/60 px-4 py-3">
+          <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-brand-sand/60 type-caption text-brand-charcoal/50">
+            L
+          </span>
+          <span className="type-body-small text-brand-charcoal/50">Lucía</span>
+          <span className="ml-auto type-caption italic text-brand-charcoal/40">
+            Waiting to join
+          </span>
+        </div>
       </div>
-      <p className="type-caption mt-4 text-brand-charcoal/50">Invite as many as you want.</p>
+      <div className="mt-4 rounded-xl border border-dashed border-brand-charcoal/25 px-4 py-3 text-center">
+        <span className="type-caption text-brand-charcoal/60">+ Invite captain</span>
+      </div>
     </div>,
   ];
 
