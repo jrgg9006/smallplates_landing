@@ -155,6 +155,9 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
     // Auto-select the newly created guest if ID is provided
     if (newGuestId) {
       setSelectedGuestId(newGuestId);
+      // Reason: without this, the trigger keeps showing "It is mine" and the
+      // recipe saves as the user's own even though a guest was just added.
+      setIsMyOwnRecipe(false);
     }
     
     // Close the AddGuestModal
