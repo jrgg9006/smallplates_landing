@@ -39,24 +39,35 @@ export async function DELETE(request: Request) {
 
     const { password } = body;
 
-    if (!password) {
-      return NextResponse.json(
-        { error: 'Password is required' },
-        { status: 400 }
-      );
-    }
+    // Reason: passwordless accounts (magic-link only) have nothing to verify —
+    // password_set_at is the server-side source of truth for whether the user
+    // deliberately set a password. The client can't be trusted to decide this.
+    const { data: profileFlags } = await supabaseAdmin
+      .from('profiles')
+      .select('password_set_at')
+      .eq('id', userId)
+      .single();
 
-    // Verify password
-    const { error: verifyError } = await supabase.auth.signInWithPassword({
-      email: user.email!,
-      password: password
-    });
+    if (profileFlags?.password_set_at) {
+      if (!password) {
+        return NextResponse.json(
+          { error: 'Password is required' },
+          { status: 400 }
+        );
+      }
 
-    if (verifyError) {
-      return NextResponse.json(
-        { error: 'Password is incorrect' },
-        { status: 401 }
-      );
+      // Verify password
+      const { error: verifyError } = await supabase.auth.signInWithPassword({
+        email: user.email!,
+        password: password
+      });
+
+      if (verifyError) {
+        return NextResponse.json(
+          { error: 'Password is incorrect' },
+          { status: 401 }
+        );
+      }
     }
 
     // Check if user already deleted (safety check)

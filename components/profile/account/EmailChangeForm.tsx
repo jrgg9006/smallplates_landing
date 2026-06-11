@@ -7,7 +7,12 @@ import { updateEmail } from '@/lib/supabase/profiles';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
-export function EmailChangeForm() {
+interface EmailChangeFormProps {
+  // null = still loading the profile flag
+  hasPassword: boolean | null;
+}
+
+export function EmailChangeForm({ hasPassword }: EmailChangeFormProps) {
   const { user } = useAuth();
   const [editing, setEditing] = useState(false);
   const [newEmail, setNewEmail] = useState('');
@@ -33,7 +38,7 @@ export function EmailChangeForm() {
       return false;
     }
 
-    if (!currentPassword.trim()) {
+    if (hasPassword && !currentPassword.trim()) {
       setError('Please enter your current password to confirm this change');
       return false;
     }
@@ -52,7 +57,10 @@ export function EmailChangeForm() {
     setError(null);
 
     try {
-      const { error } = await updateEmail(newEmail.trim(), currentPassword);
+      const { error } = await updateEmail(
+        newEmail.trim(),
+        hasPassword ? currentPassword : undefined
+      );
 
       if (error) {
         setError(error);
@@ -86,7 +94,7 @@ export function EmailChangeForm() {
         </Label>
         <div className="flex items-center justify-between gap-4">
           <p className="truncate text-[hsl(var(--brand-charcoal))]">{user?.email}</p>
-          {!editing && (
+          {!editing && hasPassword !== null && (
             <button
               type="button"
               className="text-link flex-shrink-0"
@@ -139,24 +147,31 @@ export function EmailChangeForm() {
             />
           </div>
 
-          <div>
-            <Label
-              htmlFor="currentPasswordEmail"
-              className="mb-1.5 block text-sm font-medium text-[hsl(var(--brand-charcoal))]"
-            >
-              Current password
-            </Label>
-            <Input
-              id="currentPasswordEmail"
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              className="w-full bg-white"
-              required
-              disabled={loading}
-            />
-            <p className="mt-1.5 text-sm text-gray-500">Just to confirm it&apos;s you.</p>
-          </div>
+          {hasPassword ? (
+            <div>
+              <Label
+                htmlFor="currentPasswordEmail"
+                className="mb-1.5 block text-sm font-medium text-[hsl(var(--brand-charcoal))]"
+              >
+                Current password
+              </Label>
+              <Input
+                id="currentPasswordEmail"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full bg-white"
+                required
+                disabled={loading}
+              />
+              <p className="mt-1.5 text-sm text-gray-500">Just to confirm it&apos;s you.</p>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">
+              We&apos;ll send confirmation links to both addresses. That&apos;s how we know
+              it&apos;s you.
+            </p>
+          )}
 
           {error && (
             <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-3">

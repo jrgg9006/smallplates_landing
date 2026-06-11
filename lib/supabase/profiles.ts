@@ -184,24 +184,29 @@ export async function syncEmailFromAuth(user: { id: string; email?: string | nul
 }
 
 /**
- * Update user email (requires email verification)
+ * Update user email (requires email verification).
+ * Reason: currentPassword is optional — passwordless users (magic-link only)
+ * have no password to give. For them, identity is verified by the double
+ * confirmation links Supabase sends to both the old and new address.
  */
-export async function updateEmail(newEmail: string, currentPassword: string) {
+export async function updateEmail(newEmail: string, currentPassword?: string) {
   const supabase = createSupabaseClient();
-  
+
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) {
     return { data: null, error: 'User not authenticated' };
   }
 
-  // Verify current password first
-  const { error: verifyError } = await supabase.auth.signInWithPassword({
-    email: user.email!,
-    password: currentPassword
-  });
+  // Verify current password when the account has one
+  if (currentPassword) {
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email: user.email!,
+      password: currentPassword
+    });
 
-  if (verifyError) {
-    return { data: null, error: 'Current password is incorrect' };
+    if (verifyError) {
+      return { data: null, error: 'Current password is incorrect' };
+    }
   }
 
   // Update email via Supabase Auth (triggers verification email)
@@ -217,27 +222,33 @@ export async function updateEmail(newEmail: string, currentPassword: string) {
 }
 
 /**
- * Update user password
+ * Set or update the user password.
+ * Reason: currentPassword is optional — passwordless users (magic-link only)
+ * are SETTING a password for the first time and have nothing to verify.
+ * profiles.password_set_at is stamped so the app knows the user deliberately
+ * chose a password (auth.users may hold an unknown random one from signup).
  */
-export async function updatePassword(currentPassword: string, newPassword: string) {
+export async function updatePassword(newPassword: string, currentPassword?: string) {
   const supabase = createSupabaseClient();
-  
+
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) {
     return { data: null, error: 'User not authenticated' };
   }
 
-  // Verify current password first
-  const { error: verifyError } = await supabase.auth.signInWithPassword({
-    email: user.email!,
-    password: currentPassword
-  });
+  // Verify current password when the account has one
+  if (currentPassword) {
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email: user.email!,
+      password: currentPassword
+    });
 
-  if (verifyError) {
-    return { data: null, error: 'Current password is incorrect' };
+    if (verifyError) {
+      return { data: null, error: 'Current password is incorrect' };
+    }
   }
 
-  // Update password
+  // Set the new password
   const { data, error } = await supabase.auth.updateUser({
     password: newPassword
   });
@@ -245,6 +256,12 @@ export async function updatePassword(currentPassword: string, newPassword: strin
   if (error) {
     return { data: null, error: error.message };
   }
+
+  // Mark the account as having a deliberately chosen password
+  await supabase
+    .from('profiles')
+    .update({ password_set_at: new Date().toISOString() })
+    .eq('id', user.id);
 
   return { data, error: null };
 }
@@ -254,22 +271,24 @@ export async function updatePassword(currentPassword: string, newPassword: strin
  * - If user has content (recipes, guests, groups) → Soft delete (preserve data)
  * - If user has no content → Hard delete (remove completely)
  */
-export async function deleteAccount(currentPassword: string) {
+export async function deleteAccount(currentPassword?: string) {
   const supabase = createSupabaseClient();
-  
+
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) {
     return { data: null, error: 'User not authenticated' };
   }
 
-  // Verify current password first
-  const { error: verifyError } = await supabase.auth.signInWithPassword({
-    email: user.email!,
-    password: currentPassword
-  });
+  // Verify current password when the account has one (server re-checks)
+  if (currentPassword) {
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email: user.email!,
+      password: currentPassword
+    });
 
-  if (verifyError) {
-    return { data: null, error: 'Current password is incorrect' };
+    if (verifyError) {
+      return { data: null, error: 'Current password is incorrect' };
+    }
   }
 
   // Call the API route that uses the same smart deletion logic as admin
@@ -279,7 +298,7 @@ export async function deleteAccount(currentPassword: string) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ password: currentPassword }),
+      body: JSON.stringify({ password: currentPassword || null }),
     });
 
     const result = await response.json();

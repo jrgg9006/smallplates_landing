@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>Log in to Small Plates & Co.</title>
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+    table { border-collapse: collapse !important; }
+    body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+    @media screen and (max-width: 600px) {
+      .mobile-padding { padding: 30px 20px !important; }
+      table[class="wrapper"] { width: 100% !important; }
+    }
+    @media (prefers-color-scheme: dark) {
+      body, .darkmode-bg { background-color: #1a1a1a !important; }
+      .container-bg { background-color: #2d2d2d !important; }
+      h1, h2, h3, .darkmode-text { color: #ffffff !important; }
+      p, .darkmode-subtext { color: #cccccc !important; }
+    }
+    .button-td, .button-a { transition: all 100ms ease-in; }
+    .button-td:hover, .button-a:hover { background: #C19940 !important; }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; word-spacing: normal; background-color: #f8f9fa;" class="darkmode-bg">
+  <div role="article" aria-roledescription="email" lang="en">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" width="100%" style="border-collapse: collapse;">
+      <tr>
+        <td align="center" style="padding: 40px 20px;">
+
+          <!-- Card -->
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" width="100%" style="max-width: 600px; border-collapse: collapse;" class="wrapper">
+            <tr>
+              <td style="background-color: #ffffff; border-radius: 12px; overflow: hidden; padding: 60px 40px;" class="container-bg mobile-padding">
+
+                <!-- Logo -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td align="left" style="padding-bottom: 40px;">
+                      <img src="https://smallplatesandcompany.com/images/SmallPlates_logo_horizontal.png" alt="Small Plates &amp; Co." width="160" height="auto" style="display: block; max-width: 160px; height: auto;" />
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Body text -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #555555; line-height: 1.7;">
+                      <p style="margin: 0 0 28px 0;" class="darkmode-subtext">
+                        Log in to Small Plates &amp; Co. by clicking the button below.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- CTA Button -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding-bottom: 32px;">
+                      <!--[if mso]>
+                      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{loginLink}}" style="height:52px;v-text-anchor:middle;width:280px;" arcsize="58%" stroke="f" fillcolor="#D4A854">
+                        <w:anchorlock/>
+                        <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:16px;font-weight:500;">Log in as {{buyerName}}</center>
+                      </v:roundrect>
+                      <![endif]-->
+                      <!--[if !mso]><!-->
+                      <a href="{{loginLink}}" style="display: inline-block; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; font-weight: 500; color: #ffffff; text-decoration: none; padding: 14px 36px; border-radius: 30px; background-color: #D4A854;">
+                        Log in as {{buyerName}}
+                      </a>
+                      <!--<![endif]-->
+                    </td>
+                  </tr>
+                </table>
+
+                {{#loginCode}}
+                <!-- Login code -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td style="padding: 0 0 32px 0;">
+                      <p style="margin: 0 0 10px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #999999; line-height: 1.5;">
+                        Or type this code where you're logging in:
+                      </p>
+                      <p style="margin: 0 0 6px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: 10px; color: #2D2D2D;" class="darkmode-text">
+                        {{loginCode}}
+                      </p>
+                      <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #999999; line-height: 1.5;">
+                        It expires in 1 hour.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+                {{/loginCode}}
+
+                <!-- Security note -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 14px; color: #555555; line-height: 1.7;" class="darkmode-subtext">
+                      <p style="margin: 0 0 16px 0;">
+                        Do not forward this email, as the link above gives access to your account.
+                      </p>
+                      <p style="margin: 0 0 0 0;">
+                        If this login button doesn't work, try requesting another login email or get in touch at <a href="mailto:team@smallplatesandcompany.com" style="color: #555555; text-decoration: underline;">team@smallplatesandcompany.com</a>.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+          </table>
+
+          <!-- Disclaimer outside card -->
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 580px; margin: 0 auto;">
+            <tr>
+              <td align="center" style="padding: 16px 20px 0;">
+                <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 11px; color: #B5AFA8; line-height: 1.5; text-align: center;">
+                  You're receiving this because someone requested a login link for this email on Small Plates &amp; Co. &nbsp;&middot;&nbsp;
+                  <a href="mailto:team@smallplatesandcompany.com" style="color: #B5AFA8; text-decoration: underline;">Contact us</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+
+        </td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>

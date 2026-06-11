@@ -16,9 +16,10 @@ export interface SendWelcomeLoginEmailParams {
   to: string;
   buyerName: string;
   loginLink: string;
+  loginCode?: string;
 }
 
-export async function sendWelcomeLoginEmail({ to, buyerName, loginLink }: SendWelcomeLoginEmailParams) {
+export async function sendWelcomeLoginEmail({ to, buyerName, loginLink, loginCode }: SendWelcomeLoginEmailParams) {
   try {
     const result = await postmarkClient.sendEmailWithTemplate({
       From: `Small Plates & Co. <${process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com'}>`,
@@ -28,6 +29,7 @@ export async function sendWelcomeLoginEmail({ to, buyerName, loginLink }: SendWe
       TemplateModel: {
         buyerName,
         loginLink,
+        loginCode: loginCode || '',
         userEmail: to,
       },
       MessageStream: 'outbound',
@@ -40,7 +42,7 @@ export async function sendWelcomeLoginEmail({ to, buyerName, loginLink }: SendWe
   }
 }
 
-export async function sendLoginLinkEmail({ to, buyerName, loginLink }: SendWelcomeLoginEmailParams) {
+export async function sendLoginLinkEmail({ to, buyerName, loginLink, loginCode }: SendWelcomeLoginEmailParams) {
   try {
     const result = await postmarkClient.sendEmailWithTemplate({
       From: `Small Plates & Co. <${process.env.POSTMARK_FROM_EMAIL || 'team@smallplatesandcompany.com'}>`,
@@ -50,6 +52,7 @@ export async function sendLoginLinkEmail({ to, buyerName, loginLink }: SendWelco
       TemplateModel: {
         buyerName,
         loginLink,
+        loginCode: loginCode || '',
       },
       MessageStream: 'outbound',
     });

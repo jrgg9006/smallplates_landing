@@ -55,19 +55,25 @@ function PasswordField({ id, label, value, onChange, disabled }: PasswordFieldPr
   );
 }
 
-export function PasswordChangeForm() {
+interface PasswordChangeFormProps {
+  // null = still loading the profile flag
+  hasPassword: boolean | null;
+  onPasswordSet: () => void;
+}
+
+export function PasswordChangeForm({ hasPassword, onPasswordSet }: PasswordChangeFormProps) {
   const [editing, setEditing] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const metRequirements = REQUIREMENTS.filter((r) => r.test(newPassword)).length;
 
   const validateForm = () => {
-    if (!currentPassword.trim()) {
+    if (hasPassword && !currentPassword.trim()) {
       setError('Please enter your current password');
       return false;
     }
@@ -82,7 +88,7 @@ export function PasswordChangeForm() {
       return false;
     }
 
-    if (currentPassword === newPassword) {
+    if (hasPassword && currentPassword === newPassword) {
       setError('New password must be different from your current password');
       return false;
     }
@@ -101,19 +107,23 @@ export function PasswordChangeForm() {
     setError(null);
 
     try {
-      const { error } = await updatePassword(currentPassword, newPassword);
+      const { error } = await updatePassword(
+        newPassword,
+        hasPassword ? currentPassword : undefined
+      );
 
       if (error) {
         setError(error);
         return;
       }
 
+      setSuccess(hasPassword ? 'Password updated.' : 'Password set. You can now log in with it.');
       setEditing(false);
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 5000);
+      onPasswordSet();
+      setTimeout(() => setSuccess(null), 6000);
     } catch (err) {
       setError('Failed to update password. Please try again.');
     } finally {
@@ -131,23 +141,31 @@ export function PasswordChangeForm() {
 
   return (
     <div className="space-y-4">
-      {/* Current state + change action */}
+      {/* Current state + action */}
       <div>
         <Label className="mb-1.5 block text-sm font-medium text-[hsl(var(--brand-charcoal))]">
           Password
         </Label>
         <div className="flex items-center justify-between gap-4">
-          <p className="tracking-widest text-[hsl(var(--brand-charcoal))]">••••••••</p>
-          {!editing && (
+          {hasPassword === null ? (
+            <p className="text-gray-400">&mdash;</p>
+          ) : hasPassword ? (
+            <p className="tracking-widest text-[hsl(var(--brand-charcoal))]">••••••••</p>
+          ) : (
+            <p className="text-sm text-gray-600">
+              You don&apos;t have one. You log in with email links.
+            </p>
+          )}
+          {!editing && hasPassword !== null && (
             <button
               type="button"
               className="text-link flex-shrink-0"
               onClick={() => {
                 setEditing(true);
-                setSuccess(false);
+                setSuccess(null);
               }}
             >
-              Change password
+              {hasPassword ? 'Change password' : 'Set a password'}
             </button>
           )}
         </div>
@@ -157,28 +175,36 @@ export function PasswordChangeForm() {
       {success && (
         <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 p-3">
           <CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
-          <p className="text-sm text-green-700">Password updated.</p>
+          <p className="text-sm text-green-700">{success}</p>
         </div>
       )}
 
-      {/* Change form — only when editing */}
+      {/* Set / change form — only when editing */}
       {editing && (
         <form
           onSubmit={handleSubmit}
           className="space-y-4 rounded-lg border border-[hsl(var(--brand-border))] bg-[hsl(var(--brand-warm-white-warm))] p-4"
         >
-          <PasswordField
-            id="currentPassword"
-            label="Current password"
-            value={currentPassword}
-            onChange={setCurrentPassword}
-            disabled={loading}
-          />
+          {!hasPassword && (
+            <p className="text-sm text-gray-600">
+              Optional. Email links keep working either way — a password is just a faster door.
+            </p>
+          )}
+
+          {hasPassword && (
+            <PasswordField
+              id="currentPassword"
+              label="Current password"
+              value={currentPassword}
+              onChange={setCurrentPassword}
+              disabled={loading}
+            />
+          )}
 
           <div className="space-y-2">
             <PasswordField
               id="newPassword"
-              label="New password"
+              label={hasPassword ? 'New password' : 'Password'}
               value={newPassword}
               onChange={setNewPassword}
               disabled={loading}
@@ -208,7 +234,7 @@ export function PasswordChangeForm() {
           <div>
             <PasswordField
               id="confirmPassword"
-              label="Confirm new password"
+              label={hasPassword ? 'Confirm new password' : 'Confirm password'}
               value={confirmPassword}
               onChange={setConfirmPassword}
               disabled={loading}
@@ -233,10 +259,12 @@ export function PasswordChangeForm() {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Updating...
+                  {hasPassword ? 'Updating...' : 'Saving...'}
                 </>
-              ) : (
+              ) : hasPassword ? (
                 'Update password'
+              ) : (
+                'Set password'
               )}
             </button>
           </div>

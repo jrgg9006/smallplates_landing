@@ -122,6 +122,40 @@ export async function sendMagicLink(
 }
 
 /**
+ * Verify the 6-digit login code from the login email.
+ *
+ * The code is the `email_otp` minted by `admin.generateLink({ type: "magiclink" })` —
+ * same one-time token as the link, so using either consumes both.
+ */
+export async function verifyLoginCode(email: string, code: string) {
+  const supabase = createSupabaseClient();
+
+  const { error } = await supabase.auth.verifyOtp({
+    email,
+    token: code,
+    type: 'email',
+  });
+
+  if (!error) {
+    return { error: null };
+  }
+
+  // Reason: tokens minted via generateLink({type:'magiclink'}) verify as type
+  // 'magiclink' on some GoTrue versions — retry before reporting failure.
+  const { error: legacyError } = await supabase.auth.verifyOtp({
+    email,
+    token: code,
+    type: 'magiclink',
+  });
+
+  if (legacyError) {
+    return { error: 'That code didn’t work. Check for typos, or request a new one.' };
+  }
+
+  return { error: null };
+}
+
+/**
  * Send password reset email.
  *
  * Proxies to `/api/auth/send-reset-link` which uses `supabaseAdmin.auth.admin.generateLink`

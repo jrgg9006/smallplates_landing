@@ -55,12 +55,11 @@ export async function POST(request: NextRequest) {
     const redirectUrl = `${baseUrl}/auth/callback?next=${encodeURIComponent(safeRedirect)}`;
 
     // Reason: generateLink({ type: "signup" }) requires a password, which we don't want
-    // for passwordless signup. Instead, create the auth user first, then send a magiclink.
+    // for passwordless signup. Instead, create the auth user first (no password — the
+    // account is passwordless until the user deliberately sets one), then send a magiclink.
     if (!profile) {
-      const randomPassword = crypto.randomUUID();
       await supabaseAdmin.auth.admin.createUser({
         email,
-        password: randomPassword,
         email_confirm: false,
       });
     }
@@ -78,6 +77,10 @@ export async function POST(request: NextRequest) {
 
     try {
       const firstName = profile?.full_name?.split(" ")[0] || "";
+      // Reason: generateLink also mints a 6-digit one-time code (email_otp) tied to the
+      // same token as the link — the email carries both so the user can either click
+      // or type the code on another device.
+      const loginCode = linkData.properties.email_otp;
       // Reason: existing users get the simple login-link template;
       // new users (signup mode) get the welcome template with onboarding context.
       if (profile) {
@@ -85,12 +88,14 @@ export async function POST(request: NextRequest) {
           to: email,
           buyerName: firstName || "there",
           loginLink: linkData.properties.action_link,
+          loginCode,
         });
       } else {
         await sendWelcomeLoginEmail({
           to: email,
           buyerName: firstName,
           loginLink: linkData.properties.action_link,
+          loginCode,
         });
       }
     } catch (err) {

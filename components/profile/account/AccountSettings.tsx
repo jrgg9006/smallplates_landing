@@ -1,10 +1,11 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PersonalInfoForm } from './PersonalInfoForm';
 import { EmailChangeForm } from './EmailChangeForm';
 import { PasswordChangeForm } from './PasswordChangeForm';
 import { DangerZone } from './DangerZone';
+import { getCurrentProfile } from '@/lib/supabase/profiles';
 
 interface SettingsSectionProps {
   title: string;
@@ -27,6 +28,16 @@ function SettingsSection({ title, description, children }: SettingsSectionProps)
 }
 
 export function AccountSettings() {
+  // Reason: whether the user deliberately set a password decides what the
+  // Email, Password and Delete sections ask for. null = still loading.
+  const [hasPassword, setHasPassword] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    getCurrentProfile().then(({ data }) => {
+      setHasPassword(Boolean(data?.password_set_at));
+    });
+  }, []);
+
   return (
     <div>
       {/* Header */}
@@ -48,15 +59,18 @@ export function AccountSettings() {
         </SettingsSection>
 
         <SettingsSection title="Email" description="Where we reach you.">
-          <EmailChangeForm />
+          <EmailChangeForm hasPassword={hasPassword} />
         </SettingsSection>
 
         <SettingsSection title="Password">
-          <PasswordChangeForm />
+          <PasswordChangeForm
+            hasPassword={hasPassword}
+            onPasswordSet={() => setHasPassword(true)}
+          />
         </SettingsSection>
 
         <SettingsSection title="Delete account">
-          <DangerZone />
+          <DangerZone hasPassword={hasPassword} />
         </SettingsSection>
       </div>
     </div>

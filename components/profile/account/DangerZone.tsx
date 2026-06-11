@@ -9,7 +9,12 @@ import { useRouter } from 'next/navigation';
 
 const CONFIRMATION_TEXT = 'DELETE MY ACCOUNT';
 
-export function DangerZone() {
+interface DangerZoneProps {
+  // null = still loading the profile flag
+  hasPassword: boolean | null;
+}
+
+export function DangerZone({ hasPassword }: DangerZoneProps) {
   const router = useRouter();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -41,7 +46,7 @@ export function DangerZone() {
   }, [showDeleteModal, loading]);
 
   const validateDeletion = () => {
-    if (!currentPassword.trim()) {
+    if (hasPassword && !currentPassword.trim()) {
       setError('Please enter your current password');
       return false;
     }
@@ -63,7 +68,7 @@ export function DangerZone() {
     setError(null);
 
     try {
-      const { data, error } = await deleteAccount(currentPassword);
+      const { data, error } = await deleteAccount(hasPassword ? currentPassword : undefined);
 
       if (error) {
         setError(error);
@@ -94,6 +99,7 @@ export function DangerZone() {
       <button
         type="button"
         onClick={() => setShowDeleteModal(true)}
+        disabled={hasPassword === null}
         className="btn mt-4 px-6 py-2.5 text-sm border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
       >
         Delete account
@@ -151,24 +157,26 @@ export function DangerZone() {
                 </div>
 
                 <div className="space-y-4">
-                  {/* Password Confirmation */}
-                  <div>
-                    <Label
-                      htmlFor="deletePassword"
-                      className="mb-1.5 block text-sm font-medium text-[hsl(var(--brand-charcoal))]"
-                    >
-                      Your password
-                    </Label>
-                    <Input
-                      id="deletePassword"
-                      type="password"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="w-full"
-                      required
-                      disabled={loading}
-                    />
-                  </div>
+                  {/* Password Confirmation — only for accounts that have one */}
+                  {hasPassword && (
+                    <div>
+                      <Label
+                        htmlFor="deletePassword"
+                        className="mb-1.5 block text-sm font-medium text-[hsl(var(--brand-charcoal))]"
+                      >
+                        Your password
+                      </Label>
+                      <Input
+                        id="deletePassword"
+                        type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        className="w-full"
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                  )}
 
                   {/* Confirmation Text */}
                   <div>
@@ -213,7 +221,9 @@ export function DangerZone() {
                     type="button"
                     onClick={handleDeleteAccount}
                     disabled={
-                      loading || !currentPassword || confirmationText !== CONFIRMATION_TEXT
+                      loading ||
+                      (hasPassword ? !currentPassword : false) ||
+                      confirmationText !== CONFIRMATION_TEXT
                     }
                     className="btn px-6 py-2.5 text-sm min-w-[150px] bg-red-600 text-white hover:bg-red-700 transition-colors"
                   >
