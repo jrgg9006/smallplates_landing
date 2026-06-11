@@ -7,7 +7,8 @@ import { TestimonialCard, type Testimonial } from "@/components/landing/Testimon
 // One scroll step = 1u card + gap (288 + 20 = 308px)
 const UNIT = 308;
 
-// Cards 1 (Sarah K.) and 5 (David R.) are 2u — photo placeholders until real shots arrive
+// 2u cards carry a photo; screenshot cards show the real WhatsApp messages
+// (Spanish) with the translation as the quote.
 const testimonials: Testimonial[] = [
   {
     id: 1,
@@ -20,27 +21,57 @@ const testimonials: Testimonial[] = [
   {
     id: 2,
     quote:
+      "When we opened the book I cried so much haha… The people we love most giving us a little piece of themselves, of their kitchens, of their stories — what an enormous privilege!! For us this book isn't just recipes, it's having everyone with us in this new chapter, in the most beautiful, everyday way there is.",
+    author: "Sophie",
+    descriptor: "Couple — the day the book arrived",
+    photo: "/testimonials/whatsapp_sophie.jpg",
+    screenshot: true,
+    note: "Translated from Spanish",
+  },
+  {
+    id: 3,
+    quote:
       "We did this as an anniversary gift and it was one of the most meaningful things we've done since our wedding. Small Plates and Company gives your family and friends a chance to bring their favorite recipes into your home and you get the meals that matter to the people you love. Highly recommend for anyone looking for a thoughtful gift they'll use all the time.",
     author: "Donald C.",
     descriptor: "Groom",
   },
-    {
-      id: 3,
-      quote:
-        "AMAZING GIFT!",
-      author: "Victor B. & Rocío",
-      descriptor: "Couple",
-      photo: "/testimonials/victor_testimonial.jpg",
-    },
   {
     id: 4,
+    quote:
+      "“Recipe's done! 🥰 What a lovely gift!!!”\n“Mine's in! I loved this gift!”\n“Done! What an incredible gift”\n“Done! ❤️”",
+    author: "The group chat",
+    descriptor: "Guests, the week recipes were due",
+    photo: "/testimonials/whatsapp_cadena.jpg",
+    screenshot: true,
+    note: "Translated from Spanish",
+  },
+  {
+    id: 5,
+    quote:
+      "AMAZING GIFT!",
+    author: "Victor B. & Rocío",
+    descriptor: "Couple",
+    photo: "/testimonials/victor_testimonial.jpg",
+  },
+  {
+    id: 6,
+    quote:
+      "“It's divine! They're going to love it”\n“It's incredible!!! Thank you”\n“No woooow it's incredible!!! 😍”\n“Thank you for organizing this 🙏”",
+    author: "The group chat",
+    descriptor: "Guests, seeing the book for the first time",
+    photo: "/testimonials/whatsapp_reacciones.jpg",
+    screenshot: true,
+    note: "Translated from Spanish",
+  },
+  {
+    id: 7,
     quote:
       "I loved it! and I'd definitely do this for other people too. It feels like such a thoughtful, meaningful gift.",
     author: "Mariana",
     descriptor: "Guest - Contributor",
   },
   {
-    id: 5,
+    id: 8,
     quote:
       "I loved it. It's so easy to create the recipes, and the final result is incredible.",
     author: "Maria Cristina",

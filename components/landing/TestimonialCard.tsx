@@ -9,6 +9,10 @@ export type Testimonial = {
   author: string;
   descriptor: string;
   photo?: string;
+  // Photo is a chat screenshot: no vignette, taller on mobile, anchored to top
+  screenshot?: boolean;
+  // Small print under the descriptor, e.g. "Translated from Spanish"
+  note?: string;
 };
 
 const EASE_OUT_SPRING: [number, number, number, number] = [0.22, 1, 0.36, 1];
@@ -38,12 +42,13 @@ function CardBody({ t }: { t: Testimonial }) {
   return (
     <div className="flex flex-col flex-1 px-6 py-6">
       <StarRow />
-      <blockquote className="type-caption text-white/80 flex-1 leading-relaxed">
+      <blockquote className="type-caption text-white/80 flex-1 leading-relaxed whitespace-pre-line">
         {t.quote}
       </blockquote>
       <footer className="mt-5 pt-4 border-t border-white/[0.07]">
         <p className="type-eyebrow text-white/85">{t.author}</p>
         <p className="type-caption text-white/40 mt-1.5">{t.descriptor}</p>
+        {t.note && <p className="type-caption text-white/30 mt-1">{t.note}</p>}
       </footer>
     </div>
   );
@@ -74,16 +79,20 @@ export function TestimonialCard({ t }: { t: Testimonial }) {
         "
       >
         {/* Photo — top on mobile (first in DOM), right on desktop (order-last) */}
-        <div className="md:order-last relative h-[180px] md:h-full w-full md:w-1/2 flex-shrink-0 overflow-hidden">
+        <div
+          className={`md:order-last relative md:h-full w-full md:w-1/2 flex-shrink-0 overflow-hidden ${
+            t.screenshot ? "h-[360px]" : "h-[180px]"
+          }`}
+        >
           <Image
             src={t.photo}
-            alt=""
+            alt={t.screenshot ? "WhatsApp messages from guests, in Spanish" : ""}
             fill
-            className="object-cover object-center"
+            className={t.screenshot ? "object-cover object-top" : "object-cover object-center"}
             sizes="(max-width: 768px) 85vw, 298px"
           />
           {/* Vignette so the card edge reads as charcoal, not raw photo */}
-          <div className="absolute inset-0 bg-black/20" />
+          {!t.screenshot && <div className="absolute inset-0 bg-black/20" />}
         </div>
 
         {/* Text — bottom on mobile, left on desktop (order-first) */}
