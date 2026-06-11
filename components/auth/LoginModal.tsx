@@ -253,7 +253,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               onClick={() => switchMode("email")}
               className="block mx-auto mt-3 text-xs text-gray-400 hover:text-gray-600 transition-colors"
             >
-              Email me a code instead
+              ← Go back
             </button>
           </>
         ) : (
@@ -288,7 +288,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 disabled={status === "sending" || !email.trim()}
                 className="btn btn-honey w-full rounded-full px-4 py-3.5 text-[15px] border border-transparent"
               >
-                {status === "sending" ? "Sending..." : "Continue with email"}
+                {status === "sending" ? "Sending..." : "Email me a code"}
               </button>
             </form>
 
