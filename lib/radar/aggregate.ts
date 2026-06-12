@@ -9,6 +9,7 @@ import type {
 
 // Reason: day boundaries in the founder's timezone — Vercel runs UTC and a
 // 7pm CDMX signup must count as "today", not "tomorrow".
+// Mexico City abolished DST in 2022, so fixed UTC-6 makes day-stepping by 86,400,000ms safe.
 const TZ = 'America/Mexico_City';
 const DAY_MS = 86_400_000;
 
@@ -57,6 +58,10 @@ export function computePulse(timestamps: string[], now: Date): PulseComputed {
 }
 
 const SENT_STATUSES = new Set(['sent', 'delivered', 'opened']);
+
+// Reason: whitelist — 'error' (failed checkout) and 'refunded' must never
+// count as revenue anywhere in the dashboard.
+const PAID_STATUSES = new Set(['paid', 'processing', 'in_production', 'shipped', 'delivered']);
 
 export function buildPulseMetrics(d: RadarSources, now: Date): PulseMetric[] {
   const cards: { key: string; label: string; definition: string; timestamps: string[] }[] = [
@@ -144,13 +149,15 @@ export function computeFunnel(d: RadarSources, now: Date): FunnelStep[] {
     if (gu.source === 'collection') shared.add(owner);
   }
 
-  const recipesPerOwner = new Map<string, number>();
+  // Reason: count recipes per GROUP (not per owner) so "5+ recipes" means
+  // a single book has 5 recipes, not the owner's total across all books.
+  const recipesPerGroup = new Map<string, number>();
   for (const r of d.recipes) {
-    const owner = r.group_id ? groupOwner.get(r.group_id) : undefined;
-    if (!owner) continue;
-    recipesPerOwner.set(owner, (recipesPerOwner.get(owner) ?? 0) + 1);
+    if (!r.group_id || !groupOwner.has(r.group_id)) continue;
+    recipesPerGroup.set(r.group_id, (recipesPerGroup.get(r.group_id) ?? 0) + 1);
   }
-  for (const [owner, n] of recipesPerOwner) {
+  for (const [groupId, n] of recipesPerGroup) {
+    const owner = groupOwner.get(groupId)!;
     if (n >= 1) recipe1.add(owner);
     if (n >= 5) recipe5.add(owner);
   }
@@ -163,22 +170,27 @@ export function computeFunnel(d: RadarSources, now: Date): FunnelStep[] {
   }
 
   for (const o of d.orders) {
-    if (o.status === 'refunded') continue;
+    if (!PAID_STATUSES.has(o.status)) continue;
     const byGroup = o.group_id ? groupOwner.get(o.group_id) : undefined;
     const byUser = o.user_id && cohort.has(o.user_id) ? o.user_id : undefined;
     const owner = byGroup ?? byUser;
     if (owner) paid.add(owner);
   }
 
+  // Reason: gate shared/paid on having a book — funnel must be monotonically
+  // ordered; a share event or order with no book attached is noise.
+  const sharedFinal = new Set([...shared].filter((id) => book.has(id)));
+  const paidFinal = new Set([...paid].filter((id) => book.has(id)));
+
   return [
     { key: 'signup', label: 'Registro', definition: 'Usuarios registrados en los últimos 30 días.', count: cohort.size },
     { key: 'book', label: 'Libro creado', definition: 'Del cohorte, cuántos crearon al menos un libro.', count: book.size },
     { key: 'guest', label: '≥1 invitado', definition: 'Agregaron al menos un invitado (sin contarse a sí mismos).', count: guest.size },
-    { key: 'shared', label: 'Link compartido', definition: 'Evento share_link_copied, o proxy: algún invitado llegó vía el link de colección.', count: shared.size },
+    { key: 'shared', label: 'Link compartido', definition: 'Evento share_link_copied, o proxy: algún invitado llegó vía el link de colección. Solo cuenta usuarios que ya crearon libro.', count: sharedFinal.size },
     { key: 'recipe1', label: '1ª receta', definition: 'Su libro tiene al menos una receta.', count: recipe1.size },
     { key: 'recipe5', label: '≥5 recetas', definition: 'Su libro tiene 5 o más recetas.', count: recipe5.size },
     { key: 'photo', label: 'Foto del libro', definition: 'Subieron la foto principal del libro (couple_image_url).', count: photo.size },
-    { key: 'paid', label: 'Compra', definition: 'Tienen al menos una orden pagada (orders, excluye refunded).', count: paid.size },
+    { key: 'paid', label: 'Compra', definition: 'Tienen al menos una orden pagada (orders, excluye refunded).', count: paidFinal.size },
   ];
 }
 
@@ -210,7 +222,7 @@ export function computeGroupHealth(d: RadarSources, now: Date): GroupHealthRow[]
     const sharedProxy =
       guests.some((gu) => gu.source === 'collection') ||
       events.some((e) => SHARE_EVENTS.has(e.event_name));
-    const hasPaid = d.orders.some((o) => o.group_id === g.id && o.status !== 'refunded');
+    const hasPaid = d.orders.some((o) => o.group_id === g.id && PAID_STATUSES.has(o.status));
 
     let stageIdx = 0; // 'Libro creado'
     if (guests.length > 0) stageIdx = 1;
@@ -227,9 +239,10 @@ export function computeGroupHealth(d: RadarSources, now: Date): GroupHealthRow[]
       ...comms.map((c) => new Date(c.sent_at ?? c.created_at).getTime()),
       ...edits.map((e) => new Date(e.created_at).getTime()),
       ...events.map((e) => new Date(e.created_at).getTime()),
+      ...d.recipes.filter((r) => r.group_id === g.id && r.deleted_at).map((r) => new Date(r.deleted_at as string).getTime()),
     ];
     const last = Math.max(...timestamps);
-    const daysInactive = Math.floor((now.getTime() - last) / DAY_MS);
+    const daysInactive = Math.max(0, Math.floor((now.getTime() - last) / DAY_MS));
 
     const sentComms = comms
       .filter((c) => SENT_STATUSES.has(c.status ?? ''))
@@ -344,6 +357,7 @@ export function buildFeed(d: RadarSources, limit = 50): FeedItem[] {
   }
 
   for (const o of d.orders) {
+    if (!PAID_STATUSES.has(o.status)) continue;
     items.push({
       id: `order-${o.id}`,
       at: o.created_at,
@@ -371,6 +385,8 @@ export function buildFeed(d: RadarSources, limit = 50): FeedItem[] {
     }
   }
 
-  items.sort((a, b) => (a.at < b.at ? 1 : -1));
+  // Reason: all timestamps come from Supabase as UTC ISO strings, so
+  // lexicographic order == chronological order.
+  items.sort((a, b) => b.at.localeCompare(a.at));
   return items.slice(0, limit);
 }

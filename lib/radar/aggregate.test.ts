@@ -158,3 +158,78 @@ describe('buildPulseMetrics', () => {
     }
   });
 });
+
+describe('timezone bucketing', () => {
+  it('buckets a 9pm-CDMX timestamp (3am UTC next day) into the CDMX day', () => {
+    // 2026-06-13T03:00:00Z == 2026-06-12 21:00 in America/Mexico_City
+    const series = dailySeries(['2026-06-13T03:00:00.000Z'], 1, NOW);
+    expect(series).toEqual([1]);
+  });
+});
+
+describe('order status semantics', () => {
+  it('never counts error or refunded orders as purchases', () => {
+    const d = empty();
+    d.profiles = [{ id: 'u1', email: 'a@x.com', full_name: 'Ana', created_at: at(5) }];
+    d.groups = [
+      { id: 'g1', name: 'Boda', created_by: 'u1', created_at: at(4), status: 'free_tier', book_status: 'active', couple_image_url: null },
+    ];
+    d.orders = [
+      { id: 'o1', group_id: 'g1', user_id: 'u1', amount_total: 16900, status: 'error', created_at: at(1) },
+      { id: 'o2', group_id: 'g1', user_id: 'u1', amount_total: 16900, status: 'refunded', created_at: at(1) },
+    ];
+    const funnel = computeFunnel(d, NOW);
+    expect(funnel.find((s) => s.key === 'paid')?.count).toBe(0);
+    expect(computeGroupHealth(d, NOW)[0].stage).not.toBe('Compró');
+    expect(buildFeed(d).filter((f) => f.kind === 'order')).toHaveLength(0);
+  });
+});
+
+describe('funnel monotonic gates', () => {
+  it('does not count shared/paid for cohort users without a book', () => {
+    const d = empty();
+    d.profiles = [{ id: 'u1', email: 'a@x.com', full_name: 'Ana', created_at: at(5) }];
+    d.events = [
+      { id: 1, user_id: 'u1', group_id: null, event_name: 'share_link_copied', props: {}, created_at: at(1) },
+    ];
+    d.orders = [
+      { id: 'o1', group_id: null, user_id: 'u1', amount_total: 16900, status: 'paid', created_at: at(1) },
+    ];
+    const funnel = computeFunnel(d, NOW);
+    const byKey = Object.fromEntries(funnel.map((s) => [s.key, s.count]));
+    expect(byKey.shared).toBe(0);
+    expect(byKey.paid).toBe(0);
+  });
+
+  it('requires 5 recipes in a SINGLE book for recipe5', () => {
+    const d = empty();
+    d.profiles = [{ id: 'u1', email: 'a@x.com', full_name: 'Ana', created_at: at(5) }];
+    d.groups = [
+      { id: 'g1', name: 'A', created_by: 'u1', created_at: at(4), status: 'free_tier', book_status: 'active', couple_image_url: null },
+      { id: 'g2', name: 'B', created_by: 'u1', created_at: at(4), status: 'free_tier', book_status: 'active', couple_image_url: null },
+    ];
+    d.recipes = [
+      ...Array.from({ length: 3 }, (_, i) => ({ id: `a${i}`, group_id: 'g1', guest_id: null, recipe_name: 'x', created_at: at(2), deleted_at: null, image_url: null, source: 'manual' })),
+      ...Array.from({ length: 3 }, (_, i) => ({ id: `b${i}`, group_id: 'g2', guest_id: null, recipe_name: 'x', created_at: at(2), deleted_at: null, image_url: null, source: 'manual' })),
+    ];
+    const funnel = computeFunnel(d, NOW);
+    const byKey = Object.fromEntries(funnel.map((s) => [s.key, s.count]));
+    expect(byKey.recipe1).toBe(1);
+    expect(byKey.recipe5).toBe(0); // 6 total but max 3 per book
+  });
+});
+
+describe('daysInactive clamp', () => {
+  it('never returns negative days for future timestamps', () => {
+    const d = empty();
+    d.profiles = [{ id: 'u1', email: 'a@x.com', full_name: 'Ana', created_at: at(20) }];
+    d.groups = [
+      { id: 'g1', name: 'Boda', created_by: 'u1', created_at: at(20), status: 'free_tier', book_status: 'active', couple_image_url: null },
+    ];
+    d.recipes = [
+      { id: 'r1', group_id: 'g1', guest_id: null, recipe_name: 'x', created_at: at(-1), deleted_at: null, image_url: null, source: 'manual' },
+    ];
+    const rows = computeGroupHealth(d, NOW);
+    expect(rows[0].daysInactive).toBe(0);
+  });
+});
