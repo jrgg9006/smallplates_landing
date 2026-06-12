@@ -92,7 +92,7 @@ export default function FaqPage() {
                   className="group border-b border-brand-sand py-5 last:border-b-0"
                 >
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4 [&::-webkit-details-marker]:hidden">
-                    <span className="type-subheading text-lg md:text-xl">{item.question}</span>
+                    <span className="type-question">{item.question}</span>
                     <span
                       aria-hidden
                       className="text-2xl font-light text-brand-charcoal transition-transform group-open:rotate-45"
@@ -114,12 +114,12 @@ export default function FaqPage() {
                   id={category.id}
                   className="scroll-mt-28 rounded-2xl border border-brand-sand bg-white p-6 md:p-10"
                 >
-                  <h3 className="type-subheading text-xl md:text-2xl">{category.title}</h3>
+                  <h3 className="type-subheading">{category.title}</h3>
                   <div className="mt-4 mb-8 border-b border-brand-sand" />
                   <div className="space-y-8">
                     {category.items.map((item) => (
                       <div key={item.id}>
-                        <h4 className="type-subheading text-lg md:text-xl mb-3">{item.question}</h4>
+                        <h4 className="type-question mb-3">{item.question}</h4>
                         <AnswerBody item={item} />
                       </div>
                     ))}

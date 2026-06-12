@@ -338,6 +338,12 @@ body > div.pac-container ~ div:not([id]):not([class]) {
     @apply font-sans font-light text-base md:text-lg text-brand-charcoal/70 leading-relaxed;
   }
 
+  /* type-question: FAQ/list question titles — weight contrast over the sans
+     answers below them, instead of size contrast (serif at small sizes reads weak) */
+  .type-question {
+    @apply font-sans text-base md:text-lg font-semibold text-brand-charcoal leading-snug;
+  }
+
   /* type-statement: Cold declarative observations — serif, non-italic, editorial weight */
   .type-statement {
     @apply font-serif text-xl md:text-2xl text-brand-charcoal/90 leading-relaxed;
