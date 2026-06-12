@@ -45,9 +45,20 @@ export default function Banner({
   // The dropdown always sits on a white surface, so its pills are always light.
   const mobilePill =
     "block w-full text-center py-3 px-4 rounded-full border border-brand-charcoal/30 bg-white text-brand-charcoal font-semibold hover:bg-brand-charcoal/5 transition-colors";
+  // Primary CTA: filled honey, same as the hero button — the one action that must stand out.
+  const mobilePillPrimary =
+    "block w-full text-center py-3 px-4 rounded-full bg-brand-honey text-white font-semibold hover:bg-brand-honey-dark transition-colors";
 
   return (
     <>
+      {/* Scrim: dims the page behind the open mobile menu; tap outside closes it */}
+      {isMobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-brand-charcoal/40"
+          onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
       <div
         className={`absolute top-0 left-0 right-0 z-50 transition-colors duration-300 ${
           isMobileMenuOpen ? "bg-white" : ""
@@ -131,7 +142,7 @@ export default function Banner({
 
           {/* Mobile dropdown */}
           <div
-            className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+            className={`lg:hidden overflow-hidden transition-[max-height] duration-200 ease-out ${
               isMobileMenuOpen ? "max-h-80" : "max-h-0"
             }`}
           >
@@ -146,7 +157,7 @@ export default function Banner({
               {user ? (
                 <Link
                   href="/profile/groups"
-                  className={mobilePill}
+                  className={mobilePillPrimary}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Go to Profile
@@ -164,7 +175,7 @@ export default function Banner({
                   </button>
                   <Link
                     href={onboardingHref}
-                    className={mobilePill}
+                    className={mobilePillPrimary}
                     onClick={() => {
                       trackStartBookClick("header_nav_mobile");
                       setIsMobileMenuOpen(false);
