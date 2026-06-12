@@ -70,7 +70,7 @@ export default function FaqPage() {
 
         {/* Hero */}
         <section className="px-6 pt-32 pb-10 text-center md:pt-44 md:pb-14">
-          <h1 className="type-display">Questions, answered.</h1>
+          <h1 className="type-heading">Questions, answered.</h1>
           <p className="type-body mx-auto mt-4 max-w-2xl">
             Everything about how the book gets made — from the first invite to
             the hardcover in the kitchen.
@@ -84,7 +84,7 @@ export default function FaqPage() {
 
           <div>
             {/* Most common questions */}
-            <h2 className="type-heading mb-6">Most common questions</h2>
+            <h2 className="type-subheading mb-6">Most common questions</h2>
             <div className="mb-12 rounded-2xl border border-brand-sand bg-white px-6 py-2 md:px-10">
               {topQuestions.map((item) => (
                 <details
@@ -92,7 +92,7 @@ export default function FaqPage() {
                   className="group border-b border-brand-sand py-5 last:border-b-0"
                 >
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4 [&::-webkit-details-marker]:hidden">
-                    <span className="type-subheading">{item.question}</span>
+                    <span className="type-subheading text-lg md:text-xl">{item.question}</span>
                     <span
                       aria-hidden
                       className="text-2xl font-light text-brand-charcoal transition-transform group-open:rotate-45"
@@ -106,7 +106,7 @@ export default function FaqPage() {
             </div>
 
             {/* Complete FAQ */}
-            <h2 className="type-heading mb-6">The complete FAQ</h2>
+            <h2 className="type-subheading mb-6">The complete FAQ</h2>
             <div className="space-y-8">
               {FAQ_CATEGORIES.map((category) => (
                 <section
@@ -114,12 +114,12 @@ export default function FaqPage() {
                   id={category.id}
                   className="scroll-mt-28 rounded-2xl border border-brand-sand bg-white p-6 md:p-10"
                 >
-                  <h3 className="type-heading">{category.title}</h3>
+                  <h3 className="type-subheading text-xl md:text-2xl">{category.title}</h3>
                   <div className="mt-4 mb-8 border-b border-brand-sand" />
                   <div className="space-y-8">
                     {category.items.map((item) => (
                       <div key={item.id}>
-                        <h4 className="type-subheading mb-3">{item.question}</h4>
+                        <h4 className="type-subheading text-lg md:text-xl mb-3">{item.question}</h4>
                         <AnswerBody item={item} />
                       </div>
                     ))}
