@@ -23,31 +23,36 @@ export default function Banner({
   const onboardingHref = isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding";
 
   const isLight = theme === "light";
-  const stripBorder = isLight ? "border-brand-charcoal/15" : "border-white/20";
-  const stripText = isLight ? "text-brand-charcoal" : "text-white";
-  const logoClass = isLight ? "" : "brightness-0 invert";
+  // Reason: the open mobile menu needs a solid white surface — over the dark
+  // hero a transparent dropdown is unreadable — so the header flips to light
+  // styling while the menu is open, regardless of theme.
+  const headerLight = isLight || isMobileMenuOpen;
+  const stripBorder = headerLight ? "border-brand-charcoal/15" : "border-white/20";
+  const stripText = headerLight ? "text-brand-charcoal" : "text-white";
+  const logoClass = headerLight ? "" : "brightness-0 invert";
   const loginText = isLight
     ? "font-medium text-brand-charcoal/70 hover:text-brand-charcoal transition-colors"
     : "font-medium text-white/80 hover:text-white transition-colors";
   const navLink = isLight
     ? "font-light text-brand-charcoal/70 hover:text-brand-charcoal transition-colors"
     : "font-light text-white/80 hover:text-white transition-colors";
-  const burgerClass = isLight
+  const burgerClass = headerLight
     ? "lg:hidden p-2 rounded-md text-brand-charcoal hover:text-brand-charcoal/80 transition-colors"
     : "lg:hidden p-2 rounded-md text-white hover:text-white/80 transition-colors";
   const navPill = isLight
     ? "inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold border border-brand-charcoal/30 text-brand-charcoal hover:bg-brand-charcoal/5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-charcoal focus-visible:ring-offset-2"
     : "inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold border border-white/60 text-white hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2";
-  const mobileProfile = isLight
-    ? "block w-full text-center py-3 px-4 rounded-full border border-brand-charcoal/30 text-brand-charcoal font-semibold hover:bg-brand-charcoal/5 transition-colors"
-    : "block w-full text-center py-3 px-4 rounded-full border border-white/60 text-white font-semibold hover:bg-white/10 transition-colors";
-  const mobilePill = isLight
-    ? "block w-full text-center py-3 px-4 rounded-full border border-brand-charcoal/30 bg-white text-brand-charcoal font-semibold hover:bg-brand-charcoal/5 transition-colors"
-    : "block w-full text-center py-3 px-4 rounded-full border border-white/60 bg-black/70 text-white font-semibold hover:bg-black/90 transition-colors";
+  // The dropdown always sits on a white surface, so its pills are always light.
+  const mobilePill =
+    "block w-full text-center py-3 px-4 rounded-full border border-brand-charcoal/30 bg-white text-brand-charcoal font-semibold hover:bg-brand-charcoal/5 transition-colors";
 
   return (
     <>
-      <div className="absolute top-0 left-0 right-0 z-50">
+      <div
+        className={`absolute top-0 left-0 right-0 z-50 transition-colors duration-300 ${
+          isMobileMenuOpen ? "bg-white" : ""
+        }`}
+      >
         {/* Shipping announcement strip */}
         {showShippingStrip && (
           <div className={`py-2.5 text-center border-b ${stripBorder}`}>
@@ -130,12 +135,10 @@ export default function Banner({
               isMobileMenuOpen ? "max-h-80" : "max-h-0"
             }`}
           >
-            <div className="px-6 py-5 flex flex-col gap-3">
+            <div className="px-6 py-5 flex flex-col gap-3 bg-white border-b border-brand-charcoal/10">
               <Link
                 href="/how-it-works"
-                className={`block w-full text-center py-2 font-light ${
-                  isLight ? "text-brand-charcoal" : "text-white"
-                }`}
+                className={mobilePill}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 How it Works
@@ -143,7 +146,7 @@ export default function Banner({
               {user ? (
                 <Link
                   href="/profile/groups"
-                  className={mobileProfile}
+                  className={mobilePill}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Go to Profile
