@@ -200,6 +200,7 @@ export interface Database {
           book_review_status: BookReviewStatus;
           book_review_notes: string | null;
           showcase_image_url: string | null;
+          deleted_at: string | null;
           created_at: string;
           updated_at: string;
         };
