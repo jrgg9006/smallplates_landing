@@ -119,7 +119,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "dish-photos",
         question: "Do guests need to upload a photo of the dish, or do you create the images?",
         answer: [
-          "We create them. Guests only send the recipe. Our recipe-to-image technology reads every component of the recipe (the ingredients, the technique, the dish itself) and builds an image as close to the real recipe as possible. It's not 100% perfect and it can miss a detail, but we work to get every image as true to the dish as we can.",
+          "We create them. Guests only send the recipe. Our recipe-to-image technology reads every component of the recipe (the ingredients, the technique, the dish itself) and builds an image as close to the real recipe as possible. It's not 100% perfect and it can miss a detail, but we work to get every image as true to the dish as we can. The images are created after you pay and close the book, not while you collect.",
         ],
       },
       {
@@ -180,7 +180,21 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "fix-typos",
         question: "Can I fix typos or edit recipes before printing?",
         answer: [
-          "Yes. You can edit every single recipe yourself from your dashboard, any time before the book prints. We also run our own clean-up pass (amounts, steps, typos), and you review every page before anything goes to print.",
+          "Yes. You can edit every single recipe yourself from your dashboard, any time before you close the book. After you pay, we also run our own clean-up pass (amounts, steps, typos) before anything goes to print.",
+        ],
+      },
+      {
+        id: "text-only-dashboard",
+        question: "Why do I only see text in my dashboard, and no images?",
+        answer: [
+          "Because the images don't exist yet. While you collect, each recipe shows up as text (plus anything a guest attached, like a photo or a PDF). Our images are created after you pay and send the book to print, so you never see the finished book before it arrives. That's by design: the first time anyone opens it, it's a surprise. Even for you.",
+        ],
+      },
+      {
+        id: "messy-dashboard",
+        question: "The recipes in my dashboard look messy and inconsistent. Is that normal?",
+        answer: [
+          "Completely normal. One person writes “1 cup,” another “1 cp.” Some use bullets, some dashes, some one long paragraph. Leave it all as it is. After you pay, we clean and standardize everything into one professional cookbook: same format, same structure, every page. We never touch the essence or the words of a recipe, just the formatting. You won't see that step happen; the standardized version is what arrives printed.",
         ],
       },
     ],
@@ -216,21 +230,21 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "recipes-change",
         question: "Will the recipes look exactly as guests sent them?",
         answer: [
-          "They'll change a little, on purpose. We clean and standardize every recipe so the book looks professional and consistent, without losing the essence: the dish, the voice, the weird family steps all stay. You see every recipe before it prints.",
+          "They'll change a little, on purpose. We clean and standardize every recipe so the book looks professional and consistent, without losing the essence: the dish, the voice, the weird family steps all stay. This happens after you pay, so you won't watch it happen; the standardized version is what shows up printed.",
         ],
       },
       {
         id: "see-before",
         question: "Can I see the book before it prints?",
         answer: [
-          "Yes. Before printing, you review the full book page by page, and you can edit any recipe from your dashboard. Nothing prints until you say so.",
+          "Not the designed book, no. You see and can edit every recipe as text before you close the book, but the layout and the images are created after you pay. The first time you see the finished book is when it arrives. That's by design: it keeps the surprise, even for the person who organized it.",
         ],
       },
       {
         id: "incomplete-recipe",
         question: "What if a recipe comes in incomplete?",
         answer: [
-          "Expected. Half of home cooking is “until it looks right.” We edit for clarity and keep the voice, and you can review every recipe yourself before printing. And some recipes just aren't perfect. That's the point of this book.",
+          "Expected. Half of home cooking is “until it looks right.” We edit for clarity and keep the voice, and you can review and edit every recipe's text before you close the book. And some recipes just aren't perfect. That's the point of this book.",
         ],
       },
     ],
