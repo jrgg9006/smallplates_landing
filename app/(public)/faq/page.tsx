@@ -21,14 +21,14 @@ function AnswerBody({ item, className = "" }: { item: FaqItem; className?: strin
   return (
     <div className={className}>
       {item.answer.map((paragraph) => (
-        <p key={paragraph} className="type-body-small mb-3 last:mb-0">
+        <p key={paragraph} className="type-body-small md:text-base mb-3 last:mb-0">
           {paragraph}
         </p>
       ))}
       {item.list && (
         <ol className="list-decimal space-y-2 pl-5">
           {item.list.map((entry) => (
-            <li key={entry} className="type-body-small">
+            <li key={entry} className="type-body-small md:text-base">
               {entry}
             </li>
           ))}
