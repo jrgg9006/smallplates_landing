@@ -41,6 +41,9 @@ const EXTRA_PERSISTED = [
   'submit_recipe',
   'from_book_view',
   'from_book_cta_click',
+  // Reason: server-side event; recorded directly in the couple-image route,
+  // never via client trackEvent. Listed here so the allowlist stays the single
+  // inventory of every event_name that can appear in user_events.
   'couple_image_uploaded',
 ] as const;
 
