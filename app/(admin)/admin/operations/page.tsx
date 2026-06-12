@@ -28,6 +28,10 @@ interface RecipeWithProductionStatus {
   generated_image_url_print: string | null;
   image_upscale_status: 'pending' | 'processing' | 'ready' | 'error' | 'not_needed' | null;
   image_dimensions: { width: number; height: number } | null;
+  // OCR confidence flags on guest_recipes — set by backend only, front can only clear needs_review
+  needs_review?: boolean;
+  review_reasons?: string | null;
+  confidence_score?: number | null;
   guests: {
     id: string;
     first_name: string;
@@ -162,6 +166,7 @@ export default function OperationsPage() {
   const [showArchived, setShowArchived] = useState(false);
   const [notifyOptInFilter, setNotifyOptInFilter] = useState(false);
   const [imageFilter, setImageFilter] = useState<'all' | 'yes' | 'no'>('all');
+  const [ocrReviewFilter, setOcrReviewFilter] = useState(false);
   const [hidePrinted, setHidePrinted] = useState(true);
   const [archivingRecipe, setArchivingRecipe] = useState<RecipeWithProductionStatus | null>(null);
   const [archiveLoading, setArchiveLoading] = useState(false);
@@ -372,8 +377,11 @@ export default function OperationsPage() {
     if (hidePrinted) {
       result = result.filter(r => r.group?.book_status !== 'printed' && r.group?.book_status !== 'inactive');
     }
+    if (ocrReviewFilter) {
+      result = result.filter(r => r.needs_review === true);
+    }
     return result;
-  }, [recipes, searchQuery, imageFilter, hidePrinted]);
+  }, [recipes, searchQuery, imageFilter, hidePrinted, ocrReviewFilter]);
 
   // Unique guest count from filtered recipes
   const uniqueGuestCount = useMemo(() => {
@@ -1427,6 +1435,17 @@ ${instructions}`;
               className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
             />
             <span className="font-medium text-gray-700">Notify opt-in only</span>
+          </label>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={ocrReviewFilter}
+              onChange={(e) => setOcrReviewFilter(e.target.checked)}
+              className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+            />
+            <span className="font-medium text-gray-700">⚠️ OCR review only</span>
           </label>
         </div>
         <div className="text-sm text-gray-600 ml-auto flex items-center gap-3">

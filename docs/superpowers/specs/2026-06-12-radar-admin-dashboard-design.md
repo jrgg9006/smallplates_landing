@@ -63,8 +63,10 @@ Eventos nuevos a instrumentar:
 
 | Evento | Dónde dispara | Props |
 |---|---|---|
-| `share_link_copied` | `ShareCollectionModal` (copiar link / compartir) | `{ channel? }` |
-| `recipe_deleted` | Justo antes del delete de receta | `{ recipe_name, group_id }` |
+| `share_link_copied` | `ShareCollectionModal` (copy / whatsapp / email / qr) | `{ channel }` |
+| `couple_image_uploaded` | **Server-side** en `POST /api/v1/groups/[groupId]/couple-image` (groups no tiene timestamp para esa foto) | `{}` |
+
+Nota (descubierto en planeación): `recipe_deleted` NO se instrumenta como evento cliente — `deleteRecipe()` ya hace soft delete vía `guest_recipes.deleted_at`, así que el Radar lee los borrados directo de la base (más confiable).
 
 Los eventos existentes del funnel de onboarding (PR #36: `start_book_click`, `onboarding_step_view`, `sign_up`, `book_created`, `share`, `onboarding_completed`, `start_recipe`, `submit_recipe`, etc.) se persisten automáticamente al extender `trackEvent()`.
 
@@ -81,7 +83,7 @@ Los eventos existentes del funnel de onboarding (PR #36: `start_book_click`, `on
 | Reminders / correos enviados | `communication_log` (`type`, `channel`, `status`, `sent_at`, `opened_at`) |
 | Invitaciones a capitanes | `group_invitations.created_at`, `status` |
 | Receta editada | `recipe_edit_history.created_at`, `edited_by` |
-| Receta eliminada | `user_events` (`recipe_deleted`) — antes invisible |
+| Receta eliminada | `guest_recipes.deleted_at` (soft delete ya existente) |
 | Link compartido | `user_events` (`share_link_copied` / `share`) — antes invisible |
 | Compras | `orders.created_at`, `status`, `amount_total` |
 
@@ -89,7 +91,9 @@ Los eventos existentes del funnel de onboarding (PR #36: `start_book_click`, `on
 
 ### 5.1 Pulso (fila superior — 6 tarjetas)
 
-Usuarios nuevos · Libros creados · Recetas nuevas · Invitados agregados · Correos enviados · Fotos de couple subidas.
+Usuarios nuevos · Libros creados · Recetas nuevas · Invitados agregados · Correos enviados · Recetas con foto.
+
+(La tarjeta de "fotos de couple" se descartó: `couple_image_url` no tiene timestamp, así que no puede contarse por día. El upload de esa foto sí aparece en el feed vía el evento server-side `couple_image_uploaded`.)
 
 Cada tarjeta: número grande del periodo, delta vs día anterior (▲▼ con color) y vs promedio 7 días, sparkline de 14 días, y tooltip ⓘ con la **definición exacta** de la métrica ("Usuarios nuevos = filas en `profiles` creadas ese día"). Nada ambiguo.
 

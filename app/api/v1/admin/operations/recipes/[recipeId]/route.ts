@@ -21,6 +21,7 @@ interface PatchRequestBody extends RecipeProductionStatusUpdate {
     note_clean?: string;
   };
   markNeedsReview?: boolean;
+  clearOcrReview?: boolean;  // When true, sets guest_recipes.needs_review = false (OCR verified against photo). Only the backend may set it to true.
 }
 
 export async function PATCH(
@@ -243,6 +244,24 @@ export async function PATCH(
         success: true,
         deletedFiles: pathsToDelete,
       });
+    }
+
+    // ============================================================
+    // CLEAR OCR REVIEW: human verified the recipe against the photo
+    // Reason: distinct from recipe_production_status.needs_review (different flow).
+    // The front can only clear this flag — only the AI engine sets it to true.
+    // ============================================================
+    if (body.clearOcrReview) {
+      const { error: ocrClearError } = await supabase
+        .from('guest_recipes')
+        .update({ needs_review: false, updated_at: new Date().toISOString() })
+        .eq('id', recipeId);
+
+      if (ocrClearError) {
+        return NextResponse.json({ error: ocrClearError.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true, ocrReviewCleared: true });
     }
 
     // Handle generated_image_url update on guest_recipes table

@@ -22,6 +22,7 @@ export const EVENTS = {
   SHARE: 'share',
   ONBOARDING_COMPLETED: 'onboarding_completed',
   WHATSAPP_CLICKED: 'whatsapp_clicked',
+  SHARE_LINK_COPIED: 'share_link_copied',
 } as const;
 
 // Reason: CompleteRegistration is a Meta standard event (optimizable in Ads
@@ -31,6 +32,25 @@ export const META_EVENTS = {
   START_BOOK_CLICK: 'StartBookClick',
   ONBOARDING_COMPLETED: 'OnboardingCompleted',
 } as const;
+
+// Reason: ad-hoc event names fired outside the EVENTS registry that we still
+// want persisted to user_events; this set is the allowlist for POST /api/v1/events.
+const EXTRA_PERSISTED = [
+  'onboarding_step_complete',
+  'start_recipe',
+  'submit_recipe',
+  'from_book_view',
+  'from_book_cta_click',
+  // Reason: server-side event; recorded directly in the couple-image route,
+  // never via client trackEvent. Listed here so the allowlist stays the single
+  // inventory of every event_name that can appear in user_events.
+  'couple_image_uploaded',
+] as const;
+
+export const PERSISTED_EVENTS: ReadonlySet<string> = new Set([
+  ...Object.values(EVENTS),
+  ...EXTRA_PERSISTED,
+]);
 
 // Reason: Prevent dev/preview traffic from polluting production GA4/Meta.
 function isTrackableHost(): boolean {
@@ -49,11 +69,34 @@ function cleanParams(params: TrackParams): Record<string, string | number> {
   return clean;
 }
 
+// Reason: mirror GA4 events into our own user_events table (Radar dashboard).
+// sendBeacon survives page navigations (e.g. share -> WhatsApp redirect).
+function persistEvent(name: string, params: TrackParams): void {
+  try {
+    if (typeof window === 'undefined') return;
+    if (!isTrackableHost()) return;
+    if (!PERSISTED_EVENTS.has(name)) return;
+    const { group_id, ...props } = params;
+    const body = JSON.stringify({ event_name: name, group_id, props: cleanParams(props) });
+    const blob = new Blob([body], { type: 'application/json' });
+    if (navigator.sendBeacon && navigator.sendBeacon('/api/v1/events', blob)) return;
+    void fetch('/api/v1/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+      keepalive: true,
+    }).catch(() => {});
+  } catch {
+    // Silent fail. Tracking must never break the app.
+  }
+}
+
 /**
  * Fire-and-forget event tracking. NEVER throws, NEVER blocks.
  * Safe to call from anywhere, including SSR.
  */
 export function trackEvent(name: string, params: TrackParams = {}): void {
+  persistEvent(name, params);
   try {
     if (!isTrackableHost()) return;
     if (typeof window.gtag !== 'function') return;

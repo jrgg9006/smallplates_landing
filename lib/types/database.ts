@@ -199,7 +199,13 @@ export interface Database {
           source: GuestSource;
           book_review_status: BookReviewStatus;
           book_review_notes: string | null;
+          // Reason: OCR confidence flags written by the backend AI engine only.
+          // The frontend may ONLY set needs_review to false (verified against photo).
+          confidence_score: number | null;
+          needs_review: boolean;
+          review_reasons: string | null;
           showcase_image_url: string | null;
+          deleted_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -223,6 +229,9 @@ export interface Database {
           source?: GuestSource;
           book_review_status?: BookReviewStatus;
           book_review_notes?: string | null;
+          confidence_score?: number | null;
+          needs_review?: boolean;
+          review_reasons?: string | null;
           showcase_image_url?: string | null;
         };
         Update: {
@@ -243,6 +252,9 @@ export interface Database {
           source?: GuestSource;
           book_review_status?: BookReviewStatus;
           book_review_notes?: string | null;
+          confidence_score?: number | null;
+          needs_review?: boolean;
+          review_reasons?: string | null;
           showcase_image_url?: string | null;
         };
       };
@@ -726,6 +738,27 @@ export interface Database {
           source?: NewsletterSource;
           status?: NewsletterStatus;
           unsubscribed_at?: string | null;
+        };
+      };
+      user_events: {
+        Row: {
+          id: number;
+          created_at: string;
+          user_id: string | null;
+          group_id: string | null;
+          event_name: string;
+          props: Record<string, unknown>;
+        };
+        Insert: {
+          created_at?: string;
+          user_id?: string | null;
+          group_id?: string | null;
+          event_name: string;
+          props?: Record<string, unknown>;
+        };
+        Update: {
+          event_name?: string;
+          props?: Record<string, unknown>;
         };
       };
       book_qa_reviews: {
