@@ -97,11 +97,19 @@ export default function Footer() {
                     </button>
                   </li>
                   <li>
-                    <Link 
-                      href="/pricing" 
+                    <Link
+                      href="/pricing"
                       className="font-sans font-light text-base text-white/70 hover:text-white transition-colors"
                     >
                       Pricing
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/faq"
+                      className="font-sans font-light text-base text-white/70 hover:text-white transition-colors"
+                    >
+                      FAQ
                     </Link>
                   </li>
                 </ul>
