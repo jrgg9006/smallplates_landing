@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import Link from "next/link";
 import Banner from "@/components/landing/Banner";
 import Footer from "@/components/landing/Footer";
 import WhatsAppFAB from "@/components/landing/WhatsAppFAB";
@@ -128,25 +127,19 @@ export default function FaqPage() {
               ))}
             </div>
 
-            {/* Closing CTA */}
+            {/* Closing note */}
             <div className="mt-16 text-center">
-              <p className="type-body">Still wondering about something?</p>
-              <p className="type-body-small mt-2">
+              <p className="type-question">Still wondering about something?</p>
+              <p className="type-caption mt-2">
                 Write to{" "}
                 <a
-                  className="underline underline-offset-4"
+                  className="underline underline-offset-4 transition-colors hover:text-brand-charcoal"
                   href="mailto:team@smallplatesandcompany.com"
                 >
                   team@smallplatesandcompany.com
                 </a>
                 . A person answers.
               </p>
-              <Link
-                href="/onboarding/welcome"
-                className="mt-8 inline-flex items-center justify-center rounded-full bg-brand-charcoal px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-charcoal/90"
-              >
-                Start your book. It&apos;s free.
-              </Link>
             </div>
           </div>
         </div>
