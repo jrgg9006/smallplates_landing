@@ -20,6 +20,10 @@ interface RecipeWithProductionStatus {
   generated_image_url_print: string | null;
   image_upscale_status: 'pending' | 'processing' | 'ready' | 'error' | 'not_needed' | null;
   image_dimensions: { width: number; height: number } | null;
+  // OCR confidence flags on guest_recipes — set by backend only, front can only clear needs_review
+  needs_review?: boolean;
+  review_reasons?: string | null;
+  confidence_score?: number | null;
   guests: {
     id: string;
     first_name: string;
@@ -183,6 +187,43 @@ export function RecipeOperationsTable({
     } finally {
       setUpdatingRecipeId(null);
     }
+  };
+
+  const handleVerifyOcr = async (recipeId: string) => {
+    if (!confirm('Mark this recipe as verified against the photo? This will clear the OCR review flag.')) {
+      return;
+    }
+
+    setUpdatingRecipeId(recipeId);
+
+    try {
+      const response = await fetch(`/api/v1/admin/operations/recipes/${recipeId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clearOcrReview: true }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(`Error: ${error.error}`);
+        return;
+      }
+
+      if (onStatusUpdate) {
+        onStatusUpdate();
+      }
+    } catch (error) {
+      console.error('Error clearing OCR review:', error);
+      alert('Failed to clear OCR review');
+    } finally {
+      setUpdatingRecipeId(null);
+    }
+  };
+
+  // Reason: confidence_score scale from the AI engine may be 0-1 or 0-100 — normalize for display
+  const formatConfidence = (score: number | null | undefined) => {
+    if (score === null || score === undefined) return 'n/a';
+    return score <= 1 ? `${Math.round(score * 100)}%` : `${Math.round(score)}%`;
   };
 
   const getStatusBadge = (status: 'no_action' | 'in_progress' | 'ready_to_print', needsReview: boolean) => {
@@ -401,6 +442,26 @@ export function RecipeOperationsTable({
                       >
                         Mark Reviewed
                       </button>
+                    )}
+                    {recipe.needs_review && (
+                      <>
+                        <span
+                          className="text-xs px-2 py-1 rounded-full bg-purple-100 text-purple-700 font-medium cursor-help"
+                          title={`OCR confidence: ${formatConfidence(recipe.confidence_score)}${recipe.review_reasons ? ` — ${recipe.review_reasons}` : ''}\nThe OCR read this recipe with low confidence. Compare it against the photo before printing.`}
+                        >
+                          ⚠️ OCR Review
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleVerifyOcr(recipe.id);
+                          }}
+                          className="text-xs text-purple-600 hover:text-purple-800 underline whitespace-nowrap"
+                          disabled={isUpdating}
+                        >
+                          Verified vs photo
+                        </button>
+                      </>
                     )}
                   </div>
                 </td>

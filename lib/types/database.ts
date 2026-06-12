@@ -199,6 +199,11 @@ export interface Database {
           source: GuestSource;
           book_review_status: BookReviewStatus;
           book_review_notes: string | null;
+          // Reason: OCR confidence flags written by the backend AI engine only.
+          // The frontend may ONLY set needs_review to false (verified against photo).
+          confidence_score: number | null;
+          needs_review: boolean;
+          review_reasons: string | null;
           showcase_image_url: string | null;
           deleted_at: string | null;
           created_at: string;
@@ -224,6 +229,9 @@ export interface Database {
           source?: GuestSource;
           book_review_status?: BookReviewStatus;
           book_review_notes?: string | null;
+          confidence_score?: number | null;
+          needs_review?: boolean;
+          review_reasons?: string | null;
           showcase_image_url?: string | null;
         };
         Update: {
@@ -244,6 +252,9 @@ export interface Database {
           source?: GuestSource;
           book_review_status?: BookReviewStatus;
           book_review_notes?: string | null;
+          confidence_score?: number | null;
+          needs_review?: boolean;
+          review_reasons?: string | null;
           showcase_image_url?: string | null;
         };
       };
