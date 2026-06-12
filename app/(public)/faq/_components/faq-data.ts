@@ -33,7 +33,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "who-organizes",
         question: "Who organizes the book?",
         answer: [
-          "Usually one person — the maid of honor, the sister, the mom, a friend. You don't need design skills or free time: you share a link and the rest happens on its own.",
+          "Usually one person: the maid of honor, the sister, the mom, a friend. You don't need design skills or free time. You share a link and the rest happens on its own.",
           "Couples can also run it for their own wedding.",
         ],
       },
@@ -44,7 +44,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         list: [
           "Create your event. It's free and takes a couple of minutes.",
           "Share the collection link with the guests.",
-          "Each guest submits a recipe and a note — about five minutes each.",
+          "Each guest submits a recipe and a note. About five minutes each.",
           "We clean everything up and design the book.",
           "You review every page, then send it to print.",
           "The hardcover shows up at your door.",
@@ -54,7 +54,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "tech-savvy",
         question: "Do I need to be good with technology?",
         answer: [
-          "No. If you can send a text, you can do this. There's no app to download and no password to remember — we send you a sign-in link by email.",
+          "No. If you can send a text, you can do this. There's no app to download and no password to remember. We send you a sign-in link by email.",
           "Guests just tap a link.",
         ],
       },
@@ -76,7 +76,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "how-much",
         question: "How much does it cost?",
         answer: [
-          "Starting is free — creating the event, inviting people, collecting recipes, watching them come in. You pay only when you print.",
+          "Starting is free: creating the event, inviting people, collecting recipes, watching them come in. You pay only when you print.",
           "One copy is $169. The price per copy drops as your group orders more: $129 each for 2 copies, $113 for 3, $103 for 4, $95 for 5, and $89 each from 6 on. Shipping to one address is included.",
         ],
       },
@@ -99,7 +99,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "split-cost",
         question: "Can we split the cost as a group?",
         answer: [
-          "That's how the price is built. The book is usually a group gift — several people chip in and each keeps a copy. The per-person number you see is exactly what each person puts in.",
+          "That's how the price is built. The book is usually a group gift: several people chip in and each keeps a copy. The per-person number you see is exactly what each person puts in.",
           "One person checks out; the group settles up however it normally does.",
         ],
       },
@@ -128,8 +128,8 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "guests-submit",
         question: "How do guests send their recipe?",
         answer: [
-          "They tap a link, snap a photo of the handwritten recipe — grandma's card, the back of an envelope, coffee stains and all — or type it if they'd rather. Add a short note, done. About five minutes.",
-          "No app, no account, no password. It works on any phone, tablet, or computer — including your aunt's iPad.",
+          "They tap a link, snap a photo of the handwritten recipe (grandma's card, the back of an envelope, coffee stains and all) or type it if they'd rather. Add a short note, done. About five minutes.",
+          "No app, no account, no password. It works on any phone, tablet, or computer, including your aunt's iPad.",
         ],
       },
       {
@@ -137,7 +137,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         question: "What if some guests don't cook?",
         answer: [
           "Even better. They can send the takeout order they'd defend with their life, or the sandwich they get every single time.",
-          "It's not about being a chef — it's about being in the book.",
+          "It's not about being a chef. It's about being in the book.",
         ],
       },
       {
@@ -152,7 +152,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "run-alone",
         question: "Do I have to run this alone?",
         answer: [
-          "No. You can invite captains — the other bridesmaid, the sister, whoever's good at this. Each captain gets the same dashboard you do and gathers recipes right alongside you.",
+          "No. You can invite captains: the other bridesmaid, the sister, whoever's good at this. Each captain gets the same dashboard you do and gathers recipes right alongside you.",
           "The work spreads out, so it never sits on one person.",
         ],
       },
@@ -175,7 +175,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "dish-photos",
         question: "Do guests need to photograph their dish?",
         answer: [
-          "No. Just the recipe. We create every image in the book — that's what makes it look like one book instead of fifty screenshots.",
+          "No. Just the recipe. We create every image in the book. That's what makes it look like one book instead of fifty screenshots.",
         ],
       },
       {
@@ -189,7 +189,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "fix-typos",
         question: "Can I fix typos or edit recipes before printing?",
         answer: [
-          "We do the clean-up — amounts, steps, typos — before anything reaches the book. In the review step you see every page; if something looks off, flag it and we'll fix it before it prints.",
+          "We do the clean-up (amounts, steps, typos) before anything reaches the book. In the review step you see every page; if something looks off, flag it and we'll fix it before it prints.",
         ],
       },
     ],
@@ -210,7 +210,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "personalize",
         question: "Can I personalize the book?",
         answer: [
-          "Yes. The cover has two lines you can make yours: the headline — ours says “Recipes from the people who love you,” but you can write your own — and the title, usually the couple's names, though it can say whatever the book is for.",
+          "Yes. The cover has two lines you can make yours: the headline (ours says “Recipes from the people who love you,” but you can write your own) and the title, usually the couple's names, though it can say whatever the book is for.",
           "You can also add one photo of your own, printed inside the book.",
         ],
       },
@@ -218,7 +218,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "who-designs",
         question: "Who designs it?",
         answer: [
-          "We do. Recipes arrive messy — half-remembered amounts, “a pinch of this.” We clean them up and lay them out so the whole thing reads like one book, without flattening how each person actually talks.",
+          "We do. Recipes arrive messy: half-remembered amounts, “a pinch of this.” We clean them up and lay them out so the whole thing reads like one book, without flattening how each person actually talks.",
         ],
       },
       {
@@ -246,7 +246,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "gift-or-couple",
         question: "Is the book a gift, or something the couple makes?",
         answer: [
-          "Both happen. Most books are organized as a gift — by the maid of honor, the mom, the sister. Some couples run it themselves.",
+          "Both happen. Most books are organized as a gift, by the maid of honor, the mom, the sister. Some couples run it themselves.",
           "Same book either way.",
         ],
       },
@@ -254,7 +254,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "when-give",
         question: "When do people give it?",
         answer: [
-          "The shower, the bachelorette, the rehearsal dinner — any moment where the people are actually in the room.",
+          "The shower, the bachelorette, the rehearsal dinner: any moment where the people are actually in the room.",
           "It lands harder when she can pass it around the table.",
         ],
       },
@@ -262,7 +262,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "how-far-ahead",
         question: "How far ahead should I start?",
         answer: [
-          "Give yourself six to eight weeks before the day you want to hand it over. Collecting takes a few weeks — people need a nudge or two — and printing and shipping take about three more.",
+          "Give yourself six to eight weeks before the day you want to hand it over. Collecting takes a few weeks (people need a nudge or two), and printing and shipping take about three more.",
           "Starting earlier never hurts.",
         ],
       },
@@ -270,7 +270,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "surprise",
         question: "Can we keep it a surprise from the couple?",
         answer: [
-          "Yes. The link goes to the guests, not the couple. Whether it's a surprise is your call — plenty of groups keep it quiet until the shower.",
+          "Yes. The link goes to the guests, not the couple. Whether it's a surprise is your call. Plenty of groups keep it quiet until the shower.",
         ],
       },
     ],
@@ -288,7 +288,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "how-long",
         question: "How long does the whole thing take?",
         answer: [
-          "Collecting is up to you — most groups give it a few weeks. Once you close the book and send it to print, it's at your door in about three weeks.",
+          "Collecting is up to you. Most groups give it a few weeks. Once you close the book and send it to print, it's at your door in about three weeks.",
         ],
       },
       {

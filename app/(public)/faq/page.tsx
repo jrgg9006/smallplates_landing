@@ -14,7 +14,7 @@ import {
 export const metadata: Metadata = {
   title: "FAQ — Small Plates & Co.",
   description:
-    "Everything about how the book gets made — what's free, what it costs, how guests send recipes, and when it shows up at your door.",
+    "Everything about how the book gets made: what's free, what it costs, how guests send recipes, and when it shows up at your door.",
 };
 
 function AnswerBody({ item, className = "" }: { item: FaqItem; className?: string }) {
@@ -72,7 +72,7 @@ export default function FaqPage() {
         <section className="px-6 pt-32 pb-10 text-center md:pt-44 md:pb-14">
           <h1 className="type-heading">Questions, answered.</h1>
           <p className="type-body mx-auto mt-4 max-w-2xl">
-            Everything about how the book gets made — from the first invite to
+            Everything about how the book gets made, from the first invite to
             the hardcover in the kitchen.
           </p>
         </section>
@@ -138,14 +138,14 @@ export default function FaqPage() {
                   href="mailto:team@smallplatesandcompany.com"
                 >
                   team@smallplatesandcompany.com
-                </a>{" "}
-                — a person answers.
+                </a>
+                . A person answers.
               </p>
               <Link
                 href="/onboarding/welcome"
                 className="mt-8 inline-flex items-center justify-center rounded-full bg-brand-charcoal px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-charcoal/90"
               >
-                Start your book — it&apos;s free
+                Start your book. It&apos;s free.
               </Link>
             </div>
           </div>
