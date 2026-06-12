@@ -41,28 +41,6 @@ const steps: JourneyStepData[] = [
   },
 ];
 
-function StepImage({
-  src,
-  alt,
-  bg = "bg-brand-sand",
-}: {
-  src: string;
-  alt: string;
-  bg?: string;
-}) {
-  return (
-    <div className={`relative aspect-[4/3] w-full overflow-hidden rounded-2xl ${bg}`}>
-      <Image
-        src={src}
-        alt={alt}
-        fill
-        className="object-cover"
-        sizes="(max-width: 1024px) 100vw, 50vw"
-      />
-    </div>
-  );
-}
-
 export default function HowItWorksPage() {
   const router = useRouter();
   const { user } = useAuth();
@@ -70,13 +48,38 @@ export default function HowItWorksPage() {
   const handleStart = () => router.push(user ? "/profile/groups" : "/onboarding/welcome");
 
   // Visuals alineados 1:1 con `steps`.
-  // TODO (imágenes reales): paso 1 → mockup de "collect link".
   const visuals = [
-    <StepImage
-      key="s1"
-      src="/images/HowitWorks_images/collect_iphone_mockup.png"
-      alt="Share a link so your people can send recipes"
-    />,
+    // Paso 1 — el modal "Collect Recipes" real, en HTML, + toast "Link copied"
+    // (causa → efecto, mismo lenguaje que el email del paso 3).
+    <div key="s1" className="relative mx-auto w-full max-w-sm pb-5">
+      <div className="relative rounded-2xl bg-brand-white p-6 text-center shadow-md ring-1 ring-brand-sand/60 md:p-8">
+        <span className="absolute right-4 top-3 text-brand-charcoal/35" aria-hidden>
+          &times;
+        </span>
+        <h4 className="type-subheading">Collect Recipes</h4>
+        <p className="type-body-small mt-3 text-brand-charcoal/80">
+          Send this link to everyone who should be in the book.
+        </p>
+        <p className="type-caption mt-2 text-brand-charcoal/50">
+          They submit a recipe. We design and print the book. That&rsquo;s it.
+        </p>
+        <div className="mt-6 rounded-full bg-brand-charcoal py-3">
+          <span className="type-body-small text-brand-white">Copy Link</span>
+        </div>
+        <div className="mt-2.5 rounded-full border border-brand-sand py-3">
+          <span className="type-body-small text-brand-charcoal/80">Customize message</span>
+        </div>
+        <p className="type-caption mt-5 text-brand-charcoal/55 underline underline-offset-2">
+          Preview what guests will see
+        </p>
+      </div>
+      <div className="absolute -bottom-1 right-3 flex items-center gap-1.5 rounded-full bg-brand-white px-4 py-2 shadow-lg ring-1 ring-brand-sand">
+        <span className="text-[11px] text-brand-honey" aria-hidden>
+          &#10003;
+        </span>
+        <span className="type-caption text-brand-charcoal">Link copied</span>
+      </div>
+    </div>,
     // Paso 2 — foto real de receta manuscrita + iPhone (CSS) encima con la misma
     // receta ya tipeada en el layout del collection journey. El match caligrafía →
     // texto limpio es el producto. Tipografías raw (text-[7px] etc.): miniatura de UI.
@@ -92,7 +95,7 @@ export default function HowItWorksPage() {
       </div>
       {/* iPhone con proporciones reales (~9:19), pantalla completa del journey */}
       <div className="absolute -bottom-12 -right-3 w-52 rotate-[3deg] md:-right-8 md:w-60">
-        <div className="flex aspect-[9/19] flex-col overflow-hidden rounded-[2.4rem] border-[7px] border-brand-charcoal bg-brand-white shadow-xl">
+        <div className="flex aspect-[9/18] flex-col overflow-hidden rounded-[2.4rem] border-[7px] border-brand-charcoal bg-brand-white shadow-xl">
           <div className="flex justify-center pt-2.5">
             <div className="h-4 w-20 rounded-full bg-brand-charcoal" />
           </div>
@@ -270,8 +273,18 @@ export default function HowItWorksPage() {
     </div>
   );
 
+  // Badge de tech del paso 2, debajo del copy (mismo estilo que los chips del paso 1).
+  const stepTwoTech = (
+    <div className="mt-6">
+      <span className="type-caption inline-block rounded-full border border-brand-sand bg-brand-white px-4 py-2 text-brand-charcoal/80">
+        Image-to-text technology
+      </span>
+    </div>
+  );
+
   // Tarjeta opcional (sin número, no es un paso del riel) entre el paso 1 y 2.
-  // TODO: reemplazar el preview falso por screenshots reales del builder.
+  // El preview replica el invite mobile real (app/(platform)/event-invite):
+  // eyebrow INVITE, foto cuadrada, serif, HOSTED BY / WHEN / WHERE, botón honey.
   const optionalInvite = (
     <div className="lg:pl-16">
       <div className="overflow-hidden rounded-2xl border border-dashed border-brand-sand bg-brand-white/70">
@@ -286,18 +299,53 @@ export default function HowItWorksPage() {
             </p>
           </div>
 
-          {/* Preview falso de la invitación */}
-          <div className="overflow-hidden rounded-2xl bg-brand-white shadow-sm">
-            <div className="aspect-[5/3] bg-brand-sand" />
-            <div className="space-y-1 p-5">
-              <p className="type-subheading">Ana &amp; Rich</p>
-              <p className="type-caption text-brand-charcoal/60">
-                Saturday, Oct 12 · 4pm · Napa, CA
+          {/* Mini invite, fiel al template real. Tipografías raw: miniatura de UI. */}
+          <div className="mx-auto w-full max-w-[280px]">
+            <div className="rounded-2xl bg-brand-white px-6 pb-6 pt-4 shadow-md ring-1 ring-brand-sand/60">
+              <p className="text-[8px] uppercase tracking-[0.25em] text-brand-warm-gray">
+                Small Plates &amp; Co.{" "}
+                <span className="font-bold text-brand-charcoal">Invite</span>
               </p>
-              <span className="mt-2 inline-block rounded-full bg-brand-cream px-3 py-1 type-caption text-brand-charcoal/70">
-                + Send us your recipe
-              </span>
+              <div className="relative mx-auto mt-5 h-28 w-28 overflow-hidden rounded-lg shadow-md">
+                <Image
+                  src="/images/howitworks_page/invite_photo.png"
+                  alt="The couple, on their digital invite"
+                  fill
+                  className="object-cover"
+                  sizes="112px"
+                />
+              </div>
+              <p className="mt-4 text-center font-serif text-[21px] font-medium leading-tight text-brand-charcoal">
+                Ana &amp; Rich
+              </p>
+              <p className="mt-4 text-center text-[7px] uppercase tracking-[0.2em] text-brand-warm-gray">
+                Hosted by
+              </p>
+              <p className="mt-1 text-center text-[9px] font-medium uppercase tracking-[0.15em] text-brand-charcoal">
+                Sofía Martínez
+              </p>
+              <div className="my-4 h-px bg-brand-charcoal/15" />
+              <p className="text-center text-[7px] uppercase tracking-[0.2em] text-brand-warm-gray">
+                When
+              </p>
+              <p className="mt-1 text-center text-[9px] font-medium uppercase tracking-wide text-brand-charcoal">
+                Saturday, Oct 12 · 4 PM
+              </p>
+              <p className="mt-3 text-center text-[7px] uppercase tracking-[0.2em] text-brand-warm-gray">
+                Where
+              </p>
+              <p className="mt-1 text-center text-[9px] font-medium uppercase tracking-wide text-brand-charcoal">
+                Sofia&#39;s House
+                <br />
+                Napa, CA
+              </p>
+              <div className="mt-5 rounded-full bg-brand-honey py-2 text-center text-[9px] font-medium text-brand-white shadow-md">
+                Share a Recipe &rarr;
+              </div>
             </div>
+            <p className="type-caption mt-2 pr-1 text-right text-brand-charcoal/50">
+              The ask travels with the invite
+            </p>
           </div>
         </div>
       </div>
@@ -337,7 +385,7 @@ export default function HowItWorksPage() {
             <JourneyTimeline>
               <JourneyStep step={steps[0]} index={0} visual={visuals[0]} extra={stepOneWays} />
               {optionalInvite}
-              <JourneyStep step={steps[1]} index={1} visual={visuals[1]} />
+              <JourneyStep step={steps[1]} index={1} visual={visuals[1]} extra={stepTwoTech} />
               <JourneyStep step={steps[2]} index={2} visual={visuals[2]} />
               <JourneyStep step={steps[3]} index={3} visual={visuals[3]} />
             </JourneyTimeline>
@@ -384,9 +432,11 @@ export default function HowItWorksPage() {
           >
             <div className="mx-auto max-w-2xl text-center">
               <p className="type-eyebrow text-brand-honey">THE MAGIC</p>
-              <h2 className="type-heading mt-4">We make a real, professional cookbook. But how?</h2>
+              <h2 className="type-heading mt-4">We make a real, professional cookbook.</h2>
               <p className="type-body-small mt-4 text-brand-charcoal/70">
-                You send the real stuff: a text, a photo, a voice note. We make it a book.
+                You send words: a text, a photo of grandma&rsquo;s card. We design
+                the page and create the photo of the dish, made for that exact
+                recipe. Nobody has to cook anything for the camera.
               </p>
             </div>
 
@@ -468,7 +518,7 @@ export default function HowItWorksPage() {
                     { label: "Ingredients", top: 45, left: 6 },
                     { label: "Instructions", top: 35, left: 36
                      },
-                    { label: "Photo", top: 48, left: 76 },
+                    { label: "Photo — made by us", top: 48, left: 76 },
                   ].map((pin, i) => (
                     <motion.div
                       key={pin.label}
@@ -497,32 +547,18 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
-        {/* 5. Ancla de precio */}
-        <section className="px-4 py-16 md:px-6 md:py-20">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="type-subheading">
-              Free to start. You only pay when the book is ready.
-            </p>
-            <p className="type-body-small mt-4 text-brand-charcoal/70">
-              Build the whole thing for free. Pay for the book when you order it,
-              backed by our guarantee.
-            </p>
-            <Link
-              href="/pricing"
-              className="type-body-small mt-5 inline-flex items-center gap-1 text-brand-charcoal underline underline-offset-4 transition-colors hover:text-brand-honey"
-            >
-              See pricing <span aria-hidden>→</span>
-            </Link>
-          </div>
-        </section>
-
-        {/* 6. CTA de cierre (tarjeta oscura) */}
-        <section className="px-2 pb-16 md:px-3 md:pb-24">
+        {/* 5. Cierre: ancla de precio + CTA en una sola tarjeta oscura */}
+        <section className="px-2 pb-16 pt-6 md:px-3 md:pb-24 md:pt-8">
           <div className="mx-auto max-w-7xl rounded-[2rem] bg-brand-charcoal px-5 py-16 text-center md:px-10 md:py-20">
-            <h2 className="type-subheading text-brand-warm-white-warm">
-              Ready to start your book?
+            <h2 className="type-heading text-brand-warm-white-warm">
+              Free to start.
+              <br />
+              You pay when the book is ready.
             </h2>
-            <div className="mt-8">
+            <p className="type-body mt-5 text-brand-warm-white-warm/70">
+              Build the whole thing for free. Pay when you order.
+            </p>
+            <div className="mt-9">
               <Button
                 onClick={handleStart}
                 className="rounded-full bg-brand-honey px-10 py-6 text-lg text-brand-white hover:bg-brand-honey-dark"
@@ -530,12 +566,14 @@ export default function HowItWorksPage() {
                 Start your book
               </Button>
             </div>
-            <Link
-              href="/"
-              className="type-caption mt-8 inline-block text-brand-warm-white-warm/60 transition-colors hover:text-brand-warm-white-warm"
-            >
-              ← Back to home
-            </Link>
+            <div className="mt-7">
+              <Link
+                href="/pricing"
+                className="type-body-small inline-flex items-center gap-1 text-brand-warm-white-warm/60 underline underline-offset-4 transition-colors hover:text-brand-warm-white-warm"
+              >
+                See pricing <span aria-hidden>→</span>
+              </Link>
+            </div>
           </div>
         </section>
       </main>
