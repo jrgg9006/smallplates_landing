@@ -40,6 +40,9 @@ export default function RadarDashboard() {
 
   useEffect(() => {
     const start = () => {
+      // Reason: defensive — guarantees a single live interval even if a future
+      // caller (e.g. manual refresh) invokes start() while one is running.
+      if (timerRef.current) clearInterval(timerRef.current);
       void load();
       timerRef.current = setInterval(() => void load(), POLL_MS);
     };
@@ -59,7 +62,7 @@ export default function RadarDashboard() {
   }, [load]);
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] p-6 lg:p-10">
+    <div className="min-h-screen bg-brand-warm-white p-6 lg:p-10">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
