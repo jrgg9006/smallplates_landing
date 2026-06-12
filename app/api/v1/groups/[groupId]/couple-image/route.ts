@@ -5,6 +5,7 @@ import {
   generateCoupleImageOgBuffer,
   uploadCoupleImageOgWithClient,
 } from '@/lib/supabase/og-image-processor';
+import { recordServerEvent } from '@/lib/radar/track-server';
 
 /**
  * POST /api/v1/groups/[groupId]/couple-image
@@ -156,6 +157,10 @@ export async function POST(
         { status: 500 }
       );
     }
+
+    // Reason: groups has no timestamp for the couple image; this event is the
+    // only record of WHEN it was uploaded (Radar feed + funnel analysis).
+    await recordServerEvent('couple_image_uploaded', user.id, groupId);
 
     return NextResponse.json({
       success: true,
