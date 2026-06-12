@@ -728,6 +728,27 @@ export interface Database {
           unsubscribed_at?: string | null;
         };
       };
+      user_events: {
+        Row: {
+          id: number;
+          created_at: string;
+          user_id: string | null;
+          group_id: string | null;
+          event_name: string;
+          props: Record<string, unknown>;
+        };
+        Insert: {
+          created_at?: string;
+          user_id?: string | null;
+          group_id?: string | null;
+          event_name: string;
+          props?: Record<string, unknown>;
+        };
+        Update: {
+          event_name?: string;
+          props?: Record<string, unknown>;
+        };
+      };
       book_qa_reviews: {
         Row: {
           id: string;
