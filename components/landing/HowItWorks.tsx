@@ -114,7 +114,7 @@ export default function HowItWorks() {
         <div className="mt-12 text-center md:mt-16">
           <Link
             href="/how-it-works"
-            className="btn btn-lg btn-dark"
+            className="btn btn-lg btn-dark w-full max-w-md px-16 sm:w-auto"
           >
             Learn More
           </Link>

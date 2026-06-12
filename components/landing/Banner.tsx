@@ -29,6 +29,9 @@ export default function Banner({
   const loginText = isLight
     ? "font-medium text-brand-charcoal/70 hover:text-brand-charcoal transition-colors"
     : "font-medium text-white/80 hover:text-white transition-colors";
+  const navLink = isLight
+    ? "font-light text-brand-charcoal/70 hover:text-brand-charcoal transition-colors"
+    : "font-light text-white/80 hover:text-white transition-colors";
   const burgerClass = isLight
     ? "lg:hidden p-2 rounded-md text-brand-charcoal hover:text-brand-charcoal/80 transition-colors"
     : "lg:hidden p-2 rounded-md text-white hover:text-white/80 transition-colors";
@@ -81,7 +84,10 @@ export default function Banner({
             </div>
 
             {/* Desktop nav */}
-            <div className="hidden lg:flex items-center gap-4">
+            <div className="hidden lg:flex items-center gap-8">
+              <Link href="/how-it-works" className={navLink}>
+                How it Works
+              </Link>
               {user ? (
                 <Link
                   href="/profile/groups"
@@ -121,10 +127,19 @@ export default function Banner({
           {/* Mobile dropdown */}
           <div
             className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-              isMobileMenuOpen ? "max-h-64" : "max-h-0"
+              isMobileMenuOpen ? "max-h-80" : "max-h-0"
             }`}
           >
             <div className="px-6 py-5 flex flex-col gap-3">
+              <Link
+                href="/how-it-works"
+                className={`block w-full text-center py-2 font-light ${
+                  isLight ? "text-brand-charcoal" : "text-white"
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                How it Works
+              </Link>
               {user ? (
                 <Link
                   href="/profile/groups"
