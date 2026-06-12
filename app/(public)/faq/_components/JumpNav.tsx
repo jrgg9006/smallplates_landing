@@ -41,7 +41,7 @@ export default function JumpNav({ sections }: { sections: JumpNavSection[] }) {
           <li key={id} className="shrink-0">
             <a
               href={`#${id}`}
-              className={`inline-block whitespace-nowrap rounded-full border px-4 py-2 text-sm transition-colors ${
+              className={`inline-block whitespace-nowrap rounded-full border px-4 py-2 text-sm transition-colors lg:block lg:w-full ${
                 activeId === id
                   ? "border-brand-charcoal bg-brand-charcoal text-white"
                   : "border-brand-sand bg-white text-brand-charcoal hover:border-brand-charcoal/40"
