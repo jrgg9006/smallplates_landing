@@ -368,7 +368,14 @@ export function buildFeed(d: RadarSources, limit = 50): FeedItem[] {
 
   for (const e of d.events) {
     if (SHARE_EVENTS.has(e.event_name)) {
-      const channel = typeof e.props.channel === 'string' ? e.props.channel : 'link';
+      // Reason: share_link_copied sends `channel`; the older onboarding `share`
+      // event sends `method` (copy_link / whatsapp / qr_download).
+      const channel =
+        typeof e.props.channel === 'string'
+          ? e.props.channel
+          : typeof e.props.method === 'string'
+            ? e.props.method
+            : 'link';
       items.push({
         id: `ev-${e.id}`,
         at: e.created_at,

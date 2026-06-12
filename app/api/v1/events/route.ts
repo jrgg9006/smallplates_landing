@@ -5,6 +5,10 @@ import { PERSISTED_EVENTS } from '@/lib/analytics';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// Reason: these are recorded by API routes with the service role; accepting
+// them from the public endpoint would let a client forge feed items.
+const SERVER_ONLY_EVENTS = new Set(['couple_image_uploaded']);
+
 export async function POST(req: NextRequest) {
   try {
     const raw = await req.text();
@@ -14,7 +18,7 @@ export async function POST(req: NextRequest) {
     const body = JSON.parse(raw) as { event_name?: unknown; group_id?: unknown; props?: unknown };
 
     const eventName = typeof body.event_name === 'string' ? body.event_name : '';
-    if (!PERSISTED_EVENTS.has(eventName)) {
+    if (!PERSISTED_EVENTS.has(eventName) || SERVER_ONLY_EVENTS.has(eventName)) {
       return NextResponse.json({ error: 'Unknown event' }, { status: 400 });
     }
     const groupId =
