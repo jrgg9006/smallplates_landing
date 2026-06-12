@@ -42,20 +42,11 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         question: "How does it work, start to finish?",
         answer: [],
         list: [
-          "Create your event. It's free and takes a couple of minutes.",
-          "Share the collection link with the guests.",
+          "Share your collection link with the people you want in the book: WhatsApp, text, email, whatever you use.",
           "Each guest submits a recipe and a note. About five minutes each.",
           "We clean everything up and design the book.",
           "You review every page, then send it to print.",
           "The hardcover shows up at your door.",
-        ],
-      },
-      {
-        id: "tech-savvy",
-        question: "Do I need to be good with technology?",
-        answer: [
-          "No. If you can send a text, you can do this. There's no app to download and no password to remember. We send you a sign-in link by email.",
-          "Guests just tap a link.",
         ],
       },
       {
@@ -92,7 +83,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "whats-free",
         question: "What exactly is free?",
         answer: [
-          "Everything except the printed book: the event page, the collection link, reminders to guests, and a free sample PDF so you can see how the first recipes look designed before you decide anything.",
+          "Everything except the printed book: the event page, the collection link, and reminders to guests. You collect everything first and decide about printing later.",
         ],
       },
       {
@@ -125,11 +116,18 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
     title: "Collecting recipes",
     items: [
       {
+        id: "dish-photos",
+        question: "Do guests need to upload a photo of the dish, or do you create the images?",
+        answer: [
+          "We create them. Guests only send the recipe. Our recipe-to-image technology reads every component of the recipe (the ingredients, the technique, the dish itself) and builds an image as close to the real recipe as possible. It's not 100% perfect and it can miss a detail, but we work to get every image as true to the dish as we can.",
+        ],
+      },
+      {
         id: "guests-submit",
         question: "How do guests send their recipe?",
         answer: [
-          "They tap a link, snap a photo of the handwritten recipe (grandma's card, the back of an envelope, coffee stains and all) or type it if they'd rather. Add a short note, done. About five minutes.",
-          "No app, no account, no password. It works on any phone, tablet, or computer, including your aunt's iPad.",
+          "A link arrives in their messages or inbox. From there, two ways: they type the recipe out, or they take a photo of it wherever it lives (the handwritten card, grandma's notebook, the back of an envelope) and upload that. They add a short note, and they're done. About five minutes.",
+          "No app, no account, no password. It works on any phone, tablet, or computer.",
         ],
       },
       {
@@ -144,15 +142,15 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "dont-send",
         question: "What if people don't send their recipes?",
         answer: [
-          "Some won't on the first ask. That's normal, not a reflection on you. Your dashboard shows who's in, and you can send a reminder to everyone who hasn't with one click.",
+          "Some won't on the first ask. That's normal. Your dashboard shows who's in, and you can send a reminder to everyone who hasn't with one click.",
           "If it's a wedding, you can also import your guest list straight from Zola or The Knot, so nobody gets left out.",
         ],
       },
       {
         id: "run-alone",
-        question: "Do I have to run this alone?",
+        question: "What are captains, and how do they help me collect recipes?",
         answer: [
-          "No. You can invite captains: the sister, the cousin, the other bridesmaid, whoever's good at this. Each captain gets the same dashboard you do and gathers recipes right alongside you.",
+          "Captains are the people who collect with you: the sister, the cousin, the other bridesmaid, whoever's good at this. You invite them, and each captain gets the same dashboard you do and gathers recipes right alongside you.",
           "The work spreads out, so it never sits on one person.",
         ],
       },
@@ -172,13 +170,6 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         ],
       },
       {
-        id: "dish-photos",
-        question: "Do guests need to photograph their dish?",
-        answer: [
-          "No. Just the recipe. We create every image in the book. That's what makes it look like one book instead of fifty screenshots.",
-        ],
-      },
-      {
         id: "add-myself",
         question: "Can I add recipes myself?",
         answer: [
@@ -189,7 +180,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "fix-typos",
         question: "Can I fix typos or edit recipes before printing?",
         answer: [
-          "We do the clean-up (amounts, steps, typos) before anything reaches the book. In the review step you see every page; if something looks off, flag it and we'll fix it before it prints.",
+          "Yes. You can edit every single recipe yourself from your dashboard, any time before the book prints. We also run our own clean-up pass (amounts, steps, typos), and you review every page before anything goes to print.",
         ],
       },
     ],
@@ -211,29 +202,35 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         question: "Can I personalize the book?",
         answer: [
           "Yes. The cover has two lines you can make yours: the headline (ours says “Recipes from the people who love you,” but you can write your own) and the title: the couple's names, the graduate, the birthday person, whatever the book is for.",
-          "You can also add one photo of your own, printed inside the book.",
+          "You can also add one photo of your own. It goes in the opening pages, inside the book.",
         ],
       },
       {
         id: "who-designs",
         question: "Who designs it?",
         answer: [
-          "We do. Recipes arrive messy: half-remembered amounts, “a pinch of this.” We clean them up and lay them out so the whole thing reads like one book, without flattening how each person actually talks.",
+          "We do. Recipes arrive messy: half-remembered amounts, “a pinch of this.” We clean, edit, and format every single one to the same standard, so the whole thing reads like one professional cookbook instead of fifty different notes.",
+        ],
+      },
+      {
+        id: "recipes-change",
+        question: "Will the recipes look exactly as guests sent them?",
+        answer: [
+          "They'll change a little, on purpose. We clean and standardize every recipe so the book looks professional and consistent, without losing the essence: the dish, the voice, the weird family steps all stay. You see every recipe before it prints.",
         ],
       },
       {
         id: "see-before",
         question: "Can I see the book before it prints?",
         answer: [
-          "Yes, twice. Early on you get a free sample PDF with five finished recipes, so you can see the design with your group's actual food.",
-          "Before printing, you review the full book page by page. Nothing prints until you say so.",
+          "Yes. Before printing, you review the full book page by page, and you can edit any recipe from your dashboard. Nothing prints until you say so.",
         ],
       },
       {
         id: "incomplete-recipe",
         question: "What if a recipe comes in incomplete?",
         answer: [
-          "Expected. Half of home cooking is “until it looks right.” We edit for clarity and keep the voice. If something's truly missing, it gets flagged and fixed before the book prints.",
+          "Expected. Half of home cooking is “until it looks right.” We edit for clarity and keep the voice, and you can review every recipe yourself before printing. And some recipes just aren't perfect. That's the point of this book.",
         ],
       },
     ],
@@ -339,12 +336,12 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
  * `getFaqItem` return undefined and the question silently disappears.
  */
 export const TOP_QUESTION_IDS = [
+  "dish-photos",
   "how-much",
   "when-pay",
   "guests-submit",
   "dont-cook",
   "how-long",
-  "see-before",
 ];
 
 export function getFaqItem(id: string): FaqItem | undefined {

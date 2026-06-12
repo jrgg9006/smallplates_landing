@@ -126,21 +126,6 @@ export default function FaqPage() {
                 </section>
               ))}
             </div>
-
-            {/* Closing note */}
-            <div className="mt-16 text-center">
-              <p className="type-question">Still wondering about something?</p>
-              <p className="type-caption mt-2">
-                Write to{" "}
-                <a
-                  className="underline underline-offset-4 transition-colors hover:text-brand-charcoal"
-                  href="mailto:team@smallplatesandcompany.com"
-                >
-                  team@smallplatesandcompany.com
-                </a>
-                . A person answers.
-              </p>
-            </div>
           </div>
         </div>
       </main>
