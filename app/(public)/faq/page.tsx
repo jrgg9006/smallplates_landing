@@ -20,11 +20,11 @@ export const metadata: Metadata = {
 function AnswerBody({ item, className = "" }: { item: FaqItem; className?: string }) {
   return (
     <div className={className}>
-      {item.answer.map((paragraph) => (
-        <p key={paragraph} className="type-body-small md:text-base mb-3 last:mb-0">
-          {paragraph}
-        </p>
-      ))}
+      {/* Reason: answers render as ONE paragraph regardless of how many
+          strings the data has — Ricardo prefers no gaps inside an answer */}
+      {item.answer.length > 0 && (
+        <p className="type-body-small md:text-base">{item.answer.join(" ")}</p>
+      )}
       {item.list && (
         <ol className="list-decimal space-y-2 pl-5">
           {item.list.map((entry) => (
