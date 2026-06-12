@@ -341,7 +341,7 @@ body > div.pac-container ~ div:not([id]):not([class]) {
   /* type-question: FAQ/list question titles — weight contrast over the sans
      answers below them, instead of size contrast (serif at small sizes reads weak) */
   .type-question {
-    @apply font-sans text-base md:text-lg font-semibold text-brand-charcoal leading-snug;
+    @apply font-sans text-base md:text-lg font-medium text-brand-charcoal leading-snug;
   }
 
   /* type-statement: Cold declarative observations — serif, non-italic, editorial weight */
