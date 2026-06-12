@@ -23,7 +23,10 @@ export async function POST(request: NextRequest) {
     // Call Railway agent (v2)
     const response = await fetch(`${RAILWAY_AGENT_URL}/process-image`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.RAILWAY_AGENT_SECRET}`,
+      },
       body: JSON.stringify({
         image_url,
         dish_name: dish_name || null,

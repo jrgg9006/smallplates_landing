@@ -25,7 +25,10 @@ export async function POST(request: NextRequest) {
     // Call Railway agent (v2)
     const response = await fetch(`${RAILWAY_AGENT_URL}/generate-prompt`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.RAILWAY_AGENT_SECRET}`,
+      },
       body: JSON.stringify({ dish_name, recipe, comments: comments || null }),
     });
 
