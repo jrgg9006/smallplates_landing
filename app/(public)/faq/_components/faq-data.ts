@@ -25,7 +25,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "what-is-small-plates",
         question: "What is Small Plates?",
         answer: [
-          "A hardcover cookbook written by the people who came to the wedding. Each guest sends a recipe and a note. We collect them, design the book, print it, and ship it.",
+          "A hardcover cookbook written by the people who show up: to a wedding, a shower, a birthday, a graduation. Each guest sends a recipe and a note. We collect them, design the book, print it, and ship it.",
           "It lives in the kitchen and gets stained. That's the point.",
         ],
       },
@@ -34,7 +34,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         question: "Who organizes the book?",
         answer: [
           "Usually one person: the maid of honor, the sister, the mom, a friend. You don't need design skills or free time. You share a link and the rest happens on its own.",
-          "Couples can also run it for their own wedding.",
+          "You can also run one for your own occasion.",
         ],
       },
       {
@@ -60,7 +60,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         id: "guest-book",
-        question: "Is this like a wedding guest book?",
+        question: "Is this like a guest book?",
         answer: [
           "A guest book gets signed once and goes in a box. This one gets opened on a random Tuesday because someone wants the lasagna recipe.",
           "Same people, different shelf life.",
@@ -145,14 +145,14 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         question: "What if people don't send their recipes?",
         answer: [
           "Some won't on the first ask. That's normal, not a reflection on you. Your dashboard shows who's in, and you can send a reminder to everyone who hasn't with one click.",
-          "You can also import your guest list straight from Zola or The Knot, so nobody gets left out.",
+          "If it's a wedding, you can also import your guest list straight from Zola or The Knot, so nobody gets left out.",
         ],
       },
       {
         id: "run-alone",
         question: "Do I have to run this alone?",
         answer: [
-          "No. You can invite captains: the other bridesmaid, the sister, whoever's good at this. Each captain gets the same dashboard you do and gathers recipes right alongside you.",
+          "No. You can invite captains: the sister, the cousin, the other bridesmaid, whoever's good at this. Each captain gets the same dashboard you do and gathers recipes right alongside you.",
           "The work spreads out, so it never sits on one person.",
         ],
       },
@@ -210,7 +210,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "personalize",
         question: "Can I personalize the book?",
         answer: [
-          "Yes. The cover has two lines you can make yours: the headline (ours says “Recipes from the people who love you,” but you can write your own) and the title, usually the couple's names, though it can say whatever the book is for.",
+          "Yes. The cover has two lines you can make yours: the headline (ours says “Recipes from the people who love you,” but you can write your own) and the title: the couple's names, the graduate, the birthday person, whatever the book is for.",
           "You can also add one photo of your own, printed inside the book.",
         ],
       },
@@ -244,9 +244,9 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
     items: [
       {
         id: "gift-or-couple",
-        question: "Is the book a gift, or something the couple makes?",
+        question: "Is the book a gift, or something you make for yourself?",
         answer: [
-          "Both happen. Most books are organized as a gift, by the maid of honor, the mom, the sister. Some couples run it themselves.",
+          "Both happen. Most books are organized as a gift, by the maid of honor, the mom, the sister, the friend group. Some people make one for their own table.",
           "Same book either way.",
         ],
       },
@@ -254,8 +254,8 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "when-give",
         question: "When do people give it?",
         answer: [
-          "The shower, the bachelorette, the rehearsal dinner: any moment where the people are actually in the room.",
-          "It lands harder when she can pass it around the table.",
+          "The shower, the bachelorette, the rehearsal dinner, the graduation lunch, the birthday: any moment where the people are actually in the room.",
+          "It lands harder when it can get passed around the table.",
         ],
       },
       {
@@ -268,9 +268,9 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         id: "surprise",
-        question: "Can we keep it a surprise from the couple?",
+        question: "Can we keep it a surprise?",
         answer: [
-          "Yes. The link goes to the guests, not the couple. Whether it's a surprise is your call. Plenty of groups keep it quiet until the shower.",
+          "Yes. The link goes to the guests, not to the person the book is for. Whether it's a surprise is your call. Plenty of groups keep it quiet until the day they hand it over.",
         ],
       },
     ],
