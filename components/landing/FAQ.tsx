@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function FAQ() {
   const faqs = [
@@ -45,16 +46,16 @@ export default function FAQ() {
         {/* FAQ List */}
         <div className="space-y-6">
           {faqs.map((faq, index) => (
-            <motion.div 
-              key={index} 
+            <motion.div
+              key={index}
               className="border-b border-brand-sand pb-8 last:border-b-0"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "50px" }}
-              transition={{ 
-                duration: 0.5, 
-                delay: index * 0.1, 
-                ease: "easeOut" 
+              transition={{
+                duration: 0.5,
+                delay: index * 0.1,
+                ease: "easeOut"
               }}
             >
               <h3 className="type-subheading text-xl md:text-2xl mb-3">
@@ -65,6 +66,16 @@ export default function FAQ() {
               </p>
             </motion.div>
           ))}
+        </div>
+
+        {/* Link to the full FAQ page */}
+        <div className="mt-12 text-center">
+          <Link
+            href="/faq"
+            className="type-body-small underline underline-offset-4 transition-colors hover:text-brand-honey"
+          >
+            See all FAQs →
+          </Link>
         </div>
       </div>
     </section>
