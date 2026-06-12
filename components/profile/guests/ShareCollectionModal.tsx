@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Check, Image as ImageIcon, MessageCircle, Mail, QrCode, ArrowLeft, Download } from "lucide-react";
 import { getGroupShareMessage, updateGroupShareMessage, resetGroupShareMessage } from "@/lib/supabase/groups";
+import { trackEvent, EVENTS } from '@/lib/analytics';
 import { isIOSDevice } from "@/lib/utils/sharing";
 import QRCode from "qrcode";
 import { CoupleImageEditor } from "@/components/profile/groups/CoupleImageEditor";
@@ -165,6 +166,7 @@ export function ShareCollectionModal({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
       onLinkCopied?.();
+      trackEvent(EVENTS.SHARE_LINK_COPIED, { group_id: groupId ?? undefined, channel: 'copy' });
     } catch (err) {
       setError("Failed to copy link");
       setTimeout(() => setError(null), 3000);
@@ -176,6 +178,7 @@ export function ShareCollectionModal({
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
     // Reason: signal the Setup checklist that the user shared, same as Copy does.
     onLinkCopied?.();
+    trackEvent(EVENTS.SHARE_LINK_COPIED, { group_id: groupId ?? undefined, channel: 'whatsapp' });
   };
 
   // Reason: HTML block users paste into Gmail/Outlook/Apple Mail. Inline styles
@@ -246,6 +249,7 @@ export function ShareCollectionModal({
       setEmailCopied(true);
       setTimeout(() => setEmailCopied(false), 2500);
       onLinkCopied?.();
+      trackEvent(EVENTS.SHARE_LINK_COPIED, { group_id: groupId ?? undefined, channel: 'email' });
     } catch (err) {
       // Reason: some browsers throw if HTML clipboard is blocked. Fall back
       // to plain text without surfacing a hard error.
@@ -253,6 +257,7 @@ export function ShareCollectionModal({
         await navigator.clipboard.writeText(plain);
         setEmailCopied(true);
         setTimeout(() => setEmailCopied(false), 2500);
+        trackEvent(EVENTS.SHARE_LINK_COPIED, { group_id: groupId ?? undefined, channel: 'email' });
         if (isIOSDevice()) {
           setError("Copied as text — for the styled block with photo, try this on desktop.");
           setTimeout(() => setError(null), 6000);
@@ -266,6 +271,7 @@ export function ShareCollectionModal({
 
   const handleDownloadQR = () => {
     if (!qrDataUrl) return;
+    trackEvent(EVENTS.SHARE_LINK_COPIED, { group_id: groupId ?? undefined, channel: 'qr' });
     const a = document.createElement("a");
     a.href = qrDataUrl;
     a.download = "small-plates-recipe-qr.png";
