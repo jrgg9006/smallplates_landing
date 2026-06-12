@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { X, ChevronLeft, ChevronRight, Check, AlertTriangle, Loader2, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { BookReviewStatus } from '@/lib/types/database';
 import { ArchiveRecipeModal } from './ArchiveRecipeModal';
+import { auditRecipe, type RecipeAudit, type SectionKey } from '@/lib/recipe-audit';
+import { RecipeAuditStrip, HighlightedText } from './RecipeAuditStrip';
 
 interface ReviewRecipe {
   id: string;
@@ -84,6 +86,34 @@ export default function BookReviewOverlay({
   const revisionCount = localRecipes.filter(r => r.book_review_status === 'needs_revision').length;
   const pendingCount = localRecipes.filter(r => r.book_review_status === 'pending').length;
   const allApproved = approvedCount === total && total > 0;
+
+  // Reason: deterministic audit (original vs clean) runs in-browser, instantly,
+  // for every recipe. No API, no tokens, no cost. Recomputed only when recipes change.
+  const audits = useMemo<RecipeAudit[]>(() => localRecipes.map((r) => {
+    const isManualOriginal =
+      (r.upload_method === 'image' && !!r.document_urls && r.document_urls.length > 0)
+      || !!r.raw_recipe_text;
+    return auditRecipe({
+      hasPrintReady: r.has_print_ready,
+      isManualOriginal,
+      original: {
+        name: r.recipe_name || '',
+        ingredients: r.ingredients || '',
+        instructions: r.instructions || '',
+        note: r.comments,
+      },
+      clean: {
+        name: r.print_ready?.recipe_name_clean || '',
+        ingredients: r.print_ready?.ingredients_clean || '',
+        instructions: r.print_ready?.instructions_clean || '',
+        note: r.print_ready?.note_clean ?? null,
+      },
+    });
+  }), [localRecipes]);
+
+  const currentAudit = audits[currentIndex] ?? null;
+  const auditFlaggedCount = audits.filter((a) => a.severity === 'content').length;
+  const sectionAudit = (key: SectionKey) => currentAudit?.sections.find((s) => s.section === key) ?? null;
 
   const saveReview = useCallback(async (
     recipeId: string,
@@ -367,6 +397,12 @@ export default function BookReviewOverlay({
           Book Review: {coupleName}
         </h2>
         <div className="flex items-center gap-4">
+          {!showSummary && auditFlaggedCount > 0 && (
+            <span className="flex items-center gap-1 rounded bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-300">
+              <AlertTriangle className="h-3 w-3" />
+              {auditFlaggedCount} a revisar
+            </span>
+          )}
           {!showSummary && (
             <span className="text-gray-400 text-sm tabular-nums">
               {currentIndex + 1} / {total}
@@ -421,6 +457,7 @@ export default function BookReviewOverlay({
                 <p className="text-xs uppercase tracking-[0.2em] text-gray-400 font-serif mb-2">
                   {recipe.guest_name}
                 </p>
+                {!isEditing && <RecipeAuditStrip audit={currentAudit} />}
                 {isEditing ? (
                   <input
                     value={editName}
@@ -459,7 +496,9 @@ export default function BookReviewOverlay({
                       />
                     ) : (
                       <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed font-serif">
-                        {displayIngredients}
+                        {showOriginal && sectionAudit('ingredients')
+                          ? <HighlightedText tokens={sectionAudit('ingredients')!.cleanTokens} />
+                          : displayIngredients}
                       </p>
                     )}
                   </div>
@@ -476,11 +515,15 @@ export default function BookReviewOverlay({
                       />
                     ) : (
                       <div className="text-sm text-gray-700 font-serif leading-[1.6]">
-                        {displayInstructions?.split('\n').map((line, i) => (
-                          line.trim() === ''
-                            ? <div key={i} className="h-[2em]" />
-                            : <p key={i} className="m-0">{line}</p>
-                        ))}
+                        {showOriginal && sectionAudit('instructions') ? (
+                          <HighlightedText tokens={sectionAudit('instructions')!.cleanTokens} />
+                        ) : (
+                          displayInstructions?.split('\n').map((line, i) => (
+                            line.trim() === ''
+                              ? <div key={i} className="h-[2em]" />
+                              : <p key={i} className="m-0">{line}</p>
+                          ))
+                        )}
                       </div>
                     )}
                   </div>
@@ -539,17 +582,23 @@ export default function BookReviewOverlay({
                       <div className="min-w-0">
                         <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Ingredients</h3>
                         <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed font-serif">
-                          {originalIngredients}
+                          {sectionAudit('ingredients')
+                            ? <HighlightedText tokens={sectionAudit('ingredients')!.originalTokens} />
+                            : originalIngredients}
                         </p>
                       </div>
                       <div>
                         <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Instructions</h3>
                         <div className="text-sm text-gray-700 font-serif leading-[1.6]">
-                          {originalInstructions?.split('\n').map((line, i) => (
-                            line.trim() === ''
-                              ? <div key={i} className="h-[2em]" />
-                              : <p key={i} className="m-0">{line}</p>
-                          ))}
+                          {sectionAudit('instructions') ? (
+                            <HighlightedText tokens={sectionAudit('instructions')!.originalTokens} />
+                          ) : (
+                            originalInstructions?.split('\n').map((line, i) => (
+                              line.trim() === ''
+                                ? <div key={i} className="h-[2em]" />
+                                : <p key={i} className="m-0">{line}</p>
+                            ))
+                          )}
                         </div>
                       </div>
                     </div>
@@ -615,7 +664,12 @@ export default function BookReviewOverlay({
 
                 {/* Center: status badge + original toggle + edit */}
                 <div className="flex items-center gap-2">
-                  <ReviewBadge status={recipe.book_review_status} />
+                  {/* Reason: when approved, the right-side "Approved — click to undo" button already
+                      states the status, so the badge would duplicate it. Show it only for the
+                      pending / needs_revision states where the action button doesn't say it plainly. */}
+                  {recipe.book_review_status !== 'approved' && (
+                    <ReviewBadge status={recipe.book_review_status} />
+                  )}
                   {recipe.has_print_ready && (
                     <button
                       onClick={() => setShowOriginal(v => !v)}
@@ -642,10 +696,11 @@ export default function BookReviewOverlay({
                   <button
                     onClick={() => setArchiveOpen(true)}
                     disabled={saving || archiveLoading}
-                    className="text-xs px-2 py-1 rounded bg-gray-700 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors flex items-center gap-1 disabled:opacity-50"
+                    className="text-xs p-1.5 rounded bg-gray-700 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors flex items-center disabled:opacity-50"
                     title="Quitar esta receta del libro (reversible)"
+                    aria-label="Quitar del libro"
                   >
-                    <Trash2 className="w-3 h-3" /> Quitar del libro
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
