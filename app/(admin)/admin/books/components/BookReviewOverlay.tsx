@@ -64,6 +64,9 @@ export default function BookReviewOverlay({
   });
   const [showSummary, setShowSummary] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
+  // Reason: dedicated toggle to view the guest's uploaded photo(s) on the right panel,
+  // independent of the generated image and the clean-vs-original text comparison.
+  const [showPhoto, setShowPhoto] = useState(false);
   const [showNotesInput, setShowNotesInput] = useState(false);
   const [notesValue, setNotesValue] = useState('');
   const [saving, setSaving] = useState(false);
@@ -259,6 +262,7 @@ export default function BookReviewOverlay({
     setEditInstructions(recipe.print_ready?.instructions_clean || recipe.instructions);
     setEditNote(recipe.print_ready?.note_clean || recipe.comments || '');
     setShowOriginal(false);
+    setShowPhoto(false);
     setIsEditing(true);
   }, [recipe]);
 
@@ -341,6 +345,13 @@ export default function BookReviewOverlay({
 
       if (e.key === 'o' || e.key === 'O') {
         setShowOriginal(v => !v);
+        setShowPhoto(false);
+        return;
+      }
+
+      if (e.key === 'p' || e.key === 'P') {
+        setShowPhoto(v => !v);
+        setShowOriginal(false);
         return;
       }
 
@@ -366,6 +377,7 @@ export default function BookReviewOverlay({
   // Reset notes input when navigating
   useEffect(() => {
     setShowOriginal(false);
+    setShowPhoto(false);
     setIsEditing(false);
     setShowNotesInput(false);
     setNotesValue('');
@@ -388,6 +400,14 @@ export default function BookReviewOverlay({
   const rawImage = recipe?.generated_image_url_print || recipe?.generated_image_url || null;
   // Reason: append cache buster so browser fetches fresh image after re-upload in operations
   const displayImage = rawImage && imageCacheBuster ? `${rawImage}?v=${imageCacheBuster}` : rawImage;
+
+  // Reason: the original files the guest uploaded (photos/PDFs). Photos live in document_urls;
+  // fall back to image_url. Drives the "Foto original" toggle so the admin can compare the clean
+  // text against the actual submission without leaving the screen. Independent of upload_method.
+  const originalFiles = recipe?.document_urls && recipe.document_urls.length > 0
+    ? recipe.document_urls
+    : (recipe?.image_url ? [recipe.image_url] : []);
+  const hasOriginalPhoto = originalFiles.length > 0;
 
   return (
     <div className="fixed inset-0 z-[100] bg-gray-900 flex flex-col">
@@ -531,9 +551,52 @@ export default function BookReviewOverlay({
               </div>
             </div>
 
-            {/* Right page — image or original text for comparison */}
+            {/* Right page — uploaded photo, original text, or generated image */}
             {/* Reason: while editing, force the original onto the right side so admin can compare against the source */}
-            {(showOriginal || isEditing) ? (
+            {showPhoto && hasOriginalPhoto && !isEditing ? (
+              <div className="flex-1 overflow-y-auto p-8 lg:p-12 bg-gray-50">
+                <div className="max-w-xl mx-auto">
+                  <div className="mb-4 px-3 py-1.5 bg-sky-200/60 text-sky-800 text-xs font-medium rounded inline-block">
+                    Foto original del invitado
+                  </div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-gray-400 font-serif mb-4">
+                    {recipe.guest_name}
+                  </p>
+                  <div className="flex flex-col gap-4">
+                    {originalFiles.map((url, i) => {
+                      // Reason: PDFs can't render inline — a link to open in a new tab is enough.
+                      const isPdf = url.toLowerCase().split('?')[0].endsWith('.pdf');
+                      return isPdf ? (
+                        <a
+                          key={url}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block rounded border border-gray-200 bg-white px-4 py-3 text-sm text-sky-700 hover:border-sky-400 hover:text-sky-800 transition-colors"
+                        >
+                          Abrir PDF {i + 1} de {originalFiles.length} en otra pestaña ↗
+                        </a>
+                      ) : (
+                        <div key={url}>
+                          {originalFiles.length > 1 && (
+                            <p className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-2">
+                              Imagen {i + 1} de {originalFiles.length}
+                            </p>
+                          )}
+                          <a href={url} target="_blank" rel="noopener noreferrer" className="block">
+                            <img
+                              src={url}
+                              alt={`Foto original ${i + 1}`}
+                              className="w-full rounded border border-gray-200 hover:border-gray-400 transition-colors"
+                            />
+                          </a>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            ) : (showOriginal || isEditing) ? (
               <div className="flex-1 overflow-y-auto p-8 lg:p-12 bg-amber-50">
                 <div className="max-w-xl mx-auto">
                   <div className="mb-4 px-3 py-1.5 bg-amber-200/60 text-amber-800 text-xs font-medium rounded inline-block">
@@ -672,7 +735,7 @@ export default function BookReviewOverlay({
                   )}
                   {recipe.has_print_ready && (
                     <button
-                      onClick={() => setShowOriginal(v => !v)}
+                      onClick={() => { setShowOriginal(v => !v); setShowPhoto(false); }}
                       className={`text-xs px-2 py-1 rounded transition-colors ${
                         showOriginal
                           ? 'bg-amber-500/30 text-amber-300'
@@ -680,6 +743,18 @@ export default function BookReviewOverlay({
                       }`}
                     >
                       {showOriginal ? 'Show Clean Version' : 'Show Original'} <kbd className="text-[9px] opacity-40 ml-1.5 px-1 py-0.5 rounded border border-gray-600">O</kbd>
+                    </button>
+                  )}
+                  {hasOriginalPhoto && (
+                    <button
+                      onClick={() => { setShowPhoto(v => !v); setShowOriginal(false); }}
+                      className={`text-xs px-2 py-1 rounded transition-colors ${
+                        showPhoto
+                          ? 'bg-sky-500/30 text-sky-300'
+                          : 'bg-gray-700 text-gray-400 hover:text-gray-300'
+                      }`}
+                    >
+                      {showPhoto ? 'Ocultar foto' : 'Foto original'} <kbd className="text-[9px] opacity-40 ml-1.5 px-1 py-0.5 rounded border border-gray-600">P</kbd>
                     </button>
                   )}
                   {!recipe.has_print_ready && (
