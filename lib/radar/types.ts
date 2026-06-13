@@ -20,6 +20,7 @@ export interface GroupRow {
 export interface GuestRow {
   id: string;
   group_id: string;
+  user_id?: string; // the team member (owner OR captain) whose account/link brought the guest in
   first_name: string | null;
   last_name: string | null;
   created_at: string;
@@ -31,11 +32,13 @@ export interface RecipeRow {
   id: string;
   group_id: string | null;
   guest_id: string | null;
+  user_id?: string; // account that created the recipe — owner/captain when source='manual'
   recipe_name: string | null;
   created_at: string;
   deleted_at: string | null;
   image_url: string | null;
   source: string | null;
+  upload_method?: string | null; // 'text' | 'audio' | 'image' — marks photo uploads in the feed
 }
 
 export interface CommRow {
@@ -64,6 +67,16 @@ export interface OrderRow {
   created_at: string;
 }
 
+// Reason: captains are group_members with role='member' (owner = the organizer).
+// invited_by = who invited them (null for older rows / link-flow joins).
+export interface GroupMemberRow {
+  group_id: string;
+  profile_id: string;
+  role: string;
+  joined_at: string;
+  invited_by: string | null;
+}
+
 export interface UserEventRow {
   id: number;
   user_id: string | null;
@@ -82,6 +95,7 @@ export interface RadarSources {
   edits: EditRow[];
   orders: OrderRow[];
   events: UserEventRow[];
+  members: GroupMemberRow[];
 }
 
 // Aggregated payload served by GET /api/v1/admin/radar.
@@ -137,6 +151,8 @@ export interface DetailItem {
   at: string; // ISO timestamp
   text: string;
   recipeId?: string; // set on recipe items — makes the row clickable to view the recipe
+  // set on guest items — the guest's recipes, expandable inline (each opens the recipe modal)
+  recipes?: { id: string; name: string }[];
 }
 
 export interface GroupHealthRow {

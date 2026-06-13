@@ -29,7 +29,7 @@ interface RecipeData {
 function guestLabel(g: RecipeGuest | null): string {
   if (!g) return 'Alguien';
   if (g.is_self) return 'El organizador';
-  return [g.first_name, g.last_name].filter(Boolean).join(' ') || g.email || 'Invitado';
+  return [g.first_name, g.last_name].filter(Boolean).join(' ') || g.email || 'Guest';
 }
 
 // Reason: when an image upload fails OCR, the text fields hold placeholders like

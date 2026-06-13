@@ -1,5 +1,6 @@
 import type {
   RadarSources,
+  RecipeRow,
   PulseMetric,
   FeedItem,
   FunnelStep,
@@ -57,6 +58,64 @@ export function computePulse(timestamps: string[], now: Date): PulseComputed {
   };
 }
 
+// People maps + "who acted" label, shared by feed and drill-down so attribution
+// (el dueño vs ⚓ Capitán X) is computed identically everywhere.
+export interface PeopleMaps {
+  profName: Map<string, string>;
+  groupOwner: Map<string, string>;
+  captainIds: Set<string>;
+  selfGuestIds: Set<string>; // guests with is_self — the owner's own entry in the guest list
+}
+export function buildPeopleMaps(d: RadarSources): PeopleMaps {
+  return {
+    profName: new Map(d.profiles.map((p) => [p.id, p.full_name || p.email || 'Usuario'])),
+    groupOwner: new Map(d.groups.map((g) => [g.id, g.created_by])),
+    captainIds: new Set(d.members.map((m) => m.profile_id)),
+    selfGuestIds: new Set(d.guests.filter((g) => g.is_self).map((g) => g.id)),
+  };
+}
+// Reason: role + real name, lowercase so it reads mid-sentence ("por el dueño Ana");
+// callers capitalize at sentence start. Masculine role words ("el dueño/el capitán")
+// are the unmarked form — we don't store gender, so this avoids "la capitana JP".
+export function whoActed(userId: string | undefined, groupId: string | null, m: PeopleMaps): string {
+  const owner = groupId ? m.groupOwner.get(groupId) : null;
+  const id = userId ?? owner ?? undefined;
+  if (!id) return 'el organizador';
+  const name = m.profName.get(id) ?? '—';
+  if (m.captainIds.has(id)) return `el capitán ${name}`;
+  if (owner && id === owner) return `el dueño ${name}`;
+  return name; // known person, role unclear — just the name
+}
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/**
+ * How a recipe appears in the feed / drill-down. Distinguishes the guest
+ * self-submitting via the link ("Linda subió X (vía link)") from someone
+ * entering it on the guest's behalf ("El dueño agregó X a nombre de Linda"),
+ * which is what `source='manual'` means.
+ */
+export function recipeActionText(
+  r: RecipeRow,
+  guestName: Map<string, string>,
+  people: PeopleMaps,
+  inGroup: (id: string | null) => string
+): string {
+  const name = r.recipe_name ?? 'receta';
+  const img = r.upload_method === 'image' ? ' 📷' : '';
+  // Reason: a self-guest recipe is the owner's/captain's OWN — don't say "a nombre de
+  // {self}" (e.g. "Karla agregó X a nombre de Karla"). Treat it as no guest.
+  const isSelf = r.guest_id ? people.selfGuestIds.has(r.guest_id) : false;
+  const guest = r.guest_id && !isSelf ? guestName.get(r.guest_id) ?? 'Alguien' : null;
+  const who = capitalize(whoActed(r.user_id, r.group_id, people));
+  if (r.source === 'collection') {
+    return `${guest ?? who} subió "${name}"${img} (vía link)${inGroup(r.group_id)}`;
+  }
+  const verb = r.source === 'imported' ? 'importó' : 'agregó';
+  return guest
+    ? `${who} ${verb} "${name}" a nombre de ${guest}${img}${inGroup(r.group_id)}`
+    : `${who} ${verb} "${name}"${img}${inGroup(r.group_id)}`;
+}
+
 export const SENT_STATUSES = new Set(['sent', 'delivered', 'opened']);
 
 // Reason: whitelist — 'error' (failed checkout) and 'refunded' must never
@@ -88,31 +147,29 @@ export function buildPulseMetrics(d: RadarSources, now: Date): PulseMetric[] {
       key: 'recipes',
       label: 'Recetas nuevas',
       definition:
-        'Recetas creadas ese día, por cualquier vía: link de invitados, manual o import (guest_recipes.created_at). Incluye las que luego se borraron.',
+        'Recetas creadas ese día, por cualquier vía: link de guests, manual o import (guest_recipes.created_at). Incluye las que luego se borraron.',
       timestamps: d.recipes.map((r) => r.created_at),
     },
     {
       key: 'guests',
-      label: 'Invitados agregados',
+      label: 'Guests agregados',
       definition:
-        'Invitados dados de alta ese día — manual, vía link o import (guests.created_at). Excluye al propio organizador (is_self).',
+        'Guests dados de alta ese día — manual, vía link o import (guests.created_at). Excluye al propio organizador (is_self).',
       timestamps: d.guests.filter((g) => !g.is_self).map((g) => g.created_at),
     },
     {
-      key: 'emails',
-      label: 'Correos enviados',
+      key: 'captains',
+      label: 'Capitanes',
       definition:
-        'Correos con status sent/delivered/opened en communication_log (invitaciones, reminders, etc.).',
-      timestamps: d.comms
-        .filter((c) => SENT_STATUSES.has(c.status ?? ''))
-        .map((c) => c.sent_at ?? c.created_at),
+        'Capitanes (co-organizadores) que se unieron ese día — group_members con role=member, por cualquier canal (correo o link). No incluye al organizador dueño.',
+      timestamps: d.members.filter((m) => m.role === 'member').map((m) => m.joined_at),
     },
     {
       key: 'photos',
       label: 'Recetas con foto',
       definition:
-        'Recetas creadas ese día que incluyen imagen (guest_recipes.image_url). Señal de calidad del contenido.',
-      timestamps: d.recipes.filter((r) => r.image_url).map((r) => r.created_at),
+        'Recetas que el guest subió como foto/imagen/PDF (upload_method = image), no escritas a mano. Estas pasan por OCR y suelen necesitar revisión. (No confundir con la imagen que generamos nosotros post-pago.)',
+      timestamps: d.recipes.filter((r) => r.upload_method === 'image').map((r) => r.created_at),
     },
   ];
   return cards.map(({ timestamps, ...rest }) => ({ ...rest, ...computePulse(timestamps, now) }));
@@ -192,8 +249,8 @@ export function computeFunnel(d: RadarSources, now: Date): FunnelStep[] {
   return [
     { key: 'signup', label: 'Registro', definition: 'Usuarios registrados en los últimos 30 días.', count: cohort.size },
     { key: 'book', label: 'Libro creado', definition: 'Del cohorte, cuántos crearon al menos un libro.', count: book.size },
-    { key: 'guest', label: '≥1 invitado', definition: 'Agregaron al menos un invitado (sin contarse a sí mismos).', count: guest.size },
-    { key: 'shared', label: 'Link compartido', definition: 'Evento share_link_copied, o proxy: algún invitado llegó vía el link de colección. Solo cuenta usuarios que ya crearon libro.', count: sharedFinal.size },
+    { key: 'guest', label: '≥1 guest', definition: 'Agregaron al menos un guest (sin contarse a sí mismos).', count: guest.size },
+    { key: 'shared', label: 'Link compartido', definition: 'Evento share_link_copied, o proxy: algún guest llegó vía el link de colección. Solo cuenta usuarios que ya crearon libro.', count: sharedFinal.size },
     { key: 'recipe1', label: '1ª receta', definition: 'Su libro tiene al menos una receta.', count: recipe1.size },
     { key: 'recipe5', label: '≥5 recetas', definition: 'Su libro tiene 5 o más recetas.', count: recipe5.size },
     { key: 'photo', label: 'Foto del libro', definition: 'Subieron la foto principal del libro (couple_image_url).', count: photo.size },
@@ -203,7 +260,7 @@ export function computeFunnel(d: RadarSources, now: Date): FunnelStep[] {
 
 const STAGE_ORDER = [
   'Libro creado',
-  'Invitados agregados',
+  'Guests agregados',
   'Link compartido',
   '1ª receta',
   '5+ recetas',
@@ -286,13 +343,14 @@ export function buildFeed(d: RadarSources, limit = 100): FeedItem[] {
   const guestName = new Map(
     d.guests.map((gu) => [
       gu.id,
-      [gu.first_name, gu.last_name].filter(Boolean).join(' ') || 'Invitado',
+      [gu.first_name, gu.last_name].filter(Boolean).join(' ') || 'Guest',
     ])
   );
   const profName = new Map(
     d.profiles.map((p) => [p.id, p.full_name || p.email || 'Usuario'])
   );
   const recipeInfo = new Map(d.recipes.map((r) => [r.id, r]));
+  const people = buildPeopleMaps(d);
   const inGroup = (id: string | null) => (id && groupName.has(id) ? ` — ${groupName.get(id)}` : '');
 
   const items: FeedItem[] = [];
@@ -316,14 +374,11 @@ export function buildFeed(d: RadarSources, limit = 100): FeedItem[] {
   }
 
   for (const r of d.recipes) {
-    const via =
-      r.source === 'collection' ? ' (vía link)' : r.source === 'imported' ? ' (import)' : '';
-    const who = r.guest_id ? guestName.get(r.guest_id) ?? 'Alguien' : 'El organizador';
     items.push({
       id: `recipe-${r.id}`,
       at: r.created_at,
       kind: 'recipe_created',
-      text: `${who} subió "${r.recipe_name ?? 'receta'}"${r.image_url ? ' con foto' : ''}${via}${inGroup(r.group_id)}`,
+      text: recipeActionText(r, guestName, people, inGroup),
       recipeId: r.id,
     });
     if (r.deleted_at) {
@@ -344,7 +399,7 @@ export function buildFeed(d: RadarSources, limit = 100): FeedItem[] {
       id: `guest-${gu.id}`,
       at: gu.created_at,
       kind: 'guest_added',
-      text: `Invitado agregado: ${guestName.get(gu.id)}${via}${inGroup(gu.group_id)}`,
+      text: `Guest agregado: ${guestName.get(gu.id)}${via}${inGroup(gu.group_id)}`,
     });
   }
 

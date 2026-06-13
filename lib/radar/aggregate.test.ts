@@ -23,6 +23,7 @@ const empty = (): RadarSources => ({
   edits: [],
   orders: [],
   events: [],
+  members: [],
 });
 
 describe('dailySeries', () => {
@@ -101,7 +102,7 @@ describe('computeGroupHealth', () => {
     expect(rows).toHaveLength(1);
     expect(rows[0].health).toBe('red'); // last activity 10 days ago
     expect(rows[0].daysInactive).toBe(10);
-    expect(rows[0].stage).toBe('Invitados agregados');
+    expect(rows[0].stage).toBe('Guests agregados');
     expect(rows[0].ownerName).toBe('Ana');
   });
 
@@ -169,7 +170,7 @@ describe('buildPulseMetrics', () => {
   it('returns the 6 cards with definitions', () => {
     const metrics = buildPulseMetrics(empty(), NOW);
     expect(metrics.map((m) => m.key)).toEqual([
-      'users', 'purchases', 'recipes', 'guests', 'emails', 'photos',
+      'users', 'purchases', 'recipes', 'guests', 'captains', 'photos',
     ]);
     for (const m of metrics) {
       expect(m.definition.length).toBeGreaterThan(10);
@@ -204,7 +205,7 @@ describe('buildDetails', () => {
     ];
     const details = buildDetails(d);
     expect(Object.keys(details)).toEqual(
-      expect.arrayContaining(['users', 'purchases', 'recipes', 'guests', 'emails', 'photos'])
+      expect.arrayContaining(['users', 'purchases', 'recipes', 'guests', 'captains', 'photos'])
     );
     expect(details.users).toHaveLength(1);
     expect(details.purchases).toHaveLength(1); // refunded excluded

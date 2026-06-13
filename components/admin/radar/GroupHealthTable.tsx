@@ -22,7 +22,7 @@ export function GroupHealthTable({ rows }: { rows: GroupHealthRow[] }) {
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center text-sm font-semibold uppercase tracking-wide text-gray-700">
           Salud por libro
-          <InfoTip text="Un renglón por libro, ordenado por riesgo. Última actividad = lo más reciente entre recetas, invitados, correos, ediciones y shares. Verde: <3 días. Amarillo: 3–7. Rojo: >7 días sin actividad. Cerrados = ya en producción (reviewed/ready_to_print/printed)." />
+          <InfoTip text="Un renglón por libro, ordenado por riesgo. Última actividad = lo más reciente entre recetas, guests, correos, ediciones y shares. Verde: <3 días. Amarillo: 3–7. Rojo: >7 días sin actividad. Cerrados = ya en producción (reviewed/ready_to_print/printed)." />
         </div>
         {closedCount > 0 && (
           <button
@@ -44,7 +44,7 @@ export function GroupHealthTable({ rows }: { rows: GroupHealthRow[] }) {
                 <th className="py-2 pr-3 font-medium">Libro</th>
                 <th className="py-2 pr-3 font-medium">Etapa</th>
                 <th className="py-2 pr-3 font-medium">Recetas</th>
-                <th className="py-2 pr-3 font-medium">Invitados</th>
+                <th className="py-2 pr-3 font-medium">Guests</th>
                 <th className="py-2 pr-3 font-medium">Último correo</th>
                 <th className="py-2 font-medium">Actividad</th>
               </tr>

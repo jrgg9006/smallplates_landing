@@ -31,12 +31,12 @@ export async function fetchRadarSources(): Promise<{
       .limit(5000),
     guests: supabase
       .from('guests')
-      .select('id, group_id, first_name, last_name, created_at, source, is_self')
+      .select('id, group_id, user_id, first_name, last_name, created_at, source, is_self')
       .order('created_at', { ascending: false })
       .limit(10000),
     recipes: supabase
       .from('guest_recipes')
-      .select('id, group_id, guest_id, recipe_name, created_at, deleted_at, image_url, source')
+      .select('id, group_id, guest_id, user_id, recipe_name, created_at, deleted_at, image_url, source, upload_method')
       .order('created_at', { ascending: false })
       .limit(10000),
     comms: supabase
@@ -62,6 +62,13 @@ export async function fetchRadarSources(): Promise<{
       .gte('created_at', since)
       .order('created_at', { ascending: false })
       .limit(10000),
+    // Reason: captains = group_members with role='member' (owners excluded).
+    members: supabase
+      .from('group_members')
+      .select('group_id, profile_id, role, joined_at, invited_by')
+      .eq('role', 'member')
+      .order('joined_at', { ascending: false })
+      .limit(5000),
   };
 
   const keys = Object.keys(queries) as (keyof typeof queries)[];
