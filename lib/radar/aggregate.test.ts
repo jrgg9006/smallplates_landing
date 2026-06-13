@@ -6,6 +6,7 @@ import {
   computeGroupHealth,
   buildFeed,
 } from './aggregate';
+import { buildDetails } from './details';
 import type { RadarSources } from './types';
 
 // 18:00 UTC = 12:00 in America/Mexico_City — same calendar day, no boundary surprises.
@@ -137,12 +138,12 @@ describe('buildFeed', () => {
     expect(kinds).toEqual(expect.arrayContaining(['signup', 'book_created', 'recipe_created', 'recipe_deleted']));
   });
 
-  it('caps the feed at 50 items', () => {
+  it('caps the feed at the default limit (100)', () => {
     const d = empty();
-    d.profiles = Array.from({ length: 80 }, (_, i) => ({
+    d.profiles = Array.from({ length: 150 }, (_, i) => ({
       id: `u${i}`, email: `u${i}@x.com`, full_name: null, created_at: at(0),
     }));
-    expect(buildFeed(d)).toHaveLength(50);
+    expect(buildFeed(d)).toHaveLength(100);
   });
 });
 
@@ -150,12 +151,60 @@ describe('buildPulseMetrics', () => {
   it('returns the 6 cards with definitions', () => {
     const metrics = buildPulseMetrics(empty(), NOW);
     expect(metrics.map((m) => m.key)).toEqual([
-      'users', 'books', 'recipes', 'guests', 'emails', 'photos',
+      'users', 'purchases', 'recipes', 'guests', 'emails', 'photos',
     ]);
     for (const m of metrics) {
       expect(m.definition.length).toBeGreaterThan(10);
       expect(m.spark).toHaveLength(14);
     }
+  });
+});
+
+describe('buildPulseMetrics purchases card', () => {
+  it('counts only paid orders, not created groups', () => {
+    const d = empty();
+    d.groups = [
+      { id: 'g1', name: 'A', created_by: 'u1', created_at: at(1), status: 'active', book_status: 'active', couple_image_url: null },
+      { id: 'g2', name: 'B', created_by: 'u1', created_at: at(1), status: 'active', book_status: 'active', couple_image_url: null },
+    ];
+    d.orders = [
+      { id: 'o1', group_id: 'g1', user_id: 'u1', amount_total: 16900, status: 'paid', created_at: at(0) },
+      { id: 'o2', group_id: 'g2', user_id: 'u1', amount_total: 16900, status: 'refunded', created_at: at(0) },
+    ];
+    const purchases = buildPulseMetrics(d, NOW).find((m) => m.key === 'purchases');
+    expect(purchases?.today.current).toBe(1); // only the paid order, not the 2 groups
+  });
+});
+
+describe('buildDetails', () => {
+  it('returns full lists per metric key, newest first, excluding refunded purchases', () => {
+    const d = empty();
+    d.profiles = [{ id: 'u1', email: 'a@x.com', full_name: 'Ana', created_at: at(2) }];
+    d.orders = [
+      { id: 'o1', group_id: null, user_id: 'u1', amount_total: 16900, status: 'paid', created_at: at(1) },
+      { id: 'o2', group_id: null, user_id: 'u1', amount_total: 16900, status: 'refunded', created_at: at(0) },
+    ];
+    const details = buildDetails(d);
+    expect(Object.keys(details)).toEqual(
+      expect.arrayContaining(['users', 'purchases', 'recipes', 'guests', 'emails', 'photos'])
+    );
+    expect(details.users).toHaveLength(1);
+    expect(details.purchases).toHaveLength(1); // refunded excluded
+    expect(details.purchases[0].text).toContain('169');
+  });
+});
+
+describe('computeGroupHealth closed flag', () => {
+  it('flags books past active as closed', () => {
+    const d = empty();
+    d.profiles = [{ id: 'u1', email: 'a@x.com', full_name: 'Ana', created_at: at(20) }];
+    d.groups = [
+      { id: 'g1', name: 'A', created_by: 'u1', created_at: at(2), status: 'active', book_status: 'printed', couple_image_url: null },
+      { id: 'g2', name: 'B', created_by: 'u1', created_at: at(2), status: 'active', book_status: 'active', couple_image_url: null },
+    ];
+    const rows = computeGroupHealth(d, NOW);
+    expect(rows.find((r) => r.groupId === 'g1')?.closed).toBe(true);
+    expect(rows.find((r) => r.groupId === 'g2')?.closed).toBe(false);
   });
 });
 

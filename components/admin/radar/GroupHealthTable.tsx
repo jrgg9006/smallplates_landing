@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import type { GroupHealthRow } from '@/lib/radar/types';
 import { InfoTip } from './InfoTip';
@@ -12,13 +13,28 @@ const DOT: Record<GroupHealthRow['health'], string> = {
 };
 
 export function GroupHealthTable({ rows }: { rows: GroupHealthRow[] }) {
+  const [hideClosed, setHideClosed] = useState(true);
+  const closedCount = rows.filter((r) => r.closed).length;
+  const visible = hideClosed ? rows.filter((r) => !r.closed) : rows;
+
   return (
     <div className="rounded-xl bg-white p-5 shadow-lg">
-      <div className="mb-3 flex items-center text-sm font-semibold uppercase tracking-wide text-gray-700">
-        Salud por libro
-        <InfoTip text="Un renglón por libro activo, ordenado por riesgo. Última actividad = lo más reciente entre recetas, invitados, correos, ediciones y shares. Verde: <3 días. Amarillo: 3–7. Rojo: >7 días sin actividad." />
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center text-sm font-semibold uppercase tracking-wide text-gray-700">
+          Salud por libro
+          <InfoTip text="Un renglón por libro, ordenado por riesgo. Última actividad = lo más reciente entre recetas, invitados, correos, ediciones y shares. Verde: <3 días. Amarillo: 3–7. Rojo: >7 días sin actividad. Cerrados = ya en producción (reviewed/ready_to_print/printed)." />
+        </div>
+        {closedCount > 0 && (
+          <button
+            type="button"
+            onClick={() => setHideClosed((v) => !v)}
+            className="text-xs font-medium text-gray-500 transition-colors hover:text-gray-800"
+          >
+            {hideClosed ? `Mostrar cerrados (${closedCount})` : 'Ocultar cerrados'}
+          </button>
+        )}
       </div>
-      {rows.length === 0 ? (
+      {visible.length === 0 ? (
         <p className="text-sm text-gray-400">No hay libros activos.</p>
       ) : (
         <div className="overflow-x-auto">
@@ -34,7 +50,7 @@ export function GroupHealthTable({ rows }: { rows: GroupHealthRow[] }) {
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => (
+              {visible.map((row) => (
                 <tr key={row.groupId} className="border-b border-gray-50 hover:bg-gray-50">
                   <td className="py-2.5 pr-3">
                     {row.ownerUserId ? (
@@ -43,6 +59,11 @@ export function GroupHealthTable({ rows }: { rows: GroupHealthRow[] }) {
                       </Link>
                     ) : (
                       <span className="font-medium text-gray-900">{row.name}</span>
+                    )}
+                    {row.closed && (
+                      <span className="ml-1.5 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                        cerrado
+                      </span>
                     )}
                     <div className="text-xs text-gray-400">{row.ownerName ?? '—'}</div>
                   </td>

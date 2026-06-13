@@ -57,11 +57,15 @@ export function computePulse(timestamps: string[], now: Date): PulseComputed {
   };
 }
 
-const SENT_STATUSES = new Set(['sent', 'delivered', 'opened']);
+export const SENT_STATUSES = new Set(['sent', 'delivered', 'opened']);
 
 // Reason: whitelist — 'error' (failed checkout) and 'refunded' must never
 // count as revenue anywhere in the dashboard.
-const PAID_STATUSES = new Set(['paid', 'processing', 'in_production', 'shipped', 'delivered']);
+export const PAID_STATUSES = new Set(['paid', 'processing', 'in_production', 'shipped', 'delivered']);
+
+// Reason: a book past 'active' is closed — already paid and moving through
+// production, so it drops off the founder's daily call list.
+export const CLOSED_BOOK_STATUSES = new Set(['reviewed', 'ready_to_print', 'printed']);
 
 export function buildPulseMetrics(d: RadarSources, now: Date): PulseMetric[] {
   const cards: { key: string; label: string; definition: string; timestamps: string[] }[] = [
@@ -72,10 +76,13 @@ export function buildPulseMetrics(d: RadarSources, now: Date): PulseMetric[] {
       timestamps: d.profiles.map((p) => p.created_at),
     },
     {
-      key: 'books',
-      label: 'Libros creados',
-      definition: 'Libros/grupos creados ese día (groups.created_at).',
-      timestamps: d.groups.map((g) => g.created_at),
+      key: 'purchases',
+      label: 'Libros comprados',
+      definition:
+        'Libros comprados ese día — órdenes pagadas (orders, excluye refunded y checkouts con error). Esto sí es revenue, no los libros creados gratis.',
+      timestamps: d.orders
+        .filter((o) => PAID_STATUSES.has(o.status))
+        .map((o) => o.created_at),
     },
     {
       key: 'recipes',
@@ -264,6 +271,7 @@ export function computeGroupHealth(d: RadarSources, now: Date): GroupHealthRow[]
       lastActivityAt: new Date(last).toISOString(),
       daysInactive,
       health: daysInactive < 3 ? 'green' : daysInactive <= 7 ? 'yellow' : 'red',
+      closed: CLOSED_BOOK_STATUSES.has(g.book_status ?? ''),
     });
   }
 
@@ -273,7 +281,7 @@ export function computeGroupHealth(d: RadarSources, now: Date): GroupHealthRow[]
   return rows;
 }
 
-export function buildFeed(d: RadarSources, limit = 50): FeedItem[] {
+export function buildFeed(d: RadarSources, limit = 100): FeedItem[] {
   const groupName = new Map(d.groups.map((g) => [g.id, g.name ?? 'Libro sin nombre']));
   const guestName = new Map(
     d.guests.map((gu) => [
@@ -315,6 +323,7 @@ export function buildFeed(d: RadarSources, limit = 50): FeedItem[] {
       at: r.created_at,
       kind: 'recipe_created',
       text: `${who} subió "${r.recipe_name ?? 'receta'}"${r.image_url ? ' con foto' : ''}${via}${inGroup(r.group_id)}`,
+      recipeId: r.id,
     });
     if (r.deleted_at) {
       items.push({
@@ -322,6 +331,7 @@ export function buildFeed(d: RadarSources, limit = 50): FeedItem[] {
         at: r.deleted_at,
         kind: 'recipe_deleted',
         text: `Receta eliminada: "${r.recipe_name ?? 'receta'}"${inGroup(r.group_id)}`,
+        recipeId: r.id,
       });
     }
   }

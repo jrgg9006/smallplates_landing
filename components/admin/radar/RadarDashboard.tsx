@@ -1,11 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import type { RadarPayload, RangeKey } from '@/lib/radar/types';
 import { PulseCards } from './PulseCards';
 import { LiveFeed } from './LiveFeed';
 import { ActivationFunnel } from './ActivationFunnel';
 import { GroupHealthTable } from './GroupHealthTable';
+import { DrilldownPanel } from './DrilldownPanel';
+import { RecipeViewModal } from './RecipeViewModal';
 
 const POLL_MS = 60_000;
 
@@ -18,6 +21,8 @@ const RANGE_LABEL: Record<RangeKey, string> = {
 export default function RadarDashboard() {
   const [data, setData] = useState<RadarPayload | null>(null);
   const [range, setRange] = useState<RangeKey>('today');
+  const [drilldownKey, setDrilldownKey] = useState<string | null>(null);
+  const [recipeModalId, setRecipeModalId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lastFetch, setLastFetch] = useState<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -66,6 +71,12 @@ export default function RadarDashboard() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
+            <Link
+              href="/admin"
+              className="mb-1 inline-block text-sm text-gray-500 transition-colors hover:text-gray-700"
+            >
+              ← Back to Admin
+            </Link>
             <h1 className="text-3xl font-bold text-gray-900">📡 Radar</h1>
             <p className="text-sm text-gray-500">
               Qué están haciendo los usuarios, ahora mismo
@@ -109,16 +120,33 @@ export default function RadarDashboard() {
         {data && (
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
             <div className="space-y-6 xl:col-span-2">
-              <PulseCards metrics={data.pulse} range={range} />
+              <PulseCards
+                metrics={data.pulse}
+                range={range}
+                activeKey={drilldownKey}
+                onSelect={(key) => setDrilldownKey((prev) => (prev === key ? null : key))}
+              />
               <ActivationFunnel steps={data.funnel} />
               <GroupHealthTable rows={data.groups} />
             </div>
-            <div>
-              <LiveFeed items={data.feed} />
+            <div className="space-y-6">
+              {drilldownKey && (
+                <DrilldownPanel
+                  title={data.pulse.find((m) => m.key === drilldownKey)?.label ?? drilldownKey}
+                  items={data.details[drilldownKey] ?? []}
+                  onClose={() => setDrilldownKey(null)}
+                  onOpenRecipe={setRecipeModalId}
+                />
+              )}
+              <LiveFeed items={data.feed} onOpenRecipe={setRecipeModalId} />
             </div>
           </div>
         )}
       </div>
+
+      {recipeModalId && (
+        <RecipeViewModal recipeId={recipeModalId} onClose={() => setRecipeModalId(null)} />
+      )}
     </div>
   );
 }

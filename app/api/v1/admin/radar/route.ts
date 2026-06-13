@@ -7,6 +7,7 @@ import {
   computeFunnel,
   computeGroupHealth,
 } from '@/lib/radar/aggregate';
+import { buildDetails } from '@/lib/radar/details';
 import type { RadarPayload } from '@/lib/radar/types';
 
 export const dynamic = 'force-dynamic';
@@ -24,6 +25,7 @@ export async function GET() {
       feed: buildFeed(sources),
       funnel: computeFunnel(sources, now),
       groups: computeGroupHealth(sources, now),
+      details: buildDetails(sources),
       degraded,
     };
 

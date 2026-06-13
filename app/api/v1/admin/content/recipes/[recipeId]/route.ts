@@ -15,6 +15,7 @@ export async function GET(
       .from('guest_recipes')
       .select(`
         id, recipe_name, ingredients, instructions, comments,
+        image_url, upload_method, source, group_id, deleted_at,
         submission_status, created_at, updated_at, guest_id,
         guests(first_name, last_name, email, is_self)
       `)

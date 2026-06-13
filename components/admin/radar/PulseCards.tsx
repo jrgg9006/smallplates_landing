@@ -24,13 +24,31 @@ function Delta({ numbers, range }: { numbers: RangeNumbers; range: RangeKey }) {
   );
 }
 
-export function PulseCards({ metrics, range }: { metrics: PulseMetric[]; range: RangeKey }) {
+export function PulseCards({
+  metrics,
+  range,
+  activeKey,
+  onSelect,
+}: {
+  metrics: PulseMetric[];
+  range: RangeKey;
+  activeKey: string | null;
+  onSelect: (key: string) => void;
+}) {
   return (
     <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
       {metrics.map((m) => {
         const numbers = m[range];
+        const active = activeKey === m.key;
         return (
-          <div key={m.key} className="rounded-xl bg-white p-4 shadow-lg">
+          <button
+            key={m.key}
+            type="button"
+            onClick={() => onSelect(m.key)}
+            className={`rounded-xl bg-white p-4 text-left shadow-lg transition-all hover:shadow-xl ${
+              active ? 'ring-2 ring-[#D4A854]' : 'hover:-translate-y-0.5'
+            }`}
+          >
             <div className="flex items-center text-xs font-semibold uppercase tracking-wide text-gray-500">
               {m.label}
               <InfoTip text={m.definition} />
@@ -47,7 +65,7 @@ export function PulseCards({ metrics, range }: { metrics: PulseMetric[]; range: 
               </ResponsiveContainer>
             </div>
             <div className="mt-1 text-[10px] text-gray-400">últimos 14 días</div>
-          </div>
+          </button>
         );
       })}
     </div>

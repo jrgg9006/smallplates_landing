@@ -120,6 +120,7 @@ export interface FeedItem {
   at: string; // ISO timestamp
   kind: FeedKind;
   text: string;
+  recipeId?: string; // set on recipe items — makes the row clickable to view the recipe
 }
 
 export interface FunnelStep {
@@ -127,6 +128,14 @@ export interface FunnelStep {
   label: string;
   definition: string;
   count: number;
+}
+
+// One row in the drill-down panel that opens when a pulse card is clicked.
+export interface DetailItem {
+  id: string;
+  at: string; // ISO timestamp
+  text: string;
+  recipeId?: string; // set on recipe items — makes the row clickable to view the recipe
 }
 
 export interface GroupHealthRow {
@@ -142,6 +151,7 @@ export interface GroupHealthRow {
   lastActivityAt: string | null;
   daysInactive: number;
   health: 'green' | 'yellow' | 'red';
+  closed: boolean; // book past 'active' (reviewed/ready_to_print/printed) — already in production
 }
 
 export interface RadarPayload {
@@ -150,5 +160,8 @@ export interface RadarPayload {
   feed: FeedItem[];
   funnel: FunnelStep[];
   groups: GroupHealthRow[];
+  // Full item lists per pulse metric key (users/purchases/recipes/guests/emails/photos),
+  // newest first. Powers the drill-down panel — uncapped, unlike the feed.
+  details: Record<string, DetailItem[]>;
   degraded: string[]; // source keys that failed to load
 }
