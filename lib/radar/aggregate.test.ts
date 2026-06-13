@@ -138,6 +138,24 @@ describe('buildFeed', () => {
     expect(kinds).toEqual(expect.arrayContaining(['signup', 'book_created', 'recipe_created', 'recipe_deleted']));
   });
 
+  it('collapses repeat edits of the same recipe by the same person into one counted line', () => {
+    const d = empty();
+    d.profiles = [{ id: 'u1', email: 'k@x.com', full_name: 'Karla', created_at: at(5) }];
+    d.recipes = [
+      { id: 'r1', group_id: 'g1', guest_id: null, recipe_name: 'Lasagna', created_at: at(2), deleted_at: null, image_url: null, source: 'manual' },
+    ];
+    // Two history rows ~1s apart (the double-write pattern) + one a few minutes later.
+    d.edits = [
+      { id: 'e1', recipe_id: 'r1', edited_by: 'u1', created_at: '2026-06-12T03:16:15.000Z' },
+      { id: 'e2', recipe_id: 'r1', edited_by: 'u1', created_at: '2026-06-12T03:16:14.000Z' },
+      { id: 'e3', recipe_id: 'r1', edited_by: 'u1', created_at: '2026-06-12T03:10:24.000Z' },
+    ];
+    const edits = buildFeed(d).filter((f) => f.kind === 'recipe_edited');
+    expect(edits).toHaveLength(1);
+    expect(edits[0].text).toBe('Karla editó "Lasagna" (×3)');
+    expect(edits[0].recipeId).toBe('r1');
+  });
+
   it('caps the feed at the default limit (100)', () => {
     const d = empty();
     d.profiles = Array.from({ length: 150 }, (_, i) => ({

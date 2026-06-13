@@ -22,7 +22,9 @@ export default function RadarDashboard() {
   const [data, setData] = useState<RadarPayload | null>(null);
   const [range, setRange] = useState<RangeKey>('today');
   const [drilldownKey, setDrilldownKey] = useState<string | null>(null);
-  const [recipeModalId, setRecipeModalId] = useState<string | null>(null);
+  const [recipeModal, setRecipeModal] = useState<{ recipeId: string; editId?: string } | null>(
+    null
+  );
   const [error, setError] = useState<string | null>(null);
   const [lastFetch, setLastFetch] = useState<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -135,17 +137,24 @@ export default function RadarDashboard() {
                   title={data.pulse.find((m) => m.key === drilldownKey)?.label ?? drilldownKey}
                   items={data.details[drilldownKey] ?? []}
                   onClose={() => setDrilldownKey(null)}
-                  onOpenRecipe={setRecipeModalId}
+                  onOpenRecipe={(recipeId) => setRecipeModal({ recipeId })}
                 />
               )}
-              <LiveFeed items={data.feed} onOpenRecipe={setRecipeModalId} />
+              <LiveFeed
+                items={data.feed}
+                onOpenRecipe={(recipeId, editId) => setRecipeModal({ recipeId, editId })}
+              />
             </div>
           </div>
         )}
       </div>
 
-      {recipeModalId && (
-        <RecipeViewModal recipeId={recipeModalId} onClose={() => setRecipeModalId(null)} />
+      {recipeModal && (
+        <RecipeViewModal
+          recipeId={recipeModal.recipeId}
+          editId={recipeModal.editId}
+          onClose={() => setRecipeModal(null)}
+        />
       )}
     </div>
   );

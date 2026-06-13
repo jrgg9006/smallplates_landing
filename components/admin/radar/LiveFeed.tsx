@@ -23,7 +23,7 @@ export function LiveFeed({
   onOpenRecipe,
 }: {
   items: FeedItem[];
-  onOpenRecipe: (recipeId: string) => void;
+  onOpenRecipe: (recipeId: string, editId?: string) => void;
 }) {
   return (
     <div className="rounded-xl bg-white p-5 shadow-lg">
@@ -53,7 +53,7 @@ export function LiveFeed({
                   {item.recipeId ? (
                     <button
                       type="button"
-                      onClick={() => onOpenRecipe(item.recipeId!)}
+                      onClick={() => onOpenRecipe(item.recipeId!, item.editId)}
                       className="min-w-0 text-left"
                     >
                       <p className="text-gray-800 underline decoration-gray-300 decoration-dotted underline-offset-2 hover:decoration-gray-500">

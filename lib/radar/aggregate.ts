@@ -292,6 +292,7 @@ export function buildFeed(d: RadarSources, limit = 100): FeedItem[] {
   const profName = new Map(
     d.profiles.map((p) => [p.id, p.full_name || p.email || 'Usuario'])
   );
+  const recipeInfo = new Map(d.recipes.map((r) => [r.id, r]));
   const inGroup = (id: string | null) => (id && groupName.has(id) ? ` — ${groupName.get(id)}` : '');
 
   const items: FeedItem[] = [];
@@ -357,12 +358,36 @@ export function buildFeed(d: RadarSources, limit = 100): FeedItem[] {
     });
   }
 
-  for (const e of d.edits) {
+  // Reason: collapse repeat edits of the same recipe by the same person within a
+  // window into one line with a count. The edit pipeline writes ~2 history rows per
+  // save, and even legit re-edits in one review session shouldn't spam the feed.
+  const EDIT_WINDOW_MS = 30 * 60 * 1000;
+  const sortedEdits = [...d.edits].sort((a, b) => b.created_at.localeCompare(a.created_at));
+  type EditGroup = { id: string; latestAt: string; editor: string | null; recipeId: string; count: number };
+  const openByKey = new Map<string, EditGroup>();
+  const editGroups: EditGroup[] = [];
+  for (const e of sortedEdits) {
+    const key = `${e.recipe_id}|${e.edited_by ?? ''}`;
+    const open = openByKey.get(key);
+    // Reason: compare to the group's newest edit so each group spans at most the window.
+    if (open && new Date(open.latestAt).getTime() - new Date(e.created_at).getTime() <= EDIT_WINDOW_MS) {
+      open.count += 1;
+    } else {
+      const g: EditGroup = { id: e.id, latestAt: e.created_at, editor: e.edited_by, recipeId: e.recipe_id, count: 1 };
+      editGroups.push(g);
+      openByKey.set(key, g);
+    }
+  }
+  for (const g of editGroups) {
+    const r = recipeInfo.get(g.recipeId);
+    const who = g.editor ? profName.get(g.editor) ?? 'alguien' : 'alguien';
     items.push({
-      id: `edit-${e.id}`,
-      at: e.created_at,
+      id: `edit-${g.id}`,
+      at: g.latestAt,
       kind: 'recipe_edited',
-      text: `Receta editada por ${e.edited_by ? profName.get(e.edited_by) ?? 'alguien' : 'alguien'}`,
+      text: `${who} editó "${r?.recipe_name ?? 'una receta'}"${g.count > 1 ? ` (×${g.count})` : ''}${inGroup(r?.group_id ?? null)}`,
+      recipeId: g.recipeId,
+      editId: g.id,
     });
   }
 

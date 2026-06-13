@@ -121,6 +121,7 @@ export interface FeedItem {
   kind: FeedKind;
   text: string;
   recipeId?: string; // set on recipe items — makes the row clickable to view the recipe
+  editId?: string; // set on recipe_edited items — opens the modal in diff mode
 }
 
 export interface FunnelStep {

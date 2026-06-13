@@ -282,8 +282,12 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         }
       }
 
-      // Audit trail — best-effort: a failure here must not block the edit itself
-      if (textChanged || guestChanged) {
+      // Audit trail — best-effort: a failure here must not block the edit itself.
+      // Reason: only log GUEST changes here. Text edits are already logged by the
+      // DB trigger check_recipe_edit_after_completion ('Edited by recipe owner');
+      // logging them here too caused a double-write. Guest reassignment is NOT
+      // captured by that trigger, so this is the only place that records it.
+      if (guestChanged) {
         const oldGuestLabel = localRecipe.guests
           ? `${localRecipe.guests.first_name} ${localRecipe.guests.last_name || ''}`.trim()
           : 'Unknown';
@@ -295,7 +299,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           recipeId: localRecipe.id,
           before,
           after,
-          editReason: guestChanged ? `Guest changed: ${oldGuestLabel} → ${newGuestLabel}` : null,
+          editReason: `Guest changed: ${oldGuestLabel} → ${newGuestLabel}`,
         });
         if (historyError) {
           console.error('Failed to log recipe edit:', historyError);

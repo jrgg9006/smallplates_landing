@@ -15,7 +15,7 @@ export async function GET(
       .from('guest_recipes')
       .select(`
         id, recipe_name, ingredients, instructions, comments,
-        image_url, upload_method, source, group_id, deleted_at,
+        image_url, document_urls, raw_recipe_text, upload_method, source, group_id, deleted_at,
         submission_status, created_at, updated_at, guest_id,
         guests(first_name, last_name, email, is_self)
       `)
@@ -36,7 +36,7 @@ export async function GET(
     const { data: history } = await supabase
       .from('recipe_edit_history')
       .select(`
-        id, edited_at, edit_reason, edit_target,
+        id, edited_at, edited_by, edit_reason, edit_target,
         recipe_name_before, ingredients_before, instructions_before, comments_before,
         recipe_name_after, ingredients_after, instructions_after, comments_after,
         profiles!recipe_edit_history_edited_by_fkey(email, full_name)
