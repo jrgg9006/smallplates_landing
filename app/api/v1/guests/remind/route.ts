@@ -161,6 +161,23 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', guestId);
 
+    // Reason: log the reminder so it shows up in the Radar Live Feed
+    // ("Correo reminder enviado"). Best-effort — RLS allows the insert because
+    // user_id === auth.uid(); a logging failure must never fail the send.
+    try {
+      await supabase.from('communication_log').insert({
+        guest_id: guestId,
+        group_id: groupId,
+        user_id: user.id,
+        type: 'reminder',
+        channel: 'email',
+        status: 'sent',
+        sent_at: new Date().toISOString(),
+      });
+    } catch {
+      // Silent fail — the email already went out; the log is telemetry only.
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error in remind:', error);
