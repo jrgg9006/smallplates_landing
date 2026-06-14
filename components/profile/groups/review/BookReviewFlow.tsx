@@ -148,9 +148,21 @@ export function BookReviewFlow({ group, isOwner, recipeCount, onExit }: BookRevi
     setStep(3);
   };
 
+  // Reason: only couple occasions (weddings/bridal showers/anniversaries, plus
+  // legacy groups with no occasion = old weddings) talk about "the couple".
+  // Everything else (birthdays, etc.) uses neutral "book title / cover" copy so
+  // it never says "couple" where there isn't one.
+  const isCoupleOccasion =
+    !group.occasion ||
+    group.occasion === "wedding" ||
+    group.occasion === "bridal_shower" ||
+    group.occasion === "anniversary";
+
   // Reason: title is contextual to the active screen (steps 1-3).
   const STEP_TITLES: Record<ScreenStep, string> = {
-    1: "Add the couple's name and photo",
+    1: isCoupleOccasion
+      ? "Add the couple's name and photo"
+      : "Add your book's title and a photo",
     2: "Review your cookbook",
     3: "How many copies?",
   };
@@ -216,6 +228,7 @@ export function BookReviewFlow({ group, isOwner, recipeCount, onExit }: BookRevi
           groupId={groupId}
           name={printCoupleName}
           imageUrl={coupleImageUrl}
+          isCoupleOccasion={isCoupleOccasion}
           onNameChange={setPrintCoupleName}
           onImageChange={setCoupleImageUrl}
           onContinue={() => setStep(2)}

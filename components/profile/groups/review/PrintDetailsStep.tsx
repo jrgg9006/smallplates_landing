@@ -8,6 +8,9 @@ interface PrintDetailsStepProps {
   groupId: string;
   name: string;
   imageUrl: string | null;
+  // Reason: couple occasions keep the "couple's name" copy; everything else uses
+  // neutral "book title / cover" copy so it never says "couple".
+  isCoupleOccasion: boolean;
   onNameChange: (name: string) => void;
   onImageChange: (url: string | null) => void;
   onContinue: () => void;
@@ -21,6 +24,7 @@ export function PrintDetailsStep({
   groupId,
   name,
   imageUrl,
+  isCoupleOccasion,
   onNameChange,
   onImageChange,
   onContinue,
@@ -90,35 +94,40 @@ export function PrintDetailsStep({
     <div className="w-full">
       {/* Short intro — the big step title lives in the container H1 above. */}
       <p className="type-body-small mb-10 max-w-2xl text-pretty">
-        This is how the couple&apos;s name appears in print. The photo is optional.
+        {isCoupleOccasion
+          ? "This is how the couple's name appears in print. The photo is optional."
+          : "This is how the title appears on the cover. The photo is optional."}
       </p>
 
       <div className="grid max-w-4xl gap-x-16 gap-y-10 sm:grid-cols-2 sm:items-start">
         {/* Names */}
         <div className="flex flex-col">
-          <p className="type-eyebrow mb-3">The names</p>
+          <p className="type-eyebrow mb-3">{isCoupleOccasion ? "The names" : "The title"}</p>
           <input
             type="text"
             value={name}
             onChange={(e) => onNameChange(e.target.value)}
             className="w-full rounded-xl border border-gray-200 bg-white px-4 py-4 text-center font-serif text-2xl text-brand-charcoal transition-colors focus:border-brand-honey focus:outline-none focus:ring-1 focus:ring-brand-honey/30"
-            placeholder="e.g. Rocío & Víctor"
+            placeholder={isCoupleOccasion ? "e.g. Rocío & Víctor" : "e.g. The Garcia Family Cookbook"}
             autoFocus
           />
-          <p className="mt-3 text-sm text-[hsl(var(--brand-warm-gray))]/80">
-            Tip: use &ldquo;&amp;&rdquo;. It looks best in print.
-          </p>
+          {/* Reason: the "&" tip only makes sense for an "A & B" couple name. */}
+          {isCoupleOccasion && (
+            <p className="mt-3 text-sm text-[hsl(var(--brand-warm-gray))]/80">
+              Tip: use &ldquo;&amp;&rdquo;. It looks best in print.
+            </p>
+          )}
         </div>
 
         {/* Photo */}
         <div className="flex flex-col">
-          <p className="type-eyebrow mb-3">Photo of the couple</p>
+          <p className="type-eyebrow mb-3">{isCoupleOccasion ? "Photo of the couple" : "Cover photo"}</p>
           {imageUrl ? (
             <div className="flex flex-col items-start">
               <div className="relative aspect-square w-full sm:max-w-[240px] overflow-hidden rounded-2xl border-4 border-white shadow-lg">
                 <Image
                   src={imageUrl}
-                  alt="Couple photo"
+                  alt={isCoupleOccasion ? "Couple photo" : "Cover photo"}
                   fill
                   className="object-cover"
                   sizes="240px"
