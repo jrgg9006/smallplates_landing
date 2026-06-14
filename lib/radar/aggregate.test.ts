@@ -63,7 +63,7 @@ describe('computeFunnel', () => {
       { id: 'g3', name: 'Viejo', created_by: 'u3', created_at: at(44), status: 'active', book_status: 'active', couple_image_url: null },
     ];
     d.guests = [
-      { id: 'gu1', group_id: 'g1', first_name: 'Tía', last_name: 'Lupe', created_at: at(3), source: 'collection', is_self: false },
+      { id: 'gu1', group_id: 'g1', first_name: 'Tía', last_name: 'Lupe', email: null, created_at: at(3), source: 'collection', is_self: false },
     ];
     d.recipes = Array.from({ length: 5 }, (_, i) => ({
       id: `r${i}`, group_id: 'g1', guest_id: 'gu1', recipe_name: `Receta ${i}`,
@@ -96,7 +96,7 @@ describe('computeGroupHealth', () => {
       { id: 'g1', name: 'Boda Ana', created_by: 'u1', created_at: at(20), status: 'free_tier', book_status: 'active', couple_image_url: null },
     ];
     d.guests = [
-      { id: 'gu1', group_id: 'g1', first_name: 'Tía', last_name: null, created_at: at(10), source: 'manual', is_self: false },
+      { id: 'gu1', group_id: 'g1', first_name: 'Tía', last_name: null, email: null, created_at: at(10), source: 'manual', is_self: false },
     ];
 
     const rows = computeGroupHealth(d, NOW);

@@ -31,7 +31,7 @@ export async function fetchRadarSources(): Promise<{
       .limit(5000),
     guests: supabase
       .from('guests')
-      .select('id, group_id, user_id, first_name, last_name, created_at, source, is_self')
+      .select('id, group_id, user_id, first_name, last_name, email, created_at, source, is_self')
       .order('created_at', { ascending: false })
       .limit(10000),
     recipes: supabase
@@ -41,7 +41,7 @@ export async function fetchRadarSources(): Promise<{
       .limit(10000),
     comms: supabase
       .from('communication_log')
-      .select('id, group_id, type, channel, status, sent_at, created_at')
+      .select('id, group_id, recipient_profile_id, guest_id, type, channel, status, sent_at, created_at')
       .gte('created_at', since)
       .order('created_at', { ascending: false })
       .limit(10000),

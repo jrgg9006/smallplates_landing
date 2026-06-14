@@ -373,6 +373,15 @@ export function buildFeed(d: RadarSources, limit = 100): FeedItem[] {
   const profName = new Map(
     d.profiles.map((p) => [p.id, p.full_name || p.email || 'Usuario'])
   );
+  // Reason: resolve a comm to the address it was actually sent to, so the feed can
+  // disambiguate two emails to the same group (e.g. organizer vs captain).
+  const profEmail = new Map(d.profiles.map((p) => [p.id, p.email]));
+  const guestEmail = new Map(d.guests.map((gu) => [gu.id, gu.email]));
+  const commRecipient = (c: { recipient_profile_id: string | null; guest_id: string | null }) => {
+    const email = (c.recipient_profile_id && profEmail.get(c.recipient_profile_id)) ||
+      (c.guest_id && guestEmail.get(c.guest_id));
+    return email ? ` → ${email}` : '';
+  };
   const recipeInfo = new Map(d.recipes.map((r) => [r.id, r]));
   const people = buildPeopleMaps(d);
   const inGroup = (id: string | null) => (id && groupName.has(id) ? ` — ${groupName.get(id)}` : '');
@@ -433,7 +442,7 @@ export function buildFeed(d: RadarSources, limit = 100): FeedItem[] {
       id: `comm-${c.id}`,
       at: c.sent_at ?? c.created_at,
       kind: 'email_sent',
-      text: `Correo ${c.type}${c.status === 'failed' ? ' FALLÓ' : ' enviado'}${inGroup(c.group_id)}`,
+      text: `Correo ${c.type}${c.status === 'failed' ? ' FALLÓ' : ' enviado'}${inGroup(c.group_id)}${commRecipient(c)}`,
     });
   }
 

@@ -23,6 +23,7 @@ export interface GuestRow {
   user_id?: string; // the team member (owner OR captain) whose account/link brought the guest in
   first_name: string | null;
   last_name: string | null;
+  email: string | null;
   created_at: string;
   source: string | null;
   is_self: boolean | null;
@@ -44,6 +45,8 @@ export interface RecipeRow {
 export interface CommRow {
   id: string;
   group_id: string | null;
+  recipient_profile_id: string | null;
+  guest_id: string | null;
   type: string;
   channel: string | null;
   status: string | null;
