@@ -161,6 +161,68 @@ function daysSince(iso: string): number {
   return Math.floor((Date.now() - new Date(iso).getTime()) / ONE_DAY_MS);
 }
 
+// Reason: interns work this dashboard and can easily fire a duplicate the same
+// day. If ANY send for this row happened today (same calendar day), we flip the
+// button to amber + "Already sent today" so it's impossible to miss. We do NOT
+// block the send — just make accidental double-sends loud.
+function sentToday(sentDates: string[]): boolean {
+  const now = new Date();
+  return sentDates.some(iso => {
+    const d = new Date(iso);
+    return (
+      d.getFullYear() === now.getFullYear() &&
+      d.getMonth() === now.getMonth() &&
+      d.getDate() === now.getDate()
+    );
+  });
+}
+
+// ---------- Shared send button ----------
+// Reason: the three rows shared identical Send-button logic; centralizing it
+// keeps the "already sent today" warning consistent everywhere.
+function SendButton({
+  isSending,
+  disabled,
+  disabledTitle,
+  alreadySentToday,
+  onSend,
+}: {
+  isSending: boolean;
+  disabled: boolean;
+  disabledTitle?: string;
+  alreadySentToday: boolean;
+  onSend: () => void;
+}) {
+  const label = isSending
+    ? 'Sending…'
+    : alreadySentToday
+    ? 'Already sent today'
+    : 'Send';
+  const className =
+    isSending || disabled
+      ? 'bg-gray-100 text-gray-400 border border-gray-200'
+      : alreadySentToday
+      ? 'bg-amber-500 text-white hover:bg-amber-600'
+      : 'bg-black text-white hover:bg-gray-800';
+  return (
+    <Button
+      size="sm"
+      disabled={isSending || disabled}
+      onClick={onSend}
+      className={className}
+      title={
+        disabled
+          ? disabledTitle
+          : alreadySentToday
+          ? 'You already sent this today — only send again if you really mean to.'
+          : ''
+      }
+    >
+      {label}
+    </Button>
+  );
+}
+
 // Reason: gravity color for "how long has this book gone without a captain."
 // < 7d: just bought, give it room. 7–21d: nudge worth it. > 21d: urgent (color carries the meaning).
 function ageTone(days: number): string {
@@ -207,6 +269,7 @@ export function CaptainReminderRow({
   const ageDays = daysSince(group.group_created_at);
   const ageClass = ageTone(ageDays);
   const sentDates = group.reminder_sent_dates;
+  const alreadySentToday = sentToday(sentDates);
   const closeDays = group.book_close_date
     ? Math.max(
         0,
@@ -215,7 +278,11 @@ export function CaptainReminderRow({
     : null;
 
   return (
-    <div className="border-t first:border-t-0 px-5 py-4 hover:bg-gray-50 transition">
+    <div
+      className={`border-t first:border-t-0 px-5 py-4 transition ${
+        alreadySentToday ? 'bg-amber-50 hover:bg-amber-100' : 'hover:bg-gray-50'
+      }`}
+    >
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="font-semibold text-gray-900 truncate">{primary}</div>
@@ -257,19 +324,13 @@ export function CaptainReminderRow({
           >
             Preview
           </button>
-          <Button
-            size="sm"
-            disabled={isSending || group.organizer_opted_out}
-            onClick={onSend}
-            className={
-              isSending || group.organizer_opted_out
-                ? 'bg-gray-100 text-gray-400 border border-gray-200'
-                : 'bg-black text-white hover:bg-gray-800'
-            }
-            title={group.organizer_opted_out ? 'Organizer opted out of book updates' : ''}
-          >
-            {isSending ? 'Sending…' : 'Send'}
-          </Button>
+          <SendButton
+            isSending={isSending}
+            disabled={group.organizer_opted_out}
+            disabledTitle="Organizer opted out of book updates"
+            alreadySentToday={alreadySentToday}
+            onSend={onSend}
+          />
         </div>
       </div>
 
@@ -420,9 +481,14 @@ export function WeeklyStatusRow({
   const eligibleRecipients = stats.recipients.filter(r => !r.notification_emails_opt_out);
   const noRecipients = eligibleRecipients.length === 0;
   const sentDates = stats.status_sent_dates;
+  const alreadySentToday = sentToday(sentDates);
 
   return (
-    <div className="border-t first:border-t-0 px-5 py-4 hover:bg-gray-50 transition">
+    <div
+      className={`border-t first:border-t-0 px-5 py-4 transition ${
+        alreadySentToday ? 'bg-amber-50 hover:bg-amber-100' : 'hover:bg-gray-50'
+      }`}
+    >
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="font-semibold text-gray-900 truncate">{displayName}</div>
@@ -462,19 +528,13 @@ export function WeeklyStatusRow({
           >
             Preview
           </button>
-          <Button
-            size="sm"
-            disabled={isSending || noRecipients}
-            onClick={onSend}
-            className={
-              isSending || noRecipients
-                ? 'bg-gray-100 text-gray-400 border border-gray-200'
-                : 'bg-black text-white hover:bg-gray-800'
-            }
-            title={noRecipients ? 'No eligible recipients (everyone opted out)' : ''}
-          >
-            {isSending ? 'Sending…' : 'Send'}
-          </Button>
+          <SendButton
+            isSending={isSending}
+            disabled={noRecipients}
+            disabledTitle="No eligible recipients (everyone opted out)"
+            alreadySentToday={alreadySentToday}
+            onSend={onSend}
+          />
         </div>
       </div>
 
@@ -570,19 +630,13 @@ export function ClosingNudgeRow({
           >
             Preview
           </button>
-          <Button
-            size="sm"
-            disabled={isSending || noEligible}
-            onClick={onSend}
-            className={
-              isSending || noEligible
-                ? 'bg-gray-100 text-gray-400 border border-gray-200'
-                : 'bg-black text-white hover:bg-gray-800'
-            }
-            title={noEligible ? 'No eligible guests' : ''}
-          >
-            {isSending ? 'Sending…' : 'Send'}
-          </Button>
+          <SendButton
+            isSending={isSending}
+            disabled={noEligible}
+            disabledTitle="No eligible guests"
+            alreadySentToday={false}
+            onSend={onSend}
+          />
         </div>
       </div>
     </div>
