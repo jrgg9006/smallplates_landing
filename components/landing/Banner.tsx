@@ -101,6 +101,9 @@ export default function Banner({
 
             {/* Desktop nav */}
             <div className="hidden lg:flex items-center gap-8">
+              <Link href="/pricing" className={navLink}>
+                Pricing
+              </Link>
               <Link href="/how-it-works" className={navLink}>
                 How it Works
               </Link>
@@ -147,6 +150,13 @@ export default function Banner({
             }`}
           >
             <div className="px-6 py-5 flex flex-col gap-3 bg-white border-b border-brand-charcoal/10">
+              <Link
+                href="/pricing"
+                className={mobilePill}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Pricing
+              </Link>
               <Link
                 href="/how-it-works"
                 className={mobilePill}

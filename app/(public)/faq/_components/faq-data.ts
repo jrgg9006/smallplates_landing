@@ -234,6 +234,14 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         ],
       },
       {
+        id: "printed-differences",
+        question: "Why does the printed book look different from what I collected?",
+        answer: [
+          "Because we review and format every recipe to the same standard. We don't change what's in a recipe (the ingredients, the steps, the words stay), we just standardize the style so all of them match and the book reads like one professional cookbook instead of fifty different notes.",
+          "So it's normal to see some differences between the text you collected and the printed book. That's the formatting pass, and it's what makes the finished book look like a real cookbook.",
+        ],
+      },
+      {
         id: "see-before",
         question: "Can I see the book before it prints?",
         answer: [
