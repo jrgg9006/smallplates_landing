@@ -120,18 +120,19 @@ export default function RadarDashboard() {
         {!data && !error && <p className="text-sm text-gray-400">Cargando radar…</p>}
 
         {data && (
+          // Reason: en mobile el orden del DOM manda (1 columna), así que ponemos
+          // el feed justo después de los cuadros; en xl recolocamos con grid
+          // (col-start/row-start) para reconstruir las dos columnas originales.
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-            <div className="space-y-6 xl:col-span-2">
+            <div className="xl:col-span-2 xl:row-start-1">
               <PulseCards
                 metrics={data.pulse}
                 range={range}
                 activeKey={drilldownKey}
                 onSelect={(key) => setDrilldownKey((prev) => (prev === key ? null : key))}
               />
-              <ActivationFunnel steps={data.funnel} />
-              <GroupHealthTable rows={data.groups} />
             </div>
-            <div className="space-y-6">
+            <div className="space-y-6 xl:col-start-3 xl:row-span-2">
               {drilldownKey && (
                 <DrilldownPanel
                   title={data.pulse.find((m) => m.key === drilldownKey)?.label ?? drilldownKey}
@@ -144,6 +145,10 @@ export default function RadarDashboard() {
                 items={data.feed}
                 onOpenRecipe={(recipeId, editId) => setRecipeModal({ recipeId, editId })}
               />
+            </div>
+            <div className="space-y-6 xl:col-span-2 xl:col-start-1 xl:row-start-2">
+              <ActivationFunnel steps={data.funnel} />
+              <GroupHealthTable rows={data.groups} />
             </div>
           </div>
         )}
