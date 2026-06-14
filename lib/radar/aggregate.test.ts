@@ -5,6 +5,7 @@ import {
   computeFunnel,
   computeGroupHealth,
   buildFeed,
+  stripAdmin,
 } from './aggregate';
 import { buildDetails } from './details';
 import type { RadarSources } from './types';
@@ -224,6 +225,40 @@ describe('computeGroupHealth closed flag', () => {
     const rows = computeGroupHealth(d, NOW);
     expect(rows.find((r) => r.groupId === 'g1')?.closed).toBe(true);
     expect(rows.find((r) => r.groupId === 'g2')?.closed).toBe(false);
+  });
+});
+
+describe('stripAdmin', () => {
+  it('removes everything owned or acted on by the Small Plates team', () => {
+    const d = empty();
+    d.profiles = [
+      { id: 'admin', email: 'team@smallplatesandcompany.com', full_name: 'Team Small Plates & Co', created_at: at(2) },
+      { id: 'u1', email: 'a@x.com', full_name: 'Ana', created_at: at(2) },
+    ];
+    d.groups = [
+      { id: 'g-admin', name: 'Comped', created_by: 'admin', created_at: at(2), status: 'active', book_status: 'active', couple_image_url: null },
+      { id: 'g1', name: 'Real', created_by: 'u1', created_at: at(2), status: 'active', book_status: 'active', couple_image_url: null },
+    ];
+    d.recipes = [
+      { id: 'r1', group_id: 'g1', guest_id: null, user_id: 'u1', recipe_name: 'Mole', created_at: at(2), deleted_at: null, image_url: null, source: 'manual' },
+    ];
+    d.edits = [
+      { id: 'e-admin', recipe_id: 'r1', edited_by: 'admin', created_at: at(1) }, // admin cleaning a client recipe
+      { id: 'e-user', recipe_id: 'r1', edited_by: 'u1', created_at: at(0) },
+    ];
+
+    const clean = stripAdmin(d);
+    expect(clean.profiles.map((p) => p.id)).toEqual(['u1']);
+    expect(clean.groups.map((g) => g.id)).toEqual(['g1']); // comped/admin book gone
+    expect(clean.edits.map((e) => e.id)).toEqual(['e-user']); // admin edit of client recipe gone
+    // The client recipe itself stays — only the admin's edit of it is removed.
+    expect(clean.recipes.map((r) => r.id)).toEqual(['r1']);
+  });
+
+  it('is a no-op when there are no admin accounts', () => {
+    const d = empty();
+    d.profiles = [{ id: 'u1', email: 'a@x.com', full_name: 'Ana', created_at: at(2) }];
+    expect(stripAdmin(d)).toBe(d);
   });
 });
 

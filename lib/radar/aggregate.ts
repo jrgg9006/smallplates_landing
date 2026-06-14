@@ -7,6 +7,7 @@ import type {
   GroupHealthRow,
   RangeNumbers,
 } from './types';
+import { isAdminEmail } from '@/lib/config/admin';
 
 // Reason: day boundaries in the founder's timezone — Vercel runs UTC and a
 // 7pm CDMX signup must count as "today", not "tomorrow".
@@ -66,6 +67,29 @@ export interface PeopleMaps {
   captainIds: Set<string>;
   selfGuestIds: Set<string>; // guests with is_self — the owner's own entry in the guest list
 }
+/**
+ * Removes everything owned or acted on by the Small Plates team (admin accounts)
+ * so the whole Radar — pulse, funnel, group health, feed, drill-downs — shows
+ * only real client activity. Internal recipe-cleaning edits, comped/test books,
+ * and admin-created rows drop out. Applied once at the route boundary.
+ */
+export function stripAdmin(d: RadarSources): RadarSources {
+  const adminIds = new Set(d.profiles.filter((p) => isAdminEmail(p.email)).map((p) => p.id));
+  if (adminIds.size === 0) return d;
+  const isAdmin = (id: string | null | undefined) => !!id && adminIds.has(id);
+  return {
+    profiles: d.profiles.filter((p) => !isAdmin(p.id)),
+    groups: d.groups.filter((g) => !isAdmin(g.created_by)),
+    guests: d.guests.filter((gu) => !isAdmin(gu.user_id)),
+    recipes: d.recipes.filter((r) => !isAdmin(r.user_id)),
+    comms: d.comms, // no clear actor — left as-is
+    edits: d.edits.filter((e) => !isAdmin(e.edited_by)),
+    orders: d.orders.filter((o) => !isAdmin(o.user_id)),
+    events: d.events.filter((e) => !isAdmin(e.user_id)),
+    members: d.members.filter((m) => !isAdmin(m.profile_id)),
+  };
+}
+
 export function buildPeopleMaps(d: RadarSources): PeopleMaps {
   return {
     profName: new Map(d.profiles.map((p) => [p.id, p.full_name || p.email || 'Usuario'])),

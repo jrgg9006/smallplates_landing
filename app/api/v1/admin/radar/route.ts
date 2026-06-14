@@ -6,6 +6,7 @@ import {
   buildFeed,
   computeFunnel,
   computeGroupHealth,
+  stripAdmin,
 } from '@/lib/radar/aggregate';
 import { buildDetails } from '@/lib/radar/details';
 import type { RadarPayload } from '@/lib/radar/types';
@@ -17,7 +18,9 @@ export async function GET() {
     await requireAdminAuth();
 
     const now = new Date();
-    const { sources, degraded } = await fetchRadarSources();
+    const { sources: rawSources, degraded } = await fetchRadarSources();
+    // Reason: drop Small Plates team (admin) data so the whole Radar shows only clients.
+    const sources = stripAdmin(rawSources);
 
     const payload: RadarPayload = {
       generatedAt: now.toISOString(),
