@@ -49,7 +49,7 @@ function getDeadlineText(dateString: string): string {
 
 // Reason: the recipe deadline is occasion-neutral (works for weddings, birthdays,
 // gifts alike). Prefer book_close_date; if a legacy / in-progress group only has
-// gift_date or wedding_date, derive it as that date minus 12 days — the same rule
+// gift_date or wedding_date, derive it as that date minus 20 days — the same rule
 // used by EditGroupModal and the free-tier route.
 function getRecipeDeadline(
   group: { book_close_date?: string | null; gift_date?: string | null; wedding_date?: string | null } | null
@@ -59,7 +59,7 @@ function getRecipeDeadline(
   const base = group.gift_date || group.wedding_date;
   if (!base) return null;
   const d = new Date(base + 'T00:00:00');
-  d.setDate(d.getDate() - 12);
+  d.setDate(d.getDate() - 20);
   return d.toISOString().split('T')[0];
 }
 

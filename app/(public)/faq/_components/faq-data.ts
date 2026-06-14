@@ -147,6 +147,13 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         ],
       },
       {
+        id: "recipe-deadline",
+        question: "Is there a deadline to send recipes?",
+        answer: [
+          "Yes, and we set it for you. When you pick the date you want the book in hand, the recipe deadline lands about three weeks earlier — the time it takes to print and ship. You'll see the exact date the moment you create your event, and you can move it from your dashboard.",
+        ],
+      },
+      {
         id: "run-alone",
         question: "What are captains, and how do they help me collect recipes?",
         answer: [

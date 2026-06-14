@@ -60,9 +60,9 @@ export function DatePickerStep({
   const timelineRef = useRef<HTMLDivElement>(null);
 
   const today = new Date();
-  const fromDate = addDays(today, 14);
+  const fromDate = addDays(today, 24);
   const toDate = addMonths(today, 18);
-  const bookCloseDate = selectedDate ? subDays(selectedDate, 12) : null;
+  const bookCloseDate = selectedDate ? subDays(selectedDate, 20) : null;
 
   const canContinue = !!selectedDate || isUndecided;
 
