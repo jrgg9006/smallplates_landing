@@ -62,7 +62,8 @@ export function InteriorSpread({ name, imageUrl, uploading, onUploadClick }: Int
           <span>{part1}</span>
           {hasAmp && (
             <>
-              <span className="text-brand-honey">&amp;</span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/email-pdf/ampestrand_gold_transparent.png" alt="&" className="inline-block h-[0.9em] w-auto self-center" />
               <span>{part2}</span>
             </>
           )}
