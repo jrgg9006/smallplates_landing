@@ -1146,6 +1146,61 @@ function personalizeFixedPages(doc, bookData) {
     app.changeTextPreferences = null;
 }
 
+// ============================================
+// OCCASION-AWARE: PAGE 3 TITLE (v17)
+// Reason: couples (a partner name exists) keep the two-name title and the
+// golden ampersand from the template — v16's placeholder replacement already
+// filled both names. Non-couple occasions have a single name (or a book
+// title), so we overwrite the {{TITLE_NAME}} frame with couple_display_name
+// (= print_couple_name || couple_display_name || "first & partner"). Setting
+// .contents drops the ampersand's character styling naturally.
+// ============================================
+function applyTitleName(doc, bookData) {
+    var partner = getNestedValue(bookData, "couple.partner_first_name");
+    var hasPartner = partner && String(partner).replace(/\s/g, "").length > 0;
+    if (hasPartner) {
+        $.writeln("  Title: couple (partner present) — leaving template two-name title");
+        return;
+    }
+
+    var frame = findItemByLabel(doc, CONFIG.titleNameLabel);
+    if (!frame) {
+        $.writeln("  Title: '" + CONFIG.titleNameLabel + "' frame not found — skipping (older master?)");
+        return;
+    }
+
+    var title = getNestedValue(bookData, "couple.couple_display_name") || "";
+    try {
+        frame.contents = String(title);
+        $.writeln("  Title: single-name set -> " + title);
+    } catch (e) {
+        $.writeln("  Title set error: " + e.message);
+    }
+}
+
+// ============================================
+// OCCASION-AWARE: PAGE 11 LETTER (v17)
+// Reason: two pre-styled letter frames live on page 11 of the template,
+// {{INTRO_WEDDING}} (current wedding letter) and {{INTRO_GENERIC}} (neutral
+// letter). We delete the one that does not apply; deleting (not rewriting)
+// preserves every hand-applied paragraph/character style (e.g. the bold
+// closing line). Weddings/bridal showers and legacy groups with no occasion
+// keep the wedding letter, so the result equals v16 for those groups.
+// ============================================
+function applyIntroMessage(doc, bookData) {
+    var occasion = getNestedValue(bookData, "couple.occasion");
+    var isWedding = !occasion || occasion === "wedding" || occasion === "bridal_shower";
+
+    var labelToRemove = isWedding ? CONFIG.introGenericLabel : CONFIG.introWeddingLabel;
+    var labelToKeep = isWedding ? CONFIG.introWeddingLabel : CONFIG.introGenericLabel;
+
+    var removed = removeItemByLabel(doc, labelToRemove);
+    $.writeln("  Intro: occasion=" + (occasion || "(none)") +
+              " isWedding=" + isWedding +
+              " kept=" + labelToKeep +
+              " removed=" + (removed ? labelToRemove : "(frame not found)"));
+}
+
 function populateContributors(spread, bookData) {
     var placeholders = CONFIG.bookPlaceholders;
 
