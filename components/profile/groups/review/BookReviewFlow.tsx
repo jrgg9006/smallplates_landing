@@ -164,7 +164,7 @@ export function BookReviewFlow({ group, isOwner, recipeCount, onExit }: BookRevi
 
   // Reason: title is contextual to the active screen (steps 1-3).
   const STEP_TITLES: Record<ScreenStep, string> = {
-    1: "Design your cover",
+    1: "Design your book",
     2: "Review your cookbook",
     3: "How many copies?",
   };

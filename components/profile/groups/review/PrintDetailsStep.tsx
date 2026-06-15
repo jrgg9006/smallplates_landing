@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 import { LiveCoverImage } from "./cover/LiveCoverImage";
 import { InteriorSpread } from "./cover/InteriorSpread";
 import { CoverFieldInput } from "./cover/CoverFieldInput";
+import { SubStepIndicator, type CoverSubStep } from "./cover/SubStepIndicator";
 import { COVER_LINE_MAX, COVER_NAME_MAX, DEFAULT_COVER_LINE } from "@/lib/cover/layout";
 
 interface PrintDetailsStepProps {
@@ -19,9 +21,10 @@ interface PrintDetailsStepProps {
   onContinue: () => void;
 }
 
-// Reason: Step 1 of the book-review flow, redesigned into a WYSIWYG cover editor.
-// Left = editable fields; right = the real cover rendered live (sticky). Below,
-// clearly separated, the interior spread showing the photo lands INSIDE the book.
+// Reason: Step 1 of the book-review flow is a two-screen micro-flow — "Cover"
+// then "Inside" — mirroring the physical book (outside, then open it). Each
+// surface gets its own focused, scroll-free screen. Print details are saved once,
+// on the final "Looks good, continue".
 export function PrintDetailsStep({
   groupId,
   name,
@@ -33,6 +36,7 @@ export function PrintDetailsStep({
   onImageChange,
   onContinue,
 }: PrintDetailsStepProps) {
+  const [subStep, setSubStep] = useState<CoverSubStep>("cover");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -97,79 +101,110 @@ export function PrintDetailsStep({
 
   return (
     <div className="w-full">
-      <p className="type-body-small mb-8 max-w-2xl text-pretty">
-        This is your real cover. Edit it and watch it change.
-      </p>
-
-      {/* HERO: fields (left) + live cover (right, sticky on desktop) */}
-      <div className="grid gap-x-12 gap-y-8 sm:grid-cols-[1fr_360px] sm:items-start">
-        {/* Reason: cap the field width so it doesn't stretch the full column —
-            keeps the editor balanced against the 360px cover and gives the page air. */}
-        <div className="flex w-full max-w-lg flex-col gap-7">
-          <CoverFieldInput
-            label="The line above"
-            value={coverLine}
-            max={COVER_LINE_MAX}
-            placeholder={DEFAULT_COVER_LINE}
-            uppercase
-            onChange={onCoverLineChange}
-          />
-          <CoverFieldInput
-            label="The name"
-            value={name}
-            max={COVER_NAME_MAX}
-            placeholder={isCoupleOccasion ? "Rocío & Víctor" : "Richi"}
-            tip={
-              isCoupleOccasion ? (
-                <>Tip: use &ldquo;&amp;&rdquo;. It looks best in print.</>
-              ) : null
-            }
-            onChange={onNameChange}
-            autoFocus
-          />
-        </div>
-
-        <div className="flex justify-center sm:sticky sm:top-6">
-          <LiveCoverImage coverLine={coverLine} name={name} width={360} />
-        </div>
+      <div className="mb-10 flex justify-center sm:mb-12">
+        <SubStepIndicator current={subStep} onSelect={setSubStep} />
       </div>
 
-      {/* Divider */}
-      <div className="my-12 border-t border-black/10" />
+      {subStep === "cover" ? (
+        /* ── Screen 1: the cover ── */
+        <div className="mx-auto max-w-4xl">
+          <p className="type-body-small mb-8 text-center text-pretty">
+            This is your real cover. Edit it and watch it change.
+          </p>
 
-      {/* INTERIOR PHOTO */}
-      <div className="flex flex-col">
-        <p className="type-eyebrow mb-2">A photo for inside the book</p>
-        <p className="type-body-small mb-6 max-w-xl text-pretty">
-          This photo goes inside the book — on the first page, not the cover.
-        </p>
+          <div className="grid gap-x-12 gap-y-8 sm:grid-cols-[1fr_360px] sm:items-center">
+            <div className="flex w-full max-w-lg flex-col gap-7">
+              <CoverFieldInput
+                label="The line above"
+                value={coverLine}
+                max={COVER_LINE_MAX}
+                placeholder={DEFAULT_COVER_LINE}
+                uppercase
+                onChange={onCoverLineChange}
+              />
+              <CoverFieldInput
+                label="The name"
+                value={name}
+                max={COVER_NAME_MAX}
+                placeholder={isCoupleOccasion ? "Rocío & Víctor" : "Richi"}
+                tip={isCoupleOccasion ? <>Tip: use &ldquo;&amp;&rdquo;. It looks best in print.</> : null}
+                onChange={onNameChange}
+                autoFocus
+              />
+            </div>
 
-        <InteriorSpread
-          name={name}
-          imageUrl={imageUrl}
-          uploading={uploading}
-          onUploadClick={() => fileInputRef.current?.click()}
-        />
+            <div className="flex justify-center">
+              <LiveCoverImage coverLine={coverLine} name={name} width={360} />
+            </div>
+          </div>
 
-        {imageUrl && (
-          <div className="mx-auto mt-4 flex gap-4">
+          <div className="mt-10 flex justify-center sm:justify-end">
             <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="text-sm font-medium text-brand-honey transition-colors hover:text-brand-honey-dark"
+              type="button"
+              onClick={() => setSubStep("inside")}
+              disabled={!name.trim()}
+              className="btn btn-md btn-dark inline-flex items-center gap-2"
             >
-              Change photo
-            </button>
-            <button
-              onClick={handleRemoveImage}
-              disabled={uploading}
-              className="text-sm text-gray-400 transition-colors hover:text-red-400"
-            >
-              Remove
+              Next: the first page
+              <ArrowRight className="h-4 w-4" />
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        /* ── Screen 2: the first page inside ── */
+        <div className="mx-auto max-w-3xl">
+          <p className="type-body-small mb-8 text-center text-pretty">
+            Add a photo for the first page inside the book. Optional — it never goes on the cover.
+          </p>
+
+          <InteriorSpread
+            name={name}
+            imageUrl={imageUrl}
+            uploading={uploading}
+            onUploadClick={() => fileInputRef.current?.click()}
+          />
+
+          {imageUrl && (
+            <div className="mx-auto mt-4 flex justify-center gap-4">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="text-sm font-medium text-brand-honey transition-colors hover:text-brand-honey-dark"
+              >
+                Change photo
+              </button>
+              <button
+                onClick={handleRemoveImage}
+                disabled={uploading}
+                className="text-sm text-gray-400 transition-colors hover:text-red-400"
+              >
+                Remove
+              </button>
+            </div>
+          )}
+
+          {error && <p className="mt-6 text-center text-sm text-red-500">{error}</p>}
+
+          <div className="mt-10 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => setSubStep("cover")}
+              className="inline-flex items-center gap-1.5 text-sm text-[hsl(var(--brand-warm-gray))] transition-colors hover:text-brand-charcoal"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Cover
+            </button>
+            <button
+              type="button"
+              onClick={handleContinue}
+              disabled={!name.trim() || saving}
+              className="btn btn-md btn-dark"
+            >
+              {saving ? "Saving…" : "Looks good, continue"}
+            </button>
+          </div>
+        </div>
+      )}
 
       <input
         ref={fileInputRef}
@@ -182,17 +217,6 @@ export function PrintDetailsStep({
           e.target.value = "";
         }}
       />
-
-      {error && <p className="mt-6 text-center text-sm text-red-500">{error}</p>}
-
-      <button
-        type="button"
-        onClick={handleContinue}
-        disabled={!name.trim() || saving}
-        className="btn btn-md btn-dark mt-10 mx-auto sm:ml-auto sm:mr-0 block w-full max-w-xs"
-      >
-        {saving ? "Saving…" : "Looks good, continue"}
-      </button>
     </div>
   );
 }
