@@ -47,6 +47,11 @@ var CONFIG = {
     qrImageLabel: "{{QR_IMAGE}}",
     repurchaseQRLabel: "{{QR_REPURCHASE}}",
 
+    // v17: occasion-aware front matter (page 3 title, page 11 letter)
+    titleNameLabel: "{{TITLE_NAME}}",
+    introWeddingLabel: "{{INTRO_WEDDING}}",
+    introGenericLabel: "{{INTRO_GENERIC}}",
+
     recipePlaceholders: [
         {find: "<<recipe_name>>", alt: "«recipe_name»", field: "recipe_name"},
         {find: "<<guest_name>>", alt: "«guest_name»", field: "guest_name"},
@@ -714,6 +719,21 @@ function findItemByLabel(doc, label) {
 function removeSpread(spread) {
     for (var p = spread.pages.length - 1; p >= 0; p--) {
         spread.pages[p].remove();
+    }
+}
+
+// Reason: v17 deletes one of two overlapping page-11 letter frames by its
+// Script Label. Mirrors removeSpread's defensive style; no-ops if the label
+// is absent (older master template) so generation never crashes.
+function removeItemByLabel(doc, label) {
+    var item = findItemByLabel(doc, label);
+    if (!item) return false;
+    try {
+        item.remove();
+        return true;
+    } catch (e) {
+        $.writeln("removeItemByLabel error for '" + label + "': " + e.message);
+        return false;
     }
 }
 
