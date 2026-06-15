@@ -1,6 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { splitCoupleName, DEFAULT_COVER_LINE } from '@/lib/cover/layout';
 
 export const runtime = 'nodejs';
 
@@ -31,21 +32,6 @@ async function readImage(origin: string, relPath: string): Promise<string> {
   return `data:${mime};base64,${buf.toString('base64')}`;
 }
 
-// Scale title font size down for long names so it fits on one line.
-// Reason: the cover is 900px wide with 48px padding each side (~804px usable),
-// so there's room to keep the font larger for medium-long names. Finer buckets +
-// a higher floor stop names like "Mom Lilyth Fieston Loco!" from shrinking to a
-// cramped 46px.
-function titleFontSize(maxPartLen: number): number {
-  if (maxPartLen <= 7) return 80;
-  if (maxPartLen <= 10) return 72;
-  if (maxPartLen <= 14) return 70;
-  if (maxPartLen <= 18) return 68;
-  if (maxPartLen <= 22) return 66;
-  if (maxPartLen <= 27) return 64;
-  if (maxPartLen <= 33) return 56;
-  return 48;
-}
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -53,12 +39,13 @@ export async function GET(request: NextRequest) {
   const directName = url.searchParams.get('name');
 
   let coupleNamePlain = directName || 'Cheese & Wine';
+  let coverLine = url.searchParams.get('cover_line') || DEFAULT_COVER_LINE;
 
   if (groupId && !directName) {
     const supabase = createSupabaseAdminClient();
     const { data: group } = await supabase
       .from('groups')
-      .select('print_couple_name, print_details_confirmed_at, couple_display_name, name')
+      .select('print_couple_name, print_details_confirmed_at, couple_display_name, name, print_cover_line')
       .eq('id', groupId)
       .single();
     if (group) {
@@ -68,6 +55,7 @@ export async function GET(request: NextRequest) {
       // last resort for legacy rows).
       const confirmed = group.print_details_confirmed_at && group.print_couple_name;
       coupleNamePlain = confirmed || group.couple_display_name || group.name || 'The couple';
+      coverLine = group.print_cover_line || DEFAULT_COVER_LINE;
     }
   }
 
@@ -79,12 +67,7 @@ export async function GET(request: NextRequest) {
   if (!logoData) logoData = await readImage(origin, 'images/SmallPlates_logo_horizontal.png');
   if (!ampData) ampData = await readImage(origin, 'images/email-pdf/ampestrand_gold_transparent.png');
 
-  const ampIdx = coupleNamePlain.indexOf('&');
-  const hasAmp = ampIdx > -1;
-  const part1 = hasAmp ? coupleNamePlain.slice(0, ampIdx).trim() : coupleNamePlain;
-  const part2 = hasAmp ? coupleNamePlain.slice(ampIdx + 1).trim() : '';
-
-  const fontSize = titleFontSize(Math.max(part1.length, part2.length));
+  const { hasAmp, part1, part2, fontSize } = splitCoupleName(coupleNamePlain);
   const ampImgSize = Math.round(fontSize * 1.05);
 
   return new ImageResponse(
@@ -146,7 +129,7 @@ export async function GET(request: NextRequest) {
               justifyContent: 'center',
             }}
           >
-            {'RECIPES FROM THE PEOPLE WHO LOVE'}
+            {coverLine.toUpperCase()}
           </div>
 
           {/* Couple name — independently positioned */}
