@@ -672,11 +672,11 @@ function main() {
     var reportOccasion = getNestedValue(bookData, "couple.occasion") || "(none)";
     var reportPartner = getNestedValue(bookData, "couple.partner_first_name");
     var reportHasPartner = reportPartner && String(reportPartner).replace(/\s/g, "").length > 0;
+    // Reason: mirror applyIntroMessage's isWedding rule; "(none)" is the null/legacy fallback.
+    var reportIsWedding = reportOccasion === "(none)" || reportOccasion === "wedding" || reportOccasion === "bridal_shower";
     msg += "\nOccasion: " + reportOccasion +
            " | Page 3: " + (reportHasPartner ? "two names" : "single name") +
-           " | Page 11: " + ((!getNestedValue(bookData, "couple.occasion") ||
-               getNestedValue(bookData, "couple.occasion") === "wedding" ||
-               getNestedValue(bookData, "couple.occasion") === "bridal_shower") ? "wedding letter" : "neutral letter");
+           " | Page 11: " + (reportIsWedding ? "wedding letter" : "neutral letter");
 
     // Reason: show the actual URL each QR encodes — ground truth comes from
     // the JSON (fetch-book.js writes bookData.qr_urls). Without this, you'd
@@ -1218,6 +1218,9 @@ function applyIntroMessage(doc, bookData) {
               " isWedding=" + isWedding +
               " kept=" + labelToKeep +
               " removed=" + (removed ? labelToRemove : "(frame not found)"));
+    if (!findItemByLabel(doc, labelToKeep)) {
+        $.writeln("  WARNING: keep-frame '" + labelToKeep + "' also not found — page 11 letter may be absent (older master?)");
+    }
 }
 
 function populateContributors(spread, bookData) {
