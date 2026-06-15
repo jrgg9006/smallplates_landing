@@ -112,6 +112,14 @@ export function PrintDetailsStep({
 
   return (
     <div className="w-full">
+      {/* Intro — left-aligned to the page gutter, matching the Recipes step, and
+          sitting directly under the main step bar, above the sub-step indicator. */}
+      <p className="type-body-small mb-6 max-w-4xl text-pretty">
+        {subStep === "cover"
+          ? "This is your real cover. Edit it and watch it change."
+          : "Add a photo for the first page inside the book. Optional — it never goes on the cover."}
+      </p>
+
       <div className="mb-10 flex justify-center sm:mb-12">
         <SubStepIndicator current={subStep} onSelect={setSubStep} />
       </div>
@@ -119,10 +127,6 @@ export function PrintDetailsStep({
       {subStep === "cover" ? (
         /* ── Screen 1: the cover ── */
         <div className="mx-auto max-w-4xl">
-          <p className="type-body-small mb-8 max-w-xl text-pretty">
-            This is your real cover. Edit it and watch it change.
-          </p>
-
           <div className="grid gap-x-12 gap-y-8 sm:grid-cols-[1fr_320px] sm:items-center">
             <div className="flex w-full max-w-lg flex-col gap-7">
               <CoverFieldInput
@@ -167,10 +171,6 @@ export function PrintDetailsStep({
       ) : (
         /* ── Screen 2: the first page inside ── */
         <div className="mx-auto max-w-3xl">
-          <p className="type-body-small mb-8 max-w-xl text-pretty">
-            Add a photo for the first page inside the book. Optional — it never goes on the cover.
-          </p>
-
           <InteriorSpread
             name={name}
             imageUrl={imageUrl}
