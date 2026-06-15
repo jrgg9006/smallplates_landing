@@ -103,7 +103,9 @@ export function PrintDetailsStep({
 
       {/* HERO: fields (left) + live cover (right, sticky on desktop) */}
       <div className="grid gap-x-12 gap-y-8 sm:grid-cols-[1fr_360px] sm:items-start">
-        <div className="flex flex-col gap-7">
+        {/* Reason: cap the field width so it doesn't stretch the full column —
+            keeps the editor balanced against the 360px cover and gives the page air. */}
+        <div className="flex w-full max-w-md flex-col gap-7">
           <CoverFieldInput
             label="The line above"
             value={coverLine}
