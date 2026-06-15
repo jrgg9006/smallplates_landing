@@ -3,6 +3,7 @@ import { requireAdminAuth } from '@/lib/auth/admin';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import archiver from 'archiver';
 import { PassThrough } from 'stream';
+import { DEFAULT_COVER_LINE } from '@/lib/cover/layout';
 
 export const maxDuration = 300;
 
@@ -20,7 +21,7 @@ export async function GET(
     // 1. Group data
     const { data: group, error: groupError } = await supabase
       .from('groups')
-      .select('couple_first_name, partner_first_name, couple_display_name, wedding_date, book_status, print_couple_name, couple_image_url')
+      .select('couple_first_name, partner_first_name, couple_display_name, wedding_date, book_status, print_couple_name, couple_image_url, print_cover_line')
       .eq('id', groupId)
       .single();
 
@@ -168,6 +169,7 @@ export async function GET(
         couple_display_name: coupleDisplayName,
         wedding_date: group.wedding_date || null,
         local_image_path: null as string | null,
+        cover_line: group.print_cover_line || DEFAULT_COVER_LINE,
       },
       contributors: {
         count: contributorList.length,
