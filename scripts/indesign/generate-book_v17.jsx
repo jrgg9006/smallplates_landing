@@ -283,7 +283,7 @@ function main() {
         return;
     }
 
-    if (!confirm("SMALL PLATES - Book Generator v1.14.0\n\n" +
+    if (!confirm("SMALL PLATES - Book Generator v1.15.0\n\n" +
                  "Pareja: " + bookData.couple.couple_display_name + "\n" +
                  "Recetas: " + recipes.length + " (" + recipesWithImages + " con imagen)\n" +
                  "Contributors: " + bookData.contributors.list.length + "\n" +
@@ -331,6 +331,14 @@ function main() {
     // ── STEP 4: Personalize fixed pages ──
     $.writeln("\n=== Personalizing fixed pages ===");
     personalizeFixedPages(doc, bookData);
+
+    // ── STEP 4a: Occasion-aware front matter (v17) ──
+    // Reason: page 3 title (single name vs couple) and page 11 letter
+    // (wedding vs neutral). Runs after personalizeFixedPages so the page-3
+    // override wins over the generic placeholder replacement.
+    $.writeln("\n=== Occasion-aware front matter ===");
+    applyTitleName(doc, bookData);
+    applyIntroMessage(doc, bookData);
 
     // ── STEP 4b: Place couple image ──
     $.writeln("\n=== Placing couple image ===");
@@ -629,7 +637,7 @@ function main() {
     }
 
     // ── REPORT ──
-    var msg = "LIBRO GENERADO (v1.14.0)\n\n";
+    var msg = "LIBRO GENERADO (v1.15.0)\n\n";
     msg += bookData.couple.couple_display_name + "\n\n";
     msg += "Recetas: " + stats.success + "\n";
     msg += "Imagenes: " + stats.images + "\n";
@@ -658,6 +666,17 @@ function main() {
     }
 
     msg += "\nCouple image: " + (coupleImagePlaced ? "Placed" : "None");
+
+    // Reason: surface which front-matter variant was produced so the operator
+    // can sanity-check it without opening pages 3 and 11.
+    var reportOccasion = getNestedValue(bookData, "couple.occasion") || "(none)";
+    var reportPartner = getNestedValue(bookData, "couple.partner_first_name");
+    var reportHasPartner = reportPartner && String(reportPartner).replace(/\s/g, "").length > 0;
+    msg += "\nOccasion: " + reportOccasion +
+           " | Page 3: " + (reportHasPartner ? "two names" : "single name") +
+           " | Page 11: " + ((!getNestedValue(bookData, "couple.occasion") ||
+               getNestedValue(bookData, "couple.occasion") === "wedding" ||
+               getNestedValue(bookData, "couple.occasion") === "bridal_shower") ? "wedding letter" : "neutral letter");
 
     // Reason: show the actual URL each QR encodes — ground truth comes from
     // the JSON (fetch-book.js writes bookData.qr_urls). Without this, you'd
