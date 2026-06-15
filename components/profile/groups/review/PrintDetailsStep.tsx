@@ -22,9 +22,10 @@ interface PrintDetailsStepProps {
 }
 
 // Reason: Step 1 of the book-review flow is a two-screen micro-flow — "Cover"
-// then "Inside" — mirroring the physical book (outside, then open it). Print
-// details (name + cover line) are saved on BOTH "Next" and the final continue so
-// edits propagate everywhere (dashboard cover, etc.) as soon as you move on.
+// then "Inside" — mirroring the physical book (outside, then open it). The nav
+// lives in a fixed bottom action bar so the primary CTA is ALWAYS visible (never
+// hidden below the fold). Print details (name + cover line) are saved on both
+// "Next" and the final continue so edits propagate everywhere.
 export function PrintDetailsStep({
   groupId,
   name,
@@ -97,10 +98,9 @@ export function PrintDetailsStep({
   };
 
   return (
-    <div className="w-full">
-      {/* Intro — left-aligned to the page gutter and wrapping at the same right
-          edge as the step bar (where "Checkout" ends), so the block stays
-          harmonious instead of breaking early. */}
+    // Reason: bottom padding clears the fixed action bar so content is never hidden.
+    <div className="w-full pb-28">
+      {/* Intro — left-aligned to the page gutter, wrapping at the step bar's edge. */}
       <p className="type-body-small mb-6 text-pretty">
         {subStep === "cover"
           ? "This is your real cover. Edit it and watch it change."
@@ -114,7 +114,7 @@ export function PrintDetailsStep({
       {subStep === "cover" ? (
         /* ── Screen 1: the cover ── */
         <div className="mx-auto max-w-4xl">
-          <div className="grid gap-x-12 gap-y-8 sm:grid-cols-[1fr_320px] sm:items-center">
+          <div className="grid gap-x-12 gap-y-8 sm:grid-cols-[1fr_280px] sm:items-center">
             <div className="flex w-full max-w-lg flex-col gap-7">
               <CoverFieldInput
                 label="The line above"
@@ -136,23 +136,8 @@ export function PrintDetailsStep({
             </div>
 
             <div className="flex justify-center">
-              <LiveCoverImage coverLine={coverLine} name={name} width={320} />
+              <LiveCoverImage coverLine={coverLine} name={name} width={280} />
             </div>
-          </div>
-
-          {error && <p className="mt-6 text-center text-sm text-red-500">{error}</p>}
-
-          <div className="mt-10 flex items-center justify-center gap-5 sm:justify-end">
-            <span className="type-caption text-[hsl(var(--brand-warm-gray))]/70">Step 1 of 2</span>
-            <button
-              type="button"
-              onClick={handleNext}
-              disabled={!name.trim() || saving}
-              className="btn btn-md btn-dark inline-flex items-center gap-2"
-            >
-              {saving ? "Saving…" : "Next: the first page"}
-              {!saving && <ArrowRight className="h-4 w-4" />}
-            </button>
           </div>
         </div>
       ) : (
@@ -176,32 +161,10 @@ export function PrintDetailsStep({
               </button>
             </div>
           )}
-
-          {error && <p className="mt-6 text-center text-sm text-red-500">{error}</p>}
-
-          <div className="mt-10 flex items-center justify-between">
-            <button
-              type="button"
-              onClick={() => setSubStep("cover")}
-              className="inline-flex items-center gap-2 rounded-full border border-black/15 px-5 py-2.5 text-sm font-medium text-brand-charcoal transition-colors hover:border-brand-charcoal/40 hover:bg-black/[0.03]"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Cover
-            </button>
-            <div className="flex items-center gap-5">
-              <span className="type-caption text-[hsl(var(--brand-warm-gray))]/70">Step 2 of 2</span>
-              <button
-                type="button"
-                onClick={handleContinue}
-                disabled={!name.trim() || saving}
-                className="btn btn-md btn-dark"
-              >
-                {saving ? "Saving…" : "Looks good, continue"}
-              </button>
-            </div>
-          </div>
         </div>
       )}
+
+      {error && <p className="mt-6 text-center text-sm text-red-500">{error}</p>}
 
       <input
         ref={fileInputRef}
@@ -214,6 +177,39 @@ export function PrintDetailsStep({
           e.target.value = "";
         }}
       />
+
+      {/* Fixed action bar — keeps the primary CTA visible at any screen height. */}
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-black/10 bg-[#FAF7F2]/90 backdrop-blur-sm">
+        <div className="mx-auto flex w-full max-w-[1100px] items-center justify-between gap-4 px-4 py-3.5 sm:px-8">
+          {subStep === "inside" ? (
+            <button
+              type="button"
+              onClick={() => setSubStep("cover")}
+              className="inline-flex items-center gap-2 rounded-full border border-black/15 px-5 py-2.5 text-sm font-medium text-brand-charcoal transition-colors hover:border-brand-charcoal/40 hover:bg-black/[0.03]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Cover
+            </button>
+          ) : (
+            <span />
+          )}
+
+          <div className="flex items-center gap-4 sm:gap-5">
+            <span className="type-caption text-[hsl(var(--brand-warm-gray))]/70">
+              {subStep === "cover" ? "Step 1 of 2" : "Step 2 of 2"}
+            </span>
+            <button
+              type="button"
+              onClick={subStep === "cover" ? handleNext : handleContinue}
+              disabled={!name.trim() || saving}
+              className="btn btn-md btn-dark inline-flex items-center gap-2"
+            >
+              {saving ? "Saving…" : subStep === "cover" ? "Next: the first page" : "Looks good, continue"}
+              {!saving && subStep === "cover" && <ArrowRight className="h-4 w-4" />}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
