@@ -477,6 +477,7 @@ export interface Database {
           book_closed_by_user: string | null;
           book_notes: string | null;
           print_couple_name: string | null;
+          print_cover_line: string | null;
           print_details_confirmed_at: string | null;
           owner_approved_at: string | null;
           pdf_url: string | null;
@@ -526,6 +527,7 @@ export interface Database {
           book_closed_by_user?: string | null;
           book_notes?: string | null;
           print_couple_name?: string | null;
+          print_cover_line?: string | null;
           print_details_confirmed_at?: string | null;
           owner_approved_at?: string | null;
           pdf_url?: string | null;
@@ -573,6 +575,7 @@ export interface Database {
           book_closed_by_user?: string | null;
           book_notes?: string | null;
           print_couple_name?: string | null;
+          print_cover_line?: string | null;
           print_details_confirmed_at?: string | null;
           owner_approved_at?: string | null;
           pdf_url?: string | null;
@@ -1107,6 +1110,7 @@ export interface GroupFormData {
   relationship_to_couple?: 'friend' | 'family' | 'bridesmaid' | 'wedding-planner' | 'other' | null;
   couple_display_name?: string | null;
   print_couple_name?: string | null;
+  print_cover_line?: string | null;
   print_details_confirmed_at?: string | null;
   gift_date?: string | null;
   gift_date_undecided?: boolean;
