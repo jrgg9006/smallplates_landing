@@ -204,7 +204,18 @@ export function PrintDetailsStep({
               disabled={!name.trim() || saving}
               className="btn btn-md btn-dark inline-flex items-center gap-2"
             >
-              {saving ? "Saving…" : subStep === "cover" ? "Next: the first page" : "Looks good, continue"}
+              {saving ? (
+                "Saving…"
+              ) : subStep === "cover" ? (
+                "Next: the first page"
+              ) : (
+                <>
+                  {/* Reason: full label wraps to two lines on mobile; show a short
+                      "Continue" under sm and the full copy on desktop. */}
+                  <span className="sm:hidden">Continue</span>
+                  <span className="hidden sm:inline">Looks good, continue</span>
+                </>
+              )}
               {!saving && subStep === "cover" && <ArrowRight className="h-4 w-4" />}
             </button>
           </div>
