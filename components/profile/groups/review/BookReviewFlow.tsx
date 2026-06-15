@@ -8,6 +8,7 @@ import { ReviewRecipesStep } from "./ReviewRecipesStep";
 import { QuantityStep } from "./QuantityStep";
 import { ApprovalModal } from "./ApprovalModal";
 import { MIN_RECIPES_TO_PRINT } from "@/lib/stripe/pricing";
+import { DEFAULT_COVER_LINE } from "@/lib/cover/layout";
 import type { GroupWithMembers, RecipeForReview } from "@/lib/types/database";
 
 // Reason: only steps 1-3 render a screen. Step 4 (Checkout) IS the Stripe page —
@@ -36,6 +37,9 @@ export function BookReviewFlow({ group, isOwner, recipeCount, onExit }: BookRevi
     group.print_couple_name || group.couple_display_name || group.name
   );
   const [coupleImageUrl, setCoupleImageUrl] = useState(group.couple_image_url);
+  const [printCoverLine, setPrintCoverLine] = useState(
+    group.print_cover_line || DEFAULT_COVER_LINE
+  );
   const [qty, setQty] = useState(1);
   const [redirecting, setRedirecting] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
@@ -160,9 +164,7 @@ export function BookReviewFlow({ group, isOwner, recipeCount, onExit }: BookRevi
 
   // Reason: title is contextual to the active screen (steps 1-3).
   const STEP_TITLES: Record<ScreenStep, string> = {
-    1: isCoupleOccasion
-      ? "Add the couple's name and photo"
-      : "Add your book's title and a photo",
+    1: "Design your cover",
     2: "Review your cookbook",
     3: "How many copies?",
   };
@@ -227,9 +229,11 @@ export function BookReviewFlow({ group, isOwner, recipeCount, onExit }: BookRevi
         <PrintDetailsStep
           groupId={groupId}
           name={printCoupleName}
+          coverLine={printCoverLine}
           imageUrl={coupleImageUrl}
           isCoupleOccasion={isCoupleOccasion}
           onNameChange={setPrintCoupleName}
+          onCoverLineChange={setPrintCoverLine}
           onImageChange={setCoupleImageUrl}
           onContinue={() => setStep(2)}
         />
