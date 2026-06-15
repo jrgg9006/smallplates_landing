@@ -44,7 +44,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { print_couple_name } = body;
+    const { print_couple_name, print_cover_line } = body;
 
     if (!print_couple_name || typeof print_couple_name !== 'string' || !print_couple_name.trim()) {
       return NextResponse.json(
@@ -57,10 +57,15 @@ export async function PATCH(
       .from('groups')
       .update({
         print_couple_name: print_couple_name.trim(),
+        // Reason: NULL is allowed and falls back to DEFAULT_COVER_LINE at render.
+        print_cover_line:
+          typeof print_cover_line === 'string' && print_cover_line.trim()
+            ? print_cover_line.trim()
+            : null,
         print_details_confirmed_at: new Date().toISOString(),
       })
       .eq('id', groupId)
-      .select('print_couple_name, print_details_confirmed_at, couple_image_url')
+      .select('print_couple_name, print_cover_line, print_details_confirmed_at, couple_image_url')
       .single();
 
     if (updateError) {
