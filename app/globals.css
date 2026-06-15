@@ -1,3 +1,21 @@
+/* Reason: the live cover + interior-spread replicas must render in the real
+   print font (Minion Pro) to match the printed book. This is a documented
+   exception to the type-* rule — it is a book replica, not marketing copy. */
+@font-face {
+  font-family: 'MinionPro-Display';
+  src: url('/fonts/MinionPro-Display.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MinionPro-Regular';
+  src: url('/fonts/MinionPro-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
