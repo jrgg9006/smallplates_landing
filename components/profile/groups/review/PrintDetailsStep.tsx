@@ -62,20 +62,6 @@ export function PrintDetailsStep({
     }
   };
 
-  const handleRemoveImage = async () => {
-    setError(null);
-    try {
-      const res = await fetch(`/api/v1/groups/${groupId}/couple-image`, { method: "DELETE" });
-      if (!res.ok) {
-        const json = await res.json();
-        throw new Error(json.error || "Failed to remove image");
-      }
-      onImageChange(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to remove");
-    }
-  };
-
   // Reason: persist name + cover line. Called on "Next" and the final continue so
   // the printed cover stays in sync everywhere the moment the user moves forward.
   const savePrintDetails = async (): Promise<boolean> => {
@@ -117,7 +103,7 @@ export function PrintDetailsStep({
       <p className="type-body-small mb-6 max-w-4xl text-pretty">
         {subStep === "cover"
           ? "This is your real cover. Edit it and watch it change."
-          : "Add a photo for the first page inside the book. Optional — it never goes on the cover."}
+          : "The first spread inside your book — your photo on the left page, your title on the right. The photo is optional."}
       </p>
 
       <div className="mb-10 flex justify-center sm:mb-12">
@@ -179,20 +165,13 @@ export function PrintDetailsStep({
           />
 
           {imageUrl && (
-            <div className="mx-auto mt-4 flex justify-center gap-4">
+            <div className="mx-auto mt-4 flex justify-center">
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
                 className="text-sm font-medium text-brand-honey transition-colors hover:text-brand-honey-dark"
               >
                 Change photo
-              </button>
-              <button
-                onClick={handleRemoveImage}
-                disabled={uploading}
-                className="text-sm text-gray-400 transition-colors hover:text-red-400"
-              >
-                Remove
               </button>
             </div>
           )}
