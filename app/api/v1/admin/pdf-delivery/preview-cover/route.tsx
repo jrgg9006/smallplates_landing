@@ -132,7 +132,10 @@ export async function GET(request: NextRequest) {
             {coverLine.toUpperCase()}
           </div>
 
-          {/* Couple name — independently positioned */}
+          {/* Couple name — independently positioned. Reason: long names WRAP to a
+              second line at a large font (matching the printed InDesign cover)
+              instead of shrinking to fit one line. Side padding gives real left/
+              right margins so text never reaches the edge. */}
           <div
             style={{
               position: 'absolute',
@@ -141,14 +144,11 @@ export async function GET(request: NextRequest) {
               width: W,
               display: 'flex',
               flexDirection: 'row',
+              flexWrap: 'wrap',
               alignItems: 'center',
               justifyContent: 'center',
-              // Reason: tighter side padding gives long names (e.g. "Mom Lilyth
-              // Fieston Loco!") more room so the font stays larger instead of
-              // shrinking to fit a narrow center column. Short names are centered
-              // and unaffected.
-              paddingLeft: 6,
-              paddingRight: 6,
+              paddingLeft: 80,
+              paddingRight: 80,
             }}
           >
             <span
@@ -156,8 +156,8 @@ export async function GET(request: NextRequest) {
                 fontFamily: 'MinionPro-Display',
                 fontSize,
                 color: '#4b4b4a',
-                lineHeight: 1,
-                display: 'flex',
+                lineHeight: 1.08,
+                textAlign: 'center',
               }}
             >
               {part1}
@@ -171,15 +171,15 @@ export async function GET(request: NextRequest) {
                   alt="&"
                   width={ampImgSize}
                   height={ampImgSize}
-                  style={{ marginLeft: 6, marginRight: 6 }}
+                  style={{ marginLeft: 8, marginRight: 8 }}
                 />
                 <span
                   style={{
                     fontFamily: 'MinionPro-Display',
                     fontSize,
                     color: '#4b4b4a',
-                    lineHeight: 1,
-                    display: 'flex',
+                    lineHeight: 1.08,
+                    textAlign: 'center',
                   }}
                 >
                   {part2}

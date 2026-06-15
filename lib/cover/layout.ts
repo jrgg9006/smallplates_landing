@@ -16,19 +16,15 @@ export const COVER_H = 1125;
 
 /**
  * Title font size in px for the canonical 900px-wide cover, bucketed by the
- * longest "&"-separated part. Mirrors the Satori render exactly.
- * Reason: 900px wide with ~6px side padding; finer buckets + a 48px floor keep
- * long names from collapsing to a cramped size.
+ * longest "&"-separated part.
+ * Reason: the cover keeps a LARGE font and WRAPS long names to a second line
+ * (like the printed InDesign cover) instead of shrinking to fit one line. So we
+ * only step down gently and hold a high 64px floor — the wrap absorbs the rest.
  */
 export function titleFontSize(maxPartLen: number): number {
-  if (maxPartLen <= 7) return 80;
-  if (maxPartLen <= 10) return 72;
-  if (maxPartLen <= 14) return 70;
-  if (maxPartLen <= 18) return 68;
-  if (maxPartLen <= 22) return 66;
-  if (maxPartLen <= 27) return 64;
-  if (maxPartLen <= 33) return 56;
-  return 48;
+  if (maxPartLen <= 16) return 80;
+  if (maxPartLen <= 24) return 72;
+  return 64;
 }
 
 export interface SplitName {
