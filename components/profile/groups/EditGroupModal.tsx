@@ -164,14 +164,13 @@ export function EditGroupModal({
         updateData.gift_date_undecided = false;
       }
 
-      // Reason: the cookbook name is the source of truth for the cover. When it
-      // changes, sync the legacy display name so the dashboard preview reflects it
-      // immediately, and clear the print confirmation so the owner re-confirms the
-      // final printed name in Review (print_couple_name) before it ever prints.
+      // Reason: the Book Name is the single source of truth. Keep BOTH the legacy
+      // display name and the printed cover name (print_couple_name) in sync with it
+      // so editing the name here propagates everywhere — dashboard, mocks, emails,
+      // and the printed cover — instead of diverging into a separate print name.
       if (trimmedName !== group.name) {
         updateData.couple_display_name = trimmedName;
-        updateData.print_couple_name = null;
-        updateData.print_details_confirmed_at = null;
+        updateData.print_couple_name = trimmedName;
       }
 
       const { data, error: updateError } = await updateGroup(group.id, updateData);

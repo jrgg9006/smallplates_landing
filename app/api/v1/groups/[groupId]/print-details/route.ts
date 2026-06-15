@@ -53,10 +53,18 @@ export async function PATCH(
       );
     }
 
+    const trimmedName = print_couple_name.trim();
+
     const { data, error: updateError } = await supabase
       .from('groups')
       .update({
-        print_couple_name: print_couple_name.trim(),
+        print_couple_name: trimmedName,
+        // Reason: the Book Name is the single source of truth — keep `name` and the
+        // legacy `couple_display_name` in sync with what the owner types here so the
+        // edit shows up everywhere (dashboard, Edit Cookbook, emails, collect page),
+        // not just on the printed cover.
+        name: trimmedName,
+        couple_display_name: trimmedName,
         // Reason: NULL is allowed and falls back to DEFAULT_COVER_LINE at render.
         print_cover_line:
           typeof print_cover_line === 'string' && print_cover_line.trim()
