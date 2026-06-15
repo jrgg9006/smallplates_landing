@@ -546,6 +546,23 @@ export default function GroupsPage() {
     setGroupsLoading(isLoading);
   }, []);
 
+  // Reason: the book-review flow can change the book name and cover photo. On exit,
+  // refresh group data and re-select the same book so the dashboard heading + cover
+  // update immediately, without the owner having to refresh the page.
+  const handleExitReview = useCallback(async () => {
+    setActiveView("book");
+    const currentId = selectedGroup?.id;
+    if (groupsSectionRef.current && currentId) {
+      await groupsSectionRef.current.loadGroups(true);
+      setTimeout(() => {
+        const updated = groupsSectionRef.current?.selectedGroup;
+        if (updated && updated.id === currentId) {
+          setSelectedGroup(updated);
+        }
+      }, 100);
+    }
+  }, [selectedGroup]);
+
   // Handle recipe count changes
   const handleRecipeCountChange = useCallback((count: number, contributors: number) => {
     setRecipeCount(count);
@@ -638,7 +655,7 @@ export default function GroupsPage() {
           group={selectedGroup}
           isOwner={selectedGroup.created_by === user.id}
           recipeCount={recipeCount}
-          onExit={() => setActiveView('book')}
+          onExit={handleExitReview}
         />
       )}
 
