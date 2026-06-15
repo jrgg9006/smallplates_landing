@@ -70,6 +70,13 @@ export async function GET(request: NextRequest) {
   const { hasAmp, part1, part2, fontSize } = splitCoupleName(coupleNamePlain);
   const ampImgSize = Math.round(fontSize * 1.05);
 
+  // Reason: render the name as a flat list of WORD tokens (with the gold ampersand
+  // as one token in the middle) so flex-wrap breaks between words, not at the rigid
+  // part1/&/part2 boundaries. Long couple names then wrap naturally ("Ana & Richi
+  // Book" / "TTtotal") instead of dumping the whole second name onto a new line.
+  const nameWords1 = part1.split(/\s+/).filter(Boolean);
+  const nameWords2 = hasAmp ? part2.split(/\s+/).filter(Boolean) : [];
+
   return new ImageResponse(
     (
       <div
@@ -149,43 +156,34 @@ export async function GET(request: NextRequest) {
               justifyContent: 'center',
               paddingLeft: 80,
               paddingRight: 80,
+              rowGap: 8,
+              columnGap: 18,
             }}
           >
-            <span
-              style={{
-                fontFamily: 'MinionPro-Display',
-                fontSize,
-                color: '#4b4b4a',
-                lineHeight: 1.08,
-                textAlign: 'center',
-              }}
-            >
-              {part1}
-            </span>
+            {nameWords1.map((w, i) => (
+              <span
+                key={`a${i}`}
+                style={{ fontFamily: 'MinionPro-Display', fontSize, color: '#4b4b4a', lineHeight: 1.08 }}
+              >
+                {w}
+              </span>
+            ))}
 
             {hasAmp && (
               <>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={ampData}
-                  alt="&"
-                  width={ampImgSize}
-                  height={ampImgSize}
-                  style={{ marginLeft: 8, marginRight: 8 }}
-                />
-                <span
-                  style={{
-                    fontFamily: 'MinionPro-Display',
-                    fontSize,
-                    color: '#4b4b4a',
-                    lineHeight: 1.08,
-                    textAlign: 'center',
-                  }}
-                >
-                  {part2}
-                </span>
+                <img src={ampData} alt="&" width={ampImgSize} height={ampImgSize} style={{ marginLeft: 4, marginRight: 4 }} />
               </>
             )}
+
+            {nameWords2.map((w, i) => (
+              <span
+                key={`b${i}`}
+                style={{ fontFamily: 'MinionPro-Display', fontSize, color: '#4b4b4a', lineHeight: 1.08 }}
+              >
+                {w}
+              </span>
+            ))}
           </div>
 
           {/* Logo footer */}
