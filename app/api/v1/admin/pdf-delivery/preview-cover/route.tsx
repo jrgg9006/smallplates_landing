@@ -154,8 +154,12 @@ export async function GET(request: NextRequest) {
               flexWrap: 'wrap',
               alignItems: 'center',
               justifyContent: 'center',
-              paddingLeft: 80,
-              paddingRight: 80,
+              // Reason: match the InDesign title frame (7.2 in wide on an 8 in
+              // cover). 7.2 × 112.5 px/in = 810 px of text area, so the side
+              // padding is (900 − 810) / 2 = 45 px. This makes the web preview
+              // wrap to a second line at the same point as the printed book.
+              paddingLeft: 45,
+              paddingRight: 45,
               rowGap: 8,
               columnGap: 18,
             }}

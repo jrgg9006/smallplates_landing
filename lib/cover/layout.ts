@@ -19,8 +19,13 @@ export const COVER_H = 1125;
  * Reason: the cover uses ONE fixed size for every name (like the printed
  * InDesign cover) — long names WRAP to a second line, they never shrink. Kept as
  * a function so callers don't change if we ever reintroduce size logic.
+ *
+ * Derived to match the printed cover exactly: InDesign sets the title at 47 pt on
+ * an 8 in cover; the canonical cover is 900 px wide (900/8 = 112.5 px/in), so
+ * 47 pt × 112.5/72 = 73.4 px. Rounded to 73 so the web preview wraps at the same
+ * point as the printed book.
  */
-export const COVER_TITLE_FONT_SIZE = 80;
+export const COVER_TITLE_FONT_SIZE = 73;
 
 export function titleFontSize(): number {
   return COVER_TITLE_FONT_SIZE;

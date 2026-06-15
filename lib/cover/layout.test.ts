@@ -7,7 +7,8 @@ import {
 describe('cover layout', () => {
   describe('titleFontSize', () => {
     it('returns one fixed size — names wrap, never shrink', () => {
-      expect(titleFontSize()).toBe(80);
+      // 47 pt on an 8 in cover at 112.5 px/in → 73 px (matches the printed cover).
+      expect(titleFontSize()).toBe(73);
     });
   });
 
@@ -25,8 +26,8 @@ describe('cover layout', () => {
       expect(r.part2).toBe('');
     });
     it('uses the fixed cover font size regardless of length', () => {
-      expect(splitCoupleName('Ana & David').fontSize).toBe(80);
-      expect(splitCoupleName('Maximiliano Alexander & Jo').fontSize).toBe(80);
+      expect(splitCoupleName('Ana & David').fontSize).toBe(73);
+      expect(splitCoupleName('Maximiliano Alexander & Jo').fontSize).toBe(73);
     });
   });
 
