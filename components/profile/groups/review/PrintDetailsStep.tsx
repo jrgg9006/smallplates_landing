@@ -98,9 +98,10 @@ export function PrintDetailsStep({
 
   return (
     <div className="w-full">
-      {/* Intro — left-aligned to the page gutter, matching the Recipes step, and
-          sitting directly under the main step bar, above the sub-step indicator. */}
-      <p className="type-body-small mb-6 max-w-4xl text-pretty">
+      {/* Intro — left-aligned to the page gutter and wrapping at the same right
+          edge as the step bar (where "Checkout" ends), so the block stays
+          harmonious instead of breaking early. */}
+      <p className="type-body-small mb-6 text-pretty">
         {subStep === "cover"
           ? "This is your real cover. Edit it and watch it change."
           : "The first spread inside your book — your photo on the left page, your title on the right. The photo is optional."}
