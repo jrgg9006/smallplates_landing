@@ -6,18 +6,8 @@ import {
 
 describe('cover layout', () => {
   describe('titleFontSize', () => {
-    it('returns the largest size for short names', () => {
-      expect(titleFontSize(5)).toBe(80);
-      expect(titleFontSize(16)).toBe(80);
-    });
-    it('steps down gently for medium names', () => {
-      expect(titleFontSize(17)).toBe(72);
-      expect(titleFontSize(24)).toBe(72);
-    });
-    it('holds a high 64px floor for long names (they wrap, not shrink)', () => {
-      expect(titleFontSize(25)).toBe(64);
-      expect(titleFontSize(40)).toBe(64);
-      expect(titleFontSize(80)).toBe(64);
+    it('returns one fixed size — names wrap, never shrink', () => {
+      expect(titleFontSize()).toBe(80);
     });
   });
 
@@ -34,10 +24,9 @@ describe('cover layout', () => {
       expect(r.part1).toBe('Richi');
       expect(r.part2).toBe('');
     });
-    it('sizes by the longer part', () => {
-      // longest part "Maximiliano" = 11 -> 80; "Maximiliano Alexander" = 21 -> 72
-      expect(splitCoupleName('Maximiliano & Jo').fontSize).toBe(80);
-      expect(splitCoupleName('Maximiliano Alexander & Jo').fontSize).toBe(72);
+    it('uses the fixed cover font size regardless of length', () => {
+      expect(splitCoupleName('Ana & David').fontSize).toBe(80);
+      expect(splitCoupleName('Maximiliano Alexander & Jo').fontSize).toBe(80);
     });
   });
 
