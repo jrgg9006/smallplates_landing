@@ -36,8 +36,12 @@ leaving weddings/bridal showers byte-for-byte identical to v16.
    the codebase (`lib/email/invitation-templates.ts`, `BookReviewFlow.tsx`):
    `isWedding = !occasion || occasion === 'wedding' || occasion === 'bridal_shower'`.
 4. **Logic location:** in the `.jsx` (Option A). The only `fetch-book.js` change is
-   exposing `occasion` in the JSON. Message strings live in a `CONFIG` block at the
-   top of v17 for easy editing.
+   exposing `occasion` in the JSON.
+5. **Page 11 styling:** two pre-styled letter frames live on page 11 of the template
+   (`{{INTRO_WEDDING}}` and `{{INTRO_GENERIC}}`), each fully hand-styled in InDesign
+   (including the bold closing line). The script **deletes the frame that does not
+   apply** rather than rewriting text — this preserves all paragraph/character
+   styling. The neutral copy therefore lives in the template, not in the `.jsx`.
 
 ## Architecture / data flow
 
@@ -63,23 +67,26 @@ set in the cover editor is already available — no new field needed.
 
 ### 2. InDesign master template (manual, done by Ricardo)
 - Page 3: add script label `{{TITLE_NAME}}` to the title text frame.
-- Page 11: add script label `{{INTRO_MESSAGE}}` to the letter text frame.
-- Without these labels v17 cannot locate the frames; behavior falls back to
-  leaving the page as-is (no crash).
+- Page 11: keep the current letter frame, label it `{{INTRO_WEDDING}}`. Duplicate it
+  in place, replace its text with the neutral copy (section 4), re-apply the same
+  paragraph styling (bold closing line), and label the duplicate `{{INTRO_GENERIC}}`.
+  The two frames overlap; only one survives generation.
+- Without these labels v17 leaves the page(s) as-is (no crash), matching the existing
+  `{{QR_REPURCHASE}}` "skip if not found" pattern.
 
 ### 3. `scripts/indesign/generate-book_v17.jsx` (new, copy of v16 + logic)
 - Header/version bumped to v1.15.0 / v17 with a changelog entry.
-- New `CONFIG` entries:
-  - `titleNameLabel: "{{TITLE_NAME}}"`, `introMessageLabel: "{{INTRO_MESSAGE}}"`.
-  - `introMessages: { wedding: "<current letter>", generic: "<neutral letter>" }`.
-- New step in `personalizeFixedPages` (or a dedicated function called from main):
-  - **Page 3:** if `partner_first_name` is empty/whitespace, set the
-    `{{TITLE_NAME}}` frame contents to `couple_display_name` (clears the styled
-    ampersand naturally). If a partner exists, do nothing (v16 placeholder
-    replacement already handles it).
-  - **Page 11:** compute `isWedding`; set the `{{INTRO_MESSAGE}}` frame contents to
-    the matching message. (For weddings this reproduces the existing text, so the
-    output is identical to v16.)
+- New `CONFIG` entries: `titleNameLabel: "{{TITLE_NAME}}"`,
+  `introWeddingLabel: "{{INTRO_WEDDING}}"`, `introGenericLabel: "{{INTRO_GENERIC}}"`.
+- Two new functions, called from `main()` right after `personalizeFixedPages`:
+  - **`applyTitleName(doc, bookData)` (page 3):** if `partner_first_name` is
+    empty/whitespace, set the `{{TITLE_NAME}}` frame contents to
+    `couple_display_name` (clears the styled ampersand naturally). If a partner
+    exists, do nothing (v16 placeholder replacement already handles it).
+  - **`applyIntroMessage(doc, bookData)` (page 11):** compute `isWedding`; delete the
+    frame that does not apply (`{{INTRO_GENERIC}}` for weddings, `{{INTRO_WEDDING}}`
+    otherwise). For weddings this leaves the wedding letter untouched, so output is
+    identical to v16.
 - All other steps (recipes, fillers, contributors, QR, couple image, TOC, overflow)
   unchanged.
 
