@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { LiveCover } from "./cover/LiveCover";
+import { LiveCoverImage } from "./cover/LiveCoverImage";
 import { InteriorSpread } from "./cover/InteriorSpread";
 import { CoverFieldInput } from "./cover/CoverFieldInput";
 import { COVER_LINE_MAX, COVER_NAME_MAX, DEFAULT_COVER_LINE } from "@/lib/cover/layout";
@@ -36,7 +36,6 @@ export function PrintDetailsStep({
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [focused, setFocused] = useState<"eyebrow" | "name" | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = async (file: File) => {
@@ -112,8 +111,6 @@ export function PrintDetailsStep({
             placeholder={DEFAULT_COVER_LINE}
             uppercase
             onChange={onCoverLineChange}
-            onFocus={() => setFocused("eyebrow")}
-            onBlur={() => setFocused(null)}
           />
           <CoverFieldInput
             label="The name"
@@ -126,14 +123,12 @@ export function PrintDetailsStep({
               ) : null
             }
             onChange={onNameChange}
-            onFocus={() => setFocused("name")}
-            onBlur={() => setFocused(null)}
             autoFocus
           />
         </div>
 
         <div className="flex justify-center sm:sticky sm:top-6">
-          <LiveCover coverLine={coverLine} name={name} focusedField={focused} width={360} />
+          <LiveCoverImage coverLine={coverLine} name={name} width={360} />
         </div>
       </div>
 

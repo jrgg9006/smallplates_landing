@@ -11,8 +11,8 @@ interface CoverFieldInputProps {
   uppercase?: boolean;
   tip?: React.ReactNode;
   onChange: (v: string) => void;
-  onFocus: () => void;
-  onBlur: () => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
   autoFocus?: boolean;
 }
 
