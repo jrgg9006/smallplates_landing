@@ -1,5 +1,12 @@
 # Occasion-aware book generator (InDesign v17) Implementation Plan
 
+> ⚠️ **SUPERSEDED (2026-06-15).** Shipped a far simpler solution: one universal,
+> occasion-neutral page-11 letter + a single `<<couple_display_name>>` placeholder on
+> page 3 — all in the InDesign master template, with NO code changes. `v17` and
+> `fetch-book_v2` were built, reviewed, then removed. `generate-book_v16.jsx` is the
+> production script. See the spec's SUPERSEDED note for details. This plan is kept for
+> history only.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Make the printed book adapt page 3 (title) and page 11 (letter) to the group's occasion, leaving weddings/bridal showers byte-for-byte identical to v16 and recipes untouched.

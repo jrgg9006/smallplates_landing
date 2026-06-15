@@ -1,8 +1,26 @@
 # Occasion-aware book generator (InDesign v17)
 
 **Date:** 2026-06-14
-**Status:** Approved design → implementation
+**Status:** ⚠️ SUPERSEDED (2026-06-15) — see note below
 **Branch context:** `feature/cover-editor-wysiwyg`
+
+> **SUPERSEDED — simpler outcome shipped.** While editing the template, we found the
+> wedding vs non-wedding letter differs in only two phrases, so Ricardo chose a single
+> universal letter for every occasion. That collapsed the whole occasion mechanism:
+> **no `v17`, no `fetch-book_v2`, no `occasion` field, no labels.** The original
+> `generate-book_v16.jsx` already handles everything. The only changes are in the
+> InDesign master template (not in git):
+> - **Page 3 title:** replaced `<<couple_first_name>> & <<partner_first_name>>` (+ the
+>   golden ampersand) with a single `<<couple_display_name>>` placeholder, merged the
+>   "A Small Plates Cookbook" subtitle into the same auto-sizing, centered frame so a
+>   long name wraps and pushes the subtitle down. `couple_display_name` already
+>   resolves to `print_couple_name` (the cover-editor book name) first.
+> - **Page 11 letter:** edited two phrases to be occasion-neutral — "at the wedding" →
+>   "on the big days", and "The wedding was one night." → "The day ends." One letter,
+>   used for all books.
+>
+> The v17/fetch-book_v2 code was created, reviewed, then removed in git history. The
+> design below is kept as a record of the path we explored.
 
 ## Problem
 
