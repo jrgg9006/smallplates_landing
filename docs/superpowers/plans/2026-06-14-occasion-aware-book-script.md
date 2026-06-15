@@ -460,7 +460,7 @@ the correct frames. (Optional sanity: the v17 report alert will print
 
 - [ ] **Step 1: Regenerate a wedding JSON and confirm parity with v16**
 
-Run `fetch-book.js` for a wedding group (occasion `wedding` or `bridal_shower`, or a
+Run `fetch-book_v2.js` for a wedding group (occasion `wedding` or `bridal_shower`, or a
 legacy group with null occasion). Open the master template, run
 `generate-book_v17.jsx`. Verify:
 - Page 3 shows both names + the golden ampersand (unchanged).
@@ -471,7 +471,7 @@ Expected: visually identical to a v16 run. Capture a screenshot of pages 3 and 1
 
 - [ ] **Step 2: Regenerate a non-wedding JSON and confirm new behavior**
 
-Run `fetch-book.js` for a birthday/graduation group (single name, no partner, occasion
+Run `fetch-book_v2.js` for a birthday/graduation group (single name, no partner, occasion
 not wedding/bridal). Run `generate-book_v17.jsx`. Verify:
 - Page 3 shows the single name / book title, no ampersand.
 - Page 11 shows the neutral letter, with its bold closing line intact (proves the
