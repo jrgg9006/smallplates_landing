@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
-import { splitCoupleName, DEFAULT_COVER_LINE } from '@/lib/cover/layout';
+import { splitCoupleName, DEFAULT_COVER_LINE, COVER_BG_COLOR } from '@/lib/cover/layout';
 
 export const runtime = 'nodejs';
 
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
           display: 'flex',
           position: 'relative',
           overflow: 'hidden',
-          backgroundColor: '#f0ece3',
+          backgroundColor: COVER_BG_COLOR,
         }}
       >
         {/* Paella — independently positioned so we can move it freely */}

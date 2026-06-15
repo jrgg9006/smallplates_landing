@@ -6,6 +6,15 @@
 /** Default eyebrow line when the owner has not set a custom one. */
 export const DEFAULT_COVER_LINE = 'RECIPES FROM THE PEOPLE WHO LOVE';
 
+/**
+ * Cover paper background for the WEB preview.
+ * Reason: the printed book comes out lighter and cooler ("bone") than the warm
+ * cream the file color (#f0ece3) shows on screen. The preview should predict the
+ * physical book, so we intentionally render a lighter, less-yellow tone here.
+ * This drives only the web preview — the InDesign file / print is untouched.
+ */
+export const COVER_BG_COLOR = '#f4f1ea';
+
 /** Max characters for the editable cover fields. */
 export const COVER_LINE_MAX = 40;
 export const COVER_NAME_MAX = 40;
