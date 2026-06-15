@@ -73,7 +73,8 @@ export function LiveCover({ coverLine, name, focusedField, width = 360 }: LiveCo
         <div
           style={{
             position: "absolute",
-            top: 237,
+            // Reason: 239 + 6px padding-top = 245, matching the Satori name top.
+            top: 239,
             left: 6,
             width: COVER_W - 12,
             display: "flex",
