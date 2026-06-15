@@ -46,7 +46,18 @@ export function LiveCover({ coverLine, name, focusedField, width = 360 }: LiveCo
           alt=""
           width={1170}
           height={1170}
-          style={{ position: "absolute", top: 110, left: (COVER_W - 1170) / 2 }}
+          // Reason: explicit px size + maxWidth:none so Tailwind's preflight
+          // (`img { max-width: 100%; height: auto }`) can't clamp the 1170px
+          // paella down to the 900px parent — that shrinkage is what made the
+          // live preview diverge from the Satori/print cover.
+          style={{
+            position: "absolute",
+            top: 110,
+            left: (COVER_W - 1170) / 2,
+            width: 1170,
+            height: 1170,
+            maxWidth: "none",
+          }}
         />
 
         {/* Eyebrow */}
@@ -93,7 +104,13 @@ export function LiveCover({ coverLine, name, focusedField, width = 360 }: LiveCo
           {hasAmp && (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={AMP} alt="&" width={ampSize} height={ampSize} style={{ margin: "0 6px" }} />
+              <img
+                src={AMP}
+                alt="&"
+                width={ampSize}
+                height={ampSize}
+                style={{ width: ampSize, height: ampSize, maxWidth: "none", margin: "0 6px" }}
+              />
               <span style={{ fontSize }}>{part2}</span>
             </>
           )}
@@ -110,7 +127,13 @@ export function LiveCover({ coverLine, name, focusedField, width = 360 }: LiveCo
           }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={LOGO} alt="Small Plates & Co." width={168} height={95} style={{ opacity: 0.6 }} />
+          <img
+            src={LOGO}
+            alt="Small Plates & Co."
+            width={168}
+            height={95}
+            style={{ width: 168, height: 95, maxWidth: "none", opacity: 0.6 }}
+          />
         </div>
       </div>
     </div>
