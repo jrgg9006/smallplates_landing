@@ -29,7 +29,10 @@ export function BookPreviewPanel({ group, recipeCount, onPreviewClick }: BookPre
     group.couple_display_name ||
     group.name ||
     "";
-  const coverUrl = `/api/v1/admin/pdf-delivery/preview-cover?group_id=${group.id}&v=${encodeURIComponent(coverTitle)}`;
+  // Reason: bust the cache on BOTH the title and the eyebrow so editing either
+  // refreshes the Satori cover image.
+  const coverKey = `${coverTitle}|${group.print_cover_line || ""}`;
+  const coverUrl = `/api/v1/admin/pdf-delivery/preview-cover?group_id=${group.id}&v=${encodeURIComponent(coverKey)}`;
 
   return (
     <div className="flex items-start justify-center pt-2">
