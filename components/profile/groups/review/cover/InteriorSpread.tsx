@@ -60,10 +60,11 @@ export function InteriorSpread({ name, imageUrl, uploading, onUploadClick }: Int
         )}
       </div>
 
-      {/* Right page — name (Minion Regular) + subtitle (Minion Italic), centered */}
+      {/* Right page — name (Minion Regular) + subtitle (Minion Italic), centered.
+          Sizes kept small to match the printed page's proportions. */}
       <div className="flex flex-col items-center justify-center bg-[#FAF7F2] px-6 text-center">
         <div
-          className="flex items-center gap-1.5 text-xl text-brand-charcoal sm:text-2xl"
+          className="flex items-center gap-1 text-sm text-brand-charcoal sm:text-base"
           style={{ fontFamily: "'MinionPro-Regular', serif" }}
         >
           <span>{part1}</span>
@@ -80,7 +81,7 @@ export function InteriorSpread({ name, imageUrl, uploading, onUploadClick }: Int
           )}
         </div>
         <p
-          className="mt-2.5 text-xs text-[hsl(var(--brand-warm-gray))] sm:text-sm"
+          className="mt-1.5 text-[10px] text-[hsl(var(--brand-warm-gray))] sm:text-xs"
           style={{ fontFamily: "'MinionPro-Italic', serif" }}
         >
           A Small Plates Cookbook

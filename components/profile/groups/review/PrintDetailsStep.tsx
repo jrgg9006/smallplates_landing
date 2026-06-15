@@ -22,9 +22,9 @@ interface PrintDetailsStepProps {
 }
 
 // Reason: Step 1 of the book-review flow is a two-screen micro-flow — "Cover"
-// then "Inside" — mirroring the physical book (outside, then open it). Each
-// surface gets its own focused, scroll-free screen. Print details are saved once,
-// on the final "Looks good, continue".
+// then "Inside" — mirroring the physical book (outside, then open it). Print
+// details (name + cover line) are saved on BOTH "Next" and the final continue so
+// edits propagate everywhere (dashboard cover, etc.) as soon as you move on.
 export function PrintDetailsStep({
   groupId,
   name,
@@ -76,8 +76,10 @@ export function PrintDetailsStep({
     }
   };
 
-  const handleContinue = async () => {
-    if (!name.trim()) return;
+  // Reason: persist name + cover line. Called on "Next" and the final continue so
+  // the printed cover stays in sync everywhere the moment the user moves forward.
+  const savePrintDetails = async (): Promise<boolean> => {
+    if (!name.trim()) return false;
     setSaving(true);
     setError(null);
     try {
@@ -91,12 +93,21 @@ export function PrintDetailsStep({
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Failed to save");
-      onContinue();
+      return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
+      return false;
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleNext = async () => {
+    if (await savePrintDetails()) setSubStep("inside");
+  };
+
+  const handleContinue = async () => {
+    if (await savePrintDetails()) onContinue();
   };
 
   return (
@@ -108,11 +119,11 @@ export function PrintDetailsStep({
       {subStep === "cover" ? (
         /* ── Screen 1: the cover ── */
         <div className="mx-auto max-w-4xl">
-          <p className="type-body-small mb-8 text-center text-pretty">
+          <p className="type-body-small mb-8 max-w-xl text-pretty">
             This is your real cover. Edit it and watch it change.
           </p>
 
-          <div className="grid gap-x-12 gap-y-8 sm:grid-cols-[1fr_360px] sm:items-center">
+          <div className="grid gap-x-12 gap-y-8 sm:grid-cols-[1fr_320px] sm:items-center">
             <div className="flex w-full max-w-lg flex-col gap-7">
               <CoverFieldInput
                 label="The line above"
@@ -134,26 +145,29 @@ export function PrintDetailsStep({
             </div>
 
             <div className="flex justify-center">
-              <LiveCoverImage coverLine={coverLine} name={name} width={360} />
+              <LiveCoverImage coverLine={coverLine} name={name} width={320} />
             </div>
           </div>
 
-          <div className="mt-10 flex justify-center sm:justify-end">
+          {error && <p className="mt-6 text-center text-sm text-red-500">{error}</p>}
+
+          <div className="mt-10 flex items-center justify-center gap-5 sm:justify-end">
+            <span className="type-caption text-[hsl(var(--brand-warm-gray))]/70">Step 1 of 2</span>
             <button
               type="button"
-              onClick={() => setSubStep("inside")}
-              disabled={!name.trim()}
+              onClick={handleNext}
+              disabled={!name.trim() || saving}
               className="btn btn-md btn-dark inline-flex items-center gap-2"
             >
-              Next: the first page
-              <ArrowRight className="h-4 w-4" />
+              {saving ? "Saving…" : "Next: the first page"}
+              {!saving && <ArrowRight className="h-4 w-4" />}
             </button>
           </div>
         </div>
       ) : (
         /* ── Screen 2: the first page inside ── */
         <div className="mx-auto max-w-3xl">
-          <p className="type-body-small mb-8 text-center text-pretty">
+          <p className="type-body-small mb-8 max-w-xl text-pretty">
             Add a photo for the first page inside the book. Optional — it never goes on the cover.
           </p>
 
@@ -189,19 +203,22 @@ export function PrintDetailsStep({
             <button
               type="button"
               onClick={() => setSubStep("cover")}
-              className="inline-flex items-center gap-1.5 text-sm text-[hsl(var(--brand-warm-gray))] transition-colors hover:text-brand-charcoal"
+              className="inline-flex items-center gap-2 rounded-full border border-black/15 px-5 py-2.5 text-sm font-medium text-brand-charcoal transition-colors hover:border-brand-charcoal/40 hover:bg-black/[0.03]"
             >
               <ArrowLeft className="h-4 w-4" />
               Cover
             </button>
-            <button
-              type="button"
-              onClick={handleContinue}
-              disabled={!name.trim() || saving}
-              className="btn btn-md btn-dark"
-            >
-              {saving ? "Saving…" : "Looks good, continue"}
-            </button>
+            <div className="flex items-center gap-5">
+              <span className="type-caption text-[hsl(var(--brand-warm-gray))]/70">Step 2 of 2</span>
+              <button
+                type="button"
+                onClick={handleContinue}
+                disabled={!name.trim() || saving}
+                className="btn btn-md btn-dark"
+              >
+                {saving ? "Saving…" : "Looks good, continue"}
+              </button>
+            </div>
           </div>
         </div>
       )}
