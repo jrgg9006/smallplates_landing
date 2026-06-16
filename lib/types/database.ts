@@ -719,6 +719,42 @@ export interface Database {
           agent_metadata?: Record<string, unknown> | null;
         };
       };
+      recipe_annex_images: {
+        Row: {
+          id: string;
+          recipe_id: string;
+          group_id: string;
+          source_url: string;
+          original_url: string | null;
+          print_url: string | null;
+          upscale_status: 'pending' | 'processing' | 'ready' | 'error' | null;
+          image_dimensions: Record<string, unknown> | null;
+          position: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          recipe_id: string;
+          group_id: string;
+          source_url: string;
+          original_url?: string | null;
+          print_url?: string | null;
+          upscale_status?: 'pending' | 'processing' | 'ready' | 'error' | null;
+          image_dimensions?: Record<string, unknown> | null;
+          position?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          original_url?: string | null;
+          print_url?: string | null;
+          upscale_status?: 'pending' | 'processing' | 'ready' | 'error' | null;
+          image_dimensions?: Record<string, unknown> | null;
+          position?: number;
+          updated_at?: string;
+        };
+      };
       newsletter_subscribers: {
         Row: {
           id: string;
@@ -922,6 +958,10 @@ export type RecipeEditHistoryInsert = Database['public']['Tables']['recipe_edit_
 
 export type RecipePrintReady = Database['public']['Tables']['recipe_print_ready']['Row'];
 export type RecipePrintReadyUpdate = Database['public']['Tables']['recipe_print_ready']['Update'];
+
+export type RecipeAnnexImage = Database['public']['Tables']['recipe_annex_images']['Row'];
+export type RecipeAnnexImageInsert = Database['public']['Tables']['recipe_annex_images']['Insert'];
+export type RecipeAnnexImageUpdate = Database['public']['Tables']['recipe_annex_images']['Update'];
 
 // Newsletter convenience types
 export type NewsletterSubscriber = Database['public']['Tables']['newsletter_subscribers']['Row'];
