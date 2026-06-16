@@ -363,6 +363,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       }
       setPrintReady(json.print_ready);
       setViewState('cleaned');
+      setShowOriginal(false);
 
       // Audit trail — best-effort: a failure here must not block the edit itself.
       // Reason: only log GUEST changes here. Text edits are already logged by the
