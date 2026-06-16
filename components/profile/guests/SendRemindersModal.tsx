@@ -106,12 +106,13 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
     if (data?.email_reminder_message) {
       setBody(data.email_reminder_message);
     }
-    // Reason: same fallback the /remind route uses to build the signature, so
-    // the preview's "Thanks, X" matches the real email exactly.
+    // Reason: same source the /remind route uses (Book Name first), so the
+    // preview's "From"/signature match the real email exactly. First names are
+    // only a fallback for legacy rows with no name.
     if (data) {
-      const names = [data.couple_first_name, data.partner_first_name]
-        .filter(Boolean)
-        .join(" & ") || data.name || "The Couple";
+      const names = data.name
+        || [data.couple_first_name, data.partner_first_name].filter(Boolean).join(" & ")
+        || "The Couple";
       setCoupleName(names);
 
       // Reason: mirror invitationEmail2()'s occasion-aware subject so the

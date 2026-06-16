@@ -108,9 +108,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Group not found' }, { status: 404 });
     }
 
-    const coupleNames = [group.couple_first_name, group.partner_first_name]
-      .filter(Boolean)
-      .join(' & ') || group.name || 'The Couple';
+    // Reason: the Book Name (groups.name) is the single source of truth, same
+    // as the invite routes. First names are only a fallback for legacy rows
+    // that never set a name. Keeps the reminder consistent with every other
+    // email (invitation, weekly, delivery) instead of showing "Ana & Rich"
+    // when the rest of the product shows the cookbook title.
+    const coupleNames = group.name
+      || [group.couple_first_name, group.partner_first_name].filter(Boolean).join(' & ')
+      || 'The Couple';
 
     // Get collection token
     const { data: creatorProfile } = await supabase
