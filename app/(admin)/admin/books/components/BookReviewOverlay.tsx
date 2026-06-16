@@ -30,6 +30,7 @@ interface ReviewRecipe {
   } | null;
   book_review_status: string;
   book_review_notes: string | null;
+  annex_source_urls?: string[];
 }
 
 interface BookReviewOverlayProps {
@@ -71,6 +72,8 @@ export default function BookReviewOverlay({
   const [notesValue, setNotesValue] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Reason: which source_url is currently being toggled as an "original", to disable its button.
+  const [annexBusy, setAnnexBusy] = useState<string | null>(null);
   const [markingReviewed, setMarkingReviewed] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');
@@ -409,6 +412,37 @@ export default function BookReviewOverlay({
     : (recipe?.image_url ? [recipe.image_url] : []);
   const hasOriginalPhoto = originalFiles.length > 0;
 
+  const toggleAnnex = useCallback(async (sourceUrl: string) => {
+    if (!recipe) return;
+    const isSelected = (recipe.annex_source_urls ?? []).includes(sourceUrl);
+    setAnnexBusy(sourceUrl);
+    setError(null);
+    try {
+      const res = await fetch(`/api/v1/admin/books/${groupId}/annex`, {
+        method: isSelected ? 'DELETE' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipe_id: recipe.id, source_url: sourceUrl }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        setError(j.error || 'No se pudo actualizar el original');
+        return;
+      }
+      setLocalRecipes((prev) =>
+        prev.map((r) => {
+          if (r.id !== recipe.id) return r;
+          const current = r.annex_source_urls ?? [];
+          const next = isSelected
+            ? current.filter((u) => u !== sourceUrl)
+            : [...current, sourceUrl];
+          return { ...r, annex_source_urls: next };
+        })
+      );
+    } finally {
+      setAnnexBusy(null);
+    }
+  }, [recipe, groupId]);
+
   return (
     <div className="fixed inset-0 z-[100] bg-gray-900 flex flex-col">
       {/* Top bar */}
@@ -590,6 +624,23 @@ export default function BookReviewOverlay({
                               className="w-full rounded border border-gray-200 hover:border-gray-400 transition-colors"
                             />
                           </a>
+                          {(() => {
+                            const selected = (recipe?.annex_source_urls ?? []).includes(url);
+                            return (
+                              <button
+                                type="button"
+                                onClick={() => toggleAnnex(url)}
+                                disabled={annexBusy === url}
+                                className={`mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border transition-colors disabled:opacity-50 ${
+                                  selected
+                                    ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                                    : 'bg-white text-gray-700 border-gray-300 hover:border-emerald-500'
+                                }`}
+                              >
+                                {selected ? '✓ Original incluido' : 'Incluir como original'}
+                              </button>
+                            );
+                          })()}
                         </div>
                       );
                     })}
