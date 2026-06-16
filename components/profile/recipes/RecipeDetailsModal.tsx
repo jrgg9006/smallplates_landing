@@ -593,6 +593,12 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     return `. Active in Groups: ${recipeGroups.map(g => g.group_name).join(', ')}`;
   };
 
+  const loadingBlock = (
+    <div role="status" className="flex-1 flex items-center justify-center py-16">
+      <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-200 border-t-[hsl(var(--brand-honey))]" />
+    </div>
+  );
+
   const processingBlock = (
     <div role="status" className="flex-1 flex flex-col items-center justify-center text-center px-6 py-16">
       <div className="animate-spin rounded-full h-7 w-7 border-2 border-gray-200 border-t-[hsl(var(--brand-honey))] mb-5" />
@@ -606,7 +612,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   // Content component for desktop - book-style layout
   const desktopContent = (
     <div className="flex-1 flex flex-col min-w-0">
-      {viewState === 'processing' ? processingBlock : (
+      {!cleanLoaded ? loadingBlock : viewState === 'processing' ? processingBlock : (
       <>
       {/* Guest name — small caps */}
       <div className="flex items-start justify-between gap-4 mb-1">
@@ -628,6 +634,16 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       <h2 className="font-serif text-3xl lg:text-4xl font-semibold text-brand-charcoal leading-tight mb-4">
         {displayName || 'Untitled Recipe'}
       </h2>
+
+      {/* Fallback banner — explains why the raw original is shown */}
+      {viewState === 'fallback' && !isEditMode && (
+        <div className="mb-4 rounded-xl border border-[#F0DCC8] bg-[#FBEFE6] px-4 py-3">
+          <p className="text-[13px] font-medium text-[#8A5A2B]">Still cleaning this one up</p>
+          <p className="text-[13px] leading-relaxed text-[#8A5A2B]">
+            For now you&apos;re looking at what was sent. Go ahead and edit it — we&apos;ll handle the formatting before it&apos;s printed.
+          </p>
+        </div>
+      )}
 
       {/* Cleaned-state label + View original toggle */}
       {inCleaned && !isEditMode && (
@@ -753,7 +769,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   // Content component for mobile - stacked layout
   const mobileContent = (
     <div className="flex-1 overflow-y-auto flex flex-col">
-      {viewState === 'processing' ? processingBlock : (
+      {!cleanLoaded ? loadingBlock : viewState === 'processing' ? processingBlock : (
       <>
       {/* Guest name — small caps */}
       <div className="flex items-start justify-between gap-3 mb-1">
@@ -775,6 +791,16 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       <h2 className="font-serif text-3xl font-semibold text-brand-charcoal leading-tight mb-4">
         {displayName || 'Untitled Recipe'}
       </h2>
+
+      {/* Fallback banner — explains why the raw original is shown */}
+      {viewState === 'fallback' && !isEditMode && (
+        <div className="mb-4 rounded-xl border border-[#F0DCC8] bg-[#FBEFE6] px-4 py-3">
+          <p className="text-[13px] font-medium text-[#8A5A2B]">Still cleaning this one up</p>
+          <p className="text-[13px] leading-relaxed text-[#8A5A2B]">
+            For now you&apos;re looking at what was sent. Go ahead and edit it — we&apos;ll handle the formatting before it&apos;s printed.
+          </p>
+        </div>
+      )}
 
       {/* Cleaned-state label + View original toggle */}
       {inCleaned && !isEditMode && (
