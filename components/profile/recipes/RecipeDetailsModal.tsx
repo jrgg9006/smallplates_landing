@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Edit, Download, ChevronDown, Plus } from "lucide-react";
+import { Edit, Download, ChevronDown, Plus, Info } from "lucide-react";
 import Image from "next/image";
 import { updateRecipe, changeRecipeGuest, logRecipeEdit } from "@/lib/supabase/recipes";
 import { getRecipeViewState, type RecipeViewState } from "@/lib/recipes/cleanVersionState";
@@ -75,6 +75,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   const [viewState, setViewState] = useState<RecipeViewState>('processing');
   const [cleanLoaded, setCleanLoaded] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
+  const [showCleaningInfo, setShowCleaningInfo] = useState(false);
 
   // Update local recipe when prop changes
   useEffect(() => {
@@ -593,7 +594,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   };
 
   const processingBlock = (
-    <div className="flex-1 flex flex-col items-center justify-center text-center px-6 py-16">
+    <div role="status" className="flex-1 flex flex-col items-center justify-center text-center px-6 py-16">
       <div className="animate-spin rounded-full h-7 w-7 border-2 border-gray-200 border-t-[hsl(var(--brand-honey))] mb-5" />
       <h3 className="font-serif text-2xl text-brand-charcoal mb-2">Getting your recipe ready</h3>
       <p className="text-sm text-gray-500 max-w-sm leading-relaxed">
@@ -1027,7 +1028,26 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         <SheetContent side="bottom" className="!h-[85vh] !max-h-[85vh] rounded-t-[20px] flex flex-col overflow-hidden p-0">
           <div className="px-6 pt-6 pb-6 flex flex-col h-full overflow-hidden">
             <SheetHeader className="px-0 flex-shrink-0 mb-4">
-              <SheetTitle className="type-modal-title">Recipe Details</SheetTitle>
+              <SheetTitle className="type-modal-title">
+                <span className="relative inline-flex items-center gap-2">
+                  <span>Recipe Details</span>
+                  <button
+                    type="button"
+                    aria-label="About the clean-up"
+                    onClick={() => setShowCleaningInfo((v) => !v)}
+                    className="text-gray-300 hover:text-gray-500 transition-colors"
+                  >
+                    <Info className="h-4 w-4" />
+                  </button>
+                  {showCleaningInfo && (
+                    <span className="absolute left-0 top-7 z-20 block w-72 rounded-xl border border-gray-200 bg-white p-3 text-left text-xs font-normal leading-relaxed text-gray-600 shadow-xl">
+                      Every recipe runs through a quick clean-up that fixes spelling and sets the
+                      formatting, so every page in the book reads the same way. Want to see exactly
+                      what was sent? Open <span className="font-medium">View original</span>.
+                    </span>
+                  )}
+                </span>
+              </SheetTitle>
             </SheetHeader>
             
             <div className="flex-1 overflow-hidden flex flex-col overflow-y-auto">
@@ -1077,7 +1097,26 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl w-[95vw] h-[90vh] max-h-[90vh] flex flex-col overflow-hidden p-0 gap-0 bg-white">
         <DialogHeader className="flex-shrink-0 px-8 pt-6 pb-2">
-          <DialogTitle className="type-modal-title text-gray-900">Recipe Details</DialogTitle>
+          <DialogTitle className="type-modal-title text-gray-900">
+            <span className="relative inline-flex items-center gap-2">
+              <span>Recipe Details</span>
+              <button
+                type="button"
+                aria-label="About the clean-up"
+                onClick={() => setShowCleaningInfo((v) => !v)}
+                className="text-gray-300 hover:text-gray-500 transition-colors"
+              >
+                <Info className="h-4 w-4" />
+              </button>
+              {showCleaningInfo && (
+                <span className="absolute left-0 top-7 z-20 block w-72 rounded-xl border border-gray-200 bg-white p-3 text-left text-xs font-normal leading-relaxed text-gray-600 shadow-xl">
+                  Every recipe runs through a quick clean-up that fixes spelling and sets the
+                  formatting, so every page in the book reads the same way. Want to see exactly
+                  what was sent? Open <span className="font-medium">View original</span>.
+                </span>
+              )}
+            </span>
+          </DialogTitle>
         </DialogHeader>
         
         <div className="flex-1 flex flex-col pl-8 pr-8 pt-8 pb-6 min-w-0 overflow-y-auto">
