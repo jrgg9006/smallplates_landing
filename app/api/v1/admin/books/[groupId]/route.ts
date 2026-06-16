@@ -155,6 +155,19 @@ export async function GET(
         };
       });
 
+    // Annex selections (Originals) for this group, grouped by recipe.
+    const { data: annexRows } = await supabase
+      .from('recipe_annex_images')
+      .select('recipe_id, source_url')
+      .eq('group_id', groupId);
+
+    const annexByRecipe = new Map<string, string[]>();
+    for (const row of annexRows ?? []) {
+      const list = annexByRecipe.get(row.recipe_id) ?? [];
+      list.push(row.source_url);
+      annexByRecipe.set(row.recipe_id, list);
+    }
+
     const formattedRecipes = (recipes || []).map(r => {
       const printReady = Array.isArray(r.recipe_print_ready)
         ? r.recipe_print_ready[0] || null
@@ -194,6 +207,7 @@ export async function GET(
         })(),
         book_review_status: (r as Record<string, unknown>).book_review_status as string || 'pending',
         book_review_notes: (r as Record<string, unknown>).book_review_notes as string | null || null,
+        annex_source_urls: annexByRecipe.get(r.id) ?? [],
       };
     });
 
