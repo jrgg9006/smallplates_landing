@@ -568,7 +568,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     return isPlaceholderIngredients || isPlaceholderInstructions;
   };
 
-  const showProcessingIndicator = isRecipeProcessing();
+  // Reason: in cleaned state the clean version exists, so never show the
+  // image-OCR "processing" spinner even if the original still holds placeholder text.
+  const showProcessingIndicator = isRecipeProcessing() && !inCleaned;
 
   // When a PDF was uploaded, ingredients/instructions keep placeholder text — show a note instead
   const hasPdfPlaceholder =
