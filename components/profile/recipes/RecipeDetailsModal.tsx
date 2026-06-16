@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Edit, Download, ChevronDown, Plus } from "lucide-react";
 import Image from "next/image";
 import { updateRecipe, changeRecipeGuest, logRecipeEdit } from "@/lib/supabase/recipes";
+import { getRecipeViewState, type RecipeViewState } from "@/lib/recipes/cleanVersionState";
 import { getGuests } from "@/lib/supabase/guests";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { getRecipeGroups } from "@/lib/supabase/groupRecipes";
@@ -62,6 +63,18 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   const [showGuestDropdown, setShowGuestDropdown] = useState(false);
   const [showAddGuestModal, setShowAddGuestModal] = useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  // Clean version (recipe_print_ready) state — fetched when the modal opens.
+  type CleanFields = {
+    recipe_name_clean: string;
+    ingredients_clean: string;
+    instructions_clean: string;
+    note_clean: string | null;
+  };
+  const [printReady, setPrintReady] = useState<CleanFields | null>(null);
+  const [viewState, setViewState] = useState<RecipeViewState>('processing');
+  const [cleanLoaded, setCleanLoaded] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
 
   // Update local recipe when prop changes
   useEffect(() => {
@@ -206,6 +219,43 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
 
     loadGroupsAndCheckPermissions();
   }, [localRecipe, isOpen, user]);
+
+  // Reason: the clean version (recipe_print_ready) is the source of truth the user
+  // sees/edits. Fetch it via the server endpoint (RLS-safe). Existence + recipe age
+  // drive which of the three states (cleaned/processing/fallback) we render.
+  useEffect(() => {
+    if (!localRecipe || !isOpen) return;
+    let cancelled = false;
+    setCleanLoaded(false);
+    const load = async () => {
+      try {
+        const res = await fetch(`/api/v1/recipes/${localRecipe.id}/clean`);
+        const json = await res.json();
+        if (cancelled) return;
+        const pr: CleanFields | null = res.ok ? json.print_ready : null;
+        setPrintReady(pr);
+        setViewState(getRecipeViewState({
+          hasPrintReady: !!pr,
+          recipeCreatedAt: localRecipe.created_at,
+          now: Date.now(),
+        }));
+      } catch {
+        if (!cancelled) {
+          setPrintReady(null);
+          setViewState(getRecipeViewState({
+            hasPrintReady: false,
+            recipeCreatedAt: localRecipe.created_at,
+            now: Date.now(),
+          }));
+        }
+      } finally {
+        if (!cancelled) setCleanLoaded(true);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localRecipe?.id, isOpen]);
 
   const handleCancel = () => {
     setIsEditMode(false);
