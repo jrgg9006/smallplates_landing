@@ -50,16 +50,30 @@ export async function POST(
       );
     }
 
-    // Validate the source_url actually belongs to this recipe and is an image.
+    // Validate the recipe is actually in this group. Reason: guest_recipes.group_id
+    // can be stale when recipes are linked/moved; group_recipes is the source of truth
+    // (same pattern as the books GET route).
+    const { data: membership } = await supabase
+      .from('group_recipes')
+      .select('recipe_id')
+      .eq('group_id', groupId)
+      .eq('recipe_id', recipe_id)
+      .is('removed_at', null)
+      .maybeSingle();
+
+    if (!membership) {
+      return NextResponse.json({ error: 'Recipe not found in this group' }, { status: 404 });
+    }
+
+    // Fetch the recipe's files to validate the source_url belongs to it.
     const { data: recipe, error: recipeError } = await supabase
       .from('guest_recipes')
       .select('id, document_urls, image_url')
       .eq('id', recipe_id)
-      .eq('group_id', groupId)
       .single();
 
     if (recipeError || !recipe) {
-      return NextResponse.json({ error: 'Recipe not found in this group' }, { status: 404 });
+      return NextResponse.json({ error: 'Recipe not found' }, { status: 404 });
     }
 
     const documentUrls = (recipe as { document_urls: string[] | null }).document_urls;
