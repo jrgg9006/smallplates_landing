@@ -722,7 +722,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       <div className="border-t border-gray-200 my-6" />
 
       {/* Two Column Layout — matches print layout */}
-      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
+      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[240px_1fr] gap-6">
         {/* Ingredients */}
         <div>
           <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Ingredients</h3>
@@ -951,7 +951,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       </div>
 
       {/* Two Column Layout — matches print layout */}
-      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
+      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[240px_1fr] gap-6">
         {/* Ingredients */}
         <div className="flex flex-col">
           <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Ingredients</h3>
@@ -1122,7 +1122,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   return (
     <>
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl w-[95vw] h-[90vh] max-h-[90vh] flex flex-col overflow-hidden p-0 gap-0 bg-white">
+      <DialogContent className="max-w-5xl w-[95vw] h-[90vh] max-h-[90vh] flex flex-col overflow-hidden p-0 gap-0 bg-white">
         <DialogHeader className="flex-shrink-0 px-8 pt-6 pb-2">
           <DialogTitle className="type-modal-title text-gray-900">
             <span className="relative inline-flex items-center gap-2">
