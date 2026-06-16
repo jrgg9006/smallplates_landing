@@ -114,14 +114,21 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   // Initialize form state when entering edit mode
   useEffect(() => {
     if (localRecipe && isEditMode) {
-      setRecipeTitle(localRecipe.recipe_name || '');
-      setRecipeIngredients(localRecipe.ingredients || '');
-      setRecipeInstructions(localRecipe.instructions || '');
-      setRecipeNotes(localRecipe.comments || '');
+      if (viewState === 'cleaned' && printReady) {
+        setRecipeTitle(printReady.recipe_name_clean || '');
+        setRecipeIngredients(printReady.ingredients_clean || '');
+        setRecipeInstructions(printReady.instructions_clean || '');
+        setRecipeNotes(printReady.note_clean || '');
+      } else {
+        setRecipeTitle(localRecipe.recipe_name || '');
+        setRecipeIngredients(localRecipe.ingredients || '');
+        setRecipeInstructions(localRecipe.instructions || '');
+        setRecipeNotes(localRecipe.comments || '');
+      }
       setSelectedGuestId(localRecipe.guest_id);
       setError(null);
     }
-  }, [localRecipe, isEditMode]);
+  }, [localRecipe, isEditMode, viewState, printReady]);
 
   // Load guests for the selector when entering edit mode
   useEffect(() => {
@@ -340,24 +347,42 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         }
       }
 
-      const { error: updateError } = await updateRecipe(localRecipe.id, after);
-
-      if (updateError) {
-        setError(updateError);
-        setLoading(false);
-        return;
-      }
-
-      // Flag the print-ready (cleaned) version as stale so Operations shows
-      // a re-clean badge. Best-effort: RLS only lets users touch this column.
-      if (textChanged || guestChanged) {
-        const supabase = (await import('@/lib/supabase/client')).createSupabaseClient();
-        const { error: staleError } = await supabase
-          .from('recipe_print_ready')
-          .update({ needs_regeneration: true })
-          .eq('recipe_id', localRecipe.id);
-        if (staleError) {
-          console.error('Failed to flag print-ready as stale:', staleError);
+      if (viewState === 'cleaned') {
+        // Source of truth = recipe_print_ready. Save via the user-scoped endpoint
+        // (admin client server-side). The original stays untouched.
+        const res = await fetch(`/api/v1/recipes/${localRecipe.id}/clean`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            recipe_name: after.recipe_name,
+            ingredients: after.ingredients,
+            instructions: after.instructions,
+            note: after.comments,
+          }),
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setError(json.error || 'Failed to save');
+          setLoading(false);
+          return;
+        }
+        setPrintReady(json.print_ready);
+      } else {
+        // Fallback (no clean version yet): keep today's behavior — write the original
+        // and flag the print-ready as stale / NEEDS REVIEW.
+        const { error: updateError } = await updateRecipe(localRecipe.id, after);
+        if (updateError) {
+          setError(updateError);
+          setLoading(false);
+          return;
+        }
+        if (textChanged || guestChanged) {
+          const supabase = (await import('@/lib/supabase/client')).createSupabaseClient();
+          const { error: staleError } = await supabase
+            .from('recipe_print_ready')
+            .update({ needs_regeneration: true })
+            .eq('recipe_id', localRecipe.id);
+          if (staleError) console.error('Failed to flag print-ready as stale:', staleError);
         }
       }
 
@@ -388,7 +413,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       // Success! Update local recipe state immediately
       setLocalRecipe({
         ...localRecipe,
-        ...after,
+        ...(viewState === 'cleaned' ? {} : after),
         guest_id: guestChanged ? selectedGuestId : localRecipe.guest_id,
         guests: guestChanged && newGuest
           ? {
@@ -419,6 +444,15 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   if (!localRecipe) return null;
 
   const guest = localRecipe.guests;
+
+  // Reason: cleaned state shows the clean version (source of truth); fallback shows
+  // the original. "View original" temporarily reveals the raw submission in cleaned.
+  const inCleaned = viewState === 'cleaned' && !!printReady;
+  const displayName = inCleaned && !showOriginal ? printReady!.recipe_name_clean : localRecipe.recipe_name;
+  const displayIngredients = inCleaned && !showOriginal ? printReady!.ingredients_clean : localRecipe.ingredients;
+  const displayInstructions = inCleaned && !showOriginal ? printReady!.instructions_clean : localRecipe.instructions;
+  const displayNote = inCleaned && !showOriginal ? printReady!.note_clean : localRecipe.comments;
+
   const guestRealName = guest ? `${guest.first_name} ${guest.last_name || ''}`.trim() : '';
   const guestName = guest
     ? (guest.printed_name ? `${guest.printed_name} (${guestRealName})` : guestRealName)
@@ -589,13 +623,27 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
 
       {/* Recipe title */}
       <h2 className="font-serif text-3xl lg:text-4xl font-semibold text-brand-charcoal leading-tight mb-4">
-        {localRecipe.recipe_name || 'Untitled Recipe'}
+        {displayName || 'Untitled Recipe'}
       </h2>
 
+      {/* Cleaned-state label + View original toggle */}
+      {inCleaned && !isEditMode && (
+        <div className="flex items-center gap-2 mb-3 text-xs text-gray-400">
+          <span>This is the cleaned-up version that goes in your book.</span>
+          <button
+            type="button"
+            onClick={() => setShowOriginal((v) => !v)}
+            className="underline underline-offset-2 hover:text-gray-600 transition-colors"
+          >
+            {showOriginal ? 'View cleaned' : 'View original'}
+          </button>
+        </div>
+      )}
+
       {/* Personal note */}
-      {localRecipe.comments && localRecipe.comments.trim() && (
+      {displayNote && displayNote.trim() && (
         <p className="text-base italic text-gray-500 font-serif mb-6">
-          &ldquo;{localRecipe.comments}&rdquo;
+          &ldquo;{displayNote}&rdquo;
         </p>
       )}
 
@@ -666,9 +714,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
             </div>
           ) : hasPdfPlaceholder ? (
             <p className="text-sm text-gray-400 italic">See the PDF above</p>
-          ) : localRecipe.ingredients && localRecipe.ingredients.trim() ? (
+          ) : displayIngredients && displayIngredients.trim() ? (
             <pre className="whitespace-pre-wrap break-words font-serif text-base text-gray-700 leading-relaxed m-0">
-              {localRecipe.ingredients}
+              {displayIngredients}
             </pre>
           ) : (
             <p className="text-sm text-gray-400 italic">No ingredients provided</p>
@@ -685,9 +733,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
             </div>
           ) : hasPdfPlaceholder ? (
             <p className="text-sm text-gray-400 italic">See the PDF above</p>
-          ) : localRecipe.instructions && localRecipe.instructions.trim() ? (
+          ) : displayInstructions && displayInstructions.trim() ? (
             <pre className="whitespace-pre-wrap break-words font-serif text-base text-gray-700 leading-[1.6] m-0">
-              {localRecipe.instructions}
+              {displayInstructions}
             </pre>
           ) : (
             <p className="text-sm text-gray-400 italic">No instructions provided</p>
@@ -722,13 +770,27 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
 
       {/* Recipe title */}
       <h2 className="font-serif text-3xl font-semibold text-brand-charcoal leading-tight mb-4">
-        {localRecipe.recipe_name || 'Untitled Recipe'}
+        {displayName || 'Untitled Recipe'}
       </h2>
 
+      {/* Cleaned-state label + View original toggle */}
+      {inCleaned && !isEditMode && (
+        <div className="flex items-center gap-2 mb-3 text-xs text-gray-400">
+          <span>This is the cleaned-up version that goes in your book.</span>
+          <button
+            type="button"
+            onClick={() => setShowOriginal((v) => !v)}
+            className="underline underline-offset-2 hover:text-gray-600 transition-colors"
+          >
+            {showOriginal ? 'View cleaned' : 'View original'}
+          </button>
+        </div>
+      )}
+
       {/* Personal note */}
-      {localRecipe.comments && localRecipe.comments.trim() && (
+      {displayNote && displayNote.trim() && (
         <p className="text-base italic text-gray-500 font-serif mb-6">
-          &ldquo;{localRecipe.comments}&rdquo;
+          &ldquo;{displayNote}&rdquo;
         </p>
       )}
 
@@ -799,9 +861,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
             </div>
           ) : hasPdfPlaceholder ? (
             <p className="text-sm text-gray-400 italic">See the PDF above</p>
-          ) : localRecipe.ingredients && localRecipe.ingredients.trim() ? (
+          ) : displayIngredients && displayIngredients.trim() ? (
             <pre className="whitespace-pre-wrap break-words font-serif text-base text-gray-700 leading-relaxed m-0">
-              {localRecipe.ingredients}
+              {displayIngredients}
             </pre>
           ) : (
             <p className="text-sm text-gray-400 italic">No ingredients provided</p>
@@ -818,9 +880,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
             </div>
           ) : hasPdfPlaceholder ? (
             <p className="text-sm text-gray-400 italic">See the PDF above</p>
-          ) : localRecipe.instructions && localRecipe.instructions.trim() ? (
+          ) : displayInstructions && displayInstructions.trim() ? (
             <pre className="whitespace-pre-wrap break-words font-serif text-base text-gray-700 leading-[1.6] m-0">
-              {localRecipe.instructions}
+              {displayInstructions}
             </pre>
           ) : (
             <p className="text-sm text-gray-400 italic">No instructions provided</p>
