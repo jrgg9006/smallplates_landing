@@ -257,6 +257,35 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localRecipe?.id, isOpen]);
 
+  // Reason: while cleaning is in flight we poll for the print_ready row every 3s and
+  // recompute the state (elapsed grows toward the 60s timeout). We stop as soon as
+  // the clean version lands (→ cleaned) or the timeout elapses (→ fallback).
+  useEffect(() => {
+    if (!localRecipe || !isOpen || viewState !== 'processing') return;
+    const tick = async () => {
+      try {
+        const res = await fetch(`/api/v1/recipes/${localRecipe.id}/clean`);
+        const json = await res.json();
+        const pr: CleanFields | null = res.ok ? json.print_ready : null;
+        if (pr) setPrintReady(pr);
+        setViewState(getRecipeViewState({
+          hasPrintReady: !!pr,
+          recipeCreatedAt: localRecipe.created_at,
+          now: Date.now(),
+        }));
+      } catch {
+        setViewState(getRecipeViewState({
+          hasPrintReady: false,
+          recipeCreatedAt: localRecipe.created_at,
+          now: Date.now(),
+        }));
+      }
+    };
+    const interval = setInterval(tick, 3000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localRecipe?.id, isOpen, viewState]);
+
   const handleCancel = () => {
     setIsEditMode(false);
     setError(null);
@@ -527,9 +556,21 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     return `. Active in Groups: ${recipeGroups.map(g => g.group_name).join(', ')}`;
   };
 
+  const processingBlock = (
+    <div className="flex-1 flex flex-col items-center justify-center text-center px-6 py-16">
+      <div className="animate-spin rounded-full h-7 w-7 border-2 border-gray-200 border-t-[hsl(var(--brand-honey))] mb-5" />
+      <h3 className="font-serif text-2xl text-brand-charcoal mb-2">Getting your recipe ready</h3>
+      <p className="text-sm text-gray-500 max-w-sm leading-relaxed">
+        We&apos;re cleaning up the spelling and formatting so it reads right in the book. Takes a few seconds.
+      </p>
+    </div>
+  );
+
   // Content component for desktop - book-style layout
   const desktopContent = (
     <div className="flex-1 flex flex-col min-w-0">
+      {viewState === 'processing' ? processingBlock : (
+      <>
       {/* Guest name — small caps */}
       <div className="flex items-start justify-between gap-4 mb-1">
         <p className="text-sm uppercase tracking-[0.2em] text-gray-400 font-serif">
@@ -653,12 +694,16 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           )}
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 
   // Content component for mobile - stacked layout
   const mobileContent = (
     <div className="flex-1 overflow-y-auto flex flex-col">
+      {viewState === 'processing' ? processingBlock : (
+      <>
       {/* Guest name — small caps */}
       <div className="flex items-start justify-between gap-3 mb-1">
         <p className="text-sm uppercase tracking-[0.2em] text-gray-400 font-serif">
@@ -782,6 +827,8 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           )}
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 
