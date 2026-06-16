@@ -202,7 +202,7 @@ export default function RecipeCompareModal({ recipe, onClose, onSaved }: RecipeC
             <textarea
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
-              className="w-full min-h-[220px] px-3 py-2 text-sm text-gray-800 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent font-sans resize-y"
+              className="w-full min-h-[420px] px-3 py-2 text-sm text-gray-800 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent font-sans resize-y"
               placeholder="Enter steps..."
             />
           </div>
