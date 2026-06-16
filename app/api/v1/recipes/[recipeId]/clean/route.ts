@@ -135,12 +135,21 @@ export async function PATCH(
       note_clean: note?.trim() || null,
     };
 
+    const isNewRow = !current;
+    const upsertPayload = {
+      recipe_id: recipeId,
+      ...printReady,
+      updated_at: new Date().toISOString(),
+      // Reason: a brand-new clean row means this recipe was never machine-cleaned
+      // (the user edited the raw original in fallback). Flag it for Operations review
+      // and mark it as not-AI-cleaned. On a normal update we omit these so the
+      // existing cleaning_version / needs_regeneration are preserved.
+      ...(isNewRow ? { needs_regeneration: true, cleaning_version: null } : {}),
+    };
+
     const { error: upsertError } = await admin
       .from('recipe_print_ready')
-      .upsert(
-        { recipe_id: recipeId, ...printReady, updated_at: new Date().toISOString() },
-        { onConflict: 'recipe_id' }
-      );
+      .upsert(upsertPayload, { onConflict: 'recipe_id' });
     if (upsertError) {
       return NextResponse.json({ error: upsertError.message }, { status: 500 });
     }

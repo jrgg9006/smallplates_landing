@@ -17,7 +17,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Edit, Download, ChevronDown, Plus, Info } from "lucide-react";
 import Image from "next/image";
-import { updateRecipe, changeRecipeGuest, logRecipeEdit } from "@/lib/supabase/recipes";
+import { changeRecipeGuest, logRecipeEdit } from "@/lib/supabase/recipes";
 import { getRecipeViewState, type RecipeViewState } from "@/lib/recipes/cleanVersionState";
 import { getGuests } from "@/lib/supabase/guests";
 import { useAuth } from "@/lib/contexts/AuthContext";
@@ -332,12 +332,6 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         instructions: recipeInstructions.trim(),
         comments: recipeNotes.trim() || null,
       };
-      const textChanged =
-        before.recipe_name !== after.recipe_name ||
-        before.ingredients !== after.ingredients ||
-        before.instructions !== after.instructions ||
-        (before.comments || null) !== after.comments;
-
       // Reassign the guest first — it also moves the recipes_received counters
       if (guestChanged) {
         const { error: guestChangeError } = await changeRecipeGuest(localRecipe.id, selectedGuestId);
@@ -348,44 +342,27 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         }
       }
 
-      if (viewState === 'cleaned') {
-        // Source of truth = recipe_print_ready. Save via the user-scoped endpoint
-        // (admin client server-side). The original stays untouched.
-        const res = await fetch(`/api/v1/recipes/${localRecipe.id}/clean`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            recipe_name: after.recipe_name,
-            ingredients: after.ingredients,
-            instructions: after.instructions,
-            note: after.comments,
-          }),
-        });
-        const json = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          setError(json.error || 'Failed to save');
-          setLoading(false);
-          return;
-        }
-        setPrintReady(json.print_ready);
-      } else {
-        // Fallback (no clean version yet): keep today's behavior — write the original
-        // and flag the print-ready as stale / NEEDS REVIEW.
-        const { error: updateError } = await updateRecipe(localRecipe.id, after);
-        if (updateError) {
-          setError(updateError);
-          setLoading(false);
-          return;
-        }
-        if (textChanged || guestChanged) {
-          const supabase = (await import('@/lib/supabase/client')).createSupabaseClient();
-          const { error: staleError } = await supabase
-            .from('recipe_print_ready')
-            .update({ needs_regeneration: true })
-            .eq('recipe_id', localRecipe.id);
-          if (staleError) console.error('Failed to flag print-ready as stale:', staleError);
-        }
+      // Always save to the clean version (recipe_print_ready) via the endpoint.
+      // The original (guest_recipes) is never written from here. If no clean row
+      // existed yet (fallback), the endpoint creates one and flags it for review.
+      const res = await fetch(`/api/v1/recipes/${localRecipe.id}/clean`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipe_name: after.recipe_name,
+          ingredients: after.ingredients,
+          instructions: after.instructions,
+          note: after.comments,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(json.error || 'Failed to save');
+        setLoading(false);
+        return;
       }
+      setPrintReady(json.print_ready);
+      setViewState('cleaned');
 
       // Audit trail — best-effort: a failure here must not block the edit itself.
       // Reason: only log GUEST changes here. Text edits are already logged by the
@@ -414,7 +391,6 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       // Success! Update local recipe state immediately
       setLocalRecipe({
         ...localRecipe,
-        ...(viewState === 'cleaned' ? {} : after),
         guest_id: guestChanged ? selectedGuestId : localRecipe.guest_id,
         guests: guestChanged && newGuest
           ? {
