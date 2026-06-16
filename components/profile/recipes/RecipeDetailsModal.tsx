@@ -1034,13 +1034,14 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
                   <button
                     type="button"
                     aria-label="About the clean-up"
+                    aria-expanded={showCleaningInfo}
                     onClick={() => setShowCleaningInfo((v) => !v)}
                     className="text-gray-300 hover:text-gray-500 transition-colors"
                   >
                     <Info className="h-4 w-4" />
                   </button>
                   {showCleaningInfo && (
-                    <span className="absolute left-0 top-7 z-20 block w-72 rounded-xl border border-gray-200 bg-white p-3 text-left text-xs font-normal leading-relaxed text-gray-600 shadow-xl">
+                    <span className="absolute left-0 top-7 z-20 block w-72 max-w-[calc(100vw-3rem)] rounded-xl border border-gray-200 bg-white p-3 text-left text-xs font-normal leading-relaxed text-gray-600 shadow-xl">
                       Every recipe runs through a quick clean-up that fixes spelling and sets the
                       formatting, so every page in the book reads the same way. Want to see exactly
                       what was sent? Open <span className="font-medium">View original</span>.
@@ -1103,13 +1104,14 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
               <button
                 type="button"
                 aria-label="About the clean-up"
+                aria-expanded={showCleaningInfo}
                 onClick={() => setShowCleaningInfo((v) => !v)}
                 className="text-gray-300 hover:text-gray-500 transition-colors"
               >
                 <Info className="h-4 w-4" />
               </button>
               {showCleaningInfo && (
-                <span className="absolute left-0 top-7 z-20 block w-72 rounded-xl border border-gray-200 bg-white p-3 text-left text-xs font-normal leading-relaxed text-gray-600 shadow-xl">
+                <span className="absolute left-0 top-7 z-20 block w-72 max-w-[calc(100vw-3rem)] rounded-xl border border-gray-200 bg-white p-3 text-left text-xs font-normal leading-relaxed text-gray-600 shadow-xl">
                   Every recipe runs through a quick clean-up that fixes spelling and sets the
                   formatting, so every page in the book reads the same way. Want to see exactly
                   what was sent? Open <span className="font-medium">View original</span>.
