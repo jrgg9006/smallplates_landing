@@ -459,18 +459,18 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       : guestName;
 
   const guestSelector = (
-    <div className="mb-4 max-w-sm">
-      <Label className="text-sm font-medium text-gray-700 mb-2 block">
+    <div className="mb-4 flex items-center gap-3 max-w-md">
+      <Label className="text-sm font-medium text-gray-700 flex-shrink-0">
         Who&apos;s sharing this?
       </Label>
-      <div className="relative" ref={dropdownRef}>
+      <div className="relative flex-1" ref={dropdownRef}>
         <button
           type="button"
           onClick={() => setShowGuestDropdown(!showGuestDropdown)}
           disabled={guestsLoading}
-          className="w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 border-brand-sand bg-brand-sand/40 text-sm transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none"
+          className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl border border-brand-sand bg-white text-sm text-brand-charcoal transition-all duration-200 hover:border-[hsl(var(--brand-honey))]/60 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-honey))]/30 focus-visible:border-[hsl(var(--brand-honey))]"
         >
-          <span className="text-brand-charcoal font-medium">{guestTriggerLabel}</span>
+          <span className="text-brand-charcoal">{guestTriggerLabel}</span>
           <ChevronDown
             className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
               showGuestDropdown ? 'rotate-180' : ''
@@ -489,10 +489,10 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
                     setSelectedGuestId(g.id);
                     setShowGuestDropdown(false);
                   }}
-                  className={`w-full px-4 py-3 text-left text-sm transition-colors duration-200 ${
+                  className={`w-full px-4 py-2.5 text-left text-sm transition-colors duration-200 ${
                     selectedGuestId === g.id
-                      ? 'bg-brand-sand/40 text-brand-charcoal font-medium'
-                      : 'text-gray-700 hover:bg-brand-warm-white-warm'
+                      ? 'bg-[hsl(var(--brand-honey))]/10 text-brand-charcoal font-medium'
+                      : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   {getGuestDisplayName(g)}
@@ -505,7 +505,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
                     setShowGuestDropdown(false);
                     setShowAddGuestModal(true);
                   }}
-                  className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-brand-warm-white-warm flex items-center gap-2 transition-colors duration-200"
+                  className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors duration-200"
                 >
                   <Plus className="h-4 w-4" />
                   Add new guest
@@ -625,13 +625,17 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       {/* Cleaned-state label + View original toggle */}
       {inCleaned && !isEditMode && (
         <div className="flex items-center gap-2 mb-3 text-xs text-gray-400">
-          <span>This is the cleaned-up version that goes in your book.</span>
+          <span>
+            {showOriginal
+              ? 'This is the original, exactly as it was sent.'
+              : 'This is the version that goes in your book.'}
+          </span>
           <button
             type="button"
             onClick={() => setShowOriginal((v) => !v)}
-            className="underline underline-offset-2 hover:text-gray-600 transition-colors"
+            className="rounded-sm underline underline-offset-2 hover:text-gray-600 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[hsl(var(--brand-honey))]/50"
           >
-            {showOriginal ? 'View cleaned' : 'View original'}
+            {showOriginal ? 'View book version' : 'View original'}
           </button>
         </div>
       )}
@@ -782,13 +786,17 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       {/* Cleaned-state label + View original toggle */}
       {inCleaned && !isEditMode && (
         <div className="flex items-center gap-2 mb-3 text-xs text-gray-400">
-          <span>This is the cleaned-up version that goes in your book.</span>
+          <span>
+            {showOriginal
+              ? 'This is the original, exactly as it was sent.'
+              : 'This is the version that goes in your book.'}
+          </span>
           <button
             type="button"
             onClick={() => setShowOriginal((v) => !v)}
-            className="underline underline-offset-2 hover:text-gray-600 transition-colors"
+            className="rounded-sm underline underline-offset-2 hover:text-gray-600 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[hsl(var(--brand-honey))]/50"
           >
-            {showOriginal ? 'View cleaned' : 'View original'}
+            {showOriginal ? 'View book version' : 'View original'}
           </button>
         </div>
       )}
@@ -1023,6 +1031,30 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     </div>
   );
 
+  // Clean-up explainer — a proper modal (matches AddFriendToGroupModal styling)
+  // so it reads clean and trustworthy, not like a cramped tooltip.
+  const cleaningInfoModal = (
+    <Dialog open={showCleaningInfo} onOpenChange={setShowCleaningInfo}>
+      <DialogContent className="sm:max-w-[520px]">
+        <DialogHeader>
+          <DialogTitle className="type-modal-title">We auto-clean every recipe</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <p className="text-gray-600 text-base leading-relaxed">
+            When a recipe comes in, we run a quick clean-up: we fix obvious typos and tidy the
+            formatting so every page in the book reads the same way. We don&apos;t rewrite the
+            recipe or change anyone&apos;s voice.
+          </p>
+          <p className="text-gray-600 text-base leading-relaxed">
+            What you see here is that cleaned-up version. To compare it with exactly what was
+            sent, tap <span className="font-medium text-brand-charcoal">View original</span> under
+            the title.
+          </p>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+
   // Mobile version - Sheet that slides up from bottom
   if (isMobile) {
     return (
@@ -1032,24 +1064,17 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           <div className="px-6 pt-6 pb-6 flex flex-col h-full overflow-hidden">
             <SheetHeader className="px-0 flex-shrink-0 mb-4">
               <SheetTitle className="type-modal-title">
-                <span className="relative inline-flex items-center gap-2">
+                <span className="inline-flex items-center gap-2">
                   <span>Recipe Details</span>
                   <button
                     type="button"
                     aria-label="About the clean-up"
                     aria-expanded={showCleaningInfo}
-                    onClick={() => setShowCleaningInfo((v) => !v)}
-                    className="text-gray-300 hover:text-gray-500 transition-colors"
+                    onClick={() => setShowCleaningInfo(true)}
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-full text-[hsl(var(--brand-warm-gray))] transition-colors hover:bg-[hsl(var(--brand-sand))]/50 hover:text-[hsl(var(--brand-charcoal))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-honey))]/40"
                   >
-                    <Info className="h-4 w-4" />
+                    <Info className="h-[18px] w-[18px]" />
                   </button>
-                  {showCleaningInfo && (
-                    <span className="absolute left-0 top-7 z-20 block w-72 max-w-[calc(100vw-3rem)] rounded-xl border border-gray-200 bg-white p-3 text-left text-xs font-normal leading-relaxed text-gray-600 shadow-xl">
-                      Every recipe runs through a quick clean-up that fixes spelling and sets the
-                      formatting, so every page in the book reads the same way. Want to see exactly
-                      what was sent? Open <span className="font-medium">View original</span>.
-                    </span>
-                  )}
                 </span>
               </SheetTitle>
             </SheetHeader>
@@ -1091,6 +1116,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         onGuestAdded={handleGuestAdded}
         groupId={localRecipe.group_id || recipeGroups[0]?.group_id || undefined}
       />
+      {cleaningInfoModal}
       </>
     );
   }
@@ -1102,24 +1128,17 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       <DialogContent className="max-w-5xl w-[95vw] h-[90vh] max-h-[90vh] flex flex-col overflow-hidden p-0 gap-0 bg-white">
         <DialogHeader className="flex-shrink-0 px-8 pt-6 pb-2">
           <DialogTitle className="type-modal-title text-gray-900">
-            <span className="relative inline-flex items-center gap-2">
+            <span className="inline-flex items-center gap-2">
               <span>Recipe Details</span>
               <button
                 type="button"
                 aria-label="About the clean-up"
                 aria-expanded={showCleaningInfo}
-                onClick={() => setShowCleaningInfo((v) => !v)}
-                className="text-gray-300 hover:text-gray-500 transition-colors"
+                onClick={() => setShowCleaningInfo(true)}
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full text-[hsl(var(--brand-warm-gray))] transition-colors hover:bg-[hsl(var(--brand-sand))]/50 hover:text-[hsl(var(--brand-charcoal))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-honey))]/40"
               >
-                <Info className="h-4 w-4" />
+                <Info className="h-[18px] w-[18px]" />
               </button>
-              {showCleaningInfo && (
-                <span className="absolute left-0 top-7 z-20 block w-72 max-w-[calc(100vw-3rem)] rounded-xl border border-gray-200 bg-white p-3 text-left text-xs font-normal leading-relaxed text-gray-600 shadow-xl">
-                  Every recipe runs through a quick clean-up that fixes spelling and sets the
-                  formatting, so every page in the book reads the same way. Want to see exactly
-                  what was sent? Open <span className="font-medium">View original</span>.
-                </span>
-              )}
             </span>
           </DialogTitle>
         </DialogHeader>
@@ -1127,7 +1146,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         <div className="flex-1 flex flex-col pl-8 pr-8 pt-8 pb-6 min-w-0 overflow-y-auto">
           {isEditMode ? desktopEditContent : desktopContent}
         </div>
-          
+
         {/* Action Buttons - Fixed position at bottom when in edit mode */}
           {isEditMode && (
           <div className="flex justify-end gap-3 flex-shrink-0 bg-white px-8 py-4 border-t border-gray-200">
@@ -1159,6 +1178,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       onGuestAdded={handleGuestAdded}
       groupId={localRecipe.group_id || recipeGroups[0]?.group_id || undefined}
     />
+    {cleaningInfoModal}
     </>
   );
 }
