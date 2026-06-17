@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe/client";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { calculateExtrasAmount, MIN_RECIPES_TO_PRINT } from "@/lib/stripe/pricing";
+import { pricePerCopy, MIN_RECIPES_TO_PRINT } from "@/lib/stripe/pricing";
 
 // Reason: Countries we can ship to. Mirrors the list the old in-app shipping form
 // supported (US, MX, EU). Stripe collects the address natively for us now.
@@ -79,31 +79,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
     }
 
-    // Reason: Declining group pricing — the per-copy price steps down as the group
-    // grows, so the additional copies are NOT a uniform quantity × unit_amount.
-    // We express them as a SINGLE inline line item priced at calculateExtrasAmount
-    // (the whole amount beyond the base), keeping the catalog Price for the base
-    // so coupons can still match it. Total == calculateSubtotal(qty).
+    // Reason: One catalog Product, dynamic per-copy price. We reference a single
+    // Stripe Product by id (price_data.product) — not an inline product_data.name,
+    // which would mint a throwaway ad-hoc product per checkout and fragment
+    // per-product reporting. The amount stays dynamic in code (pricePerCopy × qty),
+    // so every sale rolls up under the same product and product-scoped coupons can
+    // still match it.
+    const cookbookProductId = process.env.STRIPE_PRODUCT_ID_COOKBOOK;
+    if (!cookbookProductId) {
+      console.error("create-checkout-book-close-session: STRIPE_PRODUCT_ID_COOKBOOK is not set");
+      return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
+    }
+
+    // Reason: Per-person pricing shown natively — ONE line at the per-person price
+    // × copies, so Stripe's "× N" and subtotal match the cart and pricing page
+    // exactly (calculateSubtotal === pricePerCopy × qty). Order-level promotion
+    // codes still apply (allow_promotion_codes below). Fulfillment reads
+    // metadata.qty + amount_total, never the line items, so this is display-only.
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
       {
-        price: process.env.STRIPE_PRICE_ID_COOKBOOK!,
-        quantity: 1,
-      },
-    ];
-    const extrasAmount = calculateExtrasAmount(qty);
-    if (extrasAmount > 0) {
-      const extraCopies = qty - 1;
-      lineItems.push({
         price_data: {
           currency: "usd",
-          product_data: {
-            name: `${extraCopies} additional ${extraCopies === 1 ? "copy" : "copies"}`,
-          },
-          unit_amount: extrasAmount * 100,
+          product: cookbookProductId,
+          unit_amount: pricePerCopy(qty) * 100,
         },
-        quantity: 1,
-      });
-    }
+        quantity: qty,
+      },
+    ];
 
     // Reason: Stripe does NOT propagate Session metadata to the PaymentIntent.
     // Copy it to payment_intent_data.metadata so the payment_intent.succeeded
