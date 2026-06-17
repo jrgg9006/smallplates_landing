@@ -101,6 +101,10 @@ export function QuantityStep({
             </p>
           </div>
         )}
+
+        <p className="text-center text-[13px] leading-relaxed text-[hsl(var(--brand-warm-gray))]">
+          Once you pay, the book closes. It&apos;s printed and at your door in about three weeks.
+        </p>
       </div>
     </div>
   );
