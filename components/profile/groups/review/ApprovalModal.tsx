@@ -46,15 +46,15 @@ export function ApprovalModal({
         </DialogHeader>
 
         <p className="text-gray-600 text-base leading-relaxed">
-          We clean up the formatting of every recipe (bullet points, steps,
-          measurements) and add one image per recipe. The words stay yours. No one
-          on our team rewrites them.
+          The text you see here is the text that gets printed. Every word stays as
+          your guests wrote it. We add one image per recipe and lay it out for the
+          book, so the formatting may shift a little in design and at the press.
         </p>
 
         <p className="text-gray-600 text-base leading-relaxed">
-          What you see in the preview is what gets printed. Give it one last look.
-          Watch for typos, a duplicate, or anything you&apos;d rather not include.
-          Once you continue, the recipes are locked.
+          Give it one last look before you lock it in. Watch for typos, a duplicate,
+          or anything you&apos;d rather not include. Once you continue, the recipes
+          are locked.
         </p>
 
         <label className="flex cursor-pointer items-start gap-3 rounded-xl bg-[#F3F2F0] px-5 py-4">
