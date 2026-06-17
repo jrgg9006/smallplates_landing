@@ -144,11 +144,11 @@ export function EditGroupModal({
     setError(null);
 
     try {
-      // Reason: book_close_date = gift_date - 20 days (auto-calculated)
+      // Reason: book_close_date = gift_date - 21 days (auto-calculated)
       let bookCloseDate: string | null = null;
       if (giftDate) {
         const d = new Date(giftDate + 'T00:00:00');
-        d.setDate(d.getDate() - 20);
+        d.setDate(d.getDate() - 21);
         bookCloseDate = d.toISOString().split('T')[0];
       }
 

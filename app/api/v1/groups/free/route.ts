@@ -67,12 +67,12 @@ export async function POST(request: NextRequest) {
     //    C) Existing user with paid books wanting another: no free_tier → create new one.
     //    NEVER touch active/pending_setup groups.
 
-    // Reason: book_close_date = gift_date - 20 days (same rule as EditGroupModal),
+    // Reason: book_close_date = gift_date - 21 days (same rule as EditGroupModal),
     // so the dashboard shows "Recipes due X" for free-tier groups too.
     let bookCloseDate: string | null = null;
     if (bookDate) {
       const d = new Date(bookDate + "T00:00:00");
-      d.setDate(d.getDate() - 20);
+      d.setDate(d.getDate() - 21);
       bookCloseDate = d.toISOString().split("T")[0];
     }
 
