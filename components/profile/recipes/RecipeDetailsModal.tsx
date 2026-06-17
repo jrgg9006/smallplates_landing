@@ -628,7 +628,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           <span>
             {showOriginal
               ? 'This is the original, exactly as it was sent.'
-              : 'This is the version that goes in your book.'}
+              : '✅ This is the cleaned-up version — or your latest edit — that goes in your book.'}
           </span>
           <button
             type="button"
@@ -789,7 +789,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           <span>
             {showOriginal
               ? 'This is the original, exactly as it was sent.'
-              : 'This is the version that goes in your book.'}
+              : '✅ This is the cleaned-up version — or your latest edit — that goes in your book.'}
           </span>
           <button
             type="button"
@@ -1041,9 +1041,10 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         </DialogHeader>
         <div className="space-y-4 py-2">
           <p className="text-gray-600 text-base leading-relaxed">
-            When a recipe comes in, we run a quick clean-up: we fix obvious typos and tidy the
-            formatting so every page in the book reads the same way. We don&apos;t rewrite the
-            recipe or change anyone&apos;s voice.
+            The first time a recipe is sent in, we run a quick clean-up: we fix obvious typos and
+            tidy the formatting so every page in the book reads the same way. We don&apos;t rewrite
+            the recipe or change anyone&apos;s voice — and anything you edit afterward stays exactly
+            as you wrote it.
           </p>
           <p className="text-gray-600 text-base leading-relaxed">
             What you see here is that cleaned-up version. To compare it with exactly what was
