@@ -227,6 +227,9 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
   const [loadingAddress, setLoadingAddress] = useState(true);
   const [showPurchase, setShowPurchase] = useState(false);
   const [extraCopiesCount, setExtraCopiesCount] = useState(0);
+  // Reason: per-person pricing means the close order itself can be >1 copy, so the
+  // base count comes from the initial_purchase order(s), not a hardcoded 1.
+  const [baseCopiesCount, setBaseCopiesCount] = useState(0);
 
   // Shipping form state
   const [country, setCountry] = useState("US");
@@ -266,18 +269,25 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
         setLoadingAddress(false);
       }
     };
-    // Reason: Count extra copies from orders table instead of groups.extra_copies
-    const fetchExtraCopies = async () => {
+    // Reason: Count copies from the orders table. Base copies live on the
+    // initial_purchase order(s) (the close order, which can be >1 under per-person
+    // pricing); extra copies are later extra_copy orders. Total = base + extra.
+    const fetchCopies = async () => {
       try {
-        const res = await fetch(`/api/v1/groups/${group.id}/orders?type=extra_copy`);
-        const json = await res.json();
-        if (json.totalCopies != null) setExtraCopiesCount(json.totalCopies);
+        const [baseRes, extraRes] = await Promise.all([
+          fetch(`/api/v1/groups/${group.id}/orders?type=initial_purchase`),
+          fetch(`/api/v1/groups/${group.id}/orders?type=extra_copy`),
+        ]);
+        const baseJson = await baseRes.json();
+        const extraJson = await extraRes.json();
+        if (baseJson.totalCopies != null) setBaseCopiesCount(baseJson.totalCopies);
+        if (extraJson.totalCopies != null) setExtraCopiesCount(extraJson.totalCopies);
       } catch {
-        // Reason: Non-critical — falls back to 0
+        // Reason: Non-critical — falls back to 0/0
       }
     };
     fetchAddress();
-    fetchExtraCopies();
+    fetchCopies();
   }, [group.id]);
 
   // Reason: When country changes, clear region since state lists differ
@@ -454,9 +464,12 @@ export function BookClosedStatus({ group, recipeCount }: BookClosedStatusProps) 
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-1">Copies</p>
               <p className="text-sm text-brand-charcoal">
-                {extraCopiesCount > 0
-                  ? `${1 + extraCopiesCount} books`
-                  : "1 book"}
+                {(() => {
+                  // Reason: base (close order, may be >1) + any later extra copies.
+                  // Floor at 1 so a not-yet-loaded count never renders "0 books".
+                  const total = Math.max(1, baseCopiesCount + extraCopiesCount);
+                  return `${total} ${total === 1 ? "book" : "books"}`;
+                })()}
               </p>
               <div className="flex flex-col items-stretch gap-2 mt-3 max-w-[240px]">
                 <button
