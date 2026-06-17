@@ -76,6 +76,12 @@ export async function getGroupRecipes(groupId: string): Promise<{ data: RecipeWi
         email,
         is_self,
         source
+      ),
+      recipe_print_ready(
+        recipe_name_clean,
+        ingredients_clean,
+        instructions_clean,
+        note_clean
       )
     `)
     .in('id', recipeIds)
@@ -135,8 +141,18 @@ export async function getGroupRecipes(groupId: string): Promise<{ data: RecipeWi
       }
     }
     
+    // Reason: the clean version (recipe_print_ready) is the source of truth the
+    // user edits, so cards/lists must prefer it. The embed comes back as an object
+    // (recipe_id is unique) or, defensively, an array — normalize to one or null.
+    // RLS only returns it for recipes the viewer created; otherwise null → the
+    // card falls back to the original title (no regression).
+    const printReady = Array.isArray(recipe.recipe_print_ready)
+      ? recipe.recipe_print_ready[0] ?? null
+      : recipe.recipe_print_ready ?? null;
+
     return {
       ...recipe,
+      print_ready: printReady,
       added_by_user: addedByUser,
       added_at: groupRecipeInfo?.added_at || recipe.created_at,
       display_order: cookbookRecipeInfo?.display_order ?? 999

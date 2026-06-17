@@ -24,8 +24,9 @@ export function RecipeCardGrid({
 }: RecipeCardGridProps) {
   // Filter recipes based on search
   const filteredRecipes = searchValue 
-    ? recipes.filter(recipe => 
+    ? recipes.filter(recipe =>
         recipe.recipe_name.toLowerCase().includes(searchValue.toLowerCase()) ||
+        (recipe.print_ready?.recipe_name_clean || '').toLowerCase().includes(searchValue.toLowerCase()) ||
         recipe.guests?.first_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
         recipe.guests?.last_name?.toLowerCase().includes(searchValue.toLowerCase())
       )
@@ -111,6 +112,10 @@ function RecipeCard({ recipe, onClick, onEdit, onRemove }: RecipeCardProps) {
     ? (recipe.guests.printed_name || `${recipe.guests.first_name} ${recipe.guests.last_name}`.trim())
     : 'You';
 
+  // Reason: prefer the cleaned (print-ready) title — that's the version the user
+  // edits and what prints — falling back to the original when there's no clean row.
+  const displayTitle = recipe.print_ready?.recipe_name_clean || recipe.recipe_name;
+
   return (
     <div 
       className="recipe-card group relative"
@@ -120,7 +125,7 @@ function RecipeCard({ recipe, onClick, onEdit, onRemove }: RecipeCardProps) {
     >
       {/* Recipe Name with quotes and italic */}
       <h3 className="recipe-card__title line-clamp-3">
-        &ldquo;{recipe.recipe_name}&rdquo;
+        &ldquo;{displayTitle}&rdquo;
       </h3>
       
       {/* Decorative line */}

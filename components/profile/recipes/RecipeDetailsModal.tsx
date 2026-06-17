@@ -15,9 +15,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Edit, Download, ChevronDown, Plus } from "lucide-react";
+import { Edit, Download, ChevronDown, Plus, Info } from "lucide-react";
 import Image from "next/image";
-import { updateRecipe, changeRecipeGuest, logRecipeEdit } from "@/lib/supabase/recipes";
+import { changeRecipeGuest, logRecipeEdit } from "@/lib/supabase/recipes";
+import { getRecipeViewState, type RecipeViewState } from "@/lib/recipes/cleanVersionState";
 import { getGuests } from "@/lib/supabase/guests";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { getRecipeGroups } from "@/lib/supabase/groupRecipes";
@@ -63,6 +64,19 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   const [showAddGuestModal, setShowAddGuestModal] = useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
+  // Clean version (recipe_print_ready) state — fetched when the modal opens.
+  type CleanFields = {
+    recipe_name_clean: string;
+    ingredients_clean: string;
+    instructions_clean: string;
+    note_clean: string | null;
+  };
+  const [printReady, setPrintReady] = useState<CleanFields | null>(null);
+  const [viewState, setViewState] = useState<RecipeViewState>('processing');
+  const [cleanLoaded, setCleanLoaded] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
+  const [showCleaningInfo, setShowCleaningInfo] = useState(false);
+
   // Update local recipe when prop changes
   useEffect(() => {
     if (recipe) {
@@ -101,14 +115,21 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   // Initialize form state when entering edit mode
   useEffect(() => {
     if (localRecipe && isEditMode) {
-      setRecipeTitle(localRecipe.recipe_name || '');
-      setRecipeIngredients(localRecipe.ingredients || '');
-      setRecipeInstructions(localRecipe.instructions || '');
-      setRecipeNotes(localRecipe.comments || '');
+      if (viewState === 'cleaned' && printReady) {
+        setRecipeTitle(printReady.recipe_name_clean || '');
+        setRecipeIngredients(printReady.ingredients_clean || '');
+        setRecipeInstructions(printReady.instructions_clean || '');
+        setRecipeNotes(printReady.note_clean || '');
+      } else {
+        setRecipeTitle(localRecipe.recipe_name || '');
+        setRecipeIngredients(localRecipe.ingredients || '');
+        setRecipeInstructions(localRecipe.instructions || '');
+        setRecipeNotes(localRecipe.comments || '');
+      }
       setSelectedGuestId(localRecipe.guest_id);
       setError(null);
     }
-  }, [localRecipe, isEditMode]);
+  }, [localRecipe, isEditMode, viewState, printReady]);
 
   // Load guests for the selector when entering edit mode
   useEffect(() => {
@@ -207,6 +228,72 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     loadGroupsAndCheckPermissions();
   }, [localRecipe, isOpen, user]);
 
+  // Reason: the clean version (recipe_print_ready) is the source of truth the user
+  // sees/edits. Fetch it via the server endpoint (RLS-safe). Existence + recipe age
+  // drive which of the three states (cleaned/processing/fallback) we render.
+  useEffect(() => {
+    if (!localRecipe || !isOpen) return;
+    let cancelled = false;
+    setCleanLoaded(false);
+    const load = async () => {
+      try {
+        const res = await fetch(`/api/v1/recipes/${localRecipe.id}/clean`);
+        const json = await res.json();
+        if (cancelled) return;
+        const pr: CleanFields | null = res.ok ? json.print_ready : null;
+        setPrintReady(pr);
+        setViewState(getRecipeViewState({
+          hasPrintReady: !!pr,
+          recipeCreatedAt: localRecipe.created_at,
+          now: Date.now(),
+        }));
+      } catch {
+        if (!cancelled) {
+          setPrintReady(null);
+          setViewState(getRecipeViewState({
+            hasPrintReady: false,
+            recipeCreatedAt: localRecipe.created_at,
+            now: Date.now(),
+          }));
+        }
+      } finally {
+        if (!cancelled) setCleanLoaded(true);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localRecipe?.id, isOpen]);
+
+  // Reason: while cleaning is in flight we poll for the print_ready row every 3s and
+  // recompute the state (elapsed grows toward the 60s timeout). We stop as soon as
+  // the clean version lands (→ cleaned) or the timeout elapses (→ fallback).
+  useEffect(() => {
+    if (!localRecipe || !isOpen || viewState !== 'processing') return;
+    const tick = async () => {
+      try {
+        const res = await fetch(`/api/v1/recipes/${localRecipe.id}/clean`);
+        const json = await res.json();
+        const pr: CleanFields | null = res.ok ? json.print_ready : null;
+        if (pr) setPrintReady(pr);
+        setViewState(getRecipeViewState({
+          hasPrintReady: !!pr,
+          recipeCreatedAt: localRecipe.created_at,
+          now: Date.now(),
+        }));
+      } catch {
+        setViewState(getRecipeViewState({
+          hasPrintReady: false,
+          recipeCreatedAt: localRecipe.created_at,
+          now: Date.now(),
+        }));
+      }
+    };
+    const interval = setInterval(tick, 3000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localRecipe?.id, isOpen, viewState]);
+
   const handleCancel = () => {
     setIsEditMode(false);
     setError(null);
@@ -245,12 +332,6 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         instructions: recipeInstructions.trim(),
         comments: recipeNotes.trim() || null,
       };
-      const textChanged =
-        before.recipe_name !== after.recipe_name ||
-        before.ingredients !== after.ingredients ||
-        before.instructions !== after.instructions ||
-        (before.comments || null) !== after.comments;
-
       // Reassign the guest first — it also moves the recipes_received counters
       if (guestChanged) {
         const { error: guestChangeError } = await changeRecipeGuest(localRecipe.id, selectedGuestId);
@@ -261,26 +342,28 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         }
       }
 
-      const { error: updateError } = await updateRecipe(localRecipe.id, after);
-
-      if (updateError) {
-        setError(updateError);
+      // Always save to the clean version (recipe_print_ready) via the endpoint.
+      // The original (guest_recipes) is never written from here. If no clean row
+      // existed yet (fallback), the endpoint creates one and flags it for review.
+      const res = await fetch(`/api/v1/recipes/${localRecipe.id}/clean`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipe_name: after.recipe_name,
+          ingredients: after.ingredients,
+          instructions: after.instructions,
+          note: after.comments,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(json.error || 'Failed to save');
         setLoading(false);
         return;
       }
-
-      // Flag the print-ready (cleaned) version as stale so Operations shows
-      // a re-clean badge. Best-effort: RLS only lets users touch this column.
-      if (textChanged || guestChanged) {
-        const supabase = (await import('@/lib/supabase/client')).createSupabaseClient();
-        const { error: staleError } = await supabase
-          .from('recipe_print_ready')
-          .update({ needs_regeneration: true })
-          .eq('recipe_id', localRecipe.id);
-        if (staleError) {
-          console.error('Failed to flag print-ready as stale:', staleError);
-        }
-      }
+      setPrintReady(json.print_ready);
+      setViewState('cleaned');
+      setShowOriginal(false);
 
       // Audit trail — best-effort: a failure here must not block the edit itself.
       // Reason: only log GUEST changes here. Text edits are already logged by the
@@ -309,7 +392,6 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       // Success! Update local recipe state immediately
       setLocalRecipe({
         ...localRecipe,
-        ...after,
         guest_id: guestChanged ? selectedGuestId : localRecipe.guest_id,
         guests: guestChanged && newGuest
           ? {
@@ -340,6 +422,15 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   if (!localRecipe) return null;
 
   const guest = localRecipe.guests;
+
+  // Reason: cleaned state shows the clean version (source of truth); fallback shows
+  // the original. "View original" temporarily reveals the raw submission in cleaned.
+  const inCleaned = viewState === 'cleaned' && !!printReady;
+  const displayName = inCleaned && !showOriginal ? printReady!.recipe_name_clean : localRecipe.recipe_name;
+  const displayIngredients = inCleaned && !showOriginal ? printReady!.ingredients_clean : localRecipe.ingredients;
+  const displayInstructions = inCleaned && !showOriginal ? printReady!.instructions_clean : localRecipe.instructions;
+  const displayNote = inCleaned && !showOriginal ? printReady!.note_clean : localRecipe.comments;
+
   const guestRealName = guest ? `${guest.first_name} ${guest.last_name || ''}`.trim() : '';
   const guestName = guest
     ? (guest.printed_name ? `${guest.printed_name} (${guestRealName})` : guestRealName)
@@ -368,18 +459,18 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       : guestName;
 
   const guestSelector = (
-    <div className="mb-4 max-w-sm">
-      <Label className="text-sm font-medium text-gray-700 mb-2 block">
+    <div className="mb-4 flex items-center gap-3 max-w-md">
+      <Label className="text-sm font-medium text-gray-700 flex-shrink-0">
         Who&apos;s sharing this?
       </Label>
-      <div className="relative" ref={dropdownRef}>
+      <div className="relative flex-1" ref={dropdownRef}>
         <button
           type="button"
           onClick={() => setShowGuestDropdown(!showGuestDropdown)}
           disabled={guestsLoading}
-          className="w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 border-brand-sand bg-brand-sand/40 text-sm transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none"
+          className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl border border-brand-sand bg-white text-sm text-brand-charcoal transition-all duration-200 hover:border-[hsl(var(--brand-honey))]/60 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-honey))]/30 focus-visible:border-[hsl(var(--brand-honey))]"
         >
-          <span className="text-brand-charcoal font-medium">{guestTriggerLabel}</span>
+          <span className="text-brand-charcoal">{guestTriggerLabel}</span>
           <ChevronDown
             className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
               showGuestDropdown ? 'rotate-180' : ''
@@ -398,10 +489,10 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
                     setSelectedGuestId(g.id);
                     setShowGuestDropdown(false);
                   }}
-                  className={`w-full px-4 py-3 text-left text-sm transition-colors duration-200 ${
+                  className={`w-full px-4 py-2.5 text-left text-sm transition-colors duration-200 ${
                     selectedGuestId === g.id
-                      ? 'bg-brand-sand/40 text-brand-charcoal font-medium'
-                      : 'text-gray-700 hover:bg-brand-warm-white-warm'
+                      ? 'bg-[hsl(var(--brand-honey))]/10 text-brand-charcoal font-medium'
+                      : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   {getGuestDisplayName(g)}
@@ -414,7 +505,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
                     setShowGuestDropdown(false);
                     setShowAddGuestModal(true);
                   }}
-                  className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-brand-warm-white-warm flex items-center gap-2 transition-colors duration-200"
+                  className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors duration-200"
                 >
                   <Plus className="h-4 w-4" />
                   Add new guest
@@ -455,7 +546,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     return isPlaceholderIngredients || isPlaceholderInstructions;
   };
 
-  const showProcessingIndicator = isRecipeProcessing();
+  // Reason: in cleaned state the clean version exists, so never show the
+  // image-OCR "processing" spinner even if the original still holds placeholder text.
+  const showProcessingIndicator = isRecipeProcessing() && !inCleaned;
 
   // When a PDF was uploaded, ingredients/instructions keep placeholder text — show a note instead
   const hasPdfPlaceholder =
@@ -477,9 +570,27 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     return `. Active in Groups: ${recipeGroups.map(g => g.group_name).join(', ')}`;
   };
 
+  const loadingBlock = (
+    <div role="status" className="flex-1 flex items-center justify-center py-16">
+      <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-200 border-t-[hsl(var(--brand-honey))]" />
+    </div>
+  );
+
+  const processingBlock = (
+    <div role="status" className="flex-1 flex flex-col items-center justify-center text-center px-6 py-16">
+      <div className="animate-spin rounded-full h-7 w-7 border-2 border-gray-200 border-t-[hsl(var(--brand-honey))] mb-5" />
+      <h3 className="font-serif text-2xl text-brand-charcoal mb-2">Getting your recipe ready</h3>
+      <p className="text-sm text-gray-500 max-w-sm leading-relaxed">
+        We&apos;re cleaning up the spelling and formatting so it reads right in the book. Takes a few seconds.
+      </p>
+    </div>
+  );
+
   // Content component for desktop - book-style layout
   const desktopContent = (
     <div className="flex-1 flex flex-col min-w-0">
+      {!cleanLoaded ? loadingBlock : viewState === 'processing' ? processingBlock : (
+      <>
       {/* Guest name — small caps */}
       <div className="flex items-start justify-between gap-4 mb-1">
         <p className="text-sm uppercase tracking-[0.2em] text-gray-400 font-serif">
@@ -498,13 +609,41 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
 
       {/* Recipe title */}
       <h2 className="font-serif text-3xl lg:text-4xl font-semibold text-brand-charcoal leading-tight mb-4">
-        {localRecipe.recipe_name || 'Untitled Recipe'}
+        {displayName || 'Untitled Recipe'}
       </h2>
 
+      {/* Fallback banner — explains why the raw original is shown */}
+      {viewState === 'fallback' && !isEditMode && (
+        <div className="mb-4 rounded-xl border border-[#F0DCC8] bg-[#FBEFE6] px-4 py-3">
+          <p className="text-[13px] font-medium text-[#8A5A2B]">Still cleaning this one up</p>
+          <p className="text-[13px] leading-relaxed text-[#8A5A2B]">
+            For now you&apos;re looking at what was sent. Go ahead and edit it — we&apos;ll handle the formatting before it&apos;s printed.
+          </p>
+        </div>
+      )}
+
+      {/* Cleaned-state label + View original toggle */}
+      {inCleaned && !isEditMode && (
+        <div className="flex items-center gap-2 mb-3 text-xs text-gray-400">
+          <span>
+            {showOriginal
+              ? 'This is the original, exactly as it was sent.'
+              : '✅ This is the cleaned-up version — or your latest edit — that goes in your book.'}
+          </span>
+          <button
+            type="button"
+            onClick={() => setShowOriginal((v) => !v)}
+            className="rounded-sm underline underline-offset-2 hover:text-gray-600 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[hsl(var(--brand-honey))]/50"
+          >
+            {showOriginal ? 'View book version' : 'View original'}
+          </button>
+        </div>
+      )}
+
       {/* Personal note */}
-      {localRecipe.comments && localRecipe.comments.trim() && (
+      {displayNote && displayNote.trim() && (
         <p className="text-base italic text-gray-500 font-serif mb-6">
-          &ldquo;{localRecipe.comments}&rdquo;
+          &ldquo;{displayNote}&rdquo;
         </p>
       )}
 
@@ -564,7 +703,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       <div className="border-t border-gray-200 my-6" />
 
       {/* Two Column Layout — matches print layout */}
-      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
+      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[240px_1fr] gap-6">
         {/* Ingredients */}
         <div>
           <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Ingredients</h3>
@@ -575,9 +714,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
             </div>
           ) : hasPdfPlaceholder ? (
             <p className="text-sm text-gray-400 italic">See the PDF above</p>
-          ) : localRecipe.ingredients && localRecipe.ingredients.trim() ? (
+          ) : displayIngredients && displayIngredients.trim() ? (
             <pre className="whitespace-pre-wrap break-words font-serif text-base text-gray-700 leading-relaxed m-0">
-              {localRecipe.ingredients}
+              {displayIngredients}
             </pre>
           ) : (
             <p className="text-sm text-gray-400 italic">No ingredients provided</p>
@@ -594,21 +733,25 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
             </div>
           ) : hasPdfPlaceholder ? (
             <p className="text-sm text-gray-400 italic">See the PDF above</p>
-          ) : localRecipe.instructions && localRecipe.instructions.trim() ? (
+          ) : displayInstructions && displayInstructions.trim() ? (
             <pre className="whitespace-pre-wrap break-words font-serif text-base text-gray-700 leading-[1.6] m-0">
-              {localRecipe.instructions}
+              {displayInstructions}
             </pre>
           ) : (
             <p className="text-sm text-gray-400 italic">No instructions provided</p>
           )}
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 
   // Content component for mobile - stacked layout
   const mobileContent = (
     <div className="flex-1 overflow-y-auto flex flex-col">
+      {!cleanLoaded ? loadingBlock : viewState === 'processing' ? processingBlock : (
+      <>
       {/* Guest name — small caps */}
       <div className="flex items-start justify-between gap-3 mb-1">
         <p className="text-sm uppercase tracking-[0.2em] text-gray-400 font-serif">
@@ -627,13 +770,41 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
 
       {/* Recipe title */}
       <h2 className="font-serif text-3xl font-semibold text-brand-charcoal leading-tight mb-4">
-        {localRecipe.recipe_name || 'Untitled Recipe'}
+        {displayName || 'Untitled Recipe'}
       </h2>
 
+      {/* Fallback banner — explains why the raw original is shown */}
+      {viewState === 'fallback' && !isEditMode && (
+        <div className="mb-4 rounded-xl border border-[#F0DCC8] bg-[#FBEFE6] px-4 py-3">
+          <p className="text-[13px] font-medium text-[#8A5A2B]">Still cleaning this one up</p>
+          <p className="text-[13px] leading-relaxed text-[#8A5A2B]">
+            For now you&apos;re looking at what was sent. Go ahead and edit it — we&apos;ll handle the formatting before it&apos;s printed.
+          </p>
+        </div>
+      )}
+
+      {/* Cleaned-state label + View original toggle */}
+      {inCleaned && !isEditMode && (
+        <div className="flex items-center gap-2 mb-3 text-xs text-gray-400">
+          <span>
+            {showOriginal
+              ? 'This is the original, exactly as it was sent.'
+              : '✅ This is the cleaned-up version — or your latest edit — that goes in your book.'}
+          </span>
+          <button
+            type="button"
+            onClick={() => setShowOriginal((v) => !v)}
+            className="rounded-sm underline underline-offset-2 hover:text-gray-600 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[hsl(var(--brand-honey))]/50"
+          >
+            {showOriginal ? 'View book version' : 'View original'}
+          </button>
+        </div>
+      )}
+
       {/* Personal note */}
-      {localRecipe.comments && localRecipe.comments.trim() && (
+      {displayNote && displayNote.trim() && (
         <p className="text-base italic text-gray-500 font-serif mb-6">
-          &ldquo;{localRecipe.comments}&rdquo;
+          &ldquo;{displayNote}&rdquo;
         </p>
       )}
 
@@ -704,9 +875,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
             </div>
           ) : hasPdfPlaceholder ? (
             <p className="text-sm text-gray-400 italic">See the PDF above</p>
-          ) : localRecipe.ingredients && localRecipe.ingredients.trim() ? (
+          ) : displayIngredients && displayIngredients.trim() ? (
             <pre className="whitespace-pre-wrap break-words font-serif text-base text-gray-700 leading-relaxed m-0">
-              {localRecipe.ingredients}
+              {displayIngredients}
             </pre>
           ) : (
             <p className="text-sm text-gray-400 italic">No ingredients provided</p>
@@ -723,15 +894,17 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
             </div>
           ) : hasPdfPlaceholder ? (
             <p className="text-sm text-gray-400 italic">See the PDF above</p>
-          ) : localRecipe.instructions && localRecipe.instructions.trim() ? (
+          ) : displayInstructions && displayInstructions.trim() ? (
             <pre className="whitespace-pre-wrap break-words font-serif text-base text-gray-700 leading-[1.6] m-0">
-              {localRecipe.instructions}
+              {displayInstructions}
             </pre>
           ) : (
             <p className="text-sm text-gray-400 italic">No instructions provided</p>
           )}
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 
@@ -763,7 +936,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       </div>
 
       {/* Two Column Layout — matches print layout */}
-      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
+      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[240px_1fr] gap-6">
         {/* Ingredients */}
         <div className="flex flex-col">
           <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Ingredients</h3>
@@ -858,6 +1031,31 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     </div>
   );
 
+  // Clean-up explainer — a proper modal (matches AddFriendToGroupModal styling)
+  // so it reads clean and trustworthy, not like a cramped tooltip.
+  const cleaningInfoModal = (
+    <Dialog open={showCleaningInfo} onOpenChange={setShowCleaningInfo}>
+      <DialogContent className="sm:max-w-[520px]">
+        <DialogHeader>
+          <DialogTitle className="type-modal-title">We auto-clean every recipe</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <p className="text-gray-600 text-base leading-relaxed">
+            The first time a recipe is sent in, we run a quick clean-up: we fix obvious typos and
+            tidy the formatting so every page in the book reads the same way. We don&apos;t rewrite
+            the recipe or change anyone&apos;s voice — and anything you edit afterward stays exactly
+            as you wrote it.
+          </p>
+          <p className="text-gray-600 text-base leading-relaxed">
+            What you see here is that cleaned-up version. To compare it with exactly what was
+            sent, tap <span className="font-medium text-brand-charcoal">View original</span> under
+            the title.
+          </p>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+
   // Mobile version - Sheet that slides up from bottom
   if (isMobile) {
     return (
@@ -866,7 +1064,20 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         <SheetContent side="bottom" className="!h-[85vh] !max-h-[85vh] rounded-t-[20px] flex flex-col overflow-hidden p-0">
           <div className="px-6 pt-6 pb-6 flex flex-col h-full overflow-hidden">
             <SheetHeader className="px-0 flex-shrink-0 mb-4">
-              <SheetTitle className="type-modal-title">Recipe Details</SheetTitle>
+              <SheetTitle className="type-modal-title">
+                <span className="inline-flex items-center gap-2">
+                  <span>Recipe Details</span>
+                  <button
+                    type="button"
+                    aria-label="About the clean-up"
+                    aria-expanded={showCleaningInfo}
+                    onClick={() => setShowCleaningInfo(true)}
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-full text-[hsl(var(--brand-warm-gray))] transition-colors hover:bg-[hsl(var(--brand-sand))]/50 hover:text-[hsl(var(--brand-charcoal))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-honey))]/40"
+                  >
+                    <Info className="h-[18px] w-[18px]" />
+                  </button>
+                </span>
+              </SheetTitle>
             </SheetHeader>
             
             <div className="flex-1 overflow-hidden flex flex-col overflow-y-auto">
@@ -906,6 +1117,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         onGuestAdded={handleGuestAdded}
         groupId={localRecipe.group_id || recipeGroups[0]?.group_id || undefined}
       />
+      {cleaningInfoModal}
       </>
     );
   }
@@ -914,15 +1126,28 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   return (
     <>
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl w-[95vw] h-[90vh] max-h-[90vh] flex flex-col overflow-hidden p-0 gap-0 bg-white">
+      <DialogContent className="max-w-5xl w-[95vw] h-[90vh] max-h-[90vh] flex flex-col overflow-hidden p-0 gap-0 bg-white">
         <DialogHeader className="flex-shrink-0 px-8 pt-6 pb-2">
-          <DialogTitle className="type-modal-title text-gray-900">Recipe Details</DialogTitle>
+          <DialogTitle className="type-modal-title text-gray-900">
+            <span className="inline-flex items-center gap-2">
+              <span>Recipe Details</span>
+              <button
+                type="button"
+                aria-label="About the clean-up"
+                aria-expanded={showCleaningInfo}
+                onClick={() => setShowCleaningInfo(true)}
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full text-[hsl(var(--brand-warm-gray))] transition-colors hover:bg-[hsl(var(--brand-sand))]/50 hover:text-[hsl(var(--brand-charcoal))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-honey))]/40"
+              >
+                <Info className="h-[18px] w-[18px]" />
+              </button>
+            </span>
+          </DialogTitle>
         </DialogHeader>
         
         <div className="flex-1 flex flex-col pl-8 pr-8 pt-8 pb-6 min-w-0 overflow-y-auto">
           {isEditMode ? desktopEditContent : desktopContent}
         </div>
-          
+
         {/* Action Buttons - Fixed position at bottom when in edit mode */}
           {isEditMode && (
           <div className="flex justify-end gap-3 flex-shrink-0 bg-white px-8 py-4 border-t border-gray-200">
@@ -954,6 +1179,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       onGuestAdded={handleGuestAdded}
       groupId={localRecipe.group_id || recipeGroups[0]?.group_id || undefined}
     />
+    {cleaningInfoModal}
     </>
   );
 }
