@@ -1,12 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  BASE_BOOK_PRICE,
-  calculateSubtotal,
-  calculateExtrasAmount,
-  pricePerCopy,
-} from "@/lib/stripe/pricing";
+import { calculateSubtotal, pricePerCopy } from "@/lib/stripe/pricing";
 import { BookPreviewPanel } from "../BookPreviewPanel";
 import type { GroupWithMembers } from "@/lib/types/database";
 
@@ -26,9 +21,11 @@ interface OrderCartProps {
 // children). Single source for the price breakdown so the two steps never drift.
 export function OrderCart({ qty, group, recipeCount, children }: OrderCartProps) {
   const total = calculateSubtotal(qty);
-  const extras = qty - 1;
-  const extrasAmount = calculateExtrasAmount(qty);
   const perPerson = pricePerCopy(qty);
+  // Reason: price per person × copies IS the model (matches the pricing page).
+  // A flat "base book + extras" split would contradict the per-person number we
+  // show right below the total.
+  const split = qty > 1;
 
   return (
     <div className="rounded-2xl border border-[hsl(var(--brand-border))] bg-white p-6 sm:p-7">
@@ -49,27 +46,22 @@ export function OrderCart({ qty, group, recipeCount, children }: OrderCartProps)
       <div className="space-y-3 text-sm">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-brand-charcoal">The book</p>
+            <p className="text-brand-charcoal">
+              {qty} {qty === 1 ? "copy" : "copies"}
+            </p>
             <p className="text-xs text-[hsl(var(--brand-warm-gray))]">
-              Hardcover, printed and bound
+              {split ? "Everyone gets their own" : "Hardcover, printed and bound"}
             </p>
           </div>
-          <span className="tabular-nums text-brand-charcoal">${BASE_BOOK_PRICE}</span>
+          <span className="tabular-nums text-brand-charcoal">
+            ${perPerson}
+            {split && (
+              <span className="ml-0.5 text-xs text-[hsl(var(--brand-warm-gray))]">
+                {" "}/ person
+              </span>
+            )}
+          </span>
         </div>
-
-        {extras > 0 && (
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-brand-charcoal">
-                {extras} extra {extras === 1 ? "copy" : "copies"}
-              </p>
-              <p className="text-xs text-[hsl(var(--brand-warm-gray))]">
-                One for everyone who chips in
-              </p>
-            </div>
-            <span className="tabular-nums text-brand-charcoal">${extrasAmount}</span>
-          </div>
-        )}
 
         <div className="flex items-center justify-between">
           <span className="text-[hsl(var(--brand-warm-gray))]">Shipping</span>
@@ -82,9 +74,9 @@ export function OrderCart({ qty, group, recipeCount, children }: OrderCartProps)
         <span className="font-serif text-2xl tabular-nums text-brand-charcoal">${total}</span>
       </div>
 
-      {extras > 0 && (
+      {split && (
         <p className="mt-1.5 text-right text-xs text-[hsl(var(--brand-warm-gray))]">
-          ${perPerson} per person if you split it
+          ${perPerson} per person · split evenly
         </p>
       )}
 
