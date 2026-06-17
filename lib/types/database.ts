@@ -1023,6 +1023,15 @@ export interface RecipeWithGuest extends GuestRecipe {
   } | null;
   added_by_user?: Profile | null; // For group recipes - who added this recipe to the group
   added_at?: string; // For group recipes - when it was added to the group
+  // The cleaned (print-ready) version, when loaded. Source of truth for what the
+  // user edited; surfaces should prefer these over the original columns. Null when
+  // not cleaned yet or not readable by the current viewer (RLS).
+  print_ready?: {
+    recipe_name_clean: string;
+    ingredients_clean: string;
+    instructions_clean: string;
+    note_clean: string | null;
+  } | null;
 }
 
 // Cookbook with recipes
