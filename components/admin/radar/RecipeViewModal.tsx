@@ -26,6 +26,16 @@ interface RecipeData {
   guests: RecipeGuest | null;
 }
 
+interface PrintReadyData {
+  recipe_name_clean: string | null;
+  ingredients_clean: string | null;
+  instructions_clean: string | null;
+  note_clean: string | null;
+  // Reason: null cleaning_version = el row lo creó una edición del usuario en
+  // fallback, NO la IA. No es una versión "limpia", es lo que el usuario tecleó.
+  cleaning_version: string | null;
+}
+
 function guestLabel(g: RecipeGuest | null): string {
   if (!g) return 'Alguien';
   if (g.is_self) return 'El organizador';
@@ -48,10 +58,11 @@ export function RecipeViewModal({
   onClose: () => void;
 }) {
   const [recipe, setRecipe] = useState<RecipeData | null>(null);
+  const [printReady, setPrintReady] = useState<PrintReadyData | null>(null);
   const [history, setHistory] = useState<EditHistoryRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   // Reason: open in diff mode when launched from an edit item; let the user flip to the full recipe.
-  const [mode, setMode] = useState<'recipe' | 'diff'>(editId ? 'diff' : 'recipe');
+  const [mode, setMode] = useState<'recipe' | 'diff' | 'clean'>(editId ? 'diff' : 'recipe');
 
   useEffect(() => setMode(editId ? 'diff' : 'recipe'), [recipeId, editId]);
 
@@ -64,6 +75,7 @@ export function RecipeViewModal({
   useEffect(() => {
     let active = true;
     setRecipe(null);
+    setPrintReady(null);
     setHistory([]);
     setError(null);
     fetch(`/api/v1/admin/content/recipes/${recipeId}`, { cache: 'no-store' })
@@ -74,6 +86,7 @@ export function RecipeViewModal({
       .then((data) => {
         if (!active) return;
         setRecipe(data.recipe as RecipeData);
+        setPrintReady((data.print_ready ?? null) as PrintReadyData | null);
         setHistory((data.history ?? []) as EditHistoryRow[]);
       })
       .catch((e) => active && setError(e instanceof Error ? e.message : 'Error de conexión'));
@@ -114,40 +127,103 @@ export function RecipeViewModal({
                   : [];
             const hasText = !isPlaceholder(recipe.ingredients) || !isPlaceholder(recipe.instructions);
             const showRaw = !hasText && !!recipe.raw_recipe_text?.trim();
+            // Reason: cleaning_version != null sólo prueba que la IA corrió alguna vez —
+            // NO que el contenido actual sea suyo. Si un humano editó la versión limpia
+            // (cualquier row print_ready en el historial), ese contenido es del humano y
+            // el cleaning_version se conserva por debajo. Así que "(AI)" sólo aplica cuando
+            // la IA limpió Y nadie la editó después. history viene desc → [0] = más reciente.
+            const lastCleanEdit = history.find((h) => h.edit_target === 'print_ready');
+            const cleanByAi = !!printReady?.cleaning_version && !lastCleanEdit;
+            const cleanEditor =
+              lastCleanEdit?.profiles?.full_name?.trim() ||
+              lastCleanEdit?.profiles?.email?.trim() ||
+              guestLabel(recipe.guests);
+            const cleanTitle = cleanByAi ? 'Versión limpia (AI)' : `Versión limpiada por ${cleanEditor}`;
+            const cleanCta = cleanByAi ? 'Ver versión limpia (AI)' : `Ver versión limpiada por ${cleanEditor}`;
 
             return (
             <>
               <p className="mb-2 font-serif text-xs uppercase tracking-[0.2em] text-gray-400">
                 {mode === 'diff'
                   ? 'Cambios'
-                  : `${guestLabel(recipe.guests)}${
-                      recipe.source === 'collection'
-                        ? ' · vía link'
-                        : recipe.source === 'imported'
-                          ? ' · import'
-                          : ''
-                    }${recipe.deleted_at ? ' · eliminada' : ''}`}
+                  : mode === 'clean'
+                    ? cleanTitle
+                    : `${guestLabel(recipe.guests)}${
+                        recipe.source === 'collection'
+                          ? ' · vía link'
+                          : recipe.source === 'imported'
+                            ? ' · import'
+                            : ''
+                      }${recipe.deleted_at ? ' · eliminada' : ''}`}
               </p>
               <h1 className="mb-3 font-serif text-3xl leading-tight text-gray-900 lg:text-4xl">
-                {recipe.recipe_name}
+                {mode === 'clean' && printReady?.recipe_name_clean?.trim()
+                  ? printReady.recipe_name_clean
+                  : recipe.recipe_name}
               </h1>
-              {editId && (
-                <button
-                  type="button"
-                  onClick={() => setMode((m) => (m === 'diff' ? 'recipe' : 'diff'))}
-                  className="mb-4 text-xs font-medium text-brand-honey underline-offset-2 hover:underline"
-                >
-                  {mode === 'diff' ? 'Ver receta completa →' : 'Ver cambios →'}
-                </button>
-              )}
+              <div className="mb-4 flex flex-wrap items-center gap-4">
+                {editId && (
+                  <button
+                    type="button"
+                    onClick={() => setMode((m) => (m === 'diff' ? 'recipe' : 'diff'))}
+                    className="text-xs font-medium text-brand-honey underline-offset-2 hover:underline"
+                  >
+                    {mode === 'diff' ? 'Ver receta completa →' : 'Ver cambios →'}
+                  </button>
+                )}
+                {/* Reason: la versión limpia (recipe_print_ready) sólo existe tras el cleaning; si no, lo decimos. */}
+                {printReady ? (
+                  <button
+                    type="button"
+                    onClick={() => setMode((m) => (m === 'clean' ? 'recipe' : 'clean'))}
+                    className="text-xs font-medium text-brand-honey underline-offset-2 hover:underline"
+                  >
+                    {mode === 'clean' ? 'Ver original →' : `${cleanCta} →`}
+                  </button>
+                ) : (
+                  <span className="text-xs text-gray-400">Sin versión limpia todavía</span>
+                )}
+              </div>
               {mode === 'recipe' && recipe.comments?.trim() && (
                 <p className="mb-2 font-serif text-sm italic text-gray-500">{recipe.comments}</p>
+              )}
+              {mode === 'clean' && printReady?.note_clean?.trim() && (
+                <p className="mb-2 font-serif text-sm italic text-gray-500">{printReady.note_clean}</p>
               )}
 
               <div className="my-6 border-t border-gray-200" />
 
               {mode === 'diff' ? (
                 <RecipeDiffView history={history} editId={editId ?? ''} />
+              ) : mode === 'clean' ? (
+                <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_1.4fr]">
+                  <div className="min-w-0">
+                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-gray-500">
+                      Ingredientes
+                    </h3>
+                    <p className="whitespace-pre-line font-serif text-sm leading-relaxed text-gray-700">
+                      {printReady?.ingredients_clean?.trim() || '—'}
+                    </p>
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-gray-500">
+                      Preparación
+                    </h3>
+                    <div className="font-serif text-sm leading-[1.6] text-gray-700">
+                      {printReady?.instructions_clean?.trim()
+                        ? printReady.instructions_clean.split('\n').map((line, i) =>
+                            line.trim() === '' ? (
+                              <div key={i} className="h-[1.6em]" />
+                            ) : (
+                              <p key={i} className="m-0">
+                                {line}
+                              </p>
+                            )
+                          )
+                        : '—'}
+                    </div>
+                  </div>
+                </div>
               ) : (
               <>
               {hasText && (

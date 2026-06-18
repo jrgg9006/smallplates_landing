@@ -7,6 +7,7 @@ export interface EditHistoryRow {
   id: string;
   edited_at: string;
   edited_by: string | null;
+  edit_target?: 'original' | 'print_ready' | null;
   recipe_name_before: string | null;
   ingredients_before: string | null;
   instructions_before: string | null;
