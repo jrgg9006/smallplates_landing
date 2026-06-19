@@ -56,6 +56,7 @@ interface RecipeData {
   book_review_status: string;
   book_review_notes: string | null;
   annex_source_urls?: string[];
+  annex_reviewed?: boolean;
 }
 
 interface ArchivedRecipe {
@@ -225,7 +226,12 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
   // still need a look so nothing slips. Derived, no DB state.
   const annexSummary = (detail?.recipes ?? []).reduce(
     (acc, r) => {
-      const { state } = annexRowState(r.document_urls, r.image_url, r.annex_source_urls ?? null);
+      const { state } = annexRowState(
+        r.document_urls,
+        r.image_url,
+        r.annex_source_urls ?? null,
+        r.annex_reviewed ?? false
+      );
       if (state === 'none') return acc;
       acc.withPhoto += 1;
       if (state === 'selected') acc.withOriginal += 1;
