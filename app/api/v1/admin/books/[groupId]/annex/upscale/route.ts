@@ -8,10 +8,11 @@ import { annexSrcStoragePath, shouldQueueForUpscale } from '@/lib/annex/upscale'
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-// Reason: cap the normalized image so Real-ESRGAN 4x stays within a sane output size.
-// A handwritten note at 2048px upscales to 8192px — plenty for one-image-per-page print,
-// and it keeps Replicate from choking on full-resolution phone photos (4000px+ -> 16000px).
-const MAX_NORMALIZED_EDGE = 2048;
+// Reason: Real-ESRGAN's GPU rejects inputs whose TOTAL pixels exceed ~2,096,704
+// ("greater than the max size that fits in GPU memory"). Capping the longest edge is not
+// enough (e.g. 2048x1536 = 3.1M px is rejected), so we cap total pixels with a safety margin.
+// At 4x, ~2M input px still yields ~8M output px — plenty for one-image-per-page print.
+const MAX_UPSCALE_INPUT_PIXELS = 2_000_000;
 
 // POST — normalize every not-yet-processed annex image for this group and queue it for upscale.
 export async function POST(
@@ -48,16 +49,20 @@ export async function POST(
         if (!srcRes.ok) throw new Error(`download failed (${srcRes.status})`);
         const inputBuffer = Buffer.from(await srcRes.arrayBuffer());
 
-        // Reason: rotate() bakes in EXIF orientation; png() guarantees a clean, lossless
-        // input for Replicate regardless of the guest's original format (webp/gif/jpg).
-        const normalized = await sharp(inputBuffer)
-          .rotate()
-          .resize(MAX_NORMALIZED_EDGE, MAX_NORMALIZED_EDGE, {
-            fit: 'inside',
-            withoutEnlargement: true,
-          })
-          .png()
-          .toBuffer();
+        // Reason: rotate() bakes in EXIF orientation; resolve true post-rotation dimensions
+        // so we can bound TOTAL pixels under Real-ESRGAN's GPU limit (downscale only, never enlarge).
+        const rotated = await sharp(inputBuffer).rotate().toBuffer({ resolveWithObject: true });
+        const { width: rw, height: rh } = rotated.info;
+        let normalizer = sharp(rotated.data);
+        if (rw && rh && rw * rh > MAX_UPSCALE_INPUT_PIXELS) {
+          const scale = Math.sqrt(MAX_UPSCALE_INPUT_PIXELS / (rw * rh));
+          normalizer = normalizer.resize(
+            Math.max(1, Math.floor(rw * scale)),
+            Math.max(1, Math.floor(rh * scale))
+          );
+        }
+        // png() guarantees a clean, lossless input for Replicate regardless of source format.
+        const normalized = await normalizer.png().toBuffer();
 
         const path = annexSrcStoragePath(
           groupId,
