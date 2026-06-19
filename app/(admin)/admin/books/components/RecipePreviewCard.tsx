@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
+import { annexRowState } from '@/lib/annex/selection';
 
 interface RecipeData {
   id: string;
@@ -12,6 +13,8 @@ interface RecipeData {
   guest_name: string;
   guest_id: string;
   image_url: string | null;
+  document_urls: string[] | null;
+  annex_source_urls?: string[];
   generated_image_url: string | null;
   generated_image_url_print: string | null;
   image_upscale_status: string | null;
@@ -39,6 +42,10 @@ export default function RecipePreviewCard({ recipe, groupId, onReview }: RecipeP
 
   const hasBaseImage = !!recipe.generated_image_url;
   const hasPrintImage = !!recipe.generated_image_url_print;
+
+  // Reason: tri-state originals marker so a recipe with a guest photo never gets skipped
+  // in review. Derived (no DB state) from the guest's eligible images vs. what's marked.
+  const annex = annexRowState(recipe.document_urls, recipe.image_url, recipe.annex_source_urls ?? null);
 
   // Prioritize clean version
   const displayName = recipe.print_ready?.recipe_name_clean || recipe.recipe_name;
@@ -109,6 +116,17 @@ export default function RecipePreviewCard({ recipe, groupId, onReview }: RecipeP
             ? 'Needs Revision'
             : ''}
         </span>
+
+        {annex.state === 'unreviewed' && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded shrink-0 bg-amber-100 text-amber-700 border border-amber-300 whitespace-nowrap">
+            ⚠ Foto sin revisar
+          </span>
+        )}
+        {annex.state === 'selected' && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded shrink-0 bg-emerald-100 text-emerald-700 whitespace-nowrap">
+            ✓ {annex.selectedCount} original
+          </span>
+        )}
       </button>
 
       {/* Expanded content */}
