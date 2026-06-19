@@ -84,8 +84,6 @@ export default function BookReviewOverlay({
   const [annexStatusByUrl, setAnnexStatusByUrl] = useState<
     Record<string, { upscale_status: string | null; print_url: string | null }>
   >({});
-  const [annexUpscaling, setAnnexUpscaling] = useState(false);
-  const [annexPolling, setAnnexPolling] = useState(false);
   const [markingReviewed, setMarkingReviewed] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');
@@ -513,62 +511,6 @@ export default function BookReviewOverlay({
     loadAnnexStatus();
   }, [loadAnnexStatus]);
 
-  // Reason: count selected originals across all recipes — drives the book-level button.
-  const selectedAnnexCount = useMemo(
-    () => localRecipes.reduce((n, r) => n + (r.annex_source_urls?.length ?? 0), 0),
-    [localRecipes]
-  );
-
-  const triggerUpscale = useCallback(async () => {
-    setAnnexUpscaling(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/v1/admin/books/${groupId}/annex/upscale`, { method: 'POST' });
-      if (!res.ok) {
-        const j = await res.json().catch(() => ({}));
-        setError(j.error || 'No se pudo iniciar el upscale');
-        setAnnexUpscaling(false);
-        return;
-      }
-      await loadAnnexStatus();
-      setAnnexPolling(true);
-    } catch {
-      setError('No se pudo iniciar el upscale');
-      setAnnexUpscaling(false);
-    }
-  }, [groupId, loadAnnexStatus]);
-
-  // Reason: the upscale Edge Function runs async via the DB webhook — no realtime back to the
-  // client — so poll the annex GET every 2s (max 90s) while any row is in flight. Mirrors
-  // the operations drawer polling (app/(admin)/admin/operations/page.tsx).
-  useEffect(() => {
-    if (!annexPolling) return;
-    const startedAt = Date.now();
-    const TIMEOUT_MS = 90_000;
-    const intervalId = setInterval(async () => {
-      if (Date.now() - startedAt >= TIMEOUT_MS) {
-        setAnnexPolling(false);
-        setAnnexUpscaling(false);
-        clearInterval(intervalId);
-        return;
-      }
-      await loadAnnexStatus();
-    }, 2_000);
-    return () => clearInterval(intervalId);
-  }, [annexPolling, loadAnnexStatus]);
-
-  // Reason: stop polling once no row is 'pending'/'processing' anymore.
-  useEffect(() => {
-    if (!annexPolling) return;
-    const anyInFlight = Object.values(annexStatusByUrl).some(
-      (s) => s.upscale_status === 'pending' || s.upscale_status === 'processing'
-    );
-    if (!anyInFlight) {
-      setAnnexPolling(false);
-      setAnnexUpscaling(false);
-    }
-  }, [annexStatusByUrl, annexPolling]);
-
   // Reason: one small badge per image reflecting its upscale lifecycle. null = selected but
   // not yet processed (no badge — the toggle already shows "✓ Original incluido").
   const renderAnnexStatus = (url: string) => {
@@ -605,17 +547,6 @@ export default function BookReviewOverlay({
           Book Review: {coupleName}
         </h2>
         <div className="flex items-center gap-4">
-          {!showSummary && selectedAnnexCount > 0 && (
-            <button
-              type="button"
-              onClick={triggerUpscale}
-              disabled={annexUpscaling}
-              className="inline-flex items-center gap-1.5 rounded bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
-            >
-              {annexUpscaling && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-              {annexUpscaling ? 'Procesando originals…' : `Upscale originals (${selectedAnnexCount})`}
-            </button>
-          )}
           {!showSummary && auditFlaggedCount > 0 && (
             <span className="flex items-center gap-1 rounded bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-300">
               <AlertTriangle className="h-3 w-3" />
