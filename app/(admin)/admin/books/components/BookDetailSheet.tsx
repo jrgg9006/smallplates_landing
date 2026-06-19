@@ -11,6 +11,7 @@ import type { BookStatus } from '@/lib/types/database';
 import type { BookSummary } from './BookCard';
 import RecipePreviewCard from './RecipePreviewCard';
 import BookReviewOverlay from './BookReviewOverlay';
+import { annexRowState } from '@/lib/annex/selection';
 
 interface Contributor {
   id: string;
@@ -54,6 +55,7 @@ interface RecipeData {
   needs_review: boolean;
   book_review_status: string;
   book_review_notes: string | null;
+  annex_source_urls?: string[];
 }
 
 interface ArchivedRecipe {
@@ -218,6 +220,20 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
   // Keyed on the URL (which carries a cache-buster on re-upload), so it re-measures
   // whenever the photo changes.
   const coupleImageUrl = detail?.group.couple_image_url || null;
+
+  // Reason: book-level checklist of originals review — surfaces how many photo recipes
+  // still need a look so nothing slips. Derived, no DB state.
+  const annexSummary = (detail?.recipes ?? []).reduce(
+    (acc, r) => {
+      const { state } = annexRowState(r.document_urls, r.image_url, r.annex_source_urls ?? null);
+      if (state === 'none') return acc;
+      acc.withPhoto += 1;
+      if (state === 'selected') acc.withOriginal += 1;
+      else acc.unreviewed += 1;
+      return acc;
+    },
+    { withPhoto: 0, withOriginal: 0, unreviewed: 0 }
+  );
   useEffect(() => {
     if (!coupleImageUrl) {
       setCoupleImageDims(null);
@@ -503,6 +519,17 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
               >
                 {recipesExpanded && (
                   <div className="space-y-2">
+                    {annexSummary.withPhoto > 0 && (
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-1 pb-1 text-[11px] text-gray-500">
+                        <span>📷 {annexSummary.withPhoto} con foto</span>
+                        <span className="text-emerald-600">✓ {annexSummary.withOriginal} con original</span>
+                        {annexSummary.unreviewed > 0 && (
+                          <span className="text-amber-600 font-medium">
+                            ⚠ {annexSummary.unreviewed} sin revisar
+                          </span>
+                        )}
+                      </div>
+                    )}
                     {detail.recipes.map((r, i) => (
                       <RecipePreviewCard
                         key={r.id}
