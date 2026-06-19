@@ -590,8 +590,31 @@ export default function BookReviewOverlay({
             {showPhoto && hasOriginalPhoto && !isEditing ? (
               <div className="flex-1 overflow-y-auto p-8 lg:p-12 bg-gray-50">
                 <div className="max-w-xl mx-auto">
-                  <div className="mb-4 px-3 py-1.5 bg-sky-200/60 text-sky-800 text-xs font-medium rounded inline-block">
-                    Foto original del invitado
+                  <div className="mb-4 flex items-center gap-3">
+                    <span className="px-3 py-1.5 bg-sky-200/60 text-sky-800 text-xs font-medium rounded">
+                      Foto original del invitado
+                    </span>
+                    {/* Reason: single-image is the common case — show the annex toggle here next to
+                        the label so the admin doesn't have to scroll past a tall photo to find it.
+                        Multiple images keep a per-image button below (rendered further down). */}
+                    {originalFiles.length === 1 && !originalFiles[0].toLowerCase().split('?')[0].endsWith('.pdf') && (() => {
+                      const url = originalFiles[0];
+                      const selected = (recipe?.annex_source_urls ?? []).includes(url);
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => toggleAnnex(url)}
+                          disabled={annexBusy === url}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border transition-colors disabled:opacity-50 ${
+                            selected
+                              ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                              : 'bg-white text-gray-700 border-gray-300 hover:border-emerald-500'
+                          }`}
+                        >
+                          {selected ? '✓ Original incluido' : 'Incluir como original'}
+                        </button>
+                      );
+                    })()}
                   </div>
                   <p className="text-xs uppercase tracking-[0.2em] text-gray-400 font-serif mb-4">
                     {recipe.guest_name}
@@ -624,7 +647,7 @@ export default function BookReviewOverlay({
                               className="w-full rounded border border-gray-200 hover:border-gray-400 transition-colors"
                             />
                           </a>
-                          {(() => {
+                          {originalFiles.length > 1 && (() => {
                             const selected = (recipe?.annex_source_urls ?? []).includes(url);
                             return (
                               <button
