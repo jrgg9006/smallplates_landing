@@ -6,12 +6,12 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Pencil, Check, X, Loader2, ChevronDown, ChevronRight, Download, Upload } from 'lucide-react';
+import { Pencil, Check, X, Loader2, ChevronDown, ChevronRight, Upload } from 'lucide-react';
 import type { BookStatus } from '@/lib/types/database';
 import type { BookSummary } from './BookCard';
 import RecipePreviewCard from './RecipePreviewCard';
 import BookReviewOverlay from './BookReviewOverlay';
-import { annexRowState } from '@/lib/annex/selection';
+import { annexRowState, annexUpscaleCounts } from '@/lib/annex/selection';
 
 interface Contributor {
   id: string;
@@ -180,7 +180,12 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
   const [editingNotes, setEditingNotes] = useState(false);
   const [notesValue, setNotesValue] = useState('');
   const [reviewOverlayOpen, setReviewOverlayOpen] = useState(false);
-  const [downloadingPackage, setDownloadingPackage] = useState(false);
+  // Reason: book-level upscale of selected originals — rows come from GET /annex (carries
+  // upscale_status), polled while any is in flight. Drives the button + the pre-export warning.
+  const [annexRows, setAnnexRows] = useState<{ upscale_status: string | null }[]>([]);
+  const [annexUpscaling, setAnnexUpscaling] = useState(false);
+  const [annexPolling, setAnnexPolling] = useState(false);
+  const [showFetchWarn, setShowFetchWarn] = useState(false);
   const [reviewStartIndex, setReviewStartIndex] = useState<number | undefined>(undefined);
   // Reason: cache-busting for images — Supabase storage URLs stay the same after re-upload
   const [fetchTimestamp, setFetchTimestamp] = useState(Date.now());
@@ -216,6 +221,78 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
       setDetail(null);
     }
   }, [open, book, fetchDetail]);
+
+  const annexCounts = annexUpscaleCounts(annexRows);
+
+  const loadAnnexRows = useCallback(async (groupId: string) => {
+    try {
+      const res = await fetch(`/api/v1/admin/books/${groupId}/annex`);
+      if (!res.ok) return;
+      const { annex_images } = (await res.json()) as {
+        annex_images: { upscale_status: string | null }[];
+      };
+      setAnnexRows((annex_images ?? []).map((r) => ({ upscale_status: r.upscale_status ?? null })));
+    } catch {
+      // Swallow transient errors; polling/next load will retry.
+    }
+  }, []);
+
+  useEffect(() => {
+    // Reason: refresh annex upscale status when the sheet opens and whenever the review
+    // overlay closes (the admin may have marked new originals in there).
+    if (open && book && !reviewOverlayOpen) {
+      loadAnnexRows(book.id);
+    }
+  }, [open, book, reviewOverlayOpen, loadAnnexRows]);
+
+  const triggerUpscale = useCallback(async () => {
+    if (!book) return;
+    setAnnexUpscaling(true);
+    try {
+      const res = await fetch(`/api/v1/admin/books/${book.id}/annex/upscale`, { method: 'POST' });
+      if (!res.ok) {
+        alert('No se pudo iniciar el upscale');
+        setAnnexUpscaling(false);
+        return;
+      }
+      await loadAnnexRows(book.id);
+      setAnnexPolling(true);
+    } catch {
+      alert('No se pudo iniciar el upscale');
+      setAnnexUpscaling(false);
+    }
+  }, [book, loadAnnexRows]);
+
+  useEffect(() => {
+    if (!annexPolling || !book) return;
+    const startedAt = Date.now();
+    const TIMEOUT_MS = 90_000;
+    const intervalId = setInterval(async () => {
+      if (Date.now() - startedAt >= TIMEOUT_MS) {
+        setAnnexPolling(false);
+        setAnnexUpscaling(false);
+        clearInterval(intervalId);
+        return;
+      }
+      await loadAnnexRows(book.id);
+    }, 2_000);
+    return () => clearInterval(intervalId);
+  }, [annexPolling, book, loadAnnexRows]);
+
+  useEffect(() => {
+    if (!annexPolling) return;
+    if (annexCounts.processing === 0) {
+      setAnnexPolling(false);
+      setAnnexUpscaling(false);
+    }
+  }, [annexCounts.processing, annexPolling]);
+
+  const copyFetchCommand = useCallback(() => {
+    if (!detail) return;
+    const cmd = `node scripts/indesign/fetch-book.js ${detail.group.id}`;
+    navigator.clipboard.writeText(cmd);
+    alert('Copied to clipboard:\n' + cmd);
+  }, [detail]);
 
   // Reason: load the couple image off-screen to read its natural pixel size.
   // Keyed on the URL (which carries a cache-buster on re-upload), so it re-measures
@@ -781,40 +858,28 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                   </Button>
                 ) : (
                   <>
-                    {currentStatus === 'ready_to_print' && (
+                    {annexCounts.selected > 0 && (
                       <Button
                         variant="outline"
                         size="sm"
-                        className="border-brand-honey text-brand-honey hover:bg-brand-honey/10"
-                        disabled={downloadingPackage}
-                        onClick={async () => {
-                          setDownloadingPackage(true);
-                          try {
-                            const res = await fetch(`/api/v1/admin/books/${detail.group.id}/package`);
-                            if (!res.ok) {
-                              const data = await res.json();
-                              throw new Error(data.error || 'Download failed');
-                            }
-                            const blob = await res.blob();
-                            const url = URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url;
-                            a.download = res.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || 'book-package.zip';
-                            a.click();
-                            URL.revokeObjectURL(url);
-                          } catch (err) {
-                            alert(err instanceof Error ? err.message : 'Download failed');
-                          } finally {
-                            setDownloadingPackage(false);
-                          }
-                        }}
+                        className={
+                          annexCounts.notReady === 0
+                            ? 'border-emerald-500 text-emerald-600'
+                            : 'border-brand-honey text-brand-honey hover:bg-brand-honey/10'
+                        }
+                        disabled={annexUpscaling || annexCounts.processing > 0 || annexCounts.notReady === 0}
+                        onClick={triggerUpscale}
                       >
-                        {downloadingPackage ? (
-                          <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                        {(annexUpscaling || annexCounts.processing > 0) ? (
+                          <>
+                            <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                            Procesando… ({annexCounts.ready}/{annexCounts.selected})
+                          </>
+                        ) : annexCounts.notReady === 0 ? (
+                          '✓ Originals listos'
                         ) : (
-                          <Download className="w-3 h-3 mr-1" />
+                          `Upscale originals (${annexCounts.notReady})`
                         )}
-                        {downloadingPackage ? 'Generating...' : 'Download Book Package'}
                       </Button>
                     )}
                     {currentStatus === 'ready_to_print' && (
@@ -823,9 +888,13 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                         size="sm"
                         className="text-gray-500"
                         onClick={() => {
-                          const cmd = `node scripts/indesign/fetch-book.js ${detail.group.id}`;
-                          navigator.clipboard.writeText(cmd);
-                          alert('Copied to clipboard:\n' + cmd);
+                          // Reason: don't hard-block — warn if there are selected originals not yet
+                          // upscaled, then let the admin proceed anyway.
+                          if (annexCounts.notReady > 0) {
+                            setShowFetchWarn(true);
+                          } else {
+                            copyFetchCommand();
+                          }
                         }}
                       >
                         Copy Fetch Command
@@ -869,6 +938,35 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                 }}
                 onReviewComplete={onStatusChange}
               />
+            )}
+
+            {showFetchWarn && (
+              <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 p-4">
+                <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+                  <h3 className="text-lg font-semibold text-gray-900">Originals sin procesar</h3>
+                  <p className="mt-3 text-sm text-gray-600">
+                    Hay {annexCounts.notReady} foto(s) marcada(s) como original que todavía no pasaron
+                    por upscale (alta resolución). Si generas el libro ahora, esas imágenes saldrán en
+                    baja calidad o no se incluirán. Te recomiendo correr &quot;Upscale originals&quot;
+                    antes.
+                  </p>
+                  <div className="mt-6 flex justify-end gap-3">
+                    <Button variant="outline" size="sm" onClick={() => setShowFetchWarn(false)}>
+                      Cancelar
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="bg-brand-honey text-white hover:bg-brand-honey/90"
+                      onClick={() => {
+                        copyFetchCommand();
+                        setShowFetchWarn(false);
+                      }}
+                    >
+                      Avanzar de todos modos
+                    </Button>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         ) : (
