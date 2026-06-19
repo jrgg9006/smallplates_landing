@@ -1,12 +1,16 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { X, ChevronLeft, ChevronRight, Check, AlertTriangle, Loader2, Pencil, Trash2 } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Check, AlertTriangle, Loader2, Pencil, Trash2, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { BookReviewStatus } from '@/lib/types/database';
 import { ArchiveRecipeModal } from './ArchiveRecipeModal';
 import { auditRecipe, type RecipeAudit, type SectionKey } from '@/lib/recipe-audit';
 import { RecipeAuditStrip, HighlightedText } from './RecipeAuditStrip';
+
+// Reason: explains to the reviewer what marking an "original" actually does downstream.
+const ANNEX_HELP =
+  'Al dar clic, esta imagen se incluye tal cual en el libro impreso, en una sección de anexos al final llamada "Originals".';
 
 interface ReviewRecipe {
   id: string;
@@ -603,6 +607,7 @@ export default function BookReviewOverlay({
                       return (
                         <button
                           type="button"
+                          title={ANNEX_HELP}
                           onClick={() => toggleAnnex(url)}
                           disabled={annexBusy === url}
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border transition-colors disabled:opacity-50 ${
@@ -612,6 +617,7 @@ export default function BookReviewOverlay({
                           }`}
                         >
                           {selected ? '✓ Original incluido' : 'Incluir como original'}
+                          <Info className="w-3.5 h-3.5 opacity-60" />
                         </button>
                       );
                     })()}
@@ -652,6 +658,7 @@ export default function BookReviewOverlay({
                             return (
                               <button
                                 type="button"
+                                title={ANNEX_HELP}
                                 onClick={() => toggleAnnex(url)}
                                 disabled={annexBusy === url}
                                 className={`mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border transition-colors disabled:opacity-50 ${
@@ -661,6 +668,7 @@ export default function BookReviewOverlay({
                                 }`}
                               >
                                 {selected ? '✓ Original incluido' : 'Incluir como original'}
+                                <Info className="w-3.5 h-3.5 opacity-60" />
                               </button>
                             );
                           })()}
