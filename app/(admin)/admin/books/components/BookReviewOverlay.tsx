@@ -7,6 +7,7 @@ import type { BookReviewStatus } from '@/lib/types/database';
 import { ArchiveRecipeModal } from './ArchiveRecipeModal';
 import { auditRecipe, type RecipeAudit, type SectionKey } from '@/lib/recipe-audit';
 import { RecipeAuditStrip, HighlightedText } from './RecipeAuditStrip';
+import { eligibleAnnexImages } from '@/lib/annex/selection';
 
 // Reason: explains to the reviewer what marking an "original" actually does downstream.
 const ANNEX_HELP =
@@ -35,6 +36,7 @@ interface ReviewRecipe {
   book_review_status: string;
   book_review_notes: string | null;
   annex_source_urls?: string[];
+  annex_reviewed?: boolean;
 }
 
 interface BookReviewOverlayProps {
@@ -462,6 +464,29 @@ export default function BookReviewOverlay({
     }
   }, [recipe, groupId]);
 
+  const toggleAnnexReviewed = useCallback(async (next: boolean) => {
+    if (!recipe) return;
+    setAnnexBusy('__reviewed__');
+    setError(null);
+    try {
+      const res = await fetch(`/api/v1/admin/books/${groupId}/annex`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipe_id: recipe.id, annex_reviewed: next }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        setError(j.error || 'No se pudo actualizar el estado');
+        return;
+      }
+      setLocalRecipes((prev) =>
+        prev.map((r) => (r.id === recipe.id ? { ...r, annex_reviewed: next } : r))
+      );
+    } finally {
+      setAnnexBusy(null);
+    }
+  }, [recipe, groupId]);
+
   // Reason: the annex GET (M1) returns each row's live upscale_status/print_url; we key it
   // by source_url so each image's badge can read it. Polling refreshes this same map.
   const loadAnnexStatus = useCallback(async () => {
@@ -758,6 +783,37 @@ export default function BookReviewOverlay({
                           </button>
                           {renderAnnexStatus(url)}
                         </span>
+                      );
+                    })()}
+                    {(() => {
+                      const selectedCount = (recipe?.annex_source_urls ?? []).length;
+                      const hasEligible =
+                        eligibleAnnexImages(recipe?.document_urls ?? null, recipe?.image_url ?? null).length > 0;
+                      // Reason: dismiss is only meaningful when there's a photo and nothing marked
+                      // (a marked original already resolves the recipe to green).
+                      if (!hasEligible || selectedCount > 0) return null;
+                      const dismissed = recipe?.annex_reviewed === true;
+                      return dismissed ? (
+                        <span className="inline-flex items-center gap-2 text-xs text-gray-500">
+                          ⊘ Revisada · sin original
+                          <button
+                            type="button"
+                            onClick={() => toggleAnnexReviewed(false)}
+                            disabled={annexBusy === '__reviewed__'}
+                            className="px-2 py-1 rounded border border-gray-300 text-gray-600 hover:border-gray-500 disabled:opacity-50"
+                          >
+                            Deshacer
+                          </button>
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => toggleAnnexReviewed(true)}
+                          disabled={annexBusy === '__reviewed__'}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:border-gray-500 transition-colors disabled:opacity-50"
+                        >
+                          No incluir (revisada)
+                        </button>
                       );
                     })()}
                   </div>
