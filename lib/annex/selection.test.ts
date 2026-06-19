@@ -4,6 +4,7 @@ import {
   nextAnnexPosition,
   eligibleAnnexImages,
   annexRowState,
+  annexUpscaleCounts,
 } from './selection';
 
 describe('isAnnexEligibleUrl', () => {
@@ -97,5 +98,31 @@ describe('annexRowState', () => {
   });
   it("'none' aunque dismissed=true si no hay foto elegible", () => {
     expect(annexRowState(['https://x/a.pdf'], null, [], true).state).toBe('none');
+  });
+});
+
+describe('annexUpscaleCounts', () => {
+  it('cuenta vacío', () => {
+    expect(annexUpscaleCounts([])).toEqual({ selected: 0, ready: 0, notReady: 0, processing: 0 });
+  });
+  it('clasifica por estado', () => {
+    expect(
+      annexUpscaleCounts([
+        { upscale_status: 'ready' },
+        { upscale_status: 'ready' },
+        { upscale_status: 'pending' },
+        { upscale_status: 'processing' },
+        { upscale_status: 'error' },
+        { upscale_status: null },
+      ])
+    ).toEqual({ selected: 6, ready: 2, notReady: 4, processing: 2 });
+  });
+  it('todo listo', () => {
+    expect(annexUpscaleCounts([{ upscale_status: 'ready' }])).toEqual({
+      selected: 1,
+      ready: 1,
+      notReady: 0,
+      processing: 0,
+    });
   });
 });

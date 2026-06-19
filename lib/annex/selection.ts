@@ -58,3 +58,24 @@ export function annexRowState(
   if (dismissed) return { state: 'dismissed', selectedCount: 0, eligibleCount };
   return { state: 'unreviewed', selectedCount: 0, eligibleCount };
 }
+
+export interface AnnexUpscaleCounts {
+  selected: number;
+  ready: number;
+  notReady: number;
+  processing: number;
+}
+
+/** Counts of a book's selected originals by upscale lifecycle. Drives the
+ *  book-level "Upscale originals" button and the pre-export warning. */
+export function annexUpscaleCounts(
+  rows: { upscale_status: string | null }[]
+): AnnexUpscaleCounts {
+  let ready = 0;
+  let processing = 0;
+  for (const r of rows) {
+    if (r.upscale_status === 'ready') ready += 1;
+    else if (r.upscale_status === 'pending' || r.upscale_status === 'processing') processing += 1;
+  }
+  return { selected: rows.length, ready, notReady: rows.length - ready, processing };
+}
