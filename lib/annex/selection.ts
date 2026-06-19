@@ -26,3 +26,31 @@ export function nextAnnexPosition(existingPositions: number[]): number {
   if (existingPositions.length === 0) return 0;
   return Math.max(...existingPositions) + 1;
 }
+
+/** Eligible raster images the guest submitted (document_urls + legacy image_url). */
+export function eligibleAnnexImages(
+  documentUrls: string[] | null,
+  imageUrl: string | null
+): string[] {
+  const all = [...(documentUrls ?? []), ...(imageUrl ? [imageUrl] : [])];
+  return all.filter(isAnnexEligibleUrl);
+}
+
+export type AnnexRowState = 'none' | 'unreviewed' | 'selected';
+
+/**
+ * Tri-state for the book-list marker. 'none' = no guest photo to review; 'unreviewed' =
+ * has photo(s) but nothing marked as original yet (needs a look); 'selected' = at least
+ * one image already marked (counts as reviewed).
+ */
+export function annexRowState(
+  documentUrls: string[] | null,
+  imageUrl: string | null,
+  annexSourceUrls: string[] | null
+): { state: AnnexRowState; selectedCount: number; eligibleCount: number } {
+  const eligibleCount = eligibleAnnexImages(documentUrls, imageUrl).length;
+  const selectedCount = (annexSourceUrls ?? []).length;
+  if (eligibleCount === 0) return { state: 'none', selectedCount: 0, eligibleCount: 0 };
+  if (selectedCount >= 1) return { state: 'selected', selectedCount, eligibleCount };
+  return { state: 'unreviewed', selectedCount: 0, eligibleCount };
+}

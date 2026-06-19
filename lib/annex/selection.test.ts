@@ -1,4 +1,10 @@
-import { isAnnexEligibleUrl, isValidAnnexSource, nextAnnexPosition } from './selection';
+import {
+  isAnnexEligibleUrl,
+  isValidAnnexSource,
+  nextAnnexPosition,
+  eligibleAnnexImages,
+  annexRowState,
+} from './selection';
 
 describe('isAnnexEligibleUrl', () => {
   it('acepta extensiones de imagen comunes', () => {
@@ -36,5 +42,41 @@ describe('nextAnnexPosition', () => {
   it('devuelve max+1', () => {
     expect(nextAnnexPosition([0, 1, 2])).toBe(3);
     expect(nextAnnexPosition([5])).toBe(6);
+  });
+});
+
+describe('eligibleAnnexImages', () => {
+  it('devuelve solo imágenes raster de document_urls + image_url', () => {
+    expect(
+      eligibleAnnexImages(['https://x/a.jpg', 'https://x/b.pdf'], 'https://x/c.png')
+    ).toEqual(['https://x/a.jpg', 'https://x/c.png']);
+  });
+  it('devuelve vacío cuando no hay imágenes elegibles', () => {
+    expect(eligibleAnnexImages(['https://x/a.pdf'], null)).toEqual([]);
+    expect(eligibleAnnexImages(null, null)).toEqual([]);
+  });
+});
+
+describe('annexRowState', () => {
+  it("'none' cuando la receta no tiene imágenes elegibles", () => {
+    expect(annexRowState(['https://x/a.pdf'], null, [])).toEqual({
+      state: 'none',
+      selectedCount: 0,
+      eligibleCount: 0,
+    });
+    expect(annexRowState(null, null, null).state).toBe('none');
+  });
+  it("'unreviewed' cuando hay foto elegible y 0 marcadas", () => {
+    expect(annexRowState(['https://x/a.jpg'], null, [])).toEqual({
+      state: 'unreviewed',
+      selectedCount: 0,
+      eligibleCount: 1,
+    });
+    expect(annexRowState(['https://x/a.jpg'], null, null).state).toBe('unreviewed');
+  });
+  it("'selected' cuando hay al menos una marcada (aunque falten otras)", () => {
+    expect(
+      annexRowState(['https://x/a.jpg', 'https://x/b.jpg'], null, ['https://x/a.jpg'])
+    ).toEqual({ state: 'selected', selectedCount: 1, eligibleCount: 2 });
   });
 });
