@@ -15,6 +15,7 @@ interface RecipeData {
   image_url: string | null;
   document_urls: string[] | null;
   annex_source_urls?: string[];
+  annex_reviewed?: boolean;
   generated_image_url: string | null;
   generated_image_url_print: string | null;
   image_upscale_status: string | null;
@@ -45,7 +46,12 @@ export default function RecipePreviewCard({ recipe, groupId, onReview }: RecipeP
 
   // Reason: tri-state originals marker so a recipe with a guest photo never gets skipped
   // in review. Derived (no DB state) from the guest's eligible images vs. what's marked.
-  const annex = annexRowState(recipe.document_urls, recipe.image_url, recipe.annex_source_urls ?? null);
+  const annex = annexRowState(
+    recipe.document_urls,
+    recipe.image_url,
+    recipe.annex_source_urls ?? null,
+    recipe.annex_reviewed ?? false
+  );
 
   // Prioritize clean version
   const displayName = recipe.print_ready?.recipe_name_clean || recipe.recipe_name;
@@ -125,6 +131,11 @@ export default function RecipePreviewCard({ recipe, groupId, onReview }: RecipeP
         {annex.state === 'selected' && (
           <span className="text-[10px] px-1.5 py-0.5 rounded shrink-0 bg-emerald-100 text-emerald-700 whitespace-nowrap">
             ✓ {annex.selectedCount} original
+          </span>
+        )}
+        {annex.state === 'dismissed' && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded shrink-0 bg-gray-100 text-gray-500 whitespace-nowrap">
+            ⊘ Revisada · sin original
           </span>
         )}
       </button>
