@@ -78,6 +78,12 @@ export default function BookReviewOverlay({
   const [error, setError] = useState<string | null>(null);
   // Reason: which source_url is currently being toggled as an "original", to disable its button.
   const [annexBusy, setAnnexBusy] = useState<string | null>(null);
+  // Reason: M2 — per-image upscale status keyed by source_url, plus batch-upscale + polling state.
+  const [annexStatusByUrl, setAnnexStatusByUrl] = useState<
+    Record<string, { upscale_status: string | null; print_url: string | null }>
+  >({});
+  const [annexUpscaling, setAnnexUpscaling] = useState(false);
+  const [annexPolling, setAnnexPolling] = useState(false);
   const [markingReviewed, setMarkingReviewed] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');
@@ -442,10 +448,129 @@ export default function BookReviewOverlay({
           return { ...r, annex_source_urls: next };
         })
       );
+      // Reason: keep the M2 status map in sync so badges react instantly to (un)marking.
+      setAnnexStatusByUrl((prev) => {
+        if (isSelected) {
+          const nextMap = { ...prev };
+          delete nextMap[sourceUrl];
+          return nextMap;
+        }
+        return { ...prev, [sourceUrl]: { upscale_status: null, print_url: null } };
+      });
     } finally {
       setAnnexBusy(null);
     }
   }, [recipe, groupId]);
+
+  // Reason: the annex GET (M1) returns each row's live upscale_status/print_url; we key it
+  // by source_url so each image's badge can read it. Polling refreshes this same map.
+  const loadAnnexStatus = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/v1/admin/books/${groupId}/annex`);
+      if (!res.ok) return;
+      const { annex_images } = (await res.json()) as {
+        annex_images: { source_url: string; upscale_status: string | null; print_url: string | null }[];
+      };
+      const map: Record<string, { upscale_status: string | null; print_url: string | null }> = {};
+      for (const row of annex_images ?? []) {
+        map[row.source_url] = {
+          upscale_status: row.upscale_status ?? null,
+          print_url: row.print_url ?? null,
+        };
+      }
+      setAnnexStatusByUrl(map);
+    } catch {
+      // Swallow transient errors; polling/next load will retry.
+    }
+  }, [groupId]);
+
+  useEffect(() => {
+    loadAnnexStatus();
+  }, [loadAnnexStatus]);
+
+  // Reason: count selected originals across all recipes — drives the book-level button.
+  const selectedAnnexCount = useMemo(
+    () => localRecipes.reduce((n, r) => n + (r.annex_source_urls?.length ?? 0), 0),
+    [localRecipes]
+  );
+
+  const triggerUpscale = useCallback(async () => {
+    setAnnexUpscaling(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/v1/admin/books/${groupId}/annex/upscale`, { method: 'POST' });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        setError(j.error || 'No se pudo iniciar el upscale');
+        setAnnexUpscaling(false);
+        return;
+      }
+      await loadAnnexStatus();
+      setAnnexPolling(true);
+    } catch {
+      setError('No se pudo iniciar el upscale');
+      setAnnexUpscaling(false);
+    }
+  }, [groupId, loadAnnexStatus]);
+
+  // Reason: the upscale Edge Function runs async via the DB webhook — no realtime back to the
+  // client — so poll the annex GET every 2s (max 90s) while any row is in flight. Mirrors
+  // the operations drawer polling (app/(admin)/admin/operations/page.tsx).
+  useEffect(() => {
+    if (!annexPolling) return;
+    const startedAt = Date.now();
+    const TIMEOUT_MS = 90_000;
+    const intervalId = setInterval(async () => {
+      if (Date.now() - startedAt >= TIMEOUT_MS) {
+        setAnnexPolling(false);
+        setAnnexUpscaling(false);
+        clearInterval(intervalId);
+        return;
+      }
+      await loadAnnexStatus();
+    }, 2_000);
+    return () => clearInterval(intervalId);
+  }, [annexPolling, loadAnnexStatus]);
+
+  // Reason: stop polling once no row is 'pending'/'processing' anymore.
+  useEffect(() => {
+    if (!annexPolling) return;
+    const anyInFlight = Object.values(annexStatusByUrl).some(
+      (s) => s.upscale_status === 'pending' || s.upscale_status === 'processing'
+    );
+    if (!anyInFlight) {
+      setAnnexPolling(false);
+      setAnnexUpscaling(false);
+    }
+  }, [annexStatusByUrl, annexPolling]);
+
+  // Reason: one small badge per image reflecting its upscale lifecycle. null = selected but
+  // not yet processed (no badge — the toggle already shows "✓ Original incluido").
+  const renderAnnexStatus = (url: string) => {
+    const st = annexStatusByUrl[url]?.upscale_status ?? null;
+    if (st === 'pending' || st === 'processing') {
+      return (
+        <span className="mt-1 inline-flex items-center gap-1 text-xs text-amber-600">
+          <Loader2 className="w-3 h-3 animate-spin" /> Procesando…
+        </span>
+      );
+    }
+    if (st === 'ready') {
+      return (
+        <span className="mt-1 inline-flex items-center gap-1 text-xs text-emerald-600">
+          <Check className="w-3 h-3" /> Listo para imprimir
+        </span>
+      );
+    }
+    if (st === 'error') {
+      return (
+        <span className="mt-1 inline-flex items-center gap-1 text-xs text-red-600">
+          <AlertTriangle className="w-3 h-3" /> Error al procesar
+        </span>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="fixed inset-0 z-[100] bg-gray-900 flex flex-col">
@@ -455,6 +580,17 @@ export default function BookReviewOverlay({
           Book Review: {coupleName}
         </h2>
         <div className="flex items-center gap-4">
+          {!showSummary && selectedAnnexCount > 0 && (
+            <button
+              type="button"
+              onClick={triggerUpscale}
+              disabled={annexUpscaling}
+              className="inline-flex items-center gap-1.5 rounded bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+            >
+              {annexUpscaling && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              {annexUpscaling ? 'Procesando originals…' : `Upscale originals (${selectedAnnexCount})`}
+            </button>
+          )}
           {!showSummary && auditFlaggedCount > 0 && (
             <span className="flex items-center gap-1 rounded bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-300">
               <AlertTriangle className="h-3 w-3" />
@@ -605,20 +741,23 @@ export default function BookReviewOverlay({
                       const url = originalFiles[0];
                       const selected = (recipe?.annex_source_urls ?? []).includes(url);
                       return (
-                        <button
-                          type="button"
-                          title={ANNEX_HELP}
-                          onClick={() => toggleAnnex(url)}
-                          disabled={annexBusy === url}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border transition-colors disabled:opacity-50 ${
-                            selected
-                              ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
-                              : 'bg-white text-gray-700 border-gray-300 hover:border-emerald-500'
-                          }`}
-                        >
-                          {selected ? '✓ Original incluido' : 'Incluir como original'}
-                          <Info className="w-3.5 h-3.5 opacity-60" />
-                        </button>
+                        <span className="inline-flex flex-col items-start">
+                          <button
+                            type="button"
+                            title={ANNEX_HELP}
+                            onClick={() => toggleAnnex(url)}
+                            disabled={annexBusy === url}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border transition-colors disabled:opacity-50 ${
+                              selected
+                                ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                                : 'bg-white text-gray-700 border-gray-300 hover:border-emerald-500'
+                            }`}
+                          >
+                            {selected ? '✓ Original incluido' : 'Incluir como original'}
+                            <Info className="w-3.5 h-3.5 opacity-60" />
+                          </button>
+                          {renderAnnexStatus(url)}
+                        </span>
                       );
                     })()}
                   </div>
@@ -656,20 +795,23 @@ export default function BookReviewOverlay({
                           {originalFiles.length > 1 && (() => {
                             const selected = (recipe?.annex_source_urls ?? []).includes(url);
                             return (
-                              <button
-                                type="button"
-                                title={ANNEX_HELP}
-                                onClick={() => toggleAnnex(url)}
-                                disabled={annexBusy === url}
-                                className={`mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border transition-colors disabled:opacity-50 ${
-                                  selected
-                                    ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
-                                    : 'bg-white text-gray-700 border-gray-300 hover:border-emerald-500'
-                                }`}
-                              >
-                                {selected ? '✓ Original incluido' : 'Incluir como original'}
-                                <Info className="w-3.5 h-3.5 opacity-60" />
-                              </button>
+                              <>
+                                <button
+                                  type="button"
+                                  title={ANNEX_HELP}
+                                  onClick={() => toggleAnnex(url)}
+                                  disabled={annexBusy === url}
+                                  className={`mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border transition-colors disabled:opacity-50 ${
+                                    selected
+                                      ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                                      : 'bg-white text-gray-700 border-gray-300 hover:border-emerald-500'
+                                  }`}
+                                >
+                                  {selected ? '✓ Original incluido' : 'Incluir como original'}
+                                  <Info className="w-3.5 h-3.5 opacity-60" />
+                                </button>
+                                <div>{renderAnnexStatus(url)}</div>
+                              </>
                             );
                           })()}
                         </div>
