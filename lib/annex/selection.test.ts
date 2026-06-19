@@ -79,4 +79,23 @@ describe('annexRowState', () => {
       annexRowState(['https://x/a.jpg', 'https://x/b.jpg'], null, ['https://x/a.jpg'])
     ).toEqual({ state: 'selected', selectedCount: 1, eligibleCount: 2 });
   });
+  it("'dismissed' cuando hay foto, 0 marcadas y dismissed=true", () => {
+    expect(annexRowState(['https://x/a.jpg'], null, [], true)).toEqual({
+      state: 'dismissed',
+      selectedCount: 0,
+      eligibleCount: 1,
+    });
+  });
+  it("'selected' gana sobre dismissed", () => {
+    expect(
+      annexRowState(['https://x/a.jpg'], null, ['https://x/a.jpg'], true).state
+    ).toBe('selected');
+  });
+  it('dismissed=false (u omitido) se comporta como antes', () => {
+    expect(annexRowState(['https://x/a.jpg'], null, []).state).toBe('unreviewed');
+    expect(annexRowState(['https://x/a.jpg'], null, [], false).state).toBe('unreviewed');
+  });
+  it("'none' aunque dismissed=true si no hay foto elegible", () => {
+    expect(annexRowState(['https://x/a.pdf'], null, [], true).state).toBe('none');
+  });
 });

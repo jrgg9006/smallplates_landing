@@ -36,21 +36,25 @@ export function eligibleAnnexImages(
   return all.filter(isAnnexEligibleUrl);
 }
 
-export type AnnexRowState = 'none' | 'unreviewed' | 'selected';
+export type AnnexRowState = 'none' | 'unreviewed' | 'selected' | 'dismissed';
 
 /**
- * Tri-state for the book-list marker. 'none' = no guest photo to review; 'unreviewed' =
- * has photo(s) but nothing marked as original yet (needs a look); 'selected' = at least
- * one image already marked (counts as reviewed).
+ * Tri/quad-state for the book-list marker.
+ *   'none'       = no guest photo to review.
+ *   'selected'   = at least one image marked as original (wins over dismissed).
+ *   'dismissed'  = reviewed and explicitly not included (0 marked).
+ *   'unreviewed' = has photo(s), 0 marked, not dismissed → still needs a look.
  */
 export function annexRowState(
   documentUrls: string[] | null,
   imageUrl: string | null,
-  annexSourceUrls: string[] | null
+  annexSourceUrls: string[] | null,
+  dismissed: boolean = false
 ): { state: AnnexRowState; selectedCount: number; eligibleCount: number } {
   const eligibleCount = eligibleAnnexImages(documentUrls, imageUrl).length;
   const selectedCount = (annexSourceUrls ?? []).length;
   if (eligibleCount === 0) return { state: 'none', selectedCount: 0, eligibleCount: 0 };
   if (selectedCount >= 1) return { state: 'selected', selectedCount, eligibleCount };
+  if (dismissed) return { state: 'dismissed', selectedCount: 0, eligibleCount };
   return { state: 'unreviewed', selectedCount: 0, eligibleCount };
 }
