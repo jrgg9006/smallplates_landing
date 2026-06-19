@@ -149,3 +149,55 @@ export async function DELETE(
     );
   }
 }
+
+// PATCH — set/clear the recipe-level "reviewed, not included" flag.
+// Body: { recipe_id, annex_reviewed }.
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ groupId: string }> }
+) {
+  try {
+    await requireAdminAuth();
+    const { groupId } = await params;
+    const supabase = createSupabaseAdminClient();
+    const { recipe_id, annex_reviewed } = (await request.json()) as {
+      recipe_id?: string;
+      annex_reviewed?: boolean;
+    };
+
+    if (!recipe_id || typeof annex_reviewed !== 'boolean') {
+      return NextResponse.json(
+        { error: 'recipe_id and annex_reviewed (boolean) are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate the recipe is actually in this group (same pattern as POST).
+    const { data: membership } = await supabase
+      .from('group_recipes')
+      .select('recipe_id')
+      .eq('group_id', groupId)
+      .eq('recipe_id', recipe_id)
+      .is('removed_at', null)
+      .maybeSingle();
+
+    if (!membership) {
+      return NextResponse.json({ error: 'Recipe not found in this group' }, { status: 404 });
+    }
+
+    const { error } = await supabase
+      .from('recipe_production_status')
+      .upsert(
+        { recipe_id, annex_reviewed, updated_at: new Date().toISOString() },
+        { onConflict: 'recipe_id' }
+      );
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Unauthorized' },
+      { status: 401 }
+    );
+  }
+}

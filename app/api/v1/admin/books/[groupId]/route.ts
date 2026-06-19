@@ -72,7 +72,7 @@ export async function GET(
               recipe_name_clean, ingredients_clean, instructions_clean,
               note_clean, cleaning_version
             ),
-            recipe_production_status(needs_review)
+            recipe_production_status(needs_review, annex_reviewed)
           `)
           .in('id', activeRecipeIds)
           .is('deleted_at', null)
@@ -208,6 +208,12 @@ export async function GET(
         book_review_status: (r as Record<string, unknown>).book_review_status as string || 'pending',
         book_review_notes: (r as Record<string, unknown>).book_review_notes as string | null || null,
         annex_source_urls: annexByRecipe.get(r.id) ?? [],
+        annex_reviewed: (() => {
+          const ps = Array.isArray(r.recipe_production_status)
+            ? r.recipe_production_status[0] || null
+            : r.recipe_production_status || null;
+          return (ps as { annex_reviewed?: boolean } | null)?.annex_reviewed ?? false;
+        })(),
       };
     });
 
