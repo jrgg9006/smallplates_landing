@@ -1026,15 +1026,18 @@ export default function BookReviewOverlay({
                     </button>
                   )}
                   {hasOriginalPhoto && (
+                    // Reason: this button only renders when the recipe actually has a guest photo,
+                    // so it stays visually loud (sky accent) to flag "there's an original to look at"
+                    // — easy to spot against the other muted toolbar buttons.
                     <button
                       onClick={() => { setShowPhoto(v => !v); setShowOriginal(false); }}
-                      className={`text-xs px-2 py-1 rounded transition-colors ${
+                      className={`text-xs px-2 py-1 rounded font-medium transition-colors ${
                         showPhoto
-                          ? 'bg-sky-500/30 text-sky-300'
-                          : 'bg-gray-700 text-gray-400 hover:text-gray-300'
+                          ? 'bg-sky-500 text-white'
+                          : 'bg-sky-500/20 text-sky-200 ring-1 ring-inset ring-sky-400/60 hover:bg-sky-500/30'
                       }`}
                     >
-                      {showPhoto ? 'Ocultar foto' : 'Foto original'} <kbd className="text-[9px] opacity-40 ml-1.5 px-1 py-0.5 rounded border border-gray-600">P</kbd>
+                      📷 {showPhoto ? 'Ocultar foto' : 'Foto original'} <kbd className="text-[9px] opacity-50 ml-1.5 px-1 py-0.5 rounded border border-sky-300/40">P</kbd>
                     </button>
                   )}
                   {!recipe.has_print_ready && (
