@@ -687,7 +687,7 @@ export default function BookReviewOverlay({
               <div className="flex-1 overflow-y-auto p-8 lg:p-12 bg-gray-50">
                 <div className="max-w-xl mx-auto">
                   <div className="mb-4 flex items-center gap-3">
-                    <span className="px-3 py-1.5 bg-sky-200/60 text-sky-800 text-xs font-medium rounded">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-sky-700">
                       Foto original del invitado
                     </span>
                     {/* Reason: single-image is the common case — show the annex toggle here next to
