@@ -889,8 +889,9 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                         className="text-gray-500"
                         onClick={() => {
                           // Reason: don't hard-block — warn if there are selected originals not yet
-                          // upscaled, then let the admin proceed anyway.
-                          if (annexCounts.notReady > 0) {
+                          // upscaled OR photo recipes nobody reviewed for originals, then let the
+                          // admin proceed anyway.
+                          if (annexCounts.notReady > 0 || annexSummary.unreviewed > 0) {
                             setShowFetchWarn(true);
                           } else {
                             copyFetchCommand();
@@ -943,13 +944,22 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
             {showFetchWarn && (
               <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 p-4">
                 <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-                  <h3 className="text-lg font-semibold text-gray-900">Originals sin procesar</h3>
-                  <p className="mt-3 text-sm text-gray-600">
-                    Hay {annexCounts.notReady} foto(s) marcada(s) como original que todavía no pasaron
-                    por upscale (alta resolución). Si generas el libro ahora, esas imágenes saldrán en
-                    baja calidad o no se incluirán. Te recomiendo correr &quot;Upscale originals&quot;
-                    antes.
-                  </p>
+                  <h3 className="text-lg font-semibold text-gray-900">Revisa antes de avanzar</h3>
+                  <ul className="mt-3 space-y-2 text-sm text-gray-600">
+                    {annexCounts.notReady > 0 && (
+                      <li>
+                        ⚠ Hay <strong>{annexCounts.notReady}</strong> original(es) marcados sin upscale
+                        (alta resolución). Si avanzas, saldrán en baja calidad o no se incluirán.
+                        Corre &quot;Upscale originals&quot; antes.
+                      </li>
+                    )}
+                    {annexSummary.unreviewed > 0 && (
+                      <li>
+                        ⚠ Hay <strong>{annexSummary.unreviewed}</strong> receta(s) con foto que nadie
+                        revisó para originals. Podrías estar dejando fuera fotos que valen la pena.
+                      </li>
+                    )}
+                  </ul>
                   <div className="mt-6 flex justify-end gap-3">
                     <Button variant="outline" size="sm" onClick={() => setShowFetchWarn(false)}>
                       Cancelar
