@@ -1106,25 +1106,15 @@ export default function BookReviewOverlay({
 }
 
 function ReviewBadge({ status }: { status: string }) {
+  // Reason: this is a status label, not an action — render as plain text (no chip/background)
+  // so only actionable controls in the toolbar read as buttons.
   if (status === 'approved') {
-    return (
-      <span className="text-xs px-2 py-1 rounded bg-green-600/20 text-green-400 font-medium">
-        Approved
-      </span>
-    );
+    return <span className="text-xs font-medium text-green-400">Approved</span>;
   }
   if (status === 'needs_revision') {
-    return (
-      <span className="text-xs px-2 py-1 rounded bg-red-600/20 text-red-400 font-medium">
-        Needs Revision
-      </span>
-    );
+    return <span className="text-xs font-medium text-red-400">Needs Revision</span>;
   }
-  return (
-    <span className="text-xs px-2 py-1 rounded bg-gray-600/20 text-gray-400 font-medium">
-      Pending Review
-    </span>
-  );
+  return <span className="text-xs font-medium text-gray-400">Pending Review</span>;
 }
 
 function SummaryView({
