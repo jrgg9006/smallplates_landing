@@ -978,11 +978,14 @@ export default function BookReviewOverlay({
                           : 'bg-sky-500/20 text-sky-200 ring-1 ring-inset ring-sky-400/60 hover:bg-sky-500/30'
                       }`}
                     >
-                      📷 {showPhoto ? 'Ocultar foto' : 'Foto original'} <kbd className="text-[9px] opacity-50 ml-1.5 px-1 py-0.5 rounded border border-sky-300/40">P</kbd>
+                      📷 {showPhoto ? 'Ocultar foto' : 'Foto original'}
+                      {annexNeedsReview && (
+                        <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded bg-amber-400 text-amber-950 font-semibold">
+                          ⚠ Sin revisar
+                        </span>
+                      )}
+                      <kbd className="text-[9px] opacity-50 ml-1.5 px-1 py-0.5 rounded border border-sky-300/40">P</kbd>
                     </button>
-                  )}
-                  {annexNeedsReview && (
-                    <span className="text-xs font-medium text-amber-400">⚠ Sin revisar</span>
                   )}
                   {!recipe.has_print_ready && (
                     <span className="text-xs px-2 py-1 rounded bg-red-500/20 text-red-300">
