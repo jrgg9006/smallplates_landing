@@ -7,7 +7,7 @@ import type { BookReviewStatus } from '@/lib/types/database';
 import { ArchiveRecipeModal } from './ArchiveRecipeModal';
 import { auditRecipe, type RecipeAudit, type SectionKey } from '@/lib/recipe-audit';
 import { RecipeAuditStrip, HighlightedText } from './RecipeAuditStrip';
-import { eligibleAnnexImages } from '@/lib/annex/selection';
+import { eligibleAnnexImages, annexRowState } from '@/lib/annex/selection';
 
 // Reason: explains to the reviewer what marking an "original" actually does downstream.
 const ANNEX_HELP =
@@ -421,6 +421,16 @@ export default function BookReviewOverlay({
     ? recipe.document_urls
     : (recipe?.image_url ? [recipe.image_url] : []);
   const hasOriginalPhoto = originalFiles.length > 0;
+  // Reason: surface in the toolbar when this recipe's photo still needs an originals decision
+  // (neither included nor dismissed) so a reviewer doesn't skip it.
+  const annexNeedsReview = recipe
+    ? annexRowState(
+        recipe.document_urls,
+        recipe.image_url,
+        recipe.annex_source_urls ?? null,
+        recipe.annex_reviewed ?? false
+      ).state === 'unreviewed'
+    : false;
 
   const toggleAnnex = useCallback(async (sourceUrl: string) => {
     if (!recipe) return;
@@ -970,6 +980,9 @@ export default function BookReviewOverlay({
                     >
                       📷 {showPhoto ? 'Ocultar foto' : 'Foto original'} <kbd className="text-[9px] opacity-50 ml-1.5 px-1 py-0.5 rounded border border-sky-300/40">P</kbd>
                     </button>
+                  )}
+                  {annexNeedsReview && (
+                    <span className="text-xs font-medium text-amber-400">⚠ Sin revisar</span>
                   )}
                   {!recipe.has_print_ready && (
                     <span className="text-xs px-2 py-1 rounded bg-red-500/20 text-red-300">
