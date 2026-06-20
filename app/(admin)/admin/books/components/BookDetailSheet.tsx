@@ -311,8 +311,10 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
       );
       if (state === 'none') return acc;
       acc.withPhoto += 1;
+      // Reason: only count 'unreviewed' as pending. 'dismissed' (revisada · sin original) is
+      // already decided — it must NOT show up as "sin revisar" in the counter or the warning.
       if (state === 'selected') acc.withOriginal += 1;
-      else acc.unreviewed += 1;
+      else if (state === 'unreviewed') acc.unreviewed += 1;
       return acc;
     },
     { withPhoto: 0, withOriginal: 0, unreviewed: 0 }
