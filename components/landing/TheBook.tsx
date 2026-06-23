@@ -7,6 +7,7 @@ import Image from "next/image";
 import SpecsGrid from "@/components/landing/TheBook/SpecsGrid";
 // import HandmadeCallout from "@/components/landing/TheBook/HandmadeCallout"; // Hidden from flow; component kept for reuse
 import DetailStrip from "@/components/landing/TheBook/DetailStrip";
+import BookDetailsModal from "@/components/landing/BookDetailsModal";
 import { trackStartBookClick } from "@/lib/analytics";
 import { isFreeTierEnabled } from "@/lib/feature-flags";
 
@@ -35,6 +36,7 @@ const specTags = [
 export default function TheBook() {
   const router = useRouter();
   const [isBookHovered, setIsBookHovered] = useState(false);
+  const [isBookDetailsOpen, setIsBookDetailsOpen] = useState(false);
 
   const handleCTA = () => {
     trackStartBookClick('the_book_primary');
@@ -235,13 +237,20 @@ export default function TheBook() {
             </button>
           </div>
 
-          {/* TODO: Link to full specifications page (not yet built) */}
-          <span className="mt-4 inline-block type-caption cursor-default">
+          <button
+            type="button"
+            onClick={() => setIsBookDetailsOpen(true)}
+            className="mt-4 inline-block type-caption cursor-pointer transition-colors hover:text-brand-honey focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-honey rounded"
+          >
             Full book specifications &rarr;
-          </span>
+          </button>
         </motion.div>
       </div>
 
+      <BookDetailsModal
+        isOpen={isBookDetailsOpen}
+        onClose={() => setIsBookDetailsOpen(false)}
+      />
     </section>
   );
 }
