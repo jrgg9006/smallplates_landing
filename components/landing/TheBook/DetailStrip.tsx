@@ -26,7 +26,7 @@ const details = [
   {
     title: "The paper.",
     description:
-      "150 gsm couch\u00e9. Thick, smooth, built to hold vivid color and survive the kitchen.",
+      "Thick, smooth, built to hold vivid color and survive the kitchen.",
     visual: (
       // Reason: Abstract page representation with text-like lines
       <div className="relative w-full aspect-square rounded-md overflow-hidden bg-brand-cream flex items-center justify-center">
