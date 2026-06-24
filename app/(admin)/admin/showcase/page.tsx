@@ -466,6 +466,10 @@ export default function ShowcasePage() {
             <p className="text-sm text-gray-600 mt-1">
               Send recipe spread previews to opted-in guests
             </p>
+            <div className="mt-2 inline-flex items-center gap-2 rounded-md bg-gray-100 border border-gray-200 px-3 py-1.5">
+              <span className="text-xs font-medium uppercase tracking-wide text-gray-500">Subject</span>
+              <span className="text-sm text-gray-800">You&apos;re in the book, [name].</span>
+            </div>
           </div>
         </div>
       </div>
