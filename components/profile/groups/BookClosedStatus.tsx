@@ -46,7 +46,7 @@ function ShareCopyLink({ groupId }: { groupId: string }) {
   );
 }
 
-const REFERRAL_CODE = "REFERRAL2026";
+const REFERRAL_CODE = "FOODISLOVE";
 
 function ReferralBox() {
   const [copied, setCopied] = useState(false);
@@ -70,7 +70,7 @@ function ReferralBox() {
               Know someone getting married?
             </p>
             <p className="text-[12px] text-white/50 mt-0.5">
-              Share your code. They get 15% off their book.
+              Share your code. They get 10% off their book.
             </p>
           </div>
 
