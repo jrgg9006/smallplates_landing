@@ -6,7 +6,7 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Pencil, Check, X, Loader2, ChevronDown, ChevronRight, Upload } from 'lucide-react';
+import { Pencil, Check, X, Loader2, ChevronDown, ChevronRight, Upload, Download } from 'lucide-react';
 import type { BookStatus } from '@/lib/types/database';
 import type { BookSummary } from './BookCard';
 import RecipePreviewCard from './RecipePreviewCard';
@@ -186,6 +186,7 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
   const [annexUpscaling, setAnnexUpscaling] = useState(false);
   const [annexPolling, setAnnexPolling] = useState(false);
   const [showFetchWarn, setShowFetchWarn] = useState(false);
+  const [downloadingOriginals, setDownloadingOriginals] = useState(false);
   const [reviewStartIndex, setReviewStartIndex] = useState<number | undefined>(undefined);
   // Reason: cache-busting for images — Supabase storage URLs stay the same after re-upload
   const [fetchTimestamp, setFetchTimestamp] = useState(Date.now());
@@ -262,6 +263,31 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
       setAnnexUpscaling(false);
     }
   }, [book, loadAnnexRows]);
+
+  const downloadOriginals = useCallback(async () => {
+    if (!book) return;
+    setDownloadingOriginals(true);
+    try {
+      const res = await fetch(`/api/v1/admin/books/${book.id}/annex/download`);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Download failed');
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download =
+        res.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') ||
+        'originals.zip';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Download failed');
+    } finally {
+      setDownloadingOriginals(false);
+    }
+  }, [book]);
 
   useEffect(() => {
     if (!annexPolling || !book) return;
@@ -882,6 +908,21 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
                         ) : (
                           `Upscale originals (${annexCounts.notReady})`
                         )}
+                      </Button>
+                    )}
+                    {annexCounts.ready > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={downloadingOriginals}
+                        onClick={downloadOriginals}
+                      >
+                        {downloadingOriginals ? (
+                          <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                        ) : (
+                          <Download className="w-3 h-3 mr-1" />
+                        )}
+                        {downloadingOriginals ? 'Generando…' : 'Descargar originals'}
                       </Button>
                     )}
                     {currentStatus === 'ready_to_print' && (
