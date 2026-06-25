@@ -787,23 +787,18 @@ export default function BookReviewOverlay({
                               Imagen {i + 1} de {originalFiles.length}
                             </p>
                           )}
-                          <a href={url} target="_blank" rel="noopener noreferrer" className="block">
-                            <img
-                              src={url}
-                              alt={`Foto original ${i + 1}`}
-                              className="w-full rounded border border-gray-200 hover:border-gray-400 transition-colors"
-                            />
-                          </a>
+                          {/* Reason: keep the per-image toggle ABOVE the photo so it's always in
+                              the same spot (next to the label) and not buried under a tall image. */}
                           {originalFiles.length > 1 && (() => {
                             const selected = (recipe?.annex_source_urls ?? []).includes(url);
                             return (
-                              <>
+                              <div className="mb-2">
                                 <button
                                   type="button"
                                   title={ANNEX_HELP}
                                   onClick={() => toggleAnnex(url)}
                                   disabled={annexBusy === url}
-                                  className={`mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border transition-colors disabled:opacity-50 ${
+                                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border transition-colors disabled:opacity-50 ${
                                     selected
                                       ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
                                       : 'bg-white text-gray-700 border-gray-300 hover:border-emerald-500'
@@ -813,9 +808,16 @@ export default function BookReviewOverlay({
                                   <Info className="w-3.5 h-3.5 opacity-60" />
                                 </button>
                                 <div>{renderAnnexStatus(url)}</div>
-                              </>
+                              </div>
                             );
                           })()}
+                          <a href={url} target="_blank" rel="noopener noreferrer" className="block">
+                            <img
+                              src={url}
+                              alt={`Foto original ${i + 1}`}
+                              className="w-full rounded border border-gray-200 hover:border-gray-400 transition-colors"
+                            />
+                          </a>
                         </div>
                       );
                     })}
