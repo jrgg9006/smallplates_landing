@@ -103,6 +103,26 @@ function changedSections(r: EditHistoryRow) {
 
 type DiffSection = ReturnType<typeof changedSections>[number];
 
+// Reason: a raw before/after that differ but produce NO word-level change means the
+// edit only touched whitespace / line breaks — formatting, not content. We still want
+// to show WHO did it and WHEN (e.g. an admin adding line breaks so the AI's run-on
+// text reads better), just quietly. Returns which sections were reformatted.
+function formatOnlySections(r: HistoryRow): SectionKey[] {
+  const out: SectionKey[] = [];
+  if ((r.recipe_name_before ?? '') !== (r.recipe_name_after ?? '')) out.push('name');
+  if ((r.ingredients_before ?? '') !== (r.ingredients_after ?? '')) out.push('ingredients');
+  if ((r.instructions_before ?? '') !== (r.instructions_after ?? '')) out.push('instructions');
+  if ((r.comments_before ?? '') !== (r.comments_after ?? '')) out.push('note');
+  return out;
+}
+
+function snapshotReformatted(a: Snapshot, b: Snapshot): boolean {
+  return a.name !== b.name
+    || a.ingredients !== b.ingredients
+    || a.instructions !== b.instructions
+    || (a.note ?? '') !== (b.note ?? '');
+}
+
 // Reason: reconstruct the AI's clean output. It isn't stored immutably — human
 // edits overwrite recipe_print_ready — so we recover it from the audit trail:
 // the "before" of the EARLIEST clean edit is the clean as it was before any human
@@ -259,14 +279,20 @@ export function ChangesHistorySheet({
     .map((r) => {
       const reason = r.edit_reason ?? '';
       const isGuestChange = reason.startsWith(GUEST_CHANGE_PREFIX);
+      const changed = isGuestChange ? [] : changedSections(r);
+      // Reason: no word-level change but the raw text differs → a formatting-only
+      // edit (spaces / line breaks). Keep it so the admin who tidied the layout is
+      // attributed, shown as a quiet note instead of a red/green diff.
+      const formatSections = !isGuestChange && changed.length === 0 ? formatOnlySections(r) : [];
       return {
         row: r,
         isGuestChange,
         guestSummary: isGuestChange ? reason.slice(GUEST_CHANGE_PREFIX.length).trim() : '',
-        changed: isGuestChange ? [] : changedSections(r),
+        changed,
+        formatSections,
       };
     })
-    .filter((e) => e.isGuestChange || e.changed.length > 0);
+    .filter((e) => e.isGuestChange || e.changed.length > 0 || e.formatSections.length > 0);
 
   // Reason: the first "big change" — what the AI did when it cleaned the guest's
   // submission. Reconstructed from the trail (see reconstructAiClean). Shown at
@@ -280,6 +306,10 @@ export function ChangesHistorySheet({
   const aiDiff = pristineOriginal && aiClean
     ? diffBetween(pristineOriginal, aiClean, isManualOriginal)
     : null;
+  // Reason: the AI often joins everything into run-on text. When its only effect is
+  // whitespace/line breaks (no word change), say so instead of "sin cambios".
+  const aiReformatted = !!aiDiff && aiDiff.changed.length === 0 && !isManualOriginal
+    && !!pristineOriginal && !!aiClean && snapshotReformatted(pristineOriginal, aiClean);
 
   return (
     <Sheet open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
@@ -312,7 +342,7 @@ export function ChangesHistorySheet({
 
           {!loading &&
             !error &&
-            entries.map(({ row, changed, isGuestChange, guestSummary }) => {
+            entries.map(({ row, changed, isGuestChange, guestSummary, formatSections }) => {
               const editor = row.profiles?.full_name || row.profiles?.email || 'Alguien';
               return (
                 <div key={row.id} className="rounded-lg border border-gray-200 p-4">
@@ -343,7 +373,9 @@ export function ChangesHistorySheet({
                     <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500">
                       {isGuestChange
                         ? 'Invitado'
-                        : `${changed.length} ${changed.length === 1 ? 'cambio' : 'cambios'}`}
+                        : changed.length > 0
+                          ? `${changed.length} ${changed.length === 1 ? 'cambio' : 'cambios'}`
+                          : 'Formato'}
                     </span>
                   </div>
                   {isGuestChange ? (
@@ -351,8 +383,16 @@ export function ChangesHistorySheet({
                       Reasignó el invitado:{' '}
                       <span className="font-medium">{guestSummary || '—'}</span>
                     </p>
-                  ) : (
+                  ) : changed.length > 0 ? (
                     <DiffSections changed={changed} />
+                  ) : (
+                    <p className="text-sm text-gray-600">
+                      Ajustó el formato (espacios y saltos de línea)
+                      {formatSections.length > 0
+                        ? ` en ${formatSections.map((s) => SECTION_LABEL[s]).join(', ')}`
+                        : ''}{' '}
+                      — sin cambios de texto.
+                    </p>
                   )}
                 </div>
               );
@@ -377,7 +417,7 @@ export function ChangesHistorySheet({
                     ? 'IA'
                     : aiDiff && aiDiff.changed.length > 0
                       ? `${aiDiff.changed.length} ${aiDiff.changed.length === 1 ? 'cambio' : 'cambios'}`
-                      : 'Sin cambios'}
+                      : aiReformatted ? 'Formato' : 'Sin cambios'}
                 </span>
               </div>
 
@@ -391,6 +431,10 @@ export function ChangesHistorySheet({
                 </p>
               ) : aiDiff && aiDiff.changed.length > 0 ? (
                 <DiffSections changed={aiDiff.changed} />
+              ) : aiReformatted ? (
+                <p className="text-sm text-gray-500">
+                  La IA solo reformateó (espacios y saltos de línea), sin cambios de texto.
+                </p>
               ) : (
                 <p className="text-sm text-gray-500">
                   Sin cambios — la IA dejó la receta tal como la subió el invitado.
