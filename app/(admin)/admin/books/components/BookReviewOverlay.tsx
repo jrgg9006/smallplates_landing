@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { X, ChevronLeft, ChevronRight, Check, AlertTriangle, Loader2, Pencil, Trash2, Info } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Check, AlertTriangle, Loader2, Pencil, Trash2, Info, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { BookReviewStatus } from '@/lib/types/database';
 import { ArchiveRecipeModal } from './ArchiveRecipeModal';
+import { ChangesHistorySheet } from './ChangesHistorySheet';
 import { auditRecipe, type RecipeAudit, type SectionKey } from '@/lib/recipe-audit';
 import { RecipeAuditStrip, HighlightedText } from './RecipeAuditStrip';
 import { eligibleAnnexImages, annexRowState } from '@/lib/annex/selection';
@@ -93,6 +94,7 @@ export default function BookReviewOverlay({
   const [savingEdit, setSavingEdit] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [archiveLoading, setArchiveLoading] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const notesInputRef = useRef<HTMLInputElement>(null);
 
   const recipe = localRecipes[currentIndex];
@@ -331,6 +333,9 @@ export default function BookReviewOverlay({
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (showSummary) return;
+      // Reason: while the changes-history panel is open, let Radix own the keys
+      // (Esc closes the panel) — don't navigate or close the book behind it.
+      if (showHistory) return;
 
       // Reason: block all shortcuts when editing text, only allow Escape to cancel
       if (isEditing) {
@@ -385,7 +390,7 @@ export default function BookReviewOverlay({
 
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [showSummary, showNotesInput, isEditing, currentIndex, total, onClose, handleApprove, handleNeedsRevision, handleStartEdit, handleCancelEdit, recipe]);
+  }, [showSummary, showHistory, showNotesInput, isEditing, currentIndex, total, onClose, handleApprove, handleNeedsRevision, handleStartEdit, handleCancelEdit, recipe]);
 
   // Reset notes input when navigating
   useEffect(() => {
@@ -999,6 +1004,13 @@ export default function BookReviewOverlay({
                     <Pencil className="w-3 h-3" /> Edit Recipe <kbd className="text-[9px] opacity-40 ml-1 px-1 py-0.5 rounded border border-gray-600">E</kbd>
                   </button>
                   <button
+                    onClick={() => setShowHistory(true)}
+                    className="text-xs px-2 py-1 rounded bg-gray-700 text-gray-400 hover:text-gray-300 transition-colors flex items-center gap-1"
+                    title="Ver quién editó la versión final, cuándo y qué cambió"
+                  >
+                    <History className="w-3 h-3" /> Changes History
+                  </button>
+                  <button
                     onClick={() => setArchiveOpen(true)}
                     disabled={saving || archiveLoading}
                     className="text-xs p-1.5 rounded bg-gray-700 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors flex items-center disabled:opacity-50"
@@ -1116,6 +1128,13 @@ export default function BookReviewOverlay({
         onClose={() => !archiveLoading && setArchiveOpen(false)}
         onConfirm={handleArchiveConfirm}
         loading={archiveLoading}
+      />
+
+      <ChangesHistorySheet
+        open={showHistory}
+        onClose={() => setShowHistory(false)}
+        recipeId={recipe?.id ?? null}
+        recipeName={recipe?.recipe_name}
       />
     </div>
   );

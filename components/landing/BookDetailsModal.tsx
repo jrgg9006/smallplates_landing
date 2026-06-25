@@ -34,10 +34,10 @@ export default function BookDetailsModal({ isOpen, onClose }: BookDetailsModalPr
     { label: "Format", value: "Hardcover, Adhesive Casebound (PUR)" },
     { label: "Size", value: "US Letter Tall (8\" × 10\") – Portrait" },
     { label: "Printing", value: "Full-color throughout" },
-    { label: "Paper", value: "100 lb Satin Text (interior pages)" },
+    { label: "Paper", value: "Satin Text (interior pages)" },
     { label: "Finish", value: "Matte Lamination on cover" },
     { label: "Photos", value: "A custom image is created for every recipe — included" },
-    { label: "Recipes", value: "50 included — additional recipes available" },
+    { label: "Recipes", value: "50 included — $1 per additional recipe" },
   ];
 
   return (

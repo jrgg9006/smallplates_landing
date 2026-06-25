@@ -224,7 +224,7 @@ export default function PricingPage() {
                 ))}
               </div>
               <p className="text-center text-sm text-brand-honey mt-5">
-                Need more than 50 recipes? Additional available.
+                50 recipes are included. Each one after that is just $1, added to your total when you print.
               </p>
             </div>
 

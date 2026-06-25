@@ -244,7 +244,7 @@ ${spreadBlocks}
                             <p style="margin: 0 0 16px 0; font-family: Georgia, serif;
                               font-size: 14px; color: #9A9590; line-height: 1.4;
                               text-align: center; font-style: italic;">
-                              Someone you know is getting married.
+                              If you or someone you know wants to start a cookbook.
                             </p>
 
                             <!-- Label + code -->
@@ -256,13 +256,13 @@ ${spreadBlocks}
                             <p style="margin: 0 0 16px 0; font-family: Georgia, serif;
                               font-size: 22px; color: #F5F1EB; letter-spacing: 0.18em;
                               text-align: center; font-weight: 400;">
-                              REFERRAL2026
+                              FOODISLOVE
                             </p>
 
                             <!-- Subtext -->
                             <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
                               font-size: 13px; color: #9A9590; line-height: 1.5; text-align: center;">
-                              15% off their next book.
+                              10% off their next book.
                             </p>
 
                           </td>
@@ -297,7 +297,7 @@ ${spreadBlocks}
               <td align="center" style="padding: 16px 20px 0;">
                 <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
                   font-size: 11px; color: #B5AFA8; line-height: 1.5; text-align: center;">
-                  You received this because you opted in when you submitted your recipe. Discount code REFERRAL2026 can be applied directly at checkout. No expiration. &nbsp;&middot;&nbsp;
+                  You received this because you opted in when you submitted your recipe. Discount code FOODISLOVE can be applied directly at checkout. No expiration. &nbsp;&middot;&nbsp;
                   <a href="${unsubHref}"
                     style="color: #B5AFA8; text-decoration: underline;">Unsubscribe</a>
                 </p>
