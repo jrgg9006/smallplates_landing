@@ -5,6 +5,7 @@ import {
   eligibleAnnexImages,
   annexRowState,
   annexUpscaleCounts,
+  annexDownloadFilename,
 } from './selection';
 
 describe('isAnnexEligibleUrl', () => {
@@ -124,5 +125,21 @@ describe('annexUpscaleCounts', () => {
       notReady: 0,
       processing: 0,
     });
+  });
+});
+
+describe('annexDownloadFilename', () => {
+  it('une receta e invitado, termina en .png', () => {
+    expect(annexDownloadFilename('Red Cake', 'Maria Garcia', 0)).toBe('Red-Cake_Maria-Garcia.png');
+  });
+  it('agrega sufijo para duplicados de la misma receta', () => {
+    expect(annexDownloadFilename('Red Cake', 'Maria Garcia', 1)).toBe('Red-Cake_Maria-Garcia_2.png');
+    expect(annexDownloadFilename('Red Cake', 'Maria Garcia', 2)).toBe('Red-Cake_Maria-Garcia_3.png');
+  });
+  it('sanitiza caracteres raros y conserva acentos', () => {
+    expect(annexDownloadFilename('Pollo / Arroz!', 'José Pérez', 0)).toBe('Pollo-Arroz_José-Pérez.png');
+  });
+  it('usa fallbacks cuando viene vacío', () => {
+    expect(annexDownloadFilename('', '', 0)).toBe('Original_Invitado.png');
   });
 });

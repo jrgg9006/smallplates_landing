@@ -79,3 +79,21 @@ export function annexUpscaleCounts(
   }
   return { selected: rows.length, ready, notReady: rows.length - ready, processing };
 }
+
+// Reason: filenames inside the originals zip must be human-legible and filesystem-safe.
+// Keep letters/digits/accented chars; collapse everything else to a single dash.
+function sanitizeAnnexNamePart(value: string, fallback: string): string {
+  const cleaned = value
+    .trim()
+    .replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return cleaned || fallback;
+}
+
+/** Human-legible zip filename for an upscaled original: `{Recipe}_{Guest}.png`. */
+export function annexDownloadFilename(recipeName: string, guestName: string, dupIndex: number): string {
+  const recipe = sanitizeAnnexNamePart(recipeName, 'Original');
+  const guest = sanitizeAnnexNamePart(guestName, 'Invitado');
+  const suffix = dupIndex > 0 ? `_${dupIndex + 1}` : '';
+  return `${recipe}_${guest}${suffix}.png`;
+}
