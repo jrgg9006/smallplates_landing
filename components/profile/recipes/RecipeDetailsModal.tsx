@@ -320,12 +320,6 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       const guestChanged = Boolean(selectedGuestId) && selectedGuestId !== localRecipe.guest_id;
       const newGuest = guestChanged ? guests.find(g => g.id === selectedGuestId) : undefined;
 
-      const before = {
-        recipe_name: localRecipe.recipe_name || '',
-        ingredients: localRecipe.ingredients || '',
-        instructions: localRecipe.instructions || '',
-        comments: localRecipe.comments,
-      };
       const after = {
         recipe_name: recipeTitle.trim(),
         ingredients: recipeIngredients.trim(),
@@ -378,9 +372,13 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           ? `${newGuest.first_name} ${newGuest.last_name || ''}`.trim()
           : selectedGuestId;
 
+        // Reason: a guest reassignment is NOT a content edit. Log identical
+        // before/after so the audit captures who/when/why (the reason) without
+        // fabricating a bogus original-vs-clean diff that would read as if the
+        // owner rewrote the whole recipe at this moment.
         const { error: historyError } = await logRecipeEdit({
           recipeId: localRecipe.id,
-          before,
+          before: after,
           after,
           editReason: `Guest changed: ${oldGuestLabel} → ${newGuestLabel}`,
         });
