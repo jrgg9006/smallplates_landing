@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { RecipeWithGuest, Guest } from "@/lib/types/database";
 import {
   Sheet,
@@ -24,6 +24,21 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { getRecipeGroups } from "@/lib/supabase/groupRecipes";
 import { isGroupMember } from "@/lib/supabase/groupMembers";
 import { AddGuestModal } from "@/components/profile/guests/AddGuestModal";
+
+// Reason: crece el textarea para que quepa su contenido (mobile), con tope.
+// Safari iOS no soporta CSS field-sizing, así que se ajusta la altura por JS.
+function useAutoResize(value: string, maxHeight: number) {
+  const ref = useRef<HTMLTextAreaElement | null>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    const full = el.scrollHeight;
+    el.style.height = `${Math.min(full, maxHeight)}px`;
+    el.style.overflowY = full > maxHeight ? 'auto' : 'hidden';
+  }, [value, maxHeight]);
+  return ref;
+}
 
 interface RecipeDetailsModalProps {
   recipe: RecipeWithGuest | null;
@@ -50,7 +65,12 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   const [recipeNotes, setRecipeNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
+  // Auto-resize de los textareas de edición en mobile (crecen con el contenido, con tope).
+  const notesRef = useAutoResize(recipeNotes, 240);
+  const ingredientsRef = useAutoResize(recipeIngredients, 400);
+  const instructionsRef = useAutoResize(recipeInstructions, 480);
+
   // Groups state
   const [recipeGroups, setRecipeGroups] = useState<Array<{ group_id: string; group_name: string }>>([]);
   const [loadingGroups, setLoadingGroups] = useState(false);
@@ -622,11 +642,11 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
 
       {/* Cleaned-state label + View original toggle */}
       {inCleaned && !isEditMode && (
-        <div className="flex items-center gap-2 mb-3 text-xs text-gray-400">
+        <div className="flex items-center gap-2 mb-4 sm:mb-3 text-xs text-gray-400">
           <span>
             {showOriginal
-              ? 'This is the original, exactly as it was sent.'
-              : '✅ This is the cleaned-up version — or your latest edit — that goes in your book.'}
+              ? 'This is the original.'
+              : '✅ This is what goes in your book.'}
           </span>
           <button
             type="button"
@@ -783,11 +803,11 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
 
       {/* Cleaned-state label + View original toggle */}
       {inCleaned && !isEditMode && (
-        <div className="flex items-center gap-2 mb-3 text-xs text-gray-400">
+        <div className="flex items-center gap-2 mb-4 sm:mb-3 text-xs text-gray-400">
           <span>
             {showOriginal
-              ? 'This is the original, exactly as it was sent.'
-              : '✅ This is the cleaned-up version — or your latest edit — that goes in your book.'}
+              ? 'This is the original.'
+              : '✅ This is what goes in your book.'}
           </span>
           <button
             type="button"
@@ -987,10 +1007,11 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       {/* Personal note - Editable */}
       <textarea
         id="recipeNotes"
+        ref={notesRef}
         value={recipeNotes}
         onChange={(e) => setRecipeNotes(e.target.value)}
         placeholder="Add a personal note..."
-        className="w-full text-base italic text-gray-500 font-serif leading-relaxed bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 placeholder:not-italic resize-vertical min-h-[140px] transition-all duration-200"
+        className="w-full text-base italic text-gray-500 font-serif leading-relaxed bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] placeholder:text-gray-400 placeholder:not-italic resize-none min-h-[140px] transition-all duration-200"
       />
 
       {/* Stacked Layout for Mobile */}
@@ -1000,10 +1021,11 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Ingredients</h3>
           <textarea
             id="recipeIngredients"
+            ref={ingredientsRef}
             value={recipeIngredients}
             onChange={(e) => setRecipeIngredients(e.target.value)}
             placeholder="Pecorino, not parmesan. Good eggs. The real guanciale."
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[180px] bg-white font-serif transition-all duration-200 placeholder:text-gray-400"
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-none min-h-[180px] bg-white font-serif transition-all duration-200 placeholder:text-gray-400"
           />
         </div>
 
@@ -1012,10 +1034,11 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Instructions</h3>
           <textarea
             id="recipeInstructions"
+            ref={instructionsRef}
             value={recipeInstructions}
             onChange={(e) => setRecipeInstructions(e.target.value)}
             placeholder="Start with cold pan. Trust the process. Save the pasta water—you will need it."
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-vertical min-h-[220px] bg-white font-serif transition-all duration-200 placeholder:text-gray-400"
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-honey))]/20 focus:border-[hsl(var(--brand-honey))] resize-none min-h-[220px] bg-white font-serif transition-all duration-200 placeholder:text-gray-400"
           />
         </div>
 
