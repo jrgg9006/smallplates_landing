@@ -5,7 +5,7 @@ import Link from 'next/link';
 import type { RadarPayload, RangeKey } from '@/lib/radar/types';
 import { PulseCards } from './PulseCards';
 import { LiveFeed } from './LiveFeed';
-import { ActivationFunnel } from './ActivationFunnel';
+import { BookProgress } from './BookProgress';
 import { GroupHealthTable } from './GroupHealthTable';
 import { DrilldownPanel } from './DrilldownPanel';
 import { RecipeViewModal } from './RecipeViewModal';
@@ -147,7 +147,7 @@ export default function RadarDashboard() {
               />
             </div>
             <div className="space-y-6 xl:col-span-2 xl:col-start-1 xl:row-start-2">
-              <ActivationFunnel steps={data.funnel} />
+              <BookProgress rows={data.groups} />
               <GroupHealthTable rows={data.groups} />
             </div>
           </div>
