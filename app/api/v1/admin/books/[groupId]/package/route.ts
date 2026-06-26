@@ -4,6 +4,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import archiver from 'archiver';
 import { PassThrough } from 'stream';
 import { DEFAULT_COVER_LINE } from '@/lib/cover/layout';
+import { buildAnnexPipelinePlan, type AnnexImageBlock } from '@/lib/annex/pipeline';
 
 export const maxDuration = 300;
 
@@ -100,6 +101,14 @@ export async function GET(
       return NextResponse.json({ error: 'Failed to fetch recipes' }, { status: 500 });
     }
 
+    // 3b. Annex originals (ready only). Empty when no originals → zero-regression.
+    const { data: annexRows } = await supabase
+      .from('recipe_annex_images')
+      .select('recipe_id, position, print_url, original_url, upscale_status')
+      .eq('group_id', groupId)
+      .eq('upscale_status', 'ready');
+    const annexPlan = buildAnnexPipelinePlan(annexRows ?? [], groupId);
+
     // 4. Build recipe data + collect image URLs
     const transformedRecipes: {
       id: string;
@@ -110,9 +119,14 @@ export async function GET(
       instructions: string;
       local_image_path: string | null;
       image_source: string | null;
+      annex_images?: AnnexImageBlock[];
     }[] = [];
 
     const imageDownloads: { url: string; zipPath: string }[] = [];
+    // Reason: only the recipe's annex print files get downloaded into the zip.
+    for (const dl of annexPlan.downloads) {
+      imageDownloads.push({ url: dl.url, zipPath: dl.localImagePath });
+    }
 
     for (const recipe of recipes) {
       const guest = recipe.guests as unknown as { first_name: string | null; last_name: string | null; printed_name: string | null } | null;
@@ -135,6 +149,8 @@ export async function GET(
         imageDownloads.push({ url: imageUrl, zipPath: localImagePath });
       }
 
+      const annexImages = annexPlan.byRecipe.get(recipe.id);
+
       transformedRecipes.push({
         id: recipe.id,
         recipe_name: (printReady as { recipe_name_clean?: string } | null)?.recipe_name_clean || recipe.recipe_name || '',
@@ -144,6 +160,9 @@ export async function GET(
         instructions: (printReady as { instructions_clean?: string } | null)?.instructions_clean || recipe.instructions || '',
         local_image_path: localImagePath,
         image_source: imageUrl ? imageSource : null,
+        // Reason: omit the key entirely when the recipe has no originals so the JSON
+        // is byte-identical to today for books without an annex (zero-regression).
+        ...(annexImages ? { annex_images: annexImages } : {}),
       });
     }
 
