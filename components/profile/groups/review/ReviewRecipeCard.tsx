@@ -1,9 +1,46 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { Pencil, ImageIcon } from "lucide-react";
 import type { RecipeForReview } from "@/lib/types/database";
+
+// Reason: textarea que crece con su contenido para que al editar no se vea
+// cortado/raro — el alto se ajusta al texto en vez de quedar fijo en N rows.
+function AutoTextarea({
+  value,
+  onChange,
+  className,
+  placeholder,
+  minRows = 2,
+}: {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  className?: string;
+  placeholder?: string;
+  minRows?: number;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [value]);
+
+  return (
+    <textarea
+      ref={ref}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      rows={minRows}
+      style={{ overflow: "hidden" }}
+      className={className}
+    />
+  );
+}
 
 interface ReviewRecipeCardProps {
   recipe: RecipeForReview;
@@ -116,11 +153,10 @@ export function ReviewRecipeCard({ recipe, index, total, onSave }: ReviewRecipeC
 
           {/* Personal note */}
           {isEditing ? (
-            <textarea
+            <AutoTextarea
               value={editNote}
               onChange={(e) => setEditNote(e.target.value)}
               placeholder="Personal note (optional)"
-              rows={2}
               className="w-full text-sm italic text-gray-500 font-serif mb-6 bg-white border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-brand-honey resize-none"
             />
           ) : displayNote.trim() ? (
@@ -166,11 +202,11 @@ export function ReviewRecipeCard({ recipe, index, total, onSave }: ReviewRecipeC
                   Ingredients
                 </h3>
                 {isEditing ? (
-                  <textarea
+                  <AutoTextarea
                     value={editIngredients}
                     onChange={(e) => setEditIngredients(e.target.value)}
-                    rows={10}
-                    className="w-full text-sm text-gray-700 font-serif leading-relaxed bg-white border border-gray-200 rounded px-3 py-2 resize-y focus:outline-none focus:border-brand-honey"
+                    minRows={6}
+                    className="w-full text-sm text-gray-700 font-serif leading-relaxed bg-white border border-gray-200 rounded px-3 py-2 resize-none focus:outline-none focus:border-brand-honey"
                   />
                 ) : displayIngredients.trim() ? (
                   <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed font-serif">
@@ -187,11 +223,11 @@ export function ReviewRecipeCard({ recipe, index, total, onSave }: ReviewRecipeC
                   Instructions
                 </h3>
                 {isEditing ? (
-                  <textarea
+                  <AutoTextarea
                     value={editInstructions}
                     onChange={(e) => setEditInstructions(e.target.value)}
-                    rows={14}
-                    className="w-full text-sm text-gray-700 font-serif leading-[1.6] bg-white border border-gray-200 rounded px-3 py-2 resize-y focus:outline-none focus:border-brand-honey"
+                    minRows={8}
+                    className="w-full text-sm text-gray-700 font-serif leading-[1.6] bg-white border border-gray-200 rounded px-3 py-2 resize-none focus:outline-none focus:border-brand-honey"
                   />
                 ) : displayInstructions.trim() ? (
                   <div className="text-sm text-gray-700 font-serif leading-[1.6]">
