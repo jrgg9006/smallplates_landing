@@ -25,6 +25,11 @@ import { getRecipeGroups } from "@/lib/supabase/groupRecipes";
 import { isGroupMember } from "@/lib/supabase/groupMembers";
 import { AddGuestModal } from "@/components/profile/guests/AddGuestModal";
 
+// Reason: umbral propio del frontend (independiente del 70 del backend que rige el
+// needs_review de Operations). Solo se avisa al usuario cuando la IA quedó claramente
+// mal (< 50). Las fallas duras escriben confidence_score = 0, así que también caen aquí.
+const EXTRACTION_FAILED_CONFIDENCE_THRESHOLD = 50;
+
 // Reason: crece el textarea para que quepa su contenido (mobile), con tope.
 // Safari iOS no soporta CSS field-sizing, así que se ajusta la altura por JS.
 function useAutoResize(value: string, maxHeight: number) {
@@ -449,6 +454,25 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   const displayInstructions = inCleaned && !showOriginal ? printReady!.instructions_clean : localRecipe.instructions;
   const displayNote = inCleaned && !showOriginal ? printReady!.note_clean : localRecipe.comments;
 
+  // Reason: confidence_score llega 0-1 o 0-100 según el engine — normalizar como en Operations.
+  const normalizedConfidence =
+    localRecipe.confidence_score == null
+      ? null
+      : localRecipe.confidence_score <= 1
+        ? localRecipe.confidence_score * 100
+        : localRecipe.confidence_score;
+
+  // Reason: en una receta de imagen cuya lectura claramente falló (confianza < 50; las
+  // fallas duras quedan en 0), avisamos al usuario en vez de dejar el spinner infinito o
+  // los campos con placeholder. El guard contra null evita disparar mientras aún procesa.
+  // Desaparece solo en cuanto existe versión limpia (inCleaned): el invitado la edita aquí
+  // o el admin en Operations, ambos crean recipe_print_ready.
+  const showExtractionFailed =
+    localRecipe.upload_method === 'image' &&
+    normalizedConfidence != null &&
+    normalizedConfidence < EXTRACTION_FAILED_CONFIDENCE_THRESHOLD &&
+    !inCleaned;
+
   const guestRealName = guest ? `${guest.first_name} ${guest.last_name || ''}`.trim() : '';
   const guestName = guest
     ? (guest.printed_name ? `${guest.printed_name} (${guestRealName})` : guestRealName)
@@ -604,10 +628,31 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     </div>
   );
 
+  // Reason: reemplaza el área de ingredientes/instrucciones cuando la lectura de la foto
+  // falló. La foto y la dedicatoria siguen mostrándose arriba (scaffold normal). El botón
+  // de editar que ya existe (pencil arriba + este enlace) crea print_ready y resuelve.
+  const extractionFailedBlock = (
+    <div className="rounded-xl border border-[#F0DCC8] bg-[#FBEFE6] px-5 py-4">
+      <h3 className="font-serif text-lg text-[#8A5A2B] mb-2">We couldn&apos;t fully read this one.</h3>
+      <p className="text-[13px] leading-relaxed text-[#8A5A2B]">
+        We tried to read your photo but couldn&apos;t be sure we got everything right. Don&apos;t worry — our team will review and tidy it up before it&apos;s printed.
+      </p>
+      {canEdit && (
+        <button
+          type="button"
+          onClick={() => setIsEditMode(true)}
+          className="mt-3 text-[13px] font-medium text-[#8A5A2B] underline underline-offset-2 hover:text-[#6f4722] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#8A5A2B]/40 rounded-sm"
+        >
+          Prefer to do it yourself? Edit it ✏️
+        </button>
+      )}
+    </div>
+  );
+
   // Content component for desktop - book-style layout
   const desktopContent = (
     <div className="flex-1 flex flex-col min-w-0">
-      {!cleanLoaded ? loadingBlock : viewState === 'processing' ? processingBlock : (
+      {!cleanLoaded ? loadingBlock : (viewState === 'processing' && !showExtractionFailed) ? processingBlock : (
       <>
       {/* Guest name — small caps */}
       <div className="flex items-start justify-between gap-4 mb-1">
@@ -631,7 +676,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       </h2>
 
       {/* Fallback banner — explains why the raw original is shown */}
-      {viewState === 'fallback' && !isEditMode && (
+      {viewState === 'fallback' && !isEditMode && !showExtractionFailed && (
         <div className="mb-4 rounded-xl border border-[#F0DCC8] bg-[#FBEFE6] px-4 py-3">
           <p className="text-[13px] font-medium text-[#8A5A2B]">Still cleaning this one up</p>
           <p className="text-[13px] leading-relaxed text-[#8A5A2B]">
@@ -721,6 +766,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       <div className="border-t border-gray-200 my-6" />
 
       {/* Two Column Layout — matches print layout */}
+      {showExtractionFailed ? extractionFailedBlock : (
       <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[240px_1fr] gap-6">
         {/* Ingredients */}
         <div>
@@ -760,6 +806,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           )}
         </div>
       </div>
+      )}
       </>
       )}
     </div>
@@ -768,7 +815,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   // Content component for mobile - stacked layout
   const mobileContent = (
     <div className="flex-1 overflow-y-auto flex flex-col">
-      {!cleanLoaded ? loadingBlock : viewState === 'processing' ? processingBlock : (
+      {!cleanLoaded ? loadingBlock : (viewState === 'processing' && !showExtractionFailed) ? processingBlock : (
       <>
       {/* Guest name — small caps */}
       <div className="flex items-start justify-between gap-3 mb-1">
@@ -792,7 +839,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       </h2>
 
       {/* Fallback banner — explains why the raw original is shown */}
-      {viewState === 'fallback' && !isEditMode && (
+      {viewState === 'fallback' && !isEditMode && !showExtractionFailed && (
         <div className="mb-4 rounded-xl border border-[#F0DCC8] bg-[#FBEFE6] px-4 py-3">
           <p className="text-[13px] font-medium text-[#8A5A2B]">Still cleaning this one up</p>
           <p className="text-[13px] leading-relaxed text-[#8A5A2B]">
@@ -882,6 +929,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       <div className="border-t border-gray-200 my-6" />
 
       {/* Stacked Layout for Mobile */}
+      {showExtractionFailed ? (
+        <div className="flex-1 pb-6">{extractionFailedBlock}</div>
+      ) : (
       <div className="flex-1 space-y-6 pb-6">
         {/* Ingredients */}
         <div>
@@ -921,6 +971,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           )}
         </div>
       </div>
+      )}
       </>
       )}
     </div>
