@@ -570,6 +570,53 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   const firstDocUrl = localRecipe.document_urls?.[0] ?? null;
   const firstDocIsPdf = firstDocUrl ? isPdfUrl(firstDocUrl) : false;
 
+  // Reason: el modal muestra solo la primera imagen, pero el invitado pudo subir varias.
+  // Al descargar bajamos TODAS (excluyendo PDFs, que tienen su propio enlace "View").
+  const imageUrls = (localRecipe.document_urls || []).filter((u) => !isPdfUrl(u));
+
+  const handleDownloadImages = async () => {
+    // Reason: las imágenes viven en Supabase Storage (otro origen) y el atributo
+    // `download` se ignora cross-origin — el navegador solo abre la imagen. Para forzar
+    // la descarga (y bajar varias) hay que traer cada una como blob y disparar el click.
+    const baseName =
+      (displayName || localRecipe.recipe_name || 'recipe')
+        .trim()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-') || 'recipe';
+    for (let i = 0; i < imageUrls.length; i++) {
+      try {
+        const res = await fetch(imageUrls[i]);
+        const blob = await res.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const ext = (blob.type.split('/')[1] || 'jpg').split('+')[0];
+        const a = document.createElement('a');
+        a.href = objectUrl;
+        a.download = imageUrls.length > 1 ? `${baseName}-${i + 1}.${ext}` : `${baseName}.${ext}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(objectUrl);
+      } catch (err) {
+        // Fallback: si falla el fetch (CORS, red), al menos abre la imagen en otra pestaña.
+        console.error('Failed to download image:', err);
+        window.open(imageUrls[i], '_blank', 'noopener,noreferrer');
+      }
+    }
+  };
+
+  const downloadImagesButton = (
+    <div className="mt-2 flex justify-end">
+      <button
+        type="button"
+        onClick={handleDownloadImages}
+        className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+      >
+        <Download className="h-3.5 w-3.5" />
+        {imageUrls.length > 1 ? `Download images (${imageUrls.length})` : 'Download image'}
+      </button>
+    </div>
+  );
+
   // Helper function to determine if recipe is still processing
   const isRecipeProcessing = () => {
     if (localRecipe.upload_method !== 'image') return false;
@@ -705,7 +752,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
 
       {/* Personal note */}
       {displayNote && displayNote.trim() && (
-        <p className="text-base italic text-gray-500 font-serif mb-6">
+        <p className={`text-base italic text-gray-500 font-serif ${firstDocUrl ? 'mb-8' : 'mb-6'}`}>
           &ldquo;{displayNote}&rdquo;
         </p>
       )}
@@ -746,18 +793,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
                   />
                 </div>
               </div>
-              <div className="mt-2 flex justify-end">
-                <a
-                  href={firstDocUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  download
-                  className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  Download image
-                </a>
-              </div>
+              {downloadImagesButton}
             </>
           )}
         </div>
@@ -868,7 +904,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
 
       {/* Personal note */}
       {displayNote && displayNote.trim() && (
-        <p className="text-base italic text-gray-500 font-serif mb-6">
+        <p className={`text-base italic text-gray-500 font-serif ${firstDocUrl ? 'mb-8' : 'mb-6'}`}>
           &ldquo;{displayNote}&rdquo;
         </p>
       )}
@@ -909,18 +945,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
                   />
                 </div>
               </div>
-              <div className="mt-2 flex justify-end">
-                <a
-                  href={firstDocUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  download
-                  className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  Download image
-                </a>
-              </div>
+              {downloadImagesButton}
             </>
           )}
         </div>
@@ -1005,7 +1030,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       </div>
 
       {/* Two Column Layout — matches print layout */}
-      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[240px_1fr] gap-6">
+      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[240px_1fr] md:grid-rows-[minmax(0,1fr)] gap-6">
         {/* Ingredients */}
         <div className="flex flex-col">
           <h3 className="text-xs uppercase tracking-[0.15em] text-gray-500 font-semibold mb-3">Ingredients</h3>
@@ -1216,7 +1241,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
           </DialogTitle>
         </DialogHeader>
         
-        <div className="flex-1 flex flex-col pl-8 pr-8 pt-8 pb-6 min-w-0 overflow-y-auto">
+        <div className="flex-1 flex flex-col pl-8 pr-8 pt-4 pb-6 min-w-0 overflow-y-auto">
           {isEditMode ? desktopEditContent : desktopContent}
         </div>
 

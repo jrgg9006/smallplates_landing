@@ -228,13 +228,13 @@ export function RecipeImageUpload({
               {selectedFiles.map((file, index) =>
                 !file.type.startsWith('image/') ? null : (
                   <div key={index} className="relative group">
-                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200">
+                    <div className="aspect-square rounded-xl overflow-hidden bg-gray-50 border border-gray-200">
                       {previewUrls[index] ? (
                         <Image
                           src={previewUrls[index]}
                           alt={`Recipe image ${index + 1}`}
                           fill
-                          className="object-cover"
+                          className="object-contain p-2"
                         />
                       ) : (
                         <div className="flex flex-col items-center justify-center h-full text-gray-400">

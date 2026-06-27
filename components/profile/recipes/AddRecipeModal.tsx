@@ -473,7 +473,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
   const desktopContent = (
     <div className="flex-1 overflow-hidden flex flex-col min-w-0 pr-10 pt-6">
       {/* Main Content Grid - Controls on left, Recipe content on right */}
-      <div className="flex-1 grid grid-cols-[240px_1fr] gap-10">
+      <div className="flex-1 min-h-0 grid grid-cols-[240px_1fr] grid-rows-[minmax(0,1fr)] gap-10">
         {/* Left Column: Controls */}
         <div className="flex flex-col space-y-8">
           {/* Guest Selector — single control, "It is mine" lives inside the menu */}
@@ -645,7 +645,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                 <Label className="text-sm font-medium text-gray-700 mb-4 block flex-shrink-0">
                   Show us what you&apos;re making <span className="text-[hsl(var(--brand-honey))] text-xs">*</span>
                 </Label>
-                <div className="flex-1">
+                <div className="flex-1 min-h-0 overflow-y-auto">
                   <RecipeImageUpload
                     onFilesSelected={setSelectedFiles}
                     selectedFiles={selectedFiles}
@@ -958,13 +958,13 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
             <DialogTitle className="type-modal-title text-gray-900">Add a new Recipe</DialogTitle>
           </DialogHeader>
           
-          <div className="flex-1 overflow-hidden flex flex-col pl-8 pr-8 pb-6 min-w-0">
+          <div className="flex-1 overflow-hidden flex flex-col pl-8 pr-8 pb-2 min-w-0">
             {desktopContent}
           </div>
-          
+
           {/* Action Buttons - Fixed position at bottom.
               Desktop: right-aligned, auto width (modal is wide, so full-width would look off). */}
-          <div className="flex justify-end gap-3 flex-shrink-0 bg-white px-8 py-4">
+          <div className="flex justify-end gap-3 flex-shrink-0 border-t border-brand-sand bg-white px-8 py-3">
             <button
               type="button"
               onClick={onClose}
