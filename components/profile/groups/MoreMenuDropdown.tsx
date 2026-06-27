@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
+// Reason: Create Event Invitation oculto por ahora — no listo para usuarios. Poner en true para re-activar.
+const SHOW_CREATE_EVENT_INVITATION: boolean = false;
+
 interface MoreMenuDropdownProps {
   isOpen: boolean;
   onClose: () => void;
@@ -69,7 +72,8 @@ export function MoreMenuDropdown({ isOpen, onClose, onEditProfile, showCaptainsO
           Send email invitations
         </button>
       )}
-      {onCreateEventInvitationClick && (
+      {/* Reason: Create Event Invitation oculto por ahora — no listo para usuarios. Re-activar poniendo SHOW_CREATE_EVENT_INVITATION = true. */}
+      {SHOW_CREATE_EVENT_INVITATION && onCreateEventInvitationClick && (
         <button
           onClick={() => {
             onCreateEventInvitationClick();
