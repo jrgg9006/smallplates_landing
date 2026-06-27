@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Edit, Download, ChevronDown, Plus, Info } from "lucide-react";
+import { Edit, Download, ChevronDown, ChevronLeft, ChevronRight, Plus, Info } from "lucide-react";
 import Image from "next/image";
 import { changeRecipeGuest, logRecipeEdit } from "@/lib/supabase/recipes";
 import { getRecipeViewState, type RecipeViewState } from "@/lib/recipes/cleanVersionState";
@@ -62,6 +62,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   // Responsive hook to detect mobile
   const [isMobile, setIsMobile] = useState(false);
   
+  // Carrusel de imágenes (cuando el invitado subió varias fotos)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
   // Edit mode state
   const [isEditMode, setIsEditMode] = useState(false);
   const [recipeTitle, setRecipeTitle] = useState('');
@@ -108,6 +111,11 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       setLocalRecipe(recipe);
     }
   }, [recipe]);
+
+  // Reason: reinicia el carrusel a la primera imagen al abrir o cambiar de receta.
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [localRecipe?.id, isOpen]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 640); // sm breakpoint
@@ -604,6 +612,56 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     }
   };
 
+  const goPrevImage = () =>
+    setCurrentImageIndex((i) => (i - 1 + imageUrls.length) % imageUrls.length);
+  const goNextImage = () =>
+    setCurrentImageIndex((i) => (i + 1) % imageUrls.length);
+
+  // Reason: misma foto contenida (sin recortar) + flechas/contador cuando hay varias.
+  // Reutilizado en desktop y mobile cambiando solo `sizes` y el tope de alto.
+  const renderImageCarousel = (sizes: string, maxHClass: string) => {
+    const total = imageUrls.length;
+    const src = imageUrls[currentImageIndex] ?? imageUrls[0];
+    return (
+      <>
+        <div className="relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center p-3">
+          <Image
+            src={src}
+            alt={localRecipe?.recipe_name || 'Recipe image'}
+            width={0}
+            height={0}
+            sizes={sizes}
+            className={`w-auto h-auto max-w-full ${maxHClass} object-contain rounded-md shadow-sm`}
+          />
+          {total > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={goPrevImage}
+                aria-label="Previous image"
+                className="absolute left-2 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-md text-brand-charcoal hover:bg-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-honey))]/40"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={goNextImage}
+                aria-label="Next image"
+                className="absolute right-2 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-md text-brand-charcoal hover:bg-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-honey))]/40"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+              <span className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-2.5 py-0.5 text-xs text-white tabular-nums">
+                {currentImageIndex + 1} / {total}
+              </span>
+            </>
+          )}
+        </div>
+        {downloadImagesButton}
+      </>
+    );
+  };
+
   const downloadImagesButton = (
     <div className="mt-2 flex justify-end">
       <button
@@ -781,20 +839,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
               )}
             </>
           ) : (
-            <>
-              <div className="rounded-xl overflow-hidden shadow-lg bg-gray-100">
-                <div className="relative aspect-video w-full">
-                  <Image
-                    src={firstDocUrl}
-                    alt={localRecipe.recipe_name || 'Recipe image'}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 1280px) 65vw, 50vw"
-                  />
-                </div>
-              </div>
-              {downloadImagesButton}
-            </>
+            renderImageCarousel('(max-width: 1280px) 65vw, 50vw', 'max-h-[60vh]')
           )}
         </div>
       )}
@@ -933,20 +978,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
               )}
             </>
           ) : (
-            <>
-              <div className="rounded-xl overflow-hidden shadow-lg bg-gray-100">
-                <div className="relative aspect-video w-full">
-                  <Image
-                    src={firstDocUrl}
-                    alt={localRecipe.recipe_name || 'Recipe image'}
-                    fill
-                    className="object-cover"
-                    sizes="95vw"
-                  />
-                </div>
-              </div>
-              {downloadImagesButton}
-            </>
+            renderImageCarousel('95vw', 'max-h-[55vh]')
           )}
         </div>
       )}
