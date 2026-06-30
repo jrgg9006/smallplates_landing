@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { RECIPE_LIKELIHOOD_THRESHOLD } from '@/lib/constants/recipe-review';
 
 interface RecipeWithProductionStatus {
   id: string;
@@ -24,6 +25,8 @@ interface RecipeWithProductionStatus {
   needs_review?: boolean;
   review_reasons?: string | null;
   confidence_score?: number | null;
+  // Backend AI score 0-100; < 30 = upload probably isn't a recipe. Set by backend only.
+  recipe_likelihood?: number | null;
   guests: {
     id: string;
     first_name: string;
@@ -463,6 +466,15 @@ export function RecipeOperationsTable({
                         </button>
                       </>
                     )}
+                    {recipe.recipe_likelihood != null &&
+                      recipe.recipe_likelihood < RECIPE_LIKELIHOOD_THRESHOLD && (
+                        <span
+                          className="text-xs px-2 py-1 rounded-full bg-rose-100 text-rose-700 font-medium cursor-help"
+                          title={`Recipe likelihood: ${recipe.recipe_likelihood}/100\nThis upload probably isn't a recipe (e.g. an invoice, a document, or a photo of just the dish). Check what the guest submitted. This never blocks the book — it's only a heads-up.`}
+                        >
+                          ⚠️ Not a recipe?
+                        </span>
+                      )}
                   </div>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">

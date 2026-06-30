@@ -19,6 +19,7 @@ import { Edit, Download, ChevronDown, ChevronLeft, ChevronRight, Plus, Info } fr
 import Image from "next/image";
 import { changeRecipeGuest, logRecipeEdit } from "@/lib/supabase/recipes";
 import { getRecipeViewState, type RecipeViewState } from "@/lib/recipes/cleanVersionState";
+import { RECIPE_LIKELIHOOD_THRESHOLD } from "@/lib/constants/recipe-review";
 import { getGuests } from "@/lib/supabase/guests";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { getRecipeGroups } from "@/lib/supabase/groupRecipes";
@@ -481,6 +482,18 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     normalizedConfidence < EXTRACTION_FAILED_CONFIDENCE_THRESHOLD &&
     !inCleaned;
 
+  // Reason: avisamos cuando lo subido probablemente no es una receta. Independiente de
+  // confidence_score (una factura puede leerse al 100 pero tener recipe_likelihood = 0).
+  // Solo informa, nunca bloquea. El guard contra null evita disparar sin dato.
+  // recipe_likelihood se calcula una sola vez al subir y no se recalcula, así que usamos
+  // el mismo guard !inCleaned que showExtractionFailed: en cuanto hay versión limpia/editada
+  // (el usuario la arregló) la caja desaparece. El badge de admin en Operations no usa este
+  // guard a propósito (el dueño quiere seguir viéndolo para revisar).
+  const showNotARecipe =
+    localRecipe.recipe_likelihood != null &&
+    localRecipe.recipe_likelihood < RECIPE_LIKELIHOOD_THRESHOLD &&
+    !inCleaned;
+
   const guestRealName = guest ? `${guest.first_name} ${guest.last_name || ''}`.trim() : '';
   const guestName = guest
     ? (guest.printed_name ? `${guest.printed_name} (${guestRealName})` : guestRealName)
@@ -754,6 +767,17 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     </div>
   );
 
+  // Reason: heads-up cuando lo subido probablemente no es una receta. No reemplaza el
+  // contenido (a diferencia de extractionFailedBlock): solo avisa arriba. Nunca bloquea.
+  const notARecipeBlock = (
+    <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+      <p className="text-[13px] font-medium text-rose-800">This doesn&apos;t look like a recipe.</p>
+      <p className="text-[13px] leading-relaxed text-rose-800">
+        Please double-check you uploaded the right photo — if it&apos;s correct, you can ignore this.
+      </p>
+    </div>
+  );
+
   // Content component for desktop - book-style layout
   const desktopContent = (
     <div className="flex-1 flex flex-col min-w-0">
@@ -779,6 +803,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       <h2 className="font-serif text-3xl lg:text-4xl font-semibold text-brand-charcoal leading-tight mb-4">
         {displayName || 'Untitled Recipe'}
       </h2>
+
+      {/* Not-a-recipe heads-up — independent of confidence_score; owner-only, never blocks */}
+      {showNotARecipe && !isEditMode && notARecipeBlock}
 
       {/* Fallback banner — explains why the raw original is shown */}
       {viewState === 'fallback' && !isEditMode && !showExtractionFailed && (
@@ -918,6 +945,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       <h2 className="font-serif text-3xl font-semibold text-brand-charcoal leading-tight mb-4">
         {displayName || 'Untitled Recipe'}
       </h2>
+
+      {/* Not-a-recipe heads-up — independent of confidence_score; owner-only, never blocks */}
+      {showNotARecipe && !isEditMode && notARecipeBlock}
 
       {/* Fallback banner — explains why the raw original is shown */}
       {viewState === 'fallback' && !isEditMode && !showExtractionFailed && (

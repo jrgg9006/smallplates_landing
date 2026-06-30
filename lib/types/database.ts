@@ -202,6 +202,10 @@ export interface Database {
           // Reason: OCR confidence flags written by the backend AI engine only.
           // The frontend may ONLY set needs_review to false (verified against photo).
           confidence_score: number | null;
+          // Reason: 0-100 score written by the backend AI engine. < 30 means the
+          // upload likely isn't a recipe (invoice, document, plated-food photo).
+          // Independent of confidence_score (read quality) and needs_review.
+          recipe_likelihood: number | null;
           needs_review: boolean;
           review_reasons: string | null;
           showcase_image_url: string | null;
@@ -230,6 +234,7 @@ export interface Database {
           book_review_status?: BookReviewStatus;
           book_review_notes?: string | null;
           confidence_score?: number | null;
+          recipe_likelihood?: number | null;
           needs_review?: boolean;
           review_reasons?: string | null;
           showcase_image_url?: string | null;
@@ -253,6 +258,7 @@ export interface Database {
           book_review_status?: BookReviewStatus;
           book_review_notes?: string | null;
           confidence_score?: number | null;
+          recipe_likelihood?: number | null;
           needs_review?: boolean;
           review_reasons?: string | null;
           showcase_image_url?: string | null;
@@ -422,6 +428,7 @@ export interface Database {
           needs_review: boolean;
           needs_review_reason: string | null;
           manually_cleared: boolean;
+          annex_reviewed: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -436,6 +443,7 @@ export interface Database {
           needs_review?: boolean;
           needs_review_reason?: string | null;
           manually_cleared?: boolean;
+          annex_reviewed?: boolean;
         };
         Update: {
           text_finalized_in_indesign?: boolean;
@@ -446,6 +454,7 @@ export interface Database {
           needs_review?: boolean;
           needs_review_reason?: string | null;
           manually_cleared?: boolean;
+          annex_reviewed?: boolean;
         };
       };
       groups: {

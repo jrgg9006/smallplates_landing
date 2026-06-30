@@ -5,6 +5,7 @@ import { createSupabaseClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { isAdminEmail } from '@/lib/config/admin';
+import { RECIPE_LIKELIHOOD_THRESHOLD } from '@/lib/constants/recipe-review';
 import { RecipeOperationsTable } from './components/RecipeOperationsTable';
 import { ArchiveRecipeModal } from '../books/components/ArchiveRecipeModal';
 import Image from 'next/image';
@@ -32,6 +33,8 @@ interface RecipeWithProductionStatus {
   needs_review?: boolean;
   review_reasons?: string | null;
   confidence_score?: number | null;
+  // Backend AI score 0-100; < 30 = upload probably isn't a recipe. Set by backend only.
+  recipe_likelihood?: number | null;
   guests: {
     id: string;
     first_name: string;
@@ -167,6 +170,7 @@ export default function OperationsPage() {
   const [notifyOptInFilter, setNotifyOptInFilter] = useState(false);
   const [imageFilter, setImageFilter] = useState<'all' | 'yes' | 'no'>('all');
   const [ocrReviewFilter, setOcrReviewFilter] = useState(false);
+  const [notARecipeFilter, setNotARecipeFilter] = useState(false);
   const [hidePrinted, setHidePrinted] = useState(true);
   const [archivingRecipe, setArchivingRecipe] = useState<RecipeWithProductionStatus | null>(null);
   const [archiveLoading, setArchiveLoading] = useState(false);
@@ -380,8 +384,13 @@ export default function OperationsPage() {
     if (ocrReviewFilter) {
       result = result.filter(r => r.needs_review === true);
     }
+    if (notARecipeFilter) {
+      result = result.filter(
+        r => r.recipe_likelihood != null && r.recipe_likelihood < RECIPE_LIKELIHOOD_THRESHOLD
+      );
+    }
     return result;
-  }, [recipes, searchQuery, imageFilter, hidePrinted, ocrReviewFilter]);
+  }, [recipes, searchQuery, imageFilter, hidePrinted, ocrReviewFilter, notARecipeFilter]);
 
   // Unique guest count from filtered recipes
   const uniqueGuestCount = useMemo(() => {
@@ -1446,6 +1455,17 @@ ${instructions}`;
               className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
             />
             <span className="font-medium text-gray-700">⚠️ OCR review only</span>
+          </label>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={notARecipeFilter}
+              onChange={(e) => setNotARecipeFilter(e.target.checked)}
+              className="w-4 h-4 text-rose-600 border-gray-300 rounded focus:ring-rose-500"
+            />
+            <span className="font-medium text-gray-700">⚠️ Not a recipe only</span>
           </label>
         </div>
         <div className="text-sm text-gray-600 ml-auto flex items-center gap-3">
