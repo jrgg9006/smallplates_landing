@@ -100,6 +100,9 @@ export default function PromptEvaluationSection({
           container_used: agentMetadata?.container || null,
           agent_version: agentMetadata?.generator_version || '2.1.0',
           generation_duration_ms: agentMetadata?.total_duration_ms || null,
+          // Reason: modelo exacto que el pipeline escribió en agent_metadata (ej. "gpt-5.4");
+          // null en recetas anteriores al deploy que lo empezó a poblar
+          model_used: agentMetadata?.model_used || null,
         }),
       });
 

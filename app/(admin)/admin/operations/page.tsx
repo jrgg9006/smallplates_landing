@@ -83,6 +83,7 @@ interface RecipeWithProductionStatus {
       container_used?: string;
       generator_version?: string;
       total_duration_ms?: number;
+      model_used?: string;
     } | null;
   } | null;
   recipe_print_ready: {

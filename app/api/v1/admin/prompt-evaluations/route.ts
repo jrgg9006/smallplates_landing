@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { requireAdminAuth } from '@/lib/auth/admin';
 
 // GET - Fetch evaluation for a recipe
 export async function GET(request: NextRequest) {
@@ -37,6 +38,10 @@ export async function GET(request: NextRequest) {
 // POST - Create or update evaluation
 export async function POST(request: NextRequest) {
   try {
+    // Reason: authenticate so we can attribute the evaluation to the admin (evaluated_by)
+    // and stop leaving this write endpoint open.
+    const admin = await requireAdminAuth();
+
     const body = await request.json();
 
     const {
@@ -54,6 +59,7 @@ export async function POST(request: NextRequest) {
       container_used,
       agent_version,
       generation_duration_ms,
+      model_used,
     } = body;
 
     if (!recipe_id || !rating) {
@@ -94,6 +100,10 @@ export async function POST(request: NextRequest) {
       container_used,
       agent_version,
       generation_duration_ms,
+      // Reason: model_used comes from the pipeline (agent_metadata.model_used);
+      // evaluated_by is derived from the admin session, never trusted from the client.
+      model_used: model_used || null,
+      evaluated_by: admin.id,
       updated_at: new Date().toISOString(),
     };
 
