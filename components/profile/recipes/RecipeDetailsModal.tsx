@@ -807,8 +807,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       {/* Not-a-recipe heads-up — independent of confidence_score; owner-only, never blocks */}
       {showNotARecipe && !isEditMode && notARecipeBlock}
 
-      {/* Fallback banner — explains why the raw original is shown */}
-      {viewState === 'fallback' && !isEditMode && !showExtractionFailed && (
+      {/* Fallback banner — explains why the raw original is shown.
+          Hidden when the not-a-recipe notice is up: one message at a time. */}
+      {viewState === 'fallback' && !isEditMode && !showExtractionFailed && !showNotARecipe && (
         <div className="mb-4 rounded-xl border border-[#F0DCC8] bg-[#FBEFE6] px-4 py-3">
           <p className="text-[13px] font-medium text-[#8A5A2B]">Still cleaning this one up</p>
           <p className="text-[13px] leading-relaxed text-[#8A5A2B]">
@@ -949,8 +950,9 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
       {/* Not-a-recipe heads-up — independent of confidence_score; owner-only, never blocks */}
       {showNotARecipe && !isEditMode && notARecipeBlock}
 
-      {/* Fallback banner — explains why the raw original is shown */}
-      {viewState === 'fallback' && !isEditMode && !showExtractionFailed && (
+      {/* Fallback banner — explains why the raw original is shown.
+          Hidden when the not-a-recipe notice is up: one message at a time. */}
+      {viewState === 'fallback' && !isEditMode && !showExtractionFailed && !showNotARecipe && (
         <div className="mb-4 rounded-xl border border-[#F0DCC8] bg-[#FBEFE6] px-4 py-3">
           <p className="text-[13px] font-medium text-[#8A5A2B]">Still cleaning this one up</p>
           <p className="text-[13px] leading-relaxed text-[#8A5A2B]">
