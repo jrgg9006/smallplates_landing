@@ -8,6 +8,7 @@ import { isAdminEmail } from '@/lib/config/admin';
 import { RECIPE_LIKELIHOOD_THRESHOLD } from '@/lib/constants/recipe-review';
 import { RecipeOperationsTable } from './components/RecipeOperationsTable';
 import { ArchiveRecipeModal } from '../books/components/ArchiveRecipeModal';
+import { ChangesHistorySheet } from '../books/components/ChangesHistorySheet';
 import Image from 'next/image';
 import PromptEvaluationSection from './components/PromptEvaluationSection';
 import RecipeCompareModal from './components/RecipeCompareModal';
@@ -147,6 +148,7 @@ export default function OperationsPage() {
   const [showOriginalNotes, setShowOriginalNotes] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   // Edit states for recipe_print_ready
   const [isEditingText, setIsEditingText] = useState(false);
@@ -1557,6 +1559,19 @@ ${instructions}`;
                       </button>
                     </div>
                     <div className="flex items-center gap-3">
+                      {/* History Button — who changed what and when (AI, admin, guest) */}
+                      {!isEditingText && (
+                        <button
+                          onClick={() => setHistoryOpen(true)}
+                          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                          title="See the full edit history: AI cleaning, admin edits, guest changes"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span>History</span>
+                        </button>
+                      )}
                       {/* Compare Button — side-by-side clean vs original */}
                       {!isEditingText && (
                         <button
@@ -2397,8 +2412,17 @@ ${instructions}`;
               } : prev);
               handleStatusUpdate();
             }}
+            onOpenHistory={() => setHistoryOpen(true)}
           />
         )}
+
+        {/* Edit history panel — z-[110] sits above the detail sheet (z-50) and Compare (z-[80]) */}
+        <ChangesHistorySheet
+          open={historyOpen}
+          onClose={() => setHistoryOpen(false)}
+          recipeId={selectedRecipe?.id ?? null}
+          recipeName={selectedRecipe?.recipe_print_ready?.recipe_name_clean || selectedRecipe?.recipe_name}
+        />
 
         {/* Confirmation Modal */}
         {showConfirmModal && changesSummary && (

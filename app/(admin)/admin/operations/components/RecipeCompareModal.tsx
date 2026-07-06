@@ -22,9 +22,12 @@ interface RecipeCompareModalProps {
   onClose: () => void;
   // Reason: lets the parent update selectedRecipe + refresh the list after a save
   onSaved: (cleaned: { recipe_name_clean: string; ingredients_clean: string; instructions_clean: string; note_clean: string }) => void;
+  // Reason: the history sheet lives at page level (z-[110], above this modal) so it can
+  // also be opened from the detail sheet — here we only ask the parent to open it.
+  onOpenHistory?: () => void;
 }
 
-export default function RecipeCompareModal({ recipe, onClose, onSaved }: RecipeCompareModalProps) {
+export default function RecipeCompareModal({ recipe, onClose, onSaved, onOpenHistory }: RecipeCompareModalProps) {
   // Original = the guest's submission (right side, never edited)
   const originalNotes = recipe.comments || '';
   const originalIngredients = recipe.ingredients || '';
@@ -102,6 +105,18 @@ export default function RecipeCompareModal({ recipe, onClose, onSaved }: RecipeC
         </div>
         <div className="flex items-center gap-3">
           {error && <span className="text-sm text-red-600">{error}</span>}
+          {onOpenHistory && (
+            <button
+              onClick={onOpenHistory}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+              title="See who changed what and when (AI cleaning, admin edits, guest changes)"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>History</span>
+            </button>
+          )}
           <button
             onClick={handleSave}
             disabled={!hasChanges || saving}
