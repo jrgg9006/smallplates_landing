@@ -3,6 +3,45 @@ import { isFreeTierEnabled } from "@/lib/feature-flags";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { sendFreeTierWelcomeEmail } from "@/lib/postmark";
 
+/**
+ * Reason: a free_tier book is safe to reuse only if it has NO content. "Empty" =
+ * zero active recipes (group_recipes with removed_at IS NULL) and zero guests.
+ * A book with any content is a real, separate book (e.g. an intentional "next
+ * book") and must never be touched. Returns the most recent empty free_tier
+ * group id for this user, or null. This is the "Scenario B" the branch below
+ * documents but historically never implemented — see
+ * docs/investigations/2026-06-14-double-book-onboarding.md.
+ */
+async function findEmptyFreeTierGroupId(
+  supabaseAdmin: ReturnType<typeof createSupabaseAdminClient>,
+  userId: string
+): Promise<string | null> {
+  const { data: candidates } = await supabaseAdmin
+    .from("groups")
+    .select("id")
+    .eq("created_by", userId)
+    .eq("status", "free_tier")
+    .order("created_at", { ascending: false });
+
+  if (!candidates?.length) return null;
+
+  for (const g of candidates) {
+    const [{ count: recipeCount }, { count: guestCount }] = await Promise.all([
+      supabaseAdmin
+        .from("group_recipes")
+        .select("id", { count: "exact", head: true })
+        .eq("group_id", g.id)
+        .is("removed_at", null),
+      supabaseAdmin
+        .from("guests")
+        .select("id", { count: "exact", head: true })
+        .eq("group_id", g.id),
+    ]);
+    if ((recipeCount ?? 0) === 0 && (guestCount ?? 0) === 0) return g.id;
+  }
+  return null;
+}
+
 export async function POST(request: NextRequest) {
   if (!isFreeTierEnabled()) {
     return NextResponse.json({ error: "Free tier not enabled" }, { status: 404 });
@@ -116,14 +155,23 @@ export async function POST(request: NextRequest) {
         groupId = g.id;
       }
     } else {
-      // Existing user — ALWAYS create a new group. Never touch existing ones
-      // (even free_tier — they may have recipes already).
-      const { data: g, error: e } = await supabaseAdmin
-        .from("groups")
-        .insert({ ...freeTierFields, created_by: userId, description: "" })
-        .select("id").single();
-      if (e || !g) return NextResponse.json({ error: e?.message || "Could not create group" }, { status: 500 });
-      groupId = g.id;
+      // Scenario B: existing user re-doing free tier. If they already have an
+      // EMPTY free_tier book (0 recipes, 0 guests) — typically an accidental
+      // duplicate from restarting/refreshing onboarding — reuse it instead of
+      // leaving an orphan. A book with ANY content is a real, separate book and
+      // is never touched, so an intentional "next book" still gets created new.
+      const emptyGroupId = await findEmptyFreeTierGroupId(supabaseAdmin, userId);
+      if (emptyGroupId) {
+        groupId = emptyGroupId;
+        await supabaseAdmin.from("groups").update(freeTierFields).eq("id", groupId);
+      } else {
+        const { data: g, error: e } = await supabaseAdmin
+          .from("groups")
+          .insert({ ...freeTierFields, created_by: userId, description: "" })
+          .select("id").single();
+        if (e || !g) return NextResponse.json({ error: e?.message || "Could not create group" }, { status: 500 });
+        groupId = g.id;
+      }
     }
 
     // 3. Generate magic link token for instant session (same pattern as post-payment-setup).

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
@@ -25,6 +25,10 @@ export default function AboutYouPage() {
   const [isAuthed, setIsAuthed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  // Reason: synchronous re-entrancy guard. setSubmitting is async/batched, so a
+  // fast double-click (or Enter-mash) can fire handleSubmit twice before the
+  // button re-renders disabled — creating two books. A ref flips immediately.
+  const submitLock = useRef(false);
 
   useEffect(() => {
     const supabase = createSupabaseClient();
@@ -38,6 +42,8 @@ export default function AboutYouPage() {
   }, []);
 
   async function handleSubmit() {
+    if (submitLock.current) return;
+    submitLock.current = true;
     setSubmitting(true);
     setError("");
 
@@ -60,6 +66,7 @@ export default function AboutYouPage() {
       if (!res.ok) {
         const { error: errMsg } = await res.json();
         setError(errMsg || "Something went wrong");
+        submitLock.current = false;
         setSubmitting(false);
         return;
       }
@@ -109,6 +116,7 @@ export default function AboutYouPage() {
       router.push(`/onboarding/co-organizer?groupId=${groupId}`);
     } catch {
       setError("Something went wrong. Please try again.");
+      submitLock.current = false;
       setSubmitting(false);
     }
   }
