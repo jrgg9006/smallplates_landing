@@ -4,12 +4,10 @@ import { stripe } from "@/lib/stripe/client";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { pricePerCopy, MIN_RECIPES_TO_PRINT } from "@/lib/stripe/pricing";
 
-// Reason: Countries we can ship to. Mirrors the list the old in-app shipping form
-// supported (US, MX, EU). Stripe collects the address natively for us now.
+// Reason: Countries we can ship to (US, MX only — EU removed Jul 2026).
+// Stripe collects the address natively for us now.
 const SHIPPING_ALLOWED_COUNTRIES: Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[] = [
   "US", "MX",
-  "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU",
-  "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE",
 ];
 
 export async function POST(request: NextRequest) {

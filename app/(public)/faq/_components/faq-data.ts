@@ -308,7 +308,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
       {
         id: "where-ship",
         question: "Where do you ship?",
-        answer: ["United States, all of the European Union, and Mexico."],
+        answer: ["United States and Mexico."],
       },
       {
         id: "how-long",

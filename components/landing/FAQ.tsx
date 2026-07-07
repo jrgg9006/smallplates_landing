@@ -25,7 +25,7 @@ export default function FAQ() {
     },
     {
       question: "Where do you ship?",
-      answer: "United States, all of the European Union, and Mexico. Your book gets there."
+      answer: "United States and Mexico. Your book gets there."
     },
   ];
 

@@ -36,10 +36,10 @@ export default function FromTheBookHeader() {
       {/* Shipping announcement strip */}
       <div className="py-2.5 text-center border-b border-white/20">
         <span className="sm:hidden font-sans text-[11px] font-medium tracking-[0.15em] uppercase text-white">
-          Ships to US, MX &amp; EU
+          Ships to US &amp; MX
         </span>
         <span className="hidden sm:inline font-sans text-[11px] font-medium tracking-[0.15em] uppercase text-white">
-          Ships free to United States, Mexico, and European Union.
+          Ships free to United States and Mexico.
         </span>
       </div>
 
