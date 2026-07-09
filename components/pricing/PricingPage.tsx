@@ -23,6 +23,70 @@ const MAX_COPIES = 10;
 // edge case handled by a subordinate stepper, not extra rows.
 const TABLE_COPIES = [1, 2, 3, 4, 5, 6];
 
+// Reason: the editing/photos/design work happens after payment and is invisible
+// to the buyer — this section names it, in three acts, right below the price.
+const serviceSteps = [
+  {
+    title: "Every recipe, reviewed.",
+    description:
+      "Each submission is checked and standardized the moment it arrives. Typos out, measurements consistent.",
+    icon: (
+      <svg
+        viewBox="0 0 30 30"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-7 h-7"
+      >
+        <path d="M20 4l6 6-14 14-7 1 1-7z" />
+        <path d="M17 7l6 6" />
+      </svg>
+    ),
+  },
+  {
+    title: "Every recipe, photographed.",
+    description:
+      "A full-color photo for every dish, made for the book. Nobody has to dig up pictures.",
+    icon: (
+      <svg
+        viewBox="0 0 30 30"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-7 h-7"
+      >
+        <rect x="3" y="9" width="24" height="16" rx="2" />
+        <circle cx="15" cy="17" r="5" />
+        <path d="M10 9l2-3h6l2 3" />
+      </svg>
+    ),
+  },
+  {
+    title: "Designed, printed, shipped.",
+    description:
+      "Laid out page by page, printed in hardcover, at your door in about three weeks.",
+    icon: (
+      <svg
+        viewBox="0 0 30 30"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-7 h-7"
+      >
+        <path d="M4 10l11-5 11 5v11l-11 5-11-5z" />
+        <path d="M4 10l11 5 11-5" />
+        <path d="M15 15v11" />
+      </svg>
+    ),
+  },
+];
+
 export default function PricingPage() {
   const router = useRouter();
 
@@ -202,26 +266,20 @@ export default function PricingPage() {
                 </p>
               </div>
 
-              {/* What's included */}
-              <h2 className="text-center font-serif text-lg text-brand-charcoal mb-6">
-                Every book includes
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 max-w-lg mx-auto mb-3">
-                {[
-                  "50 recipes included",
-                  "Premium hardcover, 8 × 10 in",
-                  "Professionally designed",
-                  "Full color throughout",
-                  "Personal notes from every guest",
-                  "Full platform access",
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-2.5">
-                    <span className="mt-2 w-1.5 h-1.5 rounded-full bg-brand-honey flex-shrink-0" />
-                    <span className="text-[15px] text-[hsl(var(--brand-warm-gray-dark))] font-light leading-relaxed">
-                      {item}
+              {/* Reason: the card stays focused on the price table — the physical
+                  specs compress to one quiet tag line (TheBook's specTags style);
+                  the service gets its own section below the card. */}
+              <div className="flex flex-wrap justify-center gap-2">
+                {["Hardcover", "Full color", "8 × 10 in", "50 recipes included"].map(
+                  (tag) => (
+                    <span
+                      key={tag}
+                      className="font-sans text-xs bg-brand-cream border border-brand-sand text-brand-charcoal/60 px-3.5 py-1.5 rounded-sm"
+                    >
+                      {tag}
                     </span>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
               <p className="text-center text-sm text-brand-honey mt-5">
                 50 recipes are included. Each one after that is just $1, added to your total when you print.
@@ -249,6 +307,61 @@ export default function PricingPage() {
         </div>
       </section>
 
+      {/* The service — what the price actually covers */}
+      <section className="pb-20 md:pb-28">
+        <div className="mx-auto max-w-4xl px-6">
+          <motion.div
+            className="text-center mb-12 md:mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+          >
+            <p className="type-eyebrow mb-4">What the price actually covers</p>
+            <h2
+              className="type-heading font-normal"
+              style={{ letterSpacing: "-0.02em" }}
+            >
+              You collect the recipes. We do the rest.
+            </h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-12 sm:gap-8 md:gap-12">
+            {serviceSteps.map((step, index) => (
+              <motion.div
+                key={step.title}
+                className="text-center"
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.5, delay: index * 0.08 }}
+              >
+                <div className="flex justify-center text-brand-honey mb-5">
+                  {step.icon}
+                </div>
+                <h3 className="type-subheading text-lg mb-3">{step.title}</h3>
+                <p className="type-body-small text-[15px] max-w-[260px] mx-auto">
+                  {step.description}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Reason: the human check is the claim competitors can't make — it
+              gets its own beat below the three acts, not a crowded fourth column. */}
+          <motion.p
+            className="type-accent mt-14 md:mt-16 text-center text-lg md:text-xl text-brand-charcoal/75"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            And before anything goes to print, a real person has read every
+            recipe. Every time.
+          </motion.p>
+        </div>
+      </section>
+
       {/* A few things to know — flat text, no card */}
       <section className="pb-24 md:pb-32">
         <div className="mx-auto max-w-2xl px-6">
@@ -270,12 +383,6 @@ export default function PricingPage() {
               <p>
                 <span className="font-medium text-brand-charcoal">Timeline:</span> Most
                 books are ready 3–4 weeks after recipe collection closes.
-              </p>
-              <div className="h-px bg-brand-sand" />
-              <p>
-                <span className="font-medium text-brand-charcoal">What&apos;s included:</span> 50
-                recipes, professional design, recipe images, quality printing, and full
-                access to the platform.
               </p>
               <div className="h-px bg-brand-sand" />
               <p>
