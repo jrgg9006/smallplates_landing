@@ -57,9 +57,28 @@ export async function POST(request: Request) {
     for (const [table, rows] of Object.entries(payload.tables)) {
       if (rows.length === 0) continue;
       const ids = rows.map((r) => r.id).filter((v): v is string => typeof v === 'string');
-      if (ids.length === 0) continue;
-      const { data: existing } = await admin.from(table).select('id').in('id', ids);
-      existingIds[table] = new Set((existing || []).map((r) => rowKey(r as Record<string, unknown>)));
+      if (ids.length > 0) {
+        // Camino normal: la tabla tiene columna id (UUIDs)
+        const { data: existing, error: selectError } = await admin.from(table).select('id').in('id', ids);
+        if (selectError) {
+          return NextResponse.json({ error: `Consulta de conflictos en ${table} falló: ${selectError.message}` }, { status: 500 });
+        }
+        existingIds[table] = new Set((existing || []).map((r) => rowKey(r as Record<string, unknown>)));
+      } else {
+        // Reason: tablas junction sin columna id (ej. group_members PK=group_id+profile_id,
+        // group_recipes PK=group_id+recipe_id). Sin este bloque planRestore las considera
+        // todas nuevas → INSERT falla con violación de PK compuesta en reintento.
+        const firstRow = rows[0] as Record<string, unknown>;
+        const idCols = Object.keys(firstRow).filter((k) => k.endsWith('_id'));
+        if (idCols.length === 0) continue;
+        const filterCol = idCols[0];
+        const values = [...new Set(rows.map((r) => String((r as Record<string, unknown>)[filterCol])))];
+        const { data: existing, error: selectError } = await admin.from(table).select('*').in(filterCol, values);
+        if (selectError) {
+          return NextResponse.json({ error: `Consulta de conflictos en ${table} falló: ${selectError.message}` }, { status: 500 });
+        }
+        existingIds[table] = new Set((existing || []).map((r) => rowKey(r as Record<string, unknown>)));
+      }
     }
 
     const plan = planRestore(payload.tables, existingIds);
