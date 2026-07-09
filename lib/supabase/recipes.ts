@@ -537,7 +537,7 @@ export async function deleteRecipe(recipeId: string) {
   // Step 2: the soft-delete itself.
   const { error: deleteError } = await supabase
     .from('guest_recipes')
-    .update({ deleted_at: nowIso })
+    .update({ deleted_at: nowIso, deleted_by: user.id })
     .eq('id', recipeId);
 
   if (deleteError) {

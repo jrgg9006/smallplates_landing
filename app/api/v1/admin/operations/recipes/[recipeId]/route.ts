@@ -81,7 +81,7 @@ export async function PATCH(
       if (fullySoftDeleted) {
         const { error: deleteError } = await supabase
           .from('guest_recipes')
-          .update({ deleted_at: nowIso })
+          .update({ deleted_at: nowIso, deleted_by: admin.id })
           .eq('id', recipeId);
 
         if (deleteError) {
