@@ -1,0 +1,100 @@
+// app/api/v1/admin/delete/restore/route.ts
+import { NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/auth/admin';
+import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { planRestore } from '@/lib/admin/deletion/restore-plan';
+import { rowKey } from '@/lib/admin/deletion/order';
+import type { SnapshotTables } from '@/lib/admin/deletion/types';
+
+export async function POST(request: Request) {
+  try {
+    await requireAdminAuth();
+    const { trashId } = await request.json();
+    if (!trashId) {
+      return NextResponse.json({ error: 'trashId is required' }, { status: 400 });
+    }
+    const admin = createSupabaseAdminClient();
+
+    const { data: item, error: itemError } = await admin
+      .from('deleted_items')
+      .select('*')
+      .eq('id', trashId)
+      .eq('status', 'trashed')
+      .maybeSingle();
+    if (itemError || !item) {
+      return NextResponse.json({ error: 'No está en papelera (o ya fue restaurado/purgado)' }, { status: 404 });
+    }
+    const payload = item.payload as { tables: SnapshotTables } | null;
+    if (!payload?.tables) {
+      return NextResponse.json({ error: 'Snapshot vacío — no se puede restaurar' }, { status: 500 });
+    }
+
+    // Padre faltante: recipe necesita su group/guest vivos; guest necesita su group
+    const missing: string[] = [];
+    if (item.entity_type === 'recipe' || item.entity_type === 'guest') {
+      const rootTable = item.entity_type === 'recipe' ? 'guest_recipes' : 'guests';
+      const rootRow = payload.tables[rootTable]?.find((r) => String(r.id) === item.entity_id);
+      const groupId = rootRow?.group_id ? String(rootRow.group_id) : null;
+      if (groupId) {
+        const { data: parentGroup } = await admin.from('groups').select('id').eq('id', groupId).maybeSingle();
+        if (!parentGroup) missing.push(`groups/${groupId}`);
+      }
+      if (item.entity_type === 'recipe' && rootRow?.guest_id) {
+        const { data: parentGuest } = await admin
+          .from('guests').select('id').eq('id', String(rootRow.guest_id)).maybeSingle();
+        if (!parentGuest) missing.push(`guests/${String(rootRow.guest_id)}`);
+      }
+    }
+    if (missing.length > 0) {
+      return NextResponse.json(
+        { error: `Padre faltante: ${missing.join(', ')}. Restaura el padre primero (si está en papelera) o aborta.` },
+        { status: 409 }
+      );
+    }
+
+    // Conflictos: ids que ya existen vivos se omiten (nunca sobreescribimos)
+    const existingIds: Record<string, Set<string>> = {};
+    for (const [table, rows] of Object.entries(payload.tables)) {
+      if (rows.length === 0) continue;
+      const ids = rows.map((r) => r.id).filter((v): v is string => typeof v === 'string');
+      if (ids.length === 0) continue;
+      const { data: existing } = await admin.from(table).select('id').in('id', ids);
+      existingIds[table] = new Set((existing || []).map((r) => rowKey(r as Record<string, unknown>)));
+    }
+
+    const plan = planRestore(payload.tables, existingIds);
+    const steps: string[] = [];
+
+    if (item.entity_type === 'profile') {
+      const { error: unbanError } = await admin.auth.admin.updateUserById(item.entity_id, {
+        ban_duration: 'none',
+      });
+      if (unbanError) {
+        return NextResponse.json({ error: `Unban falló: ${unbanError.message}` }, { status: 500 });
+      }
+      steps.push('✅ Auth user desbaneado');
+    }
+
+    for (const { table, rows } of plan.inserts) {
+      const { error: insertError } = await admin.from(table).insert(rows);
+      if (insertError) {
+        return NextResponse.json(
+          { error: `Insert en ${table} falló: ${insertError.message}. Filas ya insertadas quedan vivas — reintenta (los conflictos se omiten).`, steps },
+          { status: 500 }
+        );
+      }
+      steps.push(`✅ ${rows.length} fila(s) → ${table}`);
+    }
+
+    await admin
+      .from('deleted_items')
+      .update({ status: 'restored', restored_at: new Date().toISOString() })
+      .eq('id', trashId);
+    steps.push('🗄️ Papelera: marcado como restaurado');
+
+    return NextResponse.json({ success: true, steps, conflicts: plan.conflicts });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Internal error';
+    return NextResponse.json({ error: message }, { status: message.includes('Admin') ? 401 : 500 });
+  }
+}
