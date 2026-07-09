@@ -756,6 +756,39 @@ export default function AdminUsersPage() {
                 </div>
               </div>
 
+              {/* Guests list */}
+              {userDetails.guests && userDetails.guests.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                    Guests ({userDetails.guests.length})
+                  </h3>
+                  <div className="bg-green-50 border border-green-200 rounded-lg divide-y divide-green-100">
+                    {userDetails.guests.map((guest: any) => (
+                      <div key={guest.id} className="flex items-center justify-between px-3 py-2">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-gray-900">
+                            {[guest.first_name, guest.last_name].filter(Boolean).join(' ') || '—'}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {/* Reason: guests added without email get a NO_EMAIL_ placeholder — show a dash instead */}
+                            {guest.email?.startsWith('NO_EMAIL_') ? 'No email' : guest.email || 'No email'}
+                          </span>
+                        </div>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                            guest.status === 'responded'
+                              ? 'bg-green-200 text-green-900'
+                              : 'bg-gray-200 text-gray-600'
+                          }`}
+                        >
+                          {guest.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Groups Owned */}
               {userDetails.groups.ownedCount > 0 && (
                 <div>

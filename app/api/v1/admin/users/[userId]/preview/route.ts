@@ -47,11 +47,12 @@ export async function GET(
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId);
 
-    // Count guests
-    const { count: guestsCount } = await supabaseAdmin
+    // Get guests (full rows so the modal can list who they are, not just the count)
+    const { data: guests, count: guestsCount } = await supabaseAdmin
       .from('guests')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId);
+      .select('id, first_name, last_name, email, status, group_id', { count: 'exact' })
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true });
 
     // Get groups where user is owner
     const { data: ownedGroups } = await supabaseAdmin
@@ -138,6 +139,7 @@ export async function GET(
         } : null,
         isDeleted: profile?.deleted_at !== null && profile?.deleted_at !== undefined,
         deletedAt: profile?.deleted_at || null,
+        guests: guests || [],
         counts: {
           recipes: recipesCount || 0,
           guests: guestsCount || 0,
