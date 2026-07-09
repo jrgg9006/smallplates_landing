@@ -34,26 +34,51 @@ export async function POST(request: Request) {
         entityType === 'profile'
           ? admin.from('groups').select('id, created_by').eq('created_by', entityId)
           : admin.from('groups').select('id, created_by').eq('id', entityId);
-      const { data: groups } = await groupFilter;
+      const { data: groups, error: groupsQueryError } = await groupFilter;
+      if (groupsQueryError) {
+        return NextResponse.json({ error: groupsQueryError.message }, { status: 500 });
+      }
+      let transferred = 0;
       for (const group of groups || []) {
-        const { data: others } = await admin
+        const { data: others, error: othersQueryError } = await admin
           .from('group_members')
           .select('profile_id')
           .eq('group_id', group.id)
           .neq('profile_id', group.created_by)
           .limit(1);
+        if (othersQueryError) {
+          return NextResponse.json({ error: othersQueryError.message }, { status: 500 });
+        }
         if (others && others.length > 0) {
           const newOwner = String(others[0].profile_id);
-          await admin.from('groups').update({ created_by: newOwner }).eq('id', group.id);
-          await admin
+          const { error: updateGroupError } = await admin
+            .from('groups')
+            .update({ created_by: newOwner })
+            .eq('id', group.id);
+          if (updateGroupError) {
+            return NextResponse.json({ error: updateGroupError.message }, { status: 500 });
+          }
+          const { error: updateRoleError } = await admin
             .from('group_members')
             .update({ role: 'owner' })
             .eq('group_id', group.id)
             .eq('profile_id', newOwner);
+          if (updateRoleError) {
+            // Reason: revertir created_by para no dejar ownership inconsistente
+            await admin.from('groups').update({ created_by: group.created_by }).eq('id', group.id);
+            return NextResponse.json({ error: updateRoleError.message }, { status: 500 });
+          }
           steps.push(`🔄 Grupo transferido a otro miembro (${group.id})`);
+          transferred++;
         }
       }
       if (entityType === 'group') {
+        if (transferred === 0) {
+          return NextResponse.json(
+            { error: 'No hay miembros ajenos a quien transferir — el grupo no fue modificado. Usa memberGroupsAction: "delete" o quita el parámetro.' },
+            { status: 400 }
+          );
+        }
         return NextResponse.json({ success: true, trashId: null, steps });
       }
     }
