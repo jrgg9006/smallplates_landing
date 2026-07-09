@@ -2,7 +2,8 @@ import { RESTORE_ORDER, buildCounts, mergeTables, rowKey } from './order';
 
 describe('RESTORE_ORDER', () => {
   it('inserta padres antes que hijos', () => {
-    const idx = (t: string) => RESTORE_ORDER.indexOf(t);
+    // Reason: RESTORE_ORDER es `as const` — se ensancha para poder indexar con string
+    const idx = (t: string) => (RESTORE_ORDER as readonly string[]).indexOf(t);
     expect(idx('profiles')).toBeLessThan(idx('groups'));
     expect(idx('groups')).toBeLessThan(idx('guests'));
     expect(idx('guests')).toBeLessThan(idx('guest_recipes'));

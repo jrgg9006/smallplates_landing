@@ -244,6 +244,7 @@ export interface Database {
           needs_review?: boolean;
           review_reasons?: string | null;
           showcase_image_url?: string | null;
+          // Reason: capa 1 (product-level) — quién ocultó la receta del libro
           deleted_by?: string | null;
         };
         Update: {
