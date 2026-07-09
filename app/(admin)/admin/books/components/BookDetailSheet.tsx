@@ -315,7 +315,7 @@ export default function BookDetailSheet({ book, open, onOpenChange, onStatusChan
 
   const copyFetchCommand = useCallback(() => {
     if (!detail) return;
-    const cmd = `node scripts/indesign/fetch-book.js ${detail.group.id}`;
+    const cmd = `node scripts/indesign/fetch-book_v2.js ${detail.group.id}`;
     navigator.clipboard.writeText(cmd);
     alert('Copied to clipboard:\n' + cmd);
   }, [detail]);

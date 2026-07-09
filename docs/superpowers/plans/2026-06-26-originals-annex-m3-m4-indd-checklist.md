@@ -1,3 +1,9 @@
+> **OBSOLETO (2026-07-08):** el modelo de spreads ORIGINALS_OPENER/ORIGINALS_PAIR (v17)
+> fue reemplazado por el modelo de PÁGINAS template de `generate-book_v18.jsx` (v1.16.0):
+> 3 páginas template (título / 1-up / 2-up), inserción después de OBJECTS_THAT_STAY,
+> regla 2 imágenes de una receta = página 2-up con un solo pie, filler de paridad.
+> La sección M3 (pipeline/JSON) sigue vigente. El checklist del .indd de abajo NO aplica.
+
 # Originals Annex — M3 + M4 entregados (código) + checklist del .indd
 
 **Fecha:** 2026-06-26
