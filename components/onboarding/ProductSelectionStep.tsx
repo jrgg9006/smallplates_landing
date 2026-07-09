@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import { ShippingCountry } from "@/lib/types/onboarding";
 import {
   BASE_BOOK_PRICE,
-  ADDITIONAL_BOOK_PRICE,
   calculateSubtotal,
+  calculateExtrasAmount,
 } from "@/lib/stripe/pricing";
 
 interface ProductSelectionStepProps {
@@ -100,7 +100,7 @@ export function ProductSelectionStep({
                       {qty === 1 ? "1 copy" : `${qty} copies`}
                       {qty > 1 && (
                         <span className="text-[12px] text-[hsl(var(--brand-warm-gray-light))] ml-1.5">
-                          +${ADDITIONAL_BOOK_PRICE * (qty - 1)}
+                          +${calculateExtrasAmount(qty)}
                         </span>
                       )}
                     </span>

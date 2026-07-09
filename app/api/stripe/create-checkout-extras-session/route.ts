@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe/client";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { ADDITIONAL_BOOK_PRICE } from "@/lib/stripe/pricing";
+import { pricePerCopy } from "@/lib/stripe/pricing";
 
 export async function POST(request: NextRequest) {
   try {
@@ -65,9 +65,9 @@ export async function POST(request: NextRequest) {
             currency: "usd",
             product_data: {
               name: "Additional Cookbook Copy",
-              description: "Extra hardcover copy of your Small Plates cookbook",
+              description: "Extra hardcover copy of your Small Plates cookbook · shipping included",
             },
-            unit_amount: ADDITIONAL_BOOK_PRICE * 100,
+            unit_amount: pricePerCopy(qty) * 100,
           },
           quantity: qty,
         },

@@ -5,10 +5,7 @@ import { Minus, Plus, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLoadScript, Autocomplete } from "@react-google-maps/api";
-import {
-  ADDITIONAL_BOOK_PRICE,
-  EXTRA_COPIES_SHIPPING_COST,
-} from "@/lib/stripe/pricing";
+import { pricePerCopy, calculateSubtotal } from "@/lib/stripe/pricing";
 
 const GOOGLE_MAPS_LIBRARIES: ("places")[] = ["places"];
 
@@ -72,8 +69,11 @@ function StepQty({
   onContinue: () => void;
   onBack: () => void;
 }) {
-  const booksTotal = qty * ADDITIONAL_BOOK_PRICE;
-  const grandTotal = booksTotal + EXTRA_COPIES_SHIPPING_COST;
+  // Reason: single source of truth — extra copies follow the same declining
+  // cascade as pricing.ts, restarting from $169, shipping included.
+  const perCopy = pricePerCopy(qty);
+  const booksTotal = calculateSubtotal(qty);
+  const grandTotal = booksTotal;
 
   return (
     <div className="flex flex-col items-center w-full">
@@ -104,12 +104,17 @@ function StepQty({
 
       <div className="w-full border-t border-[rgba(45,45,45,0.12)] pt-4 mb-6 space-y-2 text-[13px]">
         <div className="flex justify-between text-brand-charcoal">
-          <span>{qty} extra {qty === 1 ? "copy" : "copies"}</span>
+          <span>
+            {qty} extra {qty === 1 ? "copy" : "copies"}
+            {qty > 1 && (
+              <span className="text-[hsl(var(--brand-warm-gray))]"> · ${perCopy} per copy</span>
+            )}
+          </span>
           <span>${booksTotal}</span>
         </div>
         <div className="flex justify-between text-brand-charcoal">
           <span className="text-[hsl(var(--brand-warm-gray))]">Shipping</span>
-          <span>${EXTRA_COPIES_SHIPPING_COST}</span>
+          <span className="text-[hsl(var(--brand-warm-gray))]">Included</span>
         </div>
         <div className="flex justify-between font-medium text-[15px] text-brand-charcoal pt-2 border-t border-[rgba(45,45,45,0.12)]">
           <span>Due today</span>

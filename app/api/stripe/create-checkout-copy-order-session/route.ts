@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe/client";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import {
-  ADDITIONAL_BOOK_PRICE,
-  EXTRA_COPIES_SHIPPING_COST,
-} from "@/lib/stripe/pricing";
+import { pricePerCopy } from "@/lib/stripe/pricing";
 
 // Replaces legacy actions/createCopyOrderPaymentIntent.ts (removed in Phase 9).
 // TODO(phase-9-security): no rate limit on this public endpoint. A loop could
@@ -119,28 +116,21 @@ export async function POST(request: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer_email: trimmedEmail,
+      // Reason: mirror the declining group cascade (pricing.ts). Per-copy price
+      // drops with quantity; pricePerCopy(qty) × qty === calculateSubtotal(qty),
+      // so a single line item matches exactly what the client displays. Shipping
+      // is included in the per-copy price — no separate line.
       line_items: [
         {
           price_data: {
             currency: "usd",
             product_data: {
               name: "Cookbook Copy",
-              description: `Your copy of ${book.name}`,
+              description: `Your copy of ${book.name} · shipping included`,
             },
-            unit_amount: ADDITIONAL_BOOK_PRICE * 100,
+            unit_amount: pricePerCopy(qty) * 100,
           },
           quantity: qty,
-        },
-        {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: "Shipping",
-              description: "Flat-rate shipping to your address",
-            },
-            unit_amount: EXTRA_COPIES_SHIPPING_COST * 100,
-          },
-          quantity: 1,
         },
       ],
       metadata: sharedMetadata,

@@ -6,10 +6,7 @@ import { Minus, Plus, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLoadScript, Autocomplete } from "@react-google-maps/api";
-import {
-  ADDITIONAL_BOOK_PRICE,
-  EXTRA_COPIES_SHIPPING_COST,
-} from "@/lib/stripe/pricing";
+import { pricePerCopy, calculateSubtotal } from "@/lib/stripe/pricing";
 
 const GOOGLE_MAPS_LIBRARIES: ("places")[] = ["places"];
 
@@ -94,8 +91,12 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
   });
 
   const countryConfig = SUPPORTED_COUNTRIES.find((c) => c.code === country) || SUPPORTED_COUNTRIES[0];
-  const subtotal = qty * ADDITIONAL_BOOK_PRICE;
-  const total = subtotal + EXTRA_COPIES_SHIPPING_COST;
+  // Reason: /copy mirrors the declining group cascade in components/pricing —
+  // single source of truth is pricing.ts. Shipping is included in the per-copy
+  // price (no separate line), same as PricingPage.
+  const perCopy = pricePerCopy(qty);
+  const subtotal = calculateSubtotal(qty);
+  const total = subtotal;
 
   const handleCountryChange = (newCountry: string) => {
     setCountry(newCountry);
@@ -269,14 +270,14 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
                 <span>
                   {qty} {qty === 1 ? "copy" : "copies"}
                   {qty > 1 && (
-                    <span className="text-[hsl(var(--brand-warm-gray))]"> · ${ADDITIONAL_BOOK_PRICE} per copy</span>
+                    <span className="text-[hsl(var(--brand-warm-gray))]"> · ${perCopy} per copy</span>
                   )}
                 </span>
                 <span>${subtotal}</span>
               </div>
               <div className="flex justify-between text-brand-charcoal">
                 <span className="text-[hsl(var(--brand-warm-gray))]">Shipping</span>
-                <span>${EXTRA_COPIES_SHIPPING_COST}</span>
+                <span className="text-[hsl(var(--brand-warm-gray))]">Included</span>
               </div>
               <div className="flex justify-between font-medium text-[15px] text-brand-charcoal pt-2 border-t border-[rgba(45,45,45,0.12)]">
                 <span>Total</span>
@@ -372,12 +373,17 @@ export default function CopyOrderClient({ book }: { book: BookData }) {
 
           <div className="bg-white border border-brand-sand rounded-[10px] px-[18px] py-[14px] mb-6 text-[13px] space-y-1.5">
             <div className="flex justify-between text-brand-charcoal">
-              <span>{qty} {qty === 1 ? "copy" : "copies"}</span>
+              <span>
+                {qty} {qty === 1 ? "copy" : "copies"}
+                {qty > 1 && (
+                  <span className="text-[hsl(var(--brand-warm-gray))]"> · ${perCopy} per copy</span>
+                )}
+              </span>
               <span>${subtotal}</span>
             </div>
             <div className="flex justify-between text-brand-charcoal">
               <span className="text-[hsl(var(--brand-warm-gray))]">Shipping</span>
-              <span>${EXTRA_COPIES_SHIPPING_COST}</span>
+              <span className="text-[hsl(var(--brand-warm-gray))]">Included</span>
             </div>
             <div className="flex justify-between font-medium text-[15px] text-brand-charcoal pt-2 border-t border-[rgba(45,45,45,0.12)]">
               <span>Total</span>

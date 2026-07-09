@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe/client";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import {
-  ADDITIONAL_BOOK_PRICE,
-  EXTRA_COPIES_SHIPPING_COST,
-} from "@/lib/stripe/pricing";
+import { pricePerCopy } from "@/lib/stripe/pricing";
 
 interface ShippingAddressBody {
   recipientName: string;
@@ -114,28 +111,20 @@ export async function POST(request: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer_email: user.email || undefined,
+      // Reason: extra copies follow the same declining cascade as pricing.ts,
+      // restarting from $169. pricePerCopy(qty) × qty === calculateSubtotal(qty),
+      // so a single line item matches the client. Shipping is included.
       line_items: [
         {
           price_data: {
             currency: "usd",
             product_data: {
               name: "Additional Cookbook Copy",
-              description: "Extra hardcover copy of your Small Plates cookbook",
+              description: "Extra hardcover copy of your Small Plates cookbook · shipping included",
             },
-            unit_amount: ADDITIONAL_BOOK_PRICE * 100,
+            unit_amount: pricePerCopy(qty) * 100,
           },
           quantity: qty,
-        },
-        {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: "Shipping",
-              description: "Flat-rate shipping to your address",
-            },
-            unit_amount: EXTRA_COPIES_SHIPPING_COST * 100,
-          },
-          quantity: 1,
         },
       ],
       metadata: sharedMetadata,
