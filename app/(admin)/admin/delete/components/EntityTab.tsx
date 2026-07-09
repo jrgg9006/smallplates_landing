@@ -36,21 +36,30 @@ export default function EntityTab({ type, initialQuery, onSelect }: EntityTabPro
   const [query, setQuery] = useState(initialQuery);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async (q: string) => {
+  // Reason: AbortController evita que una respuesta lenta y vieja pise una búsqueda más reciente
+  const load = useCallback(async (q: string, signal: AbortSignal) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/v1/admin/delete/entities?type=${type}&q=${encodeURIComponent(q)}`);
+      const res = await fetch(
+        `/api/v1/admin/delete/entities?type=${type}&q=${encodeURIComponent(q)}`,
+        { signal }
+      );
       const result = await res.json();
       if (res.ok && result.success) setItems(result.data);
       else alert(`Error: ${result.error}`);
-    } finally {
       setLoading(false);
+    } catch (err) {
+      if (!(err instanceof DOMException && err.name === 'AbortError')) setLoading(false);
     }
   }, [type]);
 
   useEffect(() => {
-    const timer = setTimeout(() => load(query), 300);
-    return () => clearTimeout(timer);
+    const controller = new AbortController();
+    const timer = setTimeout(() => load(query, controller.signal), 300);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [query, load]);
 
   return (
