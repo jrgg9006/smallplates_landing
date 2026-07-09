@@ -38,7 +38,9 @@ export default function DeletePreviewSheet({ entityType, entityId, onClose, onTr
   const [confirmText, setConfirmText] = useState('');
   const [memberAction, setMemberAction] = useState<'transfer' | 'delete' | ''>('');
   const [busy, setBusy] = useState(false);
-  const [steps, setSteps] = useState<string[] | null>(null);
+  // Reason: guardamos trashId además de steps para distinguir entre "enviado a
+  // papelera" (trashId !== null) y "grupo transferido" (trashId === null).
+  const [result, setResult] = useState<{ steps: string[]; trashId: string | null } | null>(null);
 
   // Reason: refs para callbacks del padre — evita re-fetch si el padre pasa
   // funciones inline (nueva referencia en cada render) y double-call de onTrashed
@@ -58,10 +60,10 @@ export default function DeletePreviewSheet({ entityType, entityId, onClose, onTr
     const load = async () => {
       try {
         const res = await fetch(`/api/v1/admin/delete/preview?type=${entityType}&id=${entityId}`);
-        const result = await res.json();
-        if (res.ok && result.success) setSnapshot(result.data);
+        const data = await res.json();
+        if (res.ok && data.success) setSnapshot(data.data);
         else {
-          alert(`Error: ${result.error}`);
+          alert(`Error: ${data.error}`);
           onCloseRef.current();
         }
       } finally {
@@ -85,18 +87,20 @@ export default function DeletePreviewSheet({ entityType, entityId, onClose, onTr
           ...(memberAction ? { memberGroupsAction: memberAction } : {}),
         }),
       });
-      const result = await res.json();
-      if (res.ok && result.success) {
-        setSteps(result.steps);
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setResult({ steps: data.steps, trashId: data.trashId ?? null });
       } else {
-        alert(`❌ ${result.error}`);
+        alert(`❌ ${data.error}`);
       }
     } finally {
       setBusy(false);
     }
   };
 
-  const needsMemberChoice = (snapshot?.protection.warnings.length ?? 0) > 0;
+  // Reason: memberChoiceRequired indica que hay grupos con miembros ajenos que
+  // requieren una decisión explícita; un warning de libro en producción no bloquea.
+  const needsMemberChoice = snapshot?.protection.memberChoiceRequired ?? false;
   const canTrash =
     !!snapshot &&
     !snapshot.protection.blocked &&
@@ -104,23 +108,31 @@ export default function DeletePreviewSheet({ entityType, entityId, onClose, onTr
     (!needsMemberChoice || memberAction !== '');
 
   return (
-    <Dialog open onOpenChange={(open) => !open && (steps ? finish() : onClose())}>
+    <Dialog open onOpenChange={(open) => !open && (result ? finish() : onClose())}>
       <DialogContent className="sm:max-w-[640px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl font-semibold">
-            {steps ? 'Enviado a papelera' : `Borrar ${entityType}`}
+            {result
+              ? result.trashId
+                ? 'Enviado a papelera'
+                : 'Grupo transferido'
+              : `Borrar ${entityType}`}
           </DialogTitle>
           <DialogDescription>{snapshot?.entityLabel}</DialogDescription>
         </DialogHeader>
 
         {loading ? (
           <div className="py-8 text-center text-sm text-gray-500">Cargando preview de cascada…</div>
-        ) : steps ? (
+        ) : result ? (
           <div className="py-4 space-y-2">
-            {steps.map((s, i) => (
+            {result.steps.map((s, i) => (
               <div key={i} className="text-sm text-gray-800 font-mono">{s} ✓</div>
             ))}
-            <p className="text-xs text-gray-500 pt-2">Restaurable desde la Papelera cuando quieras.</p>
+            {result.trashId ? (
+              <p className="text-xs text-gray-500 pt-2">Restaurable desde la Papelera cuando quieras.</p>
+            ) : (
+              <p className="text-xs text-gray-500 pt-2">El grupo sobrevive con otro dueño — nada se borró.</p>
+            )}
           </div>
         ) : snapshot ? (
           <div className="py-4 space-y-4">
@@ -156,21 +168,25 @@ export default function DeletePreviewSheet({ entityType, entityId, onClose, onTr
               ))}
             </div>
 
-            {needsMemberChoice && (
+            {snapshot.protection.warnings.length > 0 && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 space-y-2">
                 {snapshot.protection.warnings.map((w, i) => (
                   <p key={i} className="text-sm text-yellow-900 font-medium">⚠️ {w}</p>
                 ))}
-                <label className="flex items-center gap-2 text-sm text-yellow-900">
-                  <input type="radio" name="memberAction" checked={memberAction === 'transfer'}
-                    onChange={() => setMemberAction('transfer')} />
-                  Transferir esos grupos a otro miembro (sobreviven)
-                </label>
-                <label className="flex items-center gap-2 text-sm text-yellow-900">
-                  <input type="radio" name="memberAction" checked={memberAction === 'delete'}
-                    onChange={() => setMemberAction('delete')} />
-                  Borrar los grupos completos (incluye a los otros miembros)
-                </label>
+                {needsMemberChoice && (
+                  <>
+                    <label className="flex items-center gap-2 text-sm text-yellow-900">
+                      <input type="radio" name="memberAction" checked={memberAction === 'transfer'}
+                        onChange={() => setMemberAction('transfer')} />
+                      Transferir esos grupos a otro miembro (sobreviven)
+                    </label>
+                    <label className="flex items-center gap-2 text-sm text-yellow-900">
+                      <input type="radio" name="memberAction" checked={memberAction === 'delete'}
+                        onChange={() => setMemberAction('delete')} />
+                      Borrar los grupos completos (incluye a los otros miembros)
+                    </label>
+                  </>
+                )}
               </div>
             )}
 
@@ -192,7 +208,7 @@ export default function DeletePreviewSheet({ entityType, entityId, onClose, onTr
         ) : null}
 
         <DialogFooter>
-          {steps ? (
+          {result ? (
             <Button onClick={finish} className="bg-gray-900 text-white">Listo</Button>
           ) : (
             <>

@@ -8,6 +8,7 @@ const base = {
   qaReviewCount: 0,
   isTestOwner: true,
   otherMemberCount: 0,
+  inProductionBookCount: 0,
 };
 
 describe('evaluateProtection', () => {
@@ -50,5 +51,18 @@ describe('evaluateProtection', () => {
     const p = evaluateProtection({ ...base, entityType: 'profile', otherMemberCount: 1 });
     expect(p.blocked).toBe(false);
     expect(p.warnings.length).toBeGreaterThan(0);
+  });
+
+  it('inProductionBookCount > 0 genera warning, no bloquea y memberChoiceRequired es false', () => {
+    const p = evaluateProtection({ ...base, inProductionBookCount: 1 });
+    expect(p.blocked).toBe(false);
+    expect(p.warnings.length).toBeGreaterThan(0);
+    expect(p.warnings[0]).toContain('revisión/producción');
+    expect(p.memberChoiceRequired).toBe(false);
+  });
+
+  it('otherMemberCount > 0 produce memberChoiceRequired === true', () => {
+    const p = evaluateProtection({ ...base, otherMemberCount: 1 });
+    expect(p.memberChoiceRequired).toBe(true);
   });
 });

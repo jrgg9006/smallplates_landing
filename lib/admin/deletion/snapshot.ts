@@ -4,6 +4,10 @@ import type { DeletableEntity, DeletionSnapshot, SnapshotTables } from './types'
 import { buildCounts, mergeTables } from './order';
 import { evaluateProtection } from './protection';
 
+// Reason: estados de grupo que indican un libro activo en revisión o producción —
+// borrar un guest con recetas en estos grupos puede afectar un libro por imprimir.
+const PRODUCTION_BOOK_STATUSES = ['reviewed', 'ready_to_print', 'printed'];
+
 // Reason: tablas hijas de guest_recipes con FK CASCADE (mapa verificado en la spec)
 const RECIPE_CHILD_TABLES = [
   'cookbook_recipes',
@@ -109,6 +113,7 @@ async function snapshotRecipe(admin: SupabaseClient, id: string): Promise<Deleti
     qaReviewCount: 0,
     isTestOwner: await ownerIsTest(admin, recipe.user_id ? String(recipe.user_id) : null),
     otherMemberCount: 0,
+    inProductionBookCount: 0,
   });
   return {
     entityType: 'recipe',
@@ -129,6 +134,21 @@ async function snapshotGuest(admin: SupabaseClient, id: string): Promise<Deletio
   };
   const recipeIds = tables.guest_recipes.map((r) => String(r.id));
   tables = mergeTables(tables, await recipeChildren(admin, recipeIds));
+
+  // Reason: si el guest pertenece a un grupo en producción, borrar sus recetas
+  // podría afectar un libro que ya está en revisión o listo para imprimir.
+  let inProductionBookCount = 0;
+  if (guest.group_id) {
+    const { data: groupRow } = await admin
+      .from('groups')
+      .select('id, book_status')
+      .eq('id', String(guest.group_id))
+      .maybeSingle();
+    if (groupRow && PRODUCTION_BOOK_STATUSES.includes(String(groupRow.book_status))) {
+      inProductionBookCount = 1;
+    }
+  }
+
   const protection = evaluateProtection({
     entityType: 'guest',
     orderCount: 0,
@@ -137,6 +157,7 @@ async function snapshotGuest(admin: SupabaseClient, id: string): Promise<Deletio
     qaReviewCount: 0,
     isTestOwner: await ownerIsTest(admin, guest.user_id ? String(guest.user_id) : null),
     otherMemberCount: 0,
+    inProductionBookCount,
   });
   const name = [guest.first_name, guest.last_name].filter(Boolean).join(' ');
   return {
@@ -166,6 +187,7 @@ async function snapshotGroup(admin: SupabaseClient, id: string): Promise<Deletio
     qaReviewCount: 0,
     isTestOwner: await ownerIsTest(admin, ownerId),
     otherMemberCount: otherMembers.length,
+    inProductionBookCount: 0,
   });
   return {
     entityType: 'group',
@@ -211,6 +233,7 @@ async function snapshotProfile(admin: SupabaseClient, id: string): Promise<Delet
     qaReviewCount: qaReviews.length,
     isTestOwner: Boolean(profile.is_test_account),
     otherMemberCount: otherMembers.length,
+    inProductionBookCount: 0,
   });
   return {
     entityType: 'profile',

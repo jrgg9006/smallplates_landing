@@ -94,7 +94,7 @@ export async function POST(request: Request) {
         { status: 403 }
       );
     }
-    if (snapshot.protection.warnings.length > 0 && !memberGroupsAction) {
+    if (snapshot.protection.memberChoiceRequired && !memberGroupsAction) {
       return NextResponse.json(
         { error: 'Hay miembros ajenos: manda memberGroupsAction transfer|delete', warnings: snapshot.protection.warnings },
         { status: 409 }

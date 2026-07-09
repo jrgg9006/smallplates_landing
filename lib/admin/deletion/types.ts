@@ -7,6 +7,7 @@ export interface Protection {
   reasons: string[];
   warnings: string[];
   purgeAllowed: boolean;
+  memberChoiceRequired: boolean;
 }
 
 export interface DeletionSnapshot {
