@@ -1,7 +1,7 @@
 // app/(admin)/admin/delete/components/DeletePreviewSheet.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Flame } from 'lucide-react';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
@@ -40,6 +40,20 @@ export default function DeletePreviewSheet({ entityType, entityId, onClose, onTr
   const [busy, setBusy] = useState(false);
   const [steps, setSteps] = useState<string[] | null>(null);
 
+  // Reason: refs para callbacks del padre — evita re-fetch si el padre pasa
+  // funciones inline (nueva referencia en cada render) y double-call de onTrashed
+  const onCloseRef = useRef(onClose);
+  const onTrashedRef = useRef(onTrashed);
+  onCloseRef.current = onClose;
+  onTrashedRef.current = onTrashed;
+  const finishedRef = useRef(false);
+
+  const finish = () => {
+    if (finishedRef.current) return;
+    finishedRef.current = true;
+    onTrashedRef.current();
+  };
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -48,14 +62,14 @@ export default function DeletePreviewSheet({ entityType, entityId, onClose, onTr
         if (res.ok && result.success) setSnapshot(result.data);
         else {
           alert(`Error: ${result.error}`);
-          onClose();
+          onCloseRef.current();
         }
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, [entityType, entityId, onClose]);
+  }, [entityType, entityId]);
 
   const handleTrash = async () => {
     if (!snapshot) return;
@@ -90,7 +104,7 @@ export default function DeletePreviewSheet({ entityType, entityId, onClose, onTr
     (!needsMemberChoice || memberAction !== '');
 
   return (
-    <Dialog open onOpenChange={(open) => !open && (steps ? onTrashed() : onClose())}>
+    <Dialog open onOpenChange={(open) => !open && (steps ? finish() : onClose())}>
       <DialogContent className="sm:max-w-[640px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl font-semibold">
@@ -179,7 +193,7 @@ export default function DeletePreviewSheet({ entityType, entityId, onClose, onTr
 
         <DialogFooter>
           {steps ? (
-            <Button onClick={onTrashed} className="bg-gray-900 text-white">Listo</Button>
+            <Button onClick={finish} className="bg-gray-900 text-white">Listo</Button>
           ) : (
             <>
               <Button variant="outline" onClick={onClose} disabled={busy}>Cancelar</Button>
