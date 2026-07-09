@@ -40,8 +40,8 @@ export function QuantityStep({
       {/* Left — quantity picker */}
       <div className="flex flex-col">
         <p className="type-body-small mb-8 max-w-xl text-pretty">
-          One copy is yours. Add one for everyone else who should have their own —
-          same book, same hardcover. The more you add, the less each one costs.
+          One copy is yours. Add one for everyone else who should have their own.
+          Same book, same hardcover. The more you add, the less each one costs.
         </p>
 
         <div className="flex flex-col items-center pt-6 text-center">

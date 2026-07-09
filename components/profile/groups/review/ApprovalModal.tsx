@@ -46,15 +46,14 @@ export function ApprovalModal({
         </DialogHeader>
 
         <p className="text-gray-600 text-base leading-relaxed">
-          The text you see here is the text that gets printed. Every word stays as
-          your guests wrote it. We add one image per recipe and lay it out for the
-          book, so the formatting may shift a little in design and at the press.
+          What you see is what gets printed. Every word, exactly as your guests
+          wrote it. We add a photo to each recipe and lay out the pages, so the
+          formatting may shift a little.
         </p>
 
         <p className="text-gray-600 text-base leading-relaxed">
-          Give it one last look before you lock it in. Watch for typos, a duplicate,
-          or anything you&apos;d rather not include. Once you continue, the recipes
-          are locked.
+          One last look for typos or anything you&apos;d rather leave out. After
+          this, the recipes are locked.
         </p>
 
         <label className="flex cursor-pointer items-start gap-3 rounded-xl bg-[#F3F2F0] px-5 py-4">

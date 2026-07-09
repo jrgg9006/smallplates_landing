@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Check } from "lucide-react";
 import { calculateSubtotal, pricePerCopy } from "@/lib/stripe/pricing";
 import { BookPreviewPanel } from "../BookPreviewPanel";
 import type { GroupWithMembers } from "@/lib/types/database";
@@ -74,11 +75,32 @@ export function OrderCart({ qty, group, recipeCount, children }: OrderCartProps)
         <span className="font-serif text-2xl tabular-nums text-brand-charcoal">${total}</span>
       </div>
 
-      {split && (
-        <p className="mt-1.5 text-right text-xs text-[hsl(var(--brand-warm-gray))]">
-          ${perPerson} per person · split evenly
+      {/* Reason: the total just landed — this names the invisible service (recipes
+          are cleaned on upload, photos/design happen after payment) at the exact
+          moment the buyer weighs the price. */}
+      <div className="mt-5 border-t border-[hsl(var(--brand-border))] pt-4">
+        <p className="mb-3 font-sans text-[11px] font-medium uppercase tracking-[0.12em] text-brand-charcoal/50">
+          From here, we take over
         </p>
-      )}
+        <ul className="space-y-2">
+          {[
+            "Every recipe edited and standardized — already done",
+            "A photo for every recipe",
+            "The whole book designed and laid out",
+            "Hardcover printing, shipped to your door",
+          ].map((item) => (
+            <li key={item} className="flex items-start gap-2.5">
+              <Check
+                className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-brand-honey"
+                strokeWidth={2}
+              />
+              <span className="text-[13px] leading-snug text-brand-charcoal/70">
+                {item}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       {children}
     </div>
