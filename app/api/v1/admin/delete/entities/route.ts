@@ -17,7 +17,9 @@ export async function GET(request: Request) {
     await requireAdminAuth();
     const url = new URL(request.url);
     const type = url.searchParams.get('type') as DeletableEntity | null;
-    const q = (url.searchParams.get('q') || '').trim();
+    // Reason: PostgREST .or() parsea comas/paréntesis como sintaxis del filtro —
+    // se quitan del término de búsqueda para que un email raro no rompa la query
+    const q = (url.searchParams.get('q') || '').trim().replace(/[,()]/g, '');
     const admin = createSupabaseAdminClient();
 
     let items: EntityListItem[] = [];
