@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import SpecsGrid from "@/components/landing/TheBook/SpecsGrid";
-// import HandmadeCallout from "@/components/landing/TheBook/HandmadeCallout"; // Hidden from flow; component kept for reuse
+import HandmadeCallout from "@/components/landing/TheBook/HandmadeCallout";
 import DetailStrip from "@/components/landing/TheBook/DetailStrip";
 import BookDetailsModal from "@/components/landing/BookDetailsModal";
 import { trackStartBookClick } from "@/lib/analytics";
@@ -204,8 +204,9 @@ export default function TheBook() {
         {/* Part 3: Specs Grid */}
         <SpecsGrid />
 
-        {/* Part 4: Handmade Callout — hidden; section talks about the book enough by here. Component kept for reuse */}
-        {/* <HandmadeCallout /> */}
+        {/* Part 4: Handmade Callout — the service behind the object (review,
+            photos, design). The rest of the section covers the physical book. */}
+        <HandmadeCallout />
 
         {/* Part 5: Detail Strip */}
         <DetailStrip />

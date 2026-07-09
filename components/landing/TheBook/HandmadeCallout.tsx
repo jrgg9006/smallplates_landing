@@ -1,6 +1,18 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Check } from "lucide-react";
+
+// Reason: the service half of TheBook. The review/photo/design work happens
+// after the buyer pays and is invisible by design — this panel names all of
+// it explicitly. Both halves carry content: claim on charcoal, checklist on
+// cream. No decorative filler.
+const services = [
+  "Every single recipe reviewed before printing",
+  "A full-color photo created for every dish, based on the recipe itself",
+  "Typos fixed, measurements standardized",
+  "Every page designed, one by one",
+];
 
 export default function HandmadeCallout() {
   return (
@@ -11,63 +23,39 @@ export default function HandmadeCallout() {
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.7, ease: "easeOut" }}
     >
-      {/* Left Panel — Stitch Pattern Visual */}
-      <div className="relative bg-brand-charcoal min-h-[280px] lg:min-h-[400px] flex items-center justify-center overflow-hidden">
-        {/* Decorative stitch pattern */}
-        <div className="flex flex-col items-center gap-0">
-          {Array.from({ length: 7 }).map((_, i) => (
-            <div key={i} className="flex flex-col items-center">
-              {/* Horizontal stitch line */}
-              <div className="relative flex items-center">
-                <div className="w-20 h-px bg-brand-honey/40" />
-                <div className="absolute left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-brand-honey/50" />
-              </div>
-              {/* Vertical connector (except last) */}
-              {i < 6 && (
-                <div className="w-px h-2.5 bg-brand-honey/25" />
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Label */}
-        <p className="absolute bottom-6 left-0 right-0 text-center font-serif italic text-white/20 text-sm tracking-wide">
-          one of a kind
-        </p>
-
-        {/* Photo placeholder note */}
-        <p className="absolute bottom-3 right-4 text-[10px] uppercase tracking-wider text-white/10">
-          Photo: binding close-up
+      {/* Left Panel — the claim */}
+      <div className="bg-brand-charcoal p-10 md:p-14 lg:p-16 flex flex-col justify-center lg:min-h-[400px]">
+        <h3 className="font-serif text-3xl md:text-4xl leading-snug text-brand-warm-white-warm">
+          Your only job is inviting people.
+        </h3>
+        <p className="mt-5 font-serif italic text-xl md:text-2xl text-brand-honey">
+          We handle everything else.
         </p>
       </div>
 
-      {/* Right Panel — Text */}
-      <div className="bg-brand-cream p-8 md:p-12 lg:p-16 flex flex-col justify-center">
-        {/* Eyebrow */}
-        <p className="type-eyebrow mb-4">
-          One of one
-        </p>
+      {/* Right Panel — the checklist */}
+      <div className="bg-brand-cream p-8 md:p-12 lg:p-14 flex flex-col justify-center">
+        <p className="type-eyebrow mb-6">The service</p>
+        <ul className="space-y-4">
+          {services.map((item) => (
+            <li key={item} className="flex items-start gap-3">
+              <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-brand-honey">
+                <Check className="h-3 w-3 text-white" strokeWidth={3} />
+              </span>
+              <span className="type-body-small text-brand-charcoal/80">
+                {item}
+              </span>
+            </li>
+          ))}
+        </ul>
 
-        <h3 className="type-subheading mb-6">
-          Every book is one of a kind.
-        </h3>
-
-        <div className="space-y-4">
-          <p className="type-body-small text-brand-charcoal/80">
-            Different recipes. Different people. Different stories. Every book we produce exists exactly once &mdash; because the people inside it are never the same twice.
-          </p>
-
-          <p className="type-body-small text-brand-charcoal/80">
-            No templates. No stock content. Your book is designed, laid out, and printed from scratch &mdash; built around the real recipes your people actually sent in.
+        {/* Reason: the human check happens after payment, not on upload — this
+            line states it with the correct timing and gets its own beat. */}
+        <div className="mt-6 border-t border-brand-sand pt-5">
+          <p className="type-accent text-base md:text-lg text-brand-charcoal/75">
+            And before it prints, a real person reads every page. Every time.
           </p>
         </div>
-
-        {/* Pull quote */}
-        <blockquote className="mt-8 border-l-2 border-brand-honey pl-5">
-          <p className="type-accent text-base md:text-lg text-brand-charcoal/70 leading-relaxed">
-            &ldquo;No two books are the same &mdash; because no two couples&apos; people are the same. That&apos;s the whole point.&rdquo;
-          </p>
-        </blockquote>
       </div>
     </motion.div>
   );

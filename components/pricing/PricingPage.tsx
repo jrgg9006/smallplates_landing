@@ -27,9 +27,9 @@ const TABLE_COPIES = [1, 2, 3, 4, 5, 6];
 // to the buyer — this section names it, in three acts, right below the price.
 const serviceSteps = [
   {
-    title: "Every recipe, reviewed.",
+    title: "Every recipe, cleaned up.",
     description:
-      "Each submission is checked and standardized the moment it arrives. Typos out, measurements consistent.",
+      "Typos out, measurements consistent, instructions that actually work in a kitchen.",
     icon: (
       <svg
         viewBox="0 0 30 30"
@@ -387,7 +387,7 @@ export default function PricingPage() {
               <div className="h-px bg-brand-sand" />
               <p>
                 <span className="font-medium text-brand-charcoal">What&apos;s not included:</span> Stress.
-                We handle the reminders, the design, the production. You just invite people.
+                We handle the editing, the design, the production. You just invite people.
               </p>
             </div>
           </motion.div>

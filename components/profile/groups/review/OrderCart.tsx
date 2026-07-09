@@ -84,7 +84,7 @@ export function OrderCart({ qty, group, recipeCount, children }: OrderCartProps)
         </p>
         <ul className="space-y-2">
           {[
-            "Every recipe reviewed and standardized — already done",
+            "Every recipe cleaned and standardized — already done",
             "A photo for every recipe",
             "The whole book designed and laid out",
             "Hardcover printing, shipped to your door",
