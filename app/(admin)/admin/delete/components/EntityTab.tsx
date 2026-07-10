@@ -37,15 +37,23 @@ export default function EntityTab({ type, initialQuery, onSelect }: EntityTabPro
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  // Reason: filtro por libro — solo aplica a guests y recipes (tienen group_id)
+  const supportsGroupFilter = type === 'guest' || type === 'recipe';
+  const [groupFilter, setGroupFilter] = useState('');
+  const [groups, setGroups] = useState<EntityListItem[]>([]);
+
+  const baseUrl = useCallback(
+    (q: string) =>
+      `/api/v1/admin/delete/entities?type=${type}&q=${encodeURIComponent(q)}` +
+      (groupFilter ? `&groupId=${groupFilter}` : ''),
+    [type, groupFilter]
+  );
 
   // Reason: AbortController evita que una respuesta lenta y vieja pise una búsqueda más reciente
   const load = useCallback(async (q: string, signal: AbortSignal) => {
     setLoading(true);
     try {
-      const res = await fetch(
-        `/api/v1/admin/delete/entities?type=${type}&q=${encodeURIComponent(q)}`,
-        { signal }
-      );
+      const res = await fetch(baseUrl(q), { signal });
       const result = await res.json();
       if (res.ok && result.success) {
         setItems(result.data);
@@ -55,15 +63,13 @@ export default function EntityTab({ type, initialQuery, onSelect }: EntityTabPro
     } catch (err) {
       if (!(err instanceof DOMException && err.name === 'AbortError')) setLoading(false);
     }
-  }, [type]);
+  }, [baseUrl]);
 
   // Reason: paginación por offset — trae la siguiente página y la anexa
   const loadMore = useCallback(async () => {
     setLoadingMore(true);
     try {
-      const res = await fetch(
-        `/api/v1/admin/delete/entities?type=${type}&q=${encodeURIComponent(query)}&offset=${items.length}`
-      );
+      const res = await fetch(`${baseUrl(query)}&offset=${items.length}`);
       const result = await res.json();
       if (res.ok && result.success) {
         setItems((prev) => [...prev, ...result.data]);
@@ -72,7 +78,7 @@ export default function EntityTab({ type, initialQuery, onSelect }: EntityTabPro
     } finally {
       setLoadingMore(false);
     }
-  }, [type, query, items.length]);
+  }, [baseUrl, query, items.length]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -82,6 +88,17 @@ export default function EntityTab({ type, initialQuery, onSelect }: EntityTabPro
       controller.abort();
     };
   }, [query, load]);
+
+  // Reason: pobla el dropdown de libros una vez (cap 1000, suficiente a esta escala)
+  useEffect(() => {
+    if (!supportsGroupFilter) return;
+    const fetchGroups = async () => {
+      const res = await fetch('/api/v1/admin/delete/entities?type=group&limit=1000');
+      const result = await res.json();
+      if (res.ok && result.success) setGroups(result.data);
+    };
+    fetchGroups();
+  }, [supportsGroupFilter]);
 
   return (
     <div className="space-y-4">
@@ -94,6 +111,18 @@ export default function EntityTab({ type, initialQuery, onSelect }: EntityTabPro
           onChange={(e) => setQuery(e.target.value)}
           className="flex-1 px-2 py-1 text-sm border-0 focus:outline-none"
         />
+        {supportsGroupFilter && (
+          <select
+            value={groupFilter}
+            onChange={(e) => setGroupFilter(e.target.value)}
+            className="max-w-[220px] px-2 py-1 text-sm border border-gray-200 rounded-md text-gray-700"
+          >
+            <option value="">Todos los libros</option>
+            {groups.map((g) => (
+              <option key={g.id} value={g.id}>{g.label}</option>
+            ))}
+          </select>
+        )}
       </div>
       <div className="bg-white rounded-lg shadow divide-y divide-gray-100">
         {loading ? (

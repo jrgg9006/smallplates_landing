@@ -20,10 +20,13 @@ export async function GET(request: Request) {
     // Reason: PostgREST .or() parsea comas/paréntesis como sintaxis del filtro —
     // se quitan del término de búsqueda para que un email raro no rompa la query
     const q = (url.searchParams.get('q') || '').trim().replace(/[,()]/g, '');
-    // Reason: paginación con "Cargar más" — offset avanza de PAGE_SIZE en PAGE_SIZE
+    // Reason: paginación con "Cargar más" — offset avanza de PAGE_SIZE en PAGE_SIZE.
+    // limit configurable (cap 1000) para poblar dropdowns como el filtro por libro.
     const offset = Math.max(0, parseInt(url.searchParams.get('offset') || '0', 10) || 0);
-    const PAGE_SIZE = 50;
+    const PAGE_SIZE = Math.min(1000, Math.max(1, parseInt(url.searchParams.get('limit') || '50', 10) || 50));
     const to = offset + PAGE_SIZE - 1;
+    // Reason: filtro por libro en guests/recipes — ambos tienen group_id
+    const groupId = url.searchParams.get('groupId') || '';
     const admin = createSupabaseAdminClient();
 
     let items: EntityListItem[] = [];
@@ -73,6 +76,7 @@ export async function GET(request: Request) {
         .select('id, first_name, last_name, email, status, created_at, groups(name)')
         .order('created_at', { ascending: false })
         .range(offset, to);
+      if (groupId) query = query.eq('group_id', groupId);
       if (q) query = query.or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,email.ilike.%${q}%`);
       const { data, error } = await query;
       if (error) throw new Error(error.message);
@@ -92,6 +96,7 @@ export async function GET(request: Request) {
         .select('id, recipe_name, submission_status, deleted_at, created_at, guests(first_name, last_name)')
         .order('created_at', { ascending: false })
         .range(offset, to);
+      if (groupId) query = query.eq('group_id', groupId);
       if (q) query = query.ilike('recipe_name', `%${q}%`);
       const { data, error } = await query;
       if (error) throw new Error(error.message);
