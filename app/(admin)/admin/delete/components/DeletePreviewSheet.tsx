@@ -215,9 +215,7 @@ export default function DeletePreviewSheet({ entityType, entityId, onClose, onTr
                   {main.map(renderTable)}
                   {technical.length > 0 && (
                     <div className="border-t border-red-200 pt-2 space-y-3">
-                      <p className="text-xs text-red-700 font-medium">
-                        Tablas técnicas — imágenes, historial, producción ({technicalRows} fila(s), también se van):
-                      </p>
+                      <p className="text-xs text-red-700 font-medium">Tablas técnicas</p>
                       {technical.map(renderTable)}
                     </div>
                   )}
