@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createSupabaseClient } from '@/lib/supabase/client';
 import { isAdminEmail } from '@/lib/config/admin';
-import { Trash2, Sparkles, RotateCcw, Eye, X, Flame, Search, FlaskConical } from 'lucide-react';
+import { Trash2, Sparkles, RotateCcw, Eye, X, Search, FlaskConical } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -39,7 +39,6 @@ type FilterPaid = 'all' | 'paid' | 'unpaid';
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [deleting, setDeleting] = useState<string | null>(null);
   const [cleaning, setCleaning] = useState<string | null>(null);
   const [resettingOnboarding, setResettingOnboarding] = useState<string | null>(null);
   const [togglingTest, setTogglingTest] = useState<string | null>(null);
@@ -50,13 +49,6 @@ export default function AdminUsersPage() {
   const [userDetails, setUserDetails] = useState<any>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-
-  // Hard delete confirmation modal
-  const [hardDeleteModalOpen, setHardDeleteModalOpen] = useState(false);
-  const [userToHardDelete, setUserToHardDelete] = useState<User | null>(null);
-  const [hardDeleteConfirmText, setHardDeleteConfirmText] = useState('');
-  const [hardDeletePreview, setHardDeletePreview] = useState<any>(null);
-  const [loadingPreview, setLoadingPreview] = useState(false);
 
   // Filters / search (Fase 2)
   const [searchTerm, setSearchTerm] = useState('');
@@ -125,98 +117,6 @@ export default function AdminUsersPage() {
       setDetailsModalOpen(false);
     } finally {
       setLoadingDetails(false);
-    }
-  };
-
-  // Soft delete: always preserves data, marks deleted_at
-  const handleSoftDelete = async (user: User) => {
-    if (!confirm(`SOFT DELETE ${user.email}?\n\nThe account will be marked as deleted but ALL data (recipes, guests, groups) will be preserved. Reversible by clearing deleted_at.`)) {
-      return;
-    }
-
-    setDeleting(user.id);
-    try {
-      const response = await fetch(`/api/v1/admin/users/${user.id}?mode=soft`, { method: 'DELETE' });
-      const result = await response.json();
-      if (response.ok) {
-        alert(`✅ User ${user.email} soft deleted (data preserved)`);
-        await loadUsers();
-        setDetailsModalOpen(false);
-      } else {
-        alert(`❌ Error: ${result.error}`);
-      }
-    } catch (err) {
-      alert(`❌ Error: ${err instanceof Error ? err.message : 'Failed to soft delete user'}`);
-    } finally {
-      setDeleting(null);
-    }
-  };
-
-  // Hard delete: opens confirmation modal, fetches preview of what will be deleted
-  const openHardDeleteModal = async (user: User) => {
-    setUserToHardDelete(user);
-    setHardDeleteConfirmText('');
-    setHardDeletePreview(null);
-    setHardDeleteModalOpen(true);
-    setLoadingPreview(true);
-    try {
-      const response = await fetch(`/api/v1/admin/users/${user.id}/hard-delete-preview`);
-      const result = await response.json();
-      if (response.ok && result.success) {
-        setHardDeletePreview(result.data);
-      } else {
-        alert(`❌ Preview failed: ${result.error}`);
-        setHardDeleteModalOpen(false);
-      }
-    } catch (err) {
-      alert(`❌ Preview error: ${err instanceof Error ? err.message : 'Failed to load preview'}`);
-      setHardDeleteModalOpen(false);
-    } finally {
-      setLoadingPreview(false);
-    }
-  };
-
-  // Download the preview payload as a JSON backup file before deletion
-  const downloadBackup = () => {
-    if (!hardDeletePreview || !userToHardDelete) return;
-    const blob = new Blob([JSON.stringify(hardDeletePreview, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const safeEmail = userToHardDelete.email.replace(/[^a-z0-9]/gi, '_');
-    const date = new Date().toISOString().split('T')[0];
-    a.download = `backup-${safeEmail}-${date}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
-  const handleHardDeleteConfirm = async () => {
-    if (!userToHardDelete) return;
-    if (hardDeleteConfirmText.trim().toLowerCase() !== userToHardDelete.email.toLowerCase()) {
-      alert('Email confirmation does not match.');
-      return;
-    }
-
-    setDeleting(userToHardDelete.id);
-    try {
-      const response = await fetch(`/api/v1/admin/users/${userToHardDelete.id}?mode=hard`, { method: 'DELETE' });
-      const result = await response.json();
-      if (response.ok) {
-        alert(`✅ User ${userToHardDelete.email} permanently deleted. The email is now reusable.`);
-        await loadUsers();
-        setHardDeleteModalOpen(false);
-        setUserToHardDelete(null);
-        setHardDeleteConfirmText('');
-        setDetailsModalOpen(false);
-      } else {
-        alert(`❌ Error: ${result.error}`);
-      }
-    } catch (err) {
-      alert(`❌ Error: ${err instanceof Error ? err.message : 'Failed to hard delete user'}`);
-    } finally {
-      setDeleting(null);
     }
   };
 
@@ -489,7 +389,7 @@ export default function AdminUsersPage() {
                   </tr>
                 ) : (
                   filteredUsers.map((user) => {
-                    const busy = deleting === user.id || cleaning === user.id || resettingOnboarding === user.id || togglingTest === user.id;
+                    const busy = cleaning === user.id || resettingOnboarding === user.id || togglingTest === user.id;
                     return (
                       <tr
                         key={user.id}
@@ -578,20 +478,11 @@ export default function AdminUsersPage() {
                               <Sparkles className="h-3.5 w-3.5" />
                             </button>
                             <button
-                              onClick={() => handleSoftDelete(user)}
-                              disabled={busy || !!user.deleted_at}
-                              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-orange-600 hover:text-orange-800 hover:bg-orange-50 rounded transition-colors disabled:opacity-50"
-                              title="Soft delete (preserve data)"
+                              onClick={() => router.push(`/admin/delete?tab=profile&q=${encodeURIComponent(user.email)}`)}
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
+                              title="Borrar en el Delete Portal"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              onClick={() => openHardDeleteModal(user)}
-                              disabled={busy || !user.is_test_account}
-                              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                              title={user.is_test_account ? 'HARD delete (permanent, email reusable)' : 'Hard delete disabled: mark as TEST first'}
-                            >
-                              <Flame className="h-3.5 w-3.5" />
                             </button>
                           </div>
                         </td>
@@ -756,6 +647,39 @@ export default function AdminUsersPage() {
                 </div>
               </div>
 
+              {/* Guests list */}
+              {userDetails.guests && userDetails.guests.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                    Guests ({userDetails.guests.length})
+                  </h3>
+                  <div className="bg-green-50 border border-green-200 rounded-lg divide-y divide-green-100">
+                    {userDetails.guests.map((guest: any) => (
+                      <div key={guest.id} className="flex items-center justify-between px-3 py-2">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-gray-900">
+                            {[guest.first_name, guest.last_name].filter(Boolean).join(' ') || '—'}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {/* Reason: guests added without email get a NO_EMAIL_ placeholder — show a dash instead */}
+                            {guest.email?.startsWith('NO_EMAIL_') ? 'No email' : guest.email || 'No email'}
+                          </span>
+                        </div>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                            guest.status === 'responded'
+                              ? 'bg-green-200 text-green-900'
+                              : 'bg-gray-200 text-gray-600'
+                          }`}
+                        >
+                          {guest.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Groups Owned */}
               {userDetails.groups.ownedCount > 0 && (
                 <div>
@@ -837,58 +761,6 @@ export default function AdminUsersPage() {
                 </div>
               )}
 
-              {/* What will be deleted */}
-              {!userDetails.isDeleted && (
-                <div className="border-t pt-4">
-                  {(() => {
-                    const hasContent = 
-                      (userDetails.counts.recipes > 0) ||
-                      (userDetails.counts.guests > 0) ||
-                      (userDetails.groups.ownedCount > 0) ||
-                      (userDetails.groups.membershipsCount > 0);
-                    
-                    return hasContent ? (
-                      <>
-                        <h3 className="text-sm font-semibold text-yellow-900 mb-3">⚠️ If Deleted, This Will Be Soft Deleted:</h3>
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                          <p className="text-sm text-yellow-800 mb-2 font-medium">
-                            This user has content. The account will be <strong>soft deleted</strong> - all data will be preserved:
-                          </p>
-                          <ul className="text-sm text-yellow-800 space-y-1 list-disc list-inside">
-                            <li><strong>{userDetails.counts.recipes}</strong> recipes (preserved)</li>
-                            <li><strong>{userDetails.counts.guests}</strong> guests (preserved)</li>
-                            <li><strong>{userDetails.counts.cookbooks}</strong> cookbooks (preserved)</li>
-                            <li><strong>{userDetails.groups.ownedCount}</strong> group(s) owned (ownership will be transferred)</li>
-                            <li>Membership in <strong>{userDetails.groups.membershipsCount}</strong> group(s) (preserved)</li>
-                            <li><strong>{userDetails.counts.shippingAddresses}</strong> shipping address(es) (preserved)</li>
-                            <li><strong>{userDetails.counts.communicationLogs}</strong> communication log(s) (preserved)</li>
-                            <li>User account will be deactivated (cannot login)</li>
-                          </ul>
-                          <p className="text-xs text-yellow-700 font-medium mt-3">
-                            Account will be marked as deleted but all data remains accessible.
-                          </p>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <h3 className="text-sm font-semibold text-red-900 mb-3">⚠️ If Deleted, This Will Remove:</h3>
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                          <p className="text-sm text-red-800 mb-2 font-medium">
-                            This user has no content. The account will be <strong>permanently deleted</strong>:
-                          </p>
-                          <ul className="text-sm text-red-800 space-y-1 list-disc list-inside">
-                            <li>User account and profile</li>
-                          </ul>
-                          <p className="text-xs text-red-700 font-medium mt-3">
-                            This action cannot be undone.
-                          </p>
-                        </div>
-                      </>
-                    );
-                  })()}
-                </div>
-              )}
-
               {/* Actions */}
               <DialogFooter className="gap-2">
                 <Button
@@ -914,24 +786,10 @@ export default function AdminUsersPage() {
                   Clean User
                 </Button>
                 <Button
-                  onClick={() => selectedUser && handleSoftDelete(selectedUser)}
-                  disabled={deleting === selectedUser?.id || !!selectedUser?.deleted_at}
-                  className="bg-orange-600 text-white hover:bg-orange-700"
+                  onClick={() => selectedUser && router.push(`/admin/delete?tab=profile&q=${encodeURIComponent(selectedUser.email)}`)}
+                  className="bg-red-600 text-white hover:bg-red-700"
                 >
-                  {deleting === selectedUser?.id ? 'Deleting...' : 'Soft Delete'}
-                </Button>
-                <Button
-                  onClick={() => {
-                    if (selectedUser) {
-                      openHardDeleteModal(selectedUser);
-                      setDetailsModalOpen(false);
-                    }
-                  }}
-                  disabled={deleting === selectedUser?.id || !selectedUser?.is_test_account}
-                  className="bg-red-600 text-white hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed"
-                  title={selectedUser?.is_test_account ? '' : 'Mark as TEST first to enable hard delete'}
-                >
-                  Hard Delete
+                  Borrar en Delete Portal →
                 </Button>
               </DialogFooter>
             </div>
@@ -943,109 +801,6 @@ export default function AdminUsersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Hard Delete Confirmation Modal */}
-      <Dialog open={hardDeleteModalOpen} onOpenChange={(open) => {
-        setHardDeleteModalOpen(open);
-        if (!open) {
-          setUserToHardDelete(null);
-          setHardDeleteConfirmText('');
-          setHardDeletePreview(null);
-        }
-      }}>
-        <DialogContent className="sm:max-w-[640px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="font-serif text-2xl font-semibold text-red-700 flex items-center gap-2">
-              <Flame className="h-6 w-6" />
-              Hard Delete User
-            </DialogTitle>
-            <DialogDescription className="pt-2">
-              Review exactly what will be deleted below. Download a JSON backup before proceeding.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4 space-y-4">
-            {loadingPreview ? (
-              <div className="py-8 text-center">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600 mx-auto mb-3"></div>
-                <p className="text-sm text-gray-600">Loading preview…</p>
-              </div>
-            ) : hardDeletePreview ? (
-              <>
-                {/* Counts summary */}
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                  <p className="text-xs font-semibold text-red-900 mb-2 uppercase tracking-wide">Rows that will be deleted</p>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-red-900">
-                    {Object.entries(hardDeletePreview.counts as Record<string, number>)
-                      .filter(([, n]) => n > 0)
-                      .map(([table, n]) => (
-                        <div key={table} className="flex justify-between">
-                          <span className="font-mono">{table}</span>
-                          <span className="font-bold">{n}</span>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-
-                {/* Expandable full detail */}
-                <details className="bg-gray-50 border border-gray-200 rounded-lg">
-                  <summary className="cursor-pointer px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded-lg">
-                    📋 See exact rows (IDs and key fields)
-                  </summary>
-                  <pre className="px-3 py-2 text-[10px] text-gray-700 max-h-64 overflow-auto font-mono">
-{JSON.stringify(hardDeletePreview.tables, null, 2)}
-                  </pre>
-                </details>
-
-                {/* Backup button */}
-                <button
-                  type="button"
-                  onClick={downloadBackup}
-                  className="w-full px-4 py-2 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg hover:bg-blue-100 text-sm font-medium transition-colors"
-                >
-                  💾 Download backup JSON (recommended)
-                </button>
-
-                <div className="border-t pt-3">
-                  <p className="text-sm text-gray-700">
-                    Type <strong className="text-red-700">{userToHardDelete?.email}</strong> to confirm:
-                  </p>
-                  <input
-                    type="text"
-                    value={hardDeleteConfirmText}
-                    onChange={(e) => setHardDeleteConfirmText(e.target.value)}
-                    placeholder={userToHardDelete?.email || ''}
-                    className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
-                    autoComplete="off"
-                  />
-                  <p className="text-xs text-red-600 font-medium mt-2">This action cannot be undone.</p>
-                </div>
-              </>
-            ) : null}
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setHardDeleteModalOpen(false);
-                setUserToHardDelete(null);
-                setHardDeleteConfirmText('');
-              }}
-              disabled={deleting === userToHardDelete?.id}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleHardDeleteConfirm}
-              disabled={
-                deleting === userToHardDelete?.id ||
-                hardDeleteConfirmText.trim().toLowerCase() !== userToHardDelete?.email.toLowerCase()
-              }
-              className="bg-red-600 text-white hover:bg-red-700 disabled:bg-red-300"
-            >
-              {deleting === userToHardDelete?.id ? 'Deleting…' : 'Permanently Delete'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

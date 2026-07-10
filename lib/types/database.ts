@@ -3,6 +3,9 @@
  * Generated to match the Supabase schema
  */
 
+// JSON type for Supabase JSONB columns
+export type Json = Record<string, unknown> | null;
+
 // Order status type
 export type OrderStatus = 'paid' | 'processing' | 'in_production' | 'shipped' | 'delivered' | 'refunded' | 'error';
 
@@ -210,6 +213,9 @@ export interface Database {
           review_reasons: string | null;
           showcase_image_url: string | null;
           deleted_at: string | null;
+          // Reason: capa 1 (product-level). deleted_at = receta oculta del libro
+          // (dueño o admin). La papelera admin es deleted_items (capa 2).
+          deleted_by: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -238,6 +244,8 @@ export interface Database {
           needs_review?: boolean;
           review_reasons?: string | null;
           showcase_image_url?: string | null;
+          // Reason: capa 1 (product-level) — quién ocultó la receta del libro
+          deleted_by?: string | null;
         };
         Update: {
           guest_id?: string;
@@ -262,6 +270,7 @@ export interface Database {
           needs_review?: boolean;
           review_reasons?: string | null;
           showcase_image_url?: string | null;
+          deleted_by?: string | null;
         };
       };
       communication_log: {
@@ -317,6 +326,40 @@ export interface Database {
           opened_at?: string | null;
           error_message?: string | null;
           retry_count?: number;
+        };
+      };
+      deleted_items: {
+        Row: {
+          id: string;
+          entity_type: 'profile' | 'group' | 'guest' | 'recipe';
+          entity_id: string;
+          entity_label: string;
+          payload: Json | null;
+          counts: Json;
+          status: 'trashed' | 'restored' | 'purged';
+          deleted_by: string | null;
+          deleted_at: string;
+          restored_at: string | null;
+          purged_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          entity_type: 'profile' | 'group' | 'guest' | 'recipe';
+          entity_id: string;
+          entity_label: string;
+          payload?: Json | null;
+          counts?: Json;
+          status?: 'trashed' | 'restored' | 'purged';
+          deleted_by?: string | null;
+          deleted_at?: string;
+          restored_at?: string | null;
+          purged_at?: string | null;
+        };
+        Update: {
+          payload?: Json | null;
+          status?: 'trashed' | 'restored' | 'purged';
+          restored_at?: string | null;
+          purged_at?: string | null;
         };
       };
       shipping_addresses: {
@@ -944,6 +987,10 @@ export type CookbookUpdate = Database['public']['Tables']['cookbooks']['Update']
 export type CookbookRecipe = Database['public']['Tables']['cookbook_recipes']['Row'];
 export type CookbookRecipeInsert = Database['public']['Tables']['cookbook_recipes']['Insert'];
 export type CookbookRecipeUpdate = Database['public']['Tables']['cookbook_recipes']['Update'];
+
+export type DeletedItem = Database['public']['Tables']['deleted_items']['Row'];
+export type DeletedItemInsert = Database['public']['Tables']['deleted_items']['Insert'];
+export type DeletedItemUpdate = Database['public']['Tables']['deleted_items']['Update'];
 
 export type RecipeProductionStatus = Database['public']['Tables']['recipe_production_status']['Row'];
 export type RecipeProductionStatusInsert = Database['public']['Tables']['recipe_production_status']['Insert'];
