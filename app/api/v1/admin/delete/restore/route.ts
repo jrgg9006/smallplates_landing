@@ -106,6 +106,35 @@ export async function POST(request: Request) {
         );
       }
       steps.push(`✅ ${rows.length} fila(s) → ${table}`);
+
+      // Reason: los triggers de groups INSERT (add_group_creator_as_owner,
+      // create_group_cookbook) auto-crean membresía y cookbook nuevos. El snapshot
+      // trae las filas reales — se limpian los artefactos del trigger antes de que
+      // las tablas siguientes del RESTORE_ORDER inserten las originales.
+      if (table === 'groups') {
+        const groupIds = rows
+          .map((r) => r.id)
+          .filter((v): v is string => typeof v === 'string');
+        if (groupIds.length > 0) {
+          const { error: cleanMembersError } = await admin
+            .from('group_members').delete().in('group_id', groupIds);
+          if (cleanMembersError) {
+            return NextResponse.json(
+              { error: `Limpieza de membresías de trigger falló: ${cleanMembersError.message}`, steps },
+              { status: 500 }
+            );
+          }
+          const { error: cleanCookbooksError } = await admin
+            .from('cookbooks').delete().in('group_id', groupIds);
+          if (cleanCookbooksError) {
+            return NextResponse.json(
+              { error: `Limpieza de cookbooks de trigger falló: ${cleanCookbooksError.message}`, steps },
+              { status: 500 }
+            );
+          }
+          steps.push('🧹 Artefactos de triggers limpiados (membresía/cookbook auto-creados)');
+        }
+      }
     }
 
     // Reason: re-liga los curated examples desligados en el trash. Si el example
