@@ -214,13 +214,12 @@ export default function DeletePreviewSheet({ entityType, entityId, onClose, onTr
                   </p>
                   {main.map(renderTable)}
                   {technical.length > 0 && (
-                    <details>
-                      <summary className="cursor-pointer text-xs text-red-700 font-medium">
-                        + {technicalRows} fila(s) en {technical.length} tabla(s) técnica(s) — imágenes,
-                        historial, producción (también se van)
-                      </summary>
-                      <div className="mt-2 space-y-3">{technical.map(renderTable)}</div>
-                    </details>
+                    <div className="border-t border-red-200 pt-2 space-y-3">
+                      <p className="text-xs text-red-700 font-medium">
+                        Tablas técnicas — imágenes, historial, producción ({technicalRows} fila(s), también se van):
+                      </p>
+                      {technical.map(renderTable)}
+                    </div>
                   )}
                 </div>
               );
