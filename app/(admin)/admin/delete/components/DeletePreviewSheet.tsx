@@ -27,13 +27,39 @@ const DISPLAY_FIELDS: Record<string, string[]> = {
   group_invitations: ['email', 'status'],
 };
 
+// Reason: tablas de plomería (junctions, pipelines de imagen, estados de producción)
+// — se borran igual, pero van colapsadas para que el ojo caiga en lo importante
+const TECHNICAL_TABLES = new Set([
+  'cookbook_recipes',
+  'group_recipes',
+  'group_invitations',
+  'communication_log',
+  'book_qa_reviews',
+  'image_processing_queue',
+  'midjourney_prompts',
+  'prompt_evaluations',
+  'recipe_annex_images',
+  'recipe_edit_history',
+  'recipe_print_ready',
+  'recipe_production_status',
+]);
+
 function rowLabel(table: string, row: Record<string, unknown>): string {
   const fields = DISPLAY_FIELDS[table] || ['id'];
-  return fields.map((f) => String(row[f] ?? '')).filter(Boolean).join(' · ') || String(row.id ?? '');
+  const label = fields.map((f) => String(row[f] ?? '')).filter(Boolean).join(' · ');
+  if (label) return label;
+  if (typeof row.id === 'string') return row.id;
+  // Reason: junctions sin id (group_recipes, group_members) — mostrar la clave compuesta
+  return Object.entries(row)
+    .filter(([k, v]) => k.endsWith('_id') && v)
+    .map(([k, v]) => `${k}: ${String(v).slice(0, 8)}…`)
+    .join(' · ') || '(fila)';
 }
 
+type PreviewData = DeletionSnapshot & { context?: Record<string, string> };
+
 export default function DeletePreviewSheet({ entityType, entityId, onClose, onTrashed }: Props) {
-  const [snapshot, setSnapshot] = useState<DeletionSnapshot | null>(null);
+  const [snapshot, setSnapshot] = useState<PreviewData | null>(null);
   const [loading, setLoading] = useState(true);
   const [confirmText, setConfirmText] = useState('');
   const [memberAction, setMemberAction] = useState<'transfer' | 'delete' | ''>('');
@@ -145,11 +171,26 @@ export default function DeletePreviewSheet({ entityType, entityId, onClose, onTr
               </div>
             )}
 
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 space-y-3">
-              <p className="text-xs font-semibold text-red-900 uppercase tracking-wide">
-                Esto se lleva a la papelera:
-              </p>
-              {Object.entries(snapshot.tables).map(([table, rows]) => (
+            {snapshot.context && Object.keys(snapshot.context).length > 0 && (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 space-y-1">
+                <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Contexto</p>
+                {Object.entries(snapshot.context).map(([label, value]) => (
+                  <div key={label} className="flex justify-between gap-3 text-xs">
+                    <span className="text-gray-500">{label}:</span>
+                    <span className="text-gray-900 font-medium text-right">{value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {(() => {
+              const entries = Object.entries(snapshot.tables);
+              const main = entries.filter(([t]) => !TECHNICAL_TABLES.has(t));
+              const technical = entries.filter(([t]) => TECHNICAL_TABLES.has(t));
+              const technicalRows = technical.reduce(
+                (sum, [t, rows]) => sum + (snapshot.counts[t] ?? rows.length), 0
+              );
+              const renderTable = ([table, rows]: [string, Record<string, unknown>[]]) => (
                 <div key={table}>
                   <p className="text-xs font-mono font-bold text-red-900">
                     {table} ({snapshot.counts[table] ?? rows.length})
@@ -165,8 +206,25 @@ export default function DeletePreviewSheet({ entityType, entityId, onClose, onTr
                     )}
                   </ul>
                 </div>
-              ))}
-            </div>
+              );
+              return (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 space-y-3">
+                  <p className="text-xs font-semibold text-red-900 uppercase tracking-wide">
+                    Esto se lleva a la papelera:
+                  </p>
+                  {main.map(renderTable)}
+                  {technical.length > 0 && (
+                    <details>
+                      <summary className="cursor-pointer text-xs text-red-700 font-medium">
+                        + {technicalRows} fila(s) en {technical.length} tabla(s) técnica(s) — imágenes,
+                        historial, producción (también se van)
+                      </summary>
+                      <div className="mt-2 space-y-3">{technical.map(renderTable)}</div>
+                    </details>
+                  )}
+                </div>
+              );
+            })()}
 
             {snapshot.protection.warnings.length > 0 && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 space-y-2">
