@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createSupabaseClient } from '@/lib/supabase/client';
 import { isAdminEmail } from '@/lib/config/admin';
-import { Sparkles, RotateCcw, Eye, X, Search, FlaskConical } from 'lucide-react';
+import { RotateCcw, Eye, X, Search, FlaskConical } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -39,11 +39,8 @@ type FilterPaid = 'all' | 'paid' | 'unpaid';
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [cleaning, setCleaning] = useState<string | null>(null);
   const [resettingOnboarding, setResettingOnboarding] = useState<string | null>(null);
   const [togglingTest, setTogglingTest] = useState<string | null>(null);
-  const [cleanModalOpen, setCleanModalOpen] = useState(false);
-  const [userToClean, setUserToClean] = useState<User | null>(null);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userDetails, setUserDetails] = useState<any>(null);
@@ -141,38 +138,6 @@ export default function AdminUsersPage() {
       alert(`❌ Error: ${err instanceof Error ? err.message : 'Failed to toggle test flag'}`);
     } finally {
       setTogglingTest(null);
-    }
-  };
-
-  const handleCleanClick = (user: User) => {
-    setUserToClean(user);
-    setCleanModalOpen(true);
-  };
-
-  const handleCleanConfirm = async () => {
-    if (!userToClean) return;
-
-    setCleanModalOpen(false);
-    setCleaning(userToClean.id);
-
-    try {
-      const response = await fetch(`/api/v1/admin/users/${userToClean.id}/clean`, {
-        method: 'POST',
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        alert(`✅ User ${userToClean.email} cleaned successfully. They are now in default state.`);
-        await loadUsers(); // Reload to update the list
-      } else {
-        alert(`❌ Error: ${result.error}`);
-      }
-    } catch (err) {
-      alert(`❌ Error: ${err instanceof Error ? err.message : 'Failed to clean user'}`);
-    } finally {
-      setCleaning(null);
-      setUserToClean(null);
     }
   };
 
@@ -389,7 +354,7 @@ export default function AdminUsersPage() {
                   </tr>
                 ) : (
                   filteredUsers.map((user) => {
-                    const busy = cleaning === user.id || resettingOnboarding === user.id || togglingTest === user.id;
+                    const busy = resettingOnboarding === user.id || togglingTest === user.id;
                     return (
                       <tr
                         key={user.id}
@@ -469,14 +434,6 @@ export default function AdminUsersPage() {
                             >
                               <RotateCcw className="h-3.5 w-3.5" />
                             </button>
-                            <button
-                              onClick={() => handleCleanClick(user)}
-                              disabled={busy}
-                              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors disabled:opacity-50"
-                              title="Clean (remove content, keep account)"
-                            >
-                              <Sparkles className="h-3.5 w-3.5" />
-                            </button>
                           </div>
                         </td>
                       </tr>
@@ -488,58 +445,6 @@ export default function AdminUsersPage() {
           </div>
         </div>
       </div>
-
-      {/* Clean Confirmation Modal */}
-      <Dialog open={cleanModalOpen} onOpenChange={setCleanModalOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle className="font-serif text-2xl font-semibold">
-              Clean User Data
-            </DialogTitle>
-            <DialogDescription className="pt-2">
-              This will remove all content from {userToClean?.email} and return them to default state.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4 space-y-3">
-            <p className="text-sm text-gray-700 font-medium">This will delete:</p>
-            <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside ml-2">
-              <li>All recipes</li>
-              <li>All guests</li>
-              <li>All cookbooks (except default)</li>
-              <li>Remove from all groups (except default)</li>
-              <li>All communication logs</li>
-              <li>All shipping addresses</li>
-            </ul>
-            <p className="text-sm text-gray-700 font-medium pt-2">This will keep:</p>
-            <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside ml-2">
-              <li>User account and profile</li>
-              <li>Default group &quot;My First Book&quot;</li>
-            </ul>
-            <p className="text-sm text-red-600 font-medium pt-2">
-              This action cannot be undone.
-            </p>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setCleanModalOpen(false);
-                setUserToClean(null);
-              }}
-              disabled={cleaning === userToClean?.id}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleCleanConfirm}
-              disabled={cleaning === userToClean?.id}
-              className="bg-blue-600 text-white hover:bg-blue-700"
-            >
-              {cleaning === userToClean?.id ? 'Cleaning...' : 'Confirm Clean'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* User Details Modal */}
       <Dialog open={detailsModalOpen} onOpenChange={setDetailsModalOpen}>
@@ -765,18 +670,6 @@ export default function AdminUsersPage() {
                   }}
                 >
                   Close
-                </Button>
-                <Button
-                  onClick={() => {
-                    if (selectedUser) {
-                      handleCleanClick(selectedUser);
-                      setDetailsModalOpen(false);
-                    }
-                  }}
-                  disabled={cleaning === selectedUser?.id}
-                  className="bg-blue-600 text-white hover:bg-blue-700"
-                >
-                  Clean User
                 </Button>
               </DialogFooter>
             </div>
