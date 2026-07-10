@@ -106,6 +106,22 @@ export async function GET(request: Request) {
       if (rows.length > 0) trimmed[table] = rows.slice(0, PREVIEW_ROW_LIMIT);
     }
 
+    // Reason: group_members solo trae profile_id — se enriquece con nombre/email
+    // para que el modal muestre personas, no UUIDs (solo display, no viaja al payload)
+    const members = (snapshot.tables.group_members || []) as Row[];
+    if (members.length > 0) {
+      const memberIds = [...new Set(members.map((m) => String(m.profile_id)).filter(Boolean))];
+      const { data: memberProfiles } = await admin
+        .from('profiles')
+        .select('id, email, full_name')
+        .in('id', memberIds);
+      const byId = new Map((memberProfiles || []).map((p) => [String(p.id), p]));
+      for (const m of members) {
+        const p = byId.get(String(m.profile_id));
+        if (p) m.member_label = [p.full_name, p.email].filter(Boolean).join(' · ');
+      }
+    }
+
     const context = await buildContext(admin, type, id, snapshot.tables);
 
     return NextResponse.json({ success: true, data: { ...snapshot, tables: trimmed, context } });

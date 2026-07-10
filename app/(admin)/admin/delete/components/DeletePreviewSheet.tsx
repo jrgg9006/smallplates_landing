@@ -23,7 +23,7 @@ const DISPLAY_FIELDS: Record<string, string[]> = {
   groups: ['name', 'occasion', 'status'],
   profiles: ['email', 'full_name'],
   cookbooks: ['name'],
-  group_members: ['profile_id', 'role'],
+  group_members: ['member_label', 'role'],
   group_invitations: ['email', 'status'],
 };
 
