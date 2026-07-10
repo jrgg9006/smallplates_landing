@@ -1,6 +1,6 @@
 // lib/admin/deletion/snapshot.ts
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { DeletableEntity, DeletionSnapshot, SnapshotTables } from './types';
+import type { CuratedLink, DeletableEntity, DeletionSnapshot, SnapshotTables } from './types';
 import { buildCounts, mergeTables } from './order';
 import { evaluateProtection } from './protection';
 
@@ -89,11 +89,37 @@ export async function buildSnapshot(
   entityType: DeletableEntity,
   entityId: string
 ): Promise<DeletionSnapshot> {
-  if (entityType === 'recipe') return snapshotRecipe(admin, entityId);
-  if (entityType === 'guest') return snapshotGuest(admin, entityId);
-  if (entityType === 'group') return snapshotGroup(admin, entityId);
-  return snapshotProfile(admin, entityId);
+  const base =
+    entityType === 'recipe' ? await snapshotRecipe(admin, entityId)
+    : entityType === 'guest' ? await snapshotGuest(admin, entityId)
+    : entityType === 'group' ? await snapshotGroup(admin, entityId)
+    : await snapshotProfile(admin, entityId);
+
+  // Reason: curated_examples (gold prompts promovidos) referencian prompt_evaluations
+  // con FK NO ACTION. Son autocontenidos: se conservan y solo se desliga la referencia
+  // en el trash (se re-liga en restore). Sin esto, el DELETE truena contra la FK.
+  const evalIds = (base.tables.prompt_evaluations || [])
+    .map((e) => (typeof e.id === 'string' ? e.id : null))
+    .filter((v): v is string => v !== null);
+  let curatedLinks: CuratedLink[] = [];
+  if (evalIds.length > 0) {
+    const { data, error } = await admin
+      .from('curated_examples')
+      .select('id, origin_eval_id')
+      .in('origin_eval_id', evalIds);
+    if (error) throw new Error(`snapshot curated_examples: ${error.message}`);
+    curatedLinks = ((data as CuratedLink[]) || []).filter((l) => l.id && l.origin_eval_id);
+    if (curatedLinks.length > 0) {
+      base.protection.warnings.push(
+        `Tiene ${curatedLinks.length} curated example(s) promovidos — se conservan, solo se desliga la referencia`
+      );
+    }
+  }
+
+  return { ...base, curatedLinks };
 }
+
+type BaseSnapshot = Omit<DeletionSnapshot, 'curatedLinks'>;
 
 async function root(admin: SupabaseClient, table: string, id: string): Promise<Row> {
   const { data, error } = await admin.from(table).select('*').eq('id', id).maybeSingle();
@@ -102,7 +128,7 @@ async function root(admin: SupabaseClient, table: string, id: string): Promise<R
   return data as Row;
 }
 
-async function snapshotRecipe(admin: SupabaseClient, id: string): Promise<DeletionSnapshot> {
+async function snapshotRecipe(admin: SupabaseClient, id: string): Promise<BaseSnapshot> {
   const recipe = await root(admin, 'guest_recipes', id);
   const tables = mergeTables({ guest_recipes: [recipe] }, await recipeChildren(admin, [id]));
   const protection = evaluateProtection({
@@ -125,7 +151,7 @@ async function snapshotRecipe(admin: SupabaseClient, id: string): Promise<Deleti
   };
 }
 
-async function snapshotGuest(admin: SupabaseClient, id: string): Promise<DeletionSnapshot> {
+async function snapshotGuest(admin: SupabaseClient, id: string): Promise<BaseSnapshot> {
   const guest = await root(admin, 'guests', id);
   let tables: SnapshotTables = {
     guests: [guest],
@@ -170,7 +196,7 @@ async function snapshotGuest(admin: SupabaseClient, id: string): Promise<Deletio
   };
 }
 
-async function snapshotGroup(admin: SupabaseClient, id: string): Promise<DeletionSnapshot> {
+async function snapshotGroup(admin: SupabaseClient, id: string): Promise<BaseSnapshot> {
   const group = await root(admin, 'groups', id);
   const tables = mergeTables({ groups: [group] }, await groupContent(admin, [id]));
   const orders = await countOrders(admin, 'group_id', [id]);
@@ -199,7 +225,7 @@ async function snapshotGroup(admin: SupabaseClient, id: string): Promise<Deletio
   };
 }
 
-async function snapshotProfile(admin: SupabaseClient, id: string): Promise<DeletionSnapshot> {
+async function snapshotProfile(admin: SupabaseClient, id: string): Promise<BaseSnapshot> {
   const profile = await root(admin, 'profiles', id);
   const ownedGroups = await fetchAll(admin, 'groups', 'created_by', [id]);
   const groupIds = ownedGroups.map((g) => String(g.id));

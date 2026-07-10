@@ -10,6 +10,13 @@ export interface Protection {
   memberChoiceRequired: boolean;
 }
 
+// Reason: curated_examples referencia prompt_evaluations con FK NO ACTION pero es
+// autocontenido — al borrar se desliga (origin_eval_id = null) y al restaurar se re-liga
+export interface CuratedLink {
+  id: string;
+  origin_eval_id: string;
+}
+
 export interface DeletionSnapshot {
   entityType: DeletableEntity;
   entityId: string;
@@ -17,6 +24,7 @@ export interface DeletionSnapshot {
   tables: SnapshotTables;
   counts: Record<string, number>;
   protection: Protection;
+  curatedLinks: CuratedLink[];
 }
 
 export interface RestorePlan {

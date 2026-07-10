@@ -108,7 +108,7 @@ export async function POST(request: Request) {
         entity_type: snapshot.entityType,
         entity_id: snapshot.entityId,
         entity_label: snapshot.entityLabel,
-        payload: { tables: snapshot.tables, protection: snapshot.protection },
+        payload: { tables: snapshot.tables, protection: snapshot.protection, curatedLinks: snapshot.curatedLinks },
         counts: snapshot.counts,
         deleted_by: adminUser.id,
       })
@@ -120,11 +120,31 @@ export async function POST(request: Request) {
     steps.push('🗄️ Archivado en papelera');
 
     // Borrado real. Cada DELETE de raíz es atómico (las cascadas FK van en el
-    // mismo statement). Si falla, limpiamos la fila de papelera huérfana.
+    // mismo statement). Si falla, limpiamos la fila de papelera huérfana
+    // y re-ligamos los curated examples que ya se hubieran desligado.
+    let unlinked = false;
     const fail = async (message: string) => {
+      if (unlinked) {
+        for (const link of snapshot.curatedLinks) {
+          await admin.from('curated_examples').update({ origin_eval_id: link.origin_eval_id }).eq('id', link.id);
+        }
+      }
       await admin.from('deleted_items').delete().eq('id', trashRow.id);
       return NextResponse.json({ error: message }, { status: 500 });
     };
+
+    // Reason: curated_examples referencian prompt_evaluations con FK NO ACTION —
+    // sin desligar, el DELETE truena. Son autocontenidos: sobreviven sin la referencia
+    // y el restore la re-liga (los links viajan en el payload).
+    if (snapshot.curatedLinks.length > 0) {
+      const { error: unlinkError } = await admin
+        .from('curated_examples')
+        .update({ origin_eval_id: null })
+        .in('id', snapshot.curatedLinks.map((l) => l.id));
+      if (unlinkError) return fail(`Desligar curated examples falló: ${unlinkError.message}`);
+      unlinked = true;
+      steps.push(`🔗 ${snapshot.curatedLinks.length} curated example(s) desligados (se conservan)`);
+    }
 
     if (entityType === 'profile') {
       const { error: banError } = await admin.auth.admin.updateUserById(entityId, {

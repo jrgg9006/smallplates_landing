@@ -24,7 +24,10 @@ export async function POST(request: Request) {
     if (itemError || !item) {
       return NextResponse.json({ error: 'No está en papelera (o ya fue restaurado/purgado)' }, { status: 404 });
     }
-    const payload = item.payload as { tables: SnapshotTables } | null;
+    const payload = item.payload as {
+      tables: SnapshotTables;
+      curatedLinks?: { id: string; origin_eval_id: string }[];
+    } | null;
     if (!payload?.tables) {
       return NextResponse.json({ error: 'Snapshot vacío — no se puede restaurar' }, { status: 500 });
     }
@@ -103,6 +106,16 @@ export async function POST(request: Request) {
         );
       }
       steps.push(`✅ ${rows.length} fila(s) → ${table}`);
+    }
+
+    // Reason: re-liga los curated examples desligados en el trash. Si el example
+    // ya no existe, el update afecta 0 filas — inofensivo.
+    for (const link of payload.curatedLinks || []) {
+      const { error: relinkError } = await admin
+        .from('curated_examples')
+        .update({ origin_eval_id: link.origin_eval_id })
+        .eq('id', link.id);
+      if (!relinkError) steps.push(`🔗 curated example re-ligado (${link.id.slice(0, 8)}…)`);
     }
 
     await admin
