@@ -71,7 +71,8 @@ export default function AdminHomePage() {
         setShowDeletePasswordModal(false);
         setDeletePassword('');
         setPasswordError(null);
-        router.push('/admin/users');
+        // Reason: el password gate protege el portal de borrados, no la gestión de usuarios
+        router.push('/admin/delete');
       } else {
         setPasswordError('Incorrect password');
         setDeletePassword('');
@@ -323,13 +324,13 @@ export default function AdminHomePage() {
             </div>
           </Link>
 
-          {/* Delete Portal */}
-          <Link href="/admin/delete" className="group">
+          {/* Manage Deletions — password-gated: aquí es donde se borra */}
+          <div onClick={handleDeleteUsersClick} className="group">
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-red-600 cursor-pointer h-full">
               <div className="text-5xl mb-4">🗑️</div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Delete Portal</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Manage Deletions</h2>
               <p className="text-gray-600 mb-4">
-                Borrar perfiles, recetas y grupos con preview y audit trail
+                Borrar perfiles, libros, guests y recetas — con papelera, preview y audit trail
               </p>
               <div className="flex items-center text-sm text-gray-500 group-hover:text-red-600 transition-colors">
                 <span>Abrir portal</span>
@@ -338,24 +339,24 @@ export default function AdminHomePage() {
                 </svg>
               </div>
             </div>
-          </Link>
+          </div>
 
-          {/* Delete Users - Active */}
-          <div onClick={handleDeleteUsersClick} className="group">
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-red-600 cursor-pointer h-full">
-              <div className="text-5xl mb-4">🗑️</div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Delete Users</h2>
+          {/* Manage Users — gestión de cuentas, sin borrado (eso vive en Manage Deletions) */}
+          <Link href="/admin/users" className="group">
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border-2 border-transparent group-hover:border-blue-600 cursor-pointer h-full">
+              <div className="text-5xl mb-4">👥</div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Manage Users</h2>
               <p className="text-gray-600 mb-4">
-                Delete user accounts and all associated data
+                Cuentas: detalles, clean, reset onboarding y flag de test
               </p>
-              <div className="flex items-center text-sm text-gray-500 group-hover:text-red-600 transition-colors">
+              <div className="flex items-center text-sm text-gray-500 group-hover:text-blue-600 transition-colors">
                 <span>Manage users</span>
                 <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </div>
             </div>
-          </div>
+          </Link>
 
 
           {/* Debug Logs */}

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createSupabaseClient } from '@/lib/supabase/client';
 import { isAdminEmail } from '@/lib/config/admin';
-import { Trash2, Sparkles, RotateCcw, Eye, X, Search, FlaskConical } from 'lucide-react';
+import { Sparkles, RotateCcw, Eye, X, Search, FlaskConical } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -477,13 +477,6 @@ export default function AdminUsersPage() {
                             >
                               <Sparkles className="h-3.5 w-3.5" />
                             </button>
-                            <button
-                              onClick={() => router.push(`/admin/delete?tab=profile&q=${encodeURIComponent(user.email)}`)}
-                              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
-                              title="Borrar en el Delete Portal"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
                           </div>
                         </td>
                       </tr>
@@ -784,12 +777,6 @@ export default function AdminUsersPage() {
                   className="bg-blue-600 text-white hover:bg-blue-700"
                 >
                   Clean User
-                </Button>
-                <Button
-                  onClick={() => selectedUser && router.push(`/admin/delete?tab=profile&q=${encodeURIComponent(selectedUser.email)}`)}
-                  className="bg-red-600 text-white hover:bg-red-700"
-                >
-                  Borrar en Delete Portal →
                 </Button>
               </DialogFooter>
             </div>
