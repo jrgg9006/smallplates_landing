@@ -183,6 +183,42 @@ export default function DeletePreviewSheet({ entityType, entityId, onClose, onTr
               </div>
             )}
 
+            {entityType === 'recipe' && (() => {
+              // Reason: el snapshot ya trae la receta completa — mostrarla permite
+              // confirmar que de verdad es test antes de borrar, sin salir del modal
+              const recipe = (snapshot.tables.guest_recipes || []).find(
+                (r) => String(r.id) === entityId
+              );
+              if (!recipe) return null;
+              return (
+                <details className="bg-gray-50 border border-gray-200 rounded-lg">
+                  <summary className="cursor-pointer px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded-lg">
+                    👀 Ver la receta completa
+                  </summary>
+                  <div className="px-3 pb-3 space-y-2">
+                    <div>
+                      <p className="text-xs font-semibold text-gray-700">Ingredientes</p>
+                      <p className="text-xs text-gray-600 whitespace-pre-wrap">
+                        {String(recipe.ingredients || '—')}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-gray-700">Instrucciones</p>
+                      <p className="text-xs text-gray-600 whitespace-pre-wrap">
+                        {String(recipe.instructions || '—')}
+                      </p>
+                    </div>
+                    {typeof recipe.comments === 'string' && recipe.comments && (
+                      <div>
+                        <p className="text-xs font-semibold text-gray-700">Comentarios</p>
+                        <p className="text-xs text-gray-600 whitespace-pre-wrap">{recipe.comments}</p>
+                      </div>
+                    )}
+                  </div>
+                </details>
+              );
+            })()}
+
             {(() => {
               const entries = Object.entries(snapshot.tables);
               const main = entries.filter(([t]) => !TECHNICAL_TABLES.has(t));
