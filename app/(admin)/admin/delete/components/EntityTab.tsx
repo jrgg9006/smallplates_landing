@@ -35,6 +35,8 @@ export default function EntityTab({ type, initialQuery, onSelect }: EntityTabPro
   const [items, setItems] = useState<EntityListItem[]>([]);
   const [query, setQuery] = useState(initialQuery);
   const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   // Reason: AbortController evita que una respuesta lenta y vieja pise una búsqueda más reciente
   const load = useCallback(async (q: string, signal: AbortSignal) => {
@@ -45,13 +47,32 @@ export default function EntityTab({ type, initialQuery, onSelect }: EntityTabPro
         { signal }
       );
       const result = await res.json();
-      if (res.ok && result.success) setItems(result.data);
-      else alert(`Error: ${result.error}`);
+      if (res.ok && result.success) {
+        setItems(result.data);
+        setHasMore(Boolean(result.hasMore));
+      } else alert(`Error: ${result.error}`);
       setLoading(false);
     } catch (err) {
       if (!(err instanceof DOMException && err.name === 'AbortError')) setLoading(false);
     }
   }, [type]);
+
+  // Reason: paginación por offset — trae la siguiente página y la anexa
+  const loadMore = useCallback(async () => {
+    setLoadingMore(true);
+    try {
+      const res = await fetch(
+        `/api/v1/admin/delete/entities?type=${type}&q=${encodeURIComponent(query)}&offset=${items.length}`
+      );
+      const result = await res.json();
+      if (res.ok && result.success) {
+        setItems((prev) => [...prev, ...result.data]);
+        setHasMore(Boolean(result.hasMore));
+      } else alert(`Error: ${result.error}`);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [type, query, items.length]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -102,6 +123,15 @@ export default function EntityTab({ type, initialQuery, onSelect }: EntityTabPro
               </div>
             </button>
           ))
+        )}
+        {!loading && hasMore && (
+          <button
+            onClick={loadMore}
+            disabled={loadingMore}
+            className="w-full px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+          >
+            {loadingMore ? 'Cargando…' : `Cargar 50 más (mostrando ${items.length})`}
+          </button>
         )}
       </div>
     </div>

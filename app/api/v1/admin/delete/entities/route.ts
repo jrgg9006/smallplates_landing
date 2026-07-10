@@ -20,6 +20,10 @@ export async function GET(request: Request) {
     // Reason: PostgREST .or() parsea comas/paréntesis como sintaxis del filtro —
     // se quitan del término de búsqueda para que un email raro no rompa la query
     const q = (url.searchParams.get('q') || '').trim().replace(/[,()]/g, '');
+    // Reason: paginación con "Cargar más" — offset avanza de PAGE_SIZE en PAGE_SIZE
+    const offset = Math.max(0, parseInt(url.searchParams.get('offset') || '0', 10) || 0);
+    const PAGE_SIZE = 50;
+    const to = offset + PAGE_SIZE - 1;
     const admin = createSupabaseAdminClient();
 
     let items: EntityListItem[] = [];
@@ -30,7 +34,7 @@ export async function GET(request: Request) {
         .select('id, email, full_name, is_test_account, deleted_at, created_at')
         .is('deleted_at', null)
         .order('created_at', { ascending: false })
-        .limit(50);
+        .range(offset, to);
       if (q) query = query.or(`email.ilike.%${q}%,full_name.ilike.%${q}%`);
       const { data, error } = await query;
       if (error) throw new Error(error.message);
@@ -46,7 +50,7 @@ export async function GET(request: Request) {
         .from('groups')
         .select('id, name, occasion, status, created_at, created_by')
         .order('created_at', { ascending: false })
-        .limit(50);
+        .range(offset, to);
       if (q) query = query.ilike('name', `%${q}%`);
       const { data, error } = await query;
       if (error) throw new Error(error.message);
@@ -68,7 +72,7 @@ export async function GET(request: Request) {
         .from('guests')
         .select('id, first_name, last_name, email, status, created_at, groups(name)')
         .order('created_at', { ascending: false })
-        .limit(50);
+        .range(offset, to);
       if (q) query = query.or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,email.ilike.%${q}%`);
       const { data, error } = await query;
       if (error) throw new Error(error.message);
@@ -87,7 +91,7 @@ export async function GET(request: Request) {
         .from('guest_recipes')
         .select('id, recipe_name, submission_status, deleted_at, created_at, guests(first_name, last_name)')
         .order('created_at', { ascending: false })
-        .limit(50);
+        .range(offset, to);
       if (q) query = query.ilike('recipe_name', `%${q}%`);
       const { data, error } = await query;
       if (error) throw new Error(error.message);
@@ -107,7 +111,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true, data: items });
+    return NextResponse.json({ success: true, data: items, hasMore: items.length === PAGE_SIZE });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Internal error';
     return NextResponse.json({ error: message }, { status: message.includes('Admin') ? 401 : 500 });
