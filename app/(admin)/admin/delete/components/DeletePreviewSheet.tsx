@@ -187,9 +187,6 @@ export default function DeletePreviewSheet({ entityType, entityId, onClose, onTr
               const entries = Object.entries(snapshot.tables);
               const main = entries.filter(([t]) => !TECHNICAL_TABLES.has(t));
               const technical = entries.filter(([t]) => TECHNICAL_TABLES.has(t));
-              const technicalRows = technical.reduce(
-                (sum, [t, rows]) => sum + (snapshot.counts[t] ?? rows.length), 0
-              );
               const renderTable = ([table, rows]: [string, Record<string, unknown>[]]) => (
                 <div key={table}>
                   <p className="text-xs font-mono font-bold text-red-900">
