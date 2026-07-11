@@ -23,12 +23,14 @@ She carries:
 ### Her three fears
 
 - **Ineptitude:** *"What if I can't pull this off?"*
-- **Subjugation:** *"What if I do all the work and someone else gets the credit — or worse, the person it's for never knows?"*
+- **Falling flat:** *"What if I pour myself into this and it isn't as good as what they deserve?"*
 - **Depletion:** *"What if this drains me when I'm already running on fumes?"*
 
 ### What she wants
 
-Glory without grief. Proof she's the person who gets it right. A done-for-you system that makes her look like a genius.
+To make them happy. That's the engine — not credit, not status.
+
+She knows how many people love this person. The book is her way of making that real: something they'll open, cook from, actually use — not another thing in a drawer. Nobody sells what she's trying to give. Only their people could make it.
 
 ### What she doesn't want
 
@@ -41,11 +43,21 @@ Another project to manage. Another group chat to chase. Another thing that depen
 - a dashboard that shows who's in
 - professional design — she doesn't need taste or design skills
 - a real person reads every page before it prints
-- emotional credit — when the person it's for is moved, she's the one who made it happen
+- the moment it lands — she gets to watch them find everyone they love in one book
 
 ### When she gives it, she should feel
 
 *"I didn't just give a gift. I gave them all of their people — and I didn't lose my mind doing it."*
+
+---
+
+## The Contributors
+
+Not a market. Co-authors.
+
+When they send a recipe, the thought is simple: *"I want to give them something they'll actually use — something they'll enjoy."* The recipe they're known for is the closest thing they have to being in the kitchen with them.
+
+That's all the submission flow has to honor. Make it easy. Keep it theirs.
 
 ---
 
@@ -65,10 +77,10 @@ When they receive the book, they should feel: *"They didn't just sign a card. Th
 
 ## The System
 
-The receiver gets the gift. The organizer gets the glory. Both feel seen.
+The receiver feels known. The organizer made that happen. The contributors are in the kitchen again.
 
 That's the whole system. Everything else is noise.
 
 ---
 
-*v2.0 · July 2026 · Generalized from `brand_wedding/characters.md` v1.1 (legacy). The Bride → The Receiver (any honoree). Removed the "automated reminders" claim (no automated contributor reminders exist — vetoed July 2026); replaced with what the product actually does today: free start, shared link, automatic cleaning, dashboard, human read before print.*
+*v2.1 · July 2026 · Generalized from `brand_wedding/characters.md` v1.1 (legacy). The Bride → The Receiver (any honoree). Removed the "automated reminders" claim (vetoed July 2026); replaced with what the product actually does today. Motivation model corrected per founder (July 11): the organizer's engine is the receiver's happiness, not glory/credit — "glory without grief" retired, Subjugation fear replaced with Falling flat, system line rewritten. Added The Contributors (their motivation: give something that gets used and enjoyed).*
