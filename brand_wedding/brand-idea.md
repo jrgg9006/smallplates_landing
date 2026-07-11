@@ -1,5 +1,7 @@
 # Small Plates — Brand Idea
 
+> **Superseded by `brand/` (July 2026). Kept as legacy reference.**
+
 ## THE IDEA
 
 **People you love shouldn't disappear from your life.**

@@ -1,5 +1,7 @@
 # Manifesto
 
+> **Superseded by `brand/` (July 2026). Kept as legacy reference.**
+
 Something is happening to the people you love.
 
 Not dramatically. Gradually. The distance between you and them becomes the default. The group chat goes quiet. The dinner gets rescheduled. Life intervenes — as it does — and what's left is a like, a notification, something that performs the shape of keeping in touch without the weight of it.

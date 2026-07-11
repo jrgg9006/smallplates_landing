@@ -1,5 +1,7 @@
 # Tone of Voice
 
+> **Superseded by `brand/` (July 2026). Kept as legacy reference.**
+
 *How Small Plates sounds. Two pages. Read both.*
 
 ---

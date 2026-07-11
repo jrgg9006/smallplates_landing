@@ -1,7 +1,5 @@
 # Visual Identity
 
-> **Superseded by `brand/` (July 2026). Kept as legacy reference.**
-
 # Color Palette
 
 ## Philosophy
@@ -128,5 +126,4 @@ Extremely legible on screens. Modern but not cold. Pairs perfectly with Minion P
 
 ---
 
-*v1.3 · April 2026 · Reduced to principles only. Removed application-specific prescriptions (social media, packaging, email, dashboard), photography mandates ("Always / Never in our imagery"), technical reference (aspect ratios, file specs), and pixel-level type hierarchy. The brand book gives direction; execution belongs to the team.*
-
+*v1.4 · July 2026 · Moved to `brand/` from `brand_wedding/visual-identity.md` v1.3 (legacy). Content unchanged — it was already occasion-agnostic. Part of the five-doc system listed in `brand-idea.md`.*

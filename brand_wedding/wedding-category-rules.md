@@ -1,5 +1,7 @@
 # Category Rules
 
+> **Superseded by `brand/` (July 2026). Kept as legacy reference.**
+
 *The wedding and cookbook industry rules Small Plates breaks, bends, and respects — and why.*
 
 *This is a strategic positioning document. It maps where Small Plates stands against the two saturated categories it operates in: weddings and cookbooks. For operational visual language derived from this positioning, see `visual-principles.md`.*

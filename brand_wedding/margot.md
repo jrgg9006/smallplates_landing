@@ -1,5 +1,7 @@
 # Margot
 
+> **Superseded by `brand/` (July 2026). Kept as legacy reference.**
+
 *The filter. Not a persona. Not a customer. She is the brand's taste — the person every line of copy, every image, every decision has to pass through.*
 
 *When in doubt, ask: **"Would Margot love it, ignore it, or find it cringe?"***

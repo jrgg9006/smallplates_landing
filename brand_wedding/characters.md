@@ -1,5 +1,7 @@
 # Characters — The Wedding Cast
 
+> **Superseded by `brand/` (July 2026). Kept as legacy reference.**
+
 *Not personas. Not demographics. Behavioral roles in an emotional system.*
 
 *There is one audience: the organizer. Everyone else is a role she interacts with. The bride is the receiver of the gift, not the buyer. The guests are contributors, not a market.* 
