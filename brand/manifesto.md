@@ -1,37 +1,19 @@
 # Manifesto
 
-Something is happening to the people you love.
+There's always another way to love the people you love.
 
-Not dramatically. Gradually. The distance between you and them becomes the default. The group chat goes quiet. The dinner gets rescheduled. Life intervenes, as it does, and what's left is a like, a notification, something that performs the shape of keeping in touch without the weight of it.
+Another way to discover them: the dish they're famous for, the story they'd never tell out loud. Another way to have them in your kitchen, even when they can't be there. Another way to give something real, in a world that keeps making things fast and fake.
 
-Most things made today are designed for exactly this world. Designed to be seen once, briefly, and forgotten.
+So we built one.
 
-We're not.
-
----
-
-Someone you love is having a moment. A wedding. A retirement. A new baby. A goodbye.
-
-The people who love them are scattered: another city, another country, a friendship that lives on voice notes now. But every one of them has a recipe. The one they're known for. The one that tastes like them.
-
-The book gathers what they send: a recipe, a note, a piece of themselves. From wherever they are. Collected, designed, printed, bound. It lives in the kitchen. Gets opened on a Tuesday. Gets stained.
+A book written by the people who love someone. Everyone sends a recipe and a note, from wherever they are. We design it, print it, bind it. It lives in the kitchen. Gets opened on a Tuesday. Gets stained.
 
 That's the point.
 
----
-
-We're not an occasion company. We don't sell the day.
-
-We build for the Wednesday. The ordinary evening two years later, when she opens the book for the risotto and finds her grandmother's handwriting on the page. Or her college roommate's. Or the aunt who flew in from Madrid and couldn't stay long enough.
-
-The internet promised belonging and delivered notifications. We make something you hold.
-
 Small Plates & Co.
 
-The "& Co." isn't corporate. It means the company of people: whoever is still at the table, on the Wednesday that matters more than the Saturday did.
-
-That's all we do. That's why we exist.
+The "& Co." means the company of people: whoever's in your life that matters, still here, still at the table.
 
 ---
 
-*v2.2 · July 2026 · Generalized from `brand_wedding/manifesto.md` v1.0 (legacy). Movement two rewritten from the wedding anchor to the table anchor; "showed up" framing removed. v2.2: em dashes removed.*
+*v3.0 · July 2026 · Founder rewrite (July 11): reframed from absence ("something is happening to the people you love") to abundance (there's always another way to love, discover, and give). Roughly half the length of v2.2. The Wednesday movement and the belonging/notifications line retired from this doc; the kitchen refrain and "& Co." stay.*

@@ -17,10 +17,7 @@ If she'd love it: ship it. If she'd ignore it: improve it. If it'd make her crin
 
 If she'd roll her eyes → rewrite. If she'd say it with a knowing smile → ship it.
 
-**The 2am Test.**
-> The organizer who found Small Plates at 2am on TikTok: does this feel made for her, or for her mom?
-
-If it feels made for her mom → rewrite. The brand travels daughter to mother. Never the other way.
+One test. That's it. Small Plates is for anyone who wants to share, connect, and give something real to someone they love: the daughter, the mom, the best friend, the whole group. The voice doesn't pick between them.
 
 *Full character study: `brand_legacy_documents/legacy_documents/archive/margot-character-study.md`.*
 
@@ -102,18 +99,6 @@ The same idea, said wrong and said right.
 
 ---
 
-## 5. What copy must never claim
-
-The product truths. Copy that violates these is wrong even if it sounds right.
-
-- **Recipes are cleaned automatically as they arrive**, and the organizer sees the cleaned version. Say "cleaned."
-- **A real person reads every page after payment, before print.** Say: "a real person reads every page before it prints." Never "reviewed the moment it arrives"; that mixes the two steps, and it's false.
-- **Dish images are created from the recipe itself, after the book closes.** Say: "a full-color photo created for every dish, based on the recipe itself." Never claim "no AI"; the pipeline uses it.
-- **There are no automated reminders to contributors.** Never promise "we handle the reminders" or "no chasing anyone down." The organizer shares the link; we make the link easy to share.
-- **The owner never sees the designed book.** It arrives printed. The surprise is by design. Never promise a preview.
-
----
-
 ## One last thing
 
 If you're not sure, cut the last sentence.
@@ -122,4 +107,4 @@ That's usually where the explanation hides. The part where you tell the reader w
 
 ---
 
-*v1.1 · July 2026 · Fuses `margot.md` v2.1 and `tone-of-voice.md` v1.0 from `brand_wedding/` (legacy). Generalized multi-occasion, guest numbers removed, product-truth guardrails added. v1.1: "showed up" banned, em dashes banned and removed system-wide per founder (July 11).*
+*v1.2 · July 2026 · Fuses `margot.md` v2.1 and `tone-of-voice.md` v1.0 from `brand_wedding/` (legacy). Generalized multi-occasion; guest numbers, "showed up," and em dashes banned. v1.2 per founder (July 11): 2am Test and the daughter-to-mother rule retired (Small Plates is for the mom as much as the daughter); "What copy must never claim" section cut.*
