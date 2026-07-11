@@ -4,7 +4,7 @@
 
 ## Philosophy
 
-The palette is built on warmth with sophistication — colors that feel like candlelight dinners and honey in the sun. Not cold. Not corporate. Not predictable.
+The palette is built on warmth with sophistication: colors that feel like candlelight dinners and honey in the sun. Not cold. Not corporate. Not predictable.
 
 ---
 
@@ -20,7 +20,7 @@ The palette is built on warmth with sophistication — colors that feel like can
 
 ## The Two-Tone Warm White System
 
-Small Plates uses two warm whites in deliberate counterpoint — never interchangeably. They are the same family, separated by 2% saturation. The contrast is perceptually subtle and structurally significant: it provides layering without requiring borders or shadows, preserving editorial restraint.
+Small Plates uses two warm whites in deliberate counterpoint, never interchangeably. They are the same family, separated by 2% saturation. The contrast is perceptually subtle and structurally significant: it provides layering without requiring borders or shadows, preserving editorial restraint.
 
 | Token | Hex | Role |
 |-------|-----|------|
@@ -32,11 +32,11 @@ Small Plates uses two warm whites in deliberate counterpoint — never interchan
 The roles invert by register:
 
 **In brand register** (landing pages, marketing, editorial, showcase email):
-- **Warm is canvas.** Default for full-width section backgrounds, hero sections, the body of editorial pages. The warmer tone creates the enveloping atmosphere — kitchen-warm, candle-warm, dinner-table-warm.
-- **Airy is layer.** Used sparingly when a section needs to feel lighter or more spacious — to create contrast against the predominantly Warm canvas.
+- **Warm is canvas.** Default for full-width section backgrounds, hero sections, the body of editorial pages. The warmer tone creates the enveloping atmosphere: kitchen-warm, candle-warm, dinner-table-warm.
+- **Airy is layer.** Used sparingly when a section needs to feel lighter or more spacious, to create contrast against the predominantly Warm canvas.
 
 **In product register** (organizer dashboard, submission flow, transactional surfaces):
-- **Airy is canvas.** Default for body, page background, full-width app surfaces. The airier tone creates breathing room — workflow-clear, focus-supportive, friction-free.
+- **Airy is canvas.** Default for body, page background, full-width app surfaces. The airier tone creates breathing room: workflow-clear, focus-supportive, friction-free.
 - **Warm is layer.** Used for elements that lift from the canvas: callouts, info banners, selected states, hover states, input field backgrounds, modal backgrounds, sheet backgrounds.
 
 ### Hard rules
@@ -44,11 +44,11 @@ The roles invert by register:
 - **Never** use Warm as a body or page background in product register.
 - **Never** use Airy as a section background in brand register.
 - **Never** use literal hex (`#FAF9F7` or `#FAF7F2`) in code. Always reference the named token (`bg-brand-warm-white-airy` or `bg-brand-warm-white-warm`).
-- The 2% saturation difference is the entire point. Do not "consolidate to one warm white for simplicity" — the two-tone IS the system.
+- The 2% saturation difference is the entire point. Do not "consolidate to one warm white for simplicity". The two-tone IS the system.
 
 ### Why this exists
 
-Editorial publications (Kinfolk, Apartamento, Cherry Bombe) use subtle tonal counterpoint to create visual rhythm between sections without leaning on harsh dividers or shadows. Small Plates inherits this technique. The Canvas-vs-Layer Rule is how the technique becomes operational at scale — every developer, every AI output, every future component knows which warm white belongs where, without having to ask.
+Editorial publications (Kinfolk, Apartamento, Cherry Bombe) use subtle tonal counterpoint to create visual rhythm between sections without leaning on harsh dividers or shadows. Small Plates inherits this technique. The Canvas-vs-Layer Rule is how the technique becomes operational at scale: every developer, every AI output, every future component knows which warm white belongs where, without having to ask.
 
 
 ## Secondary Palette
@@ -75,16 +75,16 @@ Editorial publications (Kinfolk, Apartamento, Cherry Bombe) use subtle tonal cou
 
 **Do:**
 
-- Use Honey sparingly — see The Ratio Rule
-- Let Warm White breathe — generous whitespace is part of the identity
-- Use Soft Charcoal for most text — softer than pure black
+- Use Honey sparingly: see The Ratio Rule
+- Let Warm White breathe: generous whitespace is part of the identity
+- Use Soft Charcoal for most text: softer than pure black
 - Let photography bring additional color naturally
 
 **Don't:**
 
-- Don't use pure black (#000000) — always Soft Charcoal or Deep Charcoal
-- Don't introduce pinks, blues, or purples — they break the warmth
-- Don't use Honey for large background areas — overwhelming
+- Don't use pure black (#000000): always Soft Charcoal or Deep Charcoal
+- Don't introduce pinks, blues, or purples: they break the warmth
+- Don't use Honey for large background areas: overwhelming
 
 ## The Ratio Rule
 
@@ -92,17 +92,25 @@ Warmth dominates. Honey is the spice, not the dish. Secondary colors (Terracotta
 
 ---
 
+# Photography
+
+- Show the book in use: stained, open, on counters, in real kitchens. Never styled and pristine.
+- The person the book is for is never the visual protagonist. The contributors are, through their handwriting and recipes.
+- Real domestic contexts. No stock imagery, no light-and-airy category defaults.
+
+---
+
 # Typography
 
 ## Primary Type System
 
-### Serif — Minion Pro
+### Serif: Minion Pro
 
 **Usage:** Headlines, titles, emotional moments, the book itself.
 
 Classic editorial feel. Highly readable at various sizes. Sophisticated without being stuffy. Works beautifully in print.
 
-### Sans-Serif — Inter
+### Sans-Serif: Inter
 
 **Usage:** Body text, UI elements, functional copy, captions.
 
@@ -112,7 +120,7 @@ Extremely legible on screens. Modern but not cold. Pairs perfectly with Minion P
 
 **Do:**
 
-- Mix Minion Pro and Inter intentionally — serif for emotion, sans for function
+- Mix Minion Pro and Inter intentionally: serif for emotion, sans for function
 - Use generous line height for body text
 - Let headlines breathe with ample spacing
 - Use italic Minion Pro for quotes and emphasis
@@ -120,10 +128,10 @@ Extremely legible on screens. Modern but not cold. Pairs perfectly with Minion P
 **Don't:**
 
 - Don't use all caps for long text (okay for short labels)
-- Don't use script for body text — ever
+- Don't use script for body text, ever
 - Don't mix more than these three typefaces
-- Don't use thin/light weights — they feel weak
+- Don't use thin/light weights: they feel weak
 
 ---
 
-*v1.4 · July 2026 · Moved to `brand/` from `brand_wedding/visual-identity.md` v1.3 (legacy). Content unchanged — it was already occasion-agnostic. Part of the five-doc system listed in `brand-idea.md`.*
+*v1.5 · July 2026 · Moved to `brand/` from `brand_wedding/visual-identity.md` v1.3 (legacy). v1.5: em dashes removed; added Photography section (book in use, honoree never the protagonist), relocated here when HOW WE POSITION in `brand-idea.md` was simplified per founder.*

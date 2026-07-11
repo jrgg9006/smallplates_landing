@@ -2,7 +2,7 @@
 
 Something is happening to the people you love.
 
-Not dramatically. Gradually. The distance between you and them becomes the default. The group chat goes quiet. The dinner gets rescheduled. Life intervenes — as it does — and what's left is a like, a notification, something that performs the shape of keeping in touch without the weight of it.
+Not dramatically. Gradually. The distance between you and them becomes the default. The group chat goes quiet. The dinner gets rescheduled. Life intervenes, as it does, and what's left is a like, a notification, something that performs the shape of keeping in touch without the weight of it.
 
 Most things made today are designed for exactly this world. Designed to be seen once, briefly, and forgotten.
 
@@ -12,9 +12,9 @@ We're not.
 
 Someone you love is having a moment. A wedding. A retirement. A new baby. A goodbye.
 
-The people who love them are scattered — another city, another country, a friendship that lives on voice notes now. But every one of them has a recipe. The one they're known for. The one that tastes like them.
+The people who love them are scattered: another city, another country, a friendship that lives on voice notes now. But every one of them has a recipe. The one they're known for. The one that tastes like them.
 
-The book gathers what they send — a recipe, a note, a piece of themselves. From wherever they are. Collected, designed, printed, bound. It lives in the kitchen. Gets opened on a Tuesday. Gets stained.
+The book gathers what they send: a recipe, a note, a piece of themselves. From wherever they are. Collected, designed, printed, bound. It lives in the kitchen. Gets opened on a Tuesday. Gets stained.
 
 That's the point.
 
@@ -28,10 +28,10 @@ The internet promised belonging and delivered notifications. We make something y
 
 Small Plates & Co.
 
-The "& Co." isn't corporate. It means the company of people — whoever is still at the table, on the Wednesday that matters more than the Saturday did.
+The "& Co." isn't corporate. It means the company of people: whoever is still at the table, on the Wednesday that matters more than the Saturday did.
 
 That's all we do. That's why we exist.
 
 ---
 
-*v2.1 · July 2026 · Generalized from `brand_wedding/manifesto.md` v1.0 (legacy). Movement two rewritten from the wedding anchor to the table anchor — the people who love someone, gathered from wherever they are. "Showed up" framing removed (implies physical attendance; the product doesn't require it). Movements one and three survive nearly intact; they were already occasion-free.*
+*v2.2 · July 2026 · Generalized from `brand_wedding/manifesto.md` v1.0 (legacy). Movement two rewritten from the wedding anchor to the table anchor; "showed up" framing removed. v2.2: em dashes removed.*

@@ -1,14 +1,14 @@
 # Voice
 
-*How Small Plates sounds, and the filter it passes through. This is the canonical home of the vocabulary — every other doc points here.*
+*How Small Plates sounds, and the filter it passes through. This is the canonical home of the vocabulary: every other doc points here.*
 
 ---
 
-## 1. Margot — the filter
+## 1. Margot: the filter
 
 28. Brooklyn. Creative Director at an independent studio. Cooks actual food. Has strong taste she doesn't announce.
 
-Not a persona. Not a customer. She is the brand's taste — the person every line of copy, every image, every decision has to pass through.
+Not a persona. Not a customer. She is the brand's taste: the person every line of copy, every image, every decision has to pass through.
 
 If she'd love it: ship it. If she'd ignore it: improve it. If it'd make her cringe: kill it.
 
@@ -18,7 +18,7 @@ If she'd love it: ship it. If she'd ignore it: improve it. If it'd make her crin
 If she'd roll her eyes → rewrite. If she'd say it with a knowing smile → ship it.
 
 **The 2am Test.**
-> The organizer who found Small Plates at 2am on TikTok — does this feel made for her, or for her mom?
+> The organizer who found Small Plates at 2am on TikTok: does this feel made for her, or for her mom?
 
 If it feels made for her mom → rewrite. The brand travels daughter to mother. Never the other way.
 
@@ -57,9 +57,11 @@ The pattern: **specific beats general. Earned beats announced. Short beats long.
 
 And the reflexes: *"I'm obsessed"* as default, *"literally dying,"* exclamation points more than once per piece.
 
-**Never numbers of guests.** "80 people came to your wedding" breaks the moment the reader's table has twelve. The group is "your people" or "everyone you love" — the reader fills in the count.
+**Never numbers of guests.** "80 people came to your wedding" breaks the moment the reader's table has twelve. The group is "your people" or "everyone you love"; the reader fills in the count.
 
-**Never "showed up."** It implies a physical event with attendance. A birthday book might have no party; the aunt in another country contributes from her couch. The people didn't show up anywhere — they're just *hers*. Say "your people," "the people who love you," "everyone in their life."
+**Never "showed up."** It implies a physical event with attendance. A birthday book might have no party; the aunt in another country contributes from her couch. The people didn't show up anywhere. They're just *hers*. Say "your people," "the people who love you," "everyone in their life."
+
+**No long dashes.** No em dashes, anywhere. Use a period, a comma, or a colon. Short sentences beat clever punctuation.
 
 **Use:**
 *kitchen · table · counter · people · real · actually · just · done · finally · stays · here · Tuesday · Wednesday · handwriting · stained · open*
@@ -88,11 +90,11 @@ The same idea, said wrong and said right.
 
 **Product description**
 > *Wrong:* "A beautiful, heartfelt gift that captures your special day."
-> *Right:* "A hardcover cookbook written by your people — for a wedding, a retirement, a new baby, a goodbye. Bound and printed. Lives in the kitchen. Gets stained. That's the point."
+> *Right:* "A hardcover cookbook written by your people: for a wedding, a retirement, a new baby, a goodbye. Bound and printed. Lives in the kitchen. Gets stained. That's the point."
 
-**Email — mid-flow update to the organizer**
+**Email: mid-flow update to the organizer**
 > *Wrong:* "Amazing news! Your group is creating something truly special together!"
-> *Right:* "32 of 45 recipes are in. Share the link once more this weekend — that usually does it."
+> *Right:* "32 of 45 recipes are in. Share the link once more this weekend. That usually does it."
 
 **Landing page supporting copy**
 > *Wrong:* "We believe in the power of gathering people together in meaningful ways."
@@ -105,8 +107,8 @@ The same idea, said wrong and said right.
 The product truths. Copy that violates these is wrong even if it sounds right.
 
 - **Recipes are cleaned automatically as they arrive**, and the organizer sees the cleaned version. Say "cleaned."
-- **A real person reads every page after payment, before print.** Say: "a real person reads every page before it prints." Never "reviewed the moment it arrives" — that mixes the two steps, and it's false.
-- **Dish images are created from the recipe itself, after the book closes.** Say: "a full-color photo created for every dish, based on the recipe itself." Never claim "no AI" — the pipeline uses it.
+- **A real person reads every page after payment, before print.** Say: "a real person reads every page before it prints." Never "reviewed the moment it arrives"; that mixes the two steps, and it's false.
+- **Dish images are created from the recipe itself, after the book closes.** Say: "a full-color photo created for every dish, based on the recipe itself." Never claim "no AI"; the pipeline uses it.
 - **There are no automated reminders to contributors.** Never promise "we handle the reminders" or "no chasing anyone down." The organizer shares the link; we make the link easy to share.
 - **The owner never sees the designed book.** It arrives printed. The surprise is by design. Never promise a preview.
 
@@ -114,10 +116,10 @@ The product truths. Copy that violates these is wrong even if it sounds right.
 
 ## One last thing
 
-If you're not sure — cut the last sentence.
+If you're not sure, cut the last sentence.
 
 That's usually where the explanation hides. The part where you tell the reader what to feel instead of trusting them to feel it. Cut it. Read what's left. It's almost always better.
 
 ---
 
-*v1.0 · July 2026 · Fuses `margot.md` v2.1 and `tone-of-voice.md` v1.0 from `brand_wedding/` (legacy). Generalized multi-occasion, guest numbers removed, product-truth guardrails added (cleaning vs. human read, no reminders, no preview).*
+*v1.1 · July 2026 · Fuses `margot.md` v2.1 and `tone-of-voice.md` v1.0 from `brand_wedding/` (legacy). Generalized multi-occasion, guest numbers removed, product-truth guardrails added. v1.1: "showed up" banned, em dashes banned and removed system-wide per founder (July 11).*
