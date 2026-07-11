@@ -36,7 +36,7 @@ The culture is arriving at something Small Plates was built around from the star
 
 ## WHAT WE MAKE
 
-A collaborative recipe book from the people who show up — for a wedding, a retirement, a graduation, a new baby, a birthday that matters. The organizer starts it free. Everyone contributes a recipe and a note through a link. We clean, design, print, and bind. Payment happens once, when the book goes to print. It lives in the kitchen.
+A collaborative recipe book from the people who love someone — for a wedding, a retirement, a graduation, a new baby, a birthday that matters. The organizer starts it free. Everyone contributes a recipe and a note through a link, from wherever they are. We clean, design, print, and bind. Payment happens once, when the book goes to print. It lives in the kitchen.
 
 The book is the proof. Presence is the product.
 
@@ -50,7 +50,7 @@ The obvious alternative is digital — a shared album, a website, a video montag
 
 But a physical object made by a whole group carries a signal no individual purchase can replicate: *this required coordination.* Someone organized it. Everyone contributed. The weight of it — literal and figurative — is the proof. You can hold it. You can open it in front of people and watch them look for their own name. It passes from hand to hand. It gets stained and stays on the counter. Digital things don't do this.
 
-The value is not the recipes. The value is the artifact of everyone showing up — made holdable and permanent.
+The value is not the recipes. The value is the artifact of everyone taking part — made holdable and permanent.
 
 This is also why price is a feature, not a problem. A cheap book would undermine the signal. Starting is free; the book is not. The price says: these people were worth it.
 
@@ -76,7 +76,7 @@ That's the whole idea.
 
 *Five sentences. For press, investors, cold intros, anyone who asks.*
 
-Small Plates & Co. makes collaborative recipe books — one hardcover, written by everyone who shows up for someone. The organizer starts it free and shares a link; people send a recipe and a note. We design, print, and deliver the book with every contributor in it — payment happens once, when it goes to print. It lives in the kitchen, gets opened on a Tuesday, gets stained. Most gifts go in a drawer within a year; this one stays on the counter.
+Small Plates & Co. makes collaborative recipe books — one hardcover, written by the people who love someone. The organizer starts it free and shares a link; people send a recipe and a note. We design, print, and deliver the book with every contributor in it — payment happens once, when it goes to print. It lives in the kitchen, gets opened on a Tuesday, gets stained. Most gifts go in a drawer within a year; this one stays on the counter.
 
 ---
 

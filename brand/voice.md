@@ -35,7 +35,7 @@ Four words. Each with proof.
 > Not: "A deeply personal gift."
 
 **Dry.**
-> "Everyone who showed up is in one book. Even the cousin who 'doesn't cook.'"
+> "Everyone's in the book. Even the cousin who 'doesn't cook.'"
 > Not: "A seamless, collaborative experience."
 
 **Direct.**
@@ -57,7 +57,9 @@ The pattern: **specific beats general. Earned beats announced. Short beats long.
 
 And the reflexes: *"I'm obsessed"* as default, *"literally dying,"* exclamation points more than once per piece.
 
-**Never numbers of guests.** "80 people came to your wedding" breaks the moment the reader's table has twelve. The group is "everyone who showed up" — the reader fills in the count.
+**Never numbers of guests.** "80 people came to your wedding" breaks the moment the reader's table has twelve. The group is "your people" or "everyone you love" — the reader fills in the count.
+
+**Never "showed up."** It implies a physical event with attendance. A birthday book might have no party; the aunt in another country contributes from her couch. The people didn't show up anywhere — they're just *hers*. Say "your people," "the people who love you," "everyone in their life."
 
 **Use:**
 *kitchen · table · counter · people · real · actually · just · done · finally · stays · here · Tuesday · Wednesday · handwriting · stained · open*
@@ -65,7 +67,7 @@ And the reflexes: *"I'm obsessed"* as default, *"literally dying,"* exclamation 
 | We say | We don't say |
 | --- | --- |
 | the people | loved ones |
-| everyone who showed up | your nearest and dearest |
+| the people in your life | your nearest and dearest |
 | the book lives in the kitchen | a timeless keepsake |
 | the afterward | forever / always |
 | she pulled it off | she created something special |
@@ -86,7 +88,7 @@ The same idea, said wrong and said right.
 
 **Product description**
 > *Wrong:* "A beautiful, heartfelt gift that captures your special day."
-> *Right:* "A hardcover cookbook written by the people who show up for you — for a wedding, a retirement, a new baby, a goodbye. Bound and printed. Lives in the kitchen. Gets stained. That's the point."
+> *Right:* "A hardcover cookbook written by your people — for a wedding, a retirement, a new baby, a goodbye. Bound and printed. Lives in the kitchen. Gets stained. That's the point."
 
 **Email — mid-flow update to the organizer**
 > *Wrong:* "Amazing news! Your group is creating something truly special together!"

@@ -10,13 +10,11 @@ We're not.
 
 ---
 
-The people who love you show up.
+Someone you love is having a moment. A wedding. A retirement. A new baby. A goodbye.
 
-For the wedding. The retirement. The new baby. The goodbye. They drive from other cities. Find a babysitter. Rearrange the week. They stand in a room for someone they love, and they mean it.
+The people who love them are scattered — another city, another country, a friendship that lives on voice notes now. But every one of them has a recipe. The one they're known for. The one that tastes like them.
 
-That's not a guest list. That's everyone who showed up.
-
-The book is built from what they bring — a recipe, a note, a piece of themselves. Collected, designed, printed, bound. It lives in the kitchen. Gets opened on a Tuesday. Gets stained.
+The book gathers what they send — a recipe, a note, a piece of themselves. From wherever they are. Collected, designed, printed, bound. It lives in the kitchen. Gets opened on a Tuesday. Gets stained.
 
 That's the point.
 
@@ -36,4 +34,4 @@ That's all we do. That's why we exist.
 
 ---
 
-*v2.0 · July 2026 · Generalized from `brand_wedding/manifesto.md` v1.0 (legacy). Movement two rewritten from the wedding anchor to the table anchor — the people who show up, for whatever they're showing up for. Movements one and three survive nearly intact; they were already occasion-free.*
+*v2.1 · July 2026 · Generalized from `brand_wedding/manifesto.md` v1.0 (legacy). Movement two rewritten from the wedding anchor to the table anchor — the people who love someone, gathered from wherever they are. "Showed up" framing removed (implies physical attendance; the product doesn't require it). Movements one and three survive nearly intact; they were already occasion-free.*

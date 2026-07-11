@@ -53,13 +53,13 @@ Another project to manage. Another group chat to chase. Another thing that depen
 
 Not the buyer. The reason.
 
-The couple. The retiring dad. The graduate. The new parents. The whole family at the table. Whoever the group is showing up for.
+The couple. The retiring dad. The graduate. The new parents. The whole family at the table. Whoever the book is for.
 
 They live inside anticipation, pressure, exhaustion, hope. Their fear is not "Is this pretty?" It's: *"Will this mean something when it's over?"*
 
 What they want: to feel seen, to feel held, to feel that the people around them matter as much as the occasion itself.
 
-When they receive the book, they should feel: *"They didn't just show up for me. They know me."*
+When they receive the book, they should feel: *"They didn't just sign a card. They know me."*
 
 ---
 
