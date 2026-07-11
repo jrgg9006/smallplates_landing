@@ -75,7 +75,7 @@ Editorial publications (Kinfolk, Apartamento, Cherry Bombe) use subtle tonal cou
 
 **Do:**
 
-- Use Honey sparingly — it's the spice, not the main dish
+- Use Honey sparingly — see The Ratio Rule
 - Let Warm White breathe — generous whitespace is part of the identity
 - Use Soft Charcoal for most text — softer than pure black
 - Let photography bring additional color naturally
