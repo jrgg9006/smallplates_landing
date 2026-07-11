@@ -140,8 +140,8 @@ smallplates_landing/
 │   └── types/            # TypeScript definitions
 ├── public/               # Static assets
 ├── supabase/             # Database schema
-├── brand_wedding/        # Brand guidelines
-├── business_plan/        # Business documentation
+├── brand/                # Brand guidelines (canonical)
+├── legacy-brand-info/    # Legacy brand + wedding-era business docs
 └── CLAUDE.md            # AI assistant instructions
 ```
 
@@ -224,19 +224,17 @@ See `CLAUDE.md` for:
 
 ## 🎨 Brand Guidelines
 
-See `brand_wedding/` for:
-- Brand positioning and voice
-- Visual identity
-- Messaging framework
-- Photography style
+See `brand/` for the canonical system (multi-occasion, July 2026):
+- Brand idea and positioning
+- Voice and the Margot filter
+- Characters (organizer, contributors, receiver)
+- Visual identity and photography
+
+`brand_wedding/` is the frozen wedding-era predecessor.
 
 ## 📊 Business Context
 
-See `business_plan/` for:
-- Executive summary
-- Market analysis
-- Customer segments
-- Competitive landscape
+Wedding-era business documentation (April 2026) lives in `legacy-brand-info/business_plan_wedding/`: executive summary, market analysis, customer segments, competitive landscape. Current growth plan and KPIs live in `docs/meta_campaign_jul2026/` and `growth/`.
 
 ## 📧 Support
 

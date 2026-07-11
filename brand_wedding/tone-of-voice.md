@@ -120,4 +120,4 @@ That's usually where the explanation hides. The part where you tell the reader w
 
 ---
 
-*v1.0 · April 2026 · Companion to `margot.md`. Full character study at `brand_legacy_documents/legacy_documents/archive/margot-character-study.md`.*
+*v1.0 · April 2026 · Companion to `margot.md`. Full character study at `legacy-brand-info/legacy_documents/archive/margot-character-study.md`.*

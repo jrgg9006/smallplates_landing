@@ -19,7 +19,7 @@ If she'd roll her eyes → rewrite. If she'd say it with a knowing smile → shi
 
 One test. That's it. Small Plates is for anyone who wants to share, connect, and give something real to someone they love: the daughter, the mom, the best friend, the whole group. The voice doesn't pick between them.
 
-*Full character study: `brand_legacy_documents/legacy_documents/archive/margot-character-study.md`.*
+*Full character study: `legacy-brand-info/legacy_documents/archive/margot-character-study.md`.*
 
 ---
 
