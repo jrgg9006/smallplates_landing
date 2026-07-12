@@ -22,7 +22,7 @@ The more digital life gets, the more forgettable it gets.
 
 We exist to connect people through food.
 
-To make the moments where someone feels loved by the people they love most. To bring people closer in the kitchen. To let a group discover each other again, one recipe at a time.
+To make the moments where someone feels loved by the people they love most. To bring people closer in the kitchen. To let a group discover each other again.
 
 The book is how we do it.
 
