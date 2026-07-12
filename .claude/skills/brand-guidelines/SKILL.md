@@ -15,6 +15,8 @@ Use this skill whenever:
 Small Plates is a connection brand, not a cookbook brand.
 Food is the excuse. People are the point.
 
+Multi-occasion: a wedding, a retirement, a graduation, a new baby, a birthday that matters. Never write as if weddings were the only case.
+
 Brand line: "Still at the table."
 Acquisition line: "Recipes from the people who love you."
 Never mix them.
@@ -23,67 +25,47 @@ Never mix them.
 
 ## Files to Reference
 
-Before writing or ideating, consult these files in `brand_wedding/`:
+The canonical system is `brand/` (five docs, July 2026). Consult before writing or ideating:
 
-**Primary (always read these first):**
-- `brand_wedding/brand-idea.md` — Core concept: "Still at the table"
-- `brand_wedding/tone-of-voice.md` — How we speak, by audience and context
-- `brand_wedding/brand-personality.md` — Who we are, our archetype
+- `brand/brand-idea.md`: the idea, why we exist, what we make, how we position
+- `brand/voice.md`: the Margot filter, vocabulary, rewrites. Read this one always
+- `brand/characters.md`: organizer (buyer), contributors, receiver
+- `brand/manifesto.md`: the public declaration
+- `brand/visual-identity.md`: colors, typography, photography
 
-**Positioning & Strategy:**
-- `brand_wedding/positioning-statement.md` — How we position vs. alternatives
-- `brand_wedding/cultural-enemy-wedding.md` — What we stand against
-- `brand_wedding/category-definition.md` — The category we're creating
-- `brand_wedding/value-proposition-for-the-givers...md` — Gift-giver messaging
+If time is limited, read only `brand/voice.md`.
 
-**Creative & Narrative:**
-- `brand_wedding/pov.md` — Our point of view on weddings and gifts
-- `brand_wedding/manifesto-wedding.md` — Our beliefs and why we exist
-- `brand_wedding/messaging-framework.md` — What to say to whom, when
-- `brand_wedding/tagline-system.md` — Brand line vs. acquisition line usage
-- `brand_wedding/characters.md` — Brand characters and archetypes
-- `brand_wedding/brand-character-profile.md` — Margot Cole persona
-
-**Visual & Editorial:**
-- `brand_wedding/visual-identity.md` — Colors, typography, logo, applications (tactical toolkit)
-- `brand_wedding/creative-direction.md` — Visual philosophy, photography, creative direction (strategic vision)
-- `brand_wedding/editorial-brief.md` — Editorial direction
-- `brand_wedding/brand-guide-toeditorial.md` — Editorial standards
-
-**Go-To-Market:**
-- `brand_wedding/trust-architecture.md` — How we build trust
-- `brand_wedding/feel-like-an-engraved-ring.md` — Premium experience principles
-
-If time is limited, read only:
-1. `brand_wedding/brand-idea.md`
-2. `brand_wedding/tone-of-voice.md`
+Never source brand rules from `legacy-brand-info/` (frozen wedding-era archive) or `PRODUCT.md` (design-work context; defers to `brand/`).
 
 ---
 
 ## Language Rules
 
-### Voice Qualities
-Warm, smart, intimate, observant, human, modern but timeless.
+All vocabulary rules live in `brand/voice.md` and win over anything here. Quick reference:
 
-### Allowed
-Short lines. Poetic phrasing. Emotional tension.
+### NEVER use these words
+cherish, treasure, memories, special, unique, loved ones, celebrate, journey, curated, perfect, amazing, magical, timeless, forever, blessed, dreamy, heartwarming, unforgettable, heartfelt, keepsake, meaningful, yummy
 
-### NEVER Use These Words
-cherish, treasure, memories, special, unique, loved ones, celebrate, journey, curated, perfect, amazing
+### Also never
+- Specific guest numbers ("80 people")
+- "Showed up" (implies physical attendance; say "your people," "the people who love you")
+- Em dashes (use a period, a comma, or a colon)
 
-### ALWAYS Prefer These Words
+### ALWAYS prefer these words
 kitchen, table, people, real, actually, just, done, finally
 
 ### Avoid
 Corporate language. Cute language. Marketing jargon. Influencer tone.
 Recipe-blog clichés. Cookbook clichés. Tech-startup tropes.
 
-### Never Sound Like
+### Never sound like
 A productivity app. An SEO-optimized page. A software brand.
 
 ---
 
 ## Visual Guidance
+
+Full system in `brand/visual-identity.md`. Quick reference:
 
 ### Typography
 - Display: Minion Pro (or editorial serif)
@@ -91,45 +73,47 @@ A productivity app. An SEO-optimized page. A software brand.
 - When using the frontend-design skill, override its font suggestions with these brand fonts
 
 ### Colors
-- Honey: #D4A854 (primary accent)
-- Warm White: #FAF7F2 (backgrounds)
+- Honey: #D4A854 (primary accent, never large areas, never body text)
+- Warm whites are two-tone: Airy #FAF9F7 and Warm #FAF7F2 (Canvas-vs-Layer rule in visual-identity.md; always use named tokens, never literal hex)
 - Soft Charcoal: #2D2D2D (text)
 - Sand: #E8E0D5 (secondary)
 - Warm Gray: #9A9590 (muted text)
 
 ### Photography Direction
-Prefer: people in motion, lived-in spaces, imperfect lighting.
-Avoid: sterile food photography, studio lighting, influencer compositions.
+Prefer: the book in use (stained, open, on counters), people in motion, lived-in spaces, imperfect lighting.
+Avoid: sterile food photography, studio lighting, influencer compositions, the honoree as visual protagonist.
 
 ---
 
 ## The Margot Test
 
 Before finalizing any copy or design, ask:
-"Would a 28-year-old New York editorial director, champagne in hand on a rooftop, say this?"
+"Would Margot, glass of natural wine in hand at a dinner party that got real at 11pm, say this out loud?"
 
 If she'd roll her eyes → rewrite.
 If she'd say it with a knowing smile → ship it.
+
+One test. Small Plates is for anyone who wants to share, connect, and give something real to someone they love: the daughter, the mom, the best friend, the whole group.
 
 ---
 
 ## Audiences
 
-- **Bride (receiver):** Terrified of cheesy, wants cool
-- **Organizer:** Wants easy + wants to be the hero
-- **Guests:** Busy, need low friction, "5 min done"
-- **Mom:** Wants substance and permanence
-- **Groom:** Wants practical, not cheesy
+Full psychology in `brand/characters.md`.
+
+- **Organizer (buyer):** her engine is making the receiver happy with something they'll actually use. Not credit, not status. Behavioral, not demographic: never address her by role.
+- **Contributors:** want to give something the receiver will use and enjoy. Their recipe is the closest thing to being in the kitchen with them. Low friction, "5 min, done."
+- **Receiver:** not the buyer, the reason. Wants to feel seen and known.
 
 ---
 
 ## Go-To-Market: Emotional Safety
 
 When writing marketing copy, onboarding, CTAs, landing pages, or campaigns:
-- Consult `brand_wedding/trust-architecture.md`
 - Remove emotional friction. Dissolve vulnerability.
 - Avoid pressure language. Preserve emotional dignity.
 - Normalize imperfection. Reduce psychological risk.
+- Speak in positive frames: what people gain (connect, discover, give), never sad absence.
 
 ### Priority Order When Brand and GTM Conflict
 Emotion > persuasion. Safety > urgency. Composure > hype. Taste > tactics.

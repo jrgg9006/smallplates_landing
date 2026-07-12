@@ -83,4 +83,4 @@ That's the whole system. Everything else is noise.
 
 ---
 
-*v2.2 · July 2026 · Generalized from `brand_wedding/characters.md` v1.1 (legacy). The Bride → The Receiver (any honoree). Removed the "automated reminders" claim (vetoed July 2026). Motivation model corrected per founder (July 11): the organizer's engine is the receiver's happiness, not glory/credit; "glory without grief" retired; Subjugation fear replaced with Falling flat; added The Contributors. v2.2: em dashes removed.*
+*v2.2 · July 2026 · Generalized from `legacy-brand-info/brand_wedding/characters.md` v1.1 (legacy). The Bride → The Receiver (any honoree). Removed the "automated reminders" claim (vetoed July 2026). Motivation model corrected per founder (July 11): the organizer's engine is the receiver's happiness, not glory/credit; "glory without grief" retired; Subjugation fear replaced with Falling flat; added The Contributors. v2.2: em dashes removed.*

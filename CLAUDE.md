@@ -22,7 +22,8 @@ Brand essence: cool on the outside, emotional on the inside.
 - `components/` — React components (ui/, recipe-journey/, profile/)
 - `lib/` — Utilities, Supabase client, helpers
 - `lib/types/database.ts` — Database schema reference (use this instead of querying Supabase)
-- `brand_wedding/` — All brand strategy docs. See @brand_wedding/tone-of-voice.md for voice rules
+- `brand/` — Canonical brand system (multi-occasion, jul 2026). See @brand/voice.md for voice rules
+- `legacy-brand-info/` — Frozen wedding-era brand + business docs. Reference only, never canon
 - `supabase/migrations/` — Database migrations
 
 ## Commands

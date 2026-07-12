@@ -230,7 +230,7 @@ See `brand/` for the canonical system (multi-occasion, July 2026):
 - Characters (organizer, contributors, receiver)
 - Visual identity and photography
 
-`brand_wedding/` is the frozen wedding-era predecessor.
+`legacy-brand-info/brand_wedding/` is the frozen wedding-era predecessor.
 
 ## 📊 Business Context
 

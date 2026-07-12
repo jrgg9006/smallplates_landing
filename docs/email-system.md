@@ -29,7 +29,7 @@
 - **ReplyTo**: always `team@smallplatesandcompany.com`.
 - **Logo**: `https://smallplatesandcompany.com/images/SmallPlates_logo_horizontal.png`, 160px wide.
 - **Visual reference**: `lib/email/pdf-delivery-template.ts` — copy its dark-mode CSS, mobile breakpoints, footer card pattern, RFC 8058 unsubscribe headers.
-- **Voice**: see `brand_wedding/tone-of-voice.md`. Margot voice. Specific, dry, direct, warm without performing it.
+- **Voice**: see `brand/voice.md`. Margot voice. Specific, dry, direct, warm without performing it.
 - **Logging**: every send writes one row to `communication_log` with the right `type`, `sent_at`, `subject`, and either `guest_id` or `recipient_profile_id` (and `group_id` for the new emails). Never skip the log — the dashboard reads it to show "X reminders sent."
 
 ## When you add a new email

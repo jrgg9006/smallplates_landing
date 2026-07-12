@@ -107,4 +107,4 @@ That's usually where the explanation hides. The part where you tell the reader w
 
 ---
 
-*v1.2 · July 2026 · Fuses `margot.md` v2.1 and `tone-of-voice.md` v1.0 from `brand_wedding/` (legacy). Generalized multi-occasion; guest numbers, "showed up," and em dashes banned. v1.2 per founder (July 11): 2am Test and the daughter-to-mother rule retired (Small Plates is for the mom as much as the daughter); "What copy must never claim" section cut.*
+*v1.2 · July 2026 · Fuses `margot.md` v2.1 and `tone-of-voice.md` v1.0 from `legacy-brand-info/brand_wedding/` (legacy). Generalized multi-occasion; guest numbers, "showed up," and em dashes banned. v1.2 per founder (July 11): 2am Test and the daughter-to-mother rule retired (Small Plates is for the mom as much as the daughter); "What copy must never claim" section cut.*

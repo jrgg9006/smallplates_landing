@@ -134,4 +134,4 @@ Extremely legible on screens. Modern but not cold. Pairs perfectly with Minion P
 
 ---
 
-*v1.5 · July 2026 · Moved to `brand/` from `brand_wedding/visual-identity.md` v1.3 (legacy). v1.5: em dashes removed; added Photography section (book in use, honoree never the protagonist), relocated here when HOW WE POSITION in `brand-idea.md` was simplified per founder.*
+*v1.5 · July 2026 · Moved to `brand/` from `legacy-brand-info/brand_wedding/visual-identity.md` v1.3 (legacy). v1.5: em dashes removed; added Photography section (book in use, honoree never the protagonist), relocated here when HOW WE POSITION in `brand-idea.md` was simplified per founder.*
