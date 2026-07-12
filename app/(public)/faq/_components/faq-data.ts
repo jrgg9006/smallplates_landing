@@ -105,8 +105,8 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "extra-copies",
         question: "Can I order more copies after the book is printed?",
         answer: [
-          "Yes. Single copies later are $129 plus $14 shipping.",
-          "It's cheaper to order them with the main print run, where copies drop to as low as $89 each.",
+          "Yes, anytime. Later orders work exactly like the first one: one copy is $169 and the price per copy drops the more you print together, down to $89 each from 6.",
+          "Separate orders don't combine, so the cheapest copies are the ones the group orders together, before the book closes.",
         ],
       },
     ],
@@ -321,7 +321,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: "shipping-cost",
         question: "How much is shipping?",
         answer: [
-          "Included for the main order, shipped to one address. Single copies ordered later ship for $14.",
+          "Included, always. Every order ships to one address, and the price you see covers it.",
         ],
       },
     ],
