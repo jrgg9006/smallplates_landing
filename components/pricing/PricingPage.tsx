@@ -134,7 +134,7 @@ export default function PricingPage() {
                   >
                     ${pricePerCopy(qty)}
                   </p>
-                  <p className="mt-2 type-caption">per person</p>
+                  <p className="mt-2 type-caption">per copy</p>
 
                   <div className="mt-7 flex items-center justify-center gap-4">
                     <button
