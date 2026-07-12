@@ -1,6 +1,6 @@
 # Pricing Page Redesign — Design Spec
 
-**Date:** 2026-07-12 · **Branch:** `feature/pricing-page-redesign` · **Status:** pending Ricardo's approval
+**Date:** 2026-07-12 · **Branch:** `feature/pricing-page-redesign` · **Status:** approved (Ricardo, 2026-07-12) · implemented
 
 ## Context
 
