@@ -96,7 +96,7 @@ export default function PricingPage() {
             Here&rsquo;s what it costs.
           </motion.h1>
           <motion.p
-            className="mt-4 font-sans text-xs font-medium uppercase tracking-[0.15em] text-brand-honey"
+            className="mt-4 type-body-small text-[hsl(var(--brand-warm-gray-light))]"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
