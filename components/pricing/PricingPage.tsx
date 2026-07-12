@@ -177,10 +177,10 @@ export default function PricingPage() {
                           viewBox="0 0 20 20"
                           fill="none"
                           stroke="currentColor"
-                          strokeWidth="2.25"
+                          strokeWidth="2.75"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          className="mt-[3px] h-4 w-4 shrink-0 text-brand-honey"
+                          className="mt-[3px] h-4 w-4 shrink-0 text-brand-honey-dark"
                           aria-hidden="true"
                         >
                           <path d="M4 10.5l4 4 8-9" />
