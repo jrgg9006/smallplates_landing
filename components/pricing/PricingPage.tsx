@@ -166,7 +166,7 @@ export default function PricingPage() {
                   </p>
 
                   <p className="mt-5 type-body-small text-[15px] max-w-[260px] mx-auto">
-                    Everyone who chips in gets a copy. More people, less each.
+                    More people, less each.
                   </p>
                 </div>
 
