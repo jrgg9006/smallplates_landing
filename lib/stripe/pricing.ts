@@ -6,14 +6,6 @@
 export const BASE_BOOK_PRICE = 169;
 
 /**
- * Flat per-copy price for the LEGACY upfront model and the post-close "extra
- * copies" flows (dashboard + public /copy link). Those are standalone, late,
- * separately-shipped copies — not the primary group order, so they keep a flat
- * price. The primary group order uses the declining schedule below.
- */
-export const ADDITIONAL_BOOK_PRICE = 129;
-
-/**
  * Per-person price for the PRIMARY group order, by number of copies. The product
  * is bought as a group gift: everyone who chips in keeps an identical copy, so we
  * price PER PERSON and the total is simply price × copies.
@@ -23,6 +15,10 @@ export const ADDITIONAL_BOOK_PRICE = 129;
  * what each person puts in. Per-person drops as the group grows (lower marginal
  * cost; shipping shared to one address) and flattens at the $89 floor from the
  * 6th copy on — every copy beyond 6 is $89.
+ *
+ * The cascade applies PER ORDER and restarts on every order, including
+ * post-close reorders (dashboard extras and the public /copy link): nothing
+ * accumulates across orders. Shipping is included in every order.
  */
 const PER_PERSON_PRICE: Record<number, number> = {
   1: 169, 2: 129, 3: 113, 4: 103, 5: 95,
@@ -39,14 +35,6 @@ const PER_PERSON_FLOOR = 89;
  * side) and is re-validated server-side in create-checkout-book-close-session.
  */
 export const MIN_RECIPES_TO_PRINT = 25;
-
-/**
- * Flat shipping cost applied to every extra_copy order placed from
- * the dashboard (post-close "Get more copies" flow). Different from
- * the upsell-during-close flow where shipping is included in the
- * main book's package.
- */
-export const EXTRA_COPIES_SHIPPING_COST = 14;
 
 /**
  * Per-person price for `totalBooks` copies — the "per person" number shown next

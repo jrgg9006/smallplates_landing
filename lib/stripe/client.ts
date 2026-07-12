@@ -12,6 +12,5 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 // Re-export pricing functions for server-side use
 export {
   BASE_BOOK_PRICE,
-  ADDITIONAL_BOOK_PRICE,
   calculateSubtotal,
 } from './pricing';
