@@ -25,24 +25,32 @@ const MAX_COPIES = 10;
 // the point of this layout. Keep in sync with OrderCart and HandmadeCallout.
 const included = [
   {
-    lead: "Every recipe, cleaned up.",
-    rest: "Typos out, measurements consistent, instructions that actually work in a kitchen.",
+    lead: "We handle everything.",
+    rest: "You ask for the recipes. Editing, design, and print are on us.",
   },
   {
-    lead: "A full-color photo for every dish,",
-    rest: "made for the book.",
+    lead: "No editing skills needed.",
+    rest: "Typos, measurements, formatting: fixed for you.",
   },
   {
-    lead: "Invite everyone.",
-    rest: "50 recipes included; each one after that adds $1.",
+    lead: "An image created for every recipe,",
+    rest: "made from the dish itself. No stock photos.",
   },
   {
-    lead: "Designed page by page.",
-    rest: "Hardcover, full color, 8 × 10 in.",
+    lead: "Email invites and easy reminders,",
+    rest: "built in. Send a link; we help you follow up.",
   },
   {
-    lead: "Printed and shipped.",
-    rest: "At your door 3 to 4 weeks after you close.",
+    lead: "A real person reviews your book,",
+    rest: "start to finish, before it prints.",
+  },
+  {
+    lead: "Premium hardcover,",
+    rest: "full color, 8 × 10 in. Made to live in the kitchen.",
+  },
+  {
+    lead: "50 recipes included.",
+    rest: "Each one after that adds $1.",
   },
 ];
 
@@ -164,14 +172,22 @@ export default function PricingPage() {
 
                 {/* Right: what's included */}
                 <div>
-                  <p className="type-eyebrow mb-5">What&rsquo;s included</p>
-                  <ul className="space-y-4">
+                  <p className="type-eyebrow mb-5">Included</p>
+                  <ul className="space-y-3.5">
                     {included.map((item) => (
                       <li key={item.lead} className="flex gap-3">
-                        <span
-                          className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-brand-honey"
+                        <svg
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.25"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="mt-[3px] h-4 w-4 shrink-0 text-brand-honey"
                           aria-hidden="true"
-                        />
+                        >
+                          <path d="M4 10.5l4 4 8-9" />
+                        </svg>
                         <p className="type-body-small text-[15px]">
                           <span className="font-medium text-brand-charcoal">{item.lead}</span>{" "}
                           {item.rest}

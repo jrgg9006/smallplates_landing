@@ -7,7 +7,7 @@ import WhatsAppFAB from "@/components/landing/WhatsAppFAB";
 export const metadata: Metadata = {
   title: "Pricing — Small Plates & Co.",
   description:
-    "One book. Or one for everyone. Each person who chips in gets their own copy — the more you print, the less each one costs.",
+    "Free to start. Pay when it prints: one hardcover recipe book written by your people, and the price per person drops the more copies you print together.",
 };
 
 export default function Pricing() {
