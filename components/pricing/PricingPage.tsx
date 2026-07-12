@@ -96,12 +96,12 @@ export default function PricingPage() {
             Here&rsquo;s what it costs.
           </motion.h1>
           <motion.p
-            className="mt-4 type-body-small text-[hsl(var(--brand-warm-gray-light))]"
+            className="mt-4 font-sans text-xs font-medium uppercase tracking-[0.15em] text-brand-honey"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            And everything that&rsquo;s included.
+            Free to start · Pay only when it&rsquo;s ready to print
           </motion.p>
         </div>
       </section>
@@ -121,9 +121,6 @@ export default function PricingPage() {
             <CornerFlourish className="bottom-4 right-4 scale-[-1]" />
 
             <div className="px-8 py-10 md:px-12 md:py-12">
-              <p className="mb-10 text-center font-sans text-xs font-medium uppercase tracking-[0.15em] text-brand-honey">
-                Free to start · Pay only when it&rsquo;s ready to print
-              </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12 md:items-center">
                 {/* Left: price + stepper */}
