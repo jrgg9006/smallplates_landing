@@ -41,7 +41,7 @@ const included = [
     rest: "built in. Send a link; we help you follow up.",
   },
   {
-    lead: "A real person reviews your book,",
+    lead: "A Cookbook Specialist reviews your book,",
     rest: "start to finish, before it prints.",
   },
   {
@@ -227,8 +227,8 @@ export default function PricingPage() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6 }}
           >
-            And before anything goes to print, a real person has read every
-            recipe. Every time.
+            And before anything goes to print, your Cookbook Specialist has read
+            every recipe. Every time.
           </motion.p>
         </div>
       </section>

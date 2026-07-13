@@ -23,7 +23,6 @@ const GALLERY = [
   { src: "/images/PricingBlock/pricingblock_4.jpg", alt: "The hardcover cookbook, cover up" },
   { src: "/images/PricingBlock/pricingblock_3.jpg", alt: "Reading the book at the table" },
   { src: "/images/PricingBlock/pricingblock_1.jpg", alt: "Showing a recipe from the book" },
-  { src: "/images/PricingBlock/pricingblock_5.jpg", alt: "A dessert recipe spread inside the book" },
   { src: "/images/PricingBlock/pricingblock_2.jpg", alt: "A plate of food beside its recipe" },
   { src: "/images/PricingBlock/pricingblock_6.jpg", alt: "A recipe spread for Oreo truffles" },
 ];
@@ -34,6 +33,7 @@ const INCLUDES = [
   "A note from every person who sends one",
   "Premium hardcover, 8 × 10 in, full color",
   "Designed and printed by us",
+  "A Cookbook Specialist who reviews your book",
   "Full platform access, no app to download",
 ];
 

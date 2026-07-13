@@ -10,7 +10,8 @@ import TheSolution from '@/components/landing/TheSolution'
 import EmotionalClose from '@/components/landing/EmotionalClose'
 import BooksPrinted from '@/components/landing/BooksPrinted'
 import HowItWorks from '@/components/landing/HowItWorks'
-import RegistryInterlude from '@/components/landing/RegistryInterlude'
+// import RegistryInterlude from '@/components/landing/RegistryInterlude' // Hidden from flow: registry interlude paused per founder; component kept for later reuse
+import CookbookSpecialist from '@/components/landing/CookbookSpecialist'
 import PersonalNotes from '@/components/landing/PersonalNotes'
 import PricingBlock from '@/components/landing/PricingBlock'
 import TheBook from '@/components/landing/TheBook'
@@ -31,7 +32,8 @@ export default function Home() {
         <TheSolution />
         <HowItWorks />
         {/* <YourTools /> — removed from flow; see import note */}
-        <RegistryInterlude />
+        {/* <RegistryInterlude /> — hidden from flow; see import note */}
+        <CookbookSpecialist />
         <PricingBlock />
         <BooksPrinted />
         <PersonalNotes />
