@@ -34,7 +34,9 @@ She knows how many people love this person. The book is her way of making that r
 
 ### What she doesn't want
 
-Another project to manage. Another group chat to chase. Another thing that depends entirely on her.
+She's not afraid of the work. She'll pour herself into this for someone she loves. What she's afraid of is the work going nowhere: putting in the hours and ending up with something generic, something anyone could have ordered. And carrying it alone, chasing a group chat that goes quiet.
+
+Zero effort is a gift card. That's not her, and that's the point. Her willingness to do the work is the thing that makes her the one who can.
 
 ### What Small Plates gives her
 
@@ -83,4 +85,4 @@ That's the whole system. Everything else is noise.
 
 ---
 
-*v2.2 · July 2026 · Generalized from `legacy-brand-info/brand_wedding/characters.md` v1.1 (legacy). The Bride → The Receiver (any honoree). Removed the "automated reminders" claim (vetoed July 2026). Motivation model corrected per founder (July 11): the organizer's engine is the receiver's happiness, not glory/credit; "glory without grief" retired; Subjugation fear replaced with Falling flat; added The Contributors. v2.2: em dashes removed.*
+*v2.2 · July 2026 · Generalized from `legacy-brand-info/brand_wedding/characters.md` v1.1 (legacy). The Bride → The Receiver (any honoree). Removed the "automated reminders" claim (vetoed July 2026). Motivation model corrected per founder (July 11): the organizer's engine is the receiver's happiness, not glory/credit; "glory without grief" retired; Subjugation fear replaced with Falling flat; added The Contributors. v2.2: em dashes removed. v2.3 (July 13): "What she doesn't want" rewritten. She doesn't fear effort, she fears wasted effort (generic result, or carrying it alone). Her willingness to do the work is what qualifies her, not something that repels her; the zero-effort gift-card buyer is not our customer.*
