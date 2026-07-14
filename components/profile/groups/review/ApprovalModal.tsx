@@ -56,6 +56,10 @@ export function ApprovalModal({
           this, the recipes are locked.
         </p>
 
+        <p className="text-gray-600 text-base leading-relaxed">
+          From here, a Cookbook Specialist reads the whole book before it prints.
+        </p>
+
         <label className="flex cursor-pointer items-start gap-3 rounded-xl bg-[#F3F2F0] px-5 py-4">
           <input
             type="checkbox"

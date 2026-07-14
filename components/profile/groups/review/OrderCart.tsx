@@ -84,9 +84,10 @@ export function OrderCart({ qty, group, recipeCount, children }: OrderCartProps)
         </p>
         <ul className="space-y-2">
           {[
-            "Every recipe cleaned and standardized — already done",
+            "Every recipe cleaned and standardized, already done",
             "A photo for every recipe",
             "The whole book designed and laid out",
+            "A Cookbook Specialist reviews the whole book before it prints",
             "Hardcover printing, shipped to your door",
           ].map((item) => (
             <li key={item} className="flex items-start gap-2.5">

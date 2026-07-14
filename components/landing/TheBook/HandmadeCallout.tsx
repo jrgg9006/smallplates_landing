@@ -53,7 +53,8 @@ export default function HandmadeCallout() {
             line states it with the correct timing and gets its own beat. */}
         <div className="mt-6 border-t border-brand-sand pt-5">
           <p className="type-accent text-base md:text-lg text-brand-charcoal/75">
-            And before it prints, a real person reads every page. Every time.
+            And before it prints, your Cookbook Specialist reads every page.
+            Every time.
           </p>
         </div>
       </div>
