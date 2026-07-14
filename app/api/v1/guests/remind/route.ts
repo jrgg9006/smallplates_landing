@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     // Fetch guest
     const { data: guest } = await supabase
       .from('guests')
-      .select('id, first_name, email, group_id, recipes_received, emails_sent_count')
+      .select('id, first_name, email, group_id, recipes_received, emails_sent_count, invitation_started_at')
       .eq('id', guestId)
       .single();
 
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     // Fetch group data for email (incl. organizer's custom body)
     const { data: group } = await supabase
       .from('groups')
-      .select('name, couple_first_name, partner_first_name, couple_image_url, created_by, email_reminder_message')
+      .select('name, couple_first_name, partner_first_name, couple_image_url, created_by, email_reminder_message, email_from_name, email_reminder_subject')
       .eq('id', groupId)
       .single();
 
@@ -151,6 +151,8 @@ export async function POST(request: NextRequest) {
       emailNumber: 2,
       customBody: group.email_reminder_message || undefined,
       namesArePeople: Boolean(group.couple_first_name || group.partner_first_name),
+      fromName: group.email_from_name || undefined,
+      customSubject: group.email_reminder_subject || undefined,
     });
 
     if (!result.success) {
@@ -158,12 +160,25 @@ export async function POST(request: NextRequest) {
     }
 
     // Update tracking
+    const trackingUpdate: {
+      last_email_sent_at: string;
+      emails_sent_count: number;
+      invitation_started_at?: string;
+    } = {
+      last_email_sent_at: new Date().toISOString(),
+      // Reason: count the email we just sent. Falls back to 0 (not 1) so a
+      // guest contacted here for the first time lands at 1, not 2.
+      emails_sent_count: (guest.emails_sent_count || 0) + 1,
+    };
+    // Reason: this modal can now email guests who were never invited. The first
+    // time we contact anyone, mark invitation_started_at so they stop showing as
+    // "uninvited" in Send Emails and both flows stay consistent.
+    if (!guest.invitation_started_at) {
+      trackingUpdate.invitation_started_at = new Date().toISOString();
+    }
     await supabase
       .from('guests')
-      .update({
-        last_email_sent_at: new Date().toISOString(),
-        emails_sent_count: (guest.emails_sent_count || 1) + 1,
-      })
+      .update(trackingUpdate)
       .eq('id', guestId);
 
     // Reason: log the reminder so it shows up in the Radar Live Feed

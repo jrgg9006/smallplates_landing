@@ -69,6 +69,11 @@ export function SendInvitationsPage({
   const [isSavingGuest, setIsSavingGuest] = useState(false);
   const [bodyMessage, setBodyMessage] = useState(DEFAULT_BODY);
   const [bodySaved, setBodySaved] = useState(false);
+  // Reason: organizer-editable From (sender name, shared with reminders via
+  // groups.email_from_name) and Subject (invitation-specific,
+  // groups.email_invite_subject). Empty = use the auto placeholder.
+  const [fromName, setFromName] = useState("");
+  const [subjectDraft, setSubjectDraft] = useState("");
 
   const loadGuests = useCallback(async () => {
     setLoading(true);
@@ -89,6 +94,8 @@ export function SendInvitationsPage({
         if (data?.email_invite_message) {
           setBodyMessage(data.email_invite_message);
         }
+        setFromName(data?.email_from_name || "");
+        setSubjectDraft(data?.email_invite_subject || "");
       });
     }
   }, [groupId, loadGuests]);
@@ -106,6 +113,23 @@ export function SendInvitationsPage({
       });
       setBodySaved(true);
       setTimeout(() => setBodySaved(false), 1500);
+    } catch {
+      // Silently fail — user can retry
+    }
+  };
+
+  // Reason: persist From/Subject on blur, same as the body. The PATCH route
+  // trims and stores NULL when empty, so the template falls back to the auto text.
+  const handleSaveField = async (
+    field: "email_from_name" | "email_invite_subject",
+    value: string
+  ) => {
+    try {
+      await fetch(`/api/v1/groups/${groupId}/event-details`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [field]: value }),
+      });
     } catch {
       // Silently fail — user can retry
     }
@@ -324,20 +348,32 @@ export function SendInvitationsPage({
               </span>
             </div>
 
-            {/* From / Subject rows */}
+            {/* From / Subject rows — editable inline; blank uses the auto placeholder */}
             <div className="bg-white border-b border-brand-sand">
-              <div className="px-6 py-2.5 border-b border-brand-sand">
-                <p className="text-sm">
-                  <span className="text-[hsl(var(--brand-warm-gray-light))]">From:</span>{" "}
-                  <span className="text-brand-charcoal">{coupleNames}</span>
-                </p>
-              </div>
-              <div className="px-6 py-2.5">
-                <p className="text-sm">
-                  <span className="text-[hsl(var(--brand-warm-gray-light))]">Subject:</span>{" "}
-                  <span className="text-brand-charcoal">{emailSubject}</span>
-                </p>
-              </div>
+              <label className="flex items-center gap-2 px-6 py-2.5 border-b border-brand-sand cursor-text">
+                <span className="text-sm text-[hsl(var(--brand-warm-gray-light))] flex-shrink-0">From:</span>
+                <input
+                  type="text"
+                  value={fromName}
+                  onChange={(e) => setFromName(e.target.value)}
+                  onBlur={() => handleSaveField("email_from_name", fromName)}
+                  placeholder={coupleNames}
+                  className="flex-1 min-w-0 text-sm text-brand-charcoal bg-transparent focus:outline-none placeholder:text-brand-charcoal"
+                />
+                <Pencil size={13} className="text-[hsl(var(--brand-warm-gray-light))] flex-shrink-0" />
+              </label>
+              <label className="flex items-center gap-2 px-6 py-2.5 cursor-text">
+                <span className="text-sm text-[hsl(var(--brand-warm-gray-light))] flex-shrink-0">Subject:</span>
+                <input
+                  type="text"
+                  value={subjectDraft}
+                  onChange={(e) => setSubjectDraft(e.target.value)}
+                  onBlur={() => handleSaveField("email_invite_subject", subjectDraft)}
+                  placeholder={emailSubject}
+                  className="flex-1 min-w-0 text-sm text-brand-charcoal bg-transparent focus:outline-none placeholder:text-brand-charcoal"
+                />
+                <Pencil size={13} className="text-[hsl(var(--brand-warm-gray-light))] flex-shrink-0" />
+              </label>
             </div>
 
             {/* Email body */}
@@ -365,7 +401,7 @@ export function SendInvitationsPage({
               )}
 
               {/* Body copy — editable, auto-saves on blur */}
-              <div className="max-w-[380px] mx-auto mb-10">
+              <div className="max-w-[460px] mx-auto mb-10">
                 <div className="relative group">
                   <div className="absolute top-2 right-2 flex items-center gap-1 text-[10px] uppercase tracking-wider text-[hsl(var(--brand-warm-gray-light))] pointer-events-none">
                     <Pencil size={10} />
@@ -377,7 +413,7 @@ export function SendInvitationsPage({
                     onBlur={handleSaveBody}
                     rows={6}
                     maxLength={MAX_BODY_CHARS}
-                    className="w-full text-[15px] text-[#666666] leading-relaxed text-center bg-[hsl(var(--brand-cream))] border border-dashed border-brand-sand hover:border-brand-honey/60 focus:border-brand-honey focus:bg-white resize-none focus:outline-none focus:ring-2 focus:ring-brand-honey/20 rounded-lg transition-all px-5 py-6"
+                    className="w-full text-[15px] text-[#666666] leading-relaxed text-center bg-white border border-dashed border-brand-honey/50 hover:border-brand-honey/70 focus:border-brand-honey resize-none focus:outline-none focus:ring-2 focus:ring-brand-honey/20 rounded-lg transition-all px-5 py-6"
                     placeholder="Write a quick note to your guests..."
                   />
                 </div>

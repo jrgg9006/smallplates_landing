@@ -20,6 +20,11 @@ export interface SendGuestInvitationParams {
   // Reason: when the heading is a real person, non-wedding occasions still get
   // the "gift for {name}" framing + possessive subject.
   namesArePeople?: boolean;
+  // Reason: organizer-edited sender name. Overrides the "From" display name and
+  // the reminder signature. The real address stays team@smallplatesandcompany.com.
+  fromName?: string;
+  // Reason: organizer-edited subject line. Overrides the auto-generated subject.
+  customSubject?: string;
 }
 
 export async function sendGuestInvitationEmail({
@@ -35,10 +40,16 @@ export async function sendGuestInvitationEmail({
   customBody,
   occasion,
   namesArePeople,
+  fromName,
+  customSubject,
 }: SendGuestInvitationParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
     // Use coupleName if provided, otherwise use coupleDisplayName for backward compatibility
     const displayName = coupleName || coupleDisplayName || 'The Couple';
+    // Reason: the sender name shown in "From" — organizer's custom name if set,
+    // otherwise the book name. Only the display name changes; the sending address
+    // stays verified (team@smallplatesandcompany.com) so deliverability holds.
+    const senderName = fromName?.trim() || displayName;
 
     // Get the template
     const { subject, html, text } = getInvitationTemplate(emailNumber, {
@@ -51,11 +62,13 @@ export async function sendGuestInvitationEmail({
       customBody,
       occasion,
       namesArePeople,
+      fromName,
+      customSubject,
     });
 
     // Send email via Postmark
     const result = await postmarkClient.sendEmail({
-      From: `${displayName} <team@smallplatesandcompany.com>`,
+      From: `${senderName} <team@smallplatesandcompany.com>`,
       To: to,
       Subject: subject,
       HtmlBody: html,

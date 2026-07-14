@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     // Fetch group data for email template (incl. organizer's custom body)
     const { data: group } = await supabase
       .from('groups')
-      .select('name, occasion, couple_first_name, partner_first_name, couple_image_url, created_by, email_invite_message')
+      .select('name, occasion, couple_first_name, partner_first_name, couple_image_url, created_by, email_invite_message, email_from_name, email_invite_subject')
       .eq('id', groupId)
       .single();
 
@@ -194,6 +194,8 @@ export async function POST(request: NextRequest) {
         customBody: group.email_invite_message || undefined,
         occasion: group.occasion,
         namesArePeople: Boolean(group.couple_first_name || group.partner_first_name),
+        fromName: group.email_from_name || undefined,
+        customSubject: group.email_invite_subject || undefined,
       });
 
       if (result.success) {

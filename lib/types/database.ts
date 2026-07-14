@@ -544,6 +544,9 @@ export interface Database {
           invite_message: string | null;
           email_invite_message: string | null;
           email_reminder_message: string | null;
+          email_from_name: string | null;
+          email_invite_subject: string | null;
+          email_reminder_subject: string | null;
           captain_invite_token: string | null;
           captain_invite_token_expires_at: string | null;
           captain_invite_token_max_uses: number;
@@ -595,6 +598,9 @@ export interface Database {
           invite_message?: string | null;
           email_invite_message?: string | null;
           email_reminder_message?: string | null;
+          email_from_name?: string | null;
+          email_invite_subject?: string | null;
+          email_reminder_subject?: string | null;
           captain_invite_token?: string | null;
           captain_invite_token_expires_at?: string | null;
           captain_invite_token_max_uses?: number;
@@ -643,6 +649,9 @@ export interface Database {
           invite_message?: string | null;
           email_invite_message?: string | null;
           email_reminder_message?: string | null;
+          email_from_name?: string | null;
+          email_invite_subject?: string | null;
+          email_reminder_subject?: string | null;
           captain_invite_token?: string | null;
           captain_invite_token_expires_at?: string | null;
           captain_invite_token_max_uses?: number;

@@ -52,6 +52,11 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
   const [view, setView] = useState<"compose" | "preview" | "recipients">("compose");
   const [coupleName, setCoupleName] = useState("The Couple");
   const [emailSubject, setEmailSubject] = useState("");
+  // Reason: organizer-editable From (sender name) and Subject. Empty = use the
+  // auto placeholder. From is shared with the invitation email (groups.email_from_name);
+  // the subject is reminder-specific (groups.email_reminder_subject).
+  const [fromName, setFromName] = useState("");
+  const [subjectDraft, setSubjectDraft] = useState("");
   const [guests, setGuests] = useState<Guest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -67,14 +72,14 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
     guest.email.trim() !== "" &&
     !guest.email.startsWith("NO_EMAIL_");
 
-  // Reason: show every guest with a valid email who already got the first
-  // invitation. Recipe-submitted ones show with a badge so the organizer
-  // can decide whether to include them. Backend still caps at 4 emails per
-  // guest — if hit, the send fails silently for that one.
+  // Reason: this is a general "send an email to any guest" tool, not just
+  // reminders. Show everyone with a valid email regardless of invite/recipe
+  // status; the per-guest labels below tell the organizer each one's position
+  // (new / emailed / recipe in). Backend still caps at 4 emails per guest.
   const visibleGuests = useMemo(
     () =>
       guests
-        .filter((g) => hasValidEmail(g) && g.invitation_started_at)
+        .filter((g) => hasValidEmail(g))
         .sort((a, b) => {
           // Reason: pending first (the ones the organizer probably wants to nudge),
           // submitted at the bottom (lighter priority but still visible).
@@ -100,7 +105,7 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
     const supabase = createSupabaseClient();
     const { data } = await supabase
       .from("groups")
-      .select("email_reminder_message, couple_first_name, partner_first_name, name, occasion")
+      .select("email_reminder_message, couple_first_name, partner_first_name, name, occasion, email_from_name, email_reminder_subject")
       .eq("id", groupId)
       .single();
     if (data?.email_reminder_message) {
@@ -125,6 +130,11 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
           ? `Reminder: your recipe for ${names}'s cookbook`
           : `Reminder: your recipe for ${names}`
       );
+
+      // Reason: prefill the editable fields with what's saved; empty falls back
+      // to the auto placeholder at send time.
+      setFromName(data.email_from_name || "");
+      setSubjectDraft(data.email_reminder_subject || "");
     }
     setBodyLoaded(true);
   }, [groupId]);
@@ -174,13 +184,21 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
     }
   };
 
+  // Reason: preview reflects the live edits; empty field falls back to the auto value.
+  const effectiveFrom = fromName.trim() || coupleName;
+  const effectiveSubject = subjectDraft.trim() || emailSubject;
+
   const handleSave = async () => {
     if (!bodyLoaded || isSaving) return;
     setIsSaving(true);
     await fetch(`/api/v1/groups/${groupId}/event-details`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email_reminder_message: body }),
+      body: JSON.stringify({
+        email_reminder_message: body,
+        email_from_name: fromName,
+        email_reminder_subject: subjectDraft,
+      }),
     });
     setIsSaving(false);
     setJustSaved(true);
@@ -191,11 +209,15 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
     setIsSending(true);
     setSendResult(null);
 
-    // Reason: save body so all reminders use the latest text
+    // Reason: save body + From + Subject so all reminders use the latest values
     await fetch(`/api/v1/groups/${groupId}/event-details`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email_reminder_message: body }),
+      body: JSON.stringify({
+        email_reminder_message: body,
+        email_from_name: fromName,
+        email_reminder_subject: subjectDraft,
+      }),
     });
 
     let sent = 0;
@@ -250,10 +272,10 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
 
   const titleText =
     view === "recipients"
-      ? "Choose who to remind"
+      ? "Choose who to email"
       : view === "preview"
         ? "Email preview"
-        : "Send an email reminder";
+        : "Send an email";
 
   // Reason: split the live textarea on blank lines the same way invitationEmail2
   // does, so the preview paragraphs match the real email.
@@ -270,7 +292,44 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
         {view === "compose" ? (
           <div className="flex-1 min-h-0 overflow-y-auto -mx-6 px-6 py-1 flex flex-col gap-4">
             <p className="text-gray-600 text-base leading-relaxed flex-shrink-0">
-              You can send an email reminder to everyone you&apos;ve invited who hasn&apos;t sent a recipe yet.
+              Send an email to any of your guests.
+            </p>
+
+            {/* From + Subject — leave blank to use the automatic text shown as placeholder */}
+            <div className="flex-shrink-0 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-[hsl(var(--brand-charcoal))] mb-1.5">
+                  From
+                </label>
+                <input
+                  type="text"
+                  value={fromName}
+                  onChange={(e) => {
+                    setFromName(e.target.value);
+                    if (justSaved) setJustSaved(false);
+                  }}
+                  placeholder={coupleName}
+                  className="w-full p-3 bg-gray-50 border border-[hsl(var(--brand-border))] rounded-lg shadow-sm focus:outline-none focus:border-[hsl(var(--brand-honey))] focus:ring-1 focus:ring-[hsl(var(--brand-honey))] focus:bg-white text-base text-[hsl(var(--brand-charcoal))] transition-colors"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-[hsl(var(--brand-charcoal))] mb-1.5">
+                  Subject
+                </label>
+                <input
+                  type="text"
+                  value={subjectDraft}
+                  onChange={(e) => {
+                    setSubjectDraft(e.target.value);
+                    if (justSaved) setJustSaved(false);
+                  }}
+                  placeholder={emailSubject}
+                  className="w-full p-3 bg-gray-50 border border-[hsl(var(--brand-border))] rounded-lg shadow-sm focus:outline-none focus:border-[hsl(var(--brand-honey))] focus:ring-1 focus:ring-[hsl(var(--brand-honey))] focus:bg-white text-base text-[hsl(var(--brand-charcoal))] transition-colors"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-[hsl(var(--brand-warm-gray))] flex-shrink-0 -mt-1">
+              Leave blank to use the automatic text.
             </p>
 
             <textarea
@@ -312,13 +371,13 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
                   <div className="px-5 py-2.5 border-b border-brand-sand">
                     <p className="text-sm">
                       <span className="text-[hsl(var(--brand-warm-gray-light))]">From:</span>{" "}
-                      <span className="text-brand-charcoal">{coupleName}</span>
+                      <span className="text-brand-charcoal">{effectiveFrom}</span>
                     </p>
                   </div>
                   <div className="px-5 py-2.5">
                     <p className="text-sm">
                       <span className="text-[hsl(var(--brand-warm-gray-light))]">Subject:</span>{" "}
-                      <span className="text-brand-charcoal">{emailSubject}</span>
+                      <span className="text-brand-charcoal">{effectiveSubject}</span>
                     </p>
                   </div>
                 </div>
@@ -347,7 +406,7 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
                   </span>
                   <p className="text-[12px] text-[#9A9590] leading-[1.5] mb-7">Or copy this link</p>
                   <p className="text-[15px] text-[#555555] leading-[1.7] mb-1">Thanks,</p>
-                  <p className="text-[15px] text-[hsl(var(--brand-charcoal))] leading-[1.7]">{coupleName}</p>
+                  <p className="text-[15px] text-[hsl(var(--brand-charcoal))] leading-[1.7]">{effectiveFrom}</p>
                   <div className="border-t border-[#F0EDE8] mt-9 pt-5">
                     <p className="text-[12px] text-[#9A9590] leading-[1.6]">
                       Something off? Just reply to this email.
@@ -378,7 +437,7 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
             ) : visibleGuests.length === 0 ? (
               <div className="text-center py-10">
                 <p className="text-sm text-[hsl(var(--brand-warm-gray))]">
-                  No one to remind yet. Send the first invitation first.
+                  No guests with an email yet. Add guests with an email address first.
                 </p>
               </div>
             ) : (
@@ -389,7 +448,7 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
                     type="checkbox"
                     checked={allSelected}
                     onChange={toggleSelectAll}
-                    className="w-4 h-4 rounded border-gray-300 text-[hsl(var(--brand-honey))] focus:ring-[hsl(var(--brand-honey))]"
+                    className="w-4 h-4 rounded border-gray-300 accent-[hsl(var(--brand-honey))] text-[hsl(var(--brand-honey))] focus:ring-[hsl(var(--brand-honey))]"
                   />
                   <span className="text-[hsl(var(--brand-charcoal))] font-medium">
                     Select all {visibleGuests.length}
@@ -408,7 +467,7 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
                             type="checkbox"
                             checked={checked}
                             onChange={() => toggleSelect(guest.id)}
-                            className="w-4 h-4 rounded border-gray-300 text-[hsl(var(--brand-honey))] focus:ring-[hsl(var(--brand-honey))]"
+                            className="w-4 h-4 rounded border-gray-300 accent-[hsl(var(--brand-honey))] text-[hsl(var(--brand-honey))] focus:ring-[hsl(var(--brand-honey))]"
                           />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm text-[hsl(var(--brand-charcoal))] truncate">
@@ -425,9 +484,13 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
                             </span>
                           ) : lastSentLabel ? (
                             <span className="text-[11px] text-[hsl(var(--brand-warm-gray))] flex-shrink-0">
-                              {lastSentLabel}
+                              Emailed {lastSentLabel}
                             </span>
-                          ) : null}
+                          ) : (
+                            <span className="text-[11px] text-[hsl(var(--brand-warm-gray-light))] flex-shrink-0">
+                              Not emailed yet
+                            </span>
+                          )}
                         </label>
                       </li>
                     );
@@ -455,7 +518,7 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
               >
                 <Check className="w-4 h-4 flex-shrink-0" />
                 <span>
-                  {sendResult.sent > 0 && `Sent ${sendResult.sent} reminder${sendResult.sent === 1 ? "" : "s"}`}
+                  {sendResult.sent > 0 && `Sent ${sendResult.sent} email${sendResult.sent === 1 ? "" : "s"}`}
                   {sendResult.sent > 0 && sendResult.failed > 0 && " · "}
                   {sendResult.failed > 0 && `${sendResult.failed} failed`}
                 </span>
@@ -504,9 +567,9 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
               </div>
             </div>
 
-            {/* Desktop: Recipients link on the left, buttons on the right */}
+            {/* Desktop: Preview link + Recipients button on the left, actions on the right */}
             <div className="hidden sm:flex sm:items-center sm:justify-between gap-3">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={() => setView("preview")}
@@ -517,7 +580,7 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
                 <button
                   type="button"
                   onClick={() => setView("recipients")}
-                  className="text-sm text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] underline underline-offset-2 transition-colors"
+                  className="rounded-full border border-[rgba(45,45,45,0.22)] px-5 py-3 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2"
                 >
                   Recipients ({selectedIds.size})
                 </button>
@@ -568,7 +631,7 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
       <Sheet open={isOpen} onOpenChange={onClose}>
         <SheetContent
           side="bottom"
-          className="!h-[90vh] !max-h-[90vh] rounded-t-[20px] flex flex-col overflow-hidden p-0"
+          className="!h-[90vh] !max-h-[90vh] rounded-t-[20px] flex flex-col overflow-hidden p-0 focus:outline-none focus-visible:outline-none"
         >
           <div className="px-6 pt-6 pb-6 flex flex-col h-full overflow-hidden">
             <SheetHeader className="px-0 flex-shrink-0 mb-3 text-left">
@@ -590,7 +653,7 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
   // Desktop: centered Dialog popup
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col focus:outline-none focus-visible:outline-none">
         <DialogHeader>
           <DialogTitle className="type-modal-title">{titleText}</DialogTitle>
         </DialogHeader>

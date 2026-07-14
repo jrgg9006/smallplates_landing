@@ -27,6 +27,13 @@ interface InvitationTemplateParams {
   // "gift for {name}" framing + possessive even on non-wedding occasions. A book
   // title stays neutral.
   namesArePeople?: boolean;
+  // Reason: organizer-edited sender name. Overrides the "From" display name and
+  // the reminder signature ("Thanks, ___") only. The hero title and the auto
+  // subject keep using the book name (coupleDisplayName). Empty = book name.
+  fromName?: string;
+  // Reason: organizer-edited subject line. When set, replaces the entire
+  // auto-generated subject. Empty = auto subject.
+  customSubject?: string;
 }
 
 // Reason: couples (wedding/bridal/anniversary, plus legacy groups with no
@@ -270,10 +277,12 @@ export function invitationEmail1(params: InvitationTemplateParams): { subject: s
   const { isPerson, heroLabel } = occasionCopy(params.occasion, !!params.namesArePeople);
 
   // Reason: people's names take a possessive ("Ana & Pedro's cookbook"); a book
-  // title ("Grandma's recipes") doesn't, so it stands alone.
-  const subject = isPerson
-    ? `Your recipe goes in ${coupleDisplayName}'s cookbook`
-    : `Your recipe goes in ${coupleDisplayName}`;
+  // title ("Grandma's recipes") doesn't, so it stands alone. An organizer-edited
+  // subject overrides both.
+  const subject = params.customSubject?.trim()
+    || (isPerson
+      ? `Your recipe goes in ${coupleDisplayName}'s cookbook`
+      : `Your recipe goes in ${coupleDisplayName}`);
 
   // Reason: when the organizer edited a custom body, use it; otherwise fall back
   // to the brand-default copy.
@@ -332,9 +341,15 @@ export function invitationEmail2(params: InvitationTemplateParams): { subject: s
   const { coupleDisplayName, collectionLink, customBody } = params;
   const { isPerson } = occasionCopy(params.occasion, !!params.namesArePeople);
 
-  const subject = isPerson
-    ? `Reminder: your recipe for ${coupleDisplayName}'s cookbook`
-    : `Reminder: your recipe for ${coupleDisplayName}`;
+  // Reason: an organizer-edited subject overrides the auto line entirely.
+  const subject = params.customSubject?.trim()
+    || (isPerson
+      ? `Reminder: your recipe for ${coupleDisplayName}'s cookbook`
+      : `Reminder: your recipe for ${coupleDisplayName}`);
+
+  // Reason: the sender name signs off the email. Falls back to the book name
+  // when the organizer hasn't set a custom From.
+  const signOffName = params.fromName?.trim() || coupleDisplayName;
 
   // Reason: keep in sync with SendRemindersModal.DEFAULT_REMINDER_BODY so
   // that "user kept the default → we save NULL → template uses this fallback"
@@ -452,7 +467,7 @@ If you haven't yet, the page is still open and we'd love yours. It only takes 5 
                   Thanks,
                 </p>
                 <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 16px; color: #2D2D2D; line-height: 1.7;" class="darkmode-text">
-                  ${coupleDisplayName}
+                  ${signOffName}
                 </p>
 
                 <!-- Disclaimer divider -->
@@ -496,7 +511,7 @@ ${bodyText}
 Add your recipe: ${collectionLink}
 
 Thanks,
-${coupleDisplayName}
+${signOffName}
 
 —
 Something off? Just reply to this email.${params.captainName ? ` This reminder was sent by ${params.captainName} via Small Plates & Co.` : ''}`;
