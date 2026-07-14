@@ -139,7 +139,9 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
         return;
       }
       
-      setGuests(guestsData || []);
+      // Reason: the user's own guest record (is_self) is already represented by
+      // the "It is mine" option, so hide it here to avoid showing the user twice.
+      setGuests((guestsData || []).filter((g) => !g.is_self));
     } catch (err) {
       console.error('Error loading guests:', err);
       setError('Failed to load guests');
