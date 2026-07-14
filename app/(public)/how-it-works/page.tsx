@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import Banner from "@/components/landing/Banner";
 import Footer from "@/components/landing/Footer";
 import WhatsAppFAB from "@/components/landing/WhatsAppFAB";
+import CookbookSpecialist from "@/components/landing/CookbookSpecialist";
 import JourneyTimeline from "./_components/JourneyTimeline";
 import JourneyStep, { type JourneyStepData } from "./_components/JourneyStep";
 
@@ -23,21 +24,21 @@ const steps: JourneyStepData[] = [
   },
   {
     number: "02",
-    title: "They snap a photo. We do the rest.",
+    title: "Just take a picture of the recipe.",
     description:
-      "No retyping, no forms. Your people photograph the handwritten recipe (grandma's card, the back of an envelope, coffee stains and all) and we turn it into clean text and a designed page. Or they type it, if they'd rather.",
+      "No retyping, no forms. Snap the handwritten card, coffee stains and all, and we turn it into clean text and a designed page. Or type it, if you'd rather.",
   },
   {
     number: "03",
-    title: "See who's in. Nudge the rest in one tap.",
+    title: "Send reminders in one click.",
     description:
-      "Import your guest list, and watch the recipes land in one place. See who's sent theirs and who hasn't, then remind everyone still missing with a single tap, or send a nicer personalized email when you want. You stay in control, without texting anyone one by one.",
+      "See who's sent a recipe and who hasn't. Nudge everyone still missing with one click. No texting people one by one.",
   },
   {
     number: "04",
-    title: "You don't do this alone. Add captains.",
+    title: "Add captains to help you collect recipes.",
     description:
-      "Invite as many people as you want. Each captain gets the same dashboard you do, and gathers recipes right alongside you. The work spreads out, so it never sits on one person.",
+      "Invite as many people as you want. Each captain gets the same dashboard, and gathers recipes right alongside you. The work never sits on one person.",
   },
 ];
 
@@ -370,7 +371,7 @@ export default function HowItWorksPage() {
             <h1 className="type-heading mt-4 [text-wrap:balance]">
               You don&rsquo;t write this book.
               <br className="hidden md:block" />{" "}
-              The people who show up do.
+              The people who love you do.
             </h1>
             <p className="type-body mt-5 text-brand-charcoal/70">
               From the first &ldquo;send me your recipe&rdquo; to the hardcover on your
@@ -384,7 +385,8 @@ export default function HowItWorksPage() {
           <div className="mx-auto max-w-7xl rounded-[2rem] bg-brand-warm-white-warm px-5 py-16 md:px-10 md:py-24">
             <JourneyTimeline>
               <JourneyStep step={steps[0]} index={0} visual={visuals[0]} extra={stepOneWays} />
-              {optionalInvite}
+              {/* Invites en pausa (feature deshabilitada). Reactivar: quitar `false &&`. */}
+              {false && optionalInvite}
               <JourneyStep step={steps[1]} index={1} visual={visuals[1]} extra={stepTwoTech} />
               <JourneyStep step={steps[2]} index={2} visual={visuals[2]} />
               <JourneyStep step={steps[3]} index={3} visual={visuals[3]} />
@@ -546,6 +548,10 @@ export default function HowItWorksPage() {
             </div>
           </div>
         </section>
+
+        {/* Cookbook Specialist — la persona real que revisa el libro antes de
+            imprimir. Reusa el componente que ya vive arriba de pricing. */}
+        <CookbookSpecialist />
 
         {/* 5. Cierre: ancla de precio + CTA en una sola tarjeta oscura */}
         <section className="px-2 pb-16 pt-6 md:px-3 md:pb-24 md:pt-8">
