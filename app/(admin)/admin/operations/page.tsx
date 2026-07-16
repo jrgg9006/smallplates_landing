@@ -809,7 +809,9 @@ ${instructions}`;
         'Unknown').replace(/[^a-z0-9\s-]/gi, '').replace(/\s+/g, '_');
 
       // Fetch the image
-      const response = await fetch(recipe.generated_image_url);
+      // Reason: storage URLs are deterministic (same path after re-upload), so the browser/CDN
+      // can serve a stale cached copy. Bust the cache so downloads always get the current file.
+      const response = await fetch(`${recipe.generated_image_url}?t=${Date.now()}`, { cache: 'no-store' });
       if (!response.ok) throw new Error('Failed to fetch image');
 
       const blob = await response.blob();
@@ -857,7 +859,9 @@ ${instructions}`;
         'Unknown').replace(/[^a-z0-9\s-]/gi, '').replace(/\s+/g, '_');
 
       // Fetch the image
-      const response = await fetch(recipe.generated_image_url_print);
+      // Reason: the print URL is deterministic and cached (max-age=3600), so the browser can
+      // return a stale copy of a previous image. Bust the cache to always download the latest.
+      const response = await fetch(`${recipe.generated_image_url_print}?t=${Date.now()}`, { cache: 'no-store' });
       if (!response.ok) throw new Error('Failed to fetch print-ready image');
 
       const blob = await response.blob();
