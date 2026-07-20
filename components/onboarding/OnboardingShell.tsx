@@ -14,6 +14,9 @@ interface OnboardingShellProps {
   titleAccent?: ReactNode;
   onContinue?: () => void | Promise<void>;
   continueLabel?: string;
+  // Reason: one-line reassurance rendered under the Continue button (e.g.
+  // "Free to set up.") so it's read at the exact moment of decision.
+  continueCaption?: string;
   continueDisabled?: boolean;
   skipHref?: string;
   skipLabel?: string;
@@ -33,6 +36,7 @@ export function OnboardingShell({
   titleAccent,
   onContinue,
   continueLabel = "Continue",
+  continueCaption,
   continueDisabled,
   skipHref,
   skipLabel = "Skip for now",
@@ -99,13 +103,18 @@ export function OnboardingShell({
             )}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-6">
             {onContinue && (
-              <button
-                onClick={onContinue}
-                disabled={continueDisabled}
-                className="btn btn-lg btn-honey px-14 w-full sm:w-auto order-1 sm:order-2"
-              >
-                {continueLabel}
-              </button>
+              <div className="w-full sm:w-auto order-1 sm:order-2 flex flex-col items-center gap-2">
+                <button
+                  onClick={onContinue}
+                  disabled={continueDisabled}
+                  className="btn btn-lg btn-honey px-14 w-full sm:w-auto"
+                >
+                  {continueLabel}
+                </button>
+                {continueCaption && (
+                  <p className="text-xs text-gray-500">{continueCaption}</p>
+                )}
+              </div>
             )}
             <div className="flex items-center justify-center sm:contents order-2 sm:order-1">
               {backHref && (

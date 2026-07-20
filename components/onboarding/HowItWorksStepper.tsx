@@ -10,13 +10,13 @@ interface Step {
 
 const STEPS: Step[] = [
   {
-    text: "Set up your project and invite your people.",
+    text: "Share one link. Everyone sends their recipe there.",
   },
   {
-    text: "We make an image for every recipe and give the book its style.",
+    text: "No photos needed. We create an image for every recipe and design the whole book.",
   },
   {
-    text: "Review everything and place your order.",
+    text: "You review every page before anything prints. Free until then.",
   },
   {
     text: "Your hardcover cookbook arrives at your door.",
@@ -44,10 +44,10 @@ export function HowItWorksStepper({ className = "" }: { className?: string }) {
                 flip ? "flex-row-reverse justify-end text-right" : "justify-start"
               }`}
             >
-              {/* Reason: keep the 84px slot even when there's no image yet so the
-                  alternating layout and spacing stay stable; final SVGs drop in here. */}
-              <div className="flex-none w-[84px] h-[84px]">
-                {step.image && (
+              {/* Reason: the slot only renders when the step has final art —
+                  an empty 84px box misaligns the text and reads as broken. */}
+              {step.image && (
+                <div className="flex-none w-[84px] h-[84px]">
                   <Image
                     src={step.image}
                     alt={step.alt ?? ""}
@@ -55,8 +55,8 @@ export function HowItWorksStepper({ className = "" }: { className?: string }) {
                     height={84}
                     className="w-full h-full object-contain"
                   />
-                )}
-              </div>
+                </div>
+              )}
               <p className="font-serif text-[17px] lg:text-[19px] leading-relaxed text-gray-800 max-w-[14rem]">
                 {step.text}
               </p>
