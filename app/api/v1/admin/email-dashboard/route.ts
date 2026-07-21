@@ -5,6 +5,7 @@ import {
   getGroupsWithCaptains,
   getActiveGroupsForWeeklyStatus,
   getGroupsClosingSoon,
+  getBooksForRemindersTip,
 } from '@/lib/email/queries';
 
 export async function GET(request: NextRequest) {
@@ -16,14 +17,22 @@ export async function GET(request: NextRequest) {
     // Weekly status and closing nudge stay scoped to active books — they're operational.
     const includeAll = request.nextUrl.searchParams.get('include_all') === 'true';
 
-    const [captainReminder, booksWithCaptains, weeklyStatus, closingNudge] = await Promise.all([
-      getGroupsWithoutCaptains(includeAll),
-      getGroupsWithCaptains(includeAll),
-      getActiveGroupsForWeeklyStatus(),
-      getGroupsClosingSoon(7),
-    ]);
+    const [captainReminder, booksWithCaptains, weeklyStatus, closingNudge, remindersTip] =
+      await Promise.all([
+        getGroupsWithoutCaptains(includeAll),
+        getGroupsWithCaptains(includeAll),
+        getActiveGroupsForWeeklyStatus(),
+        getGroupsClosingSoon(7),
+        getBooksForRemindersTip(),
+      ]);
 
-    return NextResponse.json({ captainReminder, booksWithCaptains, weeklyStatus, closingNudge });
+    return NextResponse.json({
+      captainReminder,
+      booksWithCaptains,
+      weeklyStatus,
+      closingNudge,
+      remindersTip,
+    });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to load' },

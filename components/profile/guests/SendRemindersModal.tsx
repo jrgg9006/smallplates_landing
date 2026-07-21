@@ -267,7 +267,9 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
       Sending…
     </>
   ) : (
-    "Send"
+    // Reason: show the recipient count on the button too, so the sender knows
+    // exactly how many go out (not the full guest list).
+    `Send (${selectedIds.size})`
   );
 
   const titleText =
@@ -298,7 +300,7 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
             {/* From + Subject — leave blank to use the automatic text shown as placeholder */}
             <div className="flex-shrink-0 grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="block text-sm font-medium text-[hsl(var(--brand-charcoal))] mb-1.5">
+                <label className="block text-xs font-medium text-[hsl(var(--brand-warm-gray))] mb-1">
                   From
                 </label>
                 <input
@@ -309,11 +311,11 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
                     if (justSaved) setJustSaved(false);
                   }}
                   placeholder={coupleName}
-                  className="w-full p-3 bg-gray-50 border border-[hsl(var(--brand-border))] rounded-lg shadow-sm focus:outline-none focus:border-[hsl(var(--brand-honey))] focus:ring-1 focus:ring-[hsl(var(--brand-honey))] focus:bg-white text-base text-[hsl(var(--brand-charcoal))] transition-colors"
+                  className="w-full px-0 py-1.5 bg-transparent border-0 border-b border-[hsl(var(--brand-border))] rounded-none focus:outline-none focus:border-[hsl(var(--brand-honey))] focus:ring-0 text-sm text-[hsl(var(--brand-charcoal))] placeholder:text-[hsl(var(--brand-warm-gray-light))] transition-colors"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-[hsl(var(--brand-charcoal))] mb-1.5">
+                <label className="block text-xs font-medium text-[hsl(var(--brand-warm-gray))] mb-1">
                   Subject
                 </label>
                 <input
@@ -324,7 +326,7 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
                     if (justSaved) setJustSaved(false);
                   }}
                   placeholder={emailSubject}
-                  className="w-full p-3 bg-gray-50 border border-[hsl(var(--brand-border))] rounded-lg shadow-sm focus:outline-none focus:border-[hsl(var(--brand-honey))] focus:ring-1 focus:ring-[hsl(var(--brand-honey))] focus:bg-white text-base text-[hsl(var(--brand-charcoal))] transition-colors"
+                  className="w-full px-0 py-1.5 bg-transparent border-0 border-b border-[hsl(var(--brand-border))] rounded-none focus:outline-none focus:border-[hsl(var(--brand-honey))] focus:ring-0 text-sm text-[hsl(var(--brand-charcoal))] placeholder:text-[hsl(var(--brand-warm-gray-light))] transition-colors"
                 />
               </div>
             </div>
@@ -418,16 +420,6 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
           </div>
         ) : (
           <div className="flex-1 min-h-[420px] -mx-6 px-6 py-1 flex flex-col">
-            {/* Back to compose */}
-            <button
-              type="button"
-              onClick={() => setView("compose")}
-              className="flex items-center gap-1.5 text-sm text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] transition-colors mb-4 flex-shrink-0"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Back
-            </button>
-
             {loading ? (
               <div className="space-y-2">
                 {[1, 2, 3].map((i) => (
@@ -612,7 +604,22 @@ export function SendRemindersModal({ isOpen, onClose, groupId }: SendRemindersMo
             </div>
           </div>
         ) : (
-          <div className="flex justify-end flex-shrink-0">
+          <div className="flex items-center justify-between flex-shrink-0">
+            {/* Reason: on the recipients view the Back link moves down here, left of
+                Done, so both live on the same footer line. Preview keeps its own
+                Back at the top, so its footer left slot stays empty. */}
+            {view === "recipients" ? (
+              <button
+                type="button"
+                onClick={() => setView("compose")}
+                className="flex items-center gap-1.5 text-sm text-[hsl(var(--brand-warm-gray))] hover:text-[hsl(var(--brand-charcoal))] transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Back
+              </button>
+            ) : (
+              <span />
+            )}
             <button
               type="button"
               onClick={() => setView("compose")}

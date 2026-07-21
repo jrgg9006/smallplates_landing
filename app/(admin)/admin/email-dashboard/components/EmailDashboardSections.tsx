@@ -1,11 +1,13 @@
 'use client';
 
+import { Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type {
   GroupNeedingCaptain,
   GroupWithCaptainsSummary,
   WeeklyStats,
   GroupClosingSoon,
+  BookForRemindersTip,
 } from '@/lib/email/queries';
 
 // ---------- Shared section shell ----------
@@ -67,73 +69,30 @@ export function EmailMetaCard({
 // ---------- Onboarding guide (per-tab explainer) ----------
 
 export function CaptainReminderGuide() {
+  // Reason: secondary (i) — only for whoever has doubts, must not compete with the list.
   return (
-    <details className="group bg-white rounded-xl border border-gray-200 mb-4 [&_summary::-webkit-details-marker]:hidden">
-      <summary className="cursor-pointer select-none flex items-center justify-between px-5 py-3 text-sm text-gray-600 hover:text-gray-900 transition">
-        <span>
-          <span className="font-medium">What this tab is</span>
-          <span className="text-gray-400 mx-2">&middot;</span>
-          <span>how to read the colors</span>
-        </span>
-        <span className="text-gray-400 text-xs transition-transform group-open:rotate-90">&#9656;</span>
+    <details className="group mb-4 [&_summary::-webkit-details-marker]:hidden">
+      <summary className="cursor-pointer select-none inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition">
+        <Info className="w-3.5 h-3.5" />
+        <span>How this tab works</span>
       </summary>
 
-      <div className="px-5 pb-5 pt-2 border-t border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-5">
-
-        <div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
-            What this is
-          </div>
-          <p className="text-sm text-gray-700 leading-relaxed">
-            Organizers who haven&rsquo;t added any captains yet. Captains share the
-            link with people the organizer can&rsquo;t easily reach &mdash; they
-            roughly <span className="font-medium">3&times; the recipes</span>.
-            Without one, the organizer is doing it alone.
-          </p>
-        </div>
-
-        <div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
-            What you do here
-          </div>
-          <p className="text-sm text-gray-700 leading-relaxed">
-            Click <span className="font-medium">Preview</span> to see the email,
-            then <span className="font-medium">Send</span> to fire it. The organizer
-            gets a short note explaining how to add a captain in 30 seconds. Each
-            send is logged with its date so you can see the full trail.
-          </p>
-        </div>
-
-        <div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
-            Reading the colors
-          </div>
-          <ul className="text-sm text-gray-700 leading-relaxed space-y-1">
-            <li>
-              <span className="font-medium">Days without captains</span>:{' '}
-              <span className="text-gray-500">gray</span> &lt; 7d ·{' '}
-              <span className="text-amber-600">amber</span> 7&ndash;21d ·{' '}
-              <span className="text-red-600 font-medium">red</span> &gt; 21d
-            </li>
-            <li>
-              <span className="font-medium">Closes in</span>:{' '}
-              <span className="text-red-600 font-medium">red</span> &le; 7d ·{' '}
-              <span className="text-amber-600">amber</span> 8&ndash;21d ·{' '}
-              <span className="text-gray-500">gray</span> &gt; 21d
-            </li>
-            <li>
-              <span className="font-medium">Recipes</span>:{' '}
-              <span className="text-red-600 font-medium">red</span> 0 ·{' '}
-              <span className="text-amber-600">amber</span> 1&ndash;5 ·{' '}
-              <span className="text-gray-500">gray</span> 6&ndash;24 ·{' '}
-              <span className="text-green-600 font-medium">green</span> 25+
-            </li>
-            <li>
-              <span className="font-medium">Sent</span>: total count of captain reminders sent. The full chronological trail shows below the row.
-            </li>
-          </ul>
-        </div>
-
+      <div className="mt-2 max-w-3xl text-xs text-gray-400 leading-relaxed space-y-2">
+        <p>
+          Organizers who haven&rsquo;t added any captains yet. Captains share the link
+          with people the organizer can&rsquo;t easily reach, so books with one get
+          roughly 3&times; the recipes. Preview to see the email, Send to fire it; each
+          send is logged with its date.
+        </p>
+        <p>
+          <span className="text-gray-500 font-medium">Days without captains</span>: gray
+          &lt; 7d, amber 7&ndash;21d, red &gt; 21d ·{' '}
+          <span className="text-gray-500 font-medium">Closes in</span>: red &le; 7d, amber
+          8&ndash;21d, gray &gt; 21d ·{' '}
+          <span className="text-gray-500 font-medium">Recipes</span>: red 0, amber
+          1&ndash;5, gray 6&ndash;24, green 25+ ·{' '}
+          <span className="text-gray-500 font-medium">Sent</span> = captain reminders sent.
+        </p>
       </div>
     </details>
   );
@@ -248,6 +207,15 @@ function deadlineTone(daysLeft: number): string {
   return 'text-gray-500';
 }
 
+// Reason: days since last sign of life. More days cold = more at risk = louder.
+// < 7d still active (green), 7–21 fine (gray), 22–45 cooling (amber), > 45 cold (red).
+function coldnessTone(days: number): string {
+  if (days > 45) return 'text-red-600 font-medium';
+  if (days > 21) return 'text-amber-600';
+  if (days < 7) return 'text-green-600';
+  return 'text-gray-500';
+}
+
 // ---------- 1. Captain reminder rows ----------
 
 export function CaptainReminderRow({
@@ -354,59 +322,26 @@ export function CaptainReminderRow({
 // ---------- Weekly Status Guide ----------
 
 export function WeeklyStatusGuide() {
+  // Reason: secondary (i) — only for whoever has doubts, must not compete with the list.
   return (
-    <details className="group bg-white rounded-xl border border-gray-200 mb-4 [&_summary::-webkit-details-marker]:hidden">
-      <summary className="cursor-pointer select-none flex items-center justify-between px-5 py-3 text-sm text-gray-600 hover:text-gray-900 transition">
-        <span>
-          <span className="font-medium">What this tab is</span>
-          <span className="text-gray-400 mx-2">&middot;</span>
-          <span>how the weekly send works</span>
-        </span>
-        <span className="text-gray-400 text-xs transition-transform group-open:rotate-90">&#9656;</span>
+    <details className="group mb-4 [&_summary::-webkit-details-marker]:hidden">
+      <summary className="cursor-pointer select-none inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition">
+        <Info className="w-3.5 h-3.5" />
+        <span>How this tab works</span>
       </summary>
 
-      <div className="px-5 pb-5 pt-2 border-t border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-5">
-
-        <div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
-            What this is
-          </div>
-          <p className="text-sm text-gray-700 leading-relaxed">
-            Each captain and the organizer of an active book gets a personalized
-            weekly digest: total recipes, recipes this week, new people, days left.
-            Keeps momentum going so they don&rsquo;t lose interest mid-collection.
-          </p>
-        </div>
-
-        <div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
-            What you do here
-          </div>
-          <p className="text-sm text-gray-700 leading-relaxed">
-            Click <span className="font-medium">Preview</span> to see a sample,
-            then <span className="font-medium">Send</span> to fire <em>one personalized
-            email per recipient</em> (each gets their own first name + their own
-            unsubscribe link). Already opted-out recipients are skipped automatically.
-          </p>
-        </div>
-
-        <div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
-            Reading the colors
-          </div>
-          <ul className="text-sm text-gray-700 leading-relaxed space-y-1">
-            <li>
-              <span className="font-medium">Days left</span>:{' '}
-              <span className="text-red-600 font-medium">red</span> &le; 7d ·{' '}
-              <span className="text-amber-600">amber</span> 8&ndash;21d ·{' '}
-              <span className="text-gray-500">gray</span> &gt; 21d
-            </li>
-            <li>
-              <span className="font-medium">Sent</span>: total weekly campaigns fired. Full chronological trail shows below the row.
-            </li>
-          </ul>
-        </div>
-
+      <div className="mt-2 max-w-3xl text-xs text-gray-400 leading-relaxed space-y-2">
+        <p>
+          Each captain and the organizer of an active book gets a personalized weekly
+          digest: total recipes, recipes this week, new people, days left. Preview to see
+          a sample, then Send to fire one personalized email per recipient (each with
+          their own first name and unsubscribe link). Opted-out recipients are skipped.
+        </p>
+        <p>
+          <span className="text-gray-500 font-medium">Days left</span>: red &le; 7d, amber
+          8&ndash;21d, gray &gt; 21d ·{' '}
+          <span className="text-gray-500 font-medium">Sent</span> = weekly campaigns fired.
+        </p>
       </div>
     </details>
   );
@@ -640,5 +575,207 @@ export function ClosingNudgeRow({
         </div>
       </div>
     </div>
+  );
+}
+
+// ---------- 4. Reminders tool tip ----------
+
+export function RemindersTipGuide() {
+  // Reason: this is just a "?" for anyone who has doubts — it must read as
+  // secondary, not compete with the list. Small muted (i) that expands on click.
+  return (
+    <details className="group mb-4 [&_summary::-webkit-details-marker]:hidden">
+      <summary className="cursor-pointer select-none inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition">
+        <Info className="w-3.5 h-3.5" />
+        <span>How this tab works</span>
+      </summary>
+
+      <div className="mt-2 max-w-3xl text-xs text-gray-400 leading-relaxed space-y-2">
+        <p>
+          Active books ranked by how cold they&rsquo;ve gone: the longer since the
+          organizer&rsquo;s last recipe or login, the higher up. A nudge
+          (&ldquo;don&rsquo;t forget, you can do this&rdquo;) plus a heads-up that the
+          Send Reminders tool exists.
+        </p>
+        <p>
+          <span className="text-gray-500 font-medium">Cold</span> = days since last
+          activity (recipe or login) ·{' '}
+          <span className="text-gray-500 font-medium">Recipes</span> colors: red 0, amber
+          1&ndash;5, gray 6&ndash;24, green 25+ ·{' '}
+          <span className="text-gray-500 font-medium">Sent</span> = times this tip has
+          gone out. Opted-out, closed, recently-emailed and duplicate books are collapsed
+          below.
+        </p>
+      </div>
+    </details>
+  );
+}
+
+export function RemindersTipRow({
+  book,
+  onPreview,
+  onSend,
+  isSending,
+}: {
+  book: BookForRemindersTip;
+  onPreview: () => void;
+  onSend: () => void;
+  isSending: boolean;
+}) {
+  const bookName = book.couple_display_name || book.group_name;
+  const primary = book.organizer_name || book.organizer_email;
+  const showEmailInSmall = !!book.organizer_name;
+  const sentDates = book.tip_sent_dates;
+  const alreadySentToday = sentToday(sentDates);
+
+  // Reason: label what the last sign of life actually was, for the Cold tooltip.
+  const activityLabel =
+    book.last_activity_at && book.last_activity_at === book.last_recipe_at
+      ? 'last recipe'
+      : book.last_activity_at && book.last_activity_at === book.last_login_at
+      ? 'last login'
+      : 'book created';
+
+  return (
+    <div
+      className={`border-t first:border-t-0 px-5 py-4 transition ${
+        alreadySentToday ? 'bg-amber-50 hover:bg-amber-100' : 'hover:bg-gray-50'
+      }`}
+    >
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <div className="font-semibold text-gray-900 truncate">{primary}</div>
+          <div className="text-xs text-gray-500 mt-0.5">
+            {bookName}
+            {showEmailInSmall && ` · ${book.organizer_email}`}
+            {book.reminders_used_count === 0 && (
+              <span className="ml-2 text-gray-400">never used the tool</span>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-4 text-sm text-gray-500 shrink-0">
+          <span
+            className={coldnessTone(book.coldness_days)}
+            title={`${activityLabel}: ${formatDate(book.last_activity_at)}`}
+          >
+            Cold {book.coldness_days}d
+          </span>
+          <span className={recipeTone(book.total_recipes)}>
+            {book.total_recipes} recipe{book.total_recipes === 1 ? '' : 's'}
+          </span>
+          <span className={book.captain_count > 0 ? 'text-gray-500' : 'text-gray-300'}>
+            {book.captain_count > 0
+              ? `${book.captain_count} captain${book.captain_count === 1 ? '' : 's'}`
+              : 'no captains'}
+          </span>
+          {book.days_left === null ? (
+            <span className="text-gray-300" title="No close date set">No close date</span>
+          ) : (
+            <span className={deadlineTone(book.days_left)} title={`Book closes ${formatDate(book.book_close_date)}`}>
+              Closes in {book.days_left}d
+            </span>
+          )}
+          <span>
+            <strong className="text-gray-900">{sentDates.length}</strong> sent
+          </span>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <button
+            onClick={onPreview}
+            className="text-xs text-gray-400 hover:text-gray-600 underline transition-colors"
+          >
+            Preview
+          </button>
+          <SendButton
+            isSending={isSending}
+            disabled={book.organizer_opted_out}
+            disabledTitle="Organizer opted out of book updates"
+            alreadySentToday={alreadySentToday}
+            onSend={onSend}
+          />
+        </div>
+      </div>
+
+      {sentDates.length > 0 && (
+        <div className="mt-2 text-xs text-gray-500">
+          <span className="font-medium uppercase tracking-wide text-[10px] text-gray-400 mr-2">
+            Sent
+          </span>
+          {sentDates.map((d, i) => (
+            <span key={d}>
+              {i > 0 && <span className="mx-2 text-gray-300">·</span>}
+              {formatDateLong(d)}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Reason: why a non-candidate book isn't in the main list — shown so nothing
+// silently disappears.
+function bucketReason(book: BookForRemindersTip): string {
+  switch (book.bucket) {
+    case 'no_time':
+      return 'Book closed';
+    case 'cooldown': {
+      const d = daysSince(book.last_tip_sent_at ?? '');
+      return book.last_tip_sent_at ? `Tipped ${d}d ago` : 'Tipped recently';
+    }
+    case 'duplicate':
+      return 'Same organizer, colder book above';
+    case 'opted_out':
+      return 'Opted out of book updates';
+    default:
+      return '';
+  }
+}
+
+// Reason: collapsed reference list for books we're NOT emailing right now (opted
+// out, closed, in cooldown, duplicates). Read-only, collapsed by default, hidden
+// entirely when empty. Keeps them findable without cluttering the queue.
+export function RemindersTipAsideList({
+  title,
+  subtitle,
+  books,
+}: {
+  title: string;
+  subtitle: string;
+  books: BookForRemindersTip[];
+}) {
+  if (books.length === 0) return null;
+  return (
+    <details className="group bg-white rounded-xl shadow overflow-hidden mt-6 [&_summary::-webkit-details-marker]:hidden">
+      <summary className="cursor-pointer select-none flex items-center justify-between px-5 py-4 bg-gray-50">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">
+            {title} <span className="text-gray-400 font-normal">({books.length})</span>
+          </h2>
+          <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>
+        </div>
+        <span className="text-gray-400 text-xs transition-transform group-open:rotate-90">&#9656;</span>
+      </summary>
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b bg-white">
+            <th className="text-left px-5 py-2 font-medium text-gray-600 text-xs uppercase tracking-wide">Book</th>
+            <th className="text-left px-5 py-2 font-medium text-gray-600 text-xs uppercase tracking-wide">Organizer</th>
+            <th className="text-left px-5 py-2 font-medium text-gray-600 text-xs uppercase tracking-wide">Email</th>
+            <th className="text-right px-5 py-2 font-medium text-gray-600 text-xs uppercase tracking-wide">Why not now</th>
+          </tr>
+        </thead>
+        <tbody>
+          {books.map(b => (
+            <tr key={b.group_id} className="border-b last:border-b-0 hover:bg-gray-50 transition">
+              <td className="px-5 py-3 font-medium text-gray-900">{b.couple_display_name || b.group_name}</td>
+              <td className="px-5 py-3 text-gray-500">{b.organizer_name || '—'}</td>
+              <td className="px-5 py-3 text-gray-500">{b.organizer_email}</td>
+              <td className="px-5 py-3 text-right text-gray-500">{bucketReason(b)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </details>
   );
 }
