@@ -13,6 +13,8 @@ export default function WelcomePage() {
       imageUrl=""
       rightContent={<HowItWorksStepper />}
       onContinue={() => router.push("/onboarding/occasion")}
+      continueLabel="Start your book"
+      continueCaption="Free to set up. Pay until you print."
     >
       <div className="text-left space-y-4">
         <p className="text-lg sm:text-xl font-light text-gray-700 leading-relaxed">
