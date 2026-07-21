@@ -83,7 +83,25 @@ export default function GroupsPage() {
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [collectionToken, setCollectionToken] = useState<string | null>(null);
   const [showRemindersModal, setShowRemindersModal] = useState(false);
-  
+  // Reason: the founder "Reminders tip" email deep-links here with ?open=reminders.
+  // Read from window (not useSearchParams) to avoid needing a Suspense boundary,
+  // then open the modal once a group is actually selected below.
+  const [pendingOpenReminders, setPendingOpenReminders] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (new URLSearchParams(window.location.search).get('open') === 'reminders') {
+      setPendingOpenReminders(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (pendingOpenReminders && selectedGroup) {
+      setShowRemindersModal(true);
+      setPendingOpenReminders(false);
+    }
+  }, [pendingOpenReminders, selectedGroup]);
+
   // Profile state
   const [senderName, setSenderName] = useState<string | null>(null);
   

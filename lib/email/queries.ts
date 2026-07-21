@@ -123,6 +123,219 @@ export interface GroupClosingSoon {
   guests: ClosingNudgeGuest[];
 }
 
+// ---------- 4. Reminders Tool Tip (churn / "who's going cold" queue) ----------
+
+// Reason: why a book is or isn't in the main send list. Everything but 'candidate'
+// is shown collapsed so nothing silently disappears.
+//   candidate  — email this one; ranked by coldness
+//   opted_out  — organizer opted out of book updates
+//   no_time    — book already closed (Closes in 0d); "No close date" is NOT this
+//   cooldown   — got this same tip < REMINDERS_TIP_COOLDOWN_DAYS ago
+//   duplicate  — same organizer email already has a colder book in the list
+export type RemindersTipBucket = 'candidate' | 'opted_out' | 'no_time' | 'cooldown' | 'duplicate';
+
+// Reason: don't re-send this tip within two weeks. Tied to THIS tip only (not
+// weekly-status etc.), or everyone active would always look "recently emailed".
+export const REMINDERS_TIP_COOLDOWN_DAYS = 14;
+
+export interface BookForRemindersTip {
+  group_id: string;
+  group_name: string;
+  couple_display_name: string | null;
+  organizer_profile_id: string;
+  organizer_email: string;
+  organizer_name: string | null;
+  organizer_opted_out: boolean;
+  total_recipes: number;
+  captain_count: number;
+  // Reason: how many times the organizer has used the Send Reminders tool.
+  // 0 = never used it. Shown as a signal, not a filter.
+  reminders_used_count: number;
+  book_close_date: string | null;
+  days_left: number | null;
+  // Recency signals feeding the coldness score.
+  last_recipe_at: string | null;
+  last_login_at: string | null;
+  // Reason: the most recent sign of life (recipe OR login), with book creation as
+  // the floor so brand-new/never-active books still rank instead of dropping out.
+  last_activity_at: string | null;
+  // Reason: days since last_activity_at — the primary rank. Bigger = colder = higher.
+  coldness_days: number;
+  // This tab's own sends.
+  tip_sent_dates: string[];
+  last_tip_sent_at: string | null;
+  bucket: RemindersTipBucket;
+}
+
+export async function getBooksForRemindersTip(): Promise<BookForRemindersTip[]> {
+  const supabase = createSupabaseAdminClient();
+
+  // Reason: only active books — a finished book doesn't need a "don't forget" nudge.
+  const { data: groups } = await supabase
+    .from('groups')
+    .select('id, name, couple_display_name, created_by, book_close_date, created_at')
+    .eq('book_status', 'active')
+    .order('created_at', { ascending: false });
+
+  if (!groups || groups.length === 0) return [];
+
+  const groupIds = groups.map(g => g.id);
+  const organizerIds = Array.from(new Set(groups.map(g => g.created_by)));
+
+  const [profilesRes, recipesRes, captainsRes, reminderLogRes, tipLogRes] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('id, email, full_name, notification_emails_opt_out')
+      .in('id', organizerIds),
+    supabase
+      .from('guest_recipes')
+      .select('group_id, submitted_at')
+      .in('submission_status', ['submitted', 'approved'])
+      .in('group_id', groupIds),
+    supabase
+      .from('group_members')
+      .select('group_id')
+      .eq('role', 'member')
+      .in('group_id', groupIds),
+    supabase
+      .from('communication_log')
+      .select('group_id')
+      .eq('type', 'reminder')
+      .in('group_id', groupIds),
+    supabase
+      .from('communication_log')
+      .select('group_id, sent_at')
+      .eq('type', 'reminders_tip')
+      .in('group_id', groupIds),
+  ]);
+
+  // Reason: last_sign_in_at lives in auth.users, not profiles. Fetch once and map
+  // by id (same pattern as the admin users panel). Degrade gracefully on failure.
+  const lastLoginByProfile = new Map<string, string | null>();
+  try {
+    const { data: authData } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    for (const u of authData?.users || []) lastLoginByProfile.set(u.id, u.last_sign_in_at || null);
+  } catch (e) {
+    console.error('reminders-tip: failed to list auth users for last_sign_in_at', e);
+  }
+
+  const profileMap = new Map((profilesRes.data ?? []).map(p => [p.id, p]));
+
+  const recipeCountByGroup = new Map<string, number>();
+  const lastRecipeByGroup = new Map<string, string>();
+  for (const r of recipesRes.data ?? []) {
+    if (!r.group_id) continue;
+    recipeCountByGroup.set(r.group_id, (recipeCountByGroup.get(r.group_id) ?? 0) + 1);
+    if (r.submitted_at) {
+      const prev = lastRecipeByGroup.get(r.group_id);
+      if (!prev || r.submitted_at > prev) lastRecipeByGroup.set(r.group_id, r.submitted_at);
+    }
+  }
+
+  const captainCountByGroup = new Map<string, number>();
+  for (const c of captainsRes.data ?? []) {
+    if (!c.group_id) continue;
+    captainCountByGroup.set(c.group_id, (captainCountByGroup.get(c.group_id) ?? 0) + 1);
+  }
+
+  const reminderCountByGroup = new Map<string, number>();
+  for (const log of reminderLogRes.data ?? []) {
+    if (!log.group_id) continue;
+    reminderCountByGroup.set(log.group_id, (reminderCountByGroup.get(log.group_id) ?? 0) + 1);
+  }
+
+  const tipDatesByGroup = new Map<string, string[]>();
+  for (const log of tipLogRes.data ?? []) {
+    if (!log.group_id || !log.sent_at) continue;
+    const arr = tipDatesByGroup.get(log.group_id) ?? [];
+    arr.push(log.sent_at);
+    tipDatesByGroup.set(log.group_id, arr);
+  }
+  for (const arr of tipDatesByGroup.values()) arr.sort();
+
+  const now = Date.now();
+  const daysSince = (iso: string | null): number | null =>
+    iso ? Math.floor((now - new Date(iso).getTime()) / ONE_DAY_MS) : null;
+
+  const enriched = groups
+    .map(g => {
+      const profile = profileMap.get(g.created_by);
+      if (!profile?.email) return null;
+
+      const days_left: number | null = g.book_close_date
+        ? Math.max(0, Math.floor((new Date(g.book_close_date).getTime() - now) / ONE_DAY_MS))
+        : null;
+
+      const last_recipe_at = lastRecipeByGroup.get(g.id) ?? null;
+      const last_login_at = lastLoginByProfile.get(g.created_by) ?? null;
+      // Reason: most recent sign of life; book creation is the floor so a
+      // never-active book still ranks by age instead of being treated as "fresh".
+      const activity = [last_recipe_at, last_login_at, g.created_at].filter(Boolean) as string[];
+      const last_activity_at = activity.length
+        ? activity.reduce((a, b) => (a > b ? a : b))
+        : null;
+      const coldness_days = daysSince(last_activity_at) ?? 0;
+
+      const tipDates = tipDatesByGroup.get(g.id) ?? [];
+      const last_tip_sent_at = tipDates.length ? tipDates[tipDates.length - 1] : null;
+
+      // Reason: classify once so the UI just groups by bucket. Order matters:
+      // opted-out and closed win over cooldown.
+      let bucket: RemindersTipBucket;
+      if (profile.notification_emails_opt_out) bucket = 'opted_out';
+      else if (days_left === 0) bucket = 'no_time';
+      else if (last_tip_sent_at && (daysSince(last_tip_sent_at) ?? 999) < REMINDERS_TIP_COOLDOWN_DAYS)
+        bucket = 'cooldown';
+      else bucket = 'candidate';
+
+      return {
+        group_id: g.id,
+        group_name: g.name,
+        couple_display_name: g.couple_display_name,
+        organizer_profile_id: g.created_by,
+        organizer_email: profile.email,
+        organizer_name: profile.full_name,
+        organizer_opted_out: !!profile.notification_emails_opt_out,
+        total_recipes: recipeCountByGroup.get(g.id) ?? 0,
+        captain_count: captainCountByGroup.get(g.id) ?? 0,
+        reminders_used_count: reminderCountByGroup.get(g.id) ?? 0,
+        book_close_date: g.book_close_date,
+        days_left,
+        last_recipe_at,
+        last_login_at,
+        last_activity_at,
+        coldness_days,
+        tip_sent_dates: tipDates,
+        last_tip_sent_at,
+        bucket,
+      } as BookForRemindersTip;
+    })
+    .filter((b): b is BookForRemindersTip => b !== null);
+
+  // Reason: dedupe candidates by organizer email — the same person with two books
+  // shouldn't get the tip twice. Keep the coldest (needs it most), demote the rest.
+  const seenEmail = new Set<string>();
+  for (const b of enriched
+    .filter(b => b.bucket === 'candidate')
+    .sort((a, b) => b.coldness_days - a.coldness_days)) {
+    const key = b.organizer_email.toLowerCase();
+    if (seenEmail.has(key)) b.bucket = 'duplicate';
+    else seenEmail.add(key);
+  }
+
+  // Reason: candidates first, coldest-first; tiebreak fewer recipes (more stalled)
+  // then less runway. Non-candidates fall to the bottom (UI shows them collapsed).
+  enriched.sort((a, b) => {
+    const rank = (x: BookForRemindersTip) => (x.bucket === 'candidate' ? 0 : 1);
+    if (rank(a) !== rank(b)) return rank(a) - rank(b);
+    if (b.coldness_days !== a.coldness_days) return b.coldness_days - a.coldness_days;
+    if (a.total_recipes !== b.total_recipes) return a.total_recipes - b.total_recipes;
+    return (a.days_left ?? Number.POSITIVE_INFINITY) - (b.days_left ?? Number.POSITIVE_INFINITY);
+  });
+
+  return enriched;
+}
+
 // ---------- Implementations ----------
 
 export async function getGroupsWithoutCaptains(includeAll = false): Promise<GroupNeedingCaptain[]> {

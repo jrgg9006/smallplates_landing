@@ -22,7 +22,8 @@ export type CommunicationType =
   | 'pdf_delivery'
   | 'captain_reminder'
   | 'weekly_status'
-  | 'closing_nudge';
+  | 'closing_nudge'
+  | 'reminders_tip';
 export type CommunicationChannel = 'email' | 'sms' | 'whatsapp';
 export type CommunicationStatus = 'pending' | 'sent' | 'delivered' | 'failed' | 'opened';
 

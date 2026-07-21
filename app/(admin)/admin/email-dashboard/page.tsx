@@ -10,6 +10,7 @@ import type {
   GroupWithCaptainsSummary,
   WeeklyStats,
   GroupClosingSoon,
+  BookForRemindersTip,
 } from '@/lib/email/queries';
 import {
   Section,
@@ -21,6 +22,9 @@ import {
   WeeklyStatusGuide,
   WeeklyStatusRow,
   ClosingNudgeRow,
+  RemindersTipGuide,
+  RemindersTipRow,
+  RemindersTipAsideList,
 } from './components/EmailDashboardSections';
 
 interface DashboardData {
@@ -28,9 +32,10 @@ interface DashboardData {
   booksWithCaptains: GroupWithCaptainsSummary[];
   weeklyStatus: WeeklyStats[];
   closingNudge: GroupClosingSoon[];
+  remindersTip: BookForRemindersTip[];
 }
 
-type Tab = 'captain-reminder' | 'weekly-status' | 'closing-nudge';
+type Tab = 'captain-reminder' | 'weekly-status' | 'closing-nudge' | 'reminders-tip';
 
 export default function EmailDashboardPage() {
   const router = useRouter();
@@ -94,7 +99,7 @@ export default function EmailDashboardPage() {
   };
 
   const sendEmail = async (
-    type: 'captain-reminder' | 'weekly-status' | 'closing-nudge',
+    type: 'captain-reminder' | 'weekly-status' | 'closing-nudge' | 'reminders-tip',
     groupId: string,
     confirmMessage: string
   ) => {
@@ -187,7 +192,7 @@ export default function EmailDashboardPage() {
         {data && (
           <>
             {/* Tabs (the count cards double as the navigation). */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               <TabCard
                 label="Captain reminder"
                 value={data.captainReminder.length}
@@ -205,6 +210,12 @@ export default function EmailDashboardPage() {
                 value={data.closingNudge.length}
                 active={activeTab === 'closing-nudge'}
                 onClick={() => setActiveTab('closing-nudge')}
+              />
+              <TabCard
+                label="Reminders tip"
+                value={data.remindersTip.filter(b => b.bucket === 'candidate').length}
+                active={activeTab === 'reminders-tip'}
+                onClick={() => setActiveTab('reminders-tip')}
               />
             </div>
 
@@ -326,6 +337,53 @@ export default function EmailDashboardPage() {
                   ))
                 )}
                 </Section>
+              </>
+            )}
+
+            {activeTab === 'reminders-tip' && (
+              <>
+                <RemindersTipGuide />
+                <EmailMetaCard subject="Send reminders in one click" />
+                <Section title="Coldest first" tone="primary">
+                  {data.remindersTip.filter(b => b.bucket === 'candidate').length === 0 ? (
+                    <EmptyRow message="No active book needs a nudge right now." />
+                  ) : (
+                    data.remindersTip
+                      .filter(b => b.bucket === 'candidate')
+                      .map(b => (
+                        <RemindersTipRow
+                          key={b.group_id}
+                          book={b}
+                          onPreview={() =>
+                            openPreview(
+                              '/api/v1/admin/email-dashboard/reminders-tip/preview',
+                              { group_id: b.group_id }
+                            )
+                          }
+                          onSend={() =>
+                            sendEmail(
+                              'reminders-tip',
+                              b.group_id,
+                              `Send the Send Reminders tip to ${b.organizer_email}?`
+                            )
+                          }
+                          isSending={sendingKey === `reminders-tip:${b.group_id}`}
+                        />
+                      ))
+                  )}
+                </Section>
+                <RemindersTipAsideList
+                  title="Not sending right now"
+                  subtitle="Closed books, recently emailed, or a duplicate of a colder book above."
+                  books={data.remindersTip.filter(
+                    b => b.bucket === 'no_time' || b.bucket === 'cooldown' || b.bucket === 'duplicate'
+                  )}
+                />
+                <RemindersTipAsideList
+                  title="Opted out"
+                  subtitle="These organizers opted out of book updates, so they're never emailed here."
+                  books={data.remindersTip.filter(b => b.bucket === 'opted_out')}
+                />
               </>
             )}
           </>
