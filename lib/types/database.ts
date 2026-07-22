@@ -23,7 +23,8 @@ export type CommunicationType =
   | 'captain_reminder'
   | 'weekly_status'
   | 'closing_nudge'
-  | 'reminders_tip';
+  | 'reminders_tip'
+  | 'reactivation';
 export type CommunicationChannel = 'email' | 'sms' | 'whatsapp';
 export type CommunicationStatus = 'pending' | 'sent' | 'delivered' | 'failed' | 'opened';
 

@@ -8,6 +8,7 @@ import type {
   WeeklyStats,
   GroupClosingSoon,
   BookForRemindersTip,
+  BookForReactivation,
 } from '@/lib/email/queries';
 
 // ---------- Shared section shell ----------
@@ -713,18 +714,32 @@ export function RemindersTipRow({
   );
 }
 
+// Reason: the minimal shape the collapsed aside list needs — shared by the
+// reminders-tip and reactivation queues so one component serves both.
+type AsideBook = {
+  group_id: string;
+  group_name: string;
+  couple_display_name: string | null;
+  organizer_name: string | null;
+  organizer_email: string;
+  bucket: string;
+  last_tip_sent_at: string | null;
+};
+
 // Reason: why a non-candidate book isn't in the main list — shown so nothing
 // silently disappears.
-function bucketReason(book: BookForRemindersTip): string {
+function bucketReason(book: AsideBook): string {
   switch (book.bucket) {
     case 'no_time':
       return 'Book closed';
     case 'cooldown': {
       const d = daysSince(book.last_tip_sent_at ?? '');
-      return book.last_tip_sent_at ? `Tipped ${d}d ago` : 'Tipped recently';
+      return book.last_tip_sent_at ? `Emailed ${d}d ago` : 'Emailed recently';
     }
+    case 'exhausted':
+      return 'Already emailed twice';
     case 'duplicate':
-      return 'Same organizer, colder book above';
+      return 'Same organizer, another book above';
     case 'opted_out':
       return 'Opted out of book updates';
     default:
@@ -733,16 +748,16 @@ function bucketReason(book: BookForRemindersTip): string {
 }
 
 // Reason: collapsed reference list for books we're NOT emailing right now (opted
-// out, closed, in cooldown, duplicates). Read-only, collapsed by default, hidden
-// entirely when empty. Keeps them findable without cluttering the queue.
-export function RemindersTipAsideList({
+// out, closed, in cooldown, exhausted, duplicates). Read-only, collapsed by
+// default, hidden entirely when empty. Keeps them findable without clutter.
+export function QueueAsideList({
   title,
   subtitle,
   books,
 }: {
   title: string;
   subtitle: string;
-  books: BookForRemindersTip[];
+  books: AsideBook[];
 }) {
   if (books.length === 0) return null;
   return (
@@ -777,5 +792,123 @@ export function RemindersTipAsideList({
         </tbody>
       </table>
     </details>
+  );
+}
+
+// ---------- 5. Reactivation ----------
+
+export function ReactivationGuide() {
+  // Reason: secondary (i), consistent with the other tabs.
+  return (
+    <details className="group mb-4 [&_summary::-webkit-details-marker]:hidden">
+      <summary className="cursor-pointer select-none inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition">
+        <Info className="w-3.5 h-3.5" />
+        <span>How this tab works</span>
+      </summary>
+
+      <div className="mt-2 max-w-3xl text-xs text-gray-400 leading-relaxed space-y-2">
+        <p>
+          People who signed up, then never did anything: 0 recipes, 0 guests, and no
+          return visit for at least a week. A short note from Ana reminding them why they
+          started, pointing back to their book. Oldest-abandoned first.
+        </p>
+        <p>
+          <span className="text-gray-500 font-medium">Signed up</span> = days since they
+          created the book ·{' '}
+          <span className="text-gray-500 font-medium">Last seen</span> = days since their
+          last login ·{' '}
+          <span className="text-gray-500 font-medium">Sent</span> = reactivation emails so
+          far (2 max). Opted-out, closed, recently-emailed, already-tried and duplicate
+          books are collapsed below.
+        </p>
+      </div>
+    </details>
+  );
+}
+
+// Reason: how long they've been abandoned — older = more likely forgotten (louder).
+function abandonTone(days: number): string {
+  if (days > 30) return 'text-red-600 font-medium';
+  if (days > 14) return 'text-amber-600';
+  return 'text-gray-500';
+}
+
+export function ReactivationRow({
+  book,
+  onPreview,
+  onSend,
+  isSending,
+}: {
+  book: BookForReactivation;
+  onPreview: () => void;
+  onSend: () => void;
+  isSending: boolean;
+}) {
+  const bookName = book.couple_display_name || book.group_name;
+  const primary = book.organizer_name || book.organizer_email;
+  const showEmailInSmall = !!book.organizer_name;
+  const sentDates = book.tip_sent_dates;
+  const alreadySentToday = sentToday(sentDates);
+
+  return (
+    <div
+      className={`border-t first:border-t-0 px-5 py-4 transition ${
+        alreadySentToday ? 'bg-amber-50 hover:bg-amber-100' : 'hover:bg-gray-50'
+      }`}
+    >
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <div className="font-semibold text-gray-900 truncate">{primary}</div>
+          <div className="text-xs text-gray-500 mt-0.5">
+            {bookName}
+            {showEmailInSmall && ` · ${book.organizer_email}`}
+          </div>
+        </div>
+        <div className="flex items-center gap-4 text-sm text-gray-500 shrink-0">
+          <span className={abandonTone(book.age_days)} title={`Book created ${formatDate(book.created_at)}`}>
+            Signed up {book.age_days}d ago
+          </span>
+          {book.days_since_login === null ? (
+            <span className="text-gray-300" title="No login record">never returned</span>
+          ) : (
+            <span className="text-gray-400" title={`Last login ${formatDate(book.last_login_at)}`}>
+              Last seen {book.days_since_login}d ago
+            </span>
+          )}
+          <span>
+            <strong className="text-gray-900">{sentDates.length}</strong> sent
+          </span>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <button
+            onClick={onPreview}
+            className="text-xs text-gray-400 hover:text-gray-600 underline transition-colors"
+          >
+            Preview
+          </button>
+          <SendButton
+            isSending={isSending}
+            disabled={book.organizer_opted_out}
+            disabledTitle="Organizer opted out of book updates"
+            alreadySentToday={alreadySentToday}
+            onSend={onSend}
+          />
+        </div>
+      </div>
+
+      {sentDates.length > 0 && (
+        <div className="mt-2 text-xs text-gray-500">
+          <span className="font-medium uppercase tracking-wide text-[10px] text-gray-400 mr-2">
+            Sent
+          </span>
+          {sentDates.map((d, i) => (
+            <span key={d}>
+              {i > 0 && <span className="mx-2 text-gray-300">·</span>}
+              {formatDateLong(d)}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

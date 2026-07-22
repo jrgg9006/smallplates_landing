@@ -336,6 +336,200 @@ export async function getBooksForRemindersTip(): Promise<BookForRemindersTip[]> 
   return enriched;
 }
 
+// ---------- 5. Reactivation (curious-but-abandoned winback) ----------
+
+// Reason: why an abandoned book is or isn't in the send list.
+//   candidate  — email this one; ranked by how long it's been abandoned
+//   opted_out  — organizer opted out
+//   no_time    — book already closed
+//   cooldown   — reactivation sent < REACTIVATION_COOLDOWN_DAYS ago
+//   exhausted  — already got REACTIVATION_MAX_TOUCHES nudges; stop
+//   duplicate  — same organizer email already has an older abandoned book here
+export type ReactivationBucket =
+  | 'candidate'
+  | 'opted_out'
+  | 'no_time'
+  | 'cooldown'
+  | 'exhausted'
+  | 'duplicate';
+
+// Reason: signup + this many days of zero activity before the first winback.
+export const REACTIVATION_MIN_DAYS = 7;
+// Reason: gap between the two touches (so a day-7 send reappears around day 21).
+export const REACTIVATION_COOLDOWN_DAYS = 14;
+// Reason: two touches max, then leave them alone.
+export const REACTIVATION_MAX_TOUCHES = 2;
+
+export interface BookForReactivation {
+  group_id: string;
+  group_name: string;
+  couple_display_name: string | null;
+  organizer_profile_id: string;
+  organizer_email: string;
+  organizer_name: string | null;
+  organizer_opted_out: boolean;
+  created_at: string;
+  // Reason: days since signup/book creation — the rank (oldest abandoned first).
+  age_days: number;
+  last_login_at: string | null;
+  // Reason: days since last login; null when we have no auth record.
+  days_since_login: number | null;
+  book_close_date: string | null;
+  days_left: number | null;
+  tip_sent_dates: string[];
+  last_tip_sent_at: string | null;
+  sent_count: number;
+  bucket: ReactivationBucket;
+}
+
+export async function getBooksForReactivation(): Promise<BookForReactivation[]> {
+  const supabase = createSupabaseAdminClient();
+
+  const { data: groups } = await supabase
+    .from('groups')
+    .select('id, name, couple_display_name, created_by, book_close_date, created_at')
+    .eq('book_status', 'active')
+    .order('created_at', { ascending: true });
+
+  if (!groups || groups.length === 0) return [];
+
+  const groupIds = groups.map(g => g.id);
+  const organizerIds = Array.from(new Set(groups.map(g => g.created_by)));
+
+  const [profilesRes, recipesRes, guestsRes, tipLogRes] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('id, email, full_name, notification_emails_opt_out')
+      .in('id', organizerIds),
+    supabase
+      .from('guest_recipes')
+      .select('group_id')
+      .in('submission_status', ['submitted', 'approved'])
+      .in('group_id', groupIds),
+    supabase
+      .from('guests')
+      .select('group_id')
+      .in('group_id', groupIds),
+    supabase
+      .from('communication_log')
+      .select('group_id, sent_at')
+      .eq('type', 'reactivation')
+      .in('group_id', groupIds),
+  ]);
+
+  const lastLoginByProfile = new Map<string, string | null>();
+  try {
+    const { data: authData } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    for (const u of authData?.users || []) lastLoginByProfile.set(u.id, u.last_sign_in_at || null);
+  } catch (e) {
+    console.error('reactivation: failed to list auth users for last_sign_in_at', e);
+  }
+
+  const profileMap = new Map((profilesRes.data ?? []).map(p => [p.id, p]));
+
+  const recipeCountByGroup = new Map<string, number>();
+  for (const r of recipesRes.data ?? []) {
+    if (!r.group_id) continue;
+    recipeCountByGroup.set(r.group_id, (recipeCountByGroup.get(r.group_id) ?? 0) + 1);
+  }
+
+  const guestCountByGroup = new Map<string, number>();
+  for (const g of guestsRes.data ?? []) {
+    if (!g.group_id) continue;
+    guestCountByGroup.set(g.group_id, (guestCountByGroup.get(g.group_id) ?? 0) + 1);
+  }
+
+  const tipDatesByGroup = new Map<string, string[]>();
+  for (const log of tipLogRes.data ?? []) {
+    if (!log.group_id || !log.sent_at) continue;
+    const arr = tipDatesByGroup.get(log.group_id) ?? [];
+    arr.push(log.sent_at);
+    tipDatesByGroup.set(log.group_id, arr);
+  }
+  for (const arr of tipDatesByGroup.values()) arr.sort();
+
+  const now = Date.now();
+  const daysSince = (iso: string | null): number | null =>
+    iso ? Math.floor((now - new Date(iso).getTime()) / ONE_DAY_MS) : null;
+
+  const abandoned = groups
+    .map(g => {
+      const profile = profileMap.get(g.created_by);
+      if (!profile?.email) return null;
+
+      // Reason: the abandoned population — signed up, but never did anything and
+      // never came back. Anything with a recipe, a guest, or a recent login is out.
+      const recipes = recipeCountByGroup.get(g.id) ?? 0;
+      const guests = guestCountByGroup.get(g.id) ?? 0;
+      if (recipes > 0 || guests > 0) return null;
+
+      const age_days = daysSince(g.created_at) ?? 0;
+      const last_login_at = lastLoginByProfile.get(g.created_by) ?? null;
+      const days_since_login = daysSince(last_login_at);
+      // Reason: "came back recently" disqualifies — they're browsing, not abandoned.
+      const inactiveFor = days_since_login ?? age_days;
+      if (inactiveFor < REACTIVATION_MIN_DAYS || age_days < REACTIVATION_MIN_DAYS) return null;
+
+      const days_left: number | null = g.book_close_date
+        ? Math.max(0, Math.floor((new Date(g.book_close_date).getTime() - now) / ONE_DAY_MS))
+        : null;
+
+      const tipDates = tipDatesByGroup.get(g.id) ?? [];
+      const last_tip_sent_at = tipDates.length ? tipDates[tipDates.length - 1] : null;
+      const sent_count = tipDates.length;
+
+      let bucket: ReactivationBucket;
+      if (profile.notification_emails_opt_out) bucket = 'opted_out';
+      else if (days_left === 0) bucket = 'no_time';
+      else if (sent_count >= REACTIVATION_MAX_TOUCHES) bucket = 'exhausted';
+      else if (last_tip_sent_at && (daysSince(last_tip_sent_at) ?? 999) < REACTIVATION_COOLDOWN_DAYS)
+        bucket = 'cooldown';
+      else bucket = 'candidate';
+
+      return {
+        group_id: g.id,
+        group_name: g.name,
+        couple_display_name: g.couple_display_name,
+        organizer_profile_id: g.created_by,
+        organizer_email: profile.email,
+        organizer_name: profile.full_name,
+        organizer_opted_out: !!profile.notification_emails_opt_out,
+        created_at: g.created_at,
+        age_days,
+        last_login_at,
+        days_since_login,
+        book_close_date: g.book_close_date,
+        days_left,
+        tip_sent_dates: tipDates,
+        last_tip_sent_at,
+        sent_count,
+        bucket,
+      } as BookForReactivation;
+    })
+    .filter((b): b is BookForReactivation => b !== null);
+
+  // Reason: dedupe candidates by organizer email — keep the oldest abandoned book,
+  // demote the rest so the same person isn't emailed twice.
+  const seenEmail = new Set<string>();
+  for (const b of abandoned
+    .filter(b => b.bucket === 'candidate')
+    .sort((a, b) => b.age_days - a.age_days)) {
+    const key = b.organizer_email.toLowerCase();
+    if (seenEmail.has(key)) b.bucket = 'duplicate';
+    else seenEmail.add(key);
+  }
+
+  // Reason: candidates first, oldest-abandoned first; tiebreak by longest gone quiet.
+  abandoned.sort((a, b) => {
+    const rank = (x: BookForReactivation) => (x.bucket === 'candidate' ? 0 : 1);
+    if (rank(a) !== rank(b)) return rank(a) - rank(b);
+    if (b.age_days !== a.age_days) return b.age_days - a.age_days;
+    return (b.days_since_login ?? 0) - (a.days_since_login ?? 0);
+  });
+
+  return abandoned;
+}
+
 // ---------- Implementations ----------
 
 export async function getGroupsWithoutCaptains(includeAll = false): Promise<GroupNeedingCaptain[]> {

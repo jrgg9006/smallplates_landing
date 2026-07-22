@@ -6,6 +6,7 @@ import {
   getActiveGroupsForWeeklyStatus,
   getGroupsClosingSoon,
   getBooksForRemindersTip,
+  getBooksForReactivation,
 } from '@/lib/email/queries';
 
 export async function GET(request: NextRequest) {
@@ -17,13 +18,14 @@ export async function GET(request: NextRequest) {
     // Weekly status and closing nudge stay scoped to active books — they're operational.
     const includeAll = request.nextUrl.searchParams.get('include_all') === 'true';
 
-    const [captainReminder, booksWithCaptains, weeklyStatus, closingNudge, remindersTip] =
+    const [captainReminder, booksWithCaptains, weeklyStatus, closingNudge, remindersTip, reactivation] =
       await Promise.all([
         getGroupsWithoutCaptains(includeAll),
         getGroupsWithCaptains(includeAll),
         getActiveGroupsForWeeklyStatus(),
         getGroupsClosingSoon(7),
         getBooksForRemindersTip(),
+        getBooksForReactivation(),
       ]);
 
     return NextResponse.json({
@@ -32,6 +34,7 @@ export async function GET(request: NextRequest) {
       weeklyStatus,
       closingNudge,
       remindersTip,
+      reactivation,
     });
   } catch (error) {
     return NextResponse.json(

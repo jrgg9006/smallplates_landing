@@ -11,6 +11,7 @@ import type {
   WeeklyStats,
   GroupClosingSoon,
   BookForRemindersTip,
+  BookForReactivation,
 } from '@/lib/email/queries';
 import {
   Section,
@@ -24,7 +25,9 @@ import {
   ClosingNudgeRow,
   RemindersTipGuide,
   RemindersTipRow,
-  RemindersTipAsideList,
+  QueueAsideList,
+  ReactivationGuide,
+  ReactivationRow,
 } from './components/EmailDashboardSections';
 
 interface DashboardData {
@@ -33,9 +36,15 @@ interface DashboardData {
   weeklyStatus: WeeklyStats[];
   closingNudge: GroupClosingSoon[];
   remindersTip: BookForRemindersTip[];
+  reactivation: BookForReactivation[];
 }
 
-type Tab = 'captain-reminder' | 'weekly-status' | 'closing-nudge' | 'reminders-tip';
+type Tab =
+  | 'captain-reminder'
+  | 'weekly-status'
+  | 'closing-nudge'
+  | 'reminders-tip'
+  | 'reactivation';
 
 export default function EmailDashboardPage() {
   const router = useRouter();
@@ -99,7 +108,7 @@ export default function EmailDashboardPage() {
   };
 
   const sendEmail = async (
-    type: 'captain-reminder' | 'weekly-status' | 'closing-nudge' | 'reminders-tip',
+    type: 'captain-reminder' | 'weekly-status' | 'closing-nudge' | 'reminders-tip' | 'reactivation',
     groupId: string,
     confirmMessage: string
   ) => {
@@ -192,7 +201,7 @@ export default function EmailDashboardPage() {
         {data && (
           <>
             {/* Tabs (the count cards double as the navigation). */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
               <TabCard
                 label="Captain reminder"
                 value={data.captainReminder.length}
@@ -216,6 +225,12 @@ export default function EmailDashboardPage() {
                 value={data.remindersTip.filter(b => b.bucket === 'candidate').length}
                 active={activeTab === 'reminders-tip'}
                 onClick={() => setActiveTab('reminders-tip')}
+              />
+              <TabCard
+                label="Reactivation"
+                value={data.reactivation.filter(b => b.bucket === 'candidate').length}
+                active={activeTab === 'reactivation'}
+                onClick={() => setActiveTab('reactivation')}
               />
             </div>
 
@@ -372,17 +387,68 @@ export default function EmailDashboardPage() {
                       ))
                   )}
                 </Section>
-                <RemindersTipAsideList
+                <QueueAsideList
                   title="Not sending right now"
                   subtitle="Closed books, recently emailed, or a duplicate of a colder book above."
                   books={data.remindersTip.filter(
                     b => b.bucket === 'no_time' || b.bucket === 'cooldown' || b.bucket === 'duplicate'
                   )}
                 />
-                <RemindersTipAsideList
+                <QueueAsideList
                   title="Opted out"
                   subtitle="These organizers opted out of book updates, so they're never emailed here."
                   books={data.remindersTip.filter(b => b.bucket === 'opted_out')}
+                />
+              </>
+            )}
+
+            {activeTab === 'reactivation' && (
+              <>
+                <ReactivationGuide />
+                <EmailMetaCard subject="The book you started" />
+                <Section title="Longest abandoned first" tone="primary">
+                  {data.reactivation.filter(b => b.bucket === 'candidate').length === 0 ? (
+                    <EmptyRow message="No abandoned signups to reactivate right now." />
+                  ) : (
+                    data.reactivation
+                      .filter(b => b.bucket === 'candidate')
+                      .map(b => (
+                        <ReactivationRow
+                          key={b.group_id}
+                          book={b}
+                          onPreview={() =>
+                            openPreview(
+                              '/api/v1/admin/email-dashboard/reactivation/preview',
+                              { group_id: b.group_id }
+                            )
+                          }
+                          onSend={() =>
+                            sendEmail(
+                              'reactivation',
+                              b.group_id,
+                              `Send the reactivation email to ${b.organizer_email}?`
+                            )
+                          }
+                          isSending={sendingKey === `reactivation:${b.group_id}`}
+                        />
+                      ))
+                  )}
+                </Section>
+                <QueueAsideList
+                  title="Not sending right now"
+                  subtitle="Closed books, already emailed twice, in cooldown, or a duplicate of an older book above."
+                  books={data.reactivation.filter(
+                    b =>
+                      b.bucket === 'no_time' ||
+                      b.bucket === 'cooldown' ||
+                      b.bucket === 'exhausted' ||
+                      b.bucket === 'duplicate'
+                  )}
+                />
+                <QueueAsideList
+                  title="Opted out"
+                  subtitle="These organizers opted out of book updates, so they're never emailed here."
+                  books={data.reactivation.filter(b => b.bucket === 'opted_out')}
                 />
               </>
             )}
