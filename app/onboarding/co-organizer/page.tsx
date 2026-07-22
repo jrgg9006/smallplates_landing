@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
 
@@ -49,14 +50,25 @@ function CoOrganizerContent() {
   return (
     <OnboardingShell
       title="Add a Captain"
-      subtitle="Captains have full access to your dashboard. They can help you invite people, review recipes, and manage the book."
-      imageUrl=""
+      subtitle="A captain shares your dashboard: they invite people, review recipes, and help run the book."
       skipHref={nextHref}
       onContinue={handleContinue}
       continueLabel={hasInput ? "Invite & Continue" : "Continue"}
       continueDisabled={submitting}
+      rightContent={
+        <div className="relative w-[22rem] h-[22rem]">
+          <Image
+            src="/images/onboarding/occasions/captains_icon.png"
+            alt=""
+            fill
+            sizes="352px"
+            quality={95}
+            className="object-contain"
+          />
+        </div>
+      }
     >
-      <div className="space-y-3">
+      <div className="space-y-3 max-w-md">
         <div>
           <label htmlFor="co-name" className="input-label">Name</label>
           <input
