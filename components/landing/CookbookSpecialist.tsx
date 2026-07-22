@@ -106,7 +106,7 @@ export default function CookbookSpecialist() {
             <p className="type-eyebrow mb-4">Included with every book</p>
 
             <h2 id="cookbook-specialist-heading" className="type-subheading md:text-4xl">
-              A Cookbook Specialist reads every book before it prints.
+              A Cookbook Specialist makes sure your book comes out right.
             </h2>
 
             <p className="type-body-small mt-5 max-w-md">
