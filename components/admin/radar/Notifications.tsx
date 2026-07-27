@@ -5,7 +5,8 @@ import type { RadarNotificationRow } from '@/lib/radar/monitor-types';
 const RANK: Record<string, number> = { high: 0, medium: 1, low: 2 };
 type Row = RadarNotificationRow & { groups?: { name: string } | null };
 
-export default function Notifications() {
+export default function NotificationsDrawer() {
+  const [isOpen, setIsOpen] = useState(false);
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -44,37 +45,89 @@ export default function Notifications() {
     setBusy(false);
   };
 
+  const count = rows.length;
+  const hasHigh = rows.some((r) => r.priority === 'high');
+  const badgeColor = hasHigh && count > 0 ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700';
+
   return (
-    <section className="rounded-2xl bg-white p-6 shadow-sm">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-          Notificaciones
-        </h2>
-        <button
-          onClick={() => void regenerate()}
-          disabled={busy}
-          className="text-sm text-gray-500 hover:text-gray-900 disabled:opacity-50"
+    <>
+      {/* Trigger button */}
+      <button
+        onClick={() => setIsOpen(true)}
+        className="relative flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 shadow transition-colors hover:bg-gray-50"
+        aria-label="Abrir notificaciones"
+      >
+        <span className="text-base">🔔</span>
+        <span
+          className={`min-w-[1.25rem] rounded-full px-1.5 py-0.5 text-center text-xs font-semibold ${badgeColor}`}
         >
-          {busy ? 'Regenerando…' : 'Regenerar ahora'}
-        </button>
-      </div>
-      {loading ? (
-        <p className="text-sm text-gray-400">Cargando…</p>
-      ) : rows.length === 0 ? (
-        <p className="text-sm text-gray-400">Todo en orden. Ningún libro en riesgo hoy.</p>
-      ) : (
-        <ul className="space-y-3">
-          {rows.map((n) => (
-            <NotificationCard
-              key={n.id}
-              n={n}
-              onAttend={() => void patch(n.id, 'attended')}
-              onDismiss={() => void patch(n.id, 'dismissed')}
-            />
-          ))}
-        </ul>
+          {count}
+        </span>
+      </button>
+
+      {/* Backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-49 bg-black/40"
+          style={{ zIndex: 49 }}
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        />
       )}
-    </section>
+
+      {/* Drawer */}
+      <div
+        className={`fixed right-0 top-0 z-50 flex h-screen w-[380px] max-w-[90vw] flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        {/* Drawer header */}
+        <div className="flex flex-shrink-0 items-center gap-3 border-b border-gray-100 p-4">
+          <h2 className="flex-1 text-sm font-semibold uppercase tracking-wide text-gray-500">
+            Notificaciones
+          </h2>
+          <span
+            className={`min-w-[1.25rem] rounded-full px-1.5 py-0.5 text-center text-xs font-semibold ${badgeColor}`}
+          >
+            {count}
+          </span>
+          <button
+            onClick={() => void regenerate()}
+            disabled={busy}
+            className="text-sm text-gray-500 hover:text-gray-900 disabled:opacity-50"
+          >
+            {busy ? 'Regenerando…' : 'Regenerar ahora'}
+          </button>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="ml-1 rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+            aria-label="Cerrar"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Drawer body */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {loading ? (
+            <p className="text-sm text-gray-400">Cargando…</p>
+          ) : rows.length === 0 ? (
+            <p className="text-sm text-gray-400">Todo en orden. Ningún libro en riesgo hoy.</p>
+          ) : (
+            <ul className="space-y-3">
+              {rows.map((n) => (
+                <NotificationCard
+                  key={n.id}
+                  n={n}
+                  onAttend={() => void patch(n.id, 'attended')}
+                  onDismiss={() => void patch(n.id, 'dismissed')}
+                />
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </>
   );
 }
 

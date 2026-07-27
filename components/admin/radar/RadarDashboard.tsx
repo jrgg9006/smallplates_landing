@@ -9,7 +9,7 @@ import { BookProgress } from './BookProgress';
 import { GroupHealthTable } from './GroupHealthTable';
 import { DrilldownPanel } from './DrilldownPanel';
 import { RecipeViewModal } from './RecipeViewModal';
-import Notifications from './Notifications';
+import NotificationsDrawer from './Notifications';
 
 const POLL_MS = 60_000;
 
@@ -90,18 +90,21 @@ export default function RadarDashboard() {
               )}
             </p>
           </div>
-          <div className="flex rounded-lg bg-white p-1 shadow">
-            {(Object.keys(RANGE_LABEL) as RangeKey[]).map((key) => (
-              <button
-                key={key}
-                onClick={() => setRange(key)}
-                className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
-                  range === key ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                {RANGE_LABEL[key]}
-              </button>
-            ))}
+          <div className="flex items-center gap-3">
+            <NotificationsDrawer />
+            <div className="flex rounded-lg bg-white p-1 shadow">
+              {(Object.keys(RANGE_LABEL) as RangeKey[]).map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setRange(key)}
+                  className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
+                    range === key ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  {RANGE_LABEL[key]}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -122,7 +125,6 @@ export default function RadarDashboard() {
 
         {data && (
           <>
-          <Notifications />
           {/* Reason: en mobile el orden del DOM manda (1 columna), así que ponemos
               el feed justo después de los cuadros; en xl recolocamos con grid
               (col-start/row-start) para reconstruir las dos columnas originales. */}
