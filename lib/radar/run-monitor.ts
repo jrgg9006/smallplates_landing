@@ -53,7 +53,7 @@ export async function fetchMonitorSources(
   return { sources, adminOwnerIds };
 }
 
-export async function runRadarMonitor(): Promise<{ generated: number; candidates: number }> {
+export async function runRadarMonitor(): Promise<{ generated: number; candidates: number; failed: number }> {
   const supabase = createSupabaseAdminClient();
   const now = new Date();
   const { sources } = await fetchMonitorSources(supabase);
@@ -62,12 +62,18 @@ export async function runRadarMonitor(): Promise<{ generated: number; candidates
   const existingByGroup = await fetchLatestByGroup(supabase, candidates.map((c) => c.group_id));
 
   let generated = 0;
+  let failed = 0;
   for (const candidate of candidates) {
-    const interp = await interpretCandidate(candidate);
-    const existing = existingByGroup.get(candidate.group_id) ?? null;
-    if (!shouldGenerate(existing, interp, candidate, now)) continue;
-    await persistNotification(supabase, existing, candidate, interp, now);
-    generated++;
+    try {
+      const interp = await interpretCandidate(candidate);
+      const existing = existingByGroup.get(candidate.group_id) ?? null;
+      if (!shouldGenerate(existing, interp, candidate, now)) continue;
+      await persistNotification(supabase, existing, candidate, interp, now);
+      generated++;
+    } catch (e) {
+      console.error('run-monitor: interpretCandidate failed for group_id', candidate.group_id, e);
+      failed++;
+    }
   }
-  return { generated, candidates: candidates.length };
+  return { generated, candidates: candidates.length, failed };
 }

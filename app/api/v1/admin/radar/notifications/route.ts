@@ -36,7 +36,7 @@ export async function PATCH(request: Request) {
     const patch =
       status === 'attended'
         ? { status, attended_at: now.toISOString(), cooldown_until: new Date(now.getTime() + ATTENDED_COOLDOWN_DAYS * DAY_MS).toISOString() }
-        : { status, attended_at: now.toISOString(), cooldown_until: null };
+        : { status, attended_at: null, cooldown_until: null };
     const { error } = await supabase.from('radar_notifications').update(patch).eq('id', id);
     if (error) throw error;
     return NextResponse.json({ ok: true });
