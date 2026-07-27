@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { createSupabaseClient } from '@/lib/supabase/client';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -28,7 +28,7 @@ interface UserProfile {
   recipe_goal_number: number | null;
 }
 
-export default function UserDetailPage() {
+function UserDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -254,5 +254,14 @@ export default function UserDetailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function UserDetailPageWrapper() {
+  // Reason: useSearchParams exige Suspense boundary en App Router
+  return (
+    <Suspense fallback={null}>
+      <UserDetailPage />
+    </Suspense>
   );
 }
