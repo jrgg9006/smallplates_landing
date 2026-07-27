@@ -33,7 +33,7 @@ export function BookProgress({ rows }: { rows: GroupHealthRow[] }) {
                   <span className="min-w-0 truncate font-medium text-gray-700">
                     {row.ownerUserId ? (
                       <Link
-                        href={`/admin/activity/${row.ownerUserId}`}
+                        href={`/admin/activity/${row.ownerUserId}?from=radar`}
                         className="hover:underline"
                       >
                         {row.name}
