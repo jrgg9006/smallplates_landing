@@ -13,6 +13,10 @@ test('system prompt encodes banned words + no em dash rule', () => {
   expect(RADAR_MONITOR_SYSTEM_PROMPT).toContain('em dash');
 });
 
+test('system prompt contains priority calibration guardrail', () => {
+  expect(RADAR_MONITOR_SYSTEM_PROMPT).toContain('most projects are medium or low');
+});
+
 test('user message includes the concrete signals', () => {
   const msg = buildUserMessage(c);
   expect(msg).toContain("Akanksha's Cookbook");
