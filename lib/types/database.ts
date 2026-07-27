@@ -842,6 +842,48 @@ export interface Database {
           unsubscribed_at?: string | null;
         };
       };
+      radar_notifications: {
+        Row: {
+          id: string;
+          group_id: string;
+          generated_at: string;
+          priority: 'high' | 'medium' | 'low';
+          headline: string;
+          interpretation: string;
+          recommended_action: string;
+          draft_message: string;
+          signals: Record<string, unknown>;
+          status: 'open' | 'attended' | 'dismissed';
+          attended_at: string | null;
+          cooldown_until: string | null;
+        };
+        Insert: {
+          id?: string;
+          group_id: string;
+          generated_at?: string;
+          priority: 'high' | 'medium' | 'low';
+          headline: string;
+          interpretation: string;
+          recommended_action: string;
+          draft_message: string;
+          signals?: Record<string, unknown>;
+          status?: 'open' | 'attended' | 'dismissed';
+          attended_at?: string | null;
+          cooldown_until?: string | null;
+        };
+        Update: Partial<{
+          priority: 'high' | 'medium' | 'low';
+          headline: string;
+          interpretation: string;
+          recommended_action: string;
+          draft_message: string;
+          signals: Record<string, unknown>;
+          status: 'open' | 'attended' | 'dismissed';
+          attended_at: string | null;
+          cooldown_until: string | null;
+          generated_at: string;
+        }>;
+      };
       user_events: {
         Row: {
           id: number;
