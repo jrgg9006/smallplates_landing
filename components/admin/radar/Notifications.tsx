@@ -215,7 +215,7 @@ function NotificationCard({
               onClick={onAttend}
               className="rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white"
             >
-              Marcar atendido
+              Snooze 4d
             </button>
             <button
               onClick={onDismiss}
