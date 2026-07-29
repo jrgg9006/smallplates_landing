@@ -8,22 +8,47 @@ type ArchivedBook = {
   archived_at: string | null;
   archived_reason: string | null;
 };
+type ArchivableBook = { id: string; name: string };
 
 export default function ArchivadosPage() {
   const [books, setBooks] = useState<ArchivedBook[]>([]);
+  const [archivable, setArchivable] = useState<ArchivableBook[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState('');
+  const [reason, setReason] = useState('');
+  const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     const res = await fetch('/api/v1/admin/archived');
     const json = await res.json();
     setBooks(json.archived ?? []);
+    setArchivable(json.archivable ?? []);
     setLoading(false);
   }, []);
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  const archive = async () => {
+    if (!selectedId) return;
+    setBusy(true);
+    const res = await fetch('/api/v1/admin/archived', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ groupId: selectedId, reason }),
+    });
+    setBusy(false);
+    if (!res.ok) {
+      const j = (await res.json().catch(() => ({}))) as { error?: string };
+      window.alert(j.error ?? 'No se pudo archivar.');
+      return;
+    }
+    setSelectedId('');
+    setReason('');
+    await load();
+  };
 
   const reactivate = async (groupId: string) => {
     if (!window.confirm('¿Reactivar este libro? Vuelve a aparecer en el radar y en el resto del admin.')) {
@@ -34,7 +59,7 @@ export default function ArchivadosPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ groupId }),
     });
-    setBooks((b) => b.filter((x) => x.id !== groupId));
+    await load();
   };
 
   const formatDate = (iso: string | null) =>
@@ -54,7 +79,45 @@ export default function ArchivadosPage() {
           reactivarlos cuando quieras.
         </p>
 
-        <div className="mt-8 overflow-hidden rounded-xl bg-white shadow">
+        {/* Archive a book from here */}
+        <div className="mt-8 rounded-xl bg-white p-5 shadow">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+            Dar por muerto un libro
+          </h2>
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <select
+              value={selectedId}
+              onChange={(e) => setSelectedId(e.target.value)}
+              className="min-w-0 flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800"
+            >
+              <option value="">Selecciona un libro…</option>
+              {archivable.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+            <input
+              type="text"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Razón (opcional)"
+              className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800"
+            />
+            <button
+              onClick={() => void archive()}
+              disabled={!selectedId || busy}
+              className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
+            >
+              {busy ? 'Archivando…' : 'Dar por muerto'}
+            </button>
+          </div>
+          <p className="mt-2 text-xs text-gray-400">
+            Los libros que ya pagaron no aparecen como opción de borrado y no se pueden archivar.
+          </p>
+        </div>
+
+        <div className="mt-6 overflow-hidden rounded-xl bg-white shadow">
           {loading ? (
             <p className="p-6 text-sm text-gray-400">Cargando…</p>
           ) : books.length === 0 ? (

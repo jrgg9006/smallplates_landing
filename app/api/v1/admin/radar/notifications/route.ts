@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireAdminAuth } from '@/lib/auth/admin';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { ATTENDED_COOLDOWN_DAYS, DAY_MS } from '@/lib/radar/monitor-constants';
-import { PAID_STATUSES } from '@/lib/radar/aggregate';
+import { isGroupPaid, PAID_BOOK_ARCHIVE_ERROR } from '@/lib/radar/archive-guard';
 
 export async function GET() {
   try {
@@ -42,21 +42,9 @@ export async function PATCH(request: Request) {
       const { data: notif } = await supabase.from('radar_notifications').select('group_id').eq('id', id).single();
       if (!notif) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-      // Guardrail: never hide a paid / in-production book. Losing it from Operations could drop a real order.
-      // Reason: a group can have MULTIPLE paid orders (book close + extra copies), so use limit(1) on a list,
-      // not maybeSingle() (which errors on 2+ rows and would silently skip the block).
-      const { data: paidOrders, error: paidError } = await supabase
-        .from('orders')
-        .select('id')
-        .eq('group_id', notif.group_id)
-        .in('status', Array.from(PAID_STATUSES))
-        .limit(1);
-      if (paidError) throw paidError;
-      if (paidOrders && paidOrders.length > 0) {
-        return NextResponse.json(
-          { error: 'Este libro ya pagó o está en producción. No se puede dar por muerto.' },
-          { status: 409 }
-        );
+      // Guardrail: never hide a paid / in-production book (would drop a real order from Operations).
+      if (await isGroupPaid(supabase, notif.group_id)) {
+        return NextResponse.json({ error: PAID_BOOK_ARCHIVE_ERROR }, { status: 409 });
       }
 
       // Reason: "dead" is a durable, reversible book-level flag; the notification CHECK only allows
