@@ -26,7 +26,7 @@ export function BookProgress({ rows }: { rows: GroupHealthRow[] }) {
     <div className="rounded-xl bg-white p-5 shadow-lg">
       <div className="mb-1 flex items-center text-sm font-semibold uppercase tracking-wide text-gray-700">
         Avance de libros activos
-        <InfoTip text="Un renglón por libro activo, ordenado por número de recetas. La barra llena (100%) son 25 recetas, el mínimo para mandar a imprimir. Verde = ya pasó el umbral. Los libros cerrados (en producción) no aparecen. Debajo de cada libro va el pulso: hace cuánto pasó cada señal (hoy / ayer / Nd, o — si nunca). login = último acceso del dueño; compartió = última vez que copió/compartió el link de invitación; invitó = último invitado agregado; receta = última receta subida; editó = última edición de receta." />
+        <InfoTip text="Un renglón por libro activo, ordenado por número de recetas. La barra llena (100%) son 25 recetas, el mínimo para mandar a imprimir. Verde = ya pasó el umbral. Los libros cerrados (en producción) no aparecen. Debajo de cada libro va el pulso: hace cuánto pasó cada señal (hoy / ayer / Nd, o — si nunca). login = último acceso del dueño; compartió link = última vez que copió/compartió el link de invitación; nuevo guest = último invitado agregado; receta = última receta subida; editó = última edición de receta." />
       </div>
       <p className="mb-4 text-xs text-gray-400">100% = 25 recetas (listo para imprimir)</p>
       {active.length === 0 ? (
@@ -72,7 +72,7 @@ export function BookProgress({ rows }: { rows: GroupHealthRow[] }) {
                   />
                 </div>
                 <div className="mt-1 text-[11px] text-gray-400">
-                  login {ago(row.lastLoginAt)} · compartió {ago(row.lastShareAt)} · invitó{' '}
+                  login {ago(row.lastLoginAt)} · compartió link {ago(row.lastShareAt)} · nuevo guest{' '}
                   {ago(row.lastInviteAt)} · receta {ago(row.lastRecipeAt)} · editó{' '}
                   {ago(row.lastEditAt)}
                 </div>
