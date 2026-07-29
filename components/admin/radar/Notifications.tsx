@@ -5,12 +5,15 @@ import type { RadarNotificationRow } from '@/lib/radar/monitor-types';
 const RANK: Record<string, number> = { high: 0, medium: 1, low: 2 };
 type Row = RadarNotificationRow & { groups?: { name: string } | null };
 type PatchStatus = 'attended' | 'dismissed' | 'archived';
+type ArchivedBook = { id: string; name: string; radar_archived_at: string | null };
 
 export default function NotificationsDrawer() {
   const [isOpen, setIsOpen] = useState(false);
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [archived, setArchived] = useState<ArchivedBook[]>([]);
+  const [showArchived, setShowArchived] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -26,9 +29,16 @@ export default function NotificationsDrawer() {
     setLoading(false);
   }, []);
 
+  const loadArchived = useCallback(async () => {
+    const res = await fetch('/api/v1/admin/radar/notifications/archived');
+    const json = await res.json();
+    setArchived(json.archived ?? []);
+  }, []);
+
   useEffect(() => {
     void load();
-  }, [load]);
+    void loadArchived();
+  }, [load, loadArchived]);
 
   const patch = async (id: string, status: PatchStatus) => {
     await fetch('/api/v1/admin/radar/notifications', {
@@ -39,6 +49,15 @@ export default function NotificationsDrawer() {
     setRows((r) => r.filter((x) => x.id !== id));
   };
 
+  const recuperar = async (groupId: string) => {
+    await fetch('/api/v1/admin/radar/notifications/archived', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ groupId }),
+    });
+    setArchived((a) => a.filter((x) => x.id !== groupId));
+  };
+
   const regenerate = async () => {
     setBusy(true);
     await fetch('/api/v1/admin/radar/notifications/regenerate', { method: 'POST' });
@@ -47,14 +66,16 @@ export default function NotificationsDrawer() {
   };
 
   // Reason: let the founder archive ANY book by hand, not only the auto-classified let_go ones.
-  const archive = (id: string) => {
+  const archive = async (id: string) => {
     if (
-      window.confirm(
+      !window.confirm(
         '¿Dar por perdido este libro? Sale del radar. Si el cliente vuelve a moverse, reaparece solo.'
       )
     ) {
-      void patch(id, 'archived');
+      return;
     }
+    await patch(id, 'archived');
+    await loadArchived();
   };
 
   const count = rows.length;
@@ -126,11 +147,15 @@ export default function NotificationsDrawer() {
         <div className="flex-1 overflow-y-auto p-6">
           {loading ? (
             <p className="text-sm text-gray-400">Cargando…</p>
-          ) : rows.length === 0 ? (
-            <p className="text-sm text-gray-400">Todo en orden. Ningún libro en riesgo hoy.</p>
           ) : (
-            <div className="space-y-6">
-              {revive.length > 0 && (
+            <>
+              {rows.length === 0 ? (
+                <p className="text-sm text-gray-400">
+                  Todo en orden. Ningún libro en riesgo hoy.
+                </p>
+              ) : (
+                <div className="space-y-6">
+                  {revive.length > 0 && (
                 <section>
                   <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
                     Enfócate aquí
@@ -143,7 +168,7 @@ export default function NotificationsDrawer() {
                         muted={false}
                         onAttend={() => void patch(n.id, 'attended')}
                         onDismiss={() => void patch(n.id, 'dismissed')}
-                        onLetGo={() => archive(n.id)}
+                        onLetGo={() => void archive(n.id)}
                       />
                     ))}
                   </ul>
@@ -163,13 +188,44 @@ export default function NotificationsDrawer() {
                         muted={true}
                         onAttend={() => void patch(n.id, 'attended')}
                         onDismiss={() => void patch(n.id, 'dismissed')}
-                        onLetGo={() => archive(n.id)}
+                        onLetGo={() => void archive(n.id)}
                       />
                     ))}
                   </ul>
                 </section>
               )}
-            </div>
+                </div>
+              )}
+
+              {archived.length > 0 && (
+                <div className="mt-6 border-t border-gray-100 pt-4">
+                  <button
+                    onClick={() => setShowArchived((s) => !s)}
+                    className="text-xs font-semibold uppercase tracking-wide text-gray-400 hover:text-gray-700"
+                  >
+                    {showArchived ? '▾' : '▸'} Archivados ({archived.length})
+                  </button>
+                  {showArchived && (
+                    <ul className="mt-3 space-y-2">
+                      {archived.map((b) => (
+                        <li
+                          key={b.id}
+                          className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2"
+                        >
+                          <span className="text-sm text-gray-600">{b.name}</span>
+                          <button
+                            onClick={() => void recuperar(b.id)}
+                            className="text-xs text-gray-500 hover:text-gray-900"
+                          >
+                            Recuperar
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
