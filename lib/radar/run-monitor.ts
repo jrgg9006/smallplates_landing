@@ -1,7 +1,7 @@
 // lib/radar/run-monitor.ts
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { isAdminEmail } from '@/lib/config/admin';
-import { computeCandidates } from './monitor';
+import { computeCandidates, computeResurrectedGroupIds } from './monitor';
 import { interpretCandidate } from './interpret';
 import { fetchLatestByGroup, persistNotification, shouldGenerate } from './monitor-store';
 import type { MonitorSources } from './monitor-types';
@@ -60,11 +60,9 @@ export async function runRadarMonitor(): Promise<{ generated: number; candidates
 
   const candidates = computeCandidates(sources, now);
 
-  // Reason: if a candidate made it through archive suppression, it resurrected — clear the flag so future
-  // runs don't re-evaluate the stale archive timestamp.
-  const resurrectedIds = candidates
-    .map((c) => c.group_id)
-    .filter((id) => sources.groups.find((g) => g.id === id)?.archived_at);
+  // Reason: un-archive ANY archived book with new client activity since it was archived (login, recipe,
+  // guest) — even if it returns healthy and never becomes an at-risk candidate.
+  const resurrectedIds = computeResurrectedGroupIds(sources, now);
   if (resurrectedIds.length > 0) {
     const { error: resurrectionError } = await supabase
       .from('groups')

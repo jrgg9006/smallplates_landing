@@ -52,6 +52,21 @@ export function computeClientColdnessDays(
   return { coldness: Math.floor((now.getTime() - last) / DAY_MS), lastActivity: new Date(last).toISOString() };
 }
 
+// Reason: an archived book must un-archive on ANY new client activity (login, recipe, guest),
+// even if it comes back healthy. This is decoupled from candidacy/at-risk so a clean return is not
+// stranded as still-hidden. Deterministic; no LLM.
+export function computeResurrectedGroupIds(sources: MonitorSources, now: Date): string[] {
+  const ids: string[] = [];
+  for (const g of sources.groups) {
+    if (!g.archived_at) continue;
+    const { lastActivity } = computeClientColdnessDays(g.id, g.created_by, sources, now);
+    if (lastActivity && new Date(lastActivity).getTime() > new Date(g.archived_at).getTime()) {
+      ids.push(g.id);
+    }
+  }
+  return ids;
+}
+
 export function computeCandidates(sources: MonitorSources, now: Date): NotificationCandidate[] {
   const out: NotificationCandidate[] = [];
   for (const g of sources.groups) {

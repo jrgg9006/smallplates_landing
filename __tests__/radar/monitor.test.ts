@@ -1,5 +1,10 @@
 // __tests__/radar/monitor.test.ts
-import { computeCandidates, computeMomentum, computeDaysUntilClose } from '@/lib/radar/monitor';
+import {
+  computeCandidates,
+  computeMomentum,
+  computeDaysUntilClose,
+  computeResurrectedGroupIds,
+} from '@/lib/radar/monitor';
 import type { MonitorSources } from '@/lib/radar/monitor-types';
 
 const NOW = new Date('2026-07-27T12:00:00Z');
@@ -8,6 +13,51 @@ const daysAgo = (n: number) => new Date(NOW.getTime() - n * 86400000).toISOStrin
 function baseSources(): MonitorSources {
   return { groups: [], recipes: [], guests: [], captains: [], comms: [], events: [], lastLoginByProfile: {} };
 }
+
+function archivedGroup(id: string, ownerId: string, archivedAtIso: string) {
+  return {
+    id,
+    name: id,
+    created_by: ownerId,
+    created_at: daysAgo(90),
+    book_status: 'active',
+    book_close_date: null,
+    event_date: null,
+    gift_date: null,
+    wedding_date: null,
+    archived_at: archivedAtIso,
+  };
+}
+
+test('resurrects an archived book when the owner logged in AFTER it was archived', () => {
+  const s = baseSources();
+  s.groups = [archivedGroup('g1', 'p1', daysAgo(10))];
+  s.lastLoginByProfile = { p1: daysAgo(1) }; // login 1 day ago, archived 10 days ago
+  expect(computeResurrectedGroupIds(s, NOW)).toEqual(['g1']);
+});
+
+test('resurrects on a healthy return (recent login, not an at-risk candidate)', () => {
+  const s = baseSources();
+  s.groups = [archivedGroup('g1', 'p1', daysAgo(30))];
+  s.lastLoginByProfile = { p1: daysAgo(0) }; // logged in today → coldness ~0, never a candidate
+  expect(computeResurrectedGroupIds(s, NOW)).toEqual(['g1']);
+  expect(computeCandidates(s, NOW)).toHaveLength(0); // proves the old candidate-based path missed it
+});
+
+test('does NOT resurrect an archived book with no client activity after the archive', () => {
+  const s = baseSources();
+  s.groups = [archivedGroup('g1', 'p1', daysAgo(5))];
+  s.recipes = [{ group_id: 'g1', guest_id: 'x', submitted_at: daysAgo(20), submission_status: 'submitted' }];
+  s.lastLoginByProfile = { p1: daysAgo(40) }; // all activity older than the 5-day-old archive
+  expect(computeResurrectedGroupIds(s, NOW)).toEqual([]);
+});
+
+test('ignores non-archived groups', () => {
+  const s = baseSources();
+  s.groups = [{ ...archivedGroup('g1', 'p1', daysAgo(10)), archived_at: null }];
+  s.lastLoginByProfile = { p1: daysAgo(1) };
+  expect(computeResurrectedGroupIds(s, NOW)).toEqual([]);
+});
 
 test('computeMomentum flags stalled when prior weeks had recipes but last 10 days none', () => {
   const submitted = [daysAgo(25), daysAgo(24), daysAgo(20), daysAgo(18)]; // all older than 10d
