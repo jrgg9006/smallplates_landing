@@ -87,6 +87,7 @@ export function stripAdmin(d: RadarSources): RadarSources {
     orders: d.orders.filter((o) => !isAdmin(o.user_id)),
     events: d.events.filter((e) => !isAdmin(e.user_id)),
     members: d.members.filter((m) => !isAdmin(m.profile_id)),
+    lastLoginByProfile: d.lastLoginByProfile, // Reason: preserve non-array fields through the strip.
   };
 }
 
