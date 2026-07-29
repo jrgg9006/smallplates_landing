@@ -68,7 +68,8 @@ export async function getAllUsersAdmin() {
       const { count: groupsOwnedCount } = await supabase
         .from('groups')
         .select('*', { count: 'exact', head: true })
-        .eq('created_by', profile.id);
+        .eq('created_by', profile.id)
+        .is('archived_at', null);
 
       // Get groups where user is a member but NOT owner (captain/admin memberships)
       const { count: groupsMemberCount } = await supabase

@@ -87,6 +87,7 @@ export function stripAdmin(d: RadarSources): RadarSources {
     orders: d.orders.filter((o) => !isAdmin(o.user_id)),
     events: d.events.filter((e) => !isAdmin(e.user_id)),
     members: d.members.filter((m) => !isAdmin(m.profile_id)),
+    lastLoginByProfile: d.lastLoginByProfile, // Reason: preserve non-array fields through the strip.
   };
 }
 
@@ -337,6 +338,19 @@ export function computeGroupHealth(d: RadarSources, now: Date): GroupHealthRow[]
       .map((c) => c.sent_at ?? c.created_at)
       .sort();
 
+    // Per-book pulse: the most recent timestamp of each client signal (null = never).
+    const lastOf = (times: (string | null | undefined)[]): string | null => {
+      const ms = times.filter((t): t is string => !!t).map((t) => new Date(t).getTime());
+      return ms.length ? new Date(Math.max(...ms)).toISOString() : null;
+    };
+    const lastRecipeAt = lastOf(recipes.map((r) => r.created_at));
+    const lastInviteAt = lastOf(guests.map((gu) => gu.created_at));
+    const lastShareAt = lastOf(
+      events.filter((e) => SHARE_EVENTS.has(e.event_name)).map((e) => e.created_at)
+    );
+    const lastEditAt = lastOf(edits.map((e) => e.created_at));
+    const lastLoginAt = d.lastLoginByProfile?.[g.created_by] ?? null;
+
     const owner = profileById.get(g.created_by);
 
     rows.push({
@@ -353,6 +367,11 @@ export function computeGroupHealth(d: RadarSources, now: Date): GroupHealthRow[]
       daysInactive,
       health: daysInactive < 3 ? 'green' : daysInactive <= 7 ? 'yellow' : 'red',
       closed: CLOSED_BOOK_STATUSES.has(g.book_status ?? ''),
+      lastLoginAt,
+      lastShareAt,
+      lastInviteAt,
+      lastRecipeAt,
+      lastEditAt,
     });
   }
 

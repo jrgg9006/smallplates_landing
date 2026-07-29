@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { createSupabaseClient } from '@/lib/supabase/client';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { isAdminEmail } from '@/lib/config/admin';
 
@@ -28,7 +28,7 @@ interface UserProfile {
   recipe_goal_number: number | null;
 }
 
-export default function UserDetailPage() {
+function UserDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -36,7 +36,10 @@ export default function UserDetailPage() {
   const [sortBy, setSortBy] = useState<'newest' | 'status' | 'recipes'>('newest');
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const userId = params.userId as string;
+  // Reason: Radar links append ?from=radar so the back button returns to the right page.
+  const fromRadar = searchParams.get('from') === 'radar';
 
   useEffect(() => {
     checkAdminAndLoadData();
@@ -125,10 +128,10 @@ export default function UserDetailPage() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <Link
-                href="/admin/activity"
+                href={fromRadar ? '/admin/radar' : '/admin/activity'}
                 className="text-sm text-gray-600 hover:text-gray-900 mb-2 inline-block"
               >
-                ← Back to Activity
+                {fromRadar ? '← Back to Radar' : '← Back to Activity'}
               </Link>
               <h1 className="text-3xl font-bold text-gray-900 mb-1">
                 {userProfile.full_name || 'Unnamed User'}
@@ -251,5 +254,14 @@ export default function UserDetailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function UserDetailPageWrapper() {
+  // Reason: useSearchParams exige Suspense boundary en App Router
+  return (
+    <Suspense fallback={null}>
+      <UserDetailPage />
+    </Suspense>
   );
 }

@@ -54,7 +54,7 @@ export function GroupHealthTable({ rows }: { rows: GroupHealthRow[] }) {
                 <tr key={row.groupId} className="border-b border-gray-50 hover:bg-gray-50">
                   <td className="py-2.5 pr-3">
                     {row.ownerUserId ? (
-                      <Link href={`/admin/activity/${row.ownerUserId}`} className="font-medium text-gray-900 hover:underline">
+                      <Link href={`/admin/activity/${row.ownerUserId}?from=radar`} className="font-medium text-gray-900 hover:underline">
                         {row.name}
                       </Link>
                     ) : (

@@ -99,6 +99,8 @@ export interface RadarSources {
   orders: OrderRow[];
   events: UserEventRow[];
   members: GroupMemberRow[];
+  // owner profile id -> last sign-in ISO (from auth). Optional so other callers need not provide it.
+  lastLoginByProfile?: Record<string, string | null>;
 }
 
 // Aggregated payload served by GET /api/v1/admin/radar.
@@ -172,6 +174,12 @@ export interface GroupHealthRow {
   daysInactive: number;
   health: 'green' | 'yellow' | 'red';
   closed: boolean; // book past 'active' (reviewed/ready_to_print/printed) — already in production
+  // Per-book pulse: last time each client signal happened (null = never). Powers the at-a-glance row.
+  lastLoginAt: string | null; // owner last sign-in
+  lastShareAt: string | null; // owner shared the collection link
+  lastInviteAt: string | null; // a guest was added/invited
+  lastRecipeAt: string | null; // a recipe was submitted
+  lastEditAt: string | null; // a recipe was edited
 }
 
 export interface RadarPayload {

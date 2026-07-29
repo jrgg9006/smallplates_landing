@@ -17,6 +17,7 @@ export async function GET() {
         created_at,
         profiles!groups_created_by_fkey(email, full_name)
       `)
+      .is('archived_at', null)
       .order('created_at', { ascending: false });
 
     if (error) {

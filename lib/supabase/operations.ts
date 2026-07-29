@@ -67,7 +67,8 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
         groups (
           id,
           name,
-          book_status
+          book_status,
+          archived_at
         )
       ),
       midjourney_prompts (
@@ -177,9 +178,11 @@ export async function getAllRecipesWithProductionStatusAdmin(filters?: {
 
     // Get group info - filter out removed entries (removed_at IS NULL means active)
     // A recipe is archived if it has NO active group associations
+    // Reason: also treat recipes whose group has archived_at set as having no active group,
+    // so dead groups are suppressed from the Operations list.
     const groupRecipes = recipe.group_recipes || [];
     const allGroupRecipes = Array.isArray(groupRecipes) ? groupRecipes : [groupRecipes];
-    const activeGroupRecipes = allGroupRecipes.filter((gr: any) => !gr.removed_at);
+    const activeGroupRecipes = allGroupRecipes.filter((gr: any) => !gr.removed_at && !gr.groups?.archived_at);
 
     const hasActiveGroupAssociation = activeGroupRecipes.length > 0;
     const groupRecipe = activeGroupRecipes[0];
