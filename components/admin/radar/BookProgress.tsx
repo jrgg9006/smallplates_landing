@@ -7,6 +7,15 @@ import { InfoTip } from './InfoTip';
 // Reason: 25 recetas es el umbral mínimo para mandar a imprimir, así que 100% = 25.
 const PRINT_THRESHOLD = 25;
 
+// Compact relative time for the per-book pulse. "—" = never happened.
+function ago(iso: string | null): string {
+  if (!iso) return '—';
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+  if (days <= 0) return 'hoy';
+  if (days === 1) return 'ayer';
+  return `${days}d`;
+}
+
 export function BookProgress({ rows }: { rows: GroupHealthRow[] }) {
   // Reason: solo libros que aún juntan recetas — los cerrados ya están en producción.
   const active = rows
@@ -61,6 +70,11 @@ export function BookProgress({ rows }: { rows: GroupHealthRow[] }) {
                     }`}
                     style={{ width: `${Math.max(pct, row.recipes > 0 ? 3 : 0)}%` }}
                   />
+                </div>
+                <div className="mt-1 text-[11px] text-gray-400">
+                  login {ago(row.lastLoginAt)} · compartió {ago(row.lastShareAt)} · invitó{' '}
+                  {ago(row.lastInviteAt)} · receta {ago(row.lastRecipeAt)} · editó{' '}
+                  {ago(row.lastEditAt)}
                 </div>
               </div>
             );

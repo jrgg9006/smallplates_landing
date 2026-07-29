@@ -92,5 +92,18 @@ export async function fetchRadarSources(): Promise<{
     }
   });
 
-  return { sources: out as unknown as RadarSources, degraded };
+  // Reason: last-login lives on auth.users (not profiles), so fetch it like run-monitor/email do.
+  // A failure here must not blank the dashboard — degrade to an empty map.
+  const lastLoginByProfile: Record<string, string | null> = {};
+  try {
+    const { data } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    for (const u of data?.users ?? []) lastLoginByProfile[u.id] = u.last_sign_in_at ?? null;
+  } catch (e) {
+    console.error('radar: failed to fetch logins', e);
+    degraded.push('logins');
+  }
+
+  const sources = out as unknown as RadarSources;
+  sources.lastLoginByProfile = lastLoginByProfile;
+  return { sources, degraded };
 }
