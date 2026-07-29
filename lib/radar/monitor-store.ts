@@ -61,6 +61,7 @@ export async function persistNotification(
     interpretation: interp.interpretation,
     recommended_action: interp.recommended_action,
     draft_message: interp.draft_message,
+    lifecycle: candidate.lifecycle,
     signals: candidate as unknown as Record<string, unknown>,
     status: 'open' as const,
     attended_at: null,

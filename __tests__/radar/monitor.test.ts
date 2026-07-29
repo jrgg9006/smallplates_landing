@@ -32,7 +32,7 @@ test('computeDaysUntilClose prefers book_close_date then event then gift', () =>
 
 test('a cold active book with prior momentum becomes a candidate (Danay case)', () => {
   const s = baseSources();
-  s.groups = [{ id: 'g1', name: "Akanksha's Cookbook", created_by: 'p1', created_at: daysAgo(60), book_status: 'active', book_close_date: null, event_date: null, gift_date: null, wedding_date: null }];
+  s.groups = [{ id: 'g1', name: "Akanksha's Cookbook", created_by: 'p1', created_at: daysAgo(60), book_status: 'active', book_close_date: null, event_date: null, gift_date: null, wedding_date: null, radar_archived_at: null }];
   s.guests = [{ id: 'gu1', group_id: 'g1', created_at: daysAgo(30), is_self: false }];
   // 15 recipes, all submitted ~30 days ago, none since
   s.recipes = Array.from({ length: 15 }, (_, i) => ({ group_id: 'g1', guest_id: 'gu1', submitted_at: daysAgo(30 + (i % 5)), submission_status: 'submitted' }));
@@ -47,22 +47,50 @@ test('a cold active book with prior momentum becomes a candidate (Danay case)', 
 
 test('a fresh active book (recipe yesterday) is NOT a candidate', () => {
   const s = baseSources();
-  s.groups = [{ id: 'g2', name: 'Fresh', created_by: 'p2', created_at: daysAgo(3), book_status: 'active', book_close_date: null, event_date: null, gift_date: null, wedding_date: null }];
+  s.groups = [{ id: 'g2', name: 'Fresh', created_by: 'p2', created_at: daysAgo(3), book_status: 'active', book_close_date: null, event_date: null, gift_date: null, wedding_date: null, radar_archived_at: null }];
   s.recipes = [{ group_id: 'g2', guest_id: 'x', submitted_at: daysAgo(1), submission_status: 'submitted' }];
   expect(computeCandidates(s, NOW)).toHaveLength(0);
 });
 
 test('closed books are excluded', () => {
   const s = baseSources();
-  s.groups = [{ id: 'g3', name: 'Done', created_by: 'p3', created_at: daysAgo(60), book_status: 'printed', book_close_date: null, event_date: null, gift_date: null, wedding_date: null }];
+  s.groups = [{ id: 'g3', name: 'Done', created_by: 'p3', created_at: daysAgo(60), book_status: 'printed', book_close_date: null, event_date: null, gift_date: null, wedding_date: null, radar_archived_at: null }];
   expect(computeCandidates(s, NOW)).toHaveLength(0);
 });
 
 test('founder emails do NOT reset coldness (honest coldness)', () => {
   const s = baseSources();
-  s.groups = [{ id: 'g4', name: 'Cold', created_by: 'p4', created_at: daysAgo(40), book_status: 'active', book_close_date: null, event_date: null, gift_date: null, wedding_date: null }];
+  s.groups = [{ id: 'g4', name: 'Cold', created_by: 'p4', created_at: daysAgo(40), book_status: 'active', book_close_date: null, event_date: null, gift_date: null, wedding_date: null, radar_archived_at: null }];
   s.recipes = [{ group_id: 'g4', guest_id: 'gz', submitted_at: daysAgo(20), submission_status: 'submitted' }];
   s.comms = [{ group_id: 'g4', recipient_profile_id: 'p4', type: 'reminder', sent_at: daysAgo(1), created_at: daysAgo(1) }];
   const out = computeCandidates(s, NOW);
   expect(out[0].client_coldness_days).toBeGreaterThanOrEqual(19); // email 1d ago is ignored
+});
+
+test('a let_go book is classified let_go when outreach was ignored', () => {
+  const s = baseSources();
+  s.groups = [{ id: 'g1', name: 'Gineele & Marco', created_by: 'p1', created_at: daysAgo(60), book_status: 'active', book_close_date: null, event_date: null, gift_date: null, wedding_date: null, radar_archived_at: null }];
+  // no recipes, no guests, and a founder reminder 20 days ago that was ignored
+  s.comms = [{ group_id: 'g1', recipient_profile_id: 'p1', type: 'reminder', sent_at: daysAgo(20), created_at: daysAgo(20) }];
+  const out = computeCandidates(s, NOW);
+  expect(out).toHaveLength(1);
+  expect(out[0].outreach_ignored).toBe(true);
+  expect(out[0].lifecycle).toBe('let_go');
+});
+
+test('an archived book with no new client activity is suppressed', () => {
+  const s = baseSources();
+  s.groups = [{ id: 'g1', name: 'Archived', created_by: 'p1', created_at: daysAgo(60), book_status: 'active', book_close_date: null, event_date: null, gift_date: null, wedding_date: null, radar_archived_at: daysAgo(2) }];
+  expect(computeCandidates(s, NOW)).toHaveLength(0);
+});
+
+test('an archived book resurrects when client activity is newer than the archive', () => {
+  const s = baseSources();
+  s.groups = [{ id: 'g1', name: 'Back', created_by: 'p1', created_at: daysAgo(60), book_status: 'active', book_close_date: null, event_date: null, gift_date: null, wedding_date: null, radar_archived_at: daysAgo(10) }];
+  s.recipes = [{ group_id: 'g1', guest_id: 'x', submitted_at: daysAgo(1), submission_status: 'submitted' }];
+  expect(computeCandidates(s, NOW).length).toBe(0); // recipe 1d ago → not cold enough to be a candidate at all
+  // but it is NOT suppressed by archive: prove via a cold-but-recently-active setup
+  s.recipes = [{ group_id: 'g1', guest_id: 'x', submitted_at: daysAgo(6), submission_status: 'submitted' }];
+  const out = computeCandidates(s, NOW);
+  expect(out).toHaveLength(1); // coldness ~6 >= 5 candidate; archive (10d ago) is older than activity (6d) → not suppressed
 });

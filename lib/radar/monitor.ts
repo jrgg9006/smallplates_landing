@@ -1,5 +1,6 @@
 // lib/radar/monitor.ts
 import { COLDNESS_CANDIDATE_DAYS, DEADLINE_NEAR_DAYS, MOMENTUM_STALL_DAYS, PRINT_GOAL, DAY_MS } from './monitor-constants';
+import { computeOutreachIgnored, classifyLifecycle } from './lifecycle';
 import type { MonitorSources, NotificationCandidate, CloseDateSource } from './monitor-types';
 
 const CLOSED_BOOK_STATUSES = new Set(['reviewed', 'ready_to_print', 'printed', 'inactive']);
@@ -76,11 +77,31 @@ export function computeCandidates(sources: MonitorSources, now: Date): Notificat
       .filter((c) => c.group_id === g.id && c.recipient_profile_id === g.created_by && c.sent_at)
       .sort((a, b) => (a.sent_at! > b.sent_at! ? -1 : 1))[0];
 
+    // Reason: a book the founder gave up on stays out until the client shows real activity again.
+    if (g.radar_archived_at) {
+      const archivedMs = new Date(g.radar_archived_at).getTime();
+      const activityMs = lastActivity ? new Date(lastActivity).getTime() : 0;
+      if (archivedMs >= activityMs) continue;
+    }
+
     const isCandidate =
       coldness >= COLDNESS_CANDIDATE_DAYS ||
       momentum.stalled ||
       (days_until_close != null && days_until_close <= DEADLINE_NEAR_DAYS && recipes < PRINT_GOAL);
     if (!isCandidate) continue;
+
+    const outreach_ignored = computeOutreachIgnored({
+      last_founder_outreach: outreach ? { sent_at: outreach.sent_at! } : null,
+      last_client_activity_at: lastActivity,
+    });
+    const lifecycle = classifyLifecycle({
+      outreach_ignored,
+      recipes,
+      distinct_submitters,
+      client_coldness_days: coldness === Infinity ? daysBetween(g.created_at, now) : coldness,
+      days_until_close,
+      gap_to_goal: Math.max(0, PRINT_GOAL - recipes),
+    });
 
     out.push({
       group_id: g.id,
@@ -98,6 +119,8 @@ export function computeCandidates(sources: MonitorSources, now: Date): Notificat
       contributors: { distinct_submitters, owner_submitted, is_solo: distinct_submitters <= 1 },
       owner_last_login_at: sources.lastLoginByProfile[g.created_by] ?? null,
       last_founder_outreach: outreach ? { type: outreach.type, sent_at: outreach.sent_at! } : null,
+      outreach_ignored,
+      lifecycle,
     });
   }
   return out.sort((a, b) => b.client_coldness_days - a.client_coldness_days);

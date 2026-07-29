@@ -10,6 +10,7 @@ export interface MonitorSources {
     book_status: string;
     book_close_date: string | null; event_date: string | null;
     gift_date: string | null; wedding_date: string | null;
+    radar_archived_at: string | null;
   }>;
   recipes: Array<{ group_id: string; guest_id: string | null; submitted_at: string | null; submission_status: string; }>;
   guests: Array<{ id: string; group_id: string; created_at: string; is_self: boolean; }>;
@@ -35,6 +36,8 @@ export interface NotificationCandidate {
   contributors: { distinct_submitters: number; owner_submitted: boolean; is_solo: boolean };
   owner_last_login_at: string | null;
   last_founder_outreach: { type: string; sent_at: string } | null;
+  outreach_ignored: boolean;
+  lifecycle: 'revive' | 'let_go';
 }
 
 export interface NotificationInterpretation {
@@ -54,6 +57,7 @@ export interface RadarNotificationRow {
   interpretation: string;
   recommended_action: string;
   draft_message: string;
+  lifecycle: 'revive' | 'let_go';
   signals: NotificationCandidate;
   status: NotificationStatus;
   attended_at: string | null;

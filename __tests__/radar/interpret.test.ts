@@ -6,6 +6,7 @@ const c: NotificationCandidate = {
   client_coldness_days: 30, last_client_activity_at: '2026-06-27T00:00:00Z', days_until_close: null, close_date_source: null,
   momentum: { per_week: [0, 0, 0, 3], stalled: true }, captains: { count: 0, active_count: 0 },
   contributors: { distinct_submitters: 1, owner_submitted: true, is_solo: true }, owner_last_login_at: null, last_founder_outreach: null,
+  outreach_ignored: false, lifecycle: 'revive',
 };
 
 test('system prompt encodes banned words + no em dash rule', () => {
