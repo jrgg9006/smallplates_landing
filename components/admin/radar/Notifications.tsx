@@ -46,6 +46,17 @@ export default function NotificationsDrawer() {
     setBusy(false);
   };
 
+  // Reason: let the founder archive ANY book by hand, not only the auto-classified let_go ones.
+  const archive = (id: string) => {
+    if (
+      window.confirm(
+        '¿Dar por perdido este libro? Sale del radar. Si el cliente vuelve a moverse, reaparece solo.'
+      )
+    ) {
+      void patch(id, 'archived');
+    }
+  };
+
   const count = rows.length;
   const hasHigh = rows.some((r) => r.priority === 'high');
   const badgeColor = hasHigh && count > 0 ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700';
@@ -132,6 +143,7 @@ export default function NotificationsDrawer() {
                         muted={false}
                         onAttend={() => void patch(n.id, 'attended')}
                         onDismiss={() => void patch(n.id, 'dismissed')}
+                        onLetGo={() => archive(n.id)}
                       />
                     ))}
                   </ul>
@@ -151,15 +163,7 @@ export default function NotificationsDrawer() {
                         muted={true}
                         onAttend={() => void patch(n.id, 'attended')}
                         onDismiss={() => void patch(n.id, 'dismissed')}
-                        onLetGo={() => {
-                          if (
-                            window.confirm(
-                              '¿Dar por perdido este libro? Sale del radar. Si el cliente vuelve a moverse, reaparece solo.'
-                            )
-                          ) {
-                            void patch(n.id, 'archived');
-                          }
-                        }}
+                        onLetGo={() => archive(n.id)}
                       />
                     ))}
                   </ul>
