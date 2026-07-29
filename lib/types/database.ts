@@ -534,6 +534,7 @@ export interface Database {
           print_cover_line: string | null;
           print_details_confirmed_at: string | null;
           owner_approved_at: string | null;
+          radar_archived_at: string | null;
           pdf_url: string | null;
           status: GroupStatus;
           occasion: string | null;
@@ -587,6 +588,7 @@ export interface Database {
           print_cover_line?: string | null;
           print_details_confirmed_at?: string | null;
           owner_approved_at?: string | null;
+          radar_archived_at?: string | null;
           pdf_url?: string | null;
           shipping_address_id?: string | null;
           status?: GroupStatus;
@@ -638,6 +640,7 @@ export interface Database {
           print_cover_line?: string | null;
           print_details_confirmed_at?: string | null;
           owner_approved_at?: string | null;
+          radar_archived_at?: string | null;
           pdf_url?: string | null;
           shipping_address_id?: string | null;
           status?: GroupStatus;
@@ -856,6 +859,7 @@ export interface Database {
           status: 'open' | 'attended' | 'dismissed';
           attended_at: string | null;
           cooldown_until: string | null;
+          lifecycle: 'revive' | 'let_go';
         };
         Insert: {
           id?: string;
@@ -870,6 +874,7 @@ export interface Database {
           status?: 'open' | 'attended' | 'dismissed';
           attended_at?: string | null;
           cooldown_until?: string | null;
+          lifecycle?: 'revive' | 'let_go';
         };
         Update: Partial<{
           priority: 'high' | 'medium' | 'low';
@@ -881,6 +886,7 @@ export interface Database {
           status: 'open' | 'attended' | 'dismissed';
           attended_at: string | null;
           cooldown_until: string | null;
+          lifecycle: 'revive' | 'let_go';
           generated_at: string;
         }>;
       };
