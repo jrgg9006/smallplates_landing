@@ -27,11 +27,22 @@ export async function GET() {
 export async function PATCH(request: Request) {
   try {
     await requireAdminAuth();
-    const { id, status } = (await request.json()) as { id: string; status: 'attended' | 'dismissed' };
-    if (!id || !['attended', 'dismissed'].includes(status)) {
+    const { id, status } = (await request.json()) as { id: string; status: 'attended' | 'dismissed' | 'archived' };
+    if (!id || !['attended', 'dismissed', 'archived'].includes(status)) {
       return NextResponse.json({ error: 'Bad request' }, { status: 400 });
     }
     const supabase = createSupabaseAdminClient();
+
+    if (status === 'archived') {
+      const { data: notif } = await supabase.from('radar_notifications').select('group_id').eq('id', id).single();
+      if (!notif) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+      // Reason: archive is a durable, reversible book-level flag; the notification CHECK only allows
+      // open/attended/dismissed, so the durable fact lives on groups.radar_archived_at instead.
+      await supabase.from('groups').update({ radar_archived_at: new Date().toISOString() }).eq('id', notif.group_id);
+      await supabase.from('radar_notifications').update({ status: 'dismissed' }).eq('id', id);
+      return NextResponse.json({ ok: true });
+    }
+
     const now = new Date();
     const patch =
       status === 'attended'

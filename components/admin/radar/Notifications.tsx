@@ -4,6 +4,7 @@ import type { RadarNotificationRow } from '@/lib/radar/monitor-types';
 
 const RANK: Record<string, number> = { high: 0, medium: 1, low: 2 };
 type Row = RadarNotificationRow & { groups?: { name: string } | null };
+type PatchStatus = 'attended' | 'dismissed' | 'archived';
 
 export default function NotificationsDrawer() {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,7 +30,7 @@ export default function NotificationsDrawer() {
     void load();
   }, [load]);
 
-  const patch = async (id: string, status: 'attended' | 'dismissed') => {
+  const patch = async (id: string, status: PatchStatus) => {
     await fetch('/api/v1/admin/radar/notifications', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -48,6 +49,9 @@ export default function NotificationsDrawer() {
   const count = rows.length;
   const hasHigh = rows.some((r) => r.priority === 'high');
   const badgeColor = hasHigh && count > 0 ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700';
+
+  const revive = rows.filter((r) => r.lifecycle !== 'let_go');
+  const letGo = rows.filter((r) => r.lifecycle === 'let_go');
 
   return (
     <>
@@ -114,16 +118,54 @@ export default function NotificationsDrawer() {
           ) : rows.length === 0 ? (
             <p className="text-sm text-gray-400">Todo en orden. Ningún libro en riesgo hoy.</p>
           ) : (
-            <ul className="space-y-3">
-              {rows.map((n) => (
-                <NotificationCard
-                  key={n.id}
-                  n={n}
-                  onAttend={() => void patch(n.id, 'attended')}
-                  onDismiss={() => void patch(n.id, 'dismissed')}
-                />
-              ))}
-            </ul>
+            <div className="space-y-6">
+              {revive.length > 0 && (
+                <section>
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Enfócate aquí
+                  </p>
+                  <ul className="space-y-3">
+                    {revive.map((n) => (
+                      <NotificationCard
+                        key={n.id}
+                        n={n}
+                        muted={false}
+                        onAttend={() => void patch(n.id, 'attended')}
+                        onDismiss={() => void patch(n.id, 'dismissed')}
+                      />
+                    ))}
+                  </ul>
+                </section>
+              )}
+
+              {letGo.length > 0 && (
+                <section>
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                    Probablemente perdidos
+                  </p>
+                  <ul className="space-y-3">
+                    {letGo.map((n) => (
+                      <NotificationCard
+                        key={n.id}
+                        n={n}
+                        muted={true}
+                        onAttend={() => void patch(n.id, 'attended')}
+                        onDismiss={() => void patch(n.id, 'dismissed')}
+                        onLetGo={() => {
+                          if (
+                            window.confirm(
+                              '¿Dar por perdido este libro? Sale del radar. Si el cliente vuelve a moverse, reaparece solo.'
+                            )
+                          ) {
+                            void patch(n.id, 'archived');
+                          }
+                        }}
+                      />
+                    ))}
+                  </ul>
+                </section>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -133,12 +175,16 @@ export default function NotificationsDrawer() {
 
 function NotificationCard({
   n,
+  muted,
   onAttend,
   onDismiss,
+  onLetGo,
 }: {
   n: Row;
+  muted: boolean;
   onAttend: () => void;
   onDismiss: () => void;
+  onLetGo?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const color =
@@ -149,7 +195,7 @@ function NotificationCard({
         : 'bg-gray-100 text-gray-600';
 
   return (
-    <li className="rounded-xl border border-gray-100 p-4">
+    <li className={`rounded-xl border border-gray-100 p-4 ${muted ? 'opacity-60' : ''}`}>
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center gap-3 text-left"
@@ -157,7 +203,9 @@ function NotificationCard({
         <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${color}`}>
           {n.priority}
         </span>
-        <span className="flex-1 text-sm font-medium text-gray-900">{n.headline}</span>
+        <span className={`flex-1 text-sm font-medium ${muted ? 'text-gray-500' : 'text-gray-900'}`}>
+          {n.headline}
+        </span>
         <span className="text-xs text-gray-400">{n.groups?.name}</span>
       </button>
       {open && (
@@ -178,7 +226,7 @@ function NotificationCard({
             </div>
             <p className="whitespace-pre-wrap text-gray-800">{n.draft_message}</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={onAttend}
               className="rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white"
@@ -191,6 +239,14 @@ function NotificationCard({
             >
               Descartar
             </button>
+            {onLetGo && (
+              <button
+                onClick={onLetGo}
+                className="rounded-lg border border-red-200 px-3 py-1.5 text-xs text-red-500 hover:bg-red-50"
+              >
+                Dar por perdido
+              </button>
+            )}
           </div>
         </div>
       )}
