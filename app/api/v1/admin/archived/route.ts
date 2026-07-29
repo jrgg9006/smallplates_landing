@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireAdminAuth } from '@/lib/auth/admin';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
-// Lists books the founder archived ("dar por perdido") so they can be recovered by hand.
+// Global "Archivados" list: every book the founder gave up on (hidden from all admin surfaces).
 export async function GET() {
   try {
     await requireAdminAuth();
@@ -15,7 +15,7 @@ export async function GET() {
     if (error) throw error;
     return NextResponse.json({ archived: data ?? [] });
   } catch (error) {
-    console.error('radar archived GET failed', error);
+    console.error('admin archived GET failed', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Unauthorized' },
       { status: 401 }
@@ -23,7 +23,7 @@ export async function GET() {
   }
 }
 
-// Manual resurrection: clear the archive flag so the book is evaluated again on the next run.
+// Reactivate a book: clear the flag so it is evaluated again and reappears across the admin.
 export async function PATCH(request: Request) {
   try {
     await requireAdminAuth();
@@ -39,7 +39,7 @@ export async function PATCH(request: Request) {
     if (error) throw error;
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error('radar archived PATCH failed', error);
+    console.error('admin archived PATCH failed', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Unauthorized' },
       { status: 401 }

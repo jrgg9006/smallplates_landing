@@ -5,20 +5,12 @@ import type { RadarNotificationRow } from '@/lib/radar/monitor-types';
 const RANK: Record<string, number> = { high: 0, medium: 1, low: 2 };
 type Row = RadarNotificationRow & { groups?: { name: string } | null };
 type PatchStatus = 'attended' | 'dismissed';
-type DeadBook = {
-  id: string;
-  name: string;
-  archived_at: string | null;
-  archived_reason: string | null;
-};
 
 export default function NotificationsDrawer() {
   const [isOpen, setIsOpen] = useState(false);
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [dead, setDead] = useState<DeadBook[]>([]);
-  const [showDead, setShowDead] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -34,16 +26,9 @@ export default function NotificationsDrawer() {
     setLoading(false);
   }, []);
 
-  const loadDead = useCallback(async () => {
-    const res = await fetch('/api/v1/admin/radar/notifications/archived');
-    const json = await res.json();
-    setDead(json.archived ?? []);
-  }, []);
-
   useEffect(() => {
     void load();
-    void loadDead();
-  }, [load, loadDead]);
+  }, [load]);
 
   const patch = async (id: string, status: PatchStatus) => {
     await fetch('/api/v1/admin/radar/notifications', {
@@ -75,16 +60,6 @@ export default function NotificationsDrawer() {
       return;
     }
     setRows((r) => r.filter((x) => x.id !== id));
-    await loadDead();
-  };
-
-  const reactivate = async (groupId: string) => {
-    await fetch('/api/v1/admin/radar/notifications/archived', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ groupId }),
-    });
-    setDead((d) => d.filter((x) => x.id !== groupId));
   };
 
   const regenerate = async () => {
@@ -178,41 +153,6 @@ export default function NotificationsDrawer() {
                 </ul>
               )}
 
-              {dead.length > 0 && (
-                <div className="mt-6 border-t border-gray-100 pt-4">
-                  <button
-                    onClick={() => setShowDead((s) => !s)}
-                    className="text-xs font-semibold uppercase tracking-wide text-gray-400 hover:text-gray-700"
-                  >
-                    {showDead ? '▾' : '▸'} Muertos ({dead.length})
-                  </button>
-                  {showDead && (
-                    <ul className="mt-3 space-y-2">
-                      {dead.map((b) => (
-                        <li
-                          key={b.id}
-                          className="flex items-start justify-between gap-2 rounded-lg border border-gray-100 px-3 py-2"
-                        >
-                          <div className="min-w-0">
-                            <span className="block text-sm text-gray-600">{b.name}</span>
-                            {b.archived_reason && (
-                              <span className="block text-xs text-gray-400">
-                                {b.archived_reason}
-                              </span>
-                            )}
-                          </div>
-                          <button
-                            onClick={() => void reactivate(b.id)}
-                            className="flex-shrink-0 text-xs text-gray-500 hover:text-gray-900"
-                          >
-                            Reactivar
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              )}
             </>
           )}
         </div>
