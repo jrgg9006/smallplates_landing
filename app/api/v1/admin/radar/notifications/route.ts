@@ -43,13 +43,16 @@ export async function PATCH(request: Request) {
       if (!notif) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
       // Guardrail: never hide a paid / in-production book. Losing it from Operations could drop a real order.
-      const { data: paidOrder } = await supabase
+      // Reason: a group can have MULTIPLE paid orders (book close + extra copies), so use limit(1) on a list,
+      // not maybeSingle() (which errors on 2+ rows and would silently skip the block).
+      const { data: paidOrders, error: paidError } = await supabase
         .from('orders')
         .select('id')
         .eq('group_id', notif.group_id)
         .in('status', Array.from(PAID_STATUSES))
-        .maybeSingle();
-      if (paidOrder) {
+        .limit(1);
+      if (paidError) throw paidError;
+      if (paidOrders && paidOrders.length > 0) {
         return NextResponse.json(
           { error: 'Este libro ya pagó o está en producción. No se puede dar por muerto.' },
           { status: 409 }
