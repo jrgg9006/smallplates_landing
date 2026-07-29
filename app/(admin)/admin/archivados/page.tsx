@@ -113,7 +113,8 @@ export default function ArchivadosPage() {
             </button>
           </div>
           <p className="mt-2 text-xs text-gray-400">
-            Los libros que ya pagaron no aparecen como opción de borrado y no se pueden archivar.
+            Solo aparecen libros activos. Los cerrados, pagados o entregados no se listan ni se
+            pueden archivar.
           </p>
         </div>
 

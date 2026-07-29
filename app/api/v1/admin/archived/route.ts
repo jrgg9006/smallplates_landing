@@ -16,10 +16,13 @@ export async function GET() {
         .select('id, name, archived_at, archived_reason')
         .not('archived_at', 'is', null)
         .order('archived_at', { ascending: false }),
+      // Only OPEN books are candidates to give up on. Closed / in-production / delivered books
+      // (book_status reviewed | ready_to_print | printed | inactive) are done, not "dead".
       supabase
         .from('groups')
         .select('id, name')
         .is('archived_at', null)
+        .eq('book_status', 'active')
         .order('created_at', { ascending: false }),
       supabase.from('orders').select('group_id').in('status', Array.from(PAID_STATUSES)),
     ]);
