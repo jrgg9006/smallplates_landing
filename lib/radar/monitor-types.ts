@@ -10,7 +10,7 @@ export interface MonitorSources {
     book_status: string;
     book_close_date: string | null; event_date: string | null;
     gift_date: string | null; wedding_date: string | null;
-    radar_archived_at: string | null;
+    archived_at: string | null;
   }>;
   recipes: Array<{ group_id: string; guest_id: string | null; submitted_at: string | null; submission_status: string; }>;
   guests: Array<{ id: string; group_id: string; created_at: string; is_self: boolean; }>;

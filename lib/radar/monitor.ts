@@ -78,8 +78,8 @@ export function computeCandidates(sources: MonitorSources, now: Date): Notificat
       .sort((a, b) => (a.sent_at! > b.sent_at! ? -1 : 1))[0];
 
     // Reason: a book the founder gave up on stays out until the client shows real activity again.
-    if (g.radar_archived_at) {
-      const archivedMs = new Date(g.radar_archived_at).getTime();
+    if (g.archived_at) {
+      const archivedMs = new Date(g.archived_at).getTime();
       const activityMs = lastActivity ? new Date(lastActivity).getTime() : 0;
       if (archivedMs >= activityMs) continue;
     }

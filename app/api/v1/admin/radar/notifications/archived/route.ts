@@ -9,9 +9,9 @@ export async function GET() {
     const supabase = createSupabaseAdminClient();
     const { data, error } = await supabase
       .from('groups')
-      .select('id, name, radar_archived_at')
-      .not('radar_archived_at', 'is', null)
-      .order('radar_archived_at', { ascending: false });
+      .select('id, name, archived_at, archived_reason')
+      .not('archived_at', 'is', null)
+      .order('archived_at', { ascending: false });
     if (error) throw error;
     return NextResponse.json({ archived: data ?? [] });
   } catch (error) {
@@ -34,7 +34,7 @@ export async function PATCH(request: Request) {
     const supabase = createSupabaseAdminClient();
     const { error } = await supabase
       .from('groups')
-      .update({ radar_archived_at: null })
+      .update({ archived_at: null, archived_reason: null })
       .eq('id', groupId);
     if (error) throw error;
     return NextResponse.json({ ok: true });

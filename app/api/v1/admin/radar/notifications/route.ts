@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireAdminAuth } from '@/lib/auth/admin';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { ATTENDED_COOLDOWN_DAYS, DAY_MS } from '@/lib/radar/monitor-constants';
+import { PAID_STATUSES } from '@/lib/radar/aggregate';
 
 export async function GET() {
   try {
@@ -27,7 +28,11 @@ export async function GET() {
 export async function PATCH(request: Request) {
   try {
     await requireAdminAuth();
-    const { id, status } = (await request.json()) as { id: string; status: 'attended' | 'dismissed' | 'archived' };
+    const { id, status, reason } = (await request.json()) as {
+      id: string;
+      status: 'attended' | 'dismissed' | 'archived';
+      reason?: string;
+    };
     if (!id || !['attended', 'dismissed', 'archived'].includes(status)) {
       return NextResponse.json({ error: 'Bad request' }, { status: 400 });
     }
@@ -36,13 +41,28 @@ export async function PATCH(request: Request) {
     if (status === 'archived') {
       const { data: notif } = await supabase.from('radar_notifications').select('group_id').eq('id', id).single();
       if (!notif) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-      // Reason: archive is a durable, reversible book-level flag; the notification CHECK only allows
-      // open/attended/dismissed, so the durable fact lives on groups.radar_archived_at instead.
+
+      // Guardrail: never hide a paid / in-production book. Losing it from Operations could drop a real order.
+      const { data: paidOrder } = await supabase
+        .from('orders')
+        .select('id')
+        .eq('group_id', notif.group_id)
+        .in('status', Array.from(PAID_STATUSES))
+        .maybeSingle();
+      if (paidOrder) {
+        return NextResponse.json(
+          { error: 'Este libro ya pagó o está en producción. No se puede dar por muerto.' },
+          { status: 409 }
+        );
+      }
+
+      // Reason: "dead" is a durable, reversible book-level flag; the notification CHECK only allows
+      // open/attended/dismissed, so the durable fact lives on groups.archived_at + archived_reason.
       // Reason: archive the book FIRST; only dismiss the notification if the archive write succeeds,
       // so we never silently lose the notification while leaving the book un-archived.
       const { error: archiveError } = await supabase
         .from('groups')
-        .update({ radar_archived_at: new Date().toISOString() })
+        .update({ archived_at: new Date().toISOString(), archived_reason: reason?.trim() || null })
         .eq('id', notif.group_id);
       if (archiveError) throw archiveError;
       const { error: dismissError } = await supabase

@@ -175,6 +175,7 @@ export async function getBooksForRemindersTip(): Promise<BookForRemindersTip[]> 
     .from('groups')
     .select('id, name, couple_display_name, created_by, book_close_date, created_at')
     .eq('book_status', 'active')
+    .is('archived_at', null)
     .order('created_at', { ascending: false });
 
   if (!groups || groups.length === 0) return [];
@@ -389,6 +390,7 @@ export async function getBooksForReactivation(): Promise<BookForReactivation[]> 
     .from('groups')
     .select('id, name, couple_display_name, created_by, book_close_date, created_at')
     .eq('book_status', 'active')
+    .is('archived_at', null)
     .order('created_at', { ascending: true });
 
   if (!groups || groups.length === 0) return [];
@@ -544,6 +546,7 @@ export async function getGroupsWithoutCaptains(includeAll = false): Promise<Grou
     .select('id, name, couple_display_name, created_by, book_close_date, book_status, created_at')
     .order('created_at', { ascending: false });
   query = includeAll ? query.neq('book_status', 'inactive') : query.eq('book_status', 'active');
+  query = query.is('archived_at', null);
   const { data: groups } = await query;
 
   if (!groups || groups.length === 0) return [];
@@ -633,6 +636,7 @@ export async function getGroupsWithCaptains(includeAll = false): Promise<GroupWi
     .select('id, name, couple_display_name, created_by, created_at')
     .order('created_at', { ascending: false });
   query = includeAll ? query.neq('book_status', 'inactive') : query.eq('book_status', 'active');
+  query = query.is('archived_at', null);
   const { data: groups } = await query;
 
   if (!groups || groups.length === 0) return [];
@@ -838,6 +842,7 @@ export async function getActiveGroupsForWeeklyStatus(): Promise<WeeklyStats[]> {
     .from('groups')
     .select('id')
     .eq('book_status', 'active')
+    .is('archived_at', null)
     .order('created_at', { ascending: false });
 
   if (!groups || groups.length === 0) return [];
@@ -855,6 +860,7 @@ export async function getGroupsClosingSoon(daysWindow: number): Promise<GroupClo
     .from('groups')
     .select('id, name, couple_display_name, book_close_date')
     .eq('book_status', 'active')
+    .is('archived_at', null)
     .not('book_close_date', 'is', null)
     .gte('book_close_date', now.toISOString())
     .lte('book_close_date', horizon.toISOString())

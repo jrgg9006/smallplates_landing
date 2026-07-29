@@ -534,7 +534,8 @@ export interface Database {
           print_cover_line: string | null;
           print_details_confirmed_at: string | null;
           owner_approved_at: string | null;
-          radar_archived_at: string | null;
+          archived_at: string | null;
+          archived_reason: string | null;
           pdf_url: string | null;
           status: GroupStatus;
           occasion: string | null;
@@ -588,7 +589,8 @@ export interface Database {
           print_cover_line?: string | null;
           print_details_confirmed_at?: string | null;
           owner_approved_at?: string | null;
-          radar_archived_at?: string | null;
+          archived_at?: string | null;
+          archived_reason?: string | null;
           pdf_url?: string | null;
           shipping_address_id?: string | null;
           status?: GroupStatus;
@@ -640,7 +642,8 @@ export interface Database {
           print_cover_line?: string | null;
           print_details_confirmed_at?: string | null;
           owner_approved_at?: string | null;
-          radar_archived_at?: string | null;
+          archived_at?: string | null;
+          archived_reason?: string | null;
           pdf_url?: string | null;
           shipping_address_id?: string | null;
           status?: GroupStatus;

@@ -27,6 +27,7 @@ export async function fetchRadarSources(): Promise<{
     groups: supabase
       .from('groups')
       .select('id, name, created_by, created_at, status, book_status, couple_image_url')
+      .is('archived_at', null)
       .order('created_at', { ascending: false })
       .limit(5000),
     guests: supabase

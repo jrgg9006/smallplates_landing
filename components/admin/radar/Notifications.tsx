@@ -4,16 +4,21 @@ import type { RadarNotificationRow } from '@/lib/radar/monitor-types';
 
 const RANK: Record<string, number> = { high: 0, medium: 1, low: 2 };
 type Row = RadarNotificationRow & { groups?: { name: string } | null };
-type PatchStatus = 'attended' | 'dismissed' | 'archived';
-type ArchivedBook = { id: string; name: string; radar_archived_at: string | null };
+type PatchStatus = 'attended' | 'dismissed';
+type DeadBook = {
+  id: string;
+  name: string;
+  archived_at: string | null;
+  archived_reason: string | null;
+};
 
 export default function NotificationsDrawer() {
   const [isOpen, setIsOpen] = useState(false);
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [archived, setArchived] = useState<ArchivedBook[]>([]);
-  const [showArchived, setShowArchived] = useState(false);
+  const [dead, setDead] = useState<DeadBook[]>([]);
+  const [showDead, setShowDead] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -29,16 +34,16 @@ export default function NotificationsDrawer() {
     setLoading(false);
   }, []);
 
-  const loadArchived = useCallback(async () => {
+  const loadDead = useCallback(async () => {
     const res = await fetch('/api/v1/admin/radar/notifications/archived');
     const json = await res.json();
-    setArchived(json.archived ?? []);
+    setDead(json.archived ?? []);
   }, []);
 
   useEffect(() => {
     void load();
-    void loadArchived();
-  }, [load, loadArchived]);
+    void loadDead();
+  }, [load, loadDead]);
 
   const patch = async (id: string, status: PatchStatus) => {
     await fetch('/api/v1/admin/radar/notifications', {
@@ -49,13 +54,37 @@ export default function NotificationsDrawer() {
     setRows((r) => r.filter((x) => x.id !== id));
   };
 
-  const recuperar = async (groupId: string) => {
+  // Reason: mark a book as dead (group-level, global). Blocked server-side if the book is paid.
+  const markDead = async (id: string) => {
+    if (
+      !window.confirm(
+        '¿Dar por muerto este libro? Sale de todos los paneles admin (radar, operations, book production). No se borra nada y lo puedes reactivar cuando quieras.'
+      )
+    ) {
+      return;
+    }
+    const reason = window.prompt('¿Por qué lo das por muerto? (nota corta, opcional)') ?? '';
+    const res = await fetch('/api/v1/admin/radar/notifications', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status: 'archived', reason }),
+    });
+    if (!res.ok) {
+      const j = (await res.json().catch(() => ({}))) as { error?: string };
+      window.alert(j.error ?? 'No se pudo dar por muerto.');
+      return;
+    }
+    setRows((r) => r.filter((x) => x.id !== id));
+    await loadDead();
+  };
+
+  const reactivate = async (groupId: string) => {
     await fetch('/api/v1/admin/radar/notifications/archived', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ groupId }),
     });
-    setArchived((a) => a.filter((x) => x.id !== groupId));
+    setDead((d) => d.filter((x) => x.id !== groupId));
   };
 
   const regenerate = async () => {
@@ -65,25 +94,9 @@ export default function NotificationsDrawer() {
     setBusy(false);
   };
 
-  // Reason: let the founder archive ANY book by hand, not only the auto-classified let_go ones.
-  const archive = async (id: string) => {
-    if (
-      !window.confirm(
-        '¿Dar por perdido este libro? Sale del radar. Si el cliente vuelve a moverse, reaparece solo.'
-      )
-    ) {
-      return;
-    }
-    await patch(id, 'archived');
-    await loadArchived();
-  };
-
   const count = rows.length;
   const hasHigh = rows.some((r) => r.priority === 'high');
   const badgeColor = hasHigh && count > 0 ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700';
-
-  const revive = rows.filter((r) => r.lifecycle !== 'let_go');
-  const letGo = rows.filter((r) => r.lifecycle === 'let_go');
 
   return (
     <>
@@ -104,7 +117,7 @@ export default function NotificationsDrawer() {
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-49 bg-black/40"
+          className="fixed inset-0 bg-black/40"
           style={{ zIndex: 49 }}
           onClick={() => setIsOpen(false)}
           aria-hidden="true"
@@ -150,74 +163,49 @@ export default function NotificationsDrawer() {
           ) : (
             <>
               {rows.length === 0 ? (
-                <p className="text-sm text-gray-400">
-                  Todo en orden. Ningún libro en riesgo hoy.
-                </p>
+                <p className="text-sm text-gray-400">Todo en orden. Ningún libro en riesgo hoy.</p>
               ) : (
-                <div className="space-y-6">
-                  {revive.length > 0 && (
-                <section>
-                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Enfócate aquí
-                  </p>
-                  <ul className="space-y-3">
-                    {revive.map((n) => (
-                      <NotificationCard
-                        key={n.id}
-                        n={n}
-                        muted={false}
-                        onAttend={() => void patch(n.id, 'attended')}
-                        onDismiss={() => void patch(n.id, 'dismissed')}
-                        onLetGo={() => void archive(n.id)}
-                      />
-                    ))}
-                  </ul>
-                </section>
+                <ul className="space-y-3">
+                  {rows.map((n) => (
+                    <NotificationCard
+                      key={n.id}
+                      n={n}
+                      onAttend={() => void patch(n.id, 'attended')}
+                      onDismiss={() => void patch(n.id, 'dismissed')}
+                      onDead={() => void markDead(n.id)}
+                    />
+                  ))}
+                </ul>
               )}
 
-              {letGo.length > 0 && (
-                <section>
-                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                    Probablemente perdidos
-                  </p>
-                  <ul className="space-y-3">
-                    {letGo.map((n) => (
-                      <NotificationCard
-                        key={n.id}
-                        n={n}
-                        muted={true}
-                        onAttend={() => void patch(n.id, 'attended')}
-                        onDismiss={() => void patch(n.id, 'dismissed')}
-                        onLetGo={() => void archive(n.id)}
-                      />
-                    ))}
-                  </ul>
-                </section>
-              )}
-                </div>
-              )}
-
-              {archived.length > 0 && (
+              {dead.length > 0 && (
                 <div className="mt-6 border-t border-gray-100 pt-4">
                   <button
-                    onClick={() => setShowArchived((s) => !s)}
+                    onClick={() => setShowDead((s) => !s)}
                     className="text-xs font-semibold uppercase tracking-wide text-gray-400 hover:text-gray-700"
                   >
-                    {showArchived ? '▾' : '▸'} Archivados ({archived.length})
+                    {showDead ? '▾' : '▸'} Muertos ({dead.length})
                   </button>
-                  {showArchived && (
+                  {showDead && (
                     <ul className="mt-3 space-y-2">
-                      {archived.map((b) => (
+                      {dead.map((b) => (
                         <li
                           key={b.id}
-                          className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2"
+                          className="flex items-start justify-between gap-2 rounded-lg border border-gray-100 px-3 py-2"
                         >
-                          <span className="text-sm text-gray-600">{b.name}</span>
+                          <div className="min-w-0">
+                            <span className="block text-sm text-gray-600">{b.name}</span>
+                            {b.archived_reason && (
+                              <span className="block text-xs text-gray-400">
+                                {b.archived_reason}
+                              </span>
+                            )}
+                          </div>
                           <button
-                            onClick={() => void recuperar(b.id)}
-                            className="text-xs text-gray-500 hover:text-gray-900"
+                            onClick={() => void reactivate(b.id)}
+                            className="flex-shrink-0 text-xs text-gray-500 hover:text-gray-900"
                           >
-                            Recuperar
+                            Reactivar
                           </button>
                         </li>
                       ))}
@@ -235,16 +223,14 @@ export default function NotificationsDrawer() {
 
 function NotificationCard({
   n,
-  muted,
   onAttend,
   onDismiss,
-  onLetGo,
+  onDead,
 }: {
   n: Row;
-  muted: boolean;
   onAttend: () => void;
   onDismiss: () => void;
-  onLetGo?: () => void;
+  onDead: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const color =
@@ -255,7 +241,7 @@ function NotificationCard({
         : 'bg-gray-100 text-gray-600';
 
   return (
-    <li className={`rounded-xl border border-gray-100 p-4 ${muted ? 'opacity-60' : ''}`}>
+    <li className="rounded-xl border border-gray-100 p-4">
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center gap-3 text-left"
@@ -263,9 +249,7 @@ function NotificationCard({
         <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${color}`}>
           {n.priority}
         </span>
-        <span className={`flex-1 text-sm font-medium ${muted ? 'text-gray-500' : 'text-gray-900'}`}>
-          {n.headline}
-        </span>
+        <span className="flex-1 text-sm font-medium text-gray-900">{n.headline}</span>
         <span className="text-xs text-gray-400">{n.groups?.name}</span>
       </button>
       {open && (
@@ -299,14 +283,12 @@ function NotificationCard({
             >
               Descartar
             </button>
-            {onLetGo && (
-              <button
-                onClick={onLetGo}
-                className="rounded-lg border border-red-200 px-3 py-1.5 text-xs text-red-500 hover:bg-red-50"
-              >
-                Dar por perdido
-              </button>
-            )}
+            <button
+              onClick={onDead}
+              className="rounded-lg border border-red-200 px-3 py-1.5 text-xs text-red-500 hover:bg-red-50"
+            >
+              Dar por muerto
+            </button>
           </div>
         </div>
       )}

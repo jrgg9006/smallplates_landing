@@ -17,7 +17,7 @@ export async function fetchMonitorSources(
   const [{ data: profiles }, { data: groups }, { data: recipes }, { data: guests }, { data: captains }, { data: comms }, { data: events }] =
     await Promise.all([
       supabase.from('profiles').select('id, email'),
-      supabase.from('groups').select('id, name, created_by, created_at, book_status, book_close_date, event_date, gift_date, wedding_date, radar_archived_at'),
+      supabase.from('groups').select('id, name, created_by, created_at, book_status, book_close_date, event_date, gift_date, wedding_date, archived_at'),
       supabase.from('guest_recipes').select('group_id, guest_id, submitted_at, submission_status').gte('submitted_at', since),
       supabase.from('guests').select('id, group_id, created_at, is_self'),
       // Reason: captains are role = 'member' in group_members; 'owner' is the organizer.
@@ -64,13 +64,13 @@ export async function runRadarMonitor(): Promise<{ generated: number; candidates
   // runs don't re-evaluate the stale archive timestamp.
   const resurrectedIds = candidates
     .map((c) => c.group_id)
-    .filter((id) => sources.groups.find((g) => g.id === id)?.radar_archived_at);
+    .filter((id) => sources.groups.find((g) => g.id === id)?.archived_at);
   if (resurrectedIds.length > 0) {
     const { error: resurrectionError } = await supabase
       .from('groups')
-      .update({ radar_archived_at: null })
+      .update({ archived_at: null, archived_reason: null })
       .in('id', resurrectedIds);
-    if (resurrectionError) console.error('radar-monitor: failed to clear radar_archived_at', resurrectionError);
+    if (resurrectionError) console.error('radar-monitor: failed to clear archived_at', resurrectionError);
   }
 
   const existingByGroup = await fetchLatestByGroup(supabase, candidates.map((c) => c.group_id));

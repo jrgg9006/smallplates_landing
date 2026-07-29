@@ -23,6 +23,7 @@ export async function GET() {
         book_closed_by_user,
         created_at
       `)
+      .is('archived_at', null)
       .order('created_at', { ascending: false });
 
     if (groupsError) {
