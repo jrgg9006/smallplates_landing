@@ -38,8 +38,18 @@ export async function PATCH(request: Request) {
       if (!notif) return NextResponse.json({ error: 'Not found' }, { status: 404 });
       // Reason: archive is a durable, reversible book-level flag; the notification CHECK only allows
       // open/attended/dismissed, so the durable fact lives on groups.radar_archived_at instead.
-      await supabase.from('groups').update({ radar_archived_at: new Date().toISOString() }).eq('id', notif.group_id);
-      await supabase.from('radar_notifications').update({ status: 'dismissed' }).eq('id', id);
+      // Reason: archive the book FIRST; only dismiss the notification if the archive write succeeds,
+      // so we never silently lose the notification while leaving the book un-archived.
+      const { error: archiveError } = await supabase
+        .from('groups')
+        .update({ radar_archived_at: new Date().toISOString() })
+        .eq('id', notif.group_id);
+      if (archiveError) throw archiveError;
+      const { error: dismissError } = await supabase
+        .from('radar_notifications')
+        .update({ status: 'dismissed' })
+        .eq('id', id);
+      if (dismissError) throw dismissError;
       return NextResponse.json({ ok: true });
     }
 

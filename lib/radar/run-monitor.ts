@@ -66,7 +66,11 @@ export async function runRadarMonitor(): Promise<{ generated: number; candidates
     .map((c) => c.group_id)
     .filter((id) => sources.groups.find((g) => g.id === id)?.radar_archived_at);
   if (resurrectedIds.length > 0) {
-    await supabase.from('groups').update({ radar_archived_at: null }).in('id', resurrectedIds);
+    const { error: resurrectionError } = await supabase
+      .from('groups')
+      .update({ radar_archived_at: null })
+      .in('id', resurrectedIds);
+    if (resurrectionError) console.error('radar-monitor: failed to clear radar_archived_at', resurrectionError);
   }
 
   const existingByGroup = await fetchLatestByGroup(supabase, candidates.map((c) => c.group_id));

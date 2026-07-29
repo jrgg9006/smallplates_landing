@@ -34,7 +34,7 @@ export function buildUserMessage(c: NotificationCandidate): string {
 - Contributors: ${c.contributors.distinct_submitters} distinct, owner_submitted: ${c.contributors.owner_submitted}, solo: ${c.contributors.is_solo}
 - Owner last login: ${c.owner_last_login_at ?? 'unknown'}
 - Last founder outreach: ${c.last_founder_outreach ? `${c.last_founder_outreach.type} on ${c.last_founder_outreach.sent_at}` : 'none'}
-- Lifecycle verdict: ${c.lifecycle}${c.lifecycle === 'let_go' ? ' (looks lost — consider giving up on it)' : ''}
+- Lifecycle verdict: ${c.lifecycle}${c.lifecycle === 'let_go' ? ' (looks lost: consider giving up on it)' : ''}
 
 Return the JSON.`;
 }
