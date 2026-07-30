@@ -23,7 +23,7 @@ function fmtStar(msVal: number): string {
 }
 
 function whenLabel(m: Milestone): string {
-  if (!m.done) return '— todavía no';
+  if (!m.done) return 'todavía no';
   if (!m.at) return '✓ (sin hora)';
   return `${feedDayLabel(m.at)} ${feedTime(m.at)}`;
 }
