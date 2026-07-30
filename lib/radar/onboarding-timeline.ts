@@ -34,10 +34,12 @@ export interface OnboardingInputs {
     gift_date: string | null;
     event_date: string | null;
     couple_image_url: string | null;
-    captain_invite_token: string | null;
   }>;
   groupMember: { custom_share_message: string | null } | null;
-  invitations: Array<{ group_id: string; created_at: string }>;
+  // Reason: co-organizer / captain email invites live in group_invitations.
+  invitations: Array<{ group_id: string; created_at: string; name: string | null; email: string | null }>;
+  // Reason: a captain who actually joined = a non-owner group_members row.
+  captainMembers: Array<{ group_id: string; joined_at: string | null; name: string | null }>;
   guests: Array<{
     id: string;
     group_id: string | null;
@@ -45,12 +47,16 @@ export interface OnboardingInputs {
     last_name: string | null;
     created_at: string;
     is_self: boolean;
+    source: string | null;
   }>;
   firstRecipeAt: string | null;
   events: Array<{ event_name: string; group_id: string | null; created_at: string; props: Record<string, unknown> }>;
 }
 
 const SHARE_EVENTS = new Set(['share', 'share_link_copied']);
+// Reason: account + book are one moment in free-tier onboarding; collapse them
+// into a single line when they land within this window.
+const MERGE_WINDOW_MS = 2 * 60 * 1000;
 
 // Reason: earliest ISO string in a list, or null. Lexicographic == chronological (UTC).
 function earliest(times: string[]): string | null {
@@ -75,55 +81,93 @@ export function buildOnboardingTimeline(input: OnboardingInputs): OnboardingSumm
   const eventAt = (name: string): string | null =>
     earliest(groupEvents.filter((e) => e.event_name === name).map((e) => e.created_at));
 
-  // shared link: any share-family event on this group
-  const shareTimes = groupEvents
-    .filter((e) => SHARE_EVENTS.has(e.event_name))
-    .map((e) => e.created_at);
-  const sharedAt = earliest(shareTimes);
-  const shareEvt = groupEvents
-    .filter((e) => SHARE_EVENTS.has(e.event_name))
-    .sort((a, b) => a.created_at.localeCompare(b.created_at))[0];
-  const shareChannel =
-    typeof shareEvt?.props.channel === 'string'
-      ? (shareEvt.props.channel as string)
-      : typeof shareEvt?.props.method === 'string'
-        ? (shareEvt.props.method as string)
-        : shareEvt
-          ? 'link'
-          : undefined;
-
-  // first non-self guest for this group
-  const firstGuest = group
-    ? input.guests
-        .filter((g) => !g.is_self && g.group_id === group.id)
-        .sort((a, b) => a.created_at.localeCompare(b.created_at))[0]
-    : undefined;
+  // non-self guests for this group
+  const groupGuests = group
+    ? input.guests.filter((g) => !g.is_self && g.group_id === group.id)
+    : [];
+  const sortedGuests = [...groupGuests].sort((a, b) => a.created_at.localeCompare(b.created_at));
+  const firstGuest = sortedGuests[0];
   const guestName = firstGuest
     ? [firstGuest.first_name, firstGuest.last_name].filter(Boolean).join(' ') || 'Guest'
     : undefined;
 
-  // captain: email invites for this group OR a captain link token generated
-  const groupInvites = group
-    ? input.invitations.filter((i) => i.group_id === group.id)
-    : [];
-  const captainAt = earliest(groupInvites.map((i) => i.created_at));
-  const captainDone = groupInvites.length > 0 || !!group?.captain_invite_token;
+  // shared link: a real share event OR the proxy the funnel uses — a guest who
+  // arrived via the collection link means the link WAS shared (source 'collection').
+  const shareEvt = groupEvents
+    .filter((e) => SHARE_EVENTS.has(e.event_name))
+    .sort((a, b) => a.created_at.localeCompare(b.created_at))[0];
+  const shareEventAt = shareEvt?.created_at ?? null;
+  const shareChannel =
+    typeof shareEvt?.props.channel === 'string'
+      ? shareEvt.props.channel
+      : typeof shareEvt?.props.method === 'string'
+        ? shareEvt.props.method
+        : shareEvt
+          ? 'link'
+          : undefined;
+  const firstCollectionGuestAt = earliest(
+    sortedGuests.filter((g) => g.source === 'collection').map((g) => g.created_at)
+  );
+  // Reason: prefer the real event time; fall back to the proxy's approximate time.
+  const sharedAt = shareEventAt ?? firstCollectionGuestAt;
+  const shareSource: 'event' | 'state' = shareEventAt ? 'event' : 'state';
+  const shareDetail = shareEventAt ? shareChannel : firstCollectionGuestAt ? 'vía link' : undefined;
+
+  // captain: a captain who actually joined (non-owner member) OR an email invite sent.
+  const groupCaptains = group ? input.captainMembers.filter((c) => c.group_id === group.id) : [];
+  const groupInvites = group ? input.invitations.filter((i) => i.group_id === group.id) : [];
+  const captainJoinedAt = earliest(
+    groupCaptains.map((c) => c.joined_at).filter((v): v is string => !!v)
+  );
+  const captainInvitedAt = earliest(groupInvites.map((i) => i.created_at));
+  let captain: Omit<Milestone, 'deltaFromPrevMs'>;
+  if (groupCaptains.length > 0) {
+    captain = {
+      key: 'captain', label: 'Capitán a bordo', done: true,
+      at: captainJoinedAt, source: 'state',
+      detail: groupCaptains[0].name ?? undefined,
+    };
+  } else if (groupInvites.length > 0) {
+    const inv = [...groupInvites].sort((a, b) => a.created_at.localeCompare(b.created_at))[0];
+    captain = {
+      key: 'captain', label: 'Capitán invitado', done: true,
+      at: captainInvitedAt, source: 'event',
+      detail: inv.name ?? inv.email ?? undefined,
+    };
+  } else {
+    captain = { key: 'captain', label: 'Capitán invitado', done: false, at: null, source: 'state' };
+  }
 
   const deliveryDate = group?.gift_date ?? group?.event_date ?? null;
 
+  const accountAt = input.profile.created_at;
+  const bookAt = group ? (eventAt('book_created') ?? group.created_at) : null;
+  // Reason: in free-tier, signup and book creation are the same moment — merge.
+  const mergeAccountAndBook = !!(bookAt && Math.abs(ms(bookAt, accountAt)) < MERGE_WINDOW_MS);
+
   // Reason: state answers "did it happen"; event answers "when". done via state
   // with no event => at:null, source:'state' ("✓ sin hora").
-  const raw: Array<Omit<Milestone, 'deltaFromPrevMs'>> = [
-    {
+  const raw: Array<Omit<Milestone, 'deltaFromPrevMs'>> = [];
+
+  if (mergeAccountAndBook) {
+    raw.push({
+      key: 'account_created', label: 'Cuenta y libro', done: true,
+      at: accountAt, source: 'state', detail: group?.name ?? undefined,
+    });
+  } else {
+    raw.push({
       key: 'account_created', label: 'Cuenta creada', done: true,
-      at: input.profile.created_at, source: 'state',
-    },
-    {
+      at: accountAt, source: 'state',
+    });
+    raw.push({
       key: 'book_created', label: 'Libro creado', done: !!group,
-      at: group ? (eventAt('book_created') ?? group.created_at) : null,
+      at: bookAt,
       source: eventAt('book_created') ? 'event' : 'state',
       detail: group?.name ?? undefined,
-    },
+    });
+  }
+
+  raw.push(
     {
       key: 'occasion', label: 'Ocasión elegida', done: !!group?.occasion,
       at: null, source: 'state', detail: group?.occasion ?? undefined,
@@ -143,13 +187,10 @@ export function buildOnboardingTimeline(input: OnboardingInputs): OnboardingSumm
       at: eventAt('share_message_edited'),
       source: eventAt('share_message_edited') ? 'event' : 'state',
     },
-    {
-      key: 'captain', label: 'Capitán invitado', done: captainDone,
-      at: captainAt, source: captainAt ? 'event' : 'state',
-    },
+    captain,
     {
       key: 'shared_link', label: 'Link compartido', done: !!sharedAt,
-      at: sharedAt, source: 'event', detail: shareChannel,
+      at: sharedAt, source: shareSource, detail: shareDetail,
     },
     {
       key: 'first_guest', label: 'Primer guest', done: !!firstGuest,
@@ -158,8 +199,8 @@ export function buildOnboardingTimeline(input: OnboardingInputs): OnboardingSumm
     {
       key: 'first_recipe', label: 'Primera receta recibida', done: !!input.firstRecipeAt,
       at: input.firstRecipeAt, source: 'event',
-    },
-  ];
+    }
+  );
 
   // Reason: deltaFromPrevMs = time since the previous milestone that had an `at`.
   let lastAt: string | null = null;
@@ -173,7 +214,7 @@ export function buildOnboardingTimeline(input: OnboardingInputs): OnboardingSumm
   });
 
   const hasShared = !!sharedAt;
-  const signupToFirstShareMs = sharedAt ? ms(sharedAt, input.profile.created_at) : null;
+  const signupToFirstShareMs = sharedAt ? ms(sharedAt, accountAt) : null;
 
   return { milestones, signupToFirstShareMs, hasShared, multipleBooks };
 }

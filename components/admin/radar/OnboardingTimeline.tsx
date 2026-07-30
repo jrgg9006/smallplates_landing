@@ -6,7 +6,6 @@ import { feedTime, feedDayLabel } from './timeAgo';
 // Reason: humanize a millisecond delta into a short "+14 min" / "+3 h" / "+2 d".
 function fmtDelta(msVal: number): string {
   const min = Math.round(msVal / 60_000);
-  if (min < 1) return '+0 min';
   if (min < 60) return `+${min} min`;
   const hrs = Math.round(min / 60);
   if (hrs < 48) return `+${hrs} h`;
@@ -52,31 +51,34 @@ export function OnboardingTimeline({ summary }: { summary: OnboardingSummary }) 
         </p>
       )}
 
-      <ol className="space-y-0">
-        {milestones.map((m) => (
-          <li key={m.key} className="relative pl-6">
-            {/* dot */}
-            <span
-              className={`absolute left-0 top-1.5 h-2.5 w-2.5 rounded-full ${
-                m.done ? 'bg-[#D4A854]' : 'border border-gray-300 bg-white'
-              }`}
-            />
-            <div className="flex items-baseline justify-between py-1.5">
+      <ol className="space-y-0.5">
+        {milestones.map((m) => {
+          // Reason: hide sub-minute deltas ("+0 min" is noise); show real gaps inline.
+          const showDelta = m.deltaFromPrevMs !== null && m.deltaFromPrevMs >= 60_000;
+          return (
+            <li key={m.key} className="relative flex items-baseline justify-between gap-3 pl-6">
+              <span
+                className={`absolute left-0 top-1.5 h-2.5 w-2.5 rounded-full ${
+                  m.done ? 'bg-[#D4A854]' : 'border border-gray-300 bg-white'
+                }`}
+              />
               <span className={`text-sm ${m.done ? 'text-gray-900' : 'text-gray-400'}`}>
                 {m.label}
                 {m.detail ? <span className="text-gray-500">: {m.detail}</span> : null}
               </span>
-              <span className={`text-xs ${m.done ? 'text-gray-500' : 'text-gray-400'}`}>
-                {whenLabel(m)}
+              <span className="flex shrink-0 items-baseline gap-2 whitespace-nowrap">
+                {showDelta && (
+                  <span className="text-[11px] tabular-nums text-gray-400">
+                    {fmtDelta(m.deltaFromPrevMs as number)}
+                  </span>
+                )}
+                <span className={`text-xs ${m.done ? 'text-gray-500' : 'text-gray-400'}`}>
+                  {whenLabel(m)}
+                </span>
               </span>
-            </div>
-            {m.deltaFromPrevMs !== null && (
-              <div className="ml-[-1px] border-l border-gray-200 pl-3 pb-1 text-[11px] text-gray-400">
-                {fmtDelta(m.deltaFromPrevMs)}
-              </div>
-            )}
-          </li>
-        ))}
+            </li>
+          );
+        })}
       </ol>
     </div>
   );
