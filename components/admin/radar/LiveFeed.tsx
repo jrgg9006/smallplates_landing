@@ -15,6 +15,7 @@ const KIND_ICON: Record<FeedKind, string> = {
   email_sent: '✉️',
   order: '💰',
   share: '🔗',
+  share_message: '💬',
   couple_image: '📸',
 };
 

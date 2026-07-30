@@ -525,11 +525,20 @@ export function buildFeed(d: RadarSources, limit = 100): FeedItem[] {
         text: `${e.user_id ? profName.get(e.user_id) ?? 'Alguien' : 'Alguien'} compartió el link (${channel})${inGroup(e.group_id)}`,
       });
     } else if (e.event_name === 'couple_image_uploaded') {
+      const who = e.user_id ? profName.get(e.user_id) ?? 'Alguien' : 'Alguien';
       items.push({
         id: `ev-${e.id}`,
         at: e.created_at,
         kind: 'couple_image',
-        text: `Subió la foto principal del libro${inGroup(e.group_id)}`,
+        text: `${who} subió/cambió la foto principal del libro${inGroup(e.group_id)}`,
+      });
+    } else if (e.event_name === 'share_message_edited') {
+      const who = e.user_id ? profName.get(e.user_id) ?? 'Alguien' : 'Alguien';
+      items.push({
+        id: `ev-${e.id}`,
+        at: e.created_at,
+        kind: 'share_message',
+        text: `${who} editó el mensaje del link de invitación${inGroup(e.group_id)}`,
       });
     }
   }
