@@ -54,14 +54,19 @@ export function OnboardingTimeline({ summary }: { summary: OnboardingSummary }) 
         </p>
       )}
 
-      <ol className="space-y-0.5">
+      {/* Reason: full-width rows put the time far from its label; a divider per
+          row + a hover band let the eye track label -> time across the gap. */}
+      <ol className="-mx-2 divide-y divide-gray-100">
         {milestones.map((m) => {
           // Reason: hide sub-minute deltas ("+0 min" is noise); show real gaps inline.
           const showDelta = m.deltaFromPrevMs !== null && m.deltaFromPrevMs >= 60_000;
           return (
-            <li key={m.key} className="relative flex items-baseline justify-between gap-3 pl-6">
+            <li
+              key={m.key}
+              className="relative flex items-baseline justify-between gap-3 rounded-md py-2 pl-8 pr-2 transition-colors hover:bg-gray-50"
+            >
               <span
-                className={`absolute left-0 top-1.5 h-2.5 w-2.5 rounded-full ${
+                className={`absolute left-2 top-3 h-2.5 w-2.5 rounded-full ${
                   m.done ? 'bg-[#D4A854]' : 'border border-gray-300 bg-white'
                 }`}
               />
@@ -75,7 +80,7 @@ export function OnboardingTimeline({ summary }: { summary: OnboardingSummary }) 
                     {fmtDelta(m.deltaFromPrevMs as number)}
                   </span>
                 )}
-                <span className={`text-xs ${m.done ? 'text-gray-500' : 'text-gray-400'}`}>
+                <span className={`text-xs tabular-nums ${m.done ? 'text-gray-600' : 'text-gray-400'}`}>
                   {whenLabel(m)}
                 </span>
               </span>
