@@ -407,12 +407,21 @@ export function buildFeed(d: RadarSources, limit = 100): FeedItem[] {
 
   const items: FeedItem[] = [];
 
+  // Reason: a captain is someone who accepted an invite (non-owner member) and
+  // never created their own book — distinguish them so we don't message them as
+  // if they owned a book.
+  const bookOwnerIds = new Set(d.groups.map((g) => g.created_by));
+  const captainProfileIds = new Set(
+    d.members.filter((m) => m.role !== 'owner').map((m) => m.profile_id)
+  );
   for (const p of d.profiles) {
+    const isCaptain = captainProfileIds.has(p.id) && !bookOwnerIds.has(p.id);
+    const who = p.full_name || p.email || '—';
     items.push({
       id: `signup-${p.id}`,
       at: p.created_at,
-      kind: 'signup',
-      text: `Nuevo registro: ${p.full_name || p.email || '—'}`,
+      kind: isCaptain ? 'captain_signup' : 'signup',
+      text: isCaptain ? `Nuevo capitán: ${who}` : `Nuevo registro: ${who}`,
     });
   }
 

@@ -124,6 +124,7 @@ export interface PulseMetric {
 
 export type FeedKind =
   | 'signup'
+  | 'captain_signup'
   | 'book_created'
   | 'recipe_created'
   | 'recipe_edited'

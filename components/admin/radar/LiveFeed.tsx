@@ -7,6 +7,7 @@ import { feedDayLabel, feedTime } from './timeAgo';
 
 const KIND_ICON: Record<FeedKind, string> = {
   signup: '👋',
+  captain_signup: '🧭',
   book_created: '📖',
   recipe_created: '🍲',
   recipe_edited: '✏️',
