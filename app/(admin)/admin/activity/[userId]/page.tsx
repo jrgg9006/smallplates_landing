@@ -120,9 +120,7 @@ function UserDetailPage() {
     return null;
   }
 
-  const totalRecipesExpected = guests.reduce((sum, guest) => sum + (guest.number_of_recipes || 0), 0);
   const totalRecipesReceived = guests.reduce((sum, guest) => sum + (guest.recipes_received || 0), 0);
-  const completionRate = totalRecipesExpected > 0 ? Math.round((totalRecipesReceived / totalRecipesExpected) * 100) : 0;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -145,7 +143,7 @@ function UserDetailPage() {
           </div>
 
           {/* Stats Bar */}
-          <div className="bg-white rounded-xl shadow-md p-6 grid grid-cols-3 gap-6">
+          <div className="bg-white rounded-xl shadow-md p-6 grid grid-cols-2 gap-6">
             <div>
               <div className="text-sm text-gray-600 mb-1">Total Guests</div>
               <div className="text-3xl font-bold text-gray-900">{guests.length}</div>
@@ -153,10 +151,6 @@ function UserDetailPage() {
             <div>
               <div className="text-sm text-gray-600 mb-1">Recipes Received</div>
               <div className="text-3xl font-bold text-gray-900">{totalRecipesReceived}</div>
-            </div>
-            <div>
-              <div className="text-sm text-gray-600 mb-1">Completion Rate</div>
-              <div className="text-3xl font-bold text-gray-900">{completionRate}%</div>
             </div>
           </div>
         </div>
