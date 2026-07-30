@@ -145,7 +145,7 @@ function UserDetailPage() {
           </div>
 
           {/* Stats Bar */}
-          <div className="bg-white rounded-xl shadow-md p-6 grid grid-cols-4 gap-6">
+          <div className="bg-white rounded-xl shadow-md p-6 grid grid-cols-3 gap-6">
             <div>
               <div className="text-sm text-gray-600 mb-1">Total Guests</div>
               <div className="text-3xl font-bold text-gray-900">{guests.length}</div>
@@ -159,12 +159,6 @@ function UserDetailPage() {
             <div>
               <div className="text-sm text-gray-600 mb-1">Completion Rate</div>
               <div className="text-3xl font-bold text-gray-900">{completionRate}%</div>
-            </div>
-            <div>
-              <div className="text-sm text-gray-600 mb-1">Recipe Goal</div>
-              <div className="text-3xl font-bold text-gray-900">
-                {userProfile.recipe_goal_number || '-'}
-              </div>
             </div>
           </div>
         </div>
