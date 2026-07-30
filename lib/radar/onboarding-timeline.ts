@@ -161,13 +161,11 @@ export function buildOnboardingTimeline(input: OnboardingInputs): OnboardingSumm
     },
   ];
 
-  // deltaFromPrevMs: vs previous DONE milestone that had an `at`.
-  // Reason: skip metadata milestones (share_message, delivery_date, occasion) in delta chain.
-  const skipInDeltaChain = new Set(['share_message', 'delivery_date', 'occasion']);
+  // Reason: deltaFromPrevMs = time since the previous milestone that had an `at`.
   let lastAt: string | null = null;
   const milestones: Milestone[] = raw.map((m) => {
     let delta: number | null = null;
-    if (m.at && !skipInDeltaChain.has(m.key)) {
+    if (m.at) {
       delta = lastAt ? ms(m.at, lastAt) : null;
       lastAt = m.at;
     }

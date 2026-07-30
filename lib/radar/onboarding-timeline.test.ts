@@ -48,9 +48,10 @@ test('full journey: all 10 milestones done, deltas and star metric correct', () 
   expect(m.shared_link.detail).toBe('copy_link');
   expect(m.first_guest.detail).toBe('V. Sosa');
   expect(m.first_recipe.at).toBe(t(93));
-  // delta photo->shared uses previous milestone WITH an at (photo at 47), not the
-  // state-only share_message (at null): shared at 61 => 14 min.
-  expect(m.shared_link.deltaFromPrevMs).toBe(14 * 60_000);
+  // delta chain over timestamped milestones: photo t47 -> share_message t50 (+3m)
+  // -> shared_link t61 (+11m).
+  expect(m.share_message.deltaFromPrevMs).toBe(3 * 60_000);
+  expect(m.shared_link.deltaFromPrevMs).toBe(11 * 60_000);
   expect(s.hasShared).toBe(true);
   expect(s.signupToFirstShareMs).toBe(61 * 60_000);
   expect(s.multipleBooks).toBe(false);
