@@ -5,6 +5,8 @@ import { createSupabaseClient } from '@/lib/supabase/client';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { isAdminEmail } from '@/lib/config/admin';
+import { OnboardingTimeline } from '@/components/admin/radar/OnboardingTimeline';
+import type { OnboardingSummary } from '@/lib/radar/onboarding-timeline';
 
 interface Guest {
   id: string;
@@ -33,6 +35,7 @@ function UserDetailPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [guests, setGuests] = useState<Guest[]>([]);
+  const [onboarding, setOnboarding] = useState<OnboardingSummary | null>(null);
   const [sortBy, setSortBy] = useState<'newest' | 'status' | 'recipes'>('newest');
   const router = useRouter();
   const params = useParams();
@@ -69,6 +72,7 @@ function UserDetailPage() {
       const data = await response.json();
       setUserProfile(data.profile);
       setGuests(data.guests);
+      setOnboarding(data.onboarding ?? null);
     } catch (error) {
       console.error('Error loading user data:', error);
     }
@@ -164,6 +168,8 @@ function UserDetailPage() {
             </div>
           </div>
         </div>
+
+        {onboarding && <OnboardingTimeline summary={onboarding} />}
 
         {/* Guests Table */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
