@@ -48,7 +48,7 @@ export function OnboardingTimeline({ summary }: { summary: OnboardingSummary }) 
 
       {summary.multipleBooks && (
         <p className="mb-3 text-xs text-amber-700 bg-amber-50 rounded px-2 py-1">
-          Este usuario tiene más de un libro — mostrando el más reciente.
+          Este usuario tiene más de un libro. Mostrando el más reciente.
         </p>
       )}
 
