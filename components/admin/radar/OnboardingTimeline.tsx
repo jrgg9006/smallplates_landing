@@ -30,9 +30,12 @@ function whenLabel(m: Milestone): string {
 export function OnboardingTimeline({ summary }: { summary: OnboardingSummary }) {
   const { milestones, hasShared, signupToFirstShareMs } = summary;
 
-  const star = hasShared && signupToFirstShareMs !== null
-    ? { text: `Registro → 1er share: ${fmtStar(signupToFirstShareMs)}`, danger: false }
-    : { text: 'Aún no comparte', danger: true };
+  // Reason: three states — real share time, shared-but-no-time (proxy), never shared.
+  const star = !hasShared
+    ? { text: 'Aún no comparte', danger: true }
+    : signupToFirstShareMs !== null
+      ? { text: `Registro → 1er share: ${fmtStar(signupToFirstShareMs)}`, danger: false }
+      : { text: 'Compartió (sin hora)', danger: false };
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6 mb-8">

@@ -52,7 +52,7 @@ test('full journey: account+book merged, deltas and star metric correct', () => 
   expect(m.shared_link.done).toBe(true);
   expect(m.shared_link.at).toBe(t(61));
   expect(m.shared_link.source).toBe('event');
-  expect(m.shared_link.detail).toBe('copy_link');
+  expect(m.shared_link.detail).toBe('copió el link');
   expect(m.shared_link.deltaFromPrevMs).toBe(11 * 60_000);
   expect(m.first_guest.detail).toBe('V. Sosa');
   expect(m.first_guest.deltaFromPrevMs).toBe(7 * 60_000);
@@ -111,10 +111,11 @@ test('shared via proxy: a collection guest means the link was shared', () => {
   const m = byKey(s);
   expect(s.hasShared).toBe(true);
   expect(m.shared_link.done).toBe(true);
-  expect(m.shared_link.at).toBe(t(68)); // earliest collection guest
+  // Reason: proxy proves it was shared, not when — no fake timestamp.
+  expect(m.shared_link.at).toBeNull();
   expect(m.shared_link.source).toBe('state');
-  expect(m.shared_link.detail).toBe('vía link');
-  expect(s.signupToFirstShareMs).toBe(68 * 60_000);
+  expect(m.shared_link.detail).toBe('alguien llegó por el link');
+  expect(s.signupToFirstShareMs).toBeNull();
 });
 
 test('captain joined: non-owner member => "Capitán a bordo" with name', () => {

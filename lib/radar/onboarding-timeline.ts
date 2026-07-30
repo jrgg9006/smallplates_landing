@@ -68,6 +68,26 @@ function ms(a: string, b: string): number {
   return Date.parse(a) - Date.parse(b);
 }
 
+// Reason: turn the raw share channel/method into human copy for the timeline.
+function channelLabel(ch: string | undefined): string | undefined {
+  switch (ch) {
+    case 'copy_link':
+    case 'copy':
+      return 'copió el link';
+    case 'whatsapp':
+      return 'WhatsApp';
+    case 'qr':
+    case 'qr_download':
+      return 'QR';
+    case 'email':
+      return 'email';
+    case 'sms':
+      return 'SMS';
+    default:
+      return undefined;
+  }
+}
+
 export function buildOnboardingTimeline(input: OnboardingInputs): OnboardingSummary {
   const ownGroups = input.groups
     .filter((g) => g.created_by === input.profile.id)
@@ -91,8 +111,9 @@ export function buildOnboardingTimeline(input: OnboardingInputs): OnboardingSumm
     ? [firstGuest.first_name, firstGuest.last_name].filter(Boolean).join(' ') || 'Guest'
     : undefined;
 
-  // shared link: a real share event OR the proxy the funnel uses — a guest who
-  // arrived via the collection link means the link WAS shared (source 'collection').
+  // shared link: a real share event gives the exact moment; otherwise the funnel's
+  // proxy — a guest who arrived via the collection link proves the link WAS shared,
+  // but NOT when. Never show the guest's arrival time as if it were the share time.
   const shareEvt = groupEvents
     .filter((e) => SHARE_EVENTS.has(e.event_name))
     .sort((a, b) => a.created_at.localeCompare(b.created_at))[0];
@@ -102,16 +123,25 @@ export function buildOnboardingTimeline(input: OnboardingInputs): OnboardingSumm
       ? shareEvt.props.channel
       : typeof shareEvt?.props.method === 'string'
         ? shareEvt.props.method
-        : shareEvt
-          ? 'link'
-          : undefined;
-  const firstCollectionGuestAt = earliest(
-    sortedGuests.filter((g) => g.source === 'collection').map((g) => g.created_at)
-  );
-  // Reason: prefer the real event time; fall back to the proxy's approximate time.
-  const sharedAt = shareEventAt ?? firstCollectionGuestAt;
-  const shareSource: 'event' | 'state' = shareEventAt ? 'event' : 'state';
-  const shareDetail = shareEventAt ? shareChannel : firstCollectionGuestAt ? 'vía link' : undefined;
+        : undefined;
+  const hasCollectionGuest = sortedGuests.some((g) => g.source === 'collection');
+  const hasShared = !!shareEventAt || hasCollectionGuest;
+
+  let sharedLink: Omit<Milestone, 'deltaFromPrevMs'>;
+  if (shareEventAt) {
+    sharedLink = {
+      key: 'shared_link', label: 'Link compartido', done: true,
+      at: shareEventAt, source: 'event', detail: channelLabel(shareChannel),
+    };
+  } else if (hasCollectionGuest) {
+    // Reason: at:null — we know it was shared, not when. Shown as "✓ (sin hora)".
+    sharedLink = {
+      key: 'shared_link', label: 'Link compartido', done: true,
+      at: null, source: 'state', detail: 'alguien llegó por el link',
+    };
+  } else {
+    sharedLink = { key: 'shared_link', label: 'Link compartido', done: false, at: null, source: 'state' };
+  }
 
   // captain: a captain who actually joined (non-owner member) OR an email invite sent.
   const groupCaptains = group ? input.captainMembers.filter((c) => c.group_id === group.id) : [];
@@ -196,10 +226,7 @@ export function buildOnboardingTimeline(input: OnboardingInputs): OnboardingSumm
       source: eventAt('share_message_edited') ? 'event' : 'state',
     },
     captain,
-    {
-      key: 'shared_link', label: 'Link compartido', done: !!sharedAt,
-      at: sharedAt, source: shareSource, detail: shareDetail,
-    },
+    sharedLink,
     {
       key: 'first_guest', label: 'Primer guest', done: !!firstGuest,
       at: firstGuest?.created_at ?? null, source: 'event', detail: guestName,
@@ -221,8 +248,8 @@ export function buildOnboardingTimeline(input: OnboardingInputs): OnboardingSumm
     return { ...m, deltaFromPrevMs: delta };
   });
 
-  const hasShared = !!sharedAt;
-  const signupToFirstShareMs = sharedAt ? ms(sharedAt, accountAt) : null;
+  // Reason: only a real share event yields a trustworthy "time to first share".
+  const signupToFirstShareMs = shareEventAt ? ms(shareEventAt, accountAt) : null;
 
   return { milestones, signupToFirstShareMs, hasShared, multipleBooks };
 }
