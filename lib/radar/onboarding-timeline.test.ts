@@ -131,20 +131,29 @@ test('captain joined: non-owner member => "Capitán a bordo" with name', () => {
 test('captain invited only: email invite => "Capitán invitado" with invite time', () => {
   const input = baseInput();
   input.invitations = [
-    { group_id: 'g1', created_at: t(30), name: 'Ana', email: 'ana@x.com' },
-    { group_id: 'g1', created_at: t(20), name: null, email: 'bob@x.com' },
+    { group_id: 'g1', created_at: t(30), name: 'Ana', email: 'ana@x.com', status: 'pending' },
+    { group_id: 'g1', created_at: t(20), name: null, email: 'bob@x.com', status: 'pending' },
   ];
   const m = byKey(buildOnboardingTimeline(input));
   expect(m.captain.done).toBe(true);
   expect(m.captain.label).toBe('Capitán invitado');
   expect(m.captain.at).toBe(t(20)); // earliest invite
-  expect(m.captain.detail).toBe('bob@x.com'); // falls back to email when no name
+  expect(m.captain.detail).toBe('bob@x.com (pendiente)'); // email + status when no name
   expect(m.captain.source).toBe('event');
+});
+
+test('captain invited then declined: status surfaces in detail', () => {
+  const input = baseInput();
+  input.invitations = [
+    { group_id: 'g1', created_at: t(20), name: 'Ana', email: 'ana@x.com', status: 'declined' },
+  ];
+  const m = byKey(buildOnboardingTimeline(input));
+  expect(m.captain.detail).toBe('Ana (rechazó)');
 });
 
 test('captain joined takes precedence over a pending invite', () => {
   const input = baseInput();
-  input.invitations = [{ group_id: 'g1', created_at: t(20), name: 'Ana', email: 'ana@x.com' }];
+  input.invitations = [{ group_id: 'g1', created_at: t(20), name: 'Ana', email: 'ana@x.com', status: 'pending' }];
   input.captainMembers = [{ group_id: 'g1', joined_at: t(40), name: 'Ana' }];
   const m = byKey(buildOnboardingTimeline(input));
   expect(m.captain.label).toBe('Capitán a bordo');

@@ -37,7 +37,7 @@ export interface OnboardingInputs {
   }>;
   groupMember: { custom_share_message: string | null } | null;
   // Reason: co-organizer / captain email invites live in group_invitations.
-  invitations: Array<{ group_id: string; created_at: string; name: string | null; email: string | null }>;
+  invitations: Array<{ group_id: string; created_at: string; name: string | null; email: string | null; status: string | null }>;
   // Reason: a captain who actually joined = a non-owner group_members row.
   captainMembers: Array<{ group_id: string; joined_at: string | null; name: string | null }>;
   guests: Array<{
@@ -129,10 +129,18 @@ export function buildOnboardingTimeline(input: OnboardingInputs): OnboardingSumm
     };
   } else if (groupInvites.length > 0) {
     const inv = [...groupInvites].sort((a, b) => a.created_at.localeCompare(b.created_at))[0];
+    // Reason: an invite that isn't in captainMembers hasn't been accepted — surface
+    // its status so "invited" is never mistaken for "on board".
+    const statusEs =
+      inv.status === 'accepted' ? 'aceptó'
+        : inv.status === 'declined' ? 'rechazó'
+          : inv.status === 'expired' ? 'expiró'
+            : 'pendiente';
+    const who = inv.name ?? inv.email ?? '';
     captain = {
       key: 'captain', label: 'Capitán invitado', done: true,
       at: captainInvitedAt, source: 'event',
-      detail: inv.name ?? inv.email ?? undefined,
+      detail: who ? `${who} (${statusEs})` : `(${statusEs})`,
     };
   } else {
     captain = { key: 'captain', label: 'Capitán invitado', done: false, at: null, source: 'state' };

@@ -254,7 +254,7 @@ export async function getUserOnboardingAdmin(userId: string): Promise<Onboarding
   const { data: invitations } = primary
     ? await supabase
         .from('group_invitations')
-        .select('group_id, created_at, name, email')
+        .select('group_id, created_at, name, email, status')
         .eq('group_id', primary.id)
     : { data: [] };
 
