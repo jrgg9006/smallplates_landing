@@ -152,9 +152,7 @@ function UserDetailPage() {
             </div>
             <div>
               <div className="text-sm text-gray-600 mb-1">Recipes Received</div>
-              <div className="text-3xl font-bold text-gray-900">
-                {totalRecipesReceived} / {totalRecipesExpected}
-              </div>
+              <div className="text-3xl font-bold text-gray-900">{totalRecipesReceived}</div>
             </div>
             <div>
               <div className="text-sm text-gray-600 mb-1">Completion Rate</div>
