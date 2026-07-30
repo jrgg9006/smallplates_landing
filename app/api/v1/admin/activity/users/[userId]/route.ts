@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminAuth } from '@/lib/auth/admin';
-import { getUserWithGuestsAdmin } from '@/lib/supabase/admin-users';
+import { getUserWithGuestsAdmin, getUserOnboardingAdmin } from '@/lib/supabase/admin-users';
 
 export async function GET(
   req: NextRequest,
@@ -23,9 +23,12 @@ export async function GET(
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    const onboarding = await getUserOnboardingAdmin(userId);
+
     return NextResponse.json({
       profile,
-      guests
+      guests,
+      onboarding,
     });
   } catch (error) {
     console.error('Error in /api/admin/activity/users/[userId]:', error);

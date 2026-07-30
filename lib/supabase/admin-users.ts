@@ -1,4 +1,5 @@
 import { createSupabaseAdminClient } from './admin';
+import { buildOnboardingTimeline, OnboardingSummary } from '@/lib/radar/onboarding-timeline';
 
 /**
  * Get all users with their activity stats (admin version)
@@ -207,12 +208,91 @@ export async function getUserStatsAdmin() {
  */
 export async function searchUsersAdmin(searchTerm: string) {
   const supabase = createSupabaseAdminClient();
-  
+
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
     .or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`)
     .order('created_at', { ascending: false });
-  
+
   return { data: data || [], error: error?.message || null };
+}
+
+/**
+ * Gather all inputs needed for the onboarding timeline and return an
+ * OnboardingSummary for the given user (admin, service-role, bypasses RLS).
+ * Returns null if the user profile does not exist.
+ */
+export async function getUserOnboardingAdmin(userId: string): Promise<OnboardingSummary | null> {
+  const supabase = createSupabaseAdminClient();
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, created_at')
+    .eq('id', userId)
+    .single();
+  if (!profile) return null;
+
+  const { data: groups } = await supabase
+    .from('groups')
+    .select('id, name, created_at, created_by, occasion, gift_date, event_date, couple_image_url, captain_invite_token')
+    .eq('created_by', userId)
+    .order('created_at', { ascending: false });
+
+  const primary = groups?.[0] ?? null;
+
+  // Reason: the owner's own group_members row holds their custom_share_message.
+  const { data: groupMember } = primary
+    ? await supabase
+        .from('group_members')
+        .select('custom_share_message')
+        .eq('group_id', primary.id)
+        .eq('profile_id', userId)
+        .maybeSingle()
+    : { data: null };
+
+  const { data: invitations } = primary
+    ? await supabase
+        .from('group_invitations')
+        .select('group_id, created_at')
+        .eq('group_id', primary.id)
+    : { data: [] };
+
+  const { data: guests } = primary
+    ? await supabase
+        .from('guests')
+        .select('id, group_id, first_name, last_name, created_at, is_self')
+        .eq('group_id', primary.id)
+    : { data: [] };
+
+  // Reason: earliest recipe timestamp for the primary group = "first recipe received".
+  const { data: firstRecipe } = primary
+    ? await supabase
+        .from('guest_recipes')
+        .select('created_at')
+        .eq('group_id', primary.id)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle()
+    : { data: null };
+
+  const { data: events } = await supabase
+    .from('user_events')
+    .select('event_name, group_id, created_at, props')
+    .eq('user_id', userId);
+
+  return buildOnboardingTimeline({
+    profile,
+    groups: groups ?? [],
+    groupMember: groupMember ?? null,
+    invitations: invitations ?? [],
+    guests: guests ?? [],
+    firstRecipeAt: firstRecipe?.created_at ?? null,
+    events: (events ?? []).map((e) => ({
+      event_name: e.event_name,
+      group_id: e.group_id,
+      created_at: e.created_at,
+      props: (e.props ?? {}) as Record<string, unknown>,
+    })),
+  });
 }
