@@ -132,6 +132,7 @@ export type FeedKind =
   | 'email_sent'
   | 'order'
   | 'share'
+  | 'share_message'
   | 'couple_image';
 
 export interface FeedItem {

@@ -45,6 +45,9 @@ const EXTRA_PERSISTED = [
   // never via client trackEvent. Listed here so the allowlist stays the single
   // inventory of every event_name that can appear in user_events.
   'couple_image_uploaded',
+  // Reason: fired client-side from updateGroupShareMessage when the owner saves
+  // a custom sharing-link message (onboarding or share modal). Radar feed only.
+  'share_message_edited',
 ] as const;
 
 export const PERSISTED_EVENTS: ReadonlySet<string> = new Set([

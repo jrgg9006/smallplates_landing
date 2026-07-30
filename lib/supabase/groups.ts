@@ -1,5 +1,6 @@
 import { createSupabaseClient } from '@/lib/supabase/client';
 import { createClient } from '@supabase/supabase-js';
+import { trackEvent } from '@/lib/analytics';
 import type {
   Group,
   GroupInsert,
@@ -484,6 +485,12 @@ export async function updateGroupShareMessage(
     .eq('profile_id', user.id)
     .select()
     .single();
+
+  // Reason: Radar feed signal — the owner personalized their sharing-link message.
+  // Fire only on success so failed saves don't appear as edits.
+  if (!error) {
+    trackEvent('share_message_edited', { group_id: groupId });
+  }
 
   return { data, error: error?.message || null };
 }

@@ -5,6 +5,8 @@ import { createSupabaseClient } from '@/lib/supabase/client';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { isAdminEmail } from '@/lib/config/admin';
+import { OnboardingTimeline } from '@/components/admin/radar/OnboardingTimeline';
+import type { OnboardingSummary } from '@/lib/radar/onboarding-timeline';
 
 interface Guest {
   id: string;
@@ -33,6 +35,7 @@ function UserDetailPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [guests, setGuests] = useState<Guest[]>([]);
+  const [onboarding, setOnboarding] = useState<OnboardingSummary | null>(null);
   const [sortBy, setSortBy] = useState<'newest' | 'status' | 'recipes'>('newest');
   const router = useRouter();
   const params = useParams();
@@ -69,6 +72,7 @@ function UserDetailPage() {
       const data = await response.json();
       setUserProfile(data.profile);
       setGuests(data.guests);
+      setOnboarding(data.onboarding ?? null);
     } catch (error) {
       console.error('Error loading user data:', error);
     }
@@ -116,9 +120,7 @@ function UserDetailPage() {
     return null;
   }
 
-  const totalRecipesExpected = guests.reduce((sum, guest) => sum + (guest.number_of_recipes || 0), 0);
   const totalRecipesReceived = guests.reduce((sum, guest) => sum + (guest.recipes_received || 0), 0);
-  const completionRate = totalRecipesExpected > 0 ? Math.round((totalRecipesReceived / totalRecipesExpected) * 100) : 0;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -141,29 +143,19 @@ function UserDetailPage() {
           </div>
 
           {/* Stats Bar */}
-          <div className="bg-white rounded-xl shadow-md p-6 grid grid-cols-4 gap-6">
+          <div className="bg-white rounded-xl shadow-md p-6 grid grid-cols-2 gap-6">
             <div>
               <div className="text-sm text-gray-600 mb-1">Total Guests</div>
               <div className="text-3xl font-bold text-gray-900">{guests.length}</div>
             </div>
             <div>
               <div className="text-sm text-gray-600 mb-1">Recipes Received</div>
-              <div className="text-3xl font-bold text-gray-900">
-                {totalRecipesReceived} / {totalRecipesExpected}
-              </div>
-            </div>
-            <div>
-              <div className="text-sm text-gray-600 mb-1">Completion Rate</div>
-              <div className="text-3xl font-bold text-gray-900">{completionRate}%</div>
-            </div>
-            <div>
-              <div className="text-sm text-gray-600 mb-1">Recipe Goal</div>
-              <div className="text-3xl font-bold text-gray-900">
-                {userProfile.recipe_goal_number || '-'}
-              </div>
+              <div className="text-3xl font-bold text-gray-900">{totalRecipesReceived}</div>
             </div>
           </div>
         </div>
+
+        {onboarding && <OnboardingTimeline summary={onboarding} />}
 
         {/* Guests Table */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
