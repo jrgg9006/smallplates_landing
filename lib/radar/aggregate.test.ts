@@ -158,6 +158,29 @@ describe('buildFeed', () => {
     expect(edits[0].recipeId).toBe('r1');
   });
 
+  it('labels a non-owner member with no book of their own as a captain signup', () => {
+    const d = empty();
+    d.profiles = [
+      { id: 'owner1', email: 'o@x.com', full_name: 'Ana', created_at: at(3) },
+      { id: 'cap1', email: 'c@x.com', full_name: 'Mariana Godin', created_at: at(2) },
+    ];
+    d.groups = [
+      { id: 'g1', name: 'Boda Ana', created_by: 'owner1', created_at: at(3), status: 'free_tier', book_status: 'active', couple_image_url: null },
+    ];
+    d.members = [
+      { group_id: 'g1', profile_id: 'owner1', role: 'owner', joined_at: at(3), invited_by: null },
+      { group_id: 'g1', profile_id: 'cap1', role: 'member', joined_at: at(2), invited_by: 'owner1' },
+    ];
+    const feed = buildFeed(d);
+    const cap = feed.find((f) => f.id === 'signup-cap1');
+    const owner = feed.find((f) => f.id === 'signup-owner1');
+    expect(cap?.kind).toBe('captain_signup');
+    expect(cap?.text).toBe('Nuevo capitán: Mariana Godin');
+    // the book owner stays a regular signup even though they are an 'owner' member
+    expect(owner?.kind).toBe('signup');
+    expect(owner?.text).toBe('Nuevo registro: Ana');
+  });
+
   it('caps the feed at the default limit (100)', () => {
     const d = empty();
     d.profiles = Array.from({ length: 150 }, (_, i) => ({
