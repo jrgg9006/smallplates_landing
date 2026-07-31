@@ -242,13 +242,13 @@ export default function ImageUploadStep({ onImagesReady, onFilesSelected }: Imag
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {selectedFiles.map((file, index) => (
               <div key={index} className="relative group">
-                <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200">
+                <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-50 border-2 border-gray-200">
                   {file.type.startsWith('image/') && previewUrls[index] ? (
                     <Image
                       src={previewUrls[index]}
                       alt={`Recipe image ${index + 1}`}
                       fill
-                      className="object-cover"
+                      className="object-contain p-2"
                     />
                   ) : file.type === 'application/pdf' ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-400">
