@@ -55,10 +55,7 @@ export default function SignatureStep({
             </div>
           ) : (
             <>
-              <SignaturePad height={200} onCapture={onCapture} />
-              <p className="mt-3 text-xs text-gray-400 text-center md:hidden">
-                Turn your phone for more room.
-              </p>
+              <SignaturePad height={240} onCapture={onCapture} />
               <div className="mt-6 text-center">
                 <button
                   type="button"
