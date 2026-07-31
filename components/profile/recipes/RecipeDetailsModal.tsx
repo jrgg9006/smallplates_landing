@@ -778,6 +778,23 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
     </div>
   );
 
+  // Reason: la firma manuscrita del invitado (flujo texto) cierra la página como en
+  // el libro impreso: abajo a la derecha, pequeña, solo en lectura y solo si existe.
+  // No estorba la lectura de la receta.
+  const signatureBlock = localRecipe.signature_url ? (
+    <div className="mt-8 flex flex-col items-end">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={localRecipe.signature_url}
+        alt="Guest signature"
+        className="max-h-16 w-auto"
+      />
+      <p className="text-xs uppercase tracking-[0.15em] text-gray-400 font-serif mt-1">
+        {guestRealName || guestName}
+      </p>
+    </div>
+  ) : null;
+
   // Content component for desktop - book-style layout
   const desktopContent = (
     <div className="flex-1 flex flex-col min-w-0">
@@ -916,6 +933,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         </div>
       </div>
       )}
+      {signatureBlock}
       </>
       )}
     </div>
@@ -1061,6 +1079,7 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         </div>
       </div>
       )}
+      {signatureBlock}
       </>
       )}
     </div>
