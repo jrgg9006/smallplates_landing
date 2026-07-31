@@ -157,7 +157,6 @@ export default function ImageUploadStep({ onImagesReady, onFilesSelected }: Imag
                     </div>
                     <div className="text-center">
                       <h3 className="font-medium text-lg text-brand-charcoal">Upload a file or take a picture</h3>
-                      <p className="mt-1 text-sm text-gray-500">Choose from your device or camera</p>
                       <p className="mt-1 text-xs text-gray-400">Max 5MB per file, up to 10 files</p>
                     </div>
                   </div>
