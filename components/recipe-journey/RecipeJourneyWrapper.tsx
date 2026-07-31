@@ -265,12 +265,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
         setCurrentStepIndex(personalNoteIndex);
       } else if (currentStep?.key === 'signature') {
-        // From signature, go back to the last content step of the active flow
-        const backKey = recipeData.uploadMethod === 'image'
-          ? 'imageUpload'
-          : recipeData.rawRecipeText
-            ? 'recipeTitle'
-            : 'recipeForm';
+        // From signature, go back to the last content step. Text and raw-paste both
+        // come from recipeForm; image comes from imageUpload.
+        const backKey = recipeData.uploadMethod === 'image' ? 'imageUpload' : 'recipeForm';
         setCurrentStepIndex(journeySteps.findIndex(s => s.key === backKey));
       } else if (currentStep?.key === 'summary') {
         // From summary, go back to the signature step
@@ -444,15 +441,16 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     isDirtyRef.current = true;
     
     // Store the raw text in recipe data
-    setRecipeData(prev => ({ 
-      ...prev, 
+    setRecipeData(prev => ({
+      ...prev,
       rawRecipeText: rawText,
       uploadMethod: 'text'  // Ensure it's marked as text method
     }));
-    
-    // Navigate to recipe title step
-    const recipeTitleIndex = journeySteps.findIndex(s => s.key === 'recipeTitle');
-    setCurrentStepIndex(recipeTitleIndex);
+
+    // Reason: the title was already set before recipeForm (where paste lives), so go
+    // straight to the (optional) signature step before submit — don't re-ask the title.
+    const signatureIndex = journeySteps.findIndex(s => s.key === 'signature');
+    setCurrentStepIndex(signatureIndex);
   };
 
   // Wrapper function for submitting raw text from button click
