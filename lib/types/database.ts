@@ -214,6 +214,9 @@ export interface Database {
           needs_review: boolean;
           review_reasons: string | null;
           showcase_image_url: string | null;
+          // Reason: PNG transparente de la firma dibujada por el invitado (dedo en
+          // el smartphone). Vive en el bucket recipes junto a los originales.
+          signature_url: string | null;
           deleted_at: string | null;
           // Reason: capa 1 (product-level). deleted_at = receta oculta del libro
           // (dueño o admin). La papelera admin es deleted_items (capa 2).
@@ -246,6 +249,7 @@ export interface Database {
           needs_review?: boolean;
           review_reasons?: string | null;
           showcase_image_url?: string | null;
+          signature_url?: string | null;
           // Reason: capa 1 (product-level) — quién ocultó la receta del libro
           deleted_by?: string | null;
         };
@@ -272,6 +276,7 @@ export interface Database {
           needs_review?: boolean;
           review_reasons?: string | null;
           showcase_image_url?: string | null;
+          signature_url?: string | null;
           deleted_by?: string | null;
         };
       };
