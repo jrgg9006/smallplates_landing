@@ -783,11 +783,13 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   // No estorba la lectura de la receta.
   const signatureBlock = localRecipe.signature_url ? (
     <div className="mt-8 flex flex-col items-end">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={localRecipe.signature_url}
         alt="Guest signature"
-        className="max-h-16 w-auto"
+        width={0}
+        height={0}
+        sizes="240px"
+        className="w-auto h-auto max-h-16 object-contain"
       />
       <p className="text-xs uppercase tracking-[0.15em] text-gray-400 font-serif mt-1">
         {guestRealName || guestName}
