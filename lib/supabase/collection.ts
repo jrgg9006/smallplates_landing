@@ -779,7 +779,39 @@ export async function submitGuestRecipe(
       })();
     }
 
+    // Persist the guest's signature (if drawn) BEFORE the insert so its URL can go
+    // INTO the insert row. Reason: RLS lets the anon collection client INSERT
+    // guest_recipes but NOT UPDATE it (UPDATE requires auth.uid() = user_id, which
+    // is null for anonymous collection). A post-insert update was silently denied
+    // (0 rows, no error). So we generate the recipe id up front, upload the PNG to
+    // that path, and include signature_url in the insert. Non-fatal: on any failure
+    // we fall back to a normal insert (no signature) so the recipe still saves.
+    let signatureUrl: string | null = null;
+    let presetRecipeId: string | undefined;
+    if (submission.signature_data_url?.startsWith('data:image/png;base64,')) {
+      try {
+        presetRecipeId = crypto.randomUUID();
+        const signatureBlob = await fetch(submission.signature_data_url).then(r => r.blob());
+        const signaturePath = `users/${tokenInfo.user_id}/guests/${guestId}/recipes/${presetRecipeId}/signature.png`;
+        const { error: signatureUploadError } = await supabase.storage
+          .from('recipes')
+          .upload(signaturePath, signatureBlob, { contentType: 'image/png', upsert: true });
+        if (signatureUploadError) {
+          console.warn('Signature upload failed (non-fatal):', signatureUploadError.message);
+          presetRecipeId = undefined;
+        } else {
+          signatureUrl = supabase.storage.from('recipes').getPublicUrl(signaturePath).data.publicUrl;
+        }
+      } catch (signatureError) {
+        console.warn('Signature persistence failed (non-fatal):', signatureError);
+        presetRecipeId = undefined;
+      }
+    }
+
     const recipeData: GuestRecipeInsert = {
+      // Reason: only set when we pre-uploaded a signature to this id's path; else
+      // omit so the DB default uuid applies.
+      id: presetRecipeId,
       guest_id: guestId,
       user_id: tokenInfo.user_id,
       recipe_name: submission.recipe_name.trim(),
@@ -790,6 +822,7 @@ export async function submitGuestRecipe(
       upload_method: submission.upload_method || 'text',
       document_urls: submission.document_urls || null,
       audio_url: submission.audio_url || null,
+      signature_url: signatureUrl,
       submission_status: 'submitted',
       submitted_at: new Date().toISOString(),
       source: 'collection',
@@ -810,29 +843,6 @@ export async function submitGuestRecipe(
         errorDetails: recipeError?.details,
       });
       return { data: null, error: recipeError?.message || 'Failed to save recipe' };
-    }
-
-    // Upload the guest's signature (if drawn) to the recipes bucket and persist
-    // its URL. Reason: non-fatal — the recipe is already saved; a signature hiccup
-    // must not fail the whole submission. Mirrors the admin signature route pattern
-    // (dataURL → PNG → storage → signature_url) but with the anon client already in scope.
-    if (submission.signature_data_url?.startsWith('data:image/png;base64,')) {
-      try {
-        const signatureBlob = await fetch(submission.signature_data_url).then(r => r.blob());
-        const signaturePath = `users/${tokenInfo.user_id}/guests/${guestId}/recipes/${recipe.id}/signature.png`;
-        const { error: signatureUploadError } = await supabase.storage
-          .from('recipes')
-          .upload(signaturePath, signatureBlob, { contentType: 'image/png', upsert: true });
-
-        if (signatureUploadError) {
-          console.warn('Signature upload failed (non-fatal):', signatureUploadError.message);
-        } else {
-          const { data: { publicUrl } } = supabase.storage.from('recipes').getPublicUrl(signaturePath);
-          await supabase.from('guest_recipes').update({ signature_url: publicUrl }).eq('id', recipe.id);
-        }
-      } catch (signatureError) {
-        console.warn('Signature persistence failed (non-fatal):', signatureError);
-      }
     }
 
     // Fetch guest notify fields to drive UI (show/hide opt-in controls)
