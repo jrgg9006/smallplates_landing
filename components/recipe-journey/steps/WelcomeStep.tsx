@@ -24,7 +24,7 @@ export default function WelcomeStep({ creatorName: _creatorName }: WelcomeStepPr
         </h1>
 
         <p className="type-body mt-4">
-          We&apos;re creating a real hardcover cookbook. Printed and shipped to their door.
+          We&apos;re creating a real hardcover cookbook.
         </p>
 
         <ol className="mt-8 space-y-3" role="list" aria-label="How it works">
