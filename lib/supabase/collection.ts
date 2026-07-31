@@ -946,33 +946,10 @@ export async function submitGuestRecipe(
   }
 }
 
-/**
- * Update a guest recipe with notification preferences (optional)
- */
-export async function updateGuestRecipeNotification(
-  recipeId: string,
-  opts: { notify_opt_in?: boolean; notify_email?: string | null }
-): Promise<{ error: string | null }> {
-  const supabase = createSupabaseClient();
-  try {
-    const update: Record<string, any> = {};
-    if (typeof opts.notify_opt_in === 'boolean') update.notify_opt_in = opts.notify_opt_in;
-    if (typeof opts.notify_email !== 'undefined') update.notify_email = opts.notify_email || null;
-
-    if (Object.keys(update).length === 0) return { error: null };
-
-    const { error } = await supabase
-      .from('guest_recipes')
-      .update(update)
-      .eq('id', recipeId)
-      .is('deleted_at', null);
-
-    return { error: error?.message || null };
-  } catch (err) {
-    console.error('Error updating recipe notification:', err);
-    return { error: 'Failed to update notification preferences' };
-  }
-}
+// Reason: removed updateGuestRecipeNotification — the recipe-level notify copy on
+// guest_recipes was redundant (source of truth is the guests table) AND silently
+// failed for anon (RLS blocks anon UPDATE of guest_recipes). Opt-in is persisted
+// only via updateGuestNotification below. See reference_anon_cannot_update_guest_recipes.
 
 /**
  * Update guest-level notification preferences

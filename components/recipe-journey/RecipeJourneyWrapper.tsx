@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { CollectionTokenInfo, CollectionGuestSubmission } from '@/lib/types/database';
-import { submitGuestRecipe, submitGuestRecipeWithFiles, updateGuestRecipeNotification, updateGuestNotification } from '@/lib/supabase/collection';
+import { submitGuestRecipe, submitGuestRecipeWithFiles, updateGuestNotification } from '@/lib/supabase/collection';
 import Frame from './Frame';
 import IntroInfoStep from './steps/IntroInfoStep';
 // inline simple hero step to avoid import resolution issues
@@ -801,16 +801,11 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
   }, [submitSuccess]);
 
   const handleSavePrefs = async (_name?: string, email?: string, optedIn?: boolean) => {
-    const recipeId = lastRecipeIdRef.current;
     const guestId = lastGuestIdRef.current;
-    // Keep recipe-level update for completeness
-    if (recipeId) {
-      await updateGuestRecipeNotification(recipeId, {
-        notify_opt_in: !!optedIn,
-        notify_email: email || guestData.email || null,
-      });
-    }
-    // Update guest-level preference so we don't ask again
+    // Reason: opt-in lives on the guests table (the source of truth read by PDF
+    // delivery, showcase, and winback). The old recipe-level copy on guest_recipes
+    // was redundant AND silently failed for anon (RLS blocks anon UPDATE of
+    // guest_recipes), so we don't write it. See reference_anon_cannot_update_guest_recipes.
     if (guestId) {
       await updateGuestNotification(guestId, {
         notify_opt_in: !!optedIn,
