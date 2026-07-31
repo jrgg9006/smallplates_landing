@@ -129,7 +129,7 @@ export default function ImageUploadStep({ onImagesReady, onFilesSelected }: Imag
             Upload your recipe
           </h2>
           <p className="mt-3 text-base text-gray-600">
-            Just the recipe (not the dish).
+            A photo of the written recipe (the card or page). Not the dish.
           </p>
         </div>
 
