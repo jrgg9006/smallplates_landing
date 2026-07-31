@@ -17,6 +17,7 @@ import UploadMethodStep from './steps/UploadMethodStep';
 import ImageUploadStep from './steps/ImageUploadStep';
 import RecipeTitleStep from './steps/RecipeTitleStep';
 import PersonalNoteStep from './steps/PersonalNoteStep';
+import SignatureStep from './steps/SignatureStep';
 import { journeySteps } from '@/lib/recipe-journey/recipeJourneySteps';
 import { trackEvent, getAttribution } from '@/lib/analytics';
 
@@ -163,7 +164,11 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         // This is handled by handleUploadMethodSelect, don't advance here
         return;
       } else if (currentStep?.key === 'recipeForm') {
-        // After recipe form, go to summary
+        // After recipe form, go to the (optional) signature step
+        const signatureIndex = journeySteps.findIndex(s => s.key === 'signature');
+        setCurrentStepIndex(signatureIndex);
+      } else if (currentStep?.key === 'signature') {
+        // After signature, go to review
         const summaryIndex = journeySteps.findIndex(s => s.key === 'summary');
         setCurrentStepIndex(summaryIndex);
       } else if (currentStep?.key === 'recipeTitle') {
@@ -256,10 +261,14 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         // From recipe form, go back to personal note
         const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
         setCurrentStepIndex(personalNoteIndex);
-      } else if (currentStep?.key === 'summary') {
-        // From summary, go back to recipe form
+      } else if (currentStep?.key === 'signature') {
+        // From signature, go back to recipe form
         const recipeFormIndex = journeySteps.findIndex(s => s.key === 'recipeForm');
         setCurrentStepIndex(recipeFormIndex);
+      } else if (currentStep?.key === 'summary') {
+        // From summary, go back to the signature step
+        const signatureIndex = journeySteps.findIndex(s => s.key === 'signature');
+        setCurrentStepIndex(signatureIndex);
       } else {
         // Normal navigation
         setCurrentStepIndex(currentStepIndex - 1);
@@ -480,7 +489,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         upload_method: recipeData.uploadMethod,
         document_urls: recipeData.documentUrls,
         audio_url: recipeData.audioUrl,
-        printed_name: guestData.printedName || undefined
+        printed_name: guestData.printedName || undefined,
+        signature_data_url: recipeData.signatureDataUrl
       };
 
       // Submit the recipe with cookbook/group context
@@ -627,7 +637,13 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     return () => window.removeEventListener('beforeunload', handler);
   }, [submitSuccess]);
 
-  const onEditSection = (section: 'title' | 'ingredients' | 'instructions' | 'note') => {
+  const onEditSection = (section: 'title' | 'ingredients' | 'instructions' | 'note' | 'signature') => {
+    // Signature lives on its own step, not the recipe form
+    if (section === 'signature') {
+      const signatureIndex = journeySteps.findIndex(s => s.key === 'signature');
+      setCurrentStepIndex(signatureIndex);
+      return;
+    }
     // Go to the recipe form step where all fields are editable
     const recipeFormIndex = journeySteps.findIndex(s => s.key === 'recipeForm');
     setCurrentStepIndex(recipeFormIndex);
@@ -729,7 +745,14 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
           }
           className="px-8 py-3 rounded-full bg-brand-honey text-white hover:bg-brand-honey-dark disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {current === 'imageUpload'
+          {current === 'signature'
+            ? (
+                <>
+                  <span className="md:hidden">Continue</span>
+                  <span className="hidden md:inline">Continue to Review</span>
+                </>
+              )
+            : current === 'imageUpload'
             ? (uploadingImages ? `Submitting... ${uploadProgress}%` : 'Submit Small Plate')
             : (current === 'recipeTitle' && recipeData.rawRecipeText)
               ? (submitting ? 'Submitting...' : 'Submit Small Plate')
@@ -869,6 +892,24 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
             <RecipeFormStep data={recipeData} onChange={handleFormFieldChange} onContinue={handleNext} onBack={handlePrevious} onPasteRecipe={handlePasteRecipe} autosaveState={autosaveState} />
           </motion.div>
         )}
+        {current === 'signature' && (
+          <motion.div
+            key="signature"
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
+            <SignatureStep
+              initialSignature={recipeData.signatureDataUrl}
+              onCapture={(dataUrl) => setRecipeData(prev => ({ ...prev, signatureDataUrl: dataUrl || undefined }))}
+              onSkip={() => {
+                setRecipeData(prev => ({ ...prev, signatureDataUrl: undefined }));
+                handleNext();
+              }}
+            />
+          </motion.div>
+        )}
         {current === 'recipeTitle' && (
           <motion.div
             key="recipeTitle"
@@ -929,6 +970,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
               instructions={recipeData.uploadMethod === 'image' ? `${recipeData.documentUrls?.length || 0} images uploaded` : recipeData.instructions}
               personalNote={recipeData.personalNote}
               guestName={guestData.printedName || `${guestData.firstName} ${guestData.lastName}`.trim()}
+              signatureDataUrl={recipeData.signatureDataUrl}
               onEditSection={onEditSection}
             />
           </motion.div>

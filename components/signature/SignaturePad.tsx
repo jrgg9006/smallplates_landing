@@ -21,6 +21,9 @@ interface SignaturePadProps {
   height?: number;
   className?: string;
   onChange?: (isEmpty: boolean) => void;
+  // Reason: emite el PNG (dataURL) en vivo al terminar cada trazo y null al
+  // borrar, para que el journey guarde la firma en su estado sin refs cruzados.
+  onCapture?: (dataUrl: string | null) => void;
 }
 
 // Reason: exportamos a una resolución FIJA y alta, independiente de la pantalla,
@@ -32,11 +35,13 @@ const STROKE_RATIO = 0.0055;
 const STROKE_COLOR = "#1a1a1a";
 
 const SignaturePad = forwardRef<SignaturePadHandle, SignaturePadProps>(
-  function SignaturePad({ height = 180, className, onChange }, ref) {
+  function SignaturePad({ height = 180, className, onChange, onCapture }, ref) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const drawingRef = useRef(false);
     const activePointerRef = useRef<number | null>(null);
     const lastRef = useRef<{ x: number; y: number } | null>(null);
+    // Reason: espejo síncrono de hasDrawn para emitir onCapture sin esperar re-render.
+    const drawnRef = useRef(false);
     const [hasDrawn, setHasDrawn] = useState(false);
 
     // Configura el backing store del canvas a resolución fija de impresión.
@@ -97,6 +102,7 @@ const SignaturePad = forwardRef<SignaturePadHandle, SignaturePadProps>(
       ctx.lineTo(point.x, point.y);
       ctx.stroke();
       lastRef.current = point;
+      drawnRef.current = true;
       if (!hasDrawn) markDrawn(true);
     };
 
@@ -110,6 +116,10 @@ const SignaturePad = forwardRef<SignaturePadHandle, SignaturePadProps>(
       } catch {
         // El pointer pudo haberse soltado fuera del canvas.
       }
+      // Emite el PNG en vivo tras cada trazo (para que el journey lo guarde).
+      if (drawnRef.current && canvasRef.current) {
+        onCapture?.(canvasRef.current.toDataURL("image/png"));
+      }
     };
 
     const clearCanvas = () => {
@@ -117,7 +127,9 @@ const SignaturePad = forwardRef<SignaturePadHandle, SignaturePadProps>(
       const ctx = canvas?.getContext("2d");
       if (!canvas || !ctx) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawnRef.current = false;
       markDrawn(false);
+      onCapture?.(null);
     };
 
     useImperativeHandle(ref, () => ({
@@ -149,7 +161,7 @@ const SignaturePad = forwardRef<SignaturePadHandle, SignaturePadProps>(
         />
         <div className="mt-2 flex items-center justify-between">
           <span className="text-xs text-gray-400">
-            Firma con el dedo o el mouse
+            Sign with your finger or mouse
           </span>
           <button
             type="button"
@@ -157,7 +169,7 @@ const SignaturePad = forwardRef<SignaturePadHandle, SignaturePadProps>(
             disabled={!hasDrawn}
             className="text-xs font-medium text-gray-600 hover:text-gray-900 disabled:opacity-40"
           >
-            Borrar
+            Clear
           </button>
         </div>
       </div>

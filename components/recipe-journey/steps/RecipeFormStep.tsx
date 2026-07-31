@@ -12,6 +12,9 @@ export interface RecipeData {
   uploadMethod?: 'text' | 'audio' | 'image';
   documentUrls?: string[];
   audioUrl?: string;
+  // Reason: firma dibujada por el invitado, en base64 PNG (dataURL). JSON-safe
+  // para autosave en localStorage; se sube al bucket recipes al enviar.
+  signatureDataUrl?: string;
 }
 
 interface RecipeFormStepProps {

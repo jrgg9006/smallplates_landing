@@ -1330,6 +1330,9 @@ export interface CollectionGuestSubmission {
   document_urls?: string[];
   audio_url?: string;
   printed_name?: string;
+  // Reason: firma del invitado en base64 PNG (dataURL). Se sube al bucket recipes
+  // al enviar y se persiste en guest_recipes.signature_url.
+  signature_data_url?: string;
 }
 
 export interface CollectionTokenInfo {
