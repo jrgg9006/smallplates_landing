@@ -18,6 +18,10 @@ interface PhotoRecipeWarningModalProps {
 /**
  * Shown after the guest presses Submit when the AI engine could not find a
  * written recipe in the uploaded photo. Never blocks: "Submit anyway" always works.
+ *
+ * Styling follows the product modal system (SendRemindersModal, AddFriendToGroupModal):
+ * type-modal-title, gray-600 body, and the pill footer with the charcoal primary
+ * on the right and the white outline secondary beside it.
  */
 export default function PhotoRecipeWarningModal({
   isOpen,
@@ -26,32 +30,33 @@ export default function PhotoRecipeWarningModal({
 }: PhotoRecipeWarningModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onPickAnother(); }}>
-      <DialogContent className="max-w-md w-full bg-white rounded-2xl p-6 gap-0">
-        <DialogHeader className="text-left">
-          <DialogTitle className="font-serif text-2xl font-medium text-brand-charcoal">
-            We couldn&apos;t find a recipe here
-          </DialogTitle>
-          <DialogDescription className="text-[hsl(var(--brand-warm-gray-light))] text-sm mt-2 leading-relaxed">
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle className="type-modal-title">We couldn&apos;t find a recipe here</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-6 py-4">
+          <DialogDescription className="text-gray-600 text-base leading-relaxed">
             This looks like the finished dish. We need the recipe written out: the ingredients
             and the steps. We make the picture from your words.
           </DialogDescription>
-        </DialogHeader>
 
-        <div className="mt-6 flex flex-col items-center gap-3">
-          <button
-            type="button"
-            onClick={onPickAnother}
-            className="w-full px-6 py-3 rounded-full bg-brand-honey text-white hover:bg-brand-honey-dark transition-colors focus:outline-none focus:ring-2 focus:ring-brand-honey focus:ring-offset-2 touch-manipulation"
-          >
-            Pick another photo
-          </button>
-          <button
-            type="button"
-            onClick={onSubmitAnyway}
-            className="text-sm text-[hsl(var(--brand-warm-gray-light))] underline underline-offset-4 hover:text-brand-charcoal transition-colors focus:outline-none focus:ring-2 focus:ring-brand-honey focus:ring-offset-2 rounded-md px-2 py-1"
-          >
-            Submit anyway
-          </button>
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+            <button
+              type="button"
+              onClick={onSubmitAnyway}
+              className="rounded-full border border-[rgba(45,45,45,0.14)] px-6 py-3 text-[15px] font-medium text-brand-charcoal transition-colors hover:bg-[rgba(45,45,45,0.03)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.18)] focus-visible:ring-offset-2"
+            >
+              Submit anyway
+            </button>
+            <button
+              type="button"
+              onClick={onPickAnother}
+              className="rounded-full bg-brand-charcoal px-6 py-3 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2"
+            >
+              Pick another photo
+            </button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
