@@ -631,7 +631,7 @@ async function fetchBook() {
   console.log(`  🧾 QR recompra: qr_repurchase.${GROUP_ID}.png`);
   console.log('');
   console.log('  👉 Siguiente paso: Abrir SmallPlates_MasterTemplate_v1.indd');
-  console.log('     y correr generate-book_v17.jsx');
+  console.log('     y correr generate-book_v21.jsx');
   console.log('');
   console.log('     ⚠️  Antes de mandar el PDF a impresor:');
   console.log('     escanea el QR con tu celular y verifica que abre la URL.');
