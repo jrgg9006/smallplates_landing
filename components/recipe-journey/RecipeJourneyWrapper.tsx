@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { CollectionTokenInfo, CollectionGuestSubmission } from '@/lib/types/database';
-import { submitGuestRecipe, submitGuestRecipeWithFiles, updateGuestNotification } from '@/lib/supabase/collection';
+import { submitGuestRecipe, submitGuestRecipeWithFiles, updateGuestRecipeNotification, updateGuestNotification } from '@/lib/supabase/collection';
 import Frame from './Frame';
 import IntroInfoStep from './steps/IntroInfoStep';
 // inline simple hero step to avoid import resolution issues
@@ -17,9 +17,6 @@ import UploadMethodStep from './steps/UploadMethodStep';
 import ImageUploadStep from './steps/ImageUploadStep';
 import RecipeTitleStep from './steps/RecipeTitleStep';
 import PersonalNoteStep from './steps/PersonalNoteStep';
-import SignatureStep from './steps/SignatureStep';
-import PhotoRecipeWarningModal from './PhotoRecipeWarningModal';
-import { checkPhotoHasRecipe } from '@/lib/recipe-journey/photoRecipeCheck';
 import { journeySteps } from '@/lib/recipe-journey/recipeJourneySteps';
 import { trackEvent, getAttribution } from '@/lib/analytics';
 
@@ -64,12 +61,6 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [checkingPhoto, setCheckingPhoto] = useState(false);
-  const [photoWarningOpen, setPhotoWarningOpen] = useState(false);
-  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  // Reason: the warning modal is rendered outside the submit call, so we park the
-  // promise resolver here and settle it when the guest picks an action.
-  const photoDecisionRef = useRef<((decision: 'proceed' | 'cancel') => void) | null>(null);
   const [selectedRecipeType, setSelectedRecipeType] = useState<RecipeTypeOption | null>(null);
   const isDirtyRef = useRef(false);
   const lastRecipeIdRef = useRef<string | null>(null);
@@ -172,32 +163,25 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         // This is handled by handleUploadMethodSelect, don't advance here
         return;
       } else if (currentStep?.key === 'recipeForm') {
-        // After recipe form, go to the (optional) signature step
-        const signatureIndex = journeySteps.findIndex(s => s.key === 'signature');
-        setCurrentStepIndex(signatureIndex);
-      } else if (currentStep?.key === 'signature') {
-        // After signature, go to review
+        // After recipe form, go to summary
         const summaryIndex = journeySteps.findIndex(s => s.key === 'summary');
         setCurrentStepIndex(summaryIndex);
       } else if (currentStep?.key === 'recipeTitle') {
         if (recipeData.rawRecipeText) {
-          // Raw-paste flow: go to the (optional) signature step before submit
-          const signatureIndex = journeySteps.findIndex(s => s.key === 'signature');
-          setCurrentStepIndex(signatureIndex);
-        } else {
-          const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
-          setCurrentStepIndex(personalNoteIndex);
+          // Reason: Raw text flow skips note step — submit is handled by button onClick
+          return;
         }
+        const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
+        setCurrentStepIndex(personalNoteIndex);
       } else if (currentStep?.key === 'imageUpload') {
-        // After image upload, go to the (optional) signature step before submit
-        const signatureIndex = journeySteps.findIndex(s => s.key === 'signature');
-        setCurrentStepIndex(signatureIndex);
+        // After image upload, go to personal note
+        const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
+        setCurrentStepIndex(personalNoteIndex);
       } else if (currentStep?.key === 'personalNote') {
         // From personal note, check which flow we need to continue with
         if (recipeData.rawRecipeText) {
-          // Raw-paste flow: go to the signature step before submit
-          const signatureIndex = journeySteps.findIndex(s => s.key === 'signature');
-          setCurrentStepIndex(signatureIndex);
+          // Raw text flow: submit directly (handled by different button)
+          return;
         } else if (recipeData.uploadMethod === 'text') {
           // Text flow: go to recipe form
           const recipeFormIndex = journeySteps.findIndex(s => s.key === 'recipeForm');
@@ -272,15 +256,10 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         // From recipe form, go back to personal note
         const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
         setCurrentStepIndex(personalNoteIndex);
-      } else if (currentStep?.key === 'signature') {
-        // From signature, go back to the last content step. Text and raw-paste both
-        // come from recipeForm; image comes from imageUpload.
-        const backKey = recipeData.uploadMethod === 'image' ? 'imageUpload' : 'recipeForm';
-        setCurrentStepIndex(journeySteps.findIndex(s => s.key === backKey));
       } else if (currentStep?.key === 'summary') {
-        // From summary, go back to the signature step
-        const signatureIndex = journeySteps.findIndex(s => s.key === 'signature');
-        setCurrentStepIndex(signatureIndex);
+        // From summary, go back to recipe form
+        const recipeFormIndex = journeySteps.findIndex(s => s.key === 'recipeForm');
+        setCurrentStepIndex(recipeFormIndex);
       } else {
         // Normal navigation
         setCurrentStepIndex(currentStepIndex - 1);
@@ -356,51 +335,6 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     setSubmitError(null);
   };
 
-  const stopProgressInterval = () => {
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
-      progressIntervalRef.current = null;
-    }
-  };
-
-  // Runs once the files are staged in Storage, before anything is persisted.
-  // Advisory only: any failure returns 'proceed' so the submission is untouched.
-  // Reason: pass the batch through untouched, PDFs included. Filtering them out
-  // would break the single-PDF case, and judging a subset inverts the batch rule:
-  // the real recipe may live in the file you dropped. Not warning is the cheap
-  // error; warning a valid submission is the expensive one.
-  const handleStagedFiles = async (publicUrls: string[]): Promise<'proceed' | 'cancel'> => {
-    setCheckingPhoto(true);
-    const result = await checkPhotoHasRecipe(publicUrls);
-    setCheckingPhoto(false);
-
-    // Reason: null means the check failed or timed out. Fail open: indistinguishable
-    // from has_recipe true. The `reason` is logged server-side, in the proxy route.
-    if (!result || result.has_recipe) return 'proceed';
-
-    // Reason: the fake progress bar would keep ticking behind the modal.
-    stopProgressInterval();
-    setPhotoWarningOpen(true);
-
-    return new Promise<'proceed' | 'cancel'>((resolve) => {
-      photoDecisionRef.current = resolve;
-    });
-  };
-
-  const settlePhotoWarning = (decision: 'proceed' | 'cancel') => {
-    setPhotoWarningOpen(false);
-    const resolve = photoDecisionRef.current;
-    photoDecisionRef.current = null;
-    resolve?.(decision);
-  };
-
-  const handlePickAnotherPhoto = () => {
-    settlePhotoWarning('cancel');
-    setSelectedFiles([]);
-    const idx = journeySteps.findIndex(s => s.key === 'imageUpload');
-    if (idx !== -1) setCurrentStepIndex(idx);
-  };
-
   // This function is called when user clicks "Submit Recipe" from personal note step with images
   const handleSubmitWithImages = async () => {
     if (selectedFiles.length === 0) {
@@ -426,36 +360,21 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         upload_method: 'image',
         document_urls: [], // Will be populated by the new function
         audio_url: undefined,
-        printed_name: guestData.printedName || undefined,
-        signature_data_url: recipeData.signatureDataUrl
+        printed_name: guestData.printedName || undefined
       };
 
       // Simulate progress during submission
-      progressIntervalRef.current = setInterval(() => {
+      const progressInterval = setInterval(() => {
         setUploadProgress(prev => Math.min(prev + 15, 90));
       }, 300);
-
-
+      
+      
       // Use the new improved submission function with cookbook/group context
-      const { data, error, cancelled } = await submitGuestRecipeWithFiles(
-        token,
-        submission,
-        selectedFiles,
-        { cookbookId, groupId },
-        handleStagedFiles
-      );
-
-      stopProgressInterval();
-
-      // Guest chose "Pick another photo": nothing was persisted, no error to show.
-      if (cancelled) {
-        setUploadingImages(false);
-        setUploadProgress(0);
-        return;
-      }
-
+      const { data, error } = await submitGuestRecipeWithFiles(token, submission, selectedFiles, { cookbookId, groupId });
+      
+      clearInterval(progressInterval);
       setUploadProgress(100);
-
+      
       if (error) {
         setSubmitError(error);
         setUploadingImages(false);
@@ -497,8 +416,6 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
       
     } catch (err) {
       console.error('Error in new image upload flow:', err);
-      stopProgressInterval();
-      setCheckingPhoto(false);
       setSubmitError('Failed to submit recipe with images. Please try again.');
       setUploadingImages(false);
       setUploadProgress(0);
@@ -510,16 +427,15 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     isDirtyRef.current = true;
     
     // Store the raw text in recipe data
-    setRecipeData(prev => ({
-      ...prev,
+    setRecipeData(prev => ({ 
+      ...prev, 
       rawRecipeText: rawText,
       uploadMethod: 'text'  // Ensure it's marked as text method
     }));
-
-    // Reason: the title was already set before recipeForm (where paste lives), so go
-    // straight to the (optional) signature step before submit — don't re-ask the title.
-    const signatureIndex = journeySteps.findIndex(s => s.key === 'signature');
-    setCurrentStepIndex(signatureIndex);
+    
+    // Navigate to recipe title step
+    const recipeTitleIndex = journeySteps.findIndex(s => s.key === 'recipeTitle');
+    setCurrentStepIndex(recipeTitleIndex);
   };
 
   // Wrapper function for submitting raw text from button click
@@ -564,8 +480,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         upload_method: recipeData.uploadMethod,
         document_urls: recipeData.documentUrls,
         audio_url: recipeData.audioUrl,
-        printed_name: guestData.printedName || undefined,
-        signature_data_url: recipeData.signatureDataUrl
+        printed_name: guestData.printedName || undefined
       };
 
       // Submit the recipe with cookbook/group context
@@ -639,8 +554,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         instructions: '', // Empty for raw mode
         comments: recipeData.personalNote.trim() || undefined, // Now includes personal note
         raw_recipe_text: textToSubmit, // Use the raw text
-        printed_name: guestData.printedName || undefined,
-        signature_data_url: recipeData.signatureDataUrl
+        printed_name: guestData.printedName || undefined
       };
 
       // Submit the recipe with cookbook/group context
@@ -713,13 +627,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     return () => window.removeEventListener('beforeunload', handler);
   }, [submitSuccess]);
 
-  const onEditSection = (section: 'title' | 'ingredients' | 'instructions' | 'note' | 'signature') => {
-    // Signature lives on its own step, not the recipe form
-    if (section === 'signature') {
-      const signatureIndex = journeySteps.findIndex(s => s.key === 'signature');
-      setCurrentStepIndex(signatureIndex);
-      return;
-    }
+  const onEditSection = (section: 'title' | 'ingredients' | 'instructions' | 'note') => {
     // Go to the recipe form step where all fields are editable
     const recipeFormIndex = journeySteps.findIndex(s => s.key === 'recipeForm');
     setCurrentStepIndex(recipeFormIndex);
@@ -759,10 +667,10 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
   const current = journeySteps[currentStepIndex]?.key;
 
   // Reason: Show legal notice only on steps where actual submission happens
-  // Reason: submission now happens at 'summary' (text) or at 'signature' for the
-  // image/raw-paste flows (which have no review step). Show the legal notice there.
-  const isSubmitStep = current === 'summary' ||
-    (current === 'signature' && (recipeData.uploadMethod === 'image' || !!recipeData.rawRecipeText));
+  const isSubmitStep = current === 'imageUpload' ||
+    (current === 'personalNote' && !!recipeData.rawRecipeText) ||
+    (current === 'recipeTitle' && !!recipeData.rawRecipeText) ||
+    current === 'summary';
 
   const bottomNav = (
     <div className="flex flex-col gap-2">
@@ -801,40 +709,34 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         <button
           type="button"
           onClick={
-            current === 'signature'
-              ? (recipeData.uploadMethod === 'image'
-                  ? handleSubmitWithImages
-                  : recipeData.rawRecipeText
+            current === 'imageUpload'
+              ? handleSubmitWithImages
+              : current === 'personalNote'
+                ? (recipeData.rawRecipeText
                     ? handleSubmitRawTextFromButton
                     : handleNext)
-              : handleNext
+                : (current === 'recipeTitle' && recipeData.rawRecipeText)
+                  ? handleSubmitRawTextFromButton
+                  : handleNext
           }
           disabled={
             (current === 'recipeForm' && !canContinueFromForm()) ||
             (current === 'recipeTitle' && !recipeData.recipeName.trim()) ||
-            (current === 'imageUpload' && selectedFiles.length === 0) ||
-            (current === 'signature' && (submitting || uploadingImages)) ||
+            (current === 'imageUpload' && (selectedFiles.length === 0 || uploadingImages)) ||
+            (current === 'personalNote' && recipeData.rawRecipeText && submitting) ||
+            (current === 'recipeTitle' && recipeData.rawRecipeText && submitting) ||
             submitting
           }
           className="px-8 py-3 rounded-full bg-brand-honey text-white hover:bg-brand-honey-dark disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {current === 'signature'
-            ? (recipeData.uploadMethod === 'image'
-                ? (checkingPhoto
-                    ? 'Checking your photo…'
-                    : uploadingImages ? `Submitting... ${uploadProgress}%` : 'Submit Small Plate')
-                : recipeData.rawRecipeText
-                  ? (submitting ? 'Submitting...' : 'Submit Small Plate')
-                  : (
-                      <>
-                        <span className="md:hidden">Continue</span>
-                        <span className="hidden md:inline">Continue to Review</span>
-                      </>
-                    ))
-            : current === 'imageUpload'
-              ? 'Continue'
-              : (current === 'recipeTitle' && recipeData.rawRecipeText)
-                ? 'Continue'
+          {current === 'imageUpload'
+            ? (uploadingImages ? `Submitting... ${uploadProgress}%` : 'Submit Small Plate')
+            : (current === 'recipeTitle' && recipeData.rawRecipeText)
+              ? (submitting ? 'Submitting...' : 'Submit Small Plate')
+              : current === 'personalNote'
+                ? (recipeData.rawRecipeText
+                    ? (submitting ? 'Submitting...' : 'Submit Small Plate')
+                    : 'Continue')
                 : (journeySteps[currentStepIndex]?.ctaLabel ?? 'Continue')
           }
         </button>
@@ -870,11 +772,16 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
   }, [submitSuccess]);
 
   const handleSavePrefs = async (_name?: string, email?: string, optedIn?: boolean) => {
+    const recipeId = lastRecipeIdRef.current;
     const guestId = lastGuestIdRef.current;
-    // Reason: opt-in lives on the guests table (the source of truth read by PDF
-    // delivery, showcase, and winback). The old recipe-level copy on guest_recipes
-    // was redundant AND silently failed for anon (RLS blocks anon UPDATE of
-    // guest_recipes), so we don't write it. See reference_anon_cannot_update_guest_recipes.
+    // Keep recipe-level update for completeness
+    if (recipeId) {
+      await updateGuestRecipeNotification(recipeId, {
+        notify_opt_in: !!optedIn,
+        notify_email: email || guestData.email || null,
+      });
+    }
+    // Update guest-level preference so we don't ask again
     if (guestId) {
       await updateGuestNotification(guestId, {
         notify_opt_in: !!optedIn,
@@ -962,24 +869,6 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
             <RecipeFormStep data={recipeData} onChange={handleFormFieldChange} onContinue={handleNext} onBack={handlePrevious} onPasteRecipe={handlePasteRecipe} autosaveState={autosaveState} />
           </motion.div>
         )}
-        {current === 'signature' && (
-          <motion.div
-            key="signature"
-            initial={{ opacity: 0, x: 16 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -16 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-          >
-            <SignatureStep
-              initialSignature={recipeData.signatureDataUrl}
-              onCapture={(dataUrl) => setRecipeData(prev => ({ ...prev, signatureDataUrl: dataUrl || undefined }))}
-              onSkip={() => {
-                setRecipeData(prev => ({ ...prev, signatureDataUrl: undefined }));
-                handleNext();
-              }}
-            />
-          </motion.div>
-        )}
         {current === 'recipeTitle' && (
           <motion.div
             key="recipeTitle"
@@ -1040,7 +929,6 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
               instructions={recipeData.uploadMethod === 'image' ? `${recipeData.documentUrls?.length || 0} images uploaded` : recipeData.instructions}
               personalNote={recipeData.personalNote}
               guestName={guestData.printedName || `${guestData.firstName} ${guestData.lastName}`.trim()}
-              signatureDataUrl={recipeData.signatureDataUrl}
               onEditSection={onEditSection}
             />
           </motion.div>
@@ -1077,12 +965,6 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
           </motion.div>
         )}
       </AnimatePresence>
-
-      <PhotoRecipeWarningModal
-        isOpen={photoWarningOpen}
-        onPickAnother={handlePickAnotherPhoto}
-        onSubmitAnyway={() => settlePhotoWarning('proceed')}
-      />
     </Frame>
   );
 }
