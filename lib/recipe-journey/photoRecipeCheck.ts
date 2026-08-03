@@ -18,15 +18,10 @@ const CHECK_TIMEOUT_MS = 5000;
 const MAX_IMAGES = 10;
 
 /**
- * Reason: the Railway endpoint is not deployed yet (phase 3 of the hand-off).
- * While this is non-null the check never touches the network and returns this
- * canned answer, so the whole UI can be exercised. Set to null to go live.
+ * Escape hatch for exercising the warning UI without the network. Set it to a
+ * canned result to force an outcome; null (the default) hits the real endpoint.
  */
-const STUB_RESPONSE: PhotoRecipeCheckResult | null = {
-  has_recipe: false,
-  recipe_likelihood: 10,
-  reason: 'stubbed response: finished dish, no recipe text',
-};
+const STUB_RESPONSE: PhotoRecipeCheckResult | null = null;
 
 /**
  * Returns the engine's opinion, or null when we could not get one.
