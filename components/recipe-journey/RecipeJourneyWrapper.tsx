@@ -374,12 +374,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     const result = await checkPhotoHasRecipe(publicUrls);
     setCheckingPhoto(false);
 
+    // Reason: null means the check failed or timed out. Fail open: indistinguishable
+    // from has_recipe true. The `reason` is logged server-side, in the proxy route.
     if (!result || result.has_recipe) return 'proceed';
-
-    console.log('No written recipe detected in upload:', {
-      likelihood: result.recipe_likelihood,
-      reason: result.reason,
-    });
 
     // Reason: the fake progress bar would keep ticking behind the modal.
     stopProgressInterval();
