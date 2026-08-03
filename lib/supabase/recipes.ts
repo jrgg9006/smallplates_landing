@@ -757,8 +757,12 @@ export async function addRecipeWithFiles(
   formData: RecipeFormData | UserRecipeData,
   files: File[],
   isUserRecipe: boolean = false,
-  groupId?: string | null
-): Promise<{ data: GuestRecipe | null; error: string | null }> {
+  groupId?: string | null,
+  // Reason: lets the caller inspect the just-staged files (public URLs) and abort
+  // before anything is persisted. Mirrors submitGuestRecipeWithFiles in
+  // lib/supabase/collection.ts — the two upload paths must not drift.
+  onStagedFiles?: (publicUrls: string[]) => Promise<'proceed' | 'cancel'>
+): Promise<{ data: GuestRecipe | null; error: string | null; cancelled?: boolean }> {
   const supabase = createSupabaseClient();
   
   // Get the current user
@@ -861,6 +865,20 @@ export async function addRecipeWithFiles(
       
       fileMetadata = stagingResult.fileMetadata;
       console.log(`Successfully staged ${fileMetadata.length} files with session: ${sessionId}`);
+
+      // Reason: the `recipes` bucket is public, so staged files already have working
+      // public URLs. Checking here (before the recipe row exists) means backing out
+      // leaves nothing behind: no recipe, no orphan in the final path.
+      if (onStagedFiles) {
+        const stagedUrls = fileMetadata.map(
+          (file) => supabase.storage.from('recipes').getPublicUrl(file.tempPath).data.publicUrl
+        );
+        const decision = await onStagedFiles(stagedUrls);
+        if (decision === 'cancel') {
+          await cleanupStagingFiles(sessionId);
+          return { data: null, error: null, cancelled: true };
+        }
+      }
     }
 
     // Step 3: Update guest recipe count if needed

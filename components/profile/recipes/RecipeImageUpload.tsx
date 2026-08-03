@@ -159,7 +159,9 @@ export function RecipeImageUpload({
               <h3 className="font-medium text-base text-gray-900">
                 {isMobile ? 'Upload or take a picture' : 'Upload images or PDFs'}
               </h3>
-              <p className="mt-1 text-sm text-gray-500">Select images or PDFs from your device{isMobile ? ' or camera' : ''}</p>
+              {/* Reason: same wording as the guest journey (ImageUploadStep). Guests
+                  and organizers make the same mistake, so they get the same warning. */}
+              <p className="mt-1 text-sm text-gray-500">A photo of the written recipe (the card or page). Not the dish.</p>
               <p className="mt-1 text-xs text-gray-400">Max 5MB per file, up to 10 files</p>
             </div>
           </div>
