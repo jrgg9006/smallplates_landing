@@ -42,15 +42,17 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json();
 
-    // Reason: the model's `reason` is debugging English, never shown to the guest.
-    // It lives here, in the server logs, which is where false positives get diagnosed.
-    if (data?.has_recipe === false) {
-      console.log('check-recipe-photo: no recipe found', {
-        likelihood: data.recipe_likelihood,
-        reason: data.reason,
-        images: imageUrls.length,
-      });
-    }
+    // Reason: log EVERY verdict, not just the negative one. A guest sailing through
+    // is ambiguous from the outside: the model may have said yes, or the call may
+    // have failed and fallen open. Without a line for both, the two are
+    // indistinguishable and the check cannot be debugged at all.
+    // The `reason` is model-generated English for us, never shown to the guest.
+    console.log('check-recipe-photo verdict', {
+      has_recipe: data?.has_recipe,
+      likelihood: data?.recipe_likelihood,
+      reason: data?.reason,
+      images: imageUrls.length,
+    });
 
     return NextResponse.json(data);
   } catch (error) {
