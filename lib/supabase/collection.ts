@@ -263,16 +263,21 @@ export async function submitGuestRecipeWithFiles(
   collectionToken: string,
   submission: CollectionGuestSubmission,
   files?: File[],
-  context?: { cookbookId?: string | null; groupId?: string | null }
-): Promise<{ 
-  data: { 
-    guest_id: string; 
-    recipe_id: string; 
-    guest_notify_opt_in?: boolean; 
+  context?: { cookbookId?: string | null; groupId?: string | null },
+  // Reason: lets the caller inspect the just-staged files (public URLs) and abort
+  // before anything is persisted. Used by the "is there a recipe in this photo?"
+  // warning. Omit it and the flow behaves exactly as before.
+  onStagedFiles?: (publicUrls: string[]) => Promise<'proceed' | 'cancel'>
+): Promise<{
+  data: {
+    guest_id: string;
+    recipe_id: string;
+    guest_notify_opt_in?: boolean;
     guest_notify_email?: string | null;
     file_urls?: string[];
-  } | null; 
-  error: string | null 
+  } | null;
+  error: string | null;
+  cancelled?: boolean;
 }> {
   const supabase = createSupabaseClient();
   let sessionId: string | null = null;
@@ -298,6 +303,20 @@ export async function submitGuestRecipeWithFiles(
       
       fileMetadata = stagingResult.fileMetadata;
       console.log(`Successfully staged ${fileMetadata.length} files with session: ${sessionId}`);
+
+      // Reason: the `recipes` bucket is public, so staged files already have working
+      // public URLs. Checking here (not after the final move) means a guest who backs
+      // out leaves nothing behind: no guest row, no recipe, no orphan in the final path.
+      if (onStagedFiles) {
+        const stagedUrls = fileMetadata.map(
+          (file) => supabase.storage.from('recipes').getPublicUrl(file.tempPath).data.publicUrl
+        );
+        const decision = await onStagedFiles(stagedUrls);
+        if (decision === 'cancel') {
+          await cleanupStagingFiles(sessionId);
+          return { data: null, error: null, cancelled: true };
+        }
+      }
     }
 
     // Step 3: Handle guest creation/update (same logic as original function)

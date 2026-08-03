@@ -17,6 +17,8 @@ import UploadMethodStep from './steps/UploadMethodStep';
 import ImageUploadStep from './steps/ImageUploadStep';
 import RecipeTitleStep from './steps/RecipeTitleStep';
 import PersonalNoteStep from './steps/PersonalNoteStep';
+import PhotoRecipeWarningModal from './PhotoRecipeWarningModal';
+import { checkPhotoHasRecipe } from '@/lib/recipe-journey/photoRecipeCheck';
 import { journeySteps } from '@/lib/recipe-journey/recipeJourneySteps';
 import { trackEvent, getAttribution } from '@/lib/analytics';
 
@@ -61,6 +63,13 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [checkingPhoto, setCheckingPhoto] = useState(false);
+  const [photoWarningOpen, setPhotoWarningOpen] = useState(false);
+  const [imageUploadKey, setImageUploadKey] = useState(0);
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Reason: the warning modal is rendered outside the submit call, so we park the
+  // promise resolver here and settle it when the guest picks an action.
+  const photoDecisionRef = useRef<((decision: 'proceed' | 'cancel') => void) | null>(null);
   const [selectedRecipeType, setSelectedRecipeType] = useState<RecipeTypeOption | null>(null);
   const isDirtyRef = useRef(false);
   const lastRecipeIdRef = useRef<string | null>(null);
@@ -335,6 +344,52 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     setSubmitError(null);
   };
 
+  const stopProgressInterval = () => {
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+  };
+
+  // Runs once the files are staged in Storage, before anything is persisted.
+  // Advisory only: any failure returns 'proceed' so the submission is untouched.
+  const handleStagedFiles = async (publicUrls: string[]): Promise<'proceed' | 'cancel'> => {
+    setCheckingPhoto(true);
+    const result = await checkPhotoHasRecipe(publicUrls);
+    setCheckingPhoto(false);
+
+    if (!result || result.has_recipe) return 'proceed';
+
+    console.log('No written recipe detected in upload:', {
+      likelihood: result.recipe_likelihood,
+      reason: result.reason,
+    });
+
+    // Reason: the fake progress bar would keep ticking behind the modal.
+    stopProgressInterval();
+    setPhotoWarningOpen(true);
+
+    return new Promise<'proceed' | 'cancel'>((resolve) => {
+      photoDecisionRef.current = resolve;
+    });
+  };
+
+  const settlePhotoWarning = (decision: 'proceed' | 'cancel') => {
+    setPhotoWarningOpen(false);
+    const resolve = photoDecisionRef.current;
+    photoDecisionRef.current = null;
+    resolve?.(decision);
+  };
+
+  const handlePickAnotherPhoto = () => {
+    settlePhotoWarning('cancel');
+    setSelectedFiles([]);
+    // Reason: submission happens ON the upload step, so there is no navigation to
+    // reset it. ImageUploadStep keeps its own file list in local state, so bumping
+    // the key remounts it empty and keeps it in sync with the cleared parent state.
+    setImageUploadKey(key => key + 1);
+  };
+
   // This function is called when user clicks "Submit Recipe" from personal note step with images
   const handleSubmitWithImages = async () => {
     if (selectedFiles.length === 0) {
@@ -364,17 +419,31 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
       };
 
       // Simulate progress during submission
-      const progressInterval = setInterval(() => {
+      progressIntervalRef.current = setInterval(() => {
         setUploadProgress(prev => Math.min(prev + 15, 90));
       }, 300);
-      
-      
+
+
       // Use the new improved submission function with cookbook/group context
-      const { data, error } = await submitGuestRecipeWithFiles(token, submission, selectedFiles, { cookbookId, groupId });
-      
-      clearInterval(progressInterval);
+      const { data, error, cancelled } = await submitGuestRecipeWithFiles(
+        token,
+        submission,
+        selectedFiles,
+        { cookbookId, groupId },
+        handleStagedFiles
+      );
+
+      stopProgressInterval();
+
+      // Guest chose "Pick another photo": nothing was persisted, no error to show.
+      if (cancelled) {
+        setUploadingImages(false);
+        setUploadProgress(0);
+        return;
+      }
+
       setUploadProgress(100);
-      
+
       if (error) {
         setSubmitError(error);
         setUploadingImages(false);
@@ -416,6 +485,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
       
     } catch (err) {
       console.error('Error in new image upload flow:', err);
+      stopProgressInterval();
+      setCheckingPhoto(false);
       setSubmitError('Failed to submit recipe with images. Please try again.');
       setUploadingImages(false);
       setUploadProgress(0);
@@ -730,7 +801,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
           className="px-8 py-3 rounded-full bg-brand-honey text-white hover:bg-brand-honey-dark disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {current === 'imageUpload'
-            ? (uploadingImages ? `Submitting... ${uploadProgress}%` : 'Submit Small Plate')
+            ? (checkingPhoto
+                ? 'Checking your photo…'
+                : uploadingImages ? `Submitting... ${uploadProgress}%` : 'Submit Small Plate')
             : (current === 'recipeTitle' && recipeData.rawRecipeText)
               ? (submitting ? 'Submitting...' : 'Submit Small Plate')
               : current === 'personalNote'
@@ -892,7 +965,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
             exit={{ opacity: 0, x: -16 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
           >
-            <ImageUploadStep 
+            <ImageUploadStep
+              key={imageUploadKey}
               onImagesReady={() => {}}  // Not used anymore, submit happens from personal note
               onFilesSelected={handleFilesSelected}
             />
@@ -965,6 +1039,12 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
           </motion.div>
         )}
       </AnimatePresence>
+
+      <PhotoRecipeWarningModal
+        isOpen={photoWarningOpen}
+        onPickAnother={handlePickAnotherPhoto}
+        onSubmitAnyway={() => settlePhotoWarning('proceed')}
+      />
     </Frame>
   );
 }
