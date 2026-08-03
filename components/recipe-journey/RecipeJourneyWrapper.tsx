@@ -353,6 +353,10 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
 
   // Runs once the files are staged in Storage, before anything is persisted.
   // Advisory only: any failure returns 'proceed' so the submission is untouched.
+  // Reason: pass the batch through untouched, PDFs included. Filtering them out
+  // would break the single-PDF case, and judging a subset inverts the batch rule:
+  // the real recipe may live in the file you dropped. Not warning is the cheap
+  // error; warning a valid submission is the expensive one.
   const handleStagedFiles = async (publicUrls: string[]): Promise<'proceed' | 'cancel'> => {
     setCheckingPhoto(true);
     const result = await checkPhotoHasRecipe(publicUrls);
