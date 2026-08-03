@@ -13,8 +13,15 @@ interface RecipeImageUploadProps {
 
 // Constants for file limits
 const MAX_FILES = 10;
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
-const MAX_TOTAL_SIZE = 25 * 1024 * 1024; // 25MB total
+// Reason: an iPhone screenshot or photo saved as PNG routinely lands at 5-12MB,
+// so the old 5MB cap rejected perfectly normal uploads. We keep the original file
+// untouched (it feeds the printed Originals section) and only guard against
+// pathological sizes. The `recipes` bucket has no per-file limit, so the ceiling
+// is the project-wide 50MB.
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB in bytes
+const MAX_TOTAL_SIZE = 60 * 1024 * 1024; // 60MB total
+const MAX_FILE_SIZE_MB = MAX_FILE_SIZE / (1024 * 1024);
+const MAX_TOTAL_SIZE_MB = MAX_TOTAL_SIZE / (1024 * 1024);
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
 
 export function RecipeImageUpload({ 
@@ -89,13 +96,13 @@ export function RecipeImageUpload({
 
       // Check individual file size
       if (file.size > MAX_FILE_SIZE) {
-        errors.push(`"${file.name}" is too large (max 5MB per file)`);
+        errors.push(`"${file.name}" is too large (max ${MAX_FILE_SIZE_MB}MB per file)`);
         continue;
       }
 
       // Check total size
       if (totalSize + file.size > MAX_TOTAL_SIZE) {
-        errors.push('Total file size would exceed 25MB limit');
+        errors.push(`Total file size would exceed ${MAX_TOTAL_SIZE_MB}MB limit`);
         break;
       }
 
@@ -162,7 +169,7 @@ export function RecipeImageUpload({
               {/* Reason: same wording as the guest journey (ImageUploadStep). Guests
                   and organizers make the same mistake, so they get the same warning. */}
               <p className="mt-1 text-sm text-gray-500">A photo of the written recipe (the card or page). Not the dish.</p>
-              <p className="mt-1 text-xs text-gray-400">Max 5MB per file, up to 10 files</p>
+              <p className="mt-1 text-xs text-gray-400">Max {MAX_FILE_SIZE_MB}MB per file, up to {MAX_FILES} files</p>
             </div>
           </div>
         </button>
