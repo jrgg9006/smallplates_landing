@@ -129,7 +129,7 @@ export default function ImageUploadStep({ onImagesReady, onFilesSelected }: Imag
             Upload your recipe
           </h2>
           <p className="mt-3 text-base text-gray-600">
-            Just the recipe (not the dish). We&apos;ll make it beautiful.
+            A photo of the written recipe (the card or page). Not the dish.
           </p>
         </div>
 
@@ -157,7 +157,6 @@ export default function ImageUploadStep({ onImagesReady, onFilesSelected }: Imag
                     </div>
                     <div className="text-center">
                       <h3 className="font-medium text-lg text-brand-charcoal">Upload a file or take a picture</h3>
-                      <p className="mt-1 text-sm text-gray-500">Choose from your device or camera</p>
                       <p className="mt-1 text-xs text-gray-400">Max 5MB per file, up to 10 files</p>
                     </div>
                   </div>
@@ -178,7 +177,7 @@ export default function ImageUploadStep({ onImagesReady, onFilesSelected }: Imag
                     </div>
                     <div className="text-center">
                       <h3 className="font-medium text-lg text-brand-charcoal">Upload files</h3>
-                      <p className="mt-1 text-sm text-gray-500">Select images or PDFs from your device</p>
+                      <p className="mt-1 text-sm text-gray-500">Select images or PDFs</p>
                       <p className="mt-1 text-xs text-gray-400">Max 5MB per file, up to 10 files</p>
                     </div>
                   </div>
@@ -243,13 +242,13 @@ export default function ImageUploadStep({ onImagesReady, onFilesSelected }: Imag
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {selectedFiles.map((file, index) => (
               <div key={index} className="relative group">
-                <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200">
+                <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-50 border-2 border-gray-200">
                   {file.type.startsWith('image/') && previewUrls[index] ? (
                     <Image
                       src={previewUrls[index]}
                       alt={`Recipe image ${index + 1}`}
                       fill
-                      className="object-cover"
+                      className="object-contain p-2"
                     />
                   ) : file.type === 'application/pdf' ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-400">

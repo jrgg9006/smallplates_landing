@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { PenLineIcon, CameraIcon, MicIcon } from 'lucide-react';
+import { PenLineIcon, CameraIcon } from 'lucide-react';
 
 interface UploadMethodStepProps {
   onSelectMethod: (method: 'text' | 'audio' | 'image') => void;
@@ -22,13 +22,6 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
       title: 'Photo',
       description: 'Upload images or documents',
       available: true
-    },
-    {
-      id: 'audio' as const,
-      icon: MicIcon,
-      title: 'Audio',
-      description: 'Record your plate',
-      available: false
     }
   ];
 
@@ -44,7 +37,7 @@ export default function UploadMethodStep({ onSelectMethod }: UploadMethodStepPro
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-8 max-w-2xl mx-auto">
         {methods.map((method) => (
           <button
             key={method.id}
