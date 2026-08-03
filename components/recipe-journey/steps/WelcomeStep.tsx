@@ -24,14 +24,14 @@ export default function WelcomeStep({ creatorName: _creatorName }: WelcomeStepPr
         </h1>
 
         <p className="type-body mt-4">
-          We&apos;re creating a real hardcover cookbook. Printed and shipped to their door.
+          We&apos;re creating a real hardcover cookbook.
         </p>
 
         <ol className="mt-8 space-y-3" role="list" aria-label="How it works">
           {HOW_IT_WORKS.map((step, i) => (
             <li key={i} className="flex items-baseline gap-3">
-              <span className="text-brand-honey font-medium text-base w-5 shrink-0 tabular-nums">{i + 1}</span>
-              <span className="text-gray-600 text-base">{step}</span>
+              <span className="type-body-small text-brand-honey w-5 shrink-0 tabular-nums">{i + 1}</span>
+              <span className="type-body-small">{step}</span>
             </li>
           ))}
         </ol>

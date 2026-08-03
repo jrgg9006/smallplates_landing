@@ -12,6 +12,9 @@ export interface RecipeData {
   uploadMethod?: 'text' | 'audio' | 'image';
   documentUrls?: string[];
   audioUrl?: string;
+  // Reason: firma dibujada por el invitado, en base64 PNG (dataURL). JSON-safe
+  // para autosave en localStorage; se sube al bucket recipes al enviar.
+  signatureDataUrl?: string;
 }
 
 interface RecipeFormStepProps {
@@ -117,7 +120,9 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
                   
                   // Call the paste handler if provided, otherwise fallback to old behavior
                   if (onPasteRecipe) {
-                    onChange('recipeName', firstLine);
+                    // Reason: the title was already set in the recipeTitle step, so don't
+                    // overwrite it with the first pasted line — only fill it if empty.
+                    if (!data.recipeName.trim()) onChange('recipeName', firstLine);
                     onChange('rawRecipeText', pastedText);
                     onPasteRecipe(pastedText);
                   } else {
@@ -128,7 +133,7 @@ export default function RecipeFormStep({ data, onChange, onContinue, onPasteReci
                 }
                 setShowPasteModal(false);
               }}
-              className="px-6 py-2 rounded-full bg-brand-honey text-white hover:bg-brand-honey-dark"
+              className="w-full px-8 py-3 rounded-full bg-brand-honey text-white hover:bg-brand-honey-dark"
             >
               Continue
             </button>

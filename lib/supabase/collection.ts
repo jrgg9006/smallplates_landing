@@ -259,20 +259,62 @@ export async function searchGuestInCollection(
 /**
  * New improved upload flow: Create guest/recipe records first, then handle file uploads with proper hierarchy
  */
+// Persist the guest's signature (if drawn) BEFORE the recipe insert so its URL can
+// go INTO the insert row. Reason: RLS lets the anon collection client INSERT
+// guest_recipes but NOT UPDATE it (UPDATE requires auth.uid() = user_id, null for
+// anonymous collection — a post-insert update is silently denied, 0 rows). So we
+// generate the recipe id up front, upload the PNG to that path, and return both so
+// the caller sets id + signature_url on the insert. Non-fatal: returns nulls on any
+// failure (the recipe still saves, just without a signature).
+async function uploadCollectionSignature(
+  supabase: ReturnType<typeof createSupabaseClient>,
+  userId: string,
+  guestId: string,
+  signatureDataUrl: string | undefined
+): Promise<{ recipeId?: string; signatureUrl: string | null }> {
+  if (!signatureDataUrl?.startsWith('data:image/png;base64,')) {
+    return { signatureUrl: null };
+  }
+  try {
+    const recipeId = crypto.randomUUID();
+    const blob = await fetch(signatureDataUrl).then((r) => r.blob());
+    const path = `users/${userId}/guests/${guestId}/recipes/${recipeId}/signature.png`;
+    const { error } = await supabase.storage
+      .from('recipes')
+      .upload(path, blob, { contentType: 'image/png', upsert: true });
+    if (error) {
+      console.warn('Signature upload failed (non-fatal):', error.message);
+      return { signatureUrl: null };
+    }
+    return {
+      recipeId,
+      signatureUrl: supabase.storage.from('recipes').getPublicUrl(path).data.publicUrl,
+    };
+  } catch (signatureError) {
+    console.warn('Signature persistence failed (non-fatal):', signatureError);
+    return { signatureUrl: null };
+  }
+}
+
 export async function submitGuestRecipeWithFiles(
   collectionToken: string,
   submission: CollectionGuestSubmission,
   files?: File[],
-  context?: { cookbookId?: string | null; groupId?: string | null }
-): Promise<{ 
-  data: { 
-    guest_id: string; 
-    recipe_id: string; 
-    guest_notify_opt_in?: boolean; 
+  context?: { cookbookId?: string | null; groupId?: string | null },
+  // Reason: lets the caller inspect the just-staged files (public URLs) and abort
+  // before anything is persisted. Used by the "is there a recipe in this photo?"
+  // warning. Omit it and the flow behaves exactly as before.
+  onStagedFiles?: (publicUrls: string[]) => Promise<'proceed' | 'cancel'>
+): Promise<{
+  data: {
+    guest_id: string;
+    recipe_id: string;
+    guest_notify_opt_in?: boolean;
     guest_notify_email?: string | null;
     file_urls?: string[];
-  } | null; 
-  error: string | null 
+  } | null;
+  error: string | null;
+  cancelled?: boolean;
 }> {
   const supabase = createSupabaseClient();
   let sessionId: string | null = null;
@@ -298,6 +340,20 @@ export async function submitGuestRecipeWithFiles(
       
       fileMetadata = stagingResult.fileMetadata;
       console.log(`Successfully staged ${fileMetadata.length} files with session: ${sessionId}`);
+
+      // Reason: the `recipes` bucket is public, so staged files already have working
+      // public URLs. Checking here (not after the final move) means a guest who backs
+      // out leaves nothing behind: no guest row, no recipe, no orphan in the final path.
+      if (onStagedFiles) {
+        const stagedUrls = fileMetadata.map(
+          (file) => supabase.storage.from('recipes').getPublicUrl(file.tempPath).data.publicUrl
+        );
+        const decision = await onStagedFiles(stagedUrls);
+        if (decision === 'cancel') {
+          await cleanupStagingFiles(sessionId);
+          return { data: null, error: null, cancelled: true };
+        }
+      }
     }
 
     // Step 3: Handle guest creation/update (same logic as original function)
@@ -442,8 +498,15 @@ export async function submitGuestRecipeWithFiles(
     
     // Use placeholder text for image uploads initially
     const placeholderText = submission.upload_method === 'image' ? getImagePlaceholderText(files?.length || 0) : null;
-    
+
+    // Signature: upload first so its URL goes into the insert (see helper's reason).
+    const { recipeId: presetRecipeId, signatureUrl } = await uploadCollectionSignature(
+      supabase, tokenInfo.user_id, guestId, submission.signature_data_url
+    );
+
     const recipeData: GuestRecipeInsert = {
+      // Reason: only set when we pre-uploaded a signature to this id's path; else omit.
+      id: presetRecipeId,
       guest_id: guestId,
       user_id: tokenInfo.user_id,
       recipe_name: submission.recipe_name.trim(),
@@ -454,6 +517,7 @@ export async function submitGuestRecipeWithFiles(
       upload_method: submission.upload_method || 'text',
       document_urls: finalFileUrls.length > 0 ? finalFileUrls : null, // Include URLs in initial insert
       audio_url: submission.audio_url || null,
+      signature_url: signatureUrl,
       submission_status: 'submitted',
       submitted_at: new Date().toISOString(),
       source: 'collection',
@@ -779,7 +843,15 @@ export async function submitGuestRecipe(
       })();
     }
 
+    // Signature: upload first so its URL goes into the insert (see helper's reason).
+    const { recipeId: presetRecipeId, signatureUrl } = await uploadCollectionSignature(
+      supabase, tokenInfo.user_id, guestId, submission.signature_data_url
+    );
+
     const recipeData: GuestRecipeInsert = {
+      // Reason: only set when we pre-uploaded a signature to this id's path; else
+      // omit so the DB default uuid applies.
+      id: presetRecipeId,
       guest_id: guestId,
       user_id: tokenInfo.user_id,
       recipe_name: submission.recipe_name.trim(),
@@ -790,6 +862,7 @@ export async function submitGuestRecipe(
       upload_method: submission.upload_method || 'text',
       document_urls: submission.document_urls || null,
       audio_url: submission.audio_url || null,
+      signature_url: signatureUrl,
       submission_status: 'submitted',
       submitted_at: new Date().toISOString(),
       source: 'collection',
@@ -892,33 +965,10 @@ export async function submitGuestRecipe(
   }
 }
 
-/**
- * Update a guest recipe with notification preferences (optional)
- */
-export async function updateGuestRecipeNotification(
-  recipeId: string,
-  opts: { notify_opt_in?: boolean; notify_email?: string | null }
-): Promise<{ error: string | null }> {
-  const supabase = createSupabaseClient();
-  try {
-    const update: Record<string, any> = {};
-    if (typeof opts.notify_opt_in === 'boolean') update.notify_opt_in = opts.notify_opt_in;
-    if (typeof opts.notify_email !== 'undefined') update.notify_email = opts.notify_email || null;
-
-    if (Object.keys(update).length === 0) return { error: null };
-
-    const { error } = await supabase
-      .from('guest_recipes')
-      .update(update)
-      .eq('id', recipeId)
-      .is('deleted_at', null);
-
-    return { error: error?.message || null };
-  } catch (err) {
-    console.error('Error updating recipe notification:', err);
-    return { error: 'Failed to update notification preferences' };
-  }
-}
+// Reason: removed updateGuestRecipeNotification — the recipe-level notify copy on
+// guest_recipes was redundant (source of truth is the guests table) AND silently
+// failed for anon (RLS blocks anon UPDATE of guest_recipes). Opt-in is persisted
+// only via updateGuestNotification below. See reference_anon_cannot_update_guest_recipes.
 
 /**
  * Update guest-level notification preferences

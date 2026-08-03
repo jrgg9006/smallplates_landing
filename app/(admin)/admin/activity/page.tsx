@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { isAdminEmail } from '@/lib/config/admin';
 import Image from 'next/image';
+import RecipeSignaturePanel from '@/components/signature/RecipeSignaturePanel';
 
 interface UserActivity {
   id: string;
@@ -38,6 +39,7 @@ interface Recipe {
   comments: string | null;
   image_url: string | null;
   document_urls: string[] | null;
+  signature_url: string | null;
   upload_method: 'text' | 'image' | 'audio' | null;
   submission_status: 'draft' | 'submitted' | 'approved' | 'rejected';
   created_at: string;
@@ -485,6 +487,13 @@ export default function ActivityPage() {
                     </p>
                   </div>
                 )}
+
+                {/* Signature capture (spike técnico) */}
+                <RecipeSignaturePanel
+                  key={selectedRecipe.id}
+                  recipeId={selectedRecipe.id}
+                  signatureUrl={selectedRecipe.signature_url}
+                />
               </div>
             </div>
           </div>

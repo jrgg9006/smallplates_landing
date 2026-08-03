@@ -9,10 +9,11 @@ interface SummaryStepProps {
   instructions: string;
   personalNote?: string;
   guestName?: string;
-  onEditSection?: (section: 'title' | 'ingredients' | 'instructions' | 'note') => void;
+  signatureDataUrl?: string;
+  onEditSection?: (section: 'title' | 'ingredients' | 'instructions' | 'note' | 'signature') => void;
 }
 
-export default function SummaryStep({ recipeName, ingredients, instructions, personalNote, guestName, onEditSection }: SummaryStepProps) {
+export default function SummaryStep({ recipeName, ingredients, instructions, personalNote, guestName, signatureDataUrl, onEditSection }: SummaryStepProps) {
   return (
     <div className="max-w-4xl mx-auto" role="region" aria-labelledby="summary-heading">
       {/* Header */}
@@ -94,6 +95,24 @@ export default function SummaryStep({ recipeName, ingredients, instructions, per
       </div>
 
       <div className="border-t border-brand-honey/20 mt-8"></div>
+
+      {/* Signature — the page as it goes to the book. Editing happens via the
+          single "Edit" button up top, which walks back through the signature step. */}
+      {signatureDataUrl && (
+        <div className="mt-6 flex flex-col items-end">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={signatureDataUrl}
+            alt="Your signature"
+            className="max-h-24"
+          />
+          {guestName && (
+            <p className="text-xs uppercase tracking-[0.15em] text-gray-400 font-serif mt-1">
+              {guestName}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
