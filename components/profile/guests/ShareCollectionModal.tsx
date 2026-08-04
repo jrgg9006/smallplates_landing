@@ -406,9 +406,17 @@ export function ShareCollectionModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={`${
-        showMessageCustomization ? 'lg:max-w-[820px]' : shareView === "email" ? 'lg:max-w-[760px]' : 'sm:max-w-[620px]'
-      } transition-all duration-300 max-h-[90vh] flex flex-col`}>
+      <DialogContent
+        // Reason: Radix autofocuses the first focusable child on open, which is
+        // the URL input. Its onFocus selects the whole link, so on mobile the
+        // modal opens with the text selected and the selection handles sitting
+        // on top of "Copy link". Blocking the auto-focus leaves the link
+        // unselected; tapping the field still selects it.
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        className={`${
+          showMessageCustomization ? 'lg:max-w-[820px]' : shareView === "email" ? 'lg:max-w-[760px]' : 'sm:max-w-[620px]'
+        } transition-all duration-300 max-h-[90vh] flex flex-col`}
+      >
         <DialogHeader>
           <DialogTitle className="type-modal-title">
             Collect Recipes
