@@ -120,6 +120,8 @@ export default function CollectionForm() {
       lastName: guest.last_name,
       email: guest.email,
       phone: guest.phone,
+      // Reason: carry the guest's canonical signature so the journey pre-fills it.
+      signatureUrl: guest.signature_url || undefined,
       existing: true
     };
     try {

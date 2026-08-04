@@ -28,6 +28,7 @@ interface GuestData {
   email?: string;
   phone?: string;
   printedName?: string;
+  signatureUrl?: string;
   existing: boolean;
 }
 
@@ -73,7 +74,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
   // Reset journey: go to form
   const resetJourney = () => {
     setCurrentStepIndex(1);
-    setRecipeData({
+    // Reason: keep the signature across "Submit another recipe" so the next recipe
+    // pre-fills it (same person, same session). Everything else is cleared.
+    setRecipeData(prev => ({
       recipeName: '',
       ingredients: '',
       instructions: '',
@@ -81,8 +84,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
       rawRecipeText: undefined,
       uploadMethod: 'text',
       documentUrls: [],
-      audioUrl: undefined
-    });
+      audioUrl: undefined,
+      signatureDataUrl: prev.signatureDataUrl
+    }));
     setSubmitSuccess(false);
     setSubmitError(null);
     setSubmitting(false);
@@ -615,7 +619,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     return () => clearTimeout(t);
   }, [currentStepIndex, recipeData]);
 
-  // Load from localStorage on mount
+  // Load from localStorage on mount + seed the guest's canonical signature.
   useEffect(() => {
     const saved = localStorage.getItem('recipeJourneyData');
     if (saved) {
@@ -623,12 +627,24 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         const { currentStepIndex: savedStep, recipeData: savedData } = JSON.parse(saved);
         if (typeof savedStep === 'number' && savedData) {
           setCurrentStepIndex(savedStep);
-          setRecipeData(savedData);
+          // Reason: pre-fill the guest's canonical signature when the draft has none,
+          // so an existing/returning guest sees their signature already there.
+          setRecipeData(
+            (!savedData.signatureDataUrl && guestData.signatureUrl)
+              ? { ...savedData, signatureDataUrl: guestData.signatureUrl }
+              : savedData
+          );
+          return;
         }
       } catch (e) {
         // Ignore parsing errors
       }
     }
+    // No saved draft: seed the guest's canonical signature if we have one.
+    if (guestData.signatureUrl) {
+      setRecipeData(prev => ({ ...prev, signatureDataUrl: guestData.signatureUrl }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Confirm before unload if dirty and not submitted

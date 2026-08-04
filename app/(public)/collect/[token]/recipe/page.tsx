@@ -18,6 +18,7 @@ interface GuestData {
   email?: string;
   phone?: string;
   printedName?: string;
+  signatureUrl?: string;
   existing: boolean;
 }
 

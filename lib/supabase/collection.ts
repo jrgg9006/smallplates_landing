@@ -272,7 +272,17 @@ async function uploadCollectionSignature(
   guestId: string,
   signatureDataUrl: string | undefined
 ): Promise<{ recipeId?: string; signatureUrl: string | null }> {
-  if (!signatureDataUrl?.startsWith('data:image/png;base64,')) {
+  if (!signatureDataUrl) {
+    return { signatureUrl: null };
+  }
+  // Reason: a pre-filled signature kept unchanged arrives as a remote URL (the
+  // guest's canonical signature). Reuse the same file for this recipe — no re-upload.
+  // Snapshot immutability holds because per-recipe signature files are never
+  // overwritten, so pointing recipe B at recipe A's file is safe.
+  if (/^https?:\/\//.test(signatureDataUrl)) {
+    return { signatureUrl: signatureDataUrl };
+  }
+  if (!signatureDataUrl.startsWith('data:image/png;base64,')) {
     return { signatureUrl: null };
   }
   try {
@@ -524,7 +534,13 @@ export async function submitGuestRecipeWithFiles(
       return { data: null, error: recipeError?.message || 'Failed to create recipe' };
     }
 
-    console.log('✅ Recipe created successfully:', { 
+    // Update the guest's canonical signature (latest-wins) so it pre-fills next time.
+    // Reason: anon CAN UPDATE guests in collection (unlike guest_recipes). Best-effort.
+    if (signatureUrl) {
+      await supabase.from('guests').update({ signature_url: signatureUrl }).eq('id', guestId);
+    }
+
+    console.log('✅ Recipe created successfully:', {
       recipeId: recipe.id, 
       guestId, 
       userId: tokenInfo.user_id,
@@ -864,6 +880,12 @@ export async function submitGuestRecipe(
         errorDetails: recipeError?.details,
       });
       return { data: null, error: recipeError?.message || 'Failed to save recipe' };
+    }
+
+    // Update the guest's canonical signature (latest-wins) so it pre-fills next time.
+    // Reason: anon CAN UPDATE guests in collection (unlike guest_recipes). Best-effort.
+    if (signatureUrl) {
+      await supabase.from('guests').update({ signature_url: signatureUrl }).eq('id', guestId);
     }
 
     // Fetch guest notify fields to drive UI (show/hide opt-in controls)

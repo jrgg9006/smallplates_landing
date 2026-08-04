@@ -129,6 +129,9 @@ export interface Database {
           showcase_opted_out: boolean;
           notify_opt_in: boolean;
           notify_email: string | null;
+          // Reason: firma canónica del guest (última usada). Pre-llena el paso de
+          // firma en recetas siguientes. El snapshot por-receta vive en guest_recipes.
+          signature_url: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -157,6 +160,7 @@ export interface Database {
           emails_sent_count?: number;
           invitation_paused_at?: string | null;
           showcase_opted_out?: boolean;
+          signature_url?: string | null;
         };
         Update: {
           first_name?: string;
@@ -181,6 +185,7 @@ export interface Database {
           emails_sent_count?: number;
           invitation_paused_at?: string | null;
           showcase_opted_out?: boolean;
+          signature_url?: string | null;
         };
       };
       guest_recipes: {
