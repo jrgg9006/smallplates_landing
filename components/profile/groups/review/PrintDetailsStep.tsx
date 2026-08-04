@@ -122,6 +122,7 @@ export function PrintDetailsStep({
                 max={COVER_LINE_MAX}
                 placeholder={DEFAULT_COVER_LINE}
                 uppercase
+                multiline
                 onChange={onCoverLineChange}
               />
               <CoverFieldInput
@@ -185,7 +186,11 @@ export function PrintDetailsStep({
             <button
               type="button"
               onClick={() => setSubStep("cover")}
-              className="inline-flex items-center gap-2 rounded-full border border-black/15 px-5 py-2.5 text-sm font-medium text-brand-charcoal transition-colors hover:border-brand-charcoal/40 hover:bg-black/[0.03]"
+              // Reason: match the height and text size of the primary button next
+              // to it (.btn-md = py-3 text-base). It used to be py-2.5 text-sm,
+              // which read as a smaller, weaker control on a phone. Padding stays
+              // tighter than px-8 so the bar still fits on a narrow screen.
+              className="inline-flex items-center gap-2 rounded-full border border-black/15 px-6 py-3 text-base font-medium text-brand-charcoal transition-colors hover:border-brand-charcoal/40 hover:bg-black/[0.03]"
             >
               <ArrowLeft className="h-4 w-4" />
               Cover
