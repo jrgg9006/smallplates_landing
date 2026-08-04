@@ -914,7 +914,11 @@ export default function GroupsPage() {
               }, 100);
             }
           }}
-          openExpanded={shareOpenExpanded}
+          // Reason: the checklist asks for the expanded view (photo + message)
+          // because the photo is what makes the WhatsApp preview work. Once a
+          // photo exists that step is done, so open straight into the share view
+          // instead of forcing the editor again.
+          openExpanded={shareOpenExpanded && !selectedGroup.couple_image_url}
         />
       )}
 
