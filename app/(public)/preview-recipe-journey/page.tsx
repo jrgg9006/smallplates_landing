@@ -42,6 +42,7 @@ export default function PreviewPage() {
     couple_image_position_x: 50,
     book_close_date: null,
     book_closed_by_user: null,
+    signature_enabled: true,
     resolved_group_id: null,
     available_groups: [],
   };

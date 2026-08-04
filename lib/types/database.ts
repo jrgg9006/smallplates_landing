@@ -565,6 +565,10 @@ export interface Database {
           captain_invite_token_expires_at: string | null;
           captain_invite_token_max_uses: number;
           captain_invite_token_uses: number;
+          // Reason: per-book gate for the guest signature feature. Default true so
+          // every new book gets it; existing books were backfilled to false and are
+          // enabled one by one (SQL) as each couple opts in.
+          signature_enabled: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -621,9 +625,11 @@ export interface Database {
           captain_invite_token_expires_at?: string | null;
           captain_invite_token_max_uses?: number;
           captain_invite_token_uses?: number;
+          signature_enabled?: boolean;
         };
         Update: {
           name?: string;
+          signature_enabled?: boolean;
           description?: string | null;
           created_by?: string;
           wedding_date?: string | null;
@@ -1358,6 +1364,9 @@ export interface CollectionTokenInfo {
   couple_image_position_x: number;
   book_close_date: string | null;
   book_closed_by_user: string | null;
+  // Reason: per-book gate for the guest signature step. Drives whether the journey
+  // shows the "Sign it." step. Mirrors groups.signature_enabled (default true).
+  signature_enabled: boolean;
   token: string;
   is_valid: boolean;
   // Reason: Auto-resolved group when ?group= param is missing from URL — prevents orphan recipes

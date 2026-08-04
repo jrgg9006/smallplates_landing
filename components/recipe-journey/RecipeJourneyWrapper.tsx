@@ -71,6 +71,11 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
   const guestOptInEmailRef = useRef<string | null>(null);
   const totalSteps = journeySteps.length;
 
+  // Reason: per-book gate for the signature feature. When off (existing books not yet
+  // opted in), the journey never shows the "Sign it." step and each flow submits at its
+  // pre-signature terminal: text → review, image → imageUpload, raw-paste → on paste.
+  const signatureEnabled = tokenInfo.signature_enabled ?? true;
+
   // Reset journey: go to form
   const resetJourney = () => {
     setCurrentStepIndex(1);
@@ -168,32 +173,41 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         // This is handled by handleUploadMethodSelect, don't advance here
         return;
       } else if (currentStep?.key === 'recipeForm') {
-        // After recipe form, go to the (optional) signature step
-        const signatureIndex = journeySteps.findIndex(s => s.key === 'signature');
-        setCurrentStepIndex(signatureIndex);
+        // Text flow: signature step when enabled, else straight to review.
+        const nextKey = signatureEnabled ? 'signature' : 'summary';
+        setCurrentStepIndex(journeySteps.findIndex(s => s.key === nextKey));
       } else if (currentStep?.key === 'signature') {
         // After signature, go to review
         const summaryIndex = journeySteps.findIndex(s => s.key === 'summary');
         setCurrentStepIndex(summaryIndex);
       } else if (currentStep?.key === 'recipeTitle') {
         if (recipeData.rawRecipeText) {
-          // Raw-paste flow: go to the (optional) signature step before submit
-          const signatureIndex = journeySteps.findIndex(s => s.key === 'signature');
-          setCurrentStepIndex(signatureIndex);
+          // Raw-paste flow: signature step when enabled, else submit now.
+          if (signatureEnabled) {
+            setCurrentStepIndex(journeySteps.findIndex(s => s.key === 'signature'));
+          } else {
+            handleSubmitWithRawText();
+          }
         } else {
           const personalNoteIndex = journeySteps.findIndex(s => s.key === 'personalNote');
           setCurrentStepIndex(personalNoteIndex);
         }
       } else if (currentStep?.key === 'imageUpload') {
-        // After image upload, go to the (optional) signature step before submit
-        const signatureIndex = journeySteps.findIndex(s => s.key === 'signature');
-        setCurrentStepIndex(signatureIndex);
+        // Image flow: signature step when enabled, else submit now.
+        if (signatureEnabled) {
+          setCurrentStepIndex(journeySteps.findIndex(s => s.key === 'signature'));
+        } else {
+          handleSubmitWithImages();
+        }
       } else if (currentStep?.key === 'personalNote') {
         // From personal note, check which flow we need to continue with
         if (recipeData.rawRecipeText) {
-          // Raw-paste flow: go to the signature step before submit
-          const signatureIndex = journeySteps.findIndex(s => s.key === 'signature');
-          setCurrentStepIndex(signatureIndex);
+          // Raw-paste flow: signature step when enabled, else submit now.
+          if (signatureEnabled) {
+            setCurrentStepIndex(journeySteps.findIndex(s => s.key === 'signature'));
+          } else {
+            handleSubmitWithRawText();
+          }
         } else if (recipeData.uploadMethod === 'text') {
           // Text flow: go to recipe form
           const recipeFormIndex = journeySteps.findIndex(s => s.key === 'recipeForm');
@@ -274,9 +288,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         const backKey = recipeData.uploadMethod === 'image' ? 'imageUpload' : 'recipeForm';
         setCurrentStepIndex(journeySteps.findIndex(s => s.key === backKey));
       } else if (currentStep?.key === 'summary') {
-        // From summary, go back to the signature step
-        const signatureIndex = journeySteps.findIndex(s => s.key === 'signature');
-        setCurrentStepIndex(signatureIndex);
+        // From summary, go back to the signature step (or recipe form when signatures are off).
+        const backKey = signatureEnabled ? 'signature' : 'recipeForm';
+        setCurrentStepIndex(journeySteps.findIndex(s => s.key === backKey));
       } else {
         // Normal navigation
         setCurrentStepIndex(currentStepIndex - 1);
@@ -378,7 +392,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         document_urls: [], // Will be populated by the new function
         audio_url: undefined,
         printed_name: guestData.printedName || undefined,
-        signature_data_url: recipeData.signatureDataUrl
+        signature_data_url: signatureEnabled ? recipeData.signatureDataUrl : undefined
       };
 
       // Simulate progress during submission
@@ -451,10 +465,16 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
       uploadMethod: 'text'  // Ensure it's marked as text method
     }));
 
-    // Reason: the title was already set before recipeForm (where paste lives), so go
-    // straight to the (optional) signature step before submit — don't re-ask the title.
-    const signatureIndex = journeySteps.findIndex(s => s.key === 'signature');
-    setCurrentStepIndex(signatureIndex);
+    // Reason: the title was already set before recipeForm (where paste lives), and the
+    // note was collected earlier too. With signatures on, go to the signature step before
+    // submit; with signatures off, everything is already captured, so submit right away
+    // (pass rawText since the state update above is async).
+    if (signatureEnabled) {
+      const signatureIndex = journeySteps.findIndex(s => s.key === 'signature');
+      setCurrentStepIndex(signatureIndex);
+    } else {
+      await handleSubmitWithRawText(rawText);
+    }
   };
 
   // Wrapper function for submitting raw text from button click
@@ -500,7 +520,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         document_urls: recipeData.documentUrls,
         audio_url: recipeData.audioUrl,
         printed_name: guestData.printedName || undefined,
-        signature_data_url: recipeData.signatureDataUrl
+        signature_data_url: signatureEnabled ? recipeData.signatureDataUrl : undefined
       };
 
       // Submit the recipe with cookbook/group context
@@ -575,7 +595,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         comments: recipeData.personalNote.trim() || undefined, // Now includes personal note
         raw_recipe_text: textToSubmit, // Use the raw text
         printed_name: guestData.printedName || undefined,
-        signature_data_url: recipeData.signatureDataUrl
+        signature_data_url: signatureEnabled ? recipeData.signatureDataUrl : undefined
       };
 
       // Submit the recipe with cookbook/group context
@@ -628,9 +648,10 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         if (typeof savedStep === 'number' && savedData) {
           setCurrentStepIndex(savedStep);
           // Reason: pre-fill the guest's canonical signature when the draft has none,
-          // so an existing/returning guest sees their signature already there.
+          // so an existing/returning guest sees their signature already there. Only when
+          // signatures are enabled for this book (else the step is never shown/submitted).
           setRecipeData(
-            (!savedData.signatureDataUrl && guestData.signatureUrl)
+            (signatureEnabled && !savedData.signatureDataUrl && guestData.signatureUrl)
               ? { ...savedData, signatureDataUrl: guestData.signatureUrl }
               : savedData
           );
@@ -640,8 +661,8 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
         // Ignore parsing errors
       }
     }
-    // No saved draft: seed the guest's canonical signature if we have one.
-    if (guestData.signatureUrl) {
+    // No saved draft: seed the guest's canonical signature if we have one (feature on).
+    if (signatureEnabled && guestData.signatureUrl) {
       setRecipeData(prev => ({ ...prev, signatureDataUrl: guestData.signatureUrl }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -709,7 +730,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
   // Reason: submission now happens at 'summary' (text) or at 'signature' for the
   // image/raw-paste flows (which have no review step). Show the legal notice there.
   const isSubmitStep = current === 'summary' ||
-    (current === 'signature' && (recipeData.uploadMethod === 'image' || !!recipeData.rawRecipeText));
+    (current === 'signature' && (recipeData.uploadMethod === 'image' || !!recipeData.rawRecipeText)) ||
+    // Signatures off: the image flow submits at imageUpload (its pre-signature terminal).
+    (!signatureEnabled && current === 'imageUpload');
 
   const bottomNav = (
     <div className="flex flex-col gap-2">
@@ -754,12 +777,16 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
                   : recipeData.rawRecipeText
                     ? handleSubmitRawTextFromButton
                     : handleNext)
-              : handleNext
+              : (!signatureEnabled && current === 'imageUpload')
+                // Signatures off: image flow submits here instead of continuing to signature.
+                ? handleSubmitWithImages
+                : handleNext
           }
           disabled={
             (current === 'recipeForm' && !canContinueFromForm()) ||
             (current === 'recipeTitle' && !recipeData.recipeName.trim()) ||
             (current === 'imageUpload' && selectedFiles.length === 0) ||
+            (current === 'imageUpload' && uploadingImages) ||
             (current === 'signature' && (submitting || uploadingImages)) ||
             submitting
           }
@@ -777,7 +804,9 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
                       </>
                     ))
             : current === 'imageUpload'
-              ? 'Continue'
+              ? (!signatureEnabled
+                  ? (uploadingImages ? `Submitting... ${uploadProgress}%` : 'Submit Small Plate')
+                  : 'Continue')
               : (current === 'recipeTitle' && recipeData.rawRecipeText)
                 ? 'Continue'
                 : (journeySteps[currentStepIndex]?.ctaLabel ?? 'Continue')
@@ -985,7 +1014,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
               instructions={recipeData.uploadMethod === 'image' ? `${recipeData.documentUrls?.length || 0} images uploaded` : recipeData.instructions}
               personalNote={recipeData.personalNote}
               guestName={guestData.printedName || `${guestData.firstName} ${guestData.lastName}`.trim()}
-              signatureDataUrl={recipeData.signatureDataUrl}
+              signatureDataUrl={signatureEnabled ? recipeData.signatureDataUrl : undefined}
               onEditSection={onEditSection}
             />
           </motion.div>

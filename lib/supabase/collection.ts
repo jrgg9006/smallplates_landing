@@ -61,13 +61,16 @@ export async function validateCollectionToken(token: string, groupId?: string | 
     let coupleImagePositionX = 50;
     let bookCloseDate: string | null = null;
     let bookClosedByUser: string | null = null;
+    // Reason: default true (fail-open toward the feature) for the ambiguous no-resolved-group
+    // case; the real value comes from groups.signature_enabled below.
+    let signatureEnabled = true;
 
     // If groupId is provided, get group-specific message, couple names, and image
     if (groupId) {
       // Get group info for couple names and image
       const { data: group } = await supabase
         .from('groups')
-        .select('couple_first_name, partner_first_name, couple_display_name, name, occasion, couple_image_url, couple_image_og_url, couple_image_position_y, couple_image_position_x, book_close_date, book_closed_by_user')
+        .select('couple_first_name, partner_first_name, couple_display_name, name, occasion, couple_image_url, couple_image_og_url, couple_image_position_y, couple_image_position_x, book_close_date, book_closed_by_user, signature_enabled')
         .eq('id', groupId)
         .single();
 
@@ -91,6 +94,7 @@ export async function validateCollectionToken(token: string, groupId?: string | 
         coupleImagePositionX = group.couple_image_position_x ?? 50;
         bookCloseDate = group.book_close_date ?? null;
         bookClosedByUser = group.book_closed_by_user ?? null;
+        signatureEnabled = group.signature_enabled ?? true;
       }
 
       // Get group-specific message from group_members
@@ -119,7 +123,7 @@ export async function validateCollectionToken(token: string, groupId?: string | 
       // auto-resolve when there's exactly one group for this profile.
       const { data: userGroups } = await supabase
         .from('group_members')
-        .select('group_id, groups!inner(id, name, book_closed_by_user, couple_first_name, partner_first_name, couple_display_name, occasion)')
+        .select('group_id, groups!inner(id, name, book_closed_by_user, couple_first_name, partner_first_name, couple_display_name, occasion, signature_enabled)')
         .eq('profile_id', profile.id);
 
       if (userGroups && userGroups.length > 0) {
@@ -151,13 +155,14 @@ export async function validateCollectionToken(token: string, groupId?: string | 
             return g.id === resolvedGroupId;
           });
           if (resolvedGroupData) {
-            const g = resolvedGroupData.groups as unknown as { name?: string | null; couple_first_name?: string | null; partner_first_name?: string | null; couple_display_name?: string | null; occasion?: string | null };
+            const g = resolvedGroupData.groups as unknown as { name?: string | null; couple_first_name?: string | null; partner_first_name?: string | null; couple_display_name?: string | null; occasion?: string | null; signature_enabled?: boolean };
             coupleFirstName = g.couple_first_name ?? null;
             partnerFirstName = g.partner_first_name ?? null;
             occasion = g.occasion ?? null;
             // Reason: Book name (groups.name) is the single source of truth for the
             // title (see groupId branch above). couple_display_name is a fallback only.
             coupleNames = g.name || g.couple_display_name || null;
+            signatureEnabled = g.signature_enabled ?? true;
           }
         }
         // Reason: If multiple groups, we can't auto-resolve — the UI should show a selector.
@@ -182,6 +187,7 @@ export async function validateCollectionToken(token: string, groupId?: string | 
         couple_image_position_x: coupleImagePositionX,
         book_close_date: bookCloseDate,
         book_closed_by_user: bookClosedByUser,
+        signature_enabled: signatureEnabled,
         token,
         is_valid: true,
         resolved_group_id: resolvedGroupId,
