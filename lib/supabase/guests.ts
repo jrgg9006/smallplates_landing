@@ -45,6 +45,27 @@ export async function addGuest(formData: GuestFormData) {
 }
 
 /**
+ * Get a guest's canonical signature (guests.signature_url).
+ *
+ * Reason: used by RecipeDetailsModal to mirror the print pipeline's inheritance
+ * (fetch-book_v4): a recipe with no own signature shows the guest's latest
+ * signature. Read-only, single column, no mutation.
+ */
+export async function getGuestSignatureUrl(
+  guestId: string
+): Promise<{ data: string | null; error: string | null }> {
+  const supabase = createSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('guests')
+    .select('signature_url')
+    .eq('id', guestId)
+    .single();
+
+  return { data: data?.signature_url ?? null, error: error?.message || null };
+}
+
+/**
  * Get all guests for the current user, ordered by recipe submission date
  * Guests with recipes appear first (by most recent recipe date), then guests without recipes (by creation date)
  */

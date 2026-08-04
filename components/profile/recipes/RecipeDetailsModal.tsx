@@ -20,7 +20,7 @@ import Image from "next/image";
 import { changeRecipeGuest, logRecipeEdit } from "@/lib/supabase/recipes";
 import { getRecipeViewState, type RecipeViewState } from "@/lib/recipes/cleanVersionState";
 import { RECIPE_LIKELIHOOD_THRESHOLD } from "@/lib/constants/recipe-review";
-import { getGuests } from "@/lib/supabase/guests";
+import { getGuests, getGuestSignatureUrl } from "@/lib/supabase/guests";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { getRecipeGroups } from "@/lib/supabase/groupRecipes";
 import { isGroupMember } from "@/lib/supabase/groupMembers";
@@ -106,6 +106,11 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   const [showOriginal, setShowOriginal] = useState(false);
   const [showCleaningInfo, setShowCleaningInfo] = useState(false);
 
+  // Reason: firma canónica del guest, para reflejar la herencia del pipeline de impresión
+  // (fetch-book_v4): si la receta no tiene firma propia, se muestra la última del guest.
+  // Se busca solo cuando hace falta (receta sin firma propia).
+  const [inheritedSignatureUrl, setInheritedSignatureUrl] = useState<string | null>(null);
+
   // Update local recipe when prop changes
   useEffect(() => {
     if (recipe) {
@@ -117,6 +122,20 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
   useEffect(() => {
     setCurrentImageIndex(0);
   }, [localRecipe?.id, isOpen]);
+
+  // Reason: si la receta no tiene firma propia, trae la canónica del guest para reflejar
+  // la herencia del pipeline de impresión (fetch-book_v4). Si la receta ya tiene la suya,
+  // no consulta (esa gana). Tolerante a fallos: sin firma heredada, no se muestra nada.
+  useEffect(() => {
+    setInheritedSignatureUrl(null);
+    if (!isOpen || !localRecipe) return;
+    if (localRecipe.signature_url || !localRecipe.guest_id) return;
+    let cancelled = false;
+    getGuestSignatureUrl(localRecipe.guest_id).then(({ data }) => {
+      if (!cancelled) setInheritedSignatureUrl(data);
+    });
+    return () => { cancelled = true; };
+  }, [localRecipe?.id, localRecipe?.signature_url, localRecipe?.guest_id, isOpen]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 640); // sm breakpoint
@@ -780,11 +799,13 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
 
   // Reason: la firma manuscrita del invitado (flujo texto) cierra la página como en
   // el libro impreso: abajo a la derecha, pequeña, solo en lectura y solo si existe.
-  // No estorba la lectura de la receta.
-  const signatureBlock = localRecipe.signature_url ? (
+  // No estorba la lectura de la receta. Firma efectiva: la propia de la receta (snapshot)
+  // y, si no hay, la canónica heredada del guest (igual que fetch-book_v4 al imprimir).
+  const effectiveSignatureUrl = localRecipe.signature_url || inheritedSignatureUrl;
+  const signatureBlock = effectiveSignatureUrl ? (
     <div className="mt-8 flex flex-col items-end">
       <Image
-        src={localRecipe.signature_url}
+        src={effectiveSignatureUrl}
         alt="Guest signature"
         width={0}
         height={0}
