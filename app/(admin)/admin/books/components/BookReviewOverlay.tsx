@@ -168,29 +168,17 @@ export default function BookReviewOverlay({
   }, [groupId]);
 
   const advanceToNext = useCallback(() => {
-    // Reason: look for any non-approved recipe (pending OR needs_revision) so the admin
-    // can flow through all recipes that still need attention without jumping to summary
-    const needsAttention = (r: ReviewRecipe) => r.book_review_status !== 'approved';
-
-    // Find next non-approved recipe after current
-    const afterCurrent = localRecipes.findIndex(
-      (r, i) => i > currentIndex && needsAttention(r)
-    );
-    if (afterCurrent >= 0) {
-      setCurrentIndex(afterCurrent);
+    // Reason: move strictly to the next recipe in order, same as the Next button.
+    // This used to jump to the next non-approved recipe (and wrap around), which
+    // threw the reviewer from #3 to #40 mid-pass and made the position
+    // unpredictable. Reviewing goes in order; the summary lists what's pending.
+    if (currentIndex < localRecipes.length - 1) {
+      setCurrentIndex(currentIndex + 1);
       return;
     }
-    // Wrap around: find any non-approved before current
-    const beforeCurrent = localRecipes.findIndex(
-      (r, i) => i !== currentIndex && needsAttention(r)
-    );
-    if (beforeCurrent >= 0) {
-      setCurrentIndex(beforeCurrent);
-      return;
-    }
-    // All approved — show summary
+    // Last recipe — end of the pass, show the summary.
     setShowSummary(true);
-  }, [localRecipes, currentIndex]);
+  }, [localRecipes.length, currentIndex]);
 
   const handleApprove = useCallback(async () => {
     if (!recipe || saving) return;
