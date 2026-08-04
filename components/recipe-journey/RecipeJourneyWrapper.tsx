@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { CollectionTokenInfo, CollectionGuestSubmission } from '@/lib/types/database';
-import { submitGuestRecipe, submitGuestRecipeWithFiles, updateGuestRecipeNotification, updateGuestNotification } from '@/lib/supabase/collection';
+import { submitGuestRecipe, submitGuestRecipeWithFiles, updateGuestRecipeNotification, updateGuestNotification, checkStagedPhotoForRecipe } from '@/lib/supabase/collection';
 import Frame from './Frame';
 import IntroInfoStep from './steps/IntroInfoStep';
 // inline simple hero step to avoid import resolution issues
@@ -202,9 +202,11 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
           setCurrentStepIndex(personalNoteIndex);
         }
       } else if (currentStep?.key === 'imageUpload') {
-        // Image flow: signature step when enabled, else submit now.
+        // Image flow: check the photo here (right after upload), then go to signature.
+        // Signatures off: submit now — the check runs inside that submit (same step).
         if (signatureEnabled) {
-          setCurrentStepIndex(journeySteps.findIndex(s => s.key === 'signature'));
+          advanceFromImageUpload(); // owns navigation; may stay here if the guest backs out
+          return;
         } else {
           handleSubmitWithImages();
         }
@@ -422,6 +424,29 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
     setImageUploadKey(key => key + 1);
   };
 
+  // Signatures ON only: run the photo check when leaving the upload step (right after
+  // the guest picks their images), NOT at final submit. If the check says "no recipe",
+  // the warning shows while they are still on the upload step, so "Pick another photo"
+  // lands them exactly where they need to be. On proceed (or any check failure), advance
+  // to the signature step. Advisory: never blocks. The signature-step submit skips the
+  // check since it already ran here.
+  const advanceFromImageUpload = async () => {
+    if (selectedFiles.length > 0) {
+      setCheckingPhoto(true);
+      const result = await checkStagedPhotoForRecipe(selectedFiles);
+      setCheckingPhoto(false);
+      if (result && !result.has_recipe) {
+        setPhotoWarningOpen(true);
+        const decision = await new Promise<'proceed' | 'cancel'>((resolve) => {
+          photoDecisionRef.current = resolve;
+        });
+        if (decision === 'cancel') return; // stay on the upload step
+      }
+    }
+    setCurrentStepIndex(journeySteps.findIndex(s => s.key === 'signature'));
+    setTimeout(focusFirstHeading, 0);
+  };
+
   // This function is called when user clicks "Submit Recipe" from personal note step with images
   const handleSubmitWithImages = async () => {
     if (selectedFiles.length === 0) {
@@ -457,13 +482,16 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
       }, 300);
 
 
-      // Use the new improved submission function with cookbook/group context
+      // Use the new improved submission function with cookbook/group context.
+      // Reason: with signatures ON the photo check already ran when leaving the upload
+      // step, so don't re-run it here (pass no callback). With signatures OFF this IS
+      // the upload-step submit, so run the check inline via handleStagedFiles.
       const { data, error, cancelled } = await submitGuestRecipeWithFiles(
         token,
         submission,
         selectedFiles,
         { cookbookId, groupId },
-        handleStagedFiles
+        signatureEnabled ? undefined : handleStagedFiles
       );
 
       stopProgressInterval();
@@ -858,7 +886,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
             (current === 'recipeForm' && !canContinueFromForm()) ||
             (current === 'recipeTitle' && !recipeData.recipeName.trim()) ||
             (current === 'imageUpload' && selectedFiles.length === 0) ||
-            (current === 'imageUpload' && uploadingImages) ||
+            (current === 'imageUpload' && (uploadingImages || checkingPhoto)) ||
             (current === 'signature' && (submitting || uploadingImages)) ||
             submitting
           }
@@ -882,7 +910,7 @@ export default function RecipeJourneyWrapper({ tokenInfo, guestData, token, cook
                   ? (checkingPhoto
                       ? 'Checking your photo…'
                       : uploadingImages ? `Submitting... ${uploadProgress}%` : 'Submit Small Plate')
-                  : 'Continue')
+                  : (checkingPhoto ? 'Checking your photo…' : 'Continue'))
               : (current === 'recipeTitle' && recipeData.rawRecipeText)
                 ? 'Continue'
                 : (journeySteps[currentStepIndex]?.ctaLabel ?? 'Continue')

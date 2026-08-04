@@ -7,6 +7,7 @@ import { createSupabaseClient } from './client';
 import { generateSessionId, uploadFilesToStagingWithClient, moveFilesToFinalLocationWithClient, cleanupStagingFiles } from './storage';
 import { generateAndSaveMidjourneyPrompt } from './midjourneyPrompts';
 import { processRecipeImage, hasValidExtractedData, getImagePlaceholderText } from './imageProcessing';
+import { checkPhotoHasRecipe, type PhotoRecipeCheckResult } from '@/lib/recipe-journey/photoRecipeCheck';
 import type { 
   CollectionTokenInfo, 
   CollectionGuestSubmission, 
@@ -309,6 +310,34 @@ async function uploadCollectionSignature(
   } catch (signatureError) {
     console.warn('Signature persistence failed (non-fatal):', signatureError);
     return { signatureUrl: null };
+  }
+}
+
+/**
+ * Stage the guest's photos and ask the AI engine whether they contain a written
+ * recipe, WITHOUT persisting anything. Lets us warn the guest right after they pick
+ * their images (before the signature step), so a "picture of the finished dish" is
+ * caught early instead of at the very end. Advisory only: returns null on any failure
+ * (the caller proceeds). The staged files are always cleaned up here; the real submit
+ * re-stages when the guest continues.
+ */
+export async function checkStagedPhotoForRecipe(
+  files: File[]
+): Promise<PhotoRecipeCheckResult | null> {
+  if (!files || files.length === 0) return null;
+  const supabase = createSupabaseClient();
+  const sessionId = generateSessionId();
+  try {
+    const stagingResult = await uploadFilesToStagingWithClient(supabase, sessionId, files);
+    if (stagingResult.error) return null; // fail open — never block on the check
+    const urls = stagingResult.fileMetadata.map(
+      (file) => supabase.storage.from('recipes').getPublicUrl(file.tempPath).data.publicUrl
+    );
+    return await checkPhotoHasRecipe(urls);
+  } catch {
+    return null; // fail open
+  } finally {
+    await cleanupStagingFiles(sessionId).catch(() => {});
   }
 }
 
