@@ -25,6 +25,7 @@ import { SendRemindersModal } from "@/components/profile/guests/SendRemindersMod
 import { GuestDetailsModal } from "@/components/profile/guests/GuestDetailsModal";
 import { getUserCollectionToken } from "@/lib/supabase/collection";
 import { createShareURL, extractOgVersion } from "@/lib/utils/sharing";
+import { compressImageForUpload } from "@/lib/image";
 import type { Guest } from "@/lib/types/database";
 import { ImportGuestsModal } from "@/components/profile/guests/ImportGuestsModal";
 import { SendInvitationsPage } from "@/components/profile/guests/SendInvitationsPage";
@@ -288,7 +289,7 @@ export default function GroupsPage() {
   };
 
   // Dashboard image functions
-  const handleDashboardImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDashboardImageSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -301,20 +302,35 @@ export default function GroupsPage() {
       return;
     }
 
-    // Validate file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
-      setDashboardImageError('File too large. Maximum size is 5MB.');
+    // Reason: iPhone photos and PNG screenshots routinely exceed 5MB, so the old
+    // cap rejected ordinary images. Kept in sync with the server check in
+    // app/api/v1/groups/[groupId]/dashboard-image/route.ts.
+    if (file.size > 20 * 1024 * 1024) {
+      setDashboardImageError('File too large. Maximum size is 20MB.');
       // Reset input on error
       event.target.value = '';
       return;
     }
 
-    // Clear previous file and error
-    setSelectedDashboardFile(file);
     setDashboardImageError(null);
-    
+
+    // Reason: this image is decorative (dashboard header only, never printed), so
+    // we downscale before upload the same way CoupleImageEditor does. Keeps a 20MB
+    // phone photo from becoming a 20MB dashboard load.
+    let fileToUpload = file;
+    try {
+      fileToUpload = await compressImageForUpload(file);
+    } catch (err) {
+      console.error('Dashboard image compression failed:', err);
+      setDashboardImageError("Couldn't read that image. Try saving it as a JPEG first.");
+      event.target.value = '';
+      return;
+    }
+
+    setSelectedDashboardFile(fileToUpload);
+
     // Auto-upload the file
-    handleUploadDashboardImage(file);
+    handleUploadDashboardImage(fileToUpload);
   };
 
   const handleUploadDashboardImage = async (file?: File) => {

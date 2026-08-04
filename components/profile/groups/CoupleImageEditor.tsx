@@ -442,7 +442,7 @@ export function CoupleImageEditor({
               {uploadLabel}
             </p>
             <p className="text-secondary-sm text-gray-500">
-              Click to upload (JPEG, PNG, WebP • max 5MB)
+              Click to upload (JPEG, PNG, WebP • max 30MB)
             </p>
           </div>
         </div>

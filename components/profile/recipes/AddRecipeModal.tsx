@@ -23,6 +23,8 @@ import { Guest } from "@/lib/types/database";
 import { ChevronDown, Plus, PenTool, Camera } from "lucide-react";
 import { RecipeImageUpload } from "./RecipeImageUpload";
 import { AddGuestModal } from "@/components/profile/guests/AddGuestModal";
+import PhotoRecipeWarningModal from "@/components/recipe-journey/PhotoRecipeWarningModal";
+import { checkPhotoHasRecipe } from "@/lib/recipe-journey/photoRecipeCheck";
 
 interface AddPlateModalProps {
   isOpen: boolean;
@@ -67,7 +69,43 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
   const [error, setError] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>('');
   const [userPrintedName, setUserPrintedName] = useState<string>('');
+  const [checkingPhoto, setCheckingPhoto] = useState(false);
+  const [photoWarningOpen, setPhotoWarningOpen] = useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
+  // Reason: the warning modal renders outside the save call, so we park the promise
+  // resolver here and settle it when the user picks an action.
+  const photoDecisionRef = React.useRef<((decision: 'proceed' | 'cancel') => void) | null>(null);
+
+  // Runs once the files are staged, before anything is persisted. Advisory only:
+  // any failure returns 'proceed' so the save is untouched.
+  const handleStagedFiles = async (publicUrls: string[]): Promise<'proceed' | 'cancel'> => {
+    setCheckingPhoto(true);
+    const result = await checkPhotoHasRecipe(publicUrls);
+    setCheckingPhoto(false);
+
+    // Reason: null means the check failed or timed out. Fail open, indistinguishable
+    // from has_recipe true. The verdict is logged server-side, in the proxy route.
+    if (!result || result.has_recipe) return 'proceed';
+
+    setPhotoWarningOpen(true);
+    return new Promise<'proceed' | 'cancel'>((resolve) => {
+      photoDecisionRef.current = resolve;
+    });
+  };
+
+  const settlePhotoWarning = (decision: 'proceed' | 'cancel') => {
+    setPhotoWarningOpen(false);
+    const resolve = photoDecisionRef.current;
+    photoDecisionRef.current = null;
+    resolve?.(decision);
+  };
+
+  const handlePickAnotherPhoto = () => {
+    settlePhotoWarning('cancel');
+    // Reason: RecipeImageUpload is controlled by this state, so clearing it here
+    // empties the picker. No remount needed.
+    setSelectedFiles([]);
+  };
 
   // Load guests and user profile when modal opens
   useEffect(() => {
@@ -208,7 +246,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
     // Validation based on upload method
     if (uploadMethod === 'image') {
       if (selectedFiles.length === 0) {
-        setError("Show us what you're making");
+        setError("Upload a photo of the recipe");
         return;
       }
     } else {
@@ -248,13 +286,21 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                 comments: recipeNotes.trim() || undefined,
               };
 
-          const { data: recipeResult, error: recipeError } = await addRecipeWithFiles(
+          const { data: recipeResult, error: recipeError, cancelled } = await addRecipeWithFiles(
             isMyOwnRecipe ? null : selectedGuestId,
             formData,
             selectedFiles,
             isMyOwnRecipe,
-            groupId
+            groupId,
+            handleStagedFiles
           );
+
+          // "Pick another photo": nothing was persisted, no error to show.
+          if (cancelled) {
+            setLoading(false);
+            setUploadProgress(0);
+            return;
+          }
 
           setUploadProgress(50);
 
@@ -356,13 +402,21 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                 comments: recipeNotes.trim() || undefined,
               };
 
-          const { data: recipeResult, error: recipeError } = await addRecipeWithFiles(
+          const { data: recipeResult, error: recipeError, cancelled } = await addRecipeWithFiles(
             isMyOwnRecipe ? null : selectedGuestId,
             formData,
             selectedFiles,
             isMyOwnRecipe,
-            groupId
+            groupId,
+            handleStagedFiles
           );
+
+          // "Pick another photo": nothing was persisted, no error to show.
+          if (cancelled) {
+            setLoading(false);
+            setUploadProgress(0);
+            return;
+          }
 
           setUploadProgress(100);
 
@@ -645,7 +699,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
             {uploadMethod === 'image' ? (
               <div className="h-full flex flex-col">
                 <Label className="text-sm font-medium text-gray-700 mb-4 block flex-shrink-0">
-                  Show us what you&apos;re making <span className="text-[hsl(var(--brand-honey))] text-xs">*</span>
+                  Upload your recipe <span className="text-[hsl(var(--brand-honey))] text-xs">*</span>
                 </Label>
                 <div className="flex-1 min-h-0 overflow-y-auto">
                   <RecipeImageUpload
@@ -853,7 +907,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
           <>
             {/* Image Mode: Image Upload only (notes moved above) */}            
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-3 block">Show us what you&apos;re making <span className="text-[hsl(var(--brand-honey))] text-xs">*</span></Label>
+              <Label className="text-sm font-medium text-gray-700 mb-3 block">Upload your recipe <span className="text-[hsl(var(--brand-honey))] text-xs">*</span></Label>
               <RecipeImageUpload
                 onFilesSelected={setSelectedFiles}
                 selectedFiles={selectedFiles}
@@ -934,7 +988,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
                 disabled={loading || (!isMyOwnRecipe && guests.length === 0)}
                 className="flex-1 rounded-full bg-brand-charcoal py-3.5 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-50"
               >
-                {loading ? 'Saving...' : 'Save'}
+                {checkingPhoto ? 'Checking your photo…' : loading ? 'Saving...' : 'Save'}
               </button>
             </div>
           </SheetContent>
@@ -946,6 +1000,12 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
           onClose={() => setShowAddGuestModal(false)}
           onGuestAdded={handleGuestAdded}
           groupId={groupId || undefined}
+        />
+
+        <PhotoRecipeWarningModal
+          isOpen={photoWarningOpen}
+          onPickAnother={handlePickAnotherPhoto}
+          onSubmitAnyway={() => settlePhotoWarning('proceed')}
         />
       </>
     );
@@ -981,7 +1041,7 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
               disabled={loading || (!isMyOwnRecipe && guests.length === 0)}
               className="rounded-full bg-brand-charcoal px-8 py-3.5 text-[15px] font-medium text-brand-warm-white-warm transition-colors hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(45,45,45,0.25)] focus-visible:ring-offset-2 disabled:opacity-50"
             >
-              {loading ? 'Saving...' : 'Save'}
+              {checkingPhoto ? 'Checking your photo…' : loading ? 'Saving...' : 'Save'}
             </button>
           </div>
         </DialogContent>
@@ -993,6 +1053,12 @@ export function AddRecipeModal({ isOpen, onClose, onRecipeAdded, cookbookId, gro
         onClose={() => setShowAddGuestModal(false)}
         onGuestAdded={handleGuestAdded}
         groupId={groupId || undefined}
+      />
+
+      <PhotoRecipeWarningModal
+        isOpen={photoWarningOpen}
+        onPickAnother={handlePickAnotherPhoto}
+        onSubmitAnyway={() => settlePhotoWarning('proceed')}
       />
     </>
   );

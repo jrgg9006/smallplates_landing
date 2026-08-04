@@ -956,7 +956,6 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         </div>
       </div>
       )}
-      {signatureBlock}
       </>
       )}
     </div>
@@ -1102,7 +1101,6 @@ export function RecipeDetailsModal({ recipe, isOpen, onClose, onRecipeUpdated, i
         </div>
       </div>
       )}
-      {signatureBlock}
       </>
       )}
     </div>

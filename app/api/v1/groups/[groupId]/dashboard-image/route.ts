@@ -80,9 +80,9 @@ export async function POST(
       );
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+    if (file.size > 20 * 1024 * 1024) { // 20MB limit, mirrors the client check
       return NextResponse.json(
-        { error: 'File too large. Maximum size is 5MB.' },
+        { error: 'File too large. Maximum size is 20MB.' },
         { status: 400 }
       );
     }
