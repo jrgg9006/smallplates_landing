@@ -904,6 +904,7 @@ function main() {
     msg += "\nOriginals: " + originalsStatus;
     if (hasAnnex) msg += "\nOriginals footers: " + footersFilled + " receta(s) con 'See Originals Page'";
     msg += "\nGuardado: SmallPlates_" + coupleName + ".indd";
+    msg += "\n\nFirmas: " + SIG_STATS.placed + " colocadas | " + SIG_STATS.noFrame + " sin marco {{SIGNATURE}} | " + SIG_STATS.noFile + " sin archivo | " + SIG_STATS.noField + " sin firma | " + SIG_STATS.error + " error";
     msg += "\n\nMaster template: sin cambios";
 
     alert(msg);
@@ -1087,31 +1088,49 @@ function placeImageInSpread(spread, recipe, basePath) {
 // no-op silencioso si la receta no trae firma, si el archivo no está en disco, o si el
 // template todavía no tiene el marco {{SIGNATURE}} (masters viejos).
 // ============================================
-function placeSignatureInSpread(spread, recipe, basePath) {
-    if (!recipe.signature_image_path) return false;
+// Diagnóstico visible: se resume en el alert final del run.
+var SIG_STATS = { placed: 0, noField: 0, noFile: 0, noFrame: 0, error: 0 };
 
-    var signatureFile = new File(basePath.fsName + "/" + recipe.signature_image_path);
-    if (!signatureFile.exists) {
-        $.writeln("  Signature not found: " + signatureFile.fsName);
+function placeSignatureInSpread(spread, recipe, basePath) {
+    var name = recipe.recipe_name || recipe.id;
+    if (!recipe.signature_image_path) {
+        SIG_STATS.noField++;
+        $.writeln("  [sig] " + name + ": sin campo signature_image_path (skip)");
         return false;
     }
 
+    var signatureFile = new File(basePath.fsName + "/" + recipe.signature_image_path);
+    if (!signatureFile.exists) {
+        SIG_STATS.noFile++;
+        $.writeln("  [sig] " + name + ": ARCHIVO NO EXISTE -> " + signatureFile.fsName);
+        return false;
+    }
+
+    // Reason: match tolerante a espacios/caracteres invisibles en el Script Label
+    // (mismo criterio que findItemByLabel), por si el label se tecleó con basura.
+    var targetNorm = normalizeLabel(CONFIG.signatureImageLabel);
     for (var p = 0; p < spread.pages.length; p++) {
         var items = spread.pages[p].allPageItems;
         for (var i = 0; i < items.length; i++) {
-            if (items[i].label === CONFIG.signatureImageLabel) {
+            var lbl = String(items[i].label);
+            if (lbl === CONFIG.signatureImageLabel || normalizeLabel(lbl) === targetNorm) {
                 try {
                     items[i].place(signatureFile);
                     items[i].fit(FitOptions.PROPORTIONALLY);
                     items[i].fit(FitOptions.CENTER_CONTENT);
+                    SIG_STATS.placed++;
+                    $.writeln("  [sig] " + name + ": COLOCADA");
                     return true;
                 } catch (e) {
-                    $.writeln("  Signature error: " + e.message);
+                    SIG_STATS.error++;
+                    $.writeln("  [sig] " + name + ": ERROR al colocar -> " + e.message);
                     return false;
                 }
             }
         }
     }
+    SIG_STATS.noFrame++;
+    $.writeln("  [sig] " + name + ": NO se encontró marco {{SIGNATURE}} en este spread");
     return false;
 }
 
