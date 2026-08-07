@@ -7,7 +7,7 @@ import { trackStartBookClick } from "@/lib/analytics";
 import { isFreeTierEnabled } from "@/lib/feature-flags";
 
 /**
- * THE SOLUTION — "The recipe, the photo, the note. Together on one page."
+ * THE SOLUTION — "We make the photo of every dish."
  *
  * Centered, airy layout (Remento / Storyworth pattern): a calm headline and
  * subtext up top, then real book spreads drifting full-width below. The wedge
@@ -80,7 +80,7 @@ export default function TheSolution() {
         <p className="type-eyebrow mb-5">This is Small Plates</p>
 
         <h2 id="solution-heading" className="type-heading">
-          The recipe, the photo, the note. Together on one page.
+          We make the photo of every dish.
         </h2>
 
         <p className="type-body mx-auto mt-6 max-w-2xl">
