@@ -34,8 +34,8 @@ export default function Home() {
       <Banner />
       <main className="min-h-screen">
         <Hero />
-        <ProductRouter showClub={showClub} showTiles={showTiles} />
         <TestimonialBar />
+        <ProductRouter showClub={showClub} showTiles={showTiles} />
         {/* <TheProblem /> — hidden from flow; see import note */}
         <TheSolution />
         <HowItWorks showClubToggle={showClub} />
