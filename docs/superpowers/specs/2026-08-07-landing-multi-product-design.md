@@ -61,7 +61,7 @@ FAQ                         (+ club and tiles entries)
 NewsletterSignup / Footer   (unchanged)
 ```
 
-3 new components (ProductRouter, TheClub, TheTiles), 5 modified (Hero, TheSolution, HowItWorks, PricingBlock, FAQ), rest untouched. Page file: `app/(public)/page.tsx`. Components: `components/landing/`.
+3 new components (ProductRouter, TheClub, TheTiles), 4 modified (Hero, HowItWorks, PricingBlock, FAQ), rest untouched. Page file: `app/(public)/page.tsx`. Components: `components/landing/`.
 
 ## 5. Component specs
 
@@ -81,9 +81,9 @@ Three cards directly under the hero. Each card is concrete, no poetry: **object 
 
 Group-size logic (2-6 vs 8+) appears as a fact inside the cards, never as an entry question. Cards use existing type system (`type-subheading`, `type-body-small`, `type-caption`).
 
-### 5.3 TheSolution (modified)
+### 5.3 TheSolution (no change)
 
-Light copy pass only: remove any wedding-only or gift-only assumptions so the section holds for gift, club, and (conceptually) tiles. No structural change.
+On inspection during implementation, this section required no changes. The existing copy already works for gift, club, and tiles without wedding-only or gift-only assumptions.
 
 ### 5.4 HowItWorks (modified)
 
@@ -139,6 +139,8 @@ Add entries for: what is a cookbook club / how is it different from a gift book;
 
 Club onboarding and the Tiles flow are separate projects with their own specs (not designed here). The landing can be built now; it ships when those flows are live, or earlier with the club/tiles sections behind a flag. Timing decision belongs to the implementation plan.
 
+**Important: Environment variable deployment behavior.** Next.js inlines NEXT_PUBLIC_* environment variables at build time. Toggling NEXT_PUBLIC_SHOW_CLUB or NEXT_PUBLIC_SHOW_TILES in the Vercel dashboard requires a new deployment to take effect. The changes will not go live on the next request against an existing deployment; restarting the server is not sufficient. Locally, changing .env.local requires restarting the dev server.
+
 ## 9. Out of scope (v1)
 
 - Dedicated `/club` and `/tiles` landing pages (phase 2, for ads).
@@ -153,3 +155,6 @@ Club onboarding and the Tiles flow are separate projects with their own specs (n
 2. Final tile price (before launch).
 3. Tiles: one-tile-per-dish vs one composed piece (source docs contradict; blocks tiles copy detail, not the section itself).
 4. Ship-behind-flag vs ship-when-flows-ready (implementation plan).
+5. `public/images/tiles/tiles_kitchen_wall.jpg` does not exist. The tiles section needs a real product image before visual review.
+6. The tiles CTA currently tracks the click and does nothing else, pending the tiles flow.
+7. Hero, club, and tiles copy are working drafts pending founder approval.
