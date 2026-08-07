@@ -3,6 +3,7 @@ import { requireAdminAuth } from '@/lib/auth/admin';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { ATTENDED_COOLDOWN_DAYS, DAY_MS } from '@/lib/radar/monitor-constants';
 import { isGroupPaid, PAID_BOOK_ARCHIVE_ERROR } from '@/lib/radar/archive-guard';
+import { CLOSED_BOOK_STATUSES } from '@/lib/radar/monitor';
 
 export async function GET() {
   try {
@@ -10,12 +11,17 @@ export async function GET() {
     const supabase = createSupabaseAdminClient();
     const { data, error } = await supabase
       .from('radar_notifications')
-      .select('*, groups(name)')
+      .select('*, groups(name, book_status)')
       .eq('status', 'open')
       .order('priority', { ascending: true }) // 'high' < 'low' alphabetically; re-sort client-side
       .order('generated_at', { ascending: false });
     if (error) throw error;
-    return NextResponse.json({ notifications: data ?? [] });
+    // Reason: si el libro cerró después de generarse la notificación, ya no hay nada que empujar.
+    // El monitor las cierra al regenerar; esto evita mostrarlas entre corridas.
+    const notifications = (data ?? []).filter(
+      (n) => !CLOSED_BOOK_STATUSES.has((n.groups as { book_status?: string } | null)?.book_status ?? ''),
+    );
+    return NextResponse.json({ notifications });
   } catch (error) {
     console.error('Error in GET /api/v1/admin/radar/notifications:', error);
     return NextResponse.json(

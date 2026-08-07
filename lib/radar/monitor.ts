@@ -3,7 +3,7 @@ import { COLDNESS_CANDIDATE_DAYS, DEADLINE_NEAR_DAYS, MOMENTUM_STALL_DAYS, PRINT
 import { computeOutreachIgnored, classifyLifecycle } from './lifecycle';
 import type { MonitorSources, NotificationCandidate, CloseDateSource } from './monitor-types';
 
-const CLOSED_BOOK_STATUSES = new Set(['reviewed', 'ready_to_print', 'printed', 'inactive']);
+export const CLOSED_BOOK_STATUSES = new Set(['reviewed', 'ready_to_print', 'printed', 'inactive']);
 const daysBetween = (fromIso: string, now: Date) => Math.floor((now.getTime() - new Date(fromIso).getTime()) / DAY_MS);
 
 export function computeMomentum(submittedIso: string[], now: Date): { per_week: number[]; stalled: boolean } {

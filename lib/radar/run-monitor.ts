@@ -1,7 +1,7 @@
 // lib/radar/run-monitor.ts
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { isAdminEmail } from '@/lib/config/admin';
-import { computeCandidates, computeResurrectedGroupIds } from './monitor';
+import { computeCandidates, computeResurrectedGroupIds, CLOSED_BOOK_STATUSES } from './monitor';
 import { interpretCandidate } from './interpret';
 import { fetchLatestByGroup, persistNotification, shouldGenerate } from './monitor-store';
 import type { MonitorSources } from './monitor-types';
@@ -69,6 +69,19 @@ export async function runRadarMonitor(): Promise<{ generated: number; candidates
       .update({ archived_at: null, archived_reason: null })
       .in('id', resurrectedIds);
     if (resurrectionError) console.error('radar-monitor: failed to clear archived_at', resurrectionError);
+  }
+
+  // Reason: un libro que ya cerró (reviewed/ready_to_print/printed/inactive) deja de ser candidato,
+  // pero su notificación vieja se queda 'open' para siempre. La cerramos aquí; nunca vuelve porque
+  // computeCandidates ya salta esos estados.
+  const closedGroupIds = sources.groups.filter((g) => CLOSED_BOOK_STATUSES.has(g.book_status)).map((g) => g.id);
+  if (closedGroupIds.length > 0) {
+    const { error: closeError } = await supabase
+      .from('radar_notifications')
+      .update({ status: 'dismissed' })
+      .in('group_id', closedGroupIds)
+      .eq('status', 'open');
+    if (closeError) console.error('radar-monitor: failed to close notifications for closed books', closeError);
   }
 
   const existingByGroup = await fetchLatestByGroup(supabase, candidates.map((c) => c.group_id));
