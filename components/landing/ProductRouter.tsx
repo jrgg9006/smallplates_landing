@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { trackEvent } from "@/lib/analytics";
 
@@ -21,14 +22,21 @@ type Door = {
   who: string;
   price: string;
   target: string;
+  image: string;
+  imageAlt: string;
 };
 
+// Reason: every card shows the object, because the whole argument of the brand
+// is that we make physical things. The tiles image is a cookbook placeholder
+// until a real photo of a framed set exists.
 const GIFT_DOOR: Door = {
   key: "gift",
   title: "A gift cookbook",
   who: "For someone you love, for any occasion.",
   price: "From $169",
   target: "how-it-works",
+  image: "/images/PricingBlock/pricingblock_7.jpg",
+  imageAlt: "Handing over the finished hardcover cookbook",
 };
 
 const CLUB_DOOR: Door = {
@@ -37,6 +45,8 @@ const CLUB_DOOR: Door = {
   who: "For your group. No occasion needed.",
   price: "From $169",
   target: "club",
+  image: "/images/PricingBlock/pricingblock_3.jpg",
+  imageAlt: "Reading the cookbook at the table",
 };
 
 const TILES_DOOR: Door = {
@@ -45,6 +55,8 @@ const TILES_DOOR: Door = {
   who: "For your kitchen wall. Groups of two to six.",
   price: "From $99 per tile",
   target: "tiles",
+  image: "/images/PricingBlock/pricingblock_4.jpg",
+  imageAlt: "The hardcover cookbook, cover up",
 };
 
 export default function ProductRouter({
@@ -87,6 +99,7 @@ export default function ProductRouter({
 
   return (
     <section
+      id="shop"
       className="bg-brand-warm-white-warm py-14 md:py-20"
       aria-labelledby="router-heading"
     >
@@ -102,15 +115,27 @@ export default function ProductRouter({
               type="button"
               onClick={() => handleClick(door)}
               data-cta={`router-${door.key}`}
-              className="rounded-xl border border-brand-charcoal/10 bg-white p-7 text-left transition-colors hover:border-brand-charcoal/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-honey"
+              className="group overflow-hidden rounded-xl border border-brand-charcoal/10 bg-white text-left transition-colors hover:border-brand-charcoal/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-honey"
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.45, delay: i * 0.08, ease: [0.23, 1, 0.32, 1] }}
             >
-              <h3 className="type-subheading mb-2">{door.title}</h3>
-              <p className="type-body-small mb-6">{door.who}</p>
-              <p className="type-caption">{door.price}</p>
+              <div className="relative aspect-[4/3] overflow-hidden bg-brand-sand">
+                <Image
+                  src={door.image}
+                  alt={door.imageAlt}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+              </div>
+
+              <div className="p-6">
+                <h3 className="type-subheading mb-2">{door.title}</h3>
+                <p className="type-body-small mb-5">{door.who}</p>
+                <p className="type-caption">{door.price}</p>
+              </div>
             </motion.button>
           ))}
         </div>
