@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { trackStartBookClick } from "@/lib/analytics";
+import { trackEvent } from "@/lib/analytics";
 
 /**
  * THE TILES — the second object. Same engine as the book (a group sends
@@ -23,14 +23,17 @@ const FACTS = [
 
 export default function TheTiles({ onStartTiles }: { onStartTiles?: () => void }) {
   const handleClick = () => {
-    trackStartBookClick("tiles_section");
+    // Reason: tiles cannot convert into a book, so this is tracked separately
+    // from trackStartBookClick to keep it out of the cookbook funnel's
+    // start_book_click -> sign_up baseline (spec section 7).
+    trackEvent("tiles_cta_click");
     onStartTiles?.();
   };
 
   return (
     <section
       id="tiles"
-      className="bg-brand-warm-white-warm py-20 md:py-28"
+      className="bg-brand-cream py-20 md:py-28"
       aria-labelledby="tiles-heading"
     >
       <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-6 md:grid-cols-2 md:px-10">

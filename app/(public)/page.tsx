@@ -50,7 +50,7 @@ export default function Home() {
         <TheBook />
         {showTiles && <TheTiles />}
         <EmotionalClose />
-        <FAQ />
+        <FAQ showClub={showClub} showTiles={showTiles} />
         <NewsletterSignup />
       </main>
       <Footer />

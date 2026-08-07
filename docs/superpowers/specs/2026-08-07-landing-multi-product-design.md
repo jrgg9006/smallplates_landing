@@ -158,3 +158,4 @@ Club onboarding and the Tiles flow are separate projects with their own specs (n
 5. `public/images/tiles/tiles_kitchen_wall.jpg` does not exist. The tiles section needs a real product image before visual review.
 6. The tiles CTA currently tracks the click and does nothing else, pending the tiles flow.
 7. Hero, club, and tiles copy are working drafts pending founder approval.
+8. TheClub's "Start a club for free" CTA routes to the standard gift onboarding, which speaks gift and honoree vocabulary. Expected for now (club onboarding does not exist yet) and flag-gated, but must be resolved before `NEXT_PUBLIC_SHOW_CLUB` is flipped on.

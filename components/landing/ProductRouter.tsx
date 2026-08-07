@@ -9,6 +9,12 @@ import { trackEvent } from "@/lib/analytics";
  * explains that product.
  */
 
+// Reason: HowItWorks listens for this to reset its gift/club toggle to gift
+// when the visitor arrives via the gift door, even if they had switched the
+// toggle to club earlier on the page. Module-level constant keeps both sides
+// in sync without lifting state.
+export const RESET_HOW_IT_WORKS_TO_GIFT_EVENT = "sp:reset-how-it-works-to-gift";
+
 type Door = {
   key: string;
   title: string;
@@ -60,8 +66,24 @@ export default function ProductRouter({
 
   const handleClick = (door: Door) => {
     trackEvent("product_door_click", { door: door.key });
-    document.getElementById(door.target)?.scrollIntoView({ behavior: "smooth" });
+    // Reason: a visitor who switched HowItWorks to "As a club" and then picks
+    // the gift door should land on gift steps, not whatever they left toggled.
+    if (door.key === "gift") {
+      window.dispatchEvent(new CustomEvent(RESET_HOW_IT_WORKS_TO_GIFT_EVENT));
+    }
+    // Reason: respect prefers-reduced-motion instead of always smooth-scrolling.
+    const prefersReducedMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById(door.target)?.scrollIntoView({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
   };
+
+  // Reason: two doors use two columns, three use three. A dynamically built
+  // class like `md:grid-cols-${n}` is invisible to Tailwind's build-time
+  // scanner, so the column count is a literal-class lookup instead.
+  const gridColsClass = doors.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3";
 
   return (
     <section
@@ -73,7 +95,7 @@ export default function ProductRouter({
           What you can make
         </h2>
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+        <div className={`grid grid-cols-1 gap-5 ${gridColsClass}`}>
           {doors.map((door, i) => (
             <motion.button
               key={door.key}

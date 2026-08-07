@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
+import { RESET_HOW_IT_WORKS_TO_GIFT_EVENT } from "@/components/landing/ProductRouter";
 
 const easeOut: [number, number, number, number] = [0.23, 1, 0.32, 1];
 
@@ -121,6 +122,15 @@ export default function HowItWorks({ showClubToggle = false }: { showClubToggle?
   const [mode, setMode] = useState<"gift" | "club">("gift");
   const steps = showClubToggle && mode === "club" ? CLUB_STEPS : GIFT_STEPS;
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  useEffect(() => {
+    // Reason: no-op unless the toggle exists — nothing to reset otherwise, and
+    // this also keeps the listener from ever mounting in the flags-off path.
+    if (!showClubToggle) return;
+    const resetToGift = () => setMode("gift");
+    window.addEventListener(RESET_HOW_IT_WORKS_TO_GIFT_EVENT, resetToGift);
+    return () => window.removeEventListener(RESET_HOW_IT_WORKS_TO_GIFT_EVENT, resetToGift);
+  }, [showClubToggle]);
 
   const handleTabKeyDown = (
     event: React.KeyboardEvent<HTMLButtonElement>,

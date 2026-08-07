@@ -52,6 +52,10 @@ const EXTRA_PERSISTED = [
   // (gift, club, tiles). This is the primary signal for whether the club and
   // tiles products draw real interest.
   'product_door_click',
+  // Reason: fired from the landing TheTiles CTA. Kept separate from
+  // start_book_click so tiles clicks never inflate the cookbook funnel's
+  // start_book_click -> sign_up baseline (tiles cannot convert into a book).
+  'tiles_cta_click',
 ] as const;
 
 export const PERSISTED_EVENTS: ReadonlySet<string> = new Set([
