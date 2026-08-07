@@ -5,9 +5,12 @@ import { motion } from "framer-motion";
 import { trackEvent } from "@/lib/analytics";
 
 /**
- * PRODUCT ROUTER — three doors under the hero. Sorts intent early without
- * making the visitor leave the page: every card scrolls to the section that
- * explains that product.
+ * PRODUCT ROUTER — the shop. Three products, each shown as the object it is.
+ * Sorts intent early without making the visitor leave the page: every tile
+ * scrolls to the section that explains that product.
+ *
+ * Reason: no card chrome. A bordered white box around a small image reads as a
+ * widget; the photograph itself is the surface, sitting on the section canvas.
  */
 
 // Reason: HowItWorks listens for this to reset its gift/club toggle to gift
@@ -15,6 +18,8 @@ import { trackEvent } from "@/lib/analytics";
 // toggle to club earlier on the page. Module-level constant keeps both sides
 // in sync without lifting state.
 export const RESET_HOW_IT_WORKS_TO_GIFT_EVENT = "sp:reset-how-it-works-to-gift";
+
+const EASE_OUT: [number, number, number, number] = [0.23, 1, 0.32, 1];
 
 type Door = {
   key: string;
@@ -26,7 +31,7 @@ type Door = {
   imageAlt: string;
 };
 
-// Reason: every card shows the object, because the whole argument of the brand
+// Reason: every tile shows the object, because the whole argument of the brand
 // is that we make physical things. The tiles image is a cookbook placeholder
 // until a real photo of a framed set exists.
 const GIFT_DOOR: Door = {
@@ -100,42 +105,63 @@ export default function ProductRouter({
   return (
     <section
       id="shop"
-      className="bg-brand-warm-white-warm py-14 md:py-20"
+      className="bg-brand-warm-white-warm py-20 md:py-28"
       aria-labelledby="router-heading"
     >
-      <div className="mx-auto max-w-6xl px-6 md:px-10">
-        <h2 id="router-heading" className="type-eyebrow mb-8 text-center">
-          What you can make
-        </h2>
+      <div className="mx-auto max-w-7xl px-6 md:px-10">
+        <motion.div
+          className="mb-12 max-w-2xl md:mb-16"
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.5, ease: EASE_OUT }}
+        >
+          <p className="type-eyebrow mb-5">What you can make</p>
+          <h2 id="router-heading" className="type-heading">
+            Pick one and send the link.
+          </h2>
+        </motion.div>
 
-        <div className={`grid grid-cols-1 gap-5 ${gridColsClass}`}>
+        <div className={`grid grid-cols-1 gap-12 md:gap-8 lg:gap-12 ${gridColsClass}`}>
           {doors.map((door, i) => (
             <motion.button
               key={door.key}
               type="button"
               onClick={() => handleClick(door)}
               data-cta={`router-${door.key}`}
-              className="group overflow-hidden rounded-xl border border-brand-charcoal/10 bg-white text-left transition-colors hover:border-brand-charcoal/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-honey"
-              initial={{ opacity: 0, y: 12 }}
+              className="group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-honey focus-visible:ring-offset-4 focus-visible:ring-offset-brand-warm-white-warm rounded-xl"
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.45, delay: i * 0.08, ease: [0.23, 1, 0.32, 1] }}
+              transition={{ duration: 0.55, delay: i * 0.09, ease: EASE_OUT }}
             >
-              <div className="relative aspect-[4/3] overflow-hidden bg-brand-sand">
+              <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-brand-sand">
                 <Image
                   src={door.image}
                   alt={door.imageAlt}
                   fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
               </div>
 
-              <div className="p-6">
-                <h3 className="type-subheading mb-2">{door.title}</h3>
-                <p className="type-body-small mb-5">{door.who}</p>
-                <p className="type-caption">{door.price}</p>
-              </div>
+              <h3 className="type-subheading mt-7">{door.title}</h3>
+              <p className="type-body-small mt-2 max-w-xs">{door.who}</p>
+              <p className="type-body-small mt-4 text-brand-charcoal/60">{door.price}</p>
+
+              <span className="mt-6 inline-flex items-center gap-2 rounded-full border border-brand-sand px-6 py-3 text-sm font-medium text-brand-charcoal transition-colors group-hover:border-brand-honey group-hover:text-brand-honey">
+                See how it works
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 16 16"
+                  className="h-3.5 w-3.5 transition-transform duration-300 ease-out group-hover:translate-x-1"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
+                  <path d="M2 8h11M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
             </motion.button>
           ))}
         </div>
