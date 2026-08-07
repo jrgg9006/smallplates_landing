@@ -48,6 +48,10 @@ const EXTRA_PERSISTED = [
   // Reason: fired client-side from updateGroupShareMessage when the owner saves
   // a custom sharing-link message (onboarding or share modal). Radar feed only.
   'share_message_edited',
+  // Reason: fired from the landing ProductRouter when a visitor picks a door
+  // (gift, club, tiles). This is the primary signal for whether the club and
+  // tiles products draw real interest.
+  'product_door_click',
 ] as const;
 
 export const PERSISTED_EVENTS: ReadonlySet<string> = new Set([
