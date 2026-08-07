@@ -1,13 +1,13 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 
 const easeOut: [number, number, number, number] = [0.23, 1, 0.32, 1];
 
-const steps = [
+const GIFT_STEPS = [
   {
     number: "01",
     title: "You invite.",
@@ -38,7 +38,38 @@ const steps = [
   },
 ] as const;
 
-type Step = (typeof steps)[number];
+const CLUB_STEPS = [
+  {
+    number: "01",
+    title: "You start the club.",
+    description: "Name it, set your rules, and send the link to your people. Members, not guests: everyone knows who is in.",
+    image: "/images/HowitWorks_images/collect_iphone_mockup.png",
+    imageAlt: "Invitation shared via phone",
+    imageClass: "object-cover",
+    imageBg: "bg-brand-sand",
+  },
+  {
+    number: "02",
+    title: "Everyone sends a recipe.",
+    description: "They type it out or snap a photo, and they sign it. Five minutes, no app, no account. The signature is how you know they were here.",
+    image: "/images/HowitWorks_images/sucess_iphone_mockup.png",
+    imageAlt: "Member submitting a recipe",
+    imageClass: "object-cover",
+    imageBg: "bg-brand-sand",
+  },
+  {
+    number: "03",
+    title: "Everyone gets a copy.",
+    description: "We make an image for every recipe, then design and print the hardcover. It goes out to every member of the club.",
+    caption: "Start to delivery, about four weeks.",
+    image: "/images/HowitWorks_images/book_in_hand_whitebackgound.png",
+    imageAlt: "The finished hardcover cookbook",
+    imageClass: "object-cover",
+    imageBg: "bg-brand-cream",
+  },
+] as const;
+
+type Step = (typeof GIFT_STEPS)[number] | (typeof CLUB_STEPS)[number];
 
 function StepCard({ step, index }: { step: Step; index: number }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -81,7 +112,10 @@ function StepCard({ step, index }: { step: Step; index: number }) {
   );
 }
 
-export default function HowItWorks() {
+export default function HowItWorks({ showClubToggle = false }: { showClubToggle?: boolean }) {
+  const [mode, setMode] = useState<"gift" | "club">("gift");
+  const steps = showClubToggle && mode === "club" ? CLUB_STEPS : GIFT_STEPS;
+
   return (
     <section
       id="how-it-works"
@@ -105,9 +139,37 @@ export default function HowItWorks() {
           </p>
         </motion.div>
 
+        {showClubToggle && (
+          <div
+            role="tablist"
+            aria-label="How it works, by book type"
+            className="mb-12 flex justify-center gap-2"
+          >
+            {([
+              { key: "gift", label: "As a gift" },
+              { key: "club", label: "As a club" },
+            ] as const).map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                role="tab"
+                aria-selected={mode === tab.key}
+                onClick={() => setMode(tab.key)}
+                className={`type-eyebrow rounded-full px-5 py-2 transition-colors ${
+                  mode === tab.key
+                    ? "bg-brand-charcoal text-white"
+                    : "bg-brand-sand/50 text-brand-charcoal/70 hover:bg-brand-sand"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-6 lg:gap-10 md:items-start">
           {steps.map((step, i) => (
-            <StepCard key={step.number} step={step} index={i} />
+            <StepCard key={`${mode}-${step.number}`} step={step} index={i} />
           ))}
         </div>
 
