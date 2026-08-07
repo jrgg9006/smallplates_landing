@@ -71,6 +71,11 @@ const CLUB_STEPS = [
 
 type Step = (typeof GIFT_STEPS)[number] | (typeof CLUB_STEPS)[number];
 
+const TOGGLE_TABS = [
+  { key: "gift", label: "As a gift" },
+  { key: "club", label: "As a club" },
+] as const;
+
 function StepCard({ step, index }: { step: Step; index: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0 });
@@ -115,6 +120,27 @@ function StepCard({ step, index }: { step: Step; index: number }) {
 export default function HowItWorks({ showClubToggle = false }: { showClubToggle?: boolean }) {
   const [mode, setMode] = useState<"gift" | "club">("gift");
   const steps = showClubToggle && mode === "club" ? CLUB_STEPS : GIFT_STEPS;
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const handleTabKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    index: number
+  ) => {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    event.preventDefault();
+    const direction = event.key === "ArrowRight" ? 1 : -1;
+    const nextIndex = (index + direction + TOGGLE_TABS.length) % TOGGLE_TABS.length;
+    setMode(TOGGLE_TABS[nextIndex].key);
+    tabRefs.current[nextIndex]?.focus();
+  };
+
+  const panelProps = showClubToggle
+    ? {
+        role: "tabpanel" as const,
+        id: "how-it-works-panel",
+        "aria-labelledby": `how-it-works-tab-${mode}`,
+      }
+    : {};
 
   return (
     <section
@@ -145,16 +171,20 @@ export default function HowItWorks({ showClubToggle = false }: { showClubToggle?
             aria-label="How it works, by book type"
             className="mb-12 flex justify-center gap-2"
           >
-            {([
-              { key: "gift", label: "As a gift" },
-              { key: "club", label: "As a club" },
-            ] as const).map((tab) => (
+            {TOGGLE_TABS.map((tab, index) => (
               <button
                 key={tab.key}
+                ref={(el) => {
+                  tabRefs.current[index] = el;
+                }}
                 type="button"
                 role="tab"
+                id={`how-it-works-tab-${tab.key}`}
+                aria-controls="how-it-works-panel"
                 aria-selected={mode === tab.key}
+                tabIndex={mode === tab.key ? 0 : -1}
                 onClick={() => setMode(tab.key)}
+                onKeyDown={(event) => handleTabKeyDown(event, index)}
                 className={`type-eyebrow rounded-full px-5 py-2 transition-colors ${
                   mode === tab.key
                     ? "bg-brand-charcoal text-white"
@@ -167,7 +197,10 @@ export default function HowItWorks({ showClubToggle = false }: { showClubToggle?
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-6 lg:gap-10 md:items-start">
+        <div
+          className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-6 lg:gap-10 md:items-start"
+          {...panelProps}
+        >
           {steps.map((step, i) => (
             <StepCard key={`${mode}-${step.number}`} step={step} index={i} />
           ))}

@@ -52,4 +52,19 @@ describe('HowItWorks', () => {
     expect(screen.getByRole('tab', { name: /as a club/i })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByText(/everyone gets a copy/i)).toBeInTheDocument();
   });
+
+  it('moves tab selection with the right arrow key', async () => {
+    const user = userEvent.setup();
+    render(<HowItWorks showClubToggle />);
+    const giftTab = screen.getByRole('tab', { name: /as a gift/i });
+    const clubTab = screen.getByRole('tab', { name: /as a club/i });
+
+    giftTab.focus();
+    await user.keyboard('{ArrowRight}');
+
+    expect(clubTab).toHaveAttribute('aria-selected', 'true');
+    expect(clubTab).toHaveFocus();
+    expect(giftTab).toHaveAttribute('aria-selected', 'false');
+    expect(screen.getByText(/everyone gets a copy/i)).toBeInTheDocument();
+  });
 });
