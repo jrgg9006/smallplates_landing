@@ -98,7 +98,7 @@ export default function PricingBlock() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
           >
-            <p className="type-eyebrow mb-4">The book</p>
+            <p className="type-eyebrow mb-4">The cookbook</p>
 
             <h2 id="pricing-heading" className="type-subheading md:text-4xl">
               Free to start. Pay when it&rsquo;s ready.

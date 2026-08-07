@@ -27,6 +27,18 @@ export default function FAQ() {
       question: "Where do you ship?",
       answer: "United States and Mexico. Your book gets there."
     },
+    {
+      question: "What is a cookbook club?",
+      answer: "A group that writes its own book instead of making one for someone else. No occasion, no surprise, and everyone in it gets a copy. You name it, set your rules, and everyone sends a recipe."
+    },
+    {
+      question: "What are the framed tiles?",
+      answer: "The same idea, made for a wall. A group of two to six people each send one recipe, we make the image of every dish, and it arrives framed and ready to hang. From $99 per tile."
+    },
+    {
+      question: "Do the tiles work the same way as the book?",
+      answer: "Yes. Same link, same five minutes to send a recipe, same photos we make of every dish. The book is for bigger groups and lives on the counter. The tiles are for smaller ones and live on the wall."
+    },
   ];
 
   return (

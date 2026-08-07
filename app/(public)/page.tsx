@@ -20,17 +20,26 @@ import FAQ from '@/components/landing/FAQ'
 import WhatsAppFAB from '@/components/landing/WhatsAppFAB'
 import NewsletterSignup from '@/components/landing/NewsletterSignup'
 import Footer from '@/components/landing/Footer'
+import ProductRouter from '@/components/landing/ProductRouter'
+import TheClub from '@/components/landing/TheClub'
+import TheTiles from '@/components/landing/TheTiles'
+import { isClubEnabled, isTilesEnabled } from '@/lib/feature-flags'
 
 export default function Home() {
+  const showClub = isClubEnabled()
+  const showTiles = isTilesEnabled()
+
   return (
     <>
       <Banner />
       <main className="min-h-screen">
         <Hero />
+        <ProductRouter showClub={showClub} showTiles={showTiles} />
         <TestimonialBar />
         {/* <TheProblem /> — hidden from flow; see import note */}
         <TheSolution />
-        <HowItWorks />
+        <HowItWorks showClubToggle={showClub} />
+        {showClub && <TheClub />}
         {/* <YourTools /> — removed from flow; see import note */}
         {/* <RegistryInterlude /> — hidden from flow; see import note */}
         <CookbookSpecialist />
@@ -39,6 +48,7 @@ export default function Home() {
         <PersonalNotes />
         <TestimonialsSection />
         <TheBook />
+        {showTiles && <TheTiles />}
         <EmotionalClose />
         <FAQ />
         <NewsletterSignup />
