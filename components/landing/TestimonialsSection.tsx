@@ -148,9 +148,9 @@ export default function TestimonialsSection() {
           transition={{ duration: reduced ? 0.2 : 0.6, ease: "easeOut" }}
         >
           <div>
-            <p className="type-eyebrow mb-4">PEOPLE WHO GOT THE BOOK</p>
+            <p className="type-eyebrow mb-4">PEOPLE WHO GOT ONE</p>
             <h2 id="testimonials-heading" className="type-heading">
-              What happens after the book arrives.
+              What happens after it arrives.
             </h2>
           </div>
 
