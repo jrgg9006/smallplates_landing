@@ -1,10 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
-import { trackStartBookClick } from "@/lib/analytics";
-import { isFreeTierEnabled } from "@/lib/feature-flags";
 
 /**
  * THE SOLUTION — "We make the photo of every dish."
@@ -53,13 +50,7 @@ function Spread({
 }
 
 export default function TheSolution() {
-  const router = useRouter();
   const reduced = useReducedMotion();
-
-  const handleStartBook = () => {
-    trackStartBookClick("solution_primary");
-    router.push(isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding");
-  };
 
   // Duplicated so the horizontal track can loop seamlessly (translate -50%).
   const track = [...SPREADS, ...SPREADS];
@@ -83,16 +74,6 @@ export default function TheSolution() {
           We make the photo of every dish.
         </h2>
 
-        <div className="mt-9 flex justify-center">
-          <button
-            type="button"
-            onClick={handleStartBook}
-            className="btn btn-lg btn-honey"
-            data-cta="solution-primary"
-          >
-            Start for free
-          </button>
-        </div>
       </motion.div>
 
       {/* Real spreads drifting full-width below — the product argues for itself */}
