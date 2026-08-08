@@ -106,22 +106,9 @@ export default function ProductRouter({
     <section
       id="shop"
       className="bg-brand-warm-white-warm py-20 md:py-28"
-      aria-labelledby="router-heading"
+      aria-label="What you can make"
     >
       <div className="mx-auto max-w-7xl px-6 md:px-10">
-        <motion.div
-          className="mb-12 max-w-2xl md:mb-16"
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.5, ease: EASE_OUT }}
-        >
-          <p className="type-eyebrow mb-5">What you can make</p>
-          <h2 id="router-heading" className="type-heading">
-            Pick one and send the link.
-          </h2>
-        </motion.div>
-
         <div className={`grid grid-cols-1 gap-12 md:gap-8 lg:gap-12 ${gridColsClass}`}>
           {doors.map((door, i) => (
             <motion.button
