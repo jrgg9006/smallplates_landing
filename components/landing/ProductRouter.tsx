@@ -135,20 +135,6 @@ export default function ProductRouter({
               <h3 className="type-subheading mt-7">{door.title}</h3>
               <p className="type-body-small mt-2 max-w-xs">{door.who}</p>
               <p className="type-body-small mt-4 text-brand-charcoal/60">{door.price}</p>
-
-              <span className="mt-6 inline-flex items-center gap-2 rounded-full border border-brand-sand px-6 py-3 text-sm font-medium text-brand-charcoal transition-colors group-hover:border-brand-honey group-hover:text-brand-honey">
-                See how it works
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 16 16"
-                  className="h-3.5 w-3.5 transition-transform duration-300 ease-out group-hover:translate-x-1"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path d="M2 8h11M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
             </motion.button>
           ))}
         </div>
