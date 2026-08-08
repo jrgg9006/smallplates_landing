@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -228,14 +229,24 @@ export default function PricingBlock() {
 
             {/* CTA */}
             <div className="mt-9">
-              <button
-                type="button"
-                onClick={handleStartBook}
-                className="btn btn-lg btn-honey"
-                data-cta="pricing-block-primary"
-              >
-                Start for free
-              </button>
+              <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
+                <button
+                  type="button"
+                  onClick={handleStartBook}
+                  className="btn btn-lg btn-honey"
+                  data-cta="pricing-block-primary"
+                >
+                  Start for free
+                </button>
+                {/* Reason: the block shows a per-person range; the full curve
+                    lives on /pricing and had no path from here. */}
+                <Link
+                  href="/pricing"
+                  className="text-brand-charcoal/70 underline decoration-brand-charcoal/30 underline-offset-4 transition-colors hover:text-brand-charcoal hover:decoration-brand-charcoal focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-honey rounded px-1 py-0.5"
+                >
+                  See the full pricing
+                </Link>
+              </div>
               <p className="type-caption mt-4">
                 Ready about 3&ndash;4 weeks after recipes close.
               </p>
