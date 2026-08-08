@@ -108,8 +108,8 @@ export default function ProductRouter({
       className="bg-brand-cream py-20 md:py-28"
       aria-label="What you can make"
     >
-      <div className="mx-auto max-w-[88rem] px-6 md:px-10">
-        <div className={`grid grid-cols-1 gap-12 md:gap-7 lg:gap-10 ${gridColsClass}`}>
+      <div className="mx-auto max-w-[94rem] px-6 md:px-8">
+        <div className={`grid grid-cols-1 gap-12 md:gap-6 lg:gap-8 ${gridColsClass}`}>
           {doors.map((door, i) => (
             <motion.button
               key={door.key}
