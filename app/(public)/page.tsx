@@ -38,8 +38,8 @@ export default function Home() {
         <ProductRouter showClub={showClub} showTiles={showTiles} />
         {/* <TheProblem /> — hidden from flow; see import note */}
         <HowItWorks showTilesToggle={showTiles} />
-        {showClub && <TheClub />}
         <TheSolution />
+        {showClub && <TheClub />}
         {/* <YourTools /> — removed from flow; see import note */}
         {/* <RegistryInterlude /> — hidden from flow; see import note */}
         <CookbookSpecialist />

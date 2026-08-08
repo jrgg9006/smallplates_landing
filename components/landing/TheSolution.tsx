@@ -66,7 +66,7 @@ export default function TheSolution() {
 
   return (
     <section
-      className="overflow-hidden bg-brand-warm-white py-16 md:py-24"
+      className="overflow-hidden bg-brand-warm-white-warm py-16 md:py-24"
       aria-labelledby="solution-heading"
     >
       {/* Centered text — airy, so the eye can settle */}
