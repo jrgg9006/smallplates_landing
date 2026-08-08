@@ -171,7 +171,8 @@ export default function HowItWorks({ showClubToggle = false }: { showClubToggle?
             Send the invite. The recipes come to you.
           </h2>
           <p className="mt-4 type-body text-brand-charcoal/60">
-            Then we turn them into a hardcover. Three steps, that&rsquo;s it.
+            Then we turn them into something that lives in your kitchen. Three
+            steps, that&rsquo;s it.
           </p>
         </motion.div>
 
