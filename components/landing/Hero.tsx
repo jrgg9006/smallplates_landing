@@ -51,7 +51,7 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           >
-            Share food. The old way.
+            Share food. For real.
           </motion.h1>
           <motion.p
             className="type-body mt-6 sm:text-xl md:text-2xl text-white/90 max-w-2xl"
