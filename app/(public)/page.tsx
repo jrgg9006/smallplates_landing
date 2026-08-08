@@ -37,7 +37,7 @@ export default function Home() {
         <TestimonialBar />
         <ProductRouter showClub={showClub} showTiles={showTiles} />
         {/* <TheProblem /> — hidden from flow; see import note */}
-        <HowItWorks showClubToggle={showClub} />
+        <HowItWorks showTilesToggle={showTiles} />
         {showClub && <TheClub />}
         <TheSolution />
         {/* <YourTools /> — removed from flow; see import note */}

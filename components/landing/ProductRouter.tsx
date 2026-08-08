@@ -13,11 +13,11 @@ import { trackEvent } from "@/lib/analytics";
  * widget; the photograph itself is the surface, sitting on the section canvas.
  */
 
-// Reason: HowItWorks listens for this to reset its gift/club toggle to gift
-// when the visitor arrives via the gift door, even if they had switched the
-// toggle to club earlier on the page. Module-level constant keeps both sides
+// Reason: HowItWorks listens for this to reset its product toggle to cookbook
+// when the visitor arrives via a cookbook door, even if they had switched the
+// toggle to tiles earlier on the page. Module-level constant keeps both sides
 // in sync without lifting state.
-export const RESET_HOW_IT_WORKS_TO_GIFT_EVENT = "sp:reset-how-it-works-to-gift";
+export const RESET_HOW_IT_WORKS_TO_COOKBOOK_EVENT = "sp:reset-how-it-works-to-cookbook";
 
 const EASE_OUT: [number, number, number, number] = [0.23, 1, 0.32, 1];
 
@@ -83,10 +83,10 @@ export default function ProductRouter({
 
   const handleClick = (door: Door) => {
     trackEvent("product_door_click", { door: door.key });
-    // Reason: a visitor who switched HowItWorks to "As a club" and then picks
-    // the gift door should land on gift steps, not whatever they left toggled.
+    // Reason: a visitor who switched HowItWorks to "Kitchen Tiles" and then
+    // picks the gift door should land on cookbook steps, not tile steps.
     if (door.key === "gift") {
-      window.dispatchEvent(new CustomEvent(RESET_HOW_IT_WORKS_TO_GIFT_EVENT));
+      window.dispatchEvent(new CustomEvent(RESET_HOW_IT_WORKS_TO_COOKBOOK_EVENT));
     }
     // Reason: respect prefers-reduced-motion instead of always smooth-scrolling.
     const prefersReducedMotion =

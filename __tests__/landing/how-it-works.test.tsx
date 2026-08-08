@@ -34,37 +34,37 @@ jest.mock('framer-motion', () => {
 });
 
 describe('HowItWorks', () => {
-  it('renders no toggle when showClubToggle is false', () => {
-    render(<HowItWorks showClubToggle={false} />);
-    expect(screen.queryByRole('tab', { name: /as a gift/i })).not.toBeInTheDocument();
+  it('renders no toggle when showTilesToggle is false', () => {
+    render(<HowItWorks showTilesToggle={false} />);
+    expect(screen.queryByRole('tab', { name: /^cookbook$/i })).not.toBeInTheDocument();
   });
 
-  it('shows the gift steps by default when the toggle is on', () => {
-    render(<HowItWorks showClubToggle />);
-    expect(screen.getByRole('tab', { name: /as a gift/i })).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByText(/they send a recipe/i)).toBeInTheDocument();
+  it('shows the cookbook steps by default when the toggle is on', () => {
+    render(<HowItWorks showTilesToggle />);
+    expect(screen.getByRole('tab', { name: /^cookbook$/i })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByText(/we make the book/i)).toBeInTheDocument();
   });
 
-  it('swaps to club copy when the club tab is clicked', async () => {
+  it('swaps to tiles copy when the tiles tab is clicked', async () => {
     const user = userEvent.setup();
-    render(<HowItWorks showClubToggle />);
-    await user.click(screen.getByRole('tab', { name: /as a club/i }));
-    expect(screen.getByRole('tab', { name: /as a club/i })).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByText(/everyone gets a copy/i)).toBeInTheDocument();
+    render(<HowItWorks showTilesToggle />);
+    await user.click(screen.getByRole('tab', { name: /kitchen tiles/i }));
+    expect(screen.getByRole('tab', { name: /kitchen tiles/i })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByText(/we make the tiles/i)).toBeInTheDocument();
   });
 
   it('moves tab selection with the right arrow key', async () => {
     const user = userEvent.setup();
-    render(<HowItWorks showClubToggle />);
-    const giftTab = screen.getByRole('tab', { name: /as a gift/i });
-    const clubTab = screen.getByRole('tab', { name: /as a club/i });
+    render(<HowItWorks showTilesToggle />);
+    const cookbookTab = screen.getByRole('tab', { name: /^cookbook$/i });
+    const tilesTab = screen.getByRole('tab', { name: /kitchen tiles/i });
 
-    giftTab.focus();
+    cookbookTab.focus();
     await user.keyboard('{ArrowRight}');
 
-    expect(clubTab).toHaveAttribute('aria-selected', 'true');
-    expect(clubTab).toHaveFocus();
-    expect(giftTab).toHaveAttribute('aria-selected', 'false');
-    expect(screen.getByText(/everyone gets a copy/i)).toBeInTheDocument();
+    expect(tilesTab).toHaveAttribute('aria-selected', 'true');
+    expect(tilesTab).toHaveFocus();
+    expect(cookbookTab).toHaveAttribute('aria-selected', 'false');
+    expect(screen.getByText(/we make the tiles/i)).toBeInTheDocument();
   });
 });

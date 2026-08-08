@@ -4,11 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
-import { RESET_HOW_IT_WORKS_TO_GIFT_EVENT } from "@/components/landing/ProductRouter";
+import { RESET_HOW_IT_WORKS_TO_COOKBOOK_EVENT } from "@/components/landing/ProductRouter";
 
 const easeOut: [number, number, number, number] = [0.23, 1, 0.32, 1];
 
-const GIFT_STEPS = [
+const COOKBOOK_STEPS = [
   {
     number: "01",
     title: "You invite.",
@@ -39,11 +39,14 @@ const GIFT_STEPS = [
   },
 ] as const;
 
-const CLUB_STEPS = [
+// Reason: steps 01 and 02 are the same mechanic for both products, so only the
+// group size and the finished object change. The images are cookbook photos
+// standing in until real tile photography exists.
+const TILES_STEPS = [
   {
     number: "01",
-    title: "You start the club.",
-    description: "Name it, set your rules, and send the link to your people. Members, not guests: everyone knows who is in.",
+    title: "You invite.",
+    description: "Share a link with your group, two to six people. Whatever reaches them. The ask for a recipe comes built in.",
     image: "/images/HowitWorks_images/collect_iphone_mockup.png",
     imageAlt: "Invitation shared via phone",
     imageClass: "object-cover",
@@ -51,30 +54,29 @@ const CLUB_STEPS = [
   },
   {
     number: "02",
-    title: "Everyone sends a recipe.",
-    description: "They type it out or snap a photo, and they sign it. Five minutes, no app, no account. The signature is how you know they were here.",
+    title: "They send a recipe.",
+    description: "They type it out or snap a photo. Five minutes, no app, no account. One dish each, the one they are known for.",
     image: "/images/HowitWorks_images/sucess_iphone_mockup.png",
-    imageAlt: "Member submitting a recipe",
+    imageAlt: "Guest submitting a recipe",
     imageClass: "object-cover",
     imageBg: "bg-brand-sand",
   },
   {
     number: "03",
-    title: "Everyone gets a copy.",
-    description: "We make an image for every recipe, then design and print the hardcover. It goes out to every member of the club.",
-    caption: "Start to delivery, about four weeks.",
+    title: "We make the tiles.",
+    description: "We make an image of every dish, then print and frame them. They arrive ready to hang on a nail.",
     image: "/images/HowitWorks_images/book_in_hand_whitebackgound.png",
-    imageAlt: "The finished hardcover cookbook",
+    imageAlt: "The finished framed tiles",
     imageClass: "object-cover",
     imageBg: "bg-brand-cream",
   },
 ] as const;
 
-type Step = (typeof GIFT_STEPS)[number] | (typeof CLUB_STEPS)[number];
+type Step = (typeof COOKBOOK_STEPS)[number] | (typeof TILES_STEPS)[number];
 
 const TOGGLE_TABS = [
-  { key: "gift", label: "As a gift" },
-  { key: "club", label: "As a club" },
+  { key: "cookbook", label: "Cookbook" },
+  { key: "tiles", label: "Kitchen Tiles" },
 ] as const;
 
 function StepCard({ step, index }: { step: Step; index: number }) {
@@ -118,19 +120,19 @@ function StepCard({ step, index }: { step: Step; index: number }) {
   );
 }
 
-export default function HowItWorks({ showClubToggle = false }: { showClubToggle?: boolean }) {
-  const [mode, setMode] = useState<"gift" | "club">("gift");
-  const steps = showClubToggle && mode === "club" ? CLUB_STEPS : GIFT_STEPS;
+export default function HowItWorks({ showTilesToggle = false }: { showTilesToggle?: boolean }) {
+  const [mode, setMode] = useState<"cookbook" | "tiles">("cookbook");
+  const steps = showTilesToggle && mode === "tiles" ? TILES_STEPS : COOKBOOK_STEPS;
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
     // Reason: no-op unless the toggle exists — nothing to reset otherwise, and
     // this also keeps the listener from ever mounting in the flags-off path.
-    if (!showClubToggle) return;
-    const resetToGift = () => setMode("gift");
-    window.addEventListener(RESET_HOW_IT_WORKS_TO_GIFT_EVENT, resetToGift);
-    return () => window.removeEventListener(RESET_HOW_IT_WORKS_TO_GIFT_EVENT, resetToGift);
-  }, [showClubToggle]);
+    if (!showTilesToggle) return;
+    const resetToCookbook = () => setMode("cookbook");
+    window.addEventListener(RESET_HOW_IT_WORKS_TO_COOKBOOK_EVENT, resetToCookbook);
+    return () => window.removeEventListener(RESET_HOW_IT_WORKS_TO_COOKBOOK_EVENT, resetToCookbook);
+  }, [showTilesToggle]);
 
   const handleTabKeyDown = (
     event: React.KeyboardEvent<HTMLButtonElement>,
@@ -144,7 +146,7 @@ export default function HowItWorks({ showClubToggle = false }: { showClubToggle?
     tabRefs.current[nextIndex]?.focus();
   };
 
-  const panelProps = showClubToggle
+  const panelProps = showTilesToggle
     ? {
         role: "tabpanel" as const,
         id: "how-it-works-panel",
@@ -176,10 +178,10 @@ export default function HowItWorks({ showClubToggle = false }: { showClubToggle?
           </p>
         </motion.div>
 
-        {showClubToggle && (
+        {showTilesToggle && (
           <div
             role="tablist"
-            aria-label="How it works, by book type"
+            aria-label="How it works, by product"
             className="mb-12 flex justify-center gap-2"
           >
             {TOGGLE_TABS.map((tab, index) => (
