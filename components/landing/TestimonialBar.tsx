@@ -74,7 +74,7 @@ export default function TestimonialBar() {
       aria-label="What people say"
       className="bg-brand-warm-white border-b border-brand-sand/60"
     >
-      <div className="mx-auto max-w-6xl px-6 py-9 md:py-11">
+      <div className="mx-auto max-w-6xl px-6 py-7 md:py-9">
         <div className="grid grid-cols-1 gap-y-10 md:grid-cols-3 md:gap-x-10 md:gap-y-0">
           {QUOTES.map((t, i) => (
             <motion.figure
@@ -87,13 +87,13 @@ export default function TestimonialBar() {
                 delay: reduced ? 0 : i * 0.12,
                 ease: [0.22, 1, 0.36, 1],
               }}
-              className="flex h-full flex-col items-center gap-5 px-4 text-center"
+              className="flex h-full flex-col items-center gap-4 px-4 text-center"
             >
               <Stars />
               {/* flex-1 centers the quote vertically so stars align at the top
                   and attributions at the bottom across all three columns */}
               <div className="flex flex-1 items-center">
-                <blockquote className="type-accent text-2xl md:text-[1.75rem] max-w-[20rem] text-balance leading-snug">
+                <blockquote className="type-accent text-xl md:text-2xl max-w-[20rem] text-balance leading-snug">
                   &ldquo;{t.quote}&rdquo;
                 </blockquote>
               </div>
