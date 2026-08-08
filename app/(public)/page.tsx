@@ -39,12 +39,12 @@ export default function Home() {
         {/* <TheProblem /> — hidden from flow; see import note */}
         <HowItWorks showTilesToggle={showTiles} />
         <TheSolution />
+        <PricingBlock />
+        <BooksPrinted />
         {showClub && <TheClub />}
         {/* <YourTools /> — removed from flow; see import note */}
         {/* <RegistryInterlude /> — hidden from flow; see import note */}
         <CookbookSpecialist />
-        <PricingBlock />
-        <BooksPrinted />
         <PersonalNotes />
         <TestimonialsSection />
         <TheBook />

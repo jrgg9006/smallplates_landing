@@ -175,7 +175,7 @@ export default function BooksPrinted() {
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
             <h2 className="type-heading mb-4">
-              Real recipes. Real people. Real books.
+              Real recipes. Real people. Real products.
             </h2>
             <p className="type-body text-brand-charcoal/70 max-w-3xl">
               Every one of these came from someone&rsquo;s kitchen. Tap any to look inside.
