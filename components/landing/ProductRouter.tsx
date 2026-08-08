@@ -110,17 +110,17 @@ export default function ProductRouter({
     >
       <div className="mx-auto max-w-[94rem] px-6 md:px-8">
         <div className={`grid grid-cols-1 gap-12 md:gap-6 lg:gap-8 ${gridColsClass}`}>
-          {doors.map((door, i) => (
+          {doors.map((door) => (
             <motion.button
               key={door.key}
               type="button"
               onClick={() => handleClick(door)}
               data-cta={`router-${door.key}`}
-              className="group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-honey focus-visible:ring-offset-4 focus-visible:ring-offset-brand-cream rounded-xl"
+              className="group flex h-full flex-col text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-honey focus-visible:ring-offset-4 focus-visible:ring-offset-brand-cream rounded-xl"
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.55, delay: i * 0.09, ease: EASE_OUT }}
+              transition={{ duration: 0.55, ease: EASE_OUT }}
             >
               <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-brand-sand">
                 <Image
@@ -132,9 +132,16 @@ export default function ProductRouter({
                 />
               </div>
 
-              <h3 className="type-subheading mt-7">{door.title}</h3>
-              <p className="type-body-small mt-2 max-w-xs">{door.who}</p>
-              <p className="type-body-small mt-4 text-brand-charcoal/60">{door.price}</p>
+              {/* Reason: flex-1 plus mt-auto pins the price to the same
+                  baseline across all tiles, even when one description wraps to
+                  two lines and another fits on one. */}
+              <div className="flex flex-1 flex-col">
+                <h3 className="type-subheading mt-7">{door.title}</h3>
+                <p className="type-body-small mt-2 max-w-xs">{door.who}</p>
+                <p className="type-body-small mt-auto pt-4 text-brand-charcoal/60">
+                  {door.price}
+                </p>
+              </div>
             </motion.button>
           ))}
         </div>
