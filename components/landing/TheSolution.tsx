@@ -83,11 +83,6 @@ export default function TheSolution() {
           We make the photo of every dish.
         </h2>
 
-        <p className="type-body mx-auto mt-6 max-w-2xl">
-          Each recipe comes with a photo we make of the dish, and a note from
-          the person who sent it.
-        </p>
-
         <div className="mt-9 flex justify-center">
           <button
             type="button"
