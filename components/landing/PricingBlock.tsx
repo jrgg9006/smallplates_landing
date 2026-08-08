@@ -115,7 +115,7 @@ export default function PricingBlock() {
 
             <p className="type-body-small mt-5 max-w-md text-sm text-brand-charcoal/70 md:text-[15px]">
               No card up front. You only pay once the book is printed and on its
-              way, so there&rsquo;s nothing to risk.
+              way.
             </p>
           </motion.div>
 
