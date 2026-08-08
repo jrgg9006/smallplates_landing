@@ -36,7 +36,7 @@ type Door = {
 // until a real photo of a framed set exists.
 const GIFT_DOOR: Door = {
   key: "gift",
-  title: "A gift cookbook",
+  title: "Cookbook Gift Edition",
   who: "For someone you love, for any occasion.",
   price: "From $169",
   target: "how-it-works",
@@ -46,7 +46,7 @@ const GIFT_DOOR: Door = {
 
 const CLUB_DOOR: Door = {
   key: "club",
-  title: "A club cookbook",
+  title: "The Cookbook Club",
   who: "For your group. No occasion needed.",
   price: "From $169",
   target: "club",
@@ -56,7 +56,7 @@ const CLUB_DOOR: Door = {
 
 const TILES_DOOR: Door = {
   key: "tiles",
-  title: "Framed tiles",
+  title: "The Kitchen Tiles",
   who: "For your kitchen wall. Groups of two to six.",
   price: "From $99 per tile",
   target: "tiles",
