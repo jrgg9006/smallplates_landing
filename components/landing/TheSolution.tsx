@@ -95,7 +95,7 @@ export default function TheSolution() {
             className="btn btn-lg btn-honey"
             data-cta="solution-primary"
           >
-            Start their book for free
+            Start for free
           </button>
         </div>
       </motion.div>

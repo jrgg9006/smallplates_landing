@@ -237,7 +237,7 @@ export default function PricingBlock() {
                 className="btn btn-lg btn-honey"
                 data-cta="pricing-block-primary"
               >
-                Start their book for free
+                Start for free
               </button>
               <p className="type-caption mt-4">
                 Ready about 3&ndash;4 weeks after recipes close.

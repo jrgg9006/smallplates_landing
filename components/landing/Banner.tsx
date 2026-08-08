@@ -138,7 +138,7 @@ export default function Banner({
                     onClick={() => trackStartBookClick("header_nav_desktop")}
                     className={navPill}
                   >
-                    Start their book for free
+                    Start for free
                   </Link>
                 </>
               )}
@@ -211,7 +211,7 @@ export default function Banner({
                       setIsMobileMenuOpen(false);
                     }}
                   >
-                    Start their book for free
+                    Start for free
                   </Link>
                 </>
               )}

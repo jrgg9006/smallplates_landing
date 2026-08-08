@@ -164,7 +164,7 @@ export default function Footer() {
               onClick={() => trackStartBookClick('footer_card')}
               className="btn btn-sm btn-honey"
             >
-              Start their book for free
+              Start for free
             </Link>
           </div>
         </div>

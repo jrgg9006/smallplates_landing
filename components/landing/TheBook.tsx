@@ -234,7 +234,7 @@ export default function TheBook() {
               className="btn btn-lg btn-honey"
               data-cta="the-book-primary"
             >
-              Start their book for free
+              Start for free
             </button>
           </div>
 

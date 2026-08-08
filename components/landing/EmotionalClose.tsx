@@ -125,7 +125,7 @@ export default function EmotionalClose() {
             className="btn btn-lg btn-honey"
             data-cta="emotional-close-primary"
           >
-            Start their book for free
+            Start for free
           </button>
         </motion.div>
 
