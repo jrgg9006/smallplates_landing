@@ -155,7 +155,7 @@ export default function HowItWorks({ showClubToggle = false }: { showClubToggle?
   return (
     <section
       id="how-it-works"
-      className="bg-brand-warm-white-warm py-20 md:py-28"
+      className="bg-brand-warm-white py-20 md:py-28"
       aria-labelledby="how-it-works-heading"
     >
       <div className="mx-auto max-w-6xl px-6 md:px-10">
