@@ -59,8 +59,7 @@ export default function TheClub() {
 
           <p className="type-body mx-auto mt-6 max-w-2xl">
             No occasion, nobody to surprise. Friends, a family, the people who
-            would all be at the same table if they could. Most cookbook clubs
-            cook from someone else&rsquo;s book. This one writes its own.
+            would all be at the same table if they could.
           </p>
         </motion.div>
 
