@@ -7,7 +7,7 @@ import { Menu, X } from "lucide-react";
 import LoginModal from "@/components/auth/LoginModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { trackStartBookClick } from "@/lib/analytics";
-import { isClubEnabled, isFreeTierEnabled, isTilesEnabled } from "@/lib/feature-flags";
+import { isFreeTierEnabled, isTilesEnabled } from "@/lib/feature-flags";
 
 // theme="dark" (default): white logo/text, meant to overlay the dark hero.
 // theme="light": charcoal logo/text, for light-background pages (e.g. pricing).
@@ -21,12 +21,13 @@ export default function Banner({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user } = useAuth();
   const onboardingHref = isFreeTierEnabled() ? "/onboarding/welcome" : "/onboarding";
-  // Reason: Shop points at the product grid, which only renders once there are
-  // at least two products to choose between. Gating on the same condition keeps
-  // the link from pointing at a section that is not on the page. The href is
-  // absolute (/#shop) because this header renders on every public page, not just
-  // the home page; it becomes /shop when that page exists.
-  const showProductNav = isClubEnabled() || isTilesEnabled();
+  // Reason: naming the products in the nav only earns its place once there is a
+  // second one. With tiles off the whole site is cookbooks, so the labels would
+  // distinguish nothing, and the tiles anchor would point at a section that is
+  // not on the page. The hrefs are absolute (/#anchor) because this header
+  // renders on every public page, not just the home page; they become
+  // /cookbooks and /tiles when those pages exist.
+  const showProductNav = isTilesEnabled();
 
   const isLight = theme === "light";
   // Reason: the open mobile menu needs a solid white surface — over the dark
@@ -108,9 +109,14 @@ export default function Banner({
             {/* Desktop nav */}
             <div className="hidden lg:flex items-center gap-8">
               {showProductNav && (
-                <Link href="/#shop" className={navLink}>
-                  Shop
-                </Link>
+                <>
+                  <Link href="/#how-it-works" className={navLink}>
+                    Cookbooks
+                  </Link>
+                  <Link href="/#tiles" className={navLink}>
+                    Kitchen Tiles
+                  </Link>
+                </>
               )}
               <Link href="/pricing" className={navLink}>
                 Pricing
@@ -157,18 +163,27 @@ export default function Banner({
           {/* Mobile dropdown */}
           <div
             className={`lg:hidden overflow-hidden transition-[max-height] duration-200 ease-out ${
-              isMobileMenuOpen ? (showProductNav ? "max-h-96" : "max-h-80") : "max-h-0"
+              isMobileMenuOpen ? (showProductNav ? "max-h-[28rem]" : "max-h-80") : "max-h-0"
             }`}
           >
             <div className="px-6 py-5 flex flex-col gap-3 bg-white border-b border-brand-charcoal/10">
               {showProductNav && (
-                <Link
-                  href="/#shop"
-                  className={mobilePill}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Shop
-                </Link>
+                <>
+                  <Link
+                    href="/#how-it-works"
+                    className={mobilePill}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Cookbooks
+                  </Link>
+                  <Link
+                    href="/#tiles"
+                    className={mobilePill}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Kitchen Tiles
+                  </Link>
+                </>
               )}
               <Link
                 href="/pricing"
