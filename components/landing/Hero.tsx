@@ -59,7 +59,7 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
           >
-            Everyone sends one recipe. It comes back printed, on your counter or your wall. You set it up, we handle the rest.
+            Cookbooks and Kitchen Tiles, made by your people. Everyone sends one recipe. You set it up, we handle the rest.
           </motion.p>
           <motion.div
             className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4"
