@@ -40,9 +40,9 @@ export default function Home() {
         <HowItWorks showTilesToggle={showTiles} />
         <TheSolution />
         <PricingBlock />
-        <PersonalNotes />
         <TestimonialsSection />
         <BooksPrinted />
+        <PersonalNotes />
         {showClub && <TheClub />}
         {/* <YourTools /> — removed from flow; see import note */}
         {/* <RegistryInterlude /> — hidden from flow; see import note */}
