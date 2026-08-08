@@ -105,7 +105,7 @@ export default function ProductRouter({
   return (
     <section
       id="shop"
-      className="bg-brand-warm-white-warm py-20 md:py-28"
+      className="bg-brand-cream py-20 md:py-28"
       aria-label="What you can make"
     >
       <div className="mx-auto max-w-7xl px-6 md:px-10">
@@ -116,7 +116,7 @@ export default function ProductRouter({
               type="button"
               onClick={() => handleClick(door)}
               data-cta={`router-${door.key}`}
-              className="group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-honey focus-visible:ring-offset-4 focus-visible:ring-offset-brand-warm-white-warm rounded-xl"
+              className="group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-honey focus-visible:ring-offset-4 focus-visible:ring-offset-brand-cream rounded-xl"
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
