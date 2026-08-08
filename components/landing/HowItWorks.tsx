@@ -170,11 +170,11 @@ export default function HowItWorks({ showTilesToggle = false }: { showTilesToggl
           transition={{ duration: 0.5, ease: easeOut }}
         >
           <h2 id="how-it-works-heading" className="type-heading">
-            Send the invite. The recipes come to you.
+            Send one link. Everyone&rsquo;s in.
           </h2>
           <p className="mt-4 type-body text-brand-charcoal/60">
-            Then we turn them into something that lives in your kitchen. Three
-            steps, that&rsquo;s it.
+            They each send a recipe. We turn it into something that lives in
+            your kitchen. Three steps, that&rsquo;s it.
           </p>
         </motion.div>
 
