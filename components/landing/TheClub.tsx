@@ -54,7 +54,7 @@ export default function TheClub() {
           <p className="type-eyebrow mb-5">The Cookbook Club</p>
 
           <h2 id="club-heading" className="type-heading">
-            A group writes its own cookbook.
+            A cookbook club that writes its own cookbook.
           </h2>
 
           <p className="type-body mx-auto mt-6 max-w-2xl">
