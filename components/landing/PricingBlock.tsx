@@ -28,8 +28,7 @@ const GALLERY = [
 ];
 
 const INCLUDES = [
-  "50 recipes included",
-  "A photo we make for every recipe",
+  "50 recipes, each with a photo we make",
   "A premium hardcover we design and print, 8 × 10 in, full color",
   "A Cookbook Specialist who reviews your book",
   "Full platform access, no app to download",
